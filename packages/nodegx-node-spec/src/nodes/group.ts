@@ -27,8 +27,10 @@
  *     pointer comes up among the children (`indexAt` :573-585, geometry): a face choice, written down — every act's pointer is at
  *     (0, 0), before the middle of every child, so a pointer drop's Drop Index is 0 (graded with geometry after NSP-017).
  *   - **Focus, Focused, Focus Lost** (focus-tracker.ts; group.ts `focus`, `_focus`, `_blur`): a Group is not focusable, so the
- *     viewer keeps a LIST of the focused nodes. The Focus action lists it — Focused when it was not listed — and reports Done,
- *     on the page or not (a Group has no `_canFocus`, :60). A person's click is walked from the element it landed on up through
+ *     viewer keeps a LIST of the focused nodes. The Focus action lists it — Focused when it was not listed — and reports Done.
+ *     Off the page it reports Unchanged and lists nothing, as a field's Focus does (R16, after R13: a Focus is not kept for later).
+ *     The runtime lists a Group off the page too (it has no `_canFocus`, focus-tracker.ts :60) and reports Done: row **C95**, a
+ *     known row on the runtime target (`groupFocusOffPage`). A person's click is walked from the element it landed on up through
  *     its ancestors (`onClickCapture` :118-136): a click on the Group or a child lists it (Focused when it was not), a click
  *     anywhere else drops it (Focus Lost when it was listed). The walk finds the Group by the property its component puts on the
  *     element it MOUNTED with (Group.tsx `componentDidMount` — `this.scrollRef.current.noodlNode`): a new Tag makes a new element
@@ -162,7 +164,7 @@ type Pulse =
   | 'focused'
   | 'focusLost';
 type Val = 'isLifted' | 'isDropTarget' | 'droppedValue' | 'dropIndex' | 'isDragOver' | 'droppedFile' | 'droppedFiles' | 'droppedFileName' | 'droppedFileType' | 'droppedFileSizeInBytes' | 'childrenCount';
-type Resolved = { port: ScrollOp | 'focus'; outcome: 'done' | 'failure'; error?: string };
+type Resolved = { port: ScrollOp | 'focus'; outcome: 'done' | 'failure' | 'unchanged'; error?: string };
 type Act = { set: Partial<State>; send: Val[]; emit: Pulse[]; after?: Array<{ ms: unknown; tag: string }>; cancel?: string[]; outcomes?: Resolved[] };
 
 const NOTHING: Send = { send: [] };
@@ -188,7 +190,8 @@ const FAILED_TO_MOUNT =
 export const Group = defineNode({
   type: 'Group',
   // v1 (NSP-016 s52): the Text's rules (text.ts v5) on an element with children; the slots, the focus tracker, the scroll actions
-  version: 1,
+  // v2 (s53, R16): a Focus off the page reports Unchanged and lists nothing, as a field's does (the runtime's Done is row C95)
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/visual/group.ts',
   needs: ['person', 'clock'],
   worldPool: { advances: [0, 1, 499, 500, 1000] },
@@ -463,9 +466,13 @@ export const Group = defineNode({
     acceptKind: (_s, v) => ({ set: { acceptKind: v }, send: [] }),
     acceptFileDrops: (_s, v) => ({ set: { acceptFileDrops: !!v }, send: [] }),
     acceptedFileTypes: (_s, v) => ({ set: { acceptedFileTypes: v }, send: [] }),
-    // focus-tracker.ts :56-75 — no `_canFocus`: listed, on the page or not; Focused only when it was not listed
+    // focus-tracker.ts :56-75 — listed, Focused only when it was not listed; off the page, Unchanged and nothing listed (R16)
     // a Focus behind outcomes the frame has resolved and not yet reported waits its turn (`ran`), as the runtime reports it after them
     focus: (s) => {
+      if (!s.onPage) {
+        if (s.ran.length === 0) return { send: [], outcome: 'unchanged' };
+        return { set: { ran: [...s.ran, { port: 'focus' as const, outcome: 'unchanged' as const }] }, send: [], outcome: 'pending' };
+      }
       const listing = s.listed ? { set: {}, emit: [] as const } : { set: { listed: true }, emit: ['focused'] as const };
       if (s.ran.length === 0) return { set: listing.set, send: [], emit: [...listing.emit], outcome: 'done' };
       return { set: { ...listing.set, ran: [...s.ran, { port: 'focus' as const, outcome: 'done' as const }] }, send: [], emit: [...listing.emit], outcome: 'pending' };

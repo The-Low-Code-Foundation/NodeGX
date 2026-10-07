@@ -160,8 +160,9 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
     // `whenMounted`'s chain; the frame's scrolls (`scheduleAfterInputsHaveUpdated`), the ones waiting for the component, and the
     // outcomes the frame resolved before its end (reported there, in order)
     frameEnd: ['chain', 'scheduled', 'waiting', 'ran'],
-    // the Focus action asks the tracker's list; the hold timer's lift meets the page and drains the frame's scrolls
-    elementCalls: { 'on.draggable': ['onPage', 'elem', 'attrsOn'], 'on.acceptDrops': [], 'on.focus': ['listed'], 'world.timer': ['onPage', 'elem', 'pointerAt', 'sourceElem'] }
+    // the Focus action asks the tracker's list, and (v2, R16) whether the Group is on the page; the hold timer's lift meets the page
+    // and drains the frame's scrolls
+    elementCalls: { 'on.draggable': ['onPage', 'elem', 'attrsOn'], 'on.acceptDrops': [], 'on.focus': ['listed', 'onPage'], 'world.timer': ['onPage', 'elem', 'pointerAt', 'sourceElem'] }
   },
   'net.noodl.controls.textinput': {
     node: ['fieldType', 'runOnChange', 'maxLength', 'textToInsert', 'text', 'startValue', 'out', 'wire', 'announced', 'hasAnnounced', 'queue', 'blocksPointer', 'opacityZero', ...CONTROL_NODE],

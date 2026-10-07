@@ -35,7 +35,12 @@
 6. **Rows, all open:** **C91** (low: Custom SVG's span counts as a drop slot, so a keyboard drop lands at 1), **C92** (medium: a Polygon or
    Star with a huge or infinite Points runs the page out of memory), **C93** (**high**: Image.tsx writes a sub-path Base URL back into the
    node's props, so every render adds it again — `/x/x/x/a.png` after one frame; every app deployed under a sub-path), **C94** (low: an
-   Image placed with Source Set `true` fetches "true" — React 19.0 writes the boolean only on an element it creates).
+   Image placed with Source Set `true` fetches "true" — React 19.0 writes the boolean only on an element it creates), **C95** (low: a Focus
+   on a Group off the page reports Done and fires Focused).
+7. **R16 (Richard, 2026-10-07):** C81–C94 go to **P109**, C93 first. P109 re-headed C91–C94 to its ISL-038 and **fixed C93 the same day
+   (`fe5ebfab5`**: Image.tsx keeps the based source in a local; a viewer regression renders twice per base). C95 came after and follows the same ruling.
+   And a Focus on a Group off the page reports **Unchanged**, like a field: the **Group v2** (group.ts), with C95 as its known row.
+   Group v2 readings: the interpreter at 200 on four seeds and at 10,000, the runtime at 200 on seeds 13 and 20730: CONFORM (§7.14).
 
 **Readings (2026-10-07).** Interpreter: the Shape at 200 on seeds 13, 20729, 20730, 7 and at 10,000 (20731) CONFORM, 0 survivors; the
 Image the same (after its last fix: 2,398 / 2,424 killed at 200, 2,410 / 2,436 at 10,000, the rest declared). Runtime: the Shape at 200
@@ -46,7 +51,8 @@ The stranger file was not run: no file it hashes changed (spec.ts untouched; `wi
 
 ## What s54 does
 
-1. **Ask Richard** (below). C93 is the one to hand over first: it breaks pictures in deployed apps.
+1. **Check P109's progress on the rows** (C81–C95 are theirs): when one is fixed, its scenario's `row` and its KNOWN_ROWS entry (or the
+   `WITHHELD` entry, for C92) go in the same commit — read the commit before trusting a row is still open.
 2. **Video** (NSP-016): the nearest of the seven left — the Image's way (a copy of the machinery with no Tag) plus the media's own events
    as acts (the browser plays, pauses, ends, fails). Read Video.tsx and video.ts first; its Base URL code is a local and does not grow.
 3. Then **Drag** (`visual/drag.ts`), after reading it: it may need geometry (NSP-017).
@@ -54,9 +60,7 @@ The stranger file was not run: no file it hashes changed (spec.ts untouched; `wi
    10,000 on the runtime is about 13 minutes).
 
 **Human decisions outstanding.** Ask in plain words (README §7 holds the earlier ones):
-- **C81–C94** (all open). Each ledger file proposes a fix, and none needs a ruling on intent. Ask whether to hand them to P109, C93 first.
-- **The Focus action on a Group that is not on the page** reports Focused and Done (s52). R13 says a Focus on an unmounted field fails.
-  Ask whether a Group's should fail too.
+- None new. (R16 settled the rows' owner and the Group's Focus.)
 - **R7, R8, R4's confirmation and G1**, and NSP-017's question about the templates' CSS sheets, as before.
 
 **Known face choices, written down (not gaps):** as s52's, plus: the browser's fetch happens only when the element has a `src` or a

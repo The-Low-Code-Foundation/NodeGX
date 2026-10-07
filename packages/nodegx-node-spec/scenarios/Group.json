@@ -32,8 +32,8 @@
     ]
   },
   {
-    "name": "Focus on a group that is not on the page: Focused and Done all the same",
-    "because": "focus-tracker.ts :60 — a Group has no `_canFocus`, so nothing checks it is mounted",
+    "name": "row C95 — a Focus on a Group placed off the page reports Unchanged and lists nothing (the runtime: Focused and Done — a Group has no `_canFocus`, so nothing checks it is mounted)",
+    "because": "R16 (Richard, 2026-10-07: \"Unchanged, like the field\"); focus-tracker.ts :60",
     "params": {
       "mounted": false
     },
@@ -43,7 +43,8 @@
         "signal": "focus"
       },
       "settle"
-    ]
+    ],
+    "row": "NSP-016 §6 C95"
   },
   {
     "name": "a click on it: Pointer Down, Pointer Up, Focused, then Click; a second click: no Focused",
@@ -153809,7 +153810,7 @@
     ]
   },
   {
-    "name": "the frame end's outcomes together, matrix: the frame Mounted comes back, with one, two or three of Focus, Scroll To Index and Scroll To Element in it — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame",
+    "name": "row C95 — the frame end's outcomes together, matrix: the frame Mounted comes back, with one, two or three of Focus, Scroll To Index and Scroll To Element in it — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame (the runtime: a Focus in the frame Mounted comes back is Done and Focused, the Group not yet on the page)",
     "because": "the trace prints a frame's outcomes together, in order (group.ts docblock); drag-drop.ts :136-145; focus-tracker.ts; Group.tsx componentDidMount",
     "params": {
       "draggable": true,
@@ -157946,7 +157947,8 @@
         "advance": 1
       },
       "settle"
-    ]
+    ],
+    "row": "NSP-016 §6 C95"
   },
   {
     "name": "the frame end's outcomes together, matrix: the frame Draggable's chain finds the element, with one, two or three of Focus, Scroll To Index and Scroll To Element in it — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame",
@@ -162573,7 +162575,7 @@
     ]
   },
   {
-    "name": "the frame end's outcomes together, matrix: the frame Mounted comes back while Draggable's chain waits, with one, two or three of Focus, Scroll To Index and Scroll To Element in it — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame",
+    "name": "row C95 — the frame end's outcomes together, matrix: the frame Mounted comes back while Draggable's chain waits, with one, two or three of Focus, Scroll To Index and Scroll To Element in it — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame (the runtime: a Focus in the frame Mounted comes back is Done and Focused, the Group not yet on the page)",
     "because": "the trace prints a frame's outcomes together, in order (group.ts docblock); drag-drop.ts :136-145; focus-tracker.ts; Group.tsx componentDidMount",
     "params": {
       "draggable": true,
@@ -167150,7 +167152,8 @@
         "advance": 1
       },
       "settle"
-    ]
+    ],
+    "row": "NSP-016 §6 C95"
   },
   {
     "name": "the frame end's outcomes together, matrix: the frame Draggable's chain finds the element and Mounted goes off, with one, two or three of Focus, Scroll To Index and Scroll To Element in it — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame",
@@ -173955,6 +173958,8710 @@
       {
         "act": "key",
         "value": "Escape"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C95 — a Focus on a Group placed off the page (Mounted off) reports Unchanged and lists nothing: on the page later, a click beside it fires no Focus Lost (the runtime: Done and Focused, and the click beside it fires Focus Lost)",
+    "because": "R16 (Richard, 2026-10-07: \"Unchanged, like the field\"); focus-tracker.ts :56-75 lists a Group off the page (no `_canFocus`)",
+    "params": {
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      "settle"
+    ],
+    "row": "NSP-016 §6 C95"
+  },
+  {
+    "name": "row C95 — Mounted written on and Focus in the same frame: the Group is not on the page until the frame's end, so Unchanged (the runtime: Done and Focused)",
+    "because": "R16; the page follows Mounted at the frame's end",
+    "params": {
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      "settle"
+    ],
+    "row": "NSP-016 §6 C95"
+  },
+  {
+    "name": "a Focus on a Group on the page: Done and Focused, and a click beside it fires Focus Lost — the twin of row C95, on both targets",
+    "because": "focus-tracker.ts :56-75, :118-136",
+    "steps": [
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Mounted written off and Focus in the same frame: still on the page until the frame's end, so Done and Focused; leaving drops it silently — the other twin of row C95",
+    "because": "the page follows Mounted at the frame's end; react-component-node.ts :1013 `nodeUnmounted`",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C95 — off the page, sixteen Scroll To Element wait for the element; a seventeenth and a card's lift (its flush runs the frame's work) push the oldest out with Failure, and a Focus after it waits its turn: Failure, then Unchanged (the runtime: Failure, then Done and Focused)",
+    "because": "group.ts docblock (at most 16 wait; the held outcomes, `ran`); drag-drop.ts `flush`; R16",
+    "params": {
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "act": "grab",
+        "value": {
+          "dragValue": "card-1",
+          "dragKind": "card"
+        }
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      "settle"
+    ],
+    "row": "NSP-016 §6 C95"
+  },
+  {
+    "name": "the frame end's outcomes together, matrix: the frame Mounted comes back, with Scroll To Index, Scroll To Element or both in it (no Focus) — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame — the twin of row C95's matrix, graded on both targets",
+    "because": "the trace prints a frame's outcomes together, in order (group.ts docblock); drag-drop.ts :136-145; focus-tracker.ts; Group.tsx componentDidMount",
+    "params": {
+      "draggable": true,
+      "dragValue": "me"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the frame end's outcomes together, matrix: the frame Mounted comes back while Draggable's chain waits, with Scroll To Index, Scroll To Element or both in it (no Focus) — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame — the twin of row C95's matrix, graded on both targets",
+    "because": "the trace prints a frame's outcomes together, in order (group.ts docblock); drag-drop.ts :136-145; focus-tracker.ts; Group.tsx componentDidMount",
+    "params": {
+      "draggable": true,
+      "dragValue": "me"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 1
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "scrollToElement.element",
+        "value": "x"
+      },
+      {
+        "set": "scrollToIndex.index",
+        "value": 9
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "scrollToElement.do"
+      },
+      {
+        "signal": "scrollToIndex.do"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      {
+        "advance": 1
       },
       "settle"
     ]

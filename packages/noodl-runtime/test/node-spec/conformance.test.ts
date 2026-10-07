@@ -210,6 +210,27 @@ const booleanSrcSetAtMount = (d: Divergence) => {
   return heldAt(d, 'srcSet') === true && (src === undefined || src === null || src === '');
 };
 
+/**
+ * NSP-016 §6 C95 (s53, R16) — a Focus on a Group that is not on the page reports Unchanged and lists nothing (as a field's does,
+ * R13); the runtime lists it (a Group has no `_canFocus`, focus-tracker.ts :60), fires Focused and reports Done. Narrow: the
+ * difference is in the group of events a settle printed, and the reference's group holds the Focus action's Unchanged.
+ */
+const groupFocusOffPage = (d: Divergence) => {
+  if (d.difference.threw !== undefined) return false;
+  const isStep = (e: TraceEvent) => e.t === 'set' || e.t === 'in' || e.t === 'act' || e.t === 'settle' || e.t === 'advance';
+  let k = Math.min(d.difference.index, d.reference.length) - 1;
+  while (k >= 0 && d.reference[k].t !== 'settle') {
+    if (isStep(d.reference[k])) return false;
+    k--;
+  }
+  if (k < 0) return false;
+  for (let i = k + 1; i < d.reference.length && !isStep(d.reference[i]); i++) {
+    const e = d.reference[i] as { t: string; port?: string; value?: unknown };
+    if (e.t === 'outcome' && e.port === 'focus' && e.value === 'unchanged') return true;
+  }
+  return false;
+};
+
 const WITHHELD: Record<string, Readonly<Record<string, Withheld>>> = {
   // C92 — Circle.tsx builds a Polygon or Star of `Math.round(Points)` vertices: 1e9, 2^53 or Infinity runs the heap out (measured)
   Circle: { points: { values: [1e9, 2 ** 53, Infinity], row: 'NSP-016 §6 C92 — a Polygon or Star with a huge or infinite Points builds that many vertices and the page runs out of memory' } }
@@ -249,7 +270,8 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
     { row: 'NSP-016 §6 C87 — a Tag written empty, null, 0 or false: React throws drawing the element', matches: emptyTag },
     { row: 'NSP-016 §6 C88 — Enable Scroll on and Native platform scroll off: the scroller wraps the children, so Drop Index counts the wrapper (0 or 1)', matches: scrollerWrapsChildren },
     { row: 'NSP-016 §6 C89 — Native platform scroll truthy but not true: the scroller runs on unwrapped children (Scroll To Index fails, the click is taken)', matches: nativeScrollNotBoolean },
-    { row: 'NSP-016 §6 C90 — the JavaScript scroller and Block Pointer Events together: a click fires no Click', matches: scrollerBlocksClick }
+    { row: 'NSP-016 §6 C90 — the JavaScript scroller and Block Pointer Events together: a click fires no Click', matches: scrollerBlocksClick },
+    { row: 'NSP-016 §6 C95 — a Focus on a Group off the page: the runtime lists it, fires Focused and reports Done (R16: Unchanged)', matches: groupFocusOffPage }
   ],
 };
 
