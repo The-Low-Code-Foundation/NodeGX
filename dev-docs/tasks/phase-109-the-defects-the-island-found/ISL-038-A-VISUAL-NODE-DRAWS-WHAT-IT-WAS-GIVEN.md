@@ -1,6 +1,6 @@
 # ISL-038 — A visual node draws what it was given, every time
 
-**Status: 🟡 s28 (2026-10-07): 7 of 15 fixed (C95 joined s28: P107's handoff says "C81–C95 are theirs") — C82 + C84 + C85 (`f2d9d349b`), C94 (`2dc8fd90d`), C91 (`dd71d0d83`), C92 (`4a48f6eb7`), each graded on the runtime at two seeds with a control (§9); AC2 ✅ (C88, C90, C91, C92 ruled as recommended). Left: the Group's C87, C88, C89, C90, C86 and the shared C81, C83 (both change the spec on all four nodes). s27: C93 (`fe5ebfab5`), first as ruled. Scoped 2026-10-07 from P107 R16 ("Hand all to P109, C93 first"): the open rows P107 NSP-016 s50–s53 found on the Text's drag and file drop, the Group, the Shape and the Image.** **Source:** 14 bugs from the ledger: 1 high · 8 medium · 5 low. **Side:** noodl-viewer-react (Image,
+**Status: 🟡 s29 (2026-10-07): 13 of 15 fixed — the Group's six landed: C87 + C89 (`31c78fe6e`), C88 + C90 (`9e4c79935`), C86 + C95 with the Group spec v3 (`3364b47f6`), each graded on the runtime at two seeds with a control (§10). Left: the shared C81 and C83 (both change the spec on all four nodes). s28: C82 + C84 + C85 (`f2d9d349b`), C94 (`2dc8fd90d`), C91 (`dd71d0d83`), C92 (`4a48f6eb7`); AC2 ✅. s27: C93 (`fe5ebfab5`). Scoped 2026-10-07 from P107 R16 ("Hand all to P109, C93 first").** **Source:** 14 bugs from the ledger: 1 high · 8 medium · 5 low. **Side:** noodl-viewer-react (Image,
 Shape (`Circle`), Group, drag and drop, file drop)
 
 ## 1. The person sentence
@@ -31,16 +31,16 @@ one reasonable answer: ask it in plain words (§5) before building.
 | [P107-C82](../../bugs/p107-c82-a-file-drop-is-lost-when-accepted-file-types-is-not-text.md) | medium | fixed `f2d9d349b` | as proposed | A file drop is lost with nothing said when Accepted file types holds a value that is not text (a wired number, an object) — the drop handler throws before File, Files Dropped or Files Rejected |
 | [P107-C84](../../bugs/p107-c84-a-drag-dies-at-a-zone-whose-accept-kind-is-not-text.md) | medium | fixed `f2d9d349b` | as proposed | A drag dies at a drop zone whose Accept Kind holds a value that is not text (a wired number, a list) — a pointer drag never ends and blocks every later drag; a keyboard pick-up starts in no zone |
 | [P107-C85](../../bugs/p107-c85-a-drop-never-ends-on-a-zone-whose-zone-name-is-not-text.md) | medium | fixed `f2d9d349b` | as proposed | A drop on a zone whose Zone Name holds a value that is not text fires Dropped and then never ends — the zone stays lit, the card stays lifted, and no other drag can start |
-| [P107-C87](../../bugs/p107-c87-a-group-whose-tag-is-empty-crashes-its-render.md) | medium | open | as proposed | A Group whose Tag arrives empty (or null, 0, false) throws while React draws it, and the page stops drawing |
-| [P107-C88](../../bugs/p107-c88-a-scrolling-group-counts-its-scroller-as-its-only-child-for-drop-index.md) | medium | open | ruled: count the cards | A Group with Enable Scroll on and Native platform scroll off reports Drop Index as if it had one child — a card dropped from the keyboard lands at 0 or 1, whatever the Group holds |
-| [P107-C90](../../bugs/p107-c90-a-scrolling-group-with-block-pointer-events-fires-no-click.md) | medium | open | ruled: let the list's taps through | A Group with the JavaScript scroller (Enable Scroll on, Native platform scroll off) and Block Pointer Events on never fires Click — on itself or from a child |
+| [P107-C87](../../bugs/p107-c87-a-group-whose-tag-is-empty-crashes-its-render.md) | medium | fixed `31c78fe6e` | as proposed | A Group whose Tag arrives empty (or null, 0, false) throws while React draws it, and the page stops drawing |
+| [P107-C88](../../bugs/p107-c88-a-scrolling-group-counts-its-scroller-as-its-only-child-for-drop-index.md) | medium | fixed `9e4c79935` | ruled: count the cards | A Group with Enable Scroll on and Native platform scroll off reports Drop Index as if it had one child — a card dropped from the keyboard lands at 0 or 1, whatever the Group holds |
+| [P107-C90](../../bugs/p107-c90-a-scrolling-group-with-block-pointer-events-fires-no-click.md) | medium | fixed `9e4c79935` | ruled: let the list's taps through | A Group with the JavaScript scroller (Enable Scroll on, Native platform scroll off) and Block Pointer Events on never fires Click — on itself or from a child |
 | [P107-C92](../../bugs/p107-c92-a-polygon-or-star-with-a-huge-points-value-runs-the-page-out-of-memory.md) | medium | fixed `4a48f6eb7` | ruled: cap at 500 | A Shape set to Polygon or Star with a huge or infinite Points builds that many vertices, and the page runs out of memory |
 | [P107-C83](../../bugs/p107-c83-a-card-carried-from-the-keyboard-drops-into-a-zone-that-has-left-the-page.md) | low | open | as proposed | A card carried from the keyboard is dropped into a drop zone that has left the page (Mounted off), and the zone stays lit while it is gone |
-| [P107-C86](../../bugs/p107-c86-a-click-on-a-group-after-a-tag-change-counts-as-a-click-elsewhere.md) | low | open | as proposed | After a Group's Tag changes, a click on it counts as a click somewhere else — it fires Focus Lost instead of Focused, until the Group leaves the page and comes back |
-| [P107-C89](../../bugs/p107-c89-native-platform-scroll-wired-a-value-that-is-not-true-starts-the-scroller-on-unwrapped-children.md) | low | open | as proposed | Native platform scroll wired a truthy value that is not true (1, "false") starts the JavaScript scroller on children it never wrapped — Scroll To Index fails for every child, and clicks can be lost |
+| [P107-C86](../../bugs/p107-c86-a-click-on-a-group-after-a-tag-change-counts-as-a-click-elsewhere.md) | low | fixed `3364b47f6` | as proposed | After a Group's Tag changes, a click on it counts as a click somewhere else — it fires Focus Lost instead of Focused, until the Group leaves the page and comes back |
+| [P107-C89](../../bugs/p107-c89-native-platform-scroll-wired-a-value-that-is-not-true-starts-the-scroller-on-unwrapped-children.md) | low | fixed `31c78fe6e` | as proposed | Native platform scroll wired a truthy value that is not true (1, "false") starts the JavaScript scroller on children it never wrapped — Scroll To Index fails for every child, and clicks can be lost |
 | [P107-C91](../../bugs/p107-c91-a-custom-svg-shape-counts-its-own-drawing-as-a-child-for-drop-index.md) | low | fixed `dd71d0d83` | ruled: don't count the drawing | A Shape set to Custom SVG counts its own drawing as a child for Drop Index — a card dropped on it from the keyboard lands at 1, where every other shape says 0 |
 | [P107-C94](../../bugs/p107-c94-an-image-placed-with-source-set-true-fetches-a-picture-called-true.md) | low | fixed `2dc8fd90d` | as proposed | An Image placed with Source Set true fetches a picture called "true" — React 19 writes srcset="true" on the element it creates, and none when Source Set changes to true later |
-| [P107-C95](../../bugs/p107-c95-a-focus-on-a-group-off-the-page-reports-done-and-fires-focused.md) | low | scheduled | as ruled (R16: Unchanged) | A Focus on a Group that is not on the page reports Done and fires Focused — a field reports Unchanged there, and R16 rules the Group should too |
+| [P107-C95](../../bugs/p107-c95-a-focus-on-a-group-off-the-page-reports-done-and-fires-focused.md) | low | fixed `3364b47f6` | as ruled (R16: Unchanged) | A Focus on a Group that is not on the page reports Done and fires Focused — a field reports Unchanged there, and R16 rules the Group should too |
 
 ## 4. Order of work
 
@@ -104,3 +104,34 @@ Image. **Control B** (the base Circle.tsx alone, heap 1.5 GB): the run aborts ou
 scenario carries `row`), so fixing a shared row in the runtime while a peer grades the same node breaks the peer's run mid-way.
 Build it in a worktree and land after the peer commits. Base Circle.tsx cannot be the C92 control in the same run as the others:
 with `WITHHELD` empty it takes the whole process down, so it needs its own run.
+
+## 10. Session 29 (2026-10-07) — the Group's six
+
+Built in a worktree (`p109-group`) while P107 had the Video open (an uncommitted edit to `conformance.test.ts` and the runtime
+target). Re-measured first (AC1): at `c9106c613`, seed 13, every Group row fired through its own row scenario.
+
+| Row | Commit | What changed |
+|---|---|---|
+| C87, C89 | `31c78fe6e` | Group.tsx reads the Tag `as || 'div'`, and the mount reads Native platform scroll as `render` does (`!nativeScroll`) |
+| C88, C90 | `9e4c79935` | The scroller's wrapper is marked `data-ndl-slots`; drag-drop.ts `slotParent` feeds `slots` and `homeIndex` ("count the cards"). The Group's own move and release handlers hand the event to better-scroll after Noodl's callback and before the blocker's stop, `letScrollerSee` ("let the list's taps through") |
+| C86, C95 | `3364b47f6` | The root ref stamps `noodlNode` on every element; group.ts `_canFocus`, Focus reports Unchanged (`focus/not-mounted`), and the Group gains the Unchanged port. The Group spec v3 says both. Catalog, enriched catalog and the docs page regenerated |
+
+**Grade.** Runtime target: the Group v3 conforms at seeds 13 and 20732 (1390 of 1395 scenarios, the five failing ones the open
+C79 row; 200 sequences, 0 divergences, every unkilled mutant a declared equivalent); the Text, Shape and Image conform at both
+seeds with the new drag-drop.ts; "the known rows are still open" passes. Interpreter: the Group conforms (every mutant killed or
+declared). Catalog parity + schema green; viewer 1807 / 1807; viewer and spec tsc 0; catalog, merge, docs:nodes, cloud-library
+and port-groups checks clean. **Control:** HEAD's Group.tsx, drag-drop.ts and group.ts under the Group's 24 row scenarios and
+twins are red on exactly the fifteen row scenarios (C86's five, C95's six, C87, C88, C89, C90); the nine twins pass on both.
+
+**What s29 learned.**
+- **The first C90 fix was wrong and the runtime caught it.** `bindToWrapper` (better-scroll hears the release on its own element)
+  brought Click back but fired it before Pointer Up: the scroller's handler runs before React's root listener, so its constructed
+  click lands first. The fix hands the event over from inside the blocker instead. The blocker also stopped the scroller's
+  moves, so a scroll Group with Block Pointer Events on never followed a drag either; it does now.
+- **Fixing a modelled row can strand a mutant.** C86's scenarios were the only path to "a click ending a pending press on a
+  listed Group that cannot take the keyboard". Once the walk found the new element, those clicks wrote `listed` and two
+  `person.click` mutants survived on the interpreter. One added scenario kills them; they are not equivalents.
+- **A peer's open edit can read a helper you delete.** P107's Video rows call `heldAt`, so it stays. The test file landed by
+  compare-and-swap, with the peer's working copy rebuilt as the new HEAD plus exactly their delta.
+- Jest's 30-minute `beforeAll` cut the first seed-13 run of all four nodes under a peer's load (the Group alone took 44 minutes);
+  grade the Group on its own.
