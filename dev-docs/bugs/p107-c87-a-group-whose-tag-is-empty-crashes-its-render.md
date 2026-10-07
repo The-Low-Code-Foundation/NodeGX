@@ -2,6 +2,8 @@
 id: P107-C87
 title: A Group whose Tag arrives empty (or null, 0, false) throws while React draws it, and the page stops drawing
 status: open
+phase: P109
+task: ISL-038
 severity: medium
 area: runtime / Group (noodl-viewer-react/src/components/visual/Group/Group.tsx render — `const { as = 'div', ...props } = this.props`)
 found: P107 NSP-016 s52, 2026-10-06

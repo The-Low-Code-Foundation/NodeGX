@@ -2,6 +2,8 @@
 id: P107-C89
 title: Native platform scroll wired a truthy value that is not true (1, "false") starts the JavaScript scroller on children it never wrapped — Scroll To Index fails for every child, and clicks can be lost
 status: open
+phase: P109
+task: ISL-038
 severity: low
 area: runtime / Group (noodl-viewer-react/src/components/visual/Group/Group.tsx `render` and `componentDidMount`)
 found: P107 NSP-016 s52, 2026-10-07

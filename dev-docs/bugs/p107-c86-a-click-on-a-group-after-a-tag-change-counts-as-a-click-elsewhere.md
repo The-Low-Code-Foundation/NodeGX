@@ -2,6 +2,8 @@
 id: P107-C86
 title: After a Group's Tag changes, a click on it counts as a click somewhere else — it fires Focus Lost instead of Focused, until the Group leaves the page and comes back
 status: open
+phase: P109
+task: ISL-038
 severity: low
 area: runtime / Group (noodl-viewer-react/src/components/visual/Group/Group.tsx `componentDidMount`; focus-tracker.ts `onClickCapture` :118-136)
 found: P107 NSP-016 s52, 2026-10-06

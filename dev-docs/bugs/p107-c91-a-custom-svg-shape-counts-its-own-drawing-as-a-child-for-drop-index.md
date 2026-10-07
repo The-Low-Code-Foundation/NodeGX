@@ -2,6 +2,8 @@
 id: P107-C91
 title: A Shape set to Custom SVG counts its own drawing as a child for Drop Index — a card dropped on it from the keyboard lands at 1, where every other shape says 0
 status: open
+phase: P109
+task: ISL-038
 severity: low
 area: runtime / Shape (Circle) and drag and drop (noodl-viewer-react/src/components/visual/Circle/Circle.tsx :327-334; drag-drop.ts `slots` :529-540, `keyboardLift` :858-866, the arrow keys :803-807)
 found: P107 NSP-016 s53, 2026-10-07

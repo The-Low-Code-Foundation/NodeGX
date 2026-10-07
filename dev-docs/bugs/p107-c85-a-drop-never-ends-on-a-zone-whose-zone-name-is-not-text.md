@@ -2,6 +2,8 @@
 id: P107-C85
 title: A drop on a zone whose Zone Name holds a value that is not text fires Dropped and then never ends — the zone stays lit, the card stays lifted, and no other drag can start
 status: open
+phase: P109
+task: ISL-038
 severity: medium
 area: runtime / drag and drop on every visual node that has it (noodl-viewer-react/src/drag-drop.ts `zoneName` :740-748, called in `drop` :393 before `finish`) — Text, Group, Image, Circle, Video
 found: P107 NSP-016 s51, 2026-10-06

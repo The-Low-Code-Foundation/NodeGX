@@ -2,6 +2,8 @@
 id: P107-C84
 title: A drag dies at a drop zone whose Accept Kind holds a value that is not text (a wired number, a list) — a pointer drag never ends and blocks every later drag; a keyboard pick-up starts in no zone
 status: open
+phase: P109
+task: ISL-038
 severity: medium
 area: runtime / drag and drop on every visual node that has it (noodl-viewer-react/src/drag-drop.ts `kindsOf` :155-160, called from `accepts` :166-171 in `zoneAt` :446-464, `orderedZones` :753-766 and `zoneName` :740-748) — Text, Group, Image, Circle, Video
 found: P107 NSP-016 s51, 2026-10-06

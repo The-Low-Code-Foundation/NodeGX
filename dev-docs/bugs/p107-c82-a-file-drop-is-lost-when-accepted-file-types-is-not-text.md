@@ -2,6 +2,8 @@
 id: P107-C82
 title: A file drop is lost with nothing said when Accepted file types holds a value that is not text (a wired number, an object) — the drop handler throws before File, Files Dropped or Files Rejected
 status: open
+phase: P109
+task: ISL-038
 severity: medium
 area: runtime / file drop on every visual node that has it (noodl-viewer-react/src/node-shared-port-definitions.ts `fileMatchesAcceptedTypes` :293-311, called from `onDrop` :1036-1068) — Text, Group, Image, Circle, Video
 found: P107 NSP-016 s50, 2026-10-06

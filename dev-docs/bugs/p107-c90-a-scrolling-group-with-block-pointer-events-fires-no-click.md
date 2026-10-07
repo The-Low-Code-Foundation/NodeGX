@@ -2,6 +2,8 @@
 id: P107-C90
 title: A Group with the JavaScript scroller (Enable Scroll on, Native platform scroll off) and Block Pointer Events on never fires Click — on itself or from a child
 status: open
+phase: P109
+task: ISL-038
 severity: medium
 area: runtime / Group (noodl-viewer-react/src/components/visual/Group/Group.tsx `setupIScroll`, `click: true`) with pointerlisteners.ts's Block Pointer Events blockers (:113-133)
 found: P107 NSP-016 s52, 2026-10-07

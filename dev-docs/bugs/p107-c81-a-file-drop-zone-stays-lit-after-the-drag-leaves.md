@@ -2,6 +2,8 @@
 id: P107-C81
 title: A file drop zone stays lit (Is Dragging Over true) after the drag has left, when its element was replaced under the drag or Accept File Drops was switched off during it
 status: open
+phase: P109
+task: ISL-038
 severity: medium
 area: runtime / file drop on every visual node that has it (noodl-viewer-react/src/node-shared-port-definitions.ts `addFileDropPorts` :956-1137 — the `dragDepth` count, `onDragEnter` :1009-1019, `onDragLeave` :1030-1035, `fileDropArmed` :253-261) — Text, Group, Image, Circle, Video
 found: P107 NSP-016 s50, 2026-10-06

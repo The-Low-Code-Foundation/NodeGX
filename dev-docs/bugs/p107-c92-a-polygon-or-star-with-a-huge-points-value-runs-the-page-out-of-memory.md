@@ -2,6 +2,8 @@
 id: P107-C92
 title: A Shape set to Polygon or Star with a huge or infinite Points builds that many vertices, and the page runs out of memory
 status: open
+phase: P109
+task: ISL-038
 severity: medium
 area: runtime / Shape (Circle) (noodl-viewer-react/src/components/visual/Circle/Circle.tsx `polygonPoints`, `starPoints`, `render`)
 found: P107 NSP-016 s53, 2026-10-07

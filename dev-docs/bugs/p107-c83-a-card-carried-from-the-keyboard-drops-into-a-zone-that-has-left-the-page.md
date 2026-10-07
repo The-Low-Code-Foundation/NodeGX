@@ -2,6 +2,8 @@
 id: P107-C83
 title: A card carried from the keyboard is dropped into a drop zone that has left the page (Mounted off), and the zone stays lit while it is gone
 status: open
+phase: P109
+task: ISL-038
 severity: low
 area: runtime / drag and drop on every visual node that has it (noodl-viewer-react/src/drag-drop.ts — `forget` :123-128, `onKeyDown` :783-839, `drop` :379-399; only a delete or Accept Drops off leaves a zone) — Text, Group, Image, Circle, Video
 found: P107 NSP-016 s51, 2026-10-06

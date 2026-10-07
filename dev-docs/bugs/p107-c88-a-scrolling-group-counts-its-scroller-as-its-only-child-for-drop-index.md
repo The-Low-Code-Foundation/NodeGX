@@ -2,6 +2,8 @@
 id: P107-C88
 title: A Group with Enable Scroll on and Native platform scroll off reports Drop Index as if it had one child — a card dropped from the keyboard lands at 0 or 1, whatever the Group holds
 status: open
+phase: P109
+task: ISL-038
 severity: medium
 area: runtime / Group and drag and drop (noodl-viewer-react/src/components/visual/Group/Group.tsx `renderIScroll`; drag-drop.ts `slots` :531-541, `keyboardLift` :858-866, the arrow keys :803-807)
 found: P107 NSP-016 s52, 2026-10-07

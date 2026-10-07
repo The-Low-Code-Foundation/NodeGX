@@ -2,6 +2,8 @@
 id: P107-C94
 title: An Image placed with Source Set true fetches a picture called "true" — React 19 writes srcset="true" on the element it creates, and none when Source Set changes to true later
 status: open
+phase: P109
+task: ISL-038
 severity: low
 area: runtime / Image (noodl-viewer-react/src/nodes/visual/image.ts :111-124 Source Set, `propPath: 'dom'`; components/visual/Image/Image.tsx :67-77)
 found: P107 NSP-016 s53, 2026-10-07
