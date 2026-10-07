@@ -77,27 +77,10 @@ const invisibleTakesPointer = (d: Divergence) => {
   return before.some((e) => e.t === 'set' && (e.port === 'pointerEventsEnabled' || e.port === 'pointerEventsMode'));
 };
 
-/** Did the input hold a value passing `test` at the placing or at any write before the difference? */
-const everHeld = (d: Divergence, port: string, test: (v: unknown) => boolean) =>
-  test(d.params[port]) || d.reference.slice(0, d.difference.index).some((e) => e.t === 'set' && e.port === port && test((e as { value?: unknown }).value));
-
-/**
- * NSP-016 §6 C87 (s52) — Group.tsx takes its tag with a destructuring default (`const { as = 'div' }`), which covers only `undefined`:
- * a Tag of `""`, null, 0 or false reaches `React.createElement` and the render throws. The spec draws a `div`, as the Text does
- * (`props.as || 'div'`). Narrow: the runtime threw, and the Tag last written before the difference (a placing's param is a set too)
- * is falsy and not undefined (NaN and -0 are falsy).
- */
+/** The value the input held at the difference: the last write before it, else the placing's param. */
 const heldAt = (d: Divergence, port: string): unknown => {
   const written = d.reference.slice(0, d.difference.index).filter((e) => e.t === 'set' && e.port === port).pop() as { value?: unknown } | undefined;
   return written ? written.value : d.params[port];
-};
-const emptyTag = (d: Divergence) => {
-  if (d.difference.threw === undefined) return false;
-  // a placing's Tag throws at the placing, before any step: the param is the Tag then
-  const v = heldAt(d, 'as');
-  if (v === undefined) return false;
-  const falsyNum = typeof v === 'object' && v !== null && ['NaN', '-0'].includes(String((v as { $num?: unknown }).$num));
-  return v === '' || v === null || v === false || v === 0 || falsyNum;
 };
 
 /**
@@ -111,20 +94,6 @@ const scrollerWrapsChildren = (d: Divergence) => {
   const at = (e: TraceEvent | undefined) => !!e && e.t === 'value' && e.port === 'dropIndex';
   if (!at(d.reference[d.difference.index]) && !at(d.actual[d.difference.index])) return false;
   return !!heldAt(d, 'scrollEnabled') && !heldAt(d, 'nativeScroll');
-};
-
-/**
- * NSP-016 §6 C89 (s52) — Native platform scroll holding a truthy value that is not `true` (a wired 1, "false"): Group.tsx `render`
- * reads it as native (`!props.nativeScroll`, no wrapper) and `componentDidMount` as not native (`!== true`), so the JavaScript scroller
- * runs on the unwrapped children: Scroll To Index looks for the child inside the first child and fails, and the scroller takes the
- * click (with Block Pointer Events, Click never fires). The spec reads it as native, as the render does. Narrow: Enable Scroll and such
- * a Native platform scroll held at some point before the difference (the scroller started at the mount outlives the value).
- */
-const nativeScrollNotBoolean = (d: Divergence) => {
-  if (d.difference.threw !== undefined) return false;
-  // s52's 10,000: the scroller on unwrapped children reaches further than the scroll and the click (a tap after a carry: Focused)
-  const odd = (v: unknown) => !!v && v !== true && !(typeof v === 'object' && v !== null && ['NaN', '-0'].includes(String((v as { $num?: unknown }).$num)));
-  return everHeld(d, 'nativeScroll', odd) && everHeld(d, 'scrollEnabled', (v) => !!v);
 };
 
 /**
@@ -184,9 +153,7 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   // s52 — the Group: the Text's rows (the same shared ports and drag module), and its own Tag
   Group: [
     { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer },
-    { row: 'NSP-016 §6 C87 — a Tag written empty, null, 0 or false: React throws drawing the element', matches: emptyTag },
     { row: 'NSP-016 §6 C88 — Enable Scroll on and Native platform scroll off: the scroller wraps the children, so Drop Index counts the wrapper (0 or 1)', matches: scrollerWrapsChildren },
-    { row: 'NSP-016 §6 C89 — Native platform scroll truthy but not true: the scroller runs on unwrapped children (Scroll To Index fails, the click is taken)', matches: nativeScrollNotBoolean },
     { row: 'NSP-016 §6 C90 — the JavaScript scroller and Block Pointer Events together: a click fires no Click', matches: scrollerBlocksClick },
     { row: 'NSP-016 §6 C95 — a Focus on a Group off the page: the runtime lists it, fires Focused and reports Done (R16: Unchanged)', matches: groupFocusOffPage }
   ],

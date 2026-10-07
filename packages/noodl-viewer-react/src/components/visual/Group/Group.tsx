@@ -57,7 +57,9 @@ export class Group extends React.Component<GroupProps> {
   };
 
   componentDidMount() {
-    if (this.props.scrollEnabled && this.props.nativeScroll !== true) {
+    // P107-C89: read as `render` and `componentDidUpdate` read it — a truthy Native platform scroll (a wired 1) is native, so
+    // the scroller never starts on children `render` did not wrap.
+    if (this.props.scrollEnabled && !this.props.nativeScroll) {
       this.setupIScroll();
     }
 
@@ -300,8 +302,10 @@ export class Group extends React.Component<GroupProps> {
   render() {
     // React.ElementType collapses the intrinsic-elements union; with the ref prop added,
     // the raw union exceeds the compiler's representation limit (TS2590).
-    const { as = 'div', ...props } = this.props;
-    const Component = as as React.ElementType;
+    // P107-C87: `||`, not a destructuring default — a default covers only undefined, and a wired "", null, 0 or false
+    // reached createElement and threw. The Text reads its Tag the same way.
+    const { as, ...props } = this.props;
+    const Component = (as || 'div') as React.ElementType;
 
     const children = props.scrollEnabled && !props.nativeScroll ? this.renderIScroll() : props.children;
     

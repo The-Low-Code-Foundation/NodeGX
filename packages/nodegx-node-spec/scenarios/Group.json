@@ -756,9 +756,8 @@
     ]
   },
   {
-    "name": "row C87 — a Tag written empty draws a div, as no Tag does (the runtime: React throws on the empty element name)",
+    "name": "C87 — a Tag written empty draws a div, as no Tag does",
     "because": "Group.tsx render `const { as = 'div', ...props }` — the default covers only undefined; the Text's `props.as || 'div'` is the intent",
-    "row": "NSP-016 §6 C87",
     "steps": [
       "settle",
       {
@@ -824,9 +823,8 @@
     ]
   },
   {
-    "name": "row C89 — Native platform scroll wired 1 is native: Scroll To Index 0 is Done (the runtime: the scroller runs on the unwrapped children and the scroll fails)",
+    "name": "C89 — Native platform scroll wired 1 is native: Scroll To Index 0 is Done",
     "because": "Group.tsx render reads `!props.nativeScroll`, componentDidMount `nativeScroll !== true`",
-    "row": "NSP-016 §6 C89",
     "params": {
       "scrollEnabled": true,
       "nativeScroll": 1
