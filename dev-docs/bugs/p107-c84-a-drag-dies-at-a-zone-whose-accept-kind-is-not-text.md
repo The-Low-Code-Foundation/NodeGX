@@ -1,7 +1,8 @@
 ---
 id: P107-C84
 title: A drag dies at a drop zone whose Accept Kind holds a value that is not text (a wired number, a list) — a pointer drag never ends and blocks every later drag; a keyboard pick-up starts in no zone
-status: open
+status: fixed
+commit: f2d9d349b
 phase: P109
 task: ISL-038
 severity: medium
@@ -9,7 +10,7 @@ area: runtime / drag and drop on every visual node that has it (noodl-viewer-rea
 found: P107 NSP-016 s51, 2026-10-06
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.12; found by the runtime target's 10,000 run (seed 20732); the "row C84" scenarios and their twins in packages/nodegx-node-spec/scenarios/Text.json
 kit: node-spec
-regression: packages/nodegx-node-spec/scenarios/Text.json "row C84 — Accept Kind wired a number is read as text: a card carried over it and let go is refused and the drag ends, so the click after it is swallowed and the next card lifts and drops (the runtime: the let go throws — the drag never ends)"
+regression: packages/nodegx-node-spec/scenarios/Text.json "row C84 — Accept Kind wired a number is read as text: a card carried over it and let go is refused and the drag ends, so the click after it is swallowed and the next card lifts and drops"
 ---
 
 **What a person sees.** A column's Accept Kind is wired from data, and the value arrives as a number or a list instead of
@@ -36,3 +37,5 @@ text, so the scenario carries `row` and the runtime's difference is counted as k
 **Proposed fix (one line).** Read it as text: `String(value || '')` in `kindsOf`, and the same for the source's Drag Kind in
 `accepts`. When it is fixed, remove the `row` fields from the two "row C84" scenarios and the C84 entry from KNOWN_ROWS in
 the same commit.
+
+**Fixed f2d9d349b (P109 ISL-038, 2026-10-07).** `kindsOf` reads Accept Kind, and `accepts` reads the source's Drag Kind, as `String(value || '')`: a drag that meets the zone ends whatever the value. One commit with C82 and C85. Graded on the runtime: Text v5, Group v2, Shape and Image conform at seeds 13 and 20732 (200 sequences, 0 divergences, every unkilled mutant a declared equivalent) with the row dropped; the visual batch conforms on the interpreter (13 of 13); viewer 1802 / 1802. Control: the base commit's drag-drop.ts, node-shared-port-definitions.ts and image.ts with C91's marker removed are red on exactly the row scenarios (C82, C84 twice, C85 on each of the four nodes, C91's three, C94's one); the base Circle.tsx alone runs the heap out (exit 134).
