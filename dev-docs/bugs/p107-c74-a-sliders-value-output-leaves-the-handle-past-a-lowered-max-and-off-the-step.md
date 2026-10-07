@@ -1,7 +1,8 @@
 ---
 id: P107-C74
 title: A Slider's Value output disagrees with the handle — it keeps a slid value past a lowered Max, holds a graph value the browser rounds to the step, and Value Percent keeps its old figure when Min or Max moves
-status: scheduled
+status: fixed
+commit: c92fa2afa
 phase: P109
 task: ISL-031
 severity: low
@@ -9,7 +10,7 @@ area: runtime / Slider (components/controls/Slider/Slider.tsx, nodes/controls/sl
 found: P107 NSP-016 s41, 2026-10-04
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.6 (row C74); scenarios "a slide to 80, then Max lowered to 60 …", "Value 33.5 with Step 1 …", "a slide to 50, then Max raised to 200 …" in packages/nodegx-node-spec/scenarios/net.noodl.controls.range.json — the runtime target and the spec agree
 kit: node-spec
-regression: packages/nodegx-node-spec/scenarios/net.noodl.controls.range.json "a slide to 80, then Max lowered to 60: nothing on the wire — Value still reads 80, past Max, while the browser draws the handle at 60 (row C74); slides to 70 and 60 land on 60, which the browser already holds: nothing; a slide to 30: Value 30 with Changed"
+regression: packages/nodegx-node-spec/scenarios/net.noodl.controls.range.json "a slide to 80, then Max lowered to 60: the frame's end draws the handle at 60, as the browser holds it — Value 60 and Value Percent 100, no Changed (v3, C74)"
 ---
 
 **Value**'s output description: "The value the handle is currently at, between Min and Max, as a number". **Value
@@ -32,3 +33,5 @@ state) the way the browser does — clamp, then round to the step from Min — a
 apply the same sanitizing to a Value write. Then Value and Value Percent always describe the handle.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Follow the handle".** After Min, Max or Step change, and after a Value write, the value is clamped and rounded to the step as the browser draws it, and reported without firing Changed. A Value of 33.5 with Step 1 then reads 34. Moderate change in one file. The question as asked: *"Should Value and Value Percent always describe where the handle is drawn?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed c92fa2afa (P109 ISL-031, 2026-10-07), as ruled — Slider spec v3.** Every paint draws the handle as the browser holds it — the graph's word when one waits, else where it was — against the attributes then (`browserRangeValue` in slider.ts: HTML's sanitization, clamped, rounded to the step from Min), and reports Value and Value Percent without Changed. Min, Max and Step are attributes, no longer words for the handle: a slid handle past a lowered Max is clamped to it and stays where the person put it otherwise. A reversed range holds Min (Chromium's drawing; jsdom's clamp of one flips at every re-sanitization). Also graded: 33.5 with Step 1 reads 34 ("Value 33.5 with Step 1 …"), Max raised to 200 moves Value Percent ("a slide to 50, then Max raised to 200 …"), and an act's paint on a hidden slider clamps for good (the scenario added in v3). Control: HEAD's Slider files red on exactly the 24 scenarios v3 changed or added.

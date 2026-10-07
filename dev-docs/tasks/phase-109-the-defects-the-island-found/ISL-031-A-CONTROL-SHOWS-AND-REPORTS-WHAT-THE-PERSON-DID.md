@@ -1,6 +1,6 @@
 # ISL-031 — A control shows and reports what the person did
 
-**Status: 🟡 s26 (2026-10-06/07): 14 of 23 fixed, each with a control (§9) — the Text Input's eight, the label work on four controls (C80, C66), the Checkbox's C67, the Dropdown's C71 + D34, the radio pair's C76 + D37; left: the Slider's four (C73, C74, C75, D36), the shared C64 and D30, and the Text's drag rows C77, C78, C79 (P107's Group / Text specs were open in the working tree). ✅ AC2: all 15 rulings taken 2026-10-05 (1 against the recommendation). Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 23 bugs from
+**Status: 🟡 s27 (2026-10-07): 18 of 23 fixed — the Slider's four in two commits (§10: C73 + D36 `21b27462d`, C74 + C75 `c92fa2afa`, Slider spec v3); left: the shared C64 and D30, and the Text's drag rows C77, C78, C79. s26 (2026-10-06/07): 14 of 23 fixed, each with a control (§9) — the Text Input's eight, the label work on four controls (C80, C66), the Checkbox's C67, the Dropdown's C71 + D34, the radio pair's C76 + D37. ✅ AC2: all 15 rulings taken 2026-10-05 (1 against the recommendation). Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 23 bugs from
 the ledger (`dev-docs/bugs/`) that had no task: 1 high · 14 medium · 8 low, **15 awaiting a ruling**. **Side:** noodl-viewer-react (Text Input, Checkbox, Dropdown, Slider, Radio Button (Group), drag and drop, the shared control states)
 
 ## 1. The person sentence
@@ -29,18 +29,18 @@ to ask. This table is generated from the ledger headers. **The ledger file is th
 | [P107-C67](../../bugs/p107-c67-an-action-reverting-a-click-in-the-same-frame-does-not-redraw-the-checkbox.md) | medium | fixed `b07b2a5a4` | A Check or Uncheck that reverts a person's click in the same frame does not redraw the Checkbox — the box stays as the click left it and the next click reports the opposite of what the node holds |
 | [P107-C68](../../bugs/p107-c68-a-mouse-press-on-a-text-input-fires-no-pointer-down.md) | medium | fixed `7a92ec4b1` | A mouse press on a Text Input fires no Pointer Down and never sets Pressed — the component's own onMouseDown replaces the control's; a Text Area, a finger and the release still report |
 | [P107-C71](../../bugs/p107-c71-a-dropdowns-value-written-back-after-a-pick-leaves-the-pick-on-the-screen.md) | medium | fixed `5d40a7aa3` | A Dropdown's Value written back to the value React last rendered, after a person's pick, changes the output but not the selection shown — picking the shown option again then raises nothing |
-| [P107-C73](../../bugs/p107-c73-a-sliders-value-written-back-after-a-slide-leaves-the-handle-where-the-person-put-it.md) | medium | needs-ruling | A Slider's Value written from the graph after a person's slide does nothing when it equals the last Value the author wrote — the handle stays where the person put it |
+| [P107-C73](../../bugs/p107-c73-a-sliders-value-written-back-after-a-slide-leaves-the-handle-where-the-person-put-it.md) | medium | fixed `21b27462d` | A Slider's Value written from the graph after a person's slide does nothing when it equals the last Value the author wrote — the handle stays where the person put it |
 | [P107-C76](../../bugs/p107-c76-a-radio-groups-value-written-back-in-the-pick-frame-leaves-the-pick-selected.md) | medium | fixed `8dbeb8f33` | A Radio Button Group's Value written back in the same frame as a person's pick leaves the picked button selected under a Value that names another — picking it again raises nothing, and picking the named one raises no Changed |
 | [P107-C77](../../bugs/p107-c77-a-draggable-element-loses-its-keyboard-pickup-when-its-element-is-replaced.md) | medium | open | A Draggable element can no longer be picked up from the keyboard once its element is replaced — after Mounted goes off and on, after its Tag changes, or when it mounts more than about a second after Draggable was set |
 | [P107-C79](../../bugs/p107-c79-an-invisible-element-catches-clicks-after-a-pointer-events-write.md) | medium | open | A Text at Opacity 0 catches clicks once Pointer Events Enabled or Pointer Events Mode is written after it was drawn — the style write goes straight to the DOM and the component's "opacity 0 takes no pointer" rule is never re-applied |
 | [P107-C80](../../bugs/p107-c80-enable-label-takes-the-keyboard-away-from-a-text-input.md) | medium | fixed `94b83d7ea` | Turning Enable Label on or off while someone is typing in a Text Input takes the keyboard away from them, silently — React builds a new field under the label, and Focused still says true |
 | [P107-D30](../../bugs/p107-d30-focused-stays-true-after-a-control-leaves-the-page.md) | medium | needs-ruling | Focused (and Hover, Pressed) stay as they were after a control leaves the page with Mounted off — the element that comes back holds no keyboard while Focused still reads true |
 | [P107-D34](../../bugs/p107-d34-a-dropdown-fires-changed-with-nobody-picking-after-a-remount-or-an-items-write.md) | medium | fixed `5d40a7aa3` | A Dropdown fires Changed with nobody picking — a remount, or Items written again after a person's pick, takes the author's Value back and announces it as a change |
-| [P107-D36](../../bugs/p107-d36-a-slider-fires-changed-with-nobody-sliding.md) | medium | needs-ruling | A Slider fires Changed with nobody sliding — a Value written from the graph, a Min or Max that clamps the value, a remount after a slide, and a slider placed with Min equal to Max |
+| [P107-D36](../../bugs/p107-d36-a-slider-fires-changed-with-nobody-sliding.md) | medium | fixed `21b27462d` | A Slider fires Changed with nobody sliding — a Value written from the graph, a Min or Max that clamps the value, a remount after a slide, and a slider placed with Min equal to Max |
 | [P107-D37](../../bugs/p107-d37-a-radio-button-fires-changed-for-a-selection-it-did-not-get.md) | medium | fixed `8dbeb8f33` | A Radio Button fires Changed when its Checked moves for any reason while its group's last selection was a person's — a sibling carrying the same Value picked, its own Value written in the frame of a pick, a remount after a pick |
 | [P107-C72](../../bugs/p107-c72-a-text-input-converts-and-measures-with-the-props-it-last-rendered.md) | low | fixed `580ce9e27` | A Text Input's Clear, Backspace and frame-end writes convert with the Type, and measure room with the Max length, the component LAST RENDERED — a Type turned Number with a Clear in the same frame publishes '' where the next frame says null |
-| [P107-C74](../../bugs/p107-c74-a-sliders-value-output-leaves-the-handle-past-a-lowered-max-and-off-the-step.md) | low | needs-ruling | A Slider's Value output disagrees with the handle — it keeps a slid value past a lowered Max, holds a graph value the browser rounds to the step, and Value Percent keeps its old figure when Min or Max moves |
-| [P107-C75](../../bugs/p107-c75-a-slider-with-min-equal-to-max-reports-value-percent-nan.md) | low | needs-ruling | A Slider with Min equal to Max reports Value Percent NaN, and every report fires Changed |
+| [P107-C74](../../bugs/p107-c74-a-sliders-value-output-leaves-the-handle-past-a-lowered-max-and-off-the-step.md) | low | fixed `c92fa2afa` | A Slider's Value output disagrees with the handle — it keeps a slid value past a lowered Max, holds a graph value the browser rounds to the step, and Value Percent keeps its old figure when Min or Max moves |
+| [P107-C75](../../bugs/p107-c75-a-slider-with-min-equal-to-max-reports-value-percent-nan.md) | low | fixed `c92fa2afa` | A Slider with Min equal to Max reports Value Percent NaN, and every report fires Changed |
 | [P107-C78](../../bugs/p107-c78-a-keyboard-drag-drops-an-element-on-itself.md) | low | open | An element that is both Draggable and a drop zone, picked up with the keyboard, starts inside itself — Enter drops it on itself (Dropped and Landed on the same node, its own Drag Value), which the pointer can never do |
 | [P107-D31](../../bugs/p107-d31-set-fires-value-changed-with-nothing-changed.md) | low | fixed `a969b4b31` | Text Input's Set fires Value Changed and reports Done when the field already holds the Value — "Fires whenever the Value output changes" is not what it does |
 | [P107-D32](../../bugs/p107-d32-a-text-fields-value-output-keeps-the-type-it-was-given-while-off-the-page.md) | low | fixed `0a6bb1d90` | A text-type Text Input given a number publishes '5' (text) while on the page and 5 (a number) while off it — the Value output's type depends on whether the field is mounted |
@@ -148,4 +148,34 @@ viewer suite 1777 / 1777 after the label work; spec stranger (rounds 1–4), bat
 page model, catalog parity green; viewer, spec tsc 0. **Not measured:** layout of an unlabelled control in a real browser
 (`display: contents` takes the outer div out of layout; a stylesheet selecting a Group's children by position would see it).
 **The export:** not checked for any of these rows; the exported controls are React components with their own state.
+
+## 10. Session 27 (2026-10-07) — the Slider, eighteen of twenty-three
+
+**AC1, re-measured:** the Slider's two known rows (D36, C73) still fired at HEAD; C74 and C75 were the spec's own (v2 modelled
+the runtime), so they needed a spec version, not a row drop.
+
+| Row | Commit | What changed | Grade |
+|---|---|---|---|
+| C73 + D36 | `21b27462d` | every Value write is a word the node counts (`valueWrites`); the component draws it through `takeGraphValue`, which reports without Changed; the node keeps the handle (`props.handle`), so a remount starts where the person left it | HEAD red on exactly the 30 formerly marked scenarios; seeds 13 and 20732 conform (20732's one survivor was s26's baseline) |
+| C74 + C75 | `c92fa2afa` | spec v3: every paint draws the handle as the browser holds it (clamped, rounded to the step from Min, a reversed range at Min) against the attributes then, and reports it without Changed; Min, Max, Step are attributes, not words; Value Percent recomputed at every report, 0 when Min = Max, a blank Min / Max read as 0 / 100; the Value description says "rounded to the Step" | HEAD (after the first commit) red on exactly the 24 scenarios v3 changed or added; seeds 13 and 20732 conform on the runtime, six seeds on the interpreter |
+
+**What the Slider taught:**
+
+- **A spec paint that sets a key only when it moved splits every reducer into twin branches.** v3's first draft (out, Value
+  Percent and the word's flag set only when they changed) made 3,291 interpreter mutants with 458 survivors — each act now came in
+  "the paint moved something" and "it didn't" shapes, and swap-branch hands one the other's recorded example. Writing the three
+  keys at every paint on the page (sending only what moved) collapsed it to 506 mutants and let v2's thirty "no word waiting"
+  equivalence declarations go. What survived after that was real: an act on a HIDDEN slider still paints first, and that paint's
+  clamp sticks (Max 60, act, Max 100 in one frame ends at 60) — one scenario added. The runtime conformance fell from 640 s to 45 s.
+- **jsdom's sanitization of a reversed range does not settle** (a value at or above Min becomes Max, below Min becomes Min), so a
+  paint that re-sanitizes at every frame flipped the handle 50 → 10 → 50. Found by a stability check (two quiet frames after
+  6,000 generated sequences must send nothing: 153 red, 0 after); the node follows Chromium (Max raised to Min).
+- **Clamping when Value is written would be wrong once the paint clamps** (Value 120, Max 200 in one frame must land on 120), so
+  the node stores the Value as written; the two NDA-012 viewer tests that read `props.value` now read the drawn handle.
+- The plant in `page-model-plants.test.ts` that re-creates v1's C73 is written against the spec's text: a spec rewrite makes the
+  whole plants FILE fail to collect (the Tests line then reads the other file's 14 alone — read the Suites line).
+
+**The export:** not changed. The exported Slider is a native controlled `<input type="range">` on a state variable
+(`emit/component.ts` role `range`); whether it reports the drawn value, clamps on a Min / Max change or fires a change for a graph
+write was not checked — P18's to read.
 

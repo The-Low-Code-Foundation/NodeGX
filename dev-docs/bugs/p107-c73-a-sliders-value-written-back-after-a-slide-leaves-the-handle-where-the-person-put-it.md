@@ -1,7 +1,8 @@
 ---
 id: P107-C73
 title: A Slider's Value written from the graph after a person's slide does nothing when it equals the last Value the author wrote — the handle stays where the person put it
-status: scheduled
+status: fixed
+commit: 21b27462d
 phase: P109
 task: ISL-031
 severity: medium
@@ -9,7 +10,7 @@ area: runtime / Slider (components/controls/Slider/Slider.tsx, nodes/controls/sl
 found: P107 NSP-016 s41, 2026-10-04
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.6 (row C73); scenario "a slide to 70, then Value written 0 …" in packages/nodegx-node-spec/scenarios/net.noodl.controls.range.json — the runtime target and the spec agree
 kit: node-spec
-regression: packages/nodegx-node-spec/scenarios/net.noodl.controls.range.json "a slide to 70, then Value written 0 — what the author last wrote: nothing on the wire and the handle stays at 70 (row C73); a slide to 70 again: nothing; Value 10: Value 10 with Changed"
+regression: packages/nodegx-node-spec/scenarios/net.noodl.controls.range.json "a slide to 70, then Value written 0 — what the author last wrote: the handle goes to 0 all the same (R14) — Value 0 and Value Percent 0, no Changed"
 ---
 
 The Dropdown's C71, on the Slider. A person's slide writes the component's state and the node's output (Slider.tsx
@@ -39,3 +40,5 @@ scenarios: "a slide to 70, then Value written 0 …", "… Value written 40 and 
 60 and Value written 0 …". The proposed fix (compare with the node's output) matches the ruling; whether to apply it is still to ask.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Fix it now".** Every Value from the app moves the handle, so a Reset works after a slide. Small change in one file: the new Value is compared with where the handle is. The question as asked: *"Should the running Slider follow your last-word rule now?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 21b27462d (P109 ISL-031, 2026-10-07), as ruled.** Every Value write is the graph's word for the handle: the node counts the words (`props.valueWrites`) and the component's effect is keyed on the count, so a Reset after a slide moves the handle back (a second NaN no longer reaches it at all: v3, below). Known row C73 dropped with its predicate; its row scenarios lost their marks. Control: HEAD's Slider files red on exactly the 30 formerly marked scenarios (C73's and D36's).

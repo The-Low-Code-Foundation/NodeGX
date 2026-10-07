@@ -1,7 +1,8 @@
 ---
 id: P107-D36
 title: A Slider fires Changed with nobody sliding — a Value written from the graph, a Min or Max that clamps the value, a remount after a slide, and a slider placed with Min equal to Max
-status: scheduled
+status: fixed
+commit: 21b27462d
 phase: P109
 task: ISL-031
 severity: medium
@@ -9,7 +10,7 @@ area: runtime / Slider (components/controls/Slider/Slider.tsx, nodes/controls/sl
 found: P107 NSP-016 s41, 2026-10-04
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.6 (row D36); scenarios "Value from the graph …", "placed with Min 10 …", "a slide to 30, then Mounted off and on …" in packages/nodegx-node-spec/scenarios/net.noodl.controls.range.json — the runtime target and the spec agree
 kit: node-spec
-regression: packages/nodegx-node-spec/scenarios/net.noodl.controls.range.json "Value from the graph: Value and Value Percent sent at the frame's end AND Changed fires (row D36); the same again: nothing; null, '' and 'abc': ignored; '60': Value 60 with Changed; 120: clamped to 100; -5: clamped to 0"
+regression: packages/nodegx-node-spec/scenarios/net.noodl.controls.range.json "Value from the graph: Value and Value Percent sent at the frame's end, and Changed does NOT fire"
 ---
 
 The **Value** input's description: "Moves the handle to this value, clamped to Min and Max; changing it from the graph
@@ -49,3 +50,5 @@ then Mounted off and on …", the D36 matrix (440 segments) and the act-paint ma
 question left.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Fix it now".** Writes from the app move the handle and report Value without Changed, and a hidden Slider keeps its place. Small to medium change in two files. An app that relied on Changed firing at load stops getting it. The question as asked: *"Should the running Slider follow the description and your ruling now?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 21b27462d (P109 ISL-031, 2026-10-07), as ruled.** The component draws the graph's word through a second entry point (`takeGraphValue`) that reports Value and Value Percent without Changed; the node keeps the handle (`props.handle`), so a remounted component starts where the person left it. A slide still reports through `updateOutputValue`, with Changed. Known row D36 dropped with its predicate; its row scenarios lost their marks. Control: HEAD's Slider files red on exactly the 30 formerly marked scenarios.
