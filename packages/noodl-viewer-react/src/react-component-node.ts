@@ -1008,6 +1008,8 @@ export class NoodlReactComponent extends React.Component<NoodlReactComponentProp
     this.props.noodlNode.sendSignalOnOutput('willUnmount');
     //Remove
     const noodlNode = this.props.noodlNode;
+    // P107-D30 (P109 ISL-031) — a control's states go with its element (controls/utils.ts `_leftPage`)
+    noodlNode._leftPage?.();
     // GAM-012 fault 3 — leaving the page is not a Blur. Every node is dropped from the focus list
     // here; `Group.tsx` used to send a Blur instead, and the tracker could not tell the two apart.
     noodlNode.context.setNodeUnmounted?.(noodlNode);

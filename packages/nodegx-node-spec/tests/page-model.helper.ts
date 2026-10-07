@@ -76,18 +76,26 @@ const FOCUS_CALLS = {
 };
 const FIELD_CALL = ['onPage', 'elementFocused', 'field', 'pageType', 'caret', 'hadCaret'];
 const CONTROL_NODE = ['enabled', 'hover', 'pressed', 'focused', 'mounted', 'visible'];
+/**
+ * P109 ISL-031 (P107-D30, ruled "Reset and announce") — a control's element leaving the page takes its states with it: the paint
+ * that unmounts it writes Focused, Hover and Pressed false and fires Blurred and Hover End for the ones that were on. That is the
+ * node's own work at the leaving (utils.ts `_leftPage`, from `componentWillUnmount`), not a person's, and it reads only node keys.
+ */
+const LEAVES = { frameEnd: ['focused', 'hover', 'pressed'], framePulses: ['onBlur', 'hoverEnd'] };
 
 export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
   'net.noodl.controls.button': {
     node: CONTROL_NODE,
     attr: { onPage, pageEnabled, pageVisible },
     held: { elementFocused: keyboard },
+    ...LEAVES,
     elementCalls: FOCUS_CALLS
   },
   'net.noodl.controls.checkbox': {
     node: [...CONTROL_NODE, 'checked'],
     attr: { onPage, pageEnabled, pageVisible },
     held: { elementFocused: keyboard },
+    ...LEAVES,
     elementCalls: FOCUS_CALLS
   },
   'net.noodl.visual.icon': {
@@ -175,8 +183,8 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
       hadCaret: { keeps: 'the caret' }
     },
     // text-input.ts :190, :263 — the frame-end callbacks a Set or an Insert schedules (node.ts :1276-1279)
-    frameEnd: ['startValue', 'out', 'wire', 'announced', 'hasAnnounced', 'queue'],
-    framePulses: ['textChanged'],
+    frameEnd: ['startValue', 'out', 'wire', 'announced', 'hasAnnounced', 'queue', ...LEAVES.frameEnd],
+    framePulses: ['textChanged', ...LEAVES.framePulses],
     // Clear, Backspace and a Start Value write the field at once when there is one (text-input.ts :423, :431
     // `innerReactComponentRef`; the spec's `componentSetText`): they meet its text, its type and its cursor
     elementCalls: { ...FOCUS_CALLS, 'on.clear': FIELD_CALL, 'on.backspace': FIELD_CALL, 'on.startValue': FIELD_CALL }
@@ -187,7 +195,8 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
     // the handle shows the Value (R14: the last word, a person's or the graph's)
     held: { elementFocused: keyboard, shown: { shows: (s) => (s.onPage ? s.out : KEEP) } },
     // slider.ts :39-54, :220-236 — the graph's word reaches the node's value at the next paint (v2, D36)
-    frameEnd: ['out', 'percent', 'pending'],
+    frameEnd: ['out', 'percent', 'pending', ...LEAVES.frameEnd],
+    framePulses: LEAVES.framePulses,
     elementCalls: FOCUS_CALLS
   },
   'net.noodl.controls.options': {
@@ -195,6 +204,7 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
     attr: { onPage, pageEnabled, pageVisible },
     // the selection shows the Value wherever the list offers it (v3, R14); otherwise it is the browser's (dropdown.ts `painted`)
     held: { elementFocused: keyboard, domSelected: { shows: (s) => (s.onPage && offers(s.items, s.value) ? s.value : KEEP) } },
+    ...LEAVES,
     elementCalls: FOCUS_CALLS
   },
   'net.noodl.controls.radiobutton': {
@@ -203,7 +213,8 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
     held: { elementFocused: keyboard },
     // radiobutton.ts :37 — Checked is what the button shows of the group's selection, at its paint (v2, R15 C76); the
     // placing hands the button its group (world.ts GROUP)
-    frameEnd: ['checked', 'inGroup', 'gValue'],
+    frameEnd: ['checked', 'inGroup', 'gValue', ...LEAVES.frameEnd],
+    framePulses: LEAVES.framePulses,
     elementCalls: FOCUS_CALLS
   },
   'Radio Button Group': {

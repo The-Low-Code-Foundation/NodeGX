@@ -172,9 +172,9 @@ Any free-text entry. Use `type` instead of separate nodes for email/number/passw
 | `completed` | Signal | — | Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error |
 | `didMount` | Signal | — | Fires once this element has been added to the page and can be measured |
 | `done` | Signal | — | Fires when Set, Clear, Insert Text, Backspace, Focus or Blur did something |
-| `hoverEnd` | Signal | — | Fires when the pointer leaves this control, including when it leaves while a button is still held |
+| `hoverEnd` | Signal | — | Fires when the pointer leaves this control, including when it leaves while a button is still held, or when the control leaves the page under it |
 | `hoverStart` | Signal | — | Fires when the pointer moves onto this control |
-| `onBlur` | Signal | — | Fires when keyboard focus leaves this control, which is the usual place to validate what was entered |
+| `onBlur` | Signal | — | Fires when keyboard focus leaves this control, or the control leaves the page while holding it, which is the usual place to validate what was entered |
 | `onEnter` | Signal | — | Fires when the user presses Enter in the field, which is the usual place to submit |
 | `onFocus` | Signal | — | Fires the moment this control takes keyboard focus, whether from a click, a tab or a Focus action |
 | `pointerDown` | Signal | — | Fires as a mouse button or finger goes down on this control, before any click has completed |

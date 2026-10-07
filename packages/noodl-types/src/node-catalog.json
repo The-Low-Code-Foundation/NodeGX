@@ -45081,7 +45081,7 @@
             "name": "signal"
           },
           "isSignal": true,
-          "description": "Fires when the pointer leaves this control, including when it leaves while a button is still held"
+          "description": "Fires when the pointer leaves this control, including when it leaves while a button is still held, or when the control leaves the page under it"
         },
         {
           "name": "hoverStart",
@@ -45114,7 +45114,7 @@
             "name": "signal"
           },
           "isSignal": true,
-          "description": "Fires when keyboard focus leaves this control, which is the usual place to validate what was entered"
+          "description": "Fires when keyboard focus leaves this control, or the control leaves the page while holding it, which is the usual place to validate what was entered"
         },
         {
           "name": "onClick",
@@ -47233,7 +47233,7 @@
             "name": "signal"
           },
           "isSignal": true,
-          "description": "Fires when the pointer leaves this control, including when it leaves while a button is still held"
+          "description": "Fires when the pointer leaves this control, including when it leaves while a button is still held, or when the control leaves the page under it"
         },
         {
           "name": "hoverStart",
@@ -47266,7 +47266,7 @@
             "name": "signal"
           },
           "isSignal": true,
-          "description": "Fires when keyboard focus leaves this control, which is the usual place to validate what was entered"
+          "description": "Fires when keyboard focus leaves this control, or the control leaves the page while holding it, which is the usual place to validate what was entered"
         },
         {
           "name": "onChange",
@@ -49771,7 +49771,7 @@
             "name": "signal"
           },
           "isSignal": true,
-          "description": "Fires when the pointer leaves this control, including when it leaves while a button is still held"
+          "description": "Fires when the pointer leaves this control, including when it leaves while a button is still held, or when the control leaves the page under it"
         },
         {
           "name": "hoverStart",
@@ -49804,7 +49804,7 @@
             "name": "signal"
           },
           "isSignal": true,
-          "description": "Fires when keyboard focus leaves this control, which is the usual place to validate what was entered"
+          "description": "Fires when keyboard focus leaves this control, or the control leaves the page while holding it, which is the usual place to validate what was entered"
         },
         {
           "name": "onChange",
@@ -51943,7 +51943,7 @@
             "name": "signal"
           },
           "isSignal": true,
-          "description": "Fires when the pointer leaves this control, including when it leaves while a button is still held"
+          "description": "Fires when the pointer leaves this control, including when it leaves while a button is still held, or when the control leaves the page under it"
         },
         {
           "name": "hoverStart",
@@ -51976,7 +51976,7 @@
             "name": "signal"
           },
           "isSignal": true,
-          "description": "Fires when keyboard focus leaves this control, which is the usual place to validate what was entered"
+          "description": "Fires when keyboard focus leaves this control, or the control leaves the page while holding it, which is the usual place to validate what was entered"
         },
         {
           "name": "onChange",
@@ -54284,7 +54284,7 @@
             "name": "signal"
           },
           "isSignal": true,
-          "description": "Fires when the pointer leaves this control, including when it leaves while a button is still held"
+          "description": "Fires when the pointer leaves this control, including when it leaves while a button is still held, or when the control leaves the page under it"
         },
         {
           "name": "hoverStart",
@@ -54317,7 +54317,7 @@
             "name": "signal"
           },
           "isSignal": true,
-          "description": "Fires when keyboard focus leaves this control, which is the usual place to validate what was entered"
+          "description": "Fires when keyboard focus leaves this control, or the control leaves the page while holding it, which is the usual place to validate what was entered"
         },
         {
           "name": "onChange",
@@ -57049,7 +57049,7 @@
             "name": "signal"
           },
           "isSignal": true,
-          "description": "Fires when the pointer leaves this control, including when it leaves while a button is still held"
+          "description": "Fires when the pointer leaves this control, including when it leaves while a button is still held, or when the control leaves the page under it"
         },
         {
           "name": "hoverStart",
@@ -57082,7 +57082,7 @@
             "name": "signal"
           },
           "isSignal": true,
-          "description": "Fires when keyboard focus leaves this control, which is the usual place to validate what was entered"
+          "description": "Fires when keyboard focus leaves this control, or the control leaves the page while holding it, which is the usual place to validate what was entered"
         },
         {
           "name": "onEnter",

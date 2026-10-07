@@ -78,7 +78,7 @@ type State = {
    * A sibling's `pick` is the sibling's click, which this button's visibility does not reach
    */
   pageVisible: boolean;
-  /** the element holds the keyboard — what the PAGE knows (the Checkbox's; row D30) */
+  /** the element holds the keyboard — what the PAGE knows (the Checkbox's) */
   elementFocused: boolean;
   /** the element is on the page */
   onPage: boolean;
@@ -104,7 +104,8 @@ export const RadioButton = defineNode({
   // v2 (NSP-023 step 5, 2026-10-06): the button shows its group's Value; Changed fires from a person's click; Enable Label leaves
   // the input where it is — v1 copied the group's selection, its "a person made it" flag and the label rebuild (rows C76, D37, C80)
   // v3 (P109 ISL-031, P107-C64 ruled "Ignore touches, keep hover"): a finger on a disabled control reports nothing — no Pressed, no Pointer Down or Up — as Enabled promises; the pointer's hover still reports
-  version: 3,
+  // v4 (P109 ISL-031, P107-D30 ruled "Reset and announce"): a control leaving the page (Mounted off) takes Focused, Hover and Pressed with it — each goes false, sent if it was true, with Blurred and Hover End for the ones that were on
+  version: 4,
   source: 'packages/noodl-viewer-react/src/nodes/controls/radiobutton.ts',
   needs: ['person', 'group'],
   // the page's syncs (spec.ts `synced`): not branches
@@ -239,11 +240,11 @@ export const RadioButton = defineNode({
     // utils.ts :157-195
     focusState: { type: 'boolean', from: (s) => s.focused, displayName: 'Focused', group: 'States', description: 'True while this control holds keyboard focus, so typing and Enter go to it' },
     onFocus: { type: 'signal', displayName: 'Focused', group: 'Focus Events', description: 'Fires the moment this control takes keyboard focus, whether from a click, a tab or a Focus action' },
-    onBlur: { type: 'signal', displayName: 'Blurred', group: 'Focus Events', description: 'Fires when keyboard focus leaves this control, which is the usual place to validate what was entered' },
+    onBlur: { type: 'signal', displayName: 'Blurred', group: 'Focus Events', description: 'Fires when keyboard focus leaves this control, or the control leaves the page while holding it, which is the usual place to validate what was entered' },
     // utils.ts :204-243
     hoverState: { type: 'boolean', from: (s) => s.hover, displayName: 'Hover', group: 'States', description: 'True while the pointer is over this control; stays false on touch devices with no pointer' },
     hoverStart: { type: 'signal', displayName: 'Hover Start', group: 'Pointer Events', description: 'Fires when the pointer moves onto this control' },
-    hoverEnd: { type: 'signal', displayName: 'Hover End', group: 'Pointer Events', description: 'Fires when the pointer leaves this control, including when it leaves while a button is still held' },
+    hoverEnd: { type: 'signal', displayName: 'Hover End', group: 'Pointer Events', description: 'Fires when the pointer leaves this control, including when it leaves while a button is still held, or when the control leaves the page under it' },
     // utils.ts :246-311
     pressedState: { type: 'boolean', from: (s) => s.pressed, displayName: 'Pressed', group: 'States', description: 'True while a mouse button or finger is held down on this control, and false again the moment it is released or slides off' },
     pointerDown: { type: 'signal', displayName: 'Pointer Down', group: 'Pointer Events', description: 'Fires as a mouse button or finger goes down on this control, before any click has completed' },
@@ -377,10 +378,11 @@ function painted(s: Readonly<State>): Act {
     set.onPage = true;
     emit.push('didMount');
   } else if (!s.mounted && s.onPage) {
-    // the element leaves with the keyboard it held; the node's Focused is not told (row D30)
-    set.onPage = false;
-    set.elementFocused = false;
-    emit.push('willUnmount');
+    // the element leaves with the keyboard it held, and the states go with it (v4, D30)
+    const l = leftPage(s);
+    Object.assign(set, { onPage: false, elementFocused: false }, l.set);
+    emit.push('willUnmount', ...l.emit);
+    send.push(...l.send);
   }
   if ((set.onPage ?? s.onPage) === true) {
     const c = s.inGroup && s.gValue === s.value;
@@ -405,4 +407,30 @@ function pressed(s: Readonly<State>): Act {
   return s.elementFocused
     ? { set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] }
     : { set: { pressed: true, focused: true, elementFocused: true }, send: ['pressedState', 'focusState'], emit: ['pointerDown', 'onFocus'] };
+}
+
+/**
+ * P109 ISL-031 (P107-D30, ruled "Reset and announce") — the element leaves the page: what the states said of it goes with it.
+ * Focused, Hover and Pressed go false (sent when they were true), and Blurred and Hover End fire for the ones that were on
+ * (utils.ts `_leftPage`, called from react-component-node.ts `componentWillUnmount`). Pressed has no signal of its own here.
+ */
+function leftPage(s: Readonly<State>): { set: Partial<State>; send: Array<'focusState' | 'hoverState' | 'pressedState'>; emit: Array<'onBlur' | 'hoverEnd'> } {
+  const set: Partial<State> = {};
+  const send: Array<'focusState' | 'hoverState' | 'pressedState'> = [];
+  const emit: Array<'onBlur' | 'hoverEnd'> = [];
+  if (s.focused) {
+    set.focused = false;
+    send.push('focusState');
+    emit.push('onBlur');
+  }
+  if (s.hover) {
+    set.hover = false;
+    send.push('hoverState');
+    emit.push('hoverEnd');
+  }
+  if (s.pressed) {
+    set.pressed = false;
+    send.push('pressedState');
+  }
+  return { set, send, emit };
 }

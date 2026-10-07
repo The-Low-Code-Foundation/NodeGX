@@ -818,8 +818,8 @@
     ]
   },
   {
-    "name": "focused, then Mounted off and on: Focused still reads true while the element that came back holds no keyboard — a Focus action takes it again and fires Focused; a Tab away then fires Blurred",
-    "because": "the element leaves with the keyboard (the browser's focus fixup fires no blur) and nothing resets `outputPropValues.focusState` (utils.ts :157-168, NoodlReactComponent :993-1003); focus-tracker.ts drops the node at unmount (`nodeUnmounted`) so the next Focus is a fresh one — NSP-016 §7.2 row D30",
+    "name": "focused, then Mounted off and on: the leaving takes the keyboard and Focused with it — Will Unmount, Focused false and Blurred (D30); Did Mount; a Focus action puts the keyboard on the element that came back and fires Focused; a Tab away then fires Blurred",
+    "because": "P109 ISL-031 (P107-D30, ruled \"Reset and announce\"): the browser fires no blur for an element it removes, so the node resets its states as the element leaves (utils.ts `_leftPage`, called from react-component-node.ts `componentWillUnmount`)",
     "steps": [
       "settle",
       {
@@ -2309,6 +2309,220 @@
       },
       {
         "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused and under the pointer, then Mounted off, an act and a Focus action in one frame: the act's paint takes the element off the page, and Focused and Hover with it — Will Unmount, Blurred and Hover End (D30) — so the act finds nothing and the Focus is Unchanged; Mounted on: Did Mount; every act",
+    "because": "P109 ISL-031 (P107-D30): the act paints first (`onPainted`), and the paint that unmounts the element resets the states it held; a Focus action after it in the frame reads the page the act left. The s27 mutant run left a Text Input release on a leaving field ungraded (the frame's end does the same leave, so only a reader between the two can tell them apart)",
+    "steps": [
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
       },
       "settle"
     ]

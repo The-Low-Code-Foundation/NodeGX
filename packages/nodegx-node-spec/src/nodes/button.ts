@@ -74,10 +74,9 @@ type State = {
    */
   pageVisible: boolean;
   /**
-   * the element holds the keyboard — what the PAGE knows. `focused` is what the node REPORTS: an element leaving the
-   * page (Mounted off) takes the keyboard with it and the node's Focused stays as it was (utils.ts never resets
-   * `outputPropValues.focusState`; the browser fires no blur for a removed element — the focus fixup rule), so the
-   * element that comes back is not focused while Focused still reads true (NSP-016 §7.2 row D30).
+   * the element holds the keyboard — what the PAGE knows. `focused` is what the node REPORTS: the browser fires no blur for a
+   * removed element (the focus fixup rule), so an element leaving the page (Mounted off) took the keyboard with it while
+   * Focused stayed true — row D30, fixed in P109 ISL-031: the node resets its states as the element leaves (utils.ts `_leftPage`).
    */
   elementFocused: boolean;
   /** the element is on the page — what the node HAS. Follows `mounted` at each paint (the frame's end, or the page a person acts on). */
@@ -94,7 +93,8 @@ const NONE: Act = { send: [] };
 export const Button = defineNode({
   type: 'net.noodl.controls.button',
   // v2 (P109 ISL-031, P107-C64 ruled "Ignore touches, keep hover"): a finger on a disabled control reports nothing — no Pressed, no Pointer Down or Up — as Enabled promises; the pointer's hover still reports
-  version: 2,
+  // v3 (P109 ISL-031, P107-D30 ruled "Reset and announce"): a control leaving the page (Mounted off) takes Focused, Hover and Pressed with it — each goes false, sent if it was true, with Blurred and Hover End for the ones that were on
+  version: 3,
   source: 'packages/noodl-viewer-react/src/nodes/controls/button.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches
@@ -229,11 +229,11 @@ export const Button = defineNode({
     // utils.ts :157-195
     focusState: { type: 'boolean', from: (s) => s.focused, displayName: 'Focused', group: 'States', description: 'True while this control holds keyboard focus, so typing and Enter go to it' },
     onFocus: { type: 'signal', displayName: 'Focused', group: 'Focus Events', description: 'Fires the moment this control takes keyboard focus, whether from a click, a tab or a Focus action' },
-    onBlur: { type: 'signal', displayName: 'Blurred', group: 'Focus Events', description: 'Fires when keyboard focus leaves this control, which is the usual place to validate what was entered' },
+    onBlur: { type: 'signal', displayName: 'Blurred', group: 'Focus Events', description: 'Fires when keyboard focus leaves this control, or the control leaves the page while holding it, which is the usual place to validate what was entered' },
     // utils.ts :204-243
     hoverState: { type: 'boolean', from: (s) => s.hover, displayName: 'Hover', group: 'States', description: 'True while the pointer is over this control; stays false on touch devices with no pointer' },
     hoverStart: { type: 'signal', displayName: 'Hover Start', group: 'Pointer Events', description: 'Fires when the pointer moves onto this control' },
-    hoverEnd: { type: 'signal', displayName: 'Hover End', group: 'Pointer Events', description: 'Fires when the pointer leaves this control, including when it leaves while a button is still held' },
+    hoverEnd: { type: 'signal', displayName: 'Hover End', group: 'Pointer Events', description: 'Fires when the pointer leaves this control, including when it leaves while a button is still held, or when the control leaves the page under it' },
     // utils.ts :246-311
     pressedState: { type: 'boolean', from: (s) => s.pressed, displayName: 'Pressed', group: 'States', description: 'True while a mouse button or finger is held down on this control, and false again the moment it is released or slides off' },
     pointerDown: { type: 'signal', displayName: 'Pointer Down', group: 'Pointer Events', description: 'Fires as a mouse button or finger goes down on this control, before any click has completed' },
@@ -284,10 +284,10 @@ export const Button = defineNode({
   {
     // placed on the page with its params set — the first paint (react-component-node.ts :1740-1743 reads `wantsToBeMounted`):
     // Did Mount, unless a Mounted parameter said no
-    world: { place: (s) => ({ ...painted(s), send: [] }) },
+    world: { place: (s) => painted(s) },
     // and every frame's end is a paint: the page follows what the node wants (react-component-node.ts :1675-1689, :2310-2320
     // → the element added or removed, NoodlReactComponent :982-990 / :993-1003)
-    afterInputs: (s) => ({ ...painted(s), send: [] }),
+    afterInputs: (s) => painted(s),
     // a person acts on a PAINTED page (adapter.ts `act`): the page follows first, then the act meets what is there
     person: {
       // utils.ts :216-234 — not dropped on a disabled control
@@ -321,12 +321,15 @@ type Act = { set?: Partial<State>; send: Array<'pressedState' | 'focusState' | '
  * (NoodlReactComponent :982-990); one there and not wanted leaves — Will Unmount (:993-1003), its hover,
  * pressed and focused states keeping what they held (:1000-1003 resets only the visual states).
  */
-function painted(s: Readonly<State>): { set: Partial<State>; emit: Pulse[] } {
+function painted(s: Readonly<State>): Act & { set: Partial<State>; emit: Pulse[] } {
   const set: Partial<State> = { ...(s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled }), ...(s.pageVisible === s.visible ? {} : { pageVisible: s.visible }) };
-  if (s.mounted && !s.onPage) return { set: { ...set, onPage: true }, emit: ['didMount'] };
-  // the element leaves with the keyboard it held; the node's Focused is not told (row D30)
-  if (!s.mounted && s.onPage) return { set: { ...set, onPage: false, elementFocused: false }, emit: ['willUnmount'] };
-  return { set, emit: [] };
+  if (s.mounted && !s.onPage) return { set: { ...set, onPage: true }, send: [], emit: ['didMount'] };
+  // the element leaves with the keyboard it held, and the states go with it (v3, D30)
+  if (!s.mounted && s.onPage) {
+    const l = leftPage(s);
+    return { set: { ...set, onPage: false, elementFocused: false, ...l.set }, send: l.send, emit: ['willUnmount', ...l.emit] };
+  }
+  return { set, send: [], emit: [] };
 }
 
 /** The act on the painted page: nothing to act on when the element is not there; else `then` on the painted state, after the paint's own pulses. */
@@ -334,7 +337,7 @@ function onPainted(s: Readonly<State>, then: (painted: Readonly<State>) => Act):
   const p = painted(s);
   const after: State = { ...s, ...p.set };
   const a = after.onPage ? then(after) : NONE;
-  return { set: { ...p.set, ...a.set }, send: a.send, emit: [...p.emit, ...(a.emit ?? [])] };
+  return { set: { ...p.set, ...a.set }, send: [...p.send, ...a.send], emit: [...p.emit, ...(a.emit ?? [])] };
 }
 
 /**
@@ -347,4 +350,30 @@ function pressed(s: Readonly<State>, i: { keepsFocus: boolean }): { set: Partial
   return takes
     ? { set: { pressed: true, focused: true, elementFocused: true }, send: ['pressedState', 'focusState'], emit: ['pointerDown', 'onFocus'] }
     : { set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] };
+}
+
+/**
+ * P109 ISL-031 (P107-D30, ruled "Reset and announce") — the element leaves the page: what the states said of it goes with it.
+ * Focused, Hover and Pressed go false (sent when they were true), and Blurred and Hover End fire for the ones that were on
+ * (utils.ts `_leftPage`, called from react-component-node.ts `componentWillUnmount`). Pressed has no signal of its own here.
+ */
+function leftPage(s: Readonly<State>): { set: Partial<State>; send: Array<'focusState' | 'hoverState' | 'pressedState'>; emit: Array<'onBlur' | 'hoverEnd'> } {
+  const set: Partial<State> = {};
+  const send: Array<'focusState' | 'hoverState' | 'pressedState'> = [];
+  const emit: Array<'onBlur' | 'hoverEnd'> = [];
+  if (s.focused) {
+    set.focused = false;
+    send.push('focusState');
+    emit.push('onBlur');
+  }
+  if (s.hover) {
+    set.hover = false;
+    send.push('hoverState');
+    emit.push('hoverEnd');
+  }
+  if (s.pressed) {
+    set.pressed = false;
+    send.push('pressedState');
+  }
+  return { set, send, emit };
 }

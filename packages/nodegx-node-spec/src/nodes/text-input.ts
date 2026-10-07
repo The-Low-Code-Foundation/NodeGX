@@ -168,7 +168,7 @@ type State = {
   /** NSP-016 s43 — Opacity written as exactly the number 0 (TextInput.tsx :118-120 then sets `pointer-events: none`), and as painted */
   opacityZero: boolean;
   pageOpacityZero: boolean;
-  /** the element holds the keyboard — what the PAGE knows; `focused` is what the node REPORTS (button.ts, row D30) */
+  /** the element holds the keyboard — what the PAGE knows; `focused` is what the node REPORTS (button.ts) */
   elementFocused: boolean;
   /** the component is on the page (`innerReactComponentRef`, text-input.ts :423, :431): follows `mounted` at each paint */
   onPage: boolean;
@@ -252,7 +252,8 @@ export const TextInput = defineNode({
   // v3 (P109 ISL-031, P107-D32 "Always text"): off the page the value is made text before it is published.
   // v4 (P109 ISL-031, P107-D33 "Check the field's text"): Clear is Unchanged only when the field's text was empty too.
   // v5 (P109 ISL-031, P107-C64 ruled "Ignore touches, keep hover"): a finger on a disabled control reports nothing — no Pressed, no Pointer Down or Up — as Enabled promises; the pointer's hover still reports
-  version: 5,
+  // v6 (P109 ISL-031, P107-D30 ruled "Reset and announce"): a control leaving the page (Mounted off) takes Focused, Hover and Pressed with it — each goes false, sent if it was true, with Blurred and Hover End for the ones that were on
+  version: 6,
   source: 'packages/noodl-viewer-react/src/nodes/controls/text-input.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches — the page following the node at each paint, like the disabled
@@ -455,11 +456,11 @@ export const TextInput = defineNode({
     // utils.ts :157-195
     focusState: { type: 'boolean', from: (s) => s.focused, displayName: 'Focused', group: 'States', description: 'True while this control holds keyboard focus, so typing and Enter go to it' },
     onFocus: { type: 'signal', displayName: 'Focused', group: 'Focus Events', description: 'Fires the moment this control takes keyboard focus, whether from a click, a tab or a Focus action' },
-    onBlur: { type: 'signal', displayName: 'Blurred', group: 'Focus Events', description: 'Fires when keyboard focus leaves this control, which is the usual place to validate what was entered' },
+    onBlur: { type: 'signal', displayName: 'Blurred', group: 'Focus Events', description: 'Fires when keyboard focus leaves this control, or the control leaves the page while holding it, which is the usual place to validate what was entered' },
     // utils.ts :204-243
     hoverState: { type: 'boolean', from: (s) => s.hover, displayName: 'Hover', group: 'States', description: 'True while the pointer is over this control; stays false on touch devices with no pointer' },
     hoverStart: { type: 'signal', displayName: 'Hover Start', group: 'Pointer Events', description: 'Fires when the pointer moves onto this control' },
-    hoverEnd: { type: 'signal', displayName: 'Hover End', group: 'Pointer Events', description: 'Fires when the pointer leaves this control, including when it leaves while a button is still held' },
+    hoverEnd: { type: 'signal', displayName: 'Hover End', group: 'Pointer Events', description: 'Fires when the pointer leaves this control, including when it leaves while a button is still held, or when the control leaves the page under it' },
     // utils.ts :246-311
     pressedState: { type: 'boolean', from: (s) => s.pressed, displayName: 'Pressed', group: 'States', description: 'True while a mouse button or finger is held down on this control, and false again the moment it is released or slides off' },
     pointerDown: { type: 'signal', displayName: 'Pointer Down', group: 'Pointer Events', description: 'Fires as a mouse button or finger goes down on this control, before any click has completed' },
@@ -798,8 +799,11 @@ function painted(s: Readonly<State>): { set: Partial<State>; send: ValueOut[]; e
     const c = componentSetText({ ...s, ...fresh }, s.startValue); // :109 — the same text: the cursor stays
     return { set: { ...set, ...fresh, ...c.set }, send: c.send, emit: [...c.emit, 'didMount'] };
   }
-  // the element leaves with the keyboard it held; the node's Focused is not told (row D30)
-  if (!s.mounted && s.onPage) return { set: { ...set, onPage: false, elementFocused: false }, send: [], emit: ['willUnmount'] };
+  if (!s.mounted && s.onPage) {
+    // the element leaves with the keyboard it held, and the states go with it (v6, D30)
+    const l = leftPage(s);
+    return { set: { ...set, onPage: false, elementFocused: false, ...l.set }, send: l.send, emit: ['willUnmount', ...l.emit] };
+  }
   if (!s.onPage) return { set, send: [], emit: [] };
   if (type === s.pageType) return { set, send: [], emit: [] };
   // on the page, the type changed. `<textarea>` ↔ `<input>`: a new element, its cursor at the end, the keyboard left with the
@@ -901,4 +905,30 @@ function join(a: Act, b: Act): Act {
   const outcomes = [...(a.outcomes ?? []), ...(b.outcomes ?? [])];
   if (outcomes.length > 0) out.outcomes = outcomes;
   return out;
+}
+
+/**
+ * P109 ISL-031 (P107-D30, ruled "Reset and announce") — the element leaves the page: what the states said of it goes with it.
+ * Focused, Hover and Pressed go false (sent when they were true), and Blurred and Hover End fire for the ones that were on
+ * (utils.ts `_leftPage`, called from react-component-node.ts `componentWillUnmount`). Pressed has no signal of its own here.
+ */
+function leftPage(s: Readonly<State>): { set: Partial<State>; send: Array<'focusState' | 'hoverState' | 'pressedState'>; emit: Array<'onBlur' | 'hoverEnd'> } {
+  const set: Partial<State> = {};
+  const send: Array<'focusState' | 'hoverState' | 'pressedState'> = [];
+  const emit: Array<'onBlur' | 'hoverEnd'> = [];
+  if (s.focused) {
+    set.focused = false;
+    send.push('focusState');
+    emit.push('onBlur');
+  }
+  if (s.hover) {
+    set.hover = false;
+    send.push('hoverState');
+    emit.push('hoverEnd');
+  }
+  if (s.pressed) {
+    set.pressed = false;
+    send.push('pressedState');
+  }
+  return { set, send, emit };
 }

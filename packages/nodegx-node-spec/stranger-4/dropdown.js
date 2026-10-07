@@ -184,6 +184,22 @@ class Dropdown {
         this.root = null;
         this.select = null;
         this.frame.pulse('willUnmount');
+        // Not the stranger's line: Dropdown v6 (P109 ISL-031, row D30) — the states go with the element: Focused, Hover and
+        // Pressed false, Blurred and Hover End for the ones that were on; v4, the spec this round was handed, kept them
+        if (this.focused) {
+          this.focused = false;
+          this.frame.sent('focusState');
+          this.frame.pulse('onBlur');
+        }
+        if (this.hover) {
+          this.hover = false;
+          this.frame.sent('hoverState');
+          this.frame.pulse('hoverEnd');
+        }
+        if (this.pressed) {
+          this.pressed = false;
+          this.frame.sent('pressedState');
+        }
       }
       return;
     }

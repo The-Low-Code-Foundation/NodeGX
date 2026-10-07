@@ -154,6 +154,19 @@ function onCircle(row: EquivalentMutant): EquivalentMutant {
   return { ...row, branch: shape(row.branch), ...(row.swappedWith !== undefined ? { swappedWith: shape(row.swappedWith) } : {}) };
 }
 
+// P109 ISL-031 (P107-D30) — the paint that takes a control's element off the page resets Focused, Hover and Pressed. A leave
+// that was not pressed, handed its twin's example that was: the twin fires the same pulses (Blurred with Focused, Hover End with
+// Hover — so those twins differ in what they fire and are killed), and its one extra write is Pressed false where it is false
+// already; Pressed has no pulse of its own. Narrow: the same pulses on both sides, Pressed the only key between them.
+const LEFT_UNPRESSED = "a control leaving the page that was not pressed, handed its twin's example that was: it fires the same pulses, and writes Pressed false where it is false already";
+const LEAVE_PULSES = ['"willUnmount"]', '"willUnmount","onBlur"]', '"willUnmount","hoverEnd"]', '"willUnmount","onBlur","hoverEnd"]'];
+function leftUnpressed(acts: readonly string[]): EquivalentMutant[] {
+  const reducers = ['afterInputs', ...['hover', 'leave', 'press', 'release', 'click', 'touch', 'lift', 'focus', 'blur', ...acts].map((a) => `person.${a}`)];
+  return reducers.flatMap((reducer) =>
+    LEAVE_PULSES.map((pulses) => ({ reducer, kind: 'swap-branch' as const, branch: `"onPage"],"emit":[${pulses}`, swappedWith: `"onPage","pressed"],"emit":[${pulses}`, why: LEFT_UNPRESSED }))
+  );
+}
+
 export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = Object.freeze({
   Text: TEXT,
   // NSP-016 s53 — the Shape runs the Text's machinery with no Tag
@@ -209,10 +222,12 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     }
   ],
   'net.noodl.controls.button': [
+    ...leftUnpressed([]),
     { reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE },
     ...['hover', 'leave', 'touch', 'lift'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":[],"emit":[]', why: ACT_OFF_PAGE }))
   ],
   'net.noodl.controls.checkbox': [
+    ...leftUnpressed([]),
     { reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE },
     ...['hover', 'leave', 'touch', 'lift'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":[],"emit":[]', why: ACT_OFF_PAGE }))
     // (v2, NSP-023 s45: Enable Label rebuilds nothing — the rebuild family declared here in s37 is gone with it)
@@ -220,6 +235,7 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
   // NSP-016 s42 — the Radio Button: the Checkbox's page model, so the Checkbox's v1 rebuild family (until NSP-023 step 5) — and a click joins it: a
   // click on a disabled button meets nothing as a press does (the Checkbox's click toggles the box, so its click never had this shape)
   'net.noodl.controls.radiobutton': [
+    ...leftUnpressed(['pick']),
     { reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE },
     ...['hover', 'leave', 'touch', 'lift'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":[],"emit":[]', why: ACT_OFF_PAGE })),
     // a pick that changes Checked and sets nothing else (no keyboard here, no page change, the group already holding the Value — C76),
@@ -233,6 +249,7 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     ])
   ],
   'net.noodl.controls.textinput': [
+    ...leftUnpressed(['type', 'key']),
     { reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE },
     ...['hover', 'leave', 'touch', 'lift'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":[],"emit":[]', why: ACT_OFF_PAGE })),
     // a frame's end with no callback scheduled and nothing to paint writes nothing (the Button's afterInputs always syncs; this one consumes a queue only when it held something)
@@ -250,6 +267,7 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
   ],
   // NSP-016 s39 — the Dropdown: the placing off the page and the four acts that meet no element (the Button's)
   'net.noodl.controls.options': [
+    ...leftUnpressed(['choose']),
     { reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE },
     ...['hover', 'leave', 'touch', 'lift'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":[],"emit":[]', why: ACT_OFF_PAGE }))
     // (v2, NSP-023 s45: Enable Label rebuilds nothing — the rebuild family declared here in s39 is gone with it)
@@ -264,6 +282,7 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     { reducer: 'person.pick', kind: 'drop-set', branch: '"set":[],"emit":[]', why: 'a pick that reaches no button and only syncs the painted visibility: its one reader, the next pick, paints the page itself first' }
   ],
   'net.noodl.controls.range': [
+    ...leftUnpressed(['slide']),
     { reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE },
     // v3 (P109 ISL-031, C74): every paint on the page writes the node's value, Value Percent and the word's flag, so a paint that moved
     // nothing is the branch of one that did (v2's thirty "no word waiting" twins are gone with it); what is left meets no element
