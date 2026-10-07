@@ -10,7 +10,8 @@
  * shows the last value it was given, by a person or by the graph** (R14, Richard: "Why would I not let the node show whatever
  * the last value or signal it received was? Whether it comes from the user or not"); **only a person's slide fires Changed**
  * (the descriptions of Value and Changed — D36); **a Slider hidden with Mounted and shown again is where the person left it**
- * (ruled the same day). What the runtime does instead only because of React is a known row on the runtime target (D36, C73).
+ * (ruled the same day). What the runtime did instead only because of React was a known row on the runtime target (D36, C73),
+ * until P109 ISL-031 fixed it: the node counts the graph's words and the component draws each one without announcing it.
  *
  * THE RULE, before the citations. A Slider is an `<input type="range">` drawn invisible (`opacity: 0`, Slider.tsx :108-111)
  * over a track and a thumb it paints itself (:147-175), in a wrapper (:173-186); a PERSON slides it. Four things hold the
@@ -20,19 +21,19 @@
  *     **Value** input writes — an empty value (`undefined`, `null`, `''`) is ignored, a value `Number` cannot make finite is
  *     reported on the runtime channel and ignored, anything else is clamped with `Math.max(Min, Math.min(Max, n))` over the
  *     props AS WRITTEN (a Min written `undefined` makes the clamp `NaN`). Every such write is the graph's word for the handle,
- *     the same value again included (R14; the runtime drops one equal to the last it was given, :265 — row C73). **Min** and
+ *     the same value again included (R14; the runtime dropped one equal to the last it was given — row C73, fixed in P109 ISL-031). **Min** and
  *     **Max** (:105-126) re-clamp the author's Value after writing themselves, and that is a word for the handle only when the
  *     clamp moved it (`!==` — the node's own rule: a slid handle past a lowered Max stays, row C74 in the spec).
  *   - **the node's value** (`_internal.outputValue`, slider.ts :34, :39-54 `updateOutputValue`): 0 at the making; what the
  *     **Value** output reads (:79-87). A person's slide reports it: sent, and Changed fired, when it differs (`!==`, so a `NaN`
  *     every time). The graph's word reaches it at the next paint, sent the same way and **never with Changed** (D36: the
- *     runtime's component reports the graph's Value through the slide's own function and fires Changed). Value Percent
+ *     runtime's component reported the graph's Value through the slide's own function and fired Changed, until P109 ISL-031). Value Percent
  *     (:220-236) is recomputed on that change and, while it reads falsy (0, `NaN`, never set), on every report:
  *     `Math.floor((v - Min) / (Max - Min) * 100)` over the props as written, sent when it differs (`!==`; Min equal to Max is
  *     `NaN`, row C75 in the spec).
  *   - **the handle** (`shown`: what the `<input>` is told to hold): a slide moves it; the graph's word moves it at the next
  *     paint (a frame's end, or the paint an act makes first); nothing else does — not a remount (the runtime's fresh component
- *     takes the author's Value back and announces it, row D36).
+ *     took the author's Value back and announced it, row D36, until P109 ISL-031).
  *   - **what the browser holds** (the `<input>`'s own value): the shown value sanitized by the BROWSER's range rules against
  *     the attributes as rendered (`min` / `max`, and `step` only when Step is truthy — :116-122): not a number → the middle
  *     (or Min when Max is below it); then clamped to [Min, Max] and rounded to the nearest step from Min (a tie upwards),
@@ -349,7 +350,7 @@ export const Slider = defineNode({
 /**
  * slider.ts :237-271 `_setInputValue(v)`: an empty value abstains; one `Number` cannot make finite abstains (reported on the
  * runtime channel, :254-260); else `Math.max(Min, Math.min(Max, n))` over the props as written. `word`: a Value write is the
- * graph's word for the handle whatever it equals (R14; row C73 on the runtime); a Min or Max re-clamp (`word` false) is one
+ * graph's word for the handle whatever it equals (R14; C73, fixed in P109 ISL-031); a Min or Max re-clamp (`word` false) is one
  * only when it moves the author's Value (`!==`). `extra`: the prop the caller wrote first (Min / Max).
  */
 function clampIn(s: Readonly<State>, v: unknown, extra: Partial<State>, word: boolean): Send {

@@ -32,28 +32,29 @@ const RangeNode = {
 
     this.props.value = this.props.min;
     this._internal.outputValue = 0;
+    // P107-C73 + D36 (P109 ISL-031, both ruled "Fix it now"): the handle is the node's, not the component's. `handle` is where
+    // it was last put — by a person's slide or by the graph's word drawn — so a remounted component starts there instead of
+    // taking the author's Value back (D36, "where the person left it"). `wordPending` is a Value the graph wrote that the page
+    // has not drawn yet; `valueWrites` counts those words, so the component draws each one, the same value as the last
+    // included (C73: a Reset after a slide was dropped because it equalled the author's last Value).
+    this.props.handle = 0;
+    this.props.valueWrites = 0;
+    this._internal.wordPending = true;
 
     this.props._nodeId = this.id;
 
-    //this is used by the range to communicate with the node whenever the range changes value
-    this.props.updateOutputValue = (value: string | number) => {
-      value = typeof value === 'string' ? parseFloat(value) : value;
-
-      const valueChanged = this._internal.outputValue !== value;
-      if (valueChanged) {
-        this._internal.outputValue = value;
-        this.flagOutputDirty('value');
-        this._updateOutputValuePercent(value);
-        this.sendSignalOnOutput('onChange');
-      }
-
-      // On first mount, output the initial percentage.
-      if (!this._internal.valuePercent) {
-        this._updateOutputValuePercent(value);
-      }
+    // a person's slide: Changed fires when the value moves
+    this.props.updateOutputValue = (value: string | number) => this._reportValue(value, true);
+    // the graph's word, drawn at the paint after it was written: reported without Changed (D36). Returns the value the
+    // handle now shows, or undefined when no word is waiting (a remount draws nothing — the handle is where it was)
+    this.props.takeGraphValue = () => {
+      if (!this._internal.wordPending) return undefined;
+      this._internal.wordPending = false;
+      this._reportValue(this.props.value, false);
+      return this.props.value;
     };
 
-    this.props.updateOutputValue(this.props.value); // Set the value output to an initial value
+    this._reportValue(this.props.value, false); // Set the value output to an initial value
   },
   getReactComponent() {
     return Slider;
@@ -71,7 +72,7 @@ const RangeNode = {
         'Moves the handle to this value, clamped to Min and Max; changing it from the graph does not fire Changed. An empty value leaves the handle where it is',
       index: 100,
       set(value) {
-        this._setInputValue(value);
+        this._setInputValue(value, true);
       }
     }
   },
@@ -110,7 +111,7 @@ const RangeNode = {
       default: 0,
       index: 100,
       onChange() {
-        this._setInputValue(this.props.value);
+        this._setInputValue(this.props.value, false);
       }
     },
     max: {
@@ -121,7 +122,7 @@ const RangeNode = {
       default: 100,
       index: 100,
       onChange() {
-        this._setInputValue(this.props.value);
+        this._setInputValue(this.props.value, false);
       }
     },
     step: {
@@ -217,6 +218,24 @@ const RangeNode = {
     }
   },
   methods: {
+    /** Value (and Value Percent) as the handle now shows; Changed only for a person's slide (`announce`) */
+    _reportValue(value: string | number, announce: boolean) {
+      value = typeof value === 'string' ? parseFloat(value) : value;
+      this.props.handle = value;
+
+      const valueChanged = this._internal.outputValue !== value;
+      if (valueChanged) {
+        this._internal.outputValue = value;
+        this.flagOutputDirty('value');
+        this._updateOutputValuePercent(value);
+        announce && this.sendSignalOnOutput('onChange');
+      }
+
+      // On first mount, output the initial percentage.
+      if (!this._internal.valuePercent) {
+        this._updateOutputValuePercent(value);
+      }
+    },
     _updateOutputValuePercent(value: number) {
       const min = this.props.min;
       const max = this.props.max;
@@ -234,7 +253,11 @@ const RangeNode = {
       this._internal.valuePercent = valuePercent;
       valuePercentChanged && this.flagOutputDirty('valuePercent');
     },
-    _setInputValue(newValue) {
+    /**
+     * `word`: a Value write is the graph's word for the handle whatever it equals (C73, R14 "the last word wins"); a Min or Max
+     * re-clamp is one only when it moves the author's Value.
+     */
+    _setInputValue(newValue, word: boolean) {
       // NDA-012 (Visual), G1. This was `Math.min(this.props.max, newValue || 0)`, and the two
       // things wrong with it were both invisible:
       //
@@ -262,12 +285,12 @@ const RangeNode = {
       //make sure value never goes out of range
       const value = Math.max(this.props.min, Math.min(this.props.max, asNumber));
 
-      const changed = value !== this.props.value;
+      if (!word && value === this.props.value) return;
 
-      if (changed) {
-        this.props.value = value;
-        this.forceUpdate();
-      }
+      this.props.value = value;
+      this._internal.wordPending = true;
+      this.props.valueWrites++;
+      this.forceUpdate();
     }
   }
 };

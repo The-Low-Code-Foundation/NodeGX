@@ -83,8 +83,7 @@
         "value": -5
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 D36"
+    ]
   },
   {
     "name": "placed with Min 10: the author's Value is clamped up to 10 before the first paint, which draws it — Value 10, no Changed (row D36: the runtime's mount effect fires it); a slide to 5 lands on 10 — nothing",
@@ -104,8 +103,7 @@
         "value": 40
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 D36"
+    ]
   },
   {
     "name": "a slide to 70, then Value written 0 — what the author last wrote: the handle goes to 0 all the same (R14) — Value 0 and Value Percent 0, no Changed (row C73: the runtime drops the write); a slide to 70 again: Value 70 with Changed; Value 10: Value 10",
@@ -132,8 +130,7 @@
         "value": 10
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C73"
+    ]
   },
   {
     "name": "a slide to 80, then Max lowered to 60: nothing on the wire — Value still reads 80, past Max, while the browser draws the handle at 60 (row C74); slides to 70 and 60 land on 60, which the browser already holds: nothing; a slide to 30: Value 30 with Changed",
@@ -187,8 +184,7 @@
         "value": 33
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 D36"
+    ]
   },
   {
     "name": "Min equal to Max (40): the author's Value is clamped to 40; the first paint sends Value 40 and Value Percent NaN (0 / 0, C75 — the node's own), no Changed (row D36); a slide lands on 40: nothing; Value 10 clamps to 40: nothing",
@@ -214,8 +210,7 @@
         "value": 0
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 D36"
+    ]
   },
   {
     "name": "a slide to 30, then Mounted off and on: Will Unmount; Did Mount, and the handle is where the person left it — nothing reported (row D36: the runtime's fresh component takes the author's Value back, Value 0 with Changed)",
@@ -238,8 +233,7 @@
       },
       "settle",
       "settle"
-    ],
-    "row": "NSP-016 §6 D36"
+    ]
   },
   {
     "name": "Min written undefined: the clamp reads NaN, so the author's Value is NaN — Value NaN and Value Percent NaN, no Changed (row D36); a slide to 20 (the browser's min is its default 0 again): Value 20 with Changed; Value 5: clamped to NaN again — the handle takes it: Value NaN (the runtime's effect, keyed with `Object.is`, sees the NaN it last drew and drops it: row C73)",
@@ -260,8 +254,7 @@
         "value": 5
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 D36"
+    ]
   },
   {
     "name": "Step 0.5: a slide to 50.25 lands on 50.5 (a tie upwards); to 7: 7; Step 25 with Max 60: 60 lands on 50 (rounding to 50, 75 is past Max), 100 on 50, 30 on 25, 40 on 50; Step 0 is no step attribute (the browser's default, 1): 50.4 lands on 50",
@@ -373,8 +366,7 @@
       },
       "settle",
       "settle"
-    ],
-    "row": "NSP-016 §6 D36"
+    ]
   },
   {
     "name": "Value 20, then Min raised to 40: clamped — Value 40 and Value Percent 0, no Changed (row D36); Min lowered to 10: the author's Value stays 40 — nothing; Max lowered to 30: clamped down — Value 30",
@@ -401,8 +393,7 @@
         "value": 30
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 D36"
+    ]
   },
   {
     "name": "Min lowered to -100 under an unchanged Value 0: nothing (the author's Value did not move, so there is no word for the handle); a remount: Did Mount alone — the handle is where it was (row D36: the runtime's mount effect recomputes the falsy Value Percent and sends 50)",
@@ -424,8 +415,7 @@
         "value": true
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 D36"
+    ]
   },
   {
     "name": "a slide to 50, then Max raised to 200: nothing — Value Percent still reads 50 with the handle at a quarter (row C74); a slide to 100: Value 100, Value Percent 50 with Changed",
@@ -480,8 +470,7 @@
         "value": true
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 D36"
+    ]
   },
   {
     "name": "the Focus action, then a slide: Focused once (the action's), the slide adds Value and Changed; a Tab away: Blurred",
@@ -533,8 +522,7 @@
         "value": 8
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 D36"
+    ]
   },
   {
     "name": "a slide to 30, Mounted off; Mounted on and a Tab onto it in the same frame: Did Mount and Focused — the handle where the person left it, the fresh element took the keyboard (row D36: the runtime takes the author's Value back with Changed); the same with Enabled off: Did Mount alone",
@@ -584,8 +572,7 @@
         "act": "focus"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 D36"
+    ]
   },
   {
     "name": "Mounted off; Mounted on and a slide to the value the element already holds in the same frame: Did Mount and Focused, no Changed; again with a slide to 40: Did Mount, Focused, Value 40 with Changed; disabled, Mounted on and a slide to 0: Did Mount alone, the handle still at 40 (row D36: the runtime's remount takes Value 0 back with Changed)",
@@ -641,8 +628,7 @@
         "value": 0
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 D36"
+    ]
   },
   {
     "name": "Step 0.5: Value 30, a slide to 30.5 (Value Percent 30 either way), Mounted off; Mounted on and an act in the same frame — the act's paint puts the element back with the handle where it was: Did Mount, then the act (row D36: the runtime's remount takes Value 30 back with Changed); then, enabled, a Blur action or, disabled, a Focus action (Done: the element is on the page) — every act, enabled and disabled, each segment from a fresh element",
@@ -1811,8 +1797,7 @@
         "signal": "focus"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 D36"
+    ]
   },
   {
     "name": "Margin Top wired null: the style is removed, as for undefined — nothing moves on the wire and the node keeps working",
@@ -1865,8 +1850,7 @@
         "value": 40
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 D36"
+    ]
   },
   {
     "name": "a reversed range (Min 50, Max 10): the author's Value is clamped to 50 (`Math.max(50, Math.min(10, 0))`) and the first paint sends it, no Changed (row D36); slides take nothing — not even the keyboard (the face does not play a slide on a reversed range: jsdom's sanitization of it does not settle where a browser's does); Max 100: a slide to 70 lands on 70",
@@ -1897,8 +1881,7 @@
         "value": 70
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 D36"
+    ]
   },
   {
     "name": "Step 0.5: a slide to 30.5, then Value 30.25 and an act in the same frame — the act's paint draws the graph's word first: Value 30.25, no Changed (row D36), Value Percent unchanged (30 either way), then the act, then a Blur action (enabled) or a Focus action (disabled) — every act, enabled and disabled",
@@ -2957,8 +2940,7 @@
         "signal": "focus"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 D36"
+    ]
   },
   {
     "name": "a release before the first frame: the act's paint puts the slider on the page — Did Mount and Pointer Up — and the first frame then reports every output as it stands: Value 0, Value Percent 0",
@@ -56625,8 +56607,7 @@
       },
       "settle",
       "settle"
-    ],
-    "row": "NSP-016 §6 D36"
+    ]
   },
   {
     "name": "Visible off: a hidden slider is under no pointer and takes no keyboard — every act raises nothing; the Focus action is Done with nothing; shown again, a click is a click",
@@ -56770,7 +56751,6 @@
   {
     "name": "Value 120 on a fresh slider: clamped to 100 — Value 100 and Value Percent 100, no Changed (row D36)",
     "because": "slider.ts :263 the clamp; the runtime grades the Value before its Changed — NSP-016 §6 D36",
-    "row": "NSP-016 §6 D36",
     "steps": [
       "settle",
       {
@@ -56783,7 +56763,6 @@
   {
     "name": "Value '60' (text) on a fresh slider: Value 60, no Changed (row D36)",
     "because": "slider.ts :251 `Number(v)`; the runtime grades the Value before its Changed — NSP-016 §6 D36",
-    "row": "NSP-016 §6 D36",
     "steps": [
       "settle",
       {
@@ -56796,7 +56775,6 @@
   {
     "name": "a slide to 70, then Value written 40 and 0 in one frame — 0 is what the author last wrote before 40: the handle goes to 0 (R14: the last word) — Value 0, no Changed (row C73: the runtime's effect sees 0 against the 0 it last drew and does nothing)",
     "because": "R14 — Richard: \"Why would I not let the node show whatever the last value or signal it received was?\"; the runtime's effect keys on `props.value` (Slider.tsx :88-90) — NSP-016 §6 C73",
-    "row": "NSP-016 §6 C73",
     "steps": [
       "settle",
       {
@@ -56818,7 +56796,6 @@
   {
     "name": "a slide to 80, then Max lowered to 60 and Value written 0 in one frame: the author's Value 0 is under the new Max, and the handle takes it — Value 0, no Changed (row C73: the runtime drops the write equal to the author's last)",
     "because": "slider.ts :116-126 the re-clamp moves nothing; R14 — the Value write is the last word — NSP-016 §6 C73",
-    "row": "NSP-016 §6 C73",
     "steps": [
       "settle",
       {
@@ -56840,7 +56817,6 @@
   {
     "name": "Value 90, a slide to 30, then Max lowered to 60: the re-clamp moves the author's Value (90 → 60), a word for the handle — Value 60, no Changed (row D36); Max lowered to 50 again: 50",
     "because": "slider.ts :116-126 — `_setInputValue(props.value)` after the prop, kept when it differs: the clamp that moved the author's Value is the graph's word — NSP-016 §6 D36",
-    "row": "NSP-016 §6 D36",
     "steps": [
       "settle",
       {
@@ -56900,7 +56876,6 @@
   {
     "name": "the act-paint matrix: a word from the graph and an act in one frame, then a Focus action (after an act that cannot take the keyboard itself), Min -50 and Max 150 in the same frame — the act's paint (it comes first, whether the act reaches the slider or not) puts a remounting slider back, so the Focus finds it (Done), and draws the word against the Min and Max it found, so Value Percent stands as that paint computed it, and the Min and Max writes move nothing; the words Value 40, Value 0.5, Value 0 at 0 and Value 0 after Min -100; every act, on an enabled, a disabled or a hidden slider, the keyboard off or on, remounting in the act's frame or not — 528 segments, each from Value 0 (row D36: the runtime fires Changed for each word that moves Value)",
     "because": "v2 (NSP-023): the act paints first (dropdown.ts `onPainted`) and the paint draws the graph's word (`pending`) without Changed; slider.ts :105-126 a Min or Max that leaves the author's Value where it is re-clamps nothing; :51-53 a falsy Value Percent is recomputed at every report. The runtime's 10,000 at 20731 reached this family on hidden sliders and remounting frames — NSP-016 §6 D36",
-    "row": "NSP-016 §6 D36",
     "steps": [
       "settle",
       {
@@ -106984,7 +106959,6 @@
   {
     "name": "Step 0.5: a slide to 40.5, the keyboard taken off, Mounted off; Mounted on and a slide to 40 in one frame — Value Percent 40 either way: Did Mount, Focused, Value 40 with Changed (row D36: the runtime's remount takes Value 0 back with Changed first)",
     "because": "v2 — the remount leaves the handle at 40.5; a slide whose Value Percent does not move sends Value alone. The s46 mutant run recorded this branch only at 30.5 → 30, where its sibling's example agreed — NSP-016 §6 D36",
-    "row": "NSP-016 §6 D36",
     "params": {
       "step": 0.5
     },
@@ -107018,7 +106992,6 @@
   {
     "name": "Mounted off, Value 40 written off the page, then every act off the page (none finds an element), then Mounted on: Did Mount and the paint draws the word the acts left waiting — Value 40, no Changed (row D36)",
     "because": "v2 — the graph's word waits for the paint on the page; an act that finds no element changes nothing, the word included — NSP-016 §6 D36",
-    "row": "NSP-016 §6 D36",
     "steps": [
       "settle",
       {
@@ -107079,7 +107052,6 @@
   {
     "name": "placed with Min 10, then Min written 0 before the first frame: the placing drew the author's Value 10 against Min 10 — Value 10, Value Percent 0 — and Min 0 leaves the author's Value at 10, no word: nothing more, Value Percent stays 0 (C74's stale percent; row D36: the runtime announces the placing's Value with Changed)",
     "because": "v2 — the placing is the first paint (spec.ts `WorldHandlers.place`), and draws the making's word; slider.ts :105-115 a Min that does not move the author's Value re-clamps nothing. The s46 seed-20731 run left the placing's draw swapped with an off-page placing alive — NSP-016 §6 D36",
-    "row": "NSP-016 §6 D36",
     "params": {
       "min": 10
     },
@@ -107094,7 +107066,6 @@
   {
     "name": "Min lowered to -100 (the author's Value stays 0: no word), then Value 0 — the author's Value again, a word: the handle is at 0 already, but drawing it recomputes the falsy Value Percent against Min -100 — Value Percent 50 (row C73: the runtime drops the equal Value)",
     "because": "v2 (R14) — every Value write is a word; slider.ts :51-53 `updateOutputValue` recomputes Value Percent while it reads falsy. The s46 runtime batch at seed 20730 reached the drawing that moves the percent alone — NSP-016 §6 C73",
-    "row": "NSP-016 §6 C73",
     "steps": [
       "settle",
       {
@@ -108138,7 +108109,6 @@
   {
     "name": "a slide to 30, Mounted off and on, then a slide to 0: the handle came back at 30, so the slide moves it — Value 0 with Changed (row D36: the runtime's remount already took it back to 0 with Changed)",
     "because": "ruled 2026-10-05 — a Slider hidden with Mounted and shown again is where the person left it — NSP-016 §6 D36",
-    "row": "NSP-016 §6 D36",
     "steps": [
       "settle",
       {

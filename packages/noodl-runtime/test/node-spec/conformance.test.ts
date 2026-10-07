@@ -179,77 +179,7 @@ const scrollerBlocksClick = (d: Divergence) => {
   return !!heldAt(d, 'blockTouch') && !!heldAt(d, 'scrollEnabled') && heldAt(d, 'nativeScroll') !== true;
 };
 
-/**
- * NSP-023 (R12, ruled 2026-10-05) — the Text Input v2 states the intent; what the runtime does instead only because of how React
- * draws is these known rows. Shared shape: a frame (the steps since the last settle) and the group of events that settle prints.
- */
-const isStep = (e: TraceEvent) => e.t === 'set' || e.t === 'in' || e.t === 'act' || e.t === 'settle' || e.t === 'advance';
-const portOf = (e: TraceEvent) => (e as { port?: string }).port;
-const valueOf = (e: TraceEvent) => (e as { value?: unknown }).value;
-/** The frame the difference is printed for: [first step of the frame, the settle that closed it], or undefined when the difference is not in a settle's group. */
-function settledFrame(t: readonly TraceEvent[], index: number): [number, number] | undefined {
-  let k = index - 1;
-  while (k >= 0 && !isStep(t[k])) k--;
-  if (k < 0 || t[k].t !== 'settle') return undefined;
-  let start = k - 1;
-  while (start >= 0 && t[start].t !== 'settle') start--;
-  return [start + 1, k];
-}
-/**
- * NSP-023 step 3 (R12, R14, the remount ruling — 2026-10-05) — the Slider v2 states the intent; what the runtime does instead only
- * because its component reports the graph's Value through React's effect (Slider.tsx :88-95) is these two rows.
- */
-const onSliderValue = (e: TraceEvent | undefined) => !!e && e.t === 'value' && (portOf(e) === 'value' || portOf(e) === 'valuePercent');
-const isChanged = (e: TraceEvent | undefined) => !!e && e.t === 'signal' && portOf(e) === 'onChange';
-/**
- * NSP-016 §6 D36 — Changed with nobody sliding: the effect calls the slide's own `updateOutputValue`, so a graph Value, a Min or Max
- * that clamps it, and the mount announce it; and a remount takes the author's Value back (a fresh `useState(props.value)`) and
- * reports it. Narrow: the RUNTIME fires a Changed where the spec does not; or, in the settle group of a frame whose reference prints
- * Did Mount after an earlier Will Unmount, the runtime reports Value, Value Percent or Changed where the spec has something else.
- */
-const changedWithNobodySliding = (d: Divergence) => {
-  const ref = d.difference.reference;
-  const act = d.difference.actual;
-  // s46 (the 10,000 at 20731) — the runtime's Changed IS the difference even when a setter throws later in the sequence (C63)
-  if (isChanged(act) && !isChanged(ref)) return true;
-  if (d.difference.threw !== undefined) return false;
-  if (!(onSliderValue(act) || isChanged(act))) return false;
-  const f = settledFrame(d.reference, d.difference.index);
-  if (!f) return false;
-  let group = f[1] + 1;
-  let remount = false;
-  for (; group < d.reference.length && !isStep(d.reference[group]); group++) if (d.reference[group].t === 'signal' && portOf(d.reference[group]) === 'didMount') remount = true;
-  return remount && d.reference.slice(0, f[0]).some((e) => e.t === 'signal' && portOf(e) === 'willUnmount');
-};
-/**
- * NSP-016 §6 C73 — the runtime drops a graph Value the spec draws: `_setInputValue` (slider.ts :265) drops a value equal to the last
- * the author wrote, which after a person's slide is not where the handle is; and the effect (`[props.value]`, `Object.is`) drops a
- * second NaN the setter kept. Narrow: the SPEC reports Value or Value Percent in the settle group of a frame holding a Value write,
- * where the runtime does not, after a person's slide, with the author's Value NaN, or as Value Percent alone (a word equal to the
- * handle that recomputes a falsy percent).
- */
-const graphValueDropped = (d: Divergence) => {
-  const ref = d.difference.reference;
-  const act = d.difference.actual;
-  // s46 (the 10,000 at 20731) — the runtime may print the same output with the value it kept (a Value Percent of 0 where the drawing made -0)
-  if (d.difference.threw !== undefined || !onSliderValue(ref) || (onSliderValue(act) && portOf(act!) !== portOf(ref!))) return false;
-  const f = settledFrame(d.reference, d.difference.index);
-  if (!f || !d.reference.slice(f[0], f[1]).some((e) => e.t === 'set' && portOf(e) === 'value')) return false;
-  const slid = d.reference.slice(0, f[1]).some((e) => e.t === 'act' && (e as { act?: string }).act === 'slide');
-  const v = valueOf(d.difference.reference!);
-  const nan = typeof v === 'object' && v !== null && (v as { $num?: unknown }).$num === 'NaN';
-  // s46 (seed 20730) — a dropped write equal to the handle shows only as Value Percent: drawing it recomputes a falsy percent
-  // against a Min or Max moved since (slider.ts :51-53)
-  const percentAlone = portOf(d.difference.reference!) === 'valuePercent';
-  return slid || nan || percentAlone;
-};
-
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
-  // s41 — the Slider: no label and no text style, so two of the three throwing setters (the Placement and units-typed style inputs)
-  'net.noodl.controls.range': [
-    { row: 'NSP-016 §6 D36 — Changed fires with nobody sliding (a graph Value, a clamping Min or Max, the mount), and a remount takes the author\'s Value back', matches: changedWithNobodySliding },
-    { row: 'NSP-016 §6 C73 — a graph Value equal to the last the author wrote, after a slide, or a second NaN, is dropped: the handle stays', matches: graphValueDropped }
-  ],
   // s43 — the Text: a text style (C61) and the Placement and units-typed style setters; s44 — C79 (R11: the spec says the intent)
   Text: [
     { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer },
