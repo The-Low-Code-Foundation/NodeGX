@@ -1,7 +1,7 @@
 # NSP-016 — Visual nodes: research first, then layout semantics that are not CSS
 
 **Opened 2026-09-29.** **Depends on NSP-008.**
-**Status: 🟡 s53 (2026-10-07): the Shape (`Circle`) and the Image conform on both targets (12 of 19; v1 each — the Text's machinery with no Tag; the Image adds the picture's fetch, a new act `fetched`); the runner can withhold a value a target cannot survive; rows C91 (Custom SVG's span is a drop slot), C92 (a huge Points runs the page out of memory), C93 (an Image adds a sub-path Base URL again at every render — high), C94 (Source Set true at placing fetches "true"); the Group v2 (R16: a Focus off the page reports Unchanged; row C95) (§7.14). s52 (2026-10-07): the Group conforms on both targets at 200 and 10,000 (10 of 19; v1, 1,387 scenarios) — its children as drop slots, the focus tracker, the scroll actions and when a frame's work runs; rows C86–C90 (§7.13). s44 (2026-10-05): the Text v3 — C79 is a known row (R11: the spec says the intent, not React's redraw rules); 162 scenarios; s43's 47 deep-run survivors killed (§7.9). s43 (2026-10-05): drag and drop researched ([RESEARCH-DRAG-DROP.md](RESEARCH-DRAG-DROP.md)) and the Text conforms (9 of 19; rows C77, C78, §7.8) — its drag SOURCE graded on a lone node; the zone side and the file drop are step (b). The face learned the browser's hit test, and the 7 conforming specs it moved say what a browser lets a person do. s42 (2026-10-04): the Radio Button Group and the Radio Button conform on both targets at 200 and 10,000 (8 of 19; rows C76, D37, §7.7) — the visual tree, per node: a node's children are on its PAGE (the spec declares them; the face builds them with the node's own `addChild`; a person `pick`s one) and a node's parent is its WORLD (the GROUP seam). s41 (2026-10-04): Slider and Icon conform on both targets at 200 and 10,000 (6 of 19; rows D36, C73, C74, C75; C63 takes null, §7.6) — the face grew `slide` (jsdom's range sanitization, which it applies to every write, plus the browser's step rule, which jsdom lacks; a reversed range is not played); the 13 left each need infrastructure first (a visual tree with context, drag and drop, geometry, media — §7.6). s39 (2026-10-04): Dropdown conforms on both targets (4 of 19; rows C70, C71, D34 and instances of C65, C66, D30, §7.4) — the face grew `choose` (a keyboard pick: an enabled option the list offers, no `change` for the one already selected); the spec keeps the node's value, the author's Value, the shown value and the browser's selection apart because the component does. s38: Text Input conforms on both targets (3 of 19; rows C68, C69, D31–D33, §7.3) — the face grew `type` and `key`, the format a person patch that resolves deferred outcomes (the viewer's pointer drain). s37: AC3 begun — THE PERSON face (the real React component in a jsdom page; an act is the browser's events) and the format's `act` / `acts` / `person` / `place` / `portability`; Button and Checkbox conform on the runtime (rows C61–C66, D30, §7.2). s36: research done, R10 ruled — build the logic for all 19 with each input's portability class in the spec; geometry grading after NSP-017.**
+**Status: 🟡 s54 (2026-10-07): the Video conforms on both targets at 200 and 10,000 (13 of 19; v1 — the Image's machinery, the browser's media element with four new acts, the autoplay rule, the four actions); every paint writes the element and its media as they stand, every action the playback; rows C96–C100 (C98 high: a Volume outside 0 to 1 blanks the page) (§7.15). s53 (2026-10-07): the Shape (`Circle`) and the Image conform on both targets (12 of 19; v1 each — the Text's machinery with no Tag; the Image adds the picture's fetch, a new act `fetched`); the runner can withhold a value a target cannot survive; rows C91 (Custom SVG's span is a drop slot), C92 (a huge Points runs the page out of memory), C93 (an Image adds a sub-path Base URL again at every render — high), C94 (Source Set true at placing fetches "true"); the Group v2 (R16: a Focus off the page reports Unchanged; row C95) (§7.14). s52 (2026-10-07): the Group conforms on both targets at 200 and 10,000 (10 of 19; v1, 1,387 scenarios) — its children as drop slots, the focus tracker, the scroll actions and when a frame's work runs; rows C86–C90 (§7.13). s44 (2026-10-05): the Text v3 — C79 is a known row (R11: the spec says the intent, not React's redraw rules); 162 scenarios; s43's 47 deep-run survivors killed (§7.9). s43 (2026-10-05): drag and drop researched ([RESEARCH-DRAG-DROP.md](RESEARCH-DRAG-DROP.md)) and the Text conforms (9 of 19; rows C77, C78, §7.8) — its drag SOURCE graded on a lone node; the zone side and the file drop are step (b). The face learned the browser's hit test, and the 7 conforming specs it moved say what a browser lets a person do. s42 (2026-10-04): the Radio Button Group and the Radio Button conform on both targets at 200 and 10,000 (8 of 19; rows C76, D37, §7.7) — the visual tree, per node: a node's children are on its PAGE (the spec declares them; the face builds them with the node's own `addChild`; a person `pick`s one) and a node's parent is its WORLD (the GROUP seam). s41 (2026-10-04): Slider and Icon conform on both targets at 200 and 10,000 (6 of 19; rows D36, C73, C74, C75; C63 takes null, §7.6) — the face grew `slide` (jsdom's range sanitization, which it applies to every write, plus the browser's step rule, which jsdom lacks; a reversed range is not played); the 13 left each need infrastructure first (a visual tree with context, drag and drop, geometry, media — §7.6). s39 (2026-10-04): Dropdown conforms on both targets (4 of 19; rows C70, C71, D34 and instances of C65, C66, D30, §7.4) — the face grew `choose` (a keyboard pick: an enabled option the list offers, no `change` for the one already selected); the spec keeps the node's value, the author's Value, the shown value and the browser's selection apart because the component does. s38: Text Input conforms on both targets (3 of 19; rows C68, C69, D31–D33, §7.3) — the face grew `type` and `key`, the format a person patch that resolves deferred outcomes (the viewer's pointer drain). s37: AC3 begun — THE PERSON face (the real React component in a jsdom page; an act is the browser's events) and the format's `act` / `acts` / `person` / `place` / `portability`; Button and Checkbox conform on the runtime (rows C61–C66, D30, §7.2). s36: research done, R10 ruled — build the logic for all 19 with each input's portability class in the spec; geometry grading after NSP-017.**
 
 ## 1. The person sentence
 
@@ -1269,3 +1269,116 @@ the newly differing scenarios were exactly the C95 rows; the two twins agree on 
   parity green for both. `tsc --noEmit` clean in both packages.
 - After both commits (HEAD 99d0d2353): the package suite 22 suites, 935 passed, 18 skipped (568 s; the Shape, the Image and the Group v2
   in `batch-visual`); the runtime's graph and target suites 106 / 106. The stranger file was not run: no file it hashes changed.
+
+### 7.15 s54, 2026-10-07 — the Video conforms (13 of 19): the browser's media element, the four actions, and five rows
+
+**The Video** ([video.ts](../../../packages/nodegx-node-spec/src/nodes/video.ts), `Video`, v1, 21 acts). It is the Image's machinery (the
+pointer, the keyboard, the drag, the zone side, the drag from the desktop), and:
+- **The element a Source draws.** Source is resolved as the Image's is. A Source naming a YouTube or Vimeo video (video-embed.ts's
+  patterns) draws an EMBED, an `<iframe>`; any other draws a `<video>` whose `src` carries Start Time and End Time as `#t=` (`#t=0.01`
+  with neither). A Source that moves between the two makes a new element without a mount, as the Text's Tag does. **DOM Element** is a
+  new trace tag, `OWN_ELEMENT` (`{ "$element": "own" }`, video.ts, not trace.ts, so the stranger's hashes stand): the `<video>` while
+  one is on the page, `null` once it goes; an embed never sets it.
+- **The browser's media element** (THE MEDIA ELEMENT, written once in the face and once in the spec). A `<video>` loads its source when
+  made with one and again whenever its `src` changes (removing the `src` loads nothing, as HTML says). A load pauses it without a word,
+  puts it back to 0 (Playback Position 0 when it had moved) and starts over. Four new acts are the browser's side: `loaded` (On Can
+  Play, Video Width and Height; the pending plays resolve; Autoplay starts a paused element that may play), `failed` (Error and Playback
+  Failure; each pending play then fails too), and, while it plays, `progress` and `ended` (Loop on goes back to 0 and plays on; else
+  Playback Position 60 and On Pause). On Play fires whenever a paused `<video>` starts.
+- **The autoplay policy** (Chromium's): a `<video>` may play while muted, or once the page has had a person's activation — a press, a
+  click, a lifted finger, a key other than Escape, a press or Space on a card beside it. Else the node's Play is refused: Error "The
+  browser blocked playback…", Playback Failure, and the action still reports Done.
+- **The four actions** run on the component when it exists, else wait for it with Source Object's writes (at most 16; the 17th pushes
+  the oldest out, which fails when it is an action), and run in order at the mount, each Done then. Play wants the video to play and plays
+  it when the component has seen it load (`canPlay`, kept across a change of Source — so a Play just after a Source change starts the
+  new one at once, before its load); a new component at each mount starts without it.
+- **An embed is another page inside this one**: a pointer act or a key that lands on it goes there, and nothing here hears it. A press
+  there still moves the keyboard onto the `<iframe>`, and what a person does there still counts as this page's activation.
+- **Source Object**: no scenario can hold a stream, so it is graded on what is not one. Null changes nothing; nothing (`undefined`) is
+  null to the browser, and the node writes it — the `<video>` loads again and the component forgets its load; anything else the browser
+  refuses.
+
+**The face** (node-spec-target.ts THE MEDIA ELEMENT): jsdom has no media engine (`play()` and `pause()` only report "not implemented";
+no `srcObject`), so the face gives the browser's: the load on a `src` set, `play()`'s promise and its three rejections, `pause()`,
+seeking, `srcObject`'s WebIDL check, `videoWidth` / `videoHeight`, and the activation listeners. A media element's events are tasks
+(microtasks here); a person's act now waits for the media work queued before it (`mediaWork`, only then, so no other spec's timing
+moves). An embed takes what lands on it. Face choices, written down: the browser's own controls are not an act; a load that has loaded
+never fails afterwards; End Time's stop is not an act; an element unmuted with no activation plays on (Chromium pauses it); a `<video>`
+with its controls drawn takes the keyboard only with a tabindex, as jsdom says.
+
+**How it was built.** Measured first, on the runtime: a probe mounted the real Video in jsdom and played Play, Pause, a YouTube switch,
+an unmount, Volume and Source Object — four of the five rows below came from that hour. The Image's 1,239 scenarios were converted (the
+21 about its own Source, Source Set, Alternate text and fetch dropped; "Image" read as the node in names, "image" as the dragged PNG), and
+the Video's own written (80, then killers and the act matrices: 1,573 scenarios in all). The side-by-side probe gained an in-memory fix of C100 (CachedVideo handed the
+pointer props, never on disk): behind C100 every converted scenario agrees on both targets but the five C79 rows.
+
+**Branch shapes.** The first interpreter run took 17 minutes and left 282 survivors: every paint wrote the `<video>`'s three flags only
+on some paths, so every act's branch split in two. s51's lesson again — what the paint always does, it always writes — and the same for
+`activated` (an act that can give one writes it on every path), the waiting list at a mount, Autoplay's chance at a Pause or a Reset and
+at a load (after a load nothing reads it until the next load gives it back). The Text's equivalent rows hold on the Video's shapes
+(`onVideo`: what every paint writes and `ran` on every act and frame end, `activated` on the acts that give it, a mount's component).
+
+**Every act paints first, so every act's branch split by what its paint did.** A paint does nothing, loads a new Source, takes the
+`src` away, puts an embed in the `<video>`'s place, mounts or unmounts. Killer matrices over the 19 acts (a Play and the load in one
+frame after a new Source; a Play and a progress after nothing new; the same hidden; the Source cleared and given back; the Source
+switched to an embed, read by a Play) each reached a new split and each brought its own survivors: 43 → 79 → 3 → 28 on three new seeds
+→ 115 on each seed, 5,101 mutants, 6 minutes a seed. Two traps showed in the one-mutant probe:
+- **A skipped paint heals at the next one.** A mutant that drops an act's reload (or its src removal, or its embed swap) is caught up
+  by the NEXT act's paint, which compares the Source with the element again. A reader must act between them without painting: an action
+  (Play, Pause), or an input write followed by an act in the same frame.
+- **A branch reached only where its change shows nothing is no kill.** The Reset that seeks to 0 was reached only at 0; the press on an
+  embed that takes the keyboard from a card was reached only by a play whose Escape had already moved the keyboard there.
+
+The fix was the paint, not more scenarios: **every paint now writes the element and its media as they stand (`heldElement`), then what
+it changes**, so the branch no longer says what the paint did. 3,409 mutants, every one killed or declared on four seeds, 116 s a seed.
+The matrices stay: each kills the paint's mutants on the merged branches. **Do this first for any spec whose acts paint: write the
+whole painted state on every path.**
+
+The 10,000 run found the same split in the **actions**: a seek or a pause written only when it moved something split each action by
+where the video was (and a mount's frame end too, which runs the actions that waited). The actions now write the playback as it stands
+(`heldPlayback`: Position, at the end, Playback Position, paused, the pending plays), then what they change — on an embed as well: the
+first try wrote it on a `<video>` only, and split every action by the element instead (17 survivors). The last six were a progress or an
+ended inside a mount's or an unmount's paint (the Text's mount matrix, for the media's own acts), the chain of frame starts running out
+in the frame a waiting Reset or Play mounts the Video (scenario 17's 29 frames, with an action waiting — 28 left the chain alive, and the
+first killer's name said the opposite of its trace), and a click passing through a hidden video that ends a card's carry (read by Space
+on the element the attributes went on). One is declared: a mount that runs a waiting Reset with no chain, handed the twin that spent the
+chain — chain 0 where it is 0, and a fresh element nothing reads before the next paint.
+
+**The runtime's 10,000 (seed 20733)** found one unattributed divergence. Shrunk, it was a release on a video with no Source (C100), but
+the matchers judge the UNSHRUNK play: a release on a video file, then the Source switched to a YouTube link in the same frame. The frame
+reports its outputs after all its steps, so C100's matcher, reading the Source LAST held, saw an embed. It now reads the Source held at
+the last act before the difference (the element the act landed on). The same run's survivors were acts whose paint MOUNTS the Video and
+runs an action that waited (a grab, a drag from the desktop entering): the mount matrix now covers every person act (17 scenarios, a
+grab naming a real card), with a waiting Reset for the grab, the focus and the drag. Two rows are declared, narrow, and each only for
+twins no play tells apart (a declared row never hides a killed mutant): a drag entering in the frame the Video mounts, handed a twin
+that does not mount (the frame's end mounts it and runs what waited, reporting at the same frame end; the element is numbered one more,
+so the twin's file bookkeeping names an element no longer there — the traces are identical); and a card grabbed in that frame, handed a
+twin that grabs the SAME card without mounting (a twin with another card is killed: the card let go over the Video is the one
+dropped). **Trap: a mount that runs an action writes the held playback, `timeOut` included — the first rows missed that key and
+matched nothing; check a new row against the survivor lines before a 15-minute run.**
+
+**Findings** (all open; under R16, P109's to fix):
+- **P107-C96** (medium, [the ledger](../../bugs/p107-c96-a-video-showing-a-youtube-link-throws-on-source-object.md)): Source Object on a
+  Video showing an embed throws (`this.video` is not set); before the first draw it throws inside React's commit and the page goes blank.
+- **P107-C97** (low, [the ledger](../../bugs/p107-c97-play-on-a-video-switched-to-a-youtube-link-throws.md)): Play or Restart after a file
+  loaded and the Source moved to an embed throws (`canPlay` outlives the `<video>`); neither Done nor Failure.
+- **P107-C98** (**high**, [the ledger](../../bugs/p107-c98-a-video-volume-outside-0-to-1-blanks-the-page.md)): a Volume outside 0 to 1 —
+  50, from a Slider's default range — or not a number throws in `componentDidUpdate` and blanks the page; a Video placed with it throws at
+  its first frame (it renders twice when placed). Withheld from the runtime's generated sequences.
+- **P107-C99** (low, [the ledger](../../bugs/p107-c99-a-video-source-object-that-is-not-a-stream-throws.md)): a Source Object that is not
+  a stream throws (the browser's setter refuses it). Withheld from the runtime's generated sequences.
+- **P107-C100** (medium, [the ledger](../../bugs/p107-c100-a-video-file-fires-no-click-hover-pointer-or-file-drop.md)): on a video file
+  the Video fires no Click, Hover, Pointer Down, Up or Enter and takes no file drop — `CachedVideo` is handed no `pointer` prop. 1,186 of
+  the scenarios carry its row (1,573); behind it they agree (the in-memory fix above).
+- **C79 is not a known row for the Video while C100 stands**: no pointer reaches a video file at all, so an invisible one cannot take it
+  either, and the five "row C79" scenarios agree with the runtime for that reason (the known-rows test caught the row not firing). With
+  C100 fixed in memory they diverge as on the Image; C100's ledger says to carry C79's row back in the same commit.
+
+**Readings (2026-10-07).** Interpreter: the Video at 200 on seeds 13, 20729, 20730 and 7 (3,740 / 3,764 killed, the rest declared;
+3,794 / 3,819 at 20729) and at 10,000 on seed 20731 (4,044 / 4,065): CONFORMS, 0 divergences, 0 survivors. Runtime: at 200 on seed 13
+and at 10,000 on seed 20733: CONFORMS, 0 unattributed divergences (at 10,000: C96 ×126, C100 ×1,662; C98 and C99 withheld; C97 fires
+by its 20 scenarios); the known-rows test green. The shared changes (the face's media element, `mediaWork`; the guard): the runtime's
+graph and target suites 106 / 106; the 85 non-visual specs on the runtime at seed 13 all CONFORM; the Text v5 on the runtime at seed 13
+CONFORMS; the guard and its plants 37 / 37 (after the Group's `stampOn` fix: it had been red at HEAD since P109's Group v3, 3364b47f6);
+the package suite 22 suites, 939 passed, 18 skipped, the one failure the guard's Group (602 s). No file the stranger hashes changed.
+

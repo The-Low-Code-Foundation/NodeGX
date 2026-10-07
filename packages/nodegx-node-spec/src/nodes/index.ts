@@ -52,6 +52,7 @@ import { Text } from './text';
 import { Group } from './group';
 import { Circle } from './circle';
 import { Image } from './image';
+import { Video, OWN_ELEMENT } from './video';
 import { RadioButtonGroup } from './radiobuttongroup';
 import { RadioButton } from './radiobutton';
 import { NavigateToPath } from './navigate-to-path';
@@ -166,6 +167,7 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [Group.type]: Group,
   [Circle.type]: Circle,
   [Image.type]: Image,
+  [Video.type]: Video,
   [RadioButtonGroup.type]: RadioButtonGroup,
   [RadioButton.type]: RadioButton,
   [NavigateToPath.type]: NavigateToPath,
@@ -209,6 +211,7 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
 });
 
 export { EQUIVALENT_MUTANTS } from './equivalent-mutants';
+export { OWN_ELEMENT };
 
 export function specFor(typeName: string): AnyNodeSpec | undefined {
   return specs[typeName];
@@ -260,6 +263,7 @@ export {
   Group,
   Circle,
   Image,
+  Video,
   RadioButtonGroup,
   RadioButton,
   NavigateToPath,

@@ -150,7 +150,7 @@ import type { NodeInstance, NodeMetadata, OutcomeFailureOptions, OutcomeToken, R
 import type { RuntimeNode } from '../../src/internal';
 import type { BackendCall, ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, LocationCall, RequestRecord, StackAnswer, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
 import { parseEndpoint, specFor } from '../../../nodegx-node-spec/src';
-import { AUTH_OPS, backendEvent, canonicalise, fileError, installWorld, isFileOp, locationEvent, OUTCOME_PORTS, SELF_REFERENCE, type BackendDelivery } from '../../../nodegx-node-spec/src';
+import { AUTH_OPS, backendEvent, canonicalise, fileError, installWorld, isFileOp, locationEvent, OUTCOME_PORTS, OWN_ELEMENT, SELF_REFERENCE, type BackendDelivery } from '../../../nodegx-node-spec/src';
 
 import NoodlRuntime = require('../../noodl-runtime');
 import NodeDefinition = require('../../src/nodedefinition');
@@ -209,6 +209,274 @@ let pointerAt: any = null;
  */
 let fileDrag: { files: unknown[]; over: any } | undefined;
 
+// ---------------------------------------------------------------------------------------------
+// THE MEDIA ELEMENT (NSP-016 s54, the Video). jsdom has no media engine: `play()`, `pause()` and `load()` report "not
+// implemented" and do nothing, there is no `srcObject`, and nothing ever loads. So the face is the browser's media element,
+// after the HTML standard's media elements section, reduced to what a node or a person can see (video.ts says the same):
+//   - a LOAD (the media element load algorithm) runs when the `src` attribute is set or changed — not when it is removed — and
+//     when `srcObject` is set: the play() promises still pending are rejected (AbortError), the element is paused (no event),
+//     its position goes to 0 (`timeupdate` when it moved), it is no longer ready nor failed, it may autoplay again, and it
+//     loads when it has a source (a `src` attribute that is not empty, or a `srcObject`);
+//   - the browser's side of a load is three acts: `loaded` (enough has loaded to play — the video's size, `canplay`, the pending
+//     play() promises resolve, and an autoplaying element that is allowed to play starts: `play`) and `failed` (the source cannot
+//     be played — a MediaError of code 4 with the act's message, `error`, then the pending promises rejected, NotSupportedError),
+//     each only while a load is under way; and, while the element plays, `progress` (playback reaches the act's second:
+//     `timeupdate`) and `ended` (playback reaches the end, MEDIA_END: Loop on seeks to 0 and plays on, `timeupdate`; else
+//     `timeupdate`, paused with `pause`, the pending promises rejected, then `ended`);
+//   - `play()`: rejected NotAllowedError when the element may not play (THE AUTOPLAY POLICY), then NotSupportedError after a
+//     failed load; else a promise that resolves once the element is ready. An element at its end goes back to 0 (`timeupdate`),
+//     a paused one starts (`play`);
+//   - `pause()`: a playing element pauses (`timeupdate`, `pause`) and its pending promises are rejected (AbortError);
+//   - `currentTime =`: on a ready element a seek (`timeupdate`); on one that is not, nothing to see;
+//   - THE AUTOPLAY POLICY (Chromium's): an element may play while it is muted, or once the page has had a person's activation —
+//     a mouse button down, a key other than Escape, a finger lifted (HTML's activation-triggering input events), heard on the
+//     window. One play's;
+//   - `srcObject`: null until set; WebIDL `MediaProvider?` — nothing becomes null, a value that is not a MediaStream, a
+//     MediaSource or a Blob is a TypeError.
+// Every event a call queues is a media element TASK: it fires after the caller's code (a microtask here, which the settle's
+// yield reaches), in the order queued. Face choices, written down: the browser's own controls are not an act (Controls draws
+// them; nothing here clicks them); a load that has loaded never fails or stalls afterwards; the End Time fragment's stop is not
+// an act (`ended` is the video's end); an element unmuted without an activation plays on (Chromium pauses it); a removed
+// element's pending promises are never settled (a browser rejects them, AbortError — silent either way).
+// ---------------------------------------------------------------------------------------------
+
+/** NSP-016 s54 — where the video ends, in seconds (the `ended` act puts Playback Position there). */
+const MEDIA_END = 60;
+/** NSP-016 s54 — the page has had a person's activation (THE MEDIA ELEMENT above). One play's. */
+let activated = false;
+/**
+ * NSP-016 s54 — a media element queued work (a task, a settled play() promise) since the event loop last turned. A person's act is a
+ * new task: it comes after that work, as in a browser, so `act` lets the loop turn first — only then, so a page with no media element
+ * acts exactly as before.
+ */
+let mediaWork = false;
+
+interface MediaState {
+  paused: boolean;
+  position: number;
+  /** `readyState` at HAVE_FUTURE_DATA or more: `canplay` has fired since the last load */
+  ready: boolean;
+  /** a load with a source is under way: neither loaded nor failed */
+  loading: boolean;
+  /** the failed load's MediaError message (code 4), or none */
+  failed: string | undefined;
+  pending: Array<{ resolve(): void; reject(e: unknown): void }>;
+  canAutoplay: boolean;
+  /** playback has ended (forwards, no Loop) */
+  atEnd: boolean;
+  width: number;
+  height: number;
+  srcObject: unknown;
+}
+const mediaStates = new WeakMap<object, MediaState>();
+
+function mediaOf(el: any): MediaState {
+  let m = mediaStates.get(el);
+  if (!m) {
+    m = { paused: true, position: 0, ready: false, loading: false, failed: undefined, pending: [], canAutoplay: true, atEnd: false, width: 0, height: 0, srcObject: null };
+    mediaStates.set(el, m);
+  }
+  return m;
+}
+
+/**
+ * NSP-016 s54 — a value that is the node's own element (a Video's DOM Element): what a wire from it carries is the element, which no
+ * trace can hold, so it is recorded as video.ts's `OWN_ELEMENT`, as the node's reference to itself is recorded as `SELF_REFERENCE`.
+ */
+function isOwnElement(node: unknown, value: unknown): boolean {
+  if (!value || typeof value !== 'object' || (value as { nodeType?: unknown }).nodeType !== 1) return false;
+  const n = node as { getDOMElement?(): unknown };
+  return typeof n.getDOMElement === 'function' && n.getDOMElement() === value;
+}
+
+/** THE MEDIA ELEMENT (above) on jsdom's prototypes, once per process. */
+function installMedia(w: any): void {
+  const task = (fn: () => void) => {
+    mediaWork = true;
+    void Promise.resolve().then(fn);
+  };
+  const fire = (el: any, type: string) => el.dispatchEvent(new w.Event(type));
+  const exception = (message: string, name: string) => new w.DOMException(message, name);
+  const hasSource = (el: any, m: MediaState) => !!el.getAttribute('src') || m.srcObject !== null;
+  const take = (m: MediaState) => {
+    const p = m.pending;
+    m.pending = [];
+    return p;
+  };
+  const notifyPlaying = (el: any, m: MediaState) => {
+    const p = take(m);
+    task(() => {
+      fire(el, 'playing');
+      for (const x of p) x.resolve();
+    });
+  };
+  const load = (el: any) => {
+    const m = mediaOf(el);
+    for (const x of take(m)) x.reject(exception('The play() request was interrupted by a new load request.', 'AbortError'));
+    m.paused = true;
+    if (m.position !== 0) {
+      m.position = 0;
+      task(() => fire(el, 'timeupdate'));
+    }
+    Object.assign(m, { ready: false, failed: undefined, canAutoplay: true, atEnd: false, width: 0, height: 0 });
+    m.loading = hasSource(el, m);
+  };
+  const P = w.HTMLMediaElement.prototype;
+  const setAttribute = w.Element.prototype.setAttribute;
+  P.setAttribute = function (this: any, name: string, value: unknown) {
+    setAttribute.call(this, name, value);
+    if (String(name).toLowerCase() === 'src') load(this);
+  };
+  const define = (proto: any, name: string, get: (this: any) => unknown, set?: (this: any, v: unknown) => void) =>
+    Object.defineProperty(proto, name, { configurable: true, enumerable: true, get, ...(set ? { set } : {}) });
+  define(P, 'paused', function () {
+    return mediaOf(this).paused;
+  });
+  define(P, 'readyState', function () {
+    return mediaOf(this).ready ? 4 : 0;
+  });
+  define(P, 'error', function () {
+    const m = mediaOf(this);
+    return m.failed === undefined ? null : { code: 4, message: m.failed };
+  });
+  define(
+    P,
+    'currentTime',
+    function () {
+      return mediaOf(this).position;
+    },
+    function (v) {
+      const m = mediaOf(this);
+      if (!m.ready) return;
+      m.position = Number(v);
+      m.atEnd = false;
+      task(() => fire(this, 'timeupdate'));
+    }
+  );
+  define(
+    P,
+    'srcObject',
+    function () {
+      return mediaOf(this).srcObject;
+    },
+    function (v) {
+      if (v !== null && v !== undefined && !(v instanceof w.Blob)) {
+        throw new TypeError("Failed to set the 'srcObject' property on 'HTMLMediaElement': The provided value is not of type '(MediaSourceHandle or MediaStream or MediaSource or Blob)'.");
+      }
+      mediaOf(this).srcObject = v ?? null;
+      load(this);
+    }
+  );
+  define(w.HTMLVideoElement.prototype, 'videoWidth', function () {
+    return mediaOf(this).width;
+  });
+  define(w.HTMLVideoElement.prototype, 'videoHeight', function () {
+    return mediaOf(this).height;
+  });
+  P.play = function (this: any) {
+    const m = mediaOf(this);
+    mediaWork = true;
+    if (!this.muted && !activated) return Promise.reject(exception("play() failed because the user didn't interact with the document first.", 'NotAllowedError'));
+    if (m.failed !== undefined) return Promise.reject(exception('The element has no supported sources.', 'NotSupportedError'));
+    const p = new Promise<void>((resolve, reject) => m.pending.push({ resolve, reject }));
+    if (m.atEnd) {
+      m.atEnd = false;
+      m.position = 0;
+      task(() => fire(this, 'timeupdate'));
+    }
+    if (m.paused) {
+      m.paused = false;
+      task(() => fire(this, 'play'));
+    }
+    if (m.ready) notifyPlaying(this, m);
+    m.canAutoplay = false;
+    return p;
+  };
+  P.pause = function (this: any) {
+    const m = mediaOf(this);
+    m.canAutoplay = false;
+    if (m.paused) return;
+    m.paused = true;
+    const p = take(m);
+    task(() => {
+      fire(this, 'timeupdate');
+      fire(this, 'pause');
+      for (const x of p) x.reject(exception('The play() request was interrupted by a call to pause().', 'AbortError'));
+    });
+  };
+  P.load = function (this: any) {
+    load(this);
+  };
+  // HTML's activation-triggering input events (THE AUTOPLAY POLICY), on the window for every play; `activated` is one play's
+  w.addEventListener('mousedown', () => (activated = true), true);
+  w.addEventListener('touchend', () => (activated = true), true);
+  w.addEventListener('keydown', (e: { key?: string }) => e.key !== 'Escape' && (activated = true), true);
+  w.addEventListener('pointerdown', (e: { pointerType?: string }) => e.pointerType === 'mouse' && (activated = true), true);
+  w.addEventListener('pointerup', (e: { pointerType?: string }) => e.pointerType !== 'mouse' && (activated = true), true);
+}
+
+/**
+ * THE MEDIA ELEMENT (above) — the browser's side of a load, and of playback, on the node's `<video>` (video.ts's acts). Nothing on
+ * any other element: an embed's `<iframe>` reports nothing back.
+ */
+function mediaAct(w: any, el: any, act: string, value: unknown): void {
+  if (!el || el.tagName !== 'VIDEO') return;
+  const m = mediaOf(el);
+  const fire = (type: string) => el.dispatchEvent(new w.Event(type));
+  const settleAll = (fn: (x: MediaState['pending'][number]) => void) => {
+    const p = m.pending;
+    m.pending = [];
+    for (const x of p) fn(x);
+  };
+  if (act === 'loaded') {
+    if (!m.loading) return;
+    const size = (value ?? {}) as { width?: number; height?: number };
+    const wasPlaying = !m.paused;
+    // the readyState change decides autoplay before the `canplay` it queues fires (HTML: "eligible for autoplay")
+    const autoplays = !wasPlaying && m.canAutoplay && !!el.autoplay && (!!el.muted || activated);
+    Object.assign(m, { loading: false, ready: true, width: Number(size.width ?? 0), height: Number(size.height ?? 0) });
+    if (autoplays) m.paused = false;
+    fire('canplay');
+    if (wasPlaying || autoplays) {
+      if (autoplays) void Promise.resolve().then(() => fire('play'));
+      const p = m.pending;
+      m.pending = [];
+      void Promise.resolve().then(() => {
+        fire('playing');
+        for (const x of p) x.resolve();
+      });
+    }
+    return;
+  }
+  if (act === 'failed') {
+    if (!m.loading) return;
+    m.loading = false;
+    m.failed = String(value ?? '');
+    fire('error');
+    settleAll((x) => x.reject(new w.DOMException('The element has no supported sources.', 'NotSupportedError')));
+    return;
+  }
+  if (!m.ready || m.paused) return;
+  if (act === 'progress') {
+    m.position = Number(value);
+    fire('timeupdate');
+    return;
+  }
+  // ended
+  if (el.loop) {
+    m.position = 0;
+    fire('timeupdate');
+    return;
+  }
+  m.position = MEDIA_END;
+  m.atEnd = true;
+  fire('timeupdate');
+  m.paused = true;
+  fire('pause');
+  settleAll((x) => x.reject(new w.DOMException('The play() request was interrupted because playback ended.', 'AbortError')));
+  fire('ended');
+}
+
 /** The page, made once for the process; React loaded with its globals present (react-dom reads `window` at load), outside any play. */
 function ensureDom(): Dom {
   if (dom) return dom;
@@ -230,6 +498,8 @@ function ensureDom(): Dom {
   // NSP-016 s43 — jsdom has no `elementFromPoint` (no geometry): the element under the pointer is the one the last pointer act
   // landed on (`pointerAt`, PERSON's hit test), while it is on the page
   w.document.elementFromPoint = () => (pointerAt && pointerAt.isConnected ? pointerAt : null);
+  // NSP-016 s54 — THE MEDIA ELEMENT (above)
+  installMedia(w);
   const globals: Record<string, unknown> = {
     window: w,
     document: w.document,
@@ -291,6 +561,7 @@ function installPage(): () => void {
   const d = ensureDom();
   pointerAt = null;
   fileDrag = undefined;
+  activated = false;
   // the window outlives the play (one page per process): a listener the play's page left on it — drag-drop.ts `swallowNextClick`
   // takes its own off with a `setTimeout(0)` on the WORLD's clock, which a play that ends first never turns — ate a click in a
   // LATER play. What the play added comes off with its page.
@@ -881,7 +1152,7 @@ export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 't
 export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back', 'router-navigate', 'page-inputs', 'showpopup', 'closepopup'] as const;
 
 /** NSP-016 s37 — the viewer's VISUAL nodes this phase has specced, from `src/nodes/` (their React components come with them; PERSON above). */
-export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox', 'controls/text-input', 'controls/options', 'controls/slider', 'visual/icon', 'controls/radiobuttongroup', 'controls/radiobutton', 'visual/text', 'visual/group', 'visual/circle', 'visual/image'] as const;
+export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox', 'controls/text-input', 'controls/options', 'controls/slider', 'visual/icon', 'controls/radiobuttongroup', 'controls/radiobutton', 'visual/text', 'visual/group', 'visual/circle', 'visual/image', 'visual/video'] as const;
 
 /**
  * Picker nodes whose SOURCE is in this package but which only the viewer's `register-nodes.js`
@@ -1146,7 +1417,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     node.sendValue = (name: string, value: unknown) => {
       if (s.signalOutputs?.has(name)) {
         if (value === true) s.frame.signals.push(name);
-      } else if (value !== undefined && node.hasOutput(name)) s.frame.values.set(name, value === node ? SELF_REFERENCE : canonicalise(value));
+      } else if (value !== undefined && node.hasOutput(name)) s.frame.values.set(name, value === node ? SELF_REFERENCE : isOwnElement(node, value) ? OWN_ELEMENT : canonicalise(value));
       originalSendValue(name, value);
     };
     const originalSignal = node.sendSignalOnOutput.bind(node);
@@ -1198,7 +1469,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
           continue;
         }
         // NSP-016 s37 — a visual node's `This` is the node itself: the self reference (trace.ts)
-        if (v !== undefined) values.set(output.name, v === s.h.node ? SELF_REFERENCE : canonicalise(v));
+        if (v !== undefined) values.set(output.name, v === s.h.node ? SELF_REFERENCE : isOwnElement(s.h.node, v) ? OWN_ELEMENT : canonicalise(v));
       }
     }
     for (const name of [...values.keys()].sort()) {
@@ -1726,6 +1997,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     // NSP-016 s53 — the browser finishes fetching the picture an `<img>` names (image.ts `fetched`): its `load` or `error` event on the
     // element, which React hears there. jsdom fetches nothing, so the face is the browser. Face choice, written down: a browser fetches
     // only for an element with a `src`, or a `srcset` that is not empty — with neither there is no fetch to finish, and the act is nothing
+    // NSP-016 s54 — the browser's side of a `<video>`'s load and playback (THE MEDIA ELEMENT above)
+    if (act === 'loaded' || act === 'failed' || act === 'progress' || act === 'ended') return mediaAct(w, el, act, value);
     if (act === 'fetched') {
       if (el.getAttribute('src') || el.getAttribute('srcset')) el.dispatchEvent(new w.Event(value === 'load' ? 'load' : 'error'));
       return;
@@ -1733,6 +2006,23 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     const KEYBOARD = new Set(['focus', 'blur', 'type', 'key', 'choose', 'slide']);
     const hit = KEYBOARD.has(act) ? el : underPointer(w, el);
     if (!KEYBOARD.has(act)) pointerAt = hit;
+    // NSP-016 s54 — an EMBED (a Video's `<iframe>`) is another page inside this one: what lands on it goes to that page, and nothing
+    // here hears it. A press or a click there puts the keyboard on the `<iframe>` (its mousedown's default action); a key goes into
+    // it once the keyboard is there. What a person does there is still this page's activation (HTML passes it to the ancestors)
+    if (hit === el && el.tagName === 'IFRAME' && act !== 'focus' && act !== 'blur') {
+      if (act === 'press' || act === 'click') {
+        activated = true;
+        el.focus();
+        return;
+      }
+      if (act === 'lift') activated = true;
+      if (act !== 'key') return;
+      el.focus();
+      if (d.document.activeElement === el) {
+        if (value !== 'Escape') activated = true;
+        return;
+      }
+    }
     const mouse = (type: string, init: Record<string, unknown> = {}) => hit.dispatchEvent(new w.MouseEvent(type, { bubbles: true, cancelable: true, composed: true, button: 0, ...init }));
     const touch = (type: string) => hit.dispatchEvent(new w.TouchEvent(type, { bubbles: true, cancelable: true, composed: true }));
     const pointer = (type: string, pointerType: 'mouse' | 'touch') => {
@@ -2335,10 +2625,15 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     },
 
     // PERSON (above, NSP-016 s37) — the person's act on the painted page (adapter.ts)
-    act(h, act, value) {
+    async act(h, act, value) {
       const s = states.get(h.id);
       if (!s) throw new Error(`runtime: ${h.id} is disposed`);
       if (!s.page) throw new Error(`${h.type}: a person cannot act on a node that is not on the page (its spec does not need person)`);
+      // NSP-016 s54 — a person's act is a new task, after what a media element queued (`mediaWork`)
+      if (mediaWork) {
+        mediaWork = false;
+        await yieldToEventLoop();
+      }
       const c = canonicalise(value);
       s.trace.push(c === undefined ? { t: 'act', act } : { t: 'act', act, value: c });
       paint(s);

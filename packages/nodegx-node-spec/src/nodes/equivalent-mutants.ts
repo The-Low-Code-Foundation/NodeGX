@@ -154,6 +154,32 @@ function onCircle(row: EquivalentMutant): EquivalentMutant {
   return { ...row, branch: shape(row.branch), ...(row.swappedWith !== undefined ? { swappedWith: shape(row.swappedWith) } : {}) };
 }
 
+/**
+ * NSP-016 s54 — the Video runs the Image's machinery (video.ts), so each Text row (on the Shape's patch, `onCircle`) holds on the
+ * Video's shape of the same patch: every paint writes the `<video>`'s three flags as the node holds them, and every act and frame end
+ * writes the outcomes held for the frame's end (`ran`). The row is made exact on outcomes, so a twin that resolved one is never covered.
+ */
+function onVideo(row: EquivalentMutant): EquivalentMutant[] {
+  const always = row.reducer === 'afterInputs' || row.reducer.startsWith('person.');
+  const activates = ['press', 'click', 'lift', 'key', 'grab', 'pickUp'].some((a) => row.reducer === `person.${a}`);
+  // the component a mount makes (its element and media are among what every paint writes)
+  const MOUNT = ['canPlay', 'waiting', 'wantToPlay'];
+  const shape = (b: string | undefined) => {
+    const m = b === undefined ? null : /^"set":\[(.*?)\],"emit":\[(.*?)\]$/.exec(b);
+    if (!m || !always) return b;
+    const keys = new Set<string>(m[1] ? (JSON.parse(`[${m[1]}]`) as string[]) : []);
+    for (const k of [...VIDEO_PAINT, 'ran']) keys.add(k);
+    if (activates) keys.add('activated');
+    if (m[2].includes('"didMount"')) for (const k of MOUNT) keys.add(k);
+    return `"set":${JSON.stringify([...keys].sort())},"emit":[${m[2]}],"outcome":null,"outcomes":[]`;
+  };
+  const c = onCircle(row);
+  return [{ ...c, branch: shape(c.branch), ...(c.swappedWith !== undefined ? { swappedWith: shape(c.swappedWith) } : {}) }];
+}
+
+/** What every paint of the Video writes (video.ts `painted`): the `<video>`'s three flags, and the element and its media as they stand. */
+const VIDEO_PAINT = ['atEnd', 'canAutoplay', 'domElement', 'elAutoplay', 'elLoop', 'elMuted', 'elem', 'failed', 'height', 'kind', 'loading', 'paused', 'pending', 'position', 'ready', 'srcAttr', 'width'];
+
 // P109 ISL-031 (P107-D30) — the paint that takes a control's element off the page resets Focused, Hover and Pressed. A leave
 // that was not pressed, handed its twin's example that was: the twin fires the same pulses (Blurred with Focused, Hover End with
 // Hover — so those twins differ in what they fire and are killed), and its one extra write is Pressed false where it is false
@@ -173,6 +199,36 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
   Circle: TEXT.map(onCircle),
   // NSP-016 s53 — the Image runs the Shape's machinery (no Tag), and its fetch
   Image: TEXT.map(onCircle),
+  // NSP-016 s54 — the Video runs the Image's machinery, on its own shapes (`onVideo`)
+  Video: [
+    ...TEXT.flatMap(onVideo),
+    // s54 — a Play before the component has seen a load, handed the patch of a Play on a video already playing: it spends Autoplay's
+    // chance (canAutoplay false) and settles no promise (none is pending before a load). The Play it wants starts at the load what
+    // Autoplay would have — On Play once, after On Can Play — and whatever stops wanting it (Pause, Reset) spends that chance too,
+    // while a new element or a reload gives it back
+    { reducer: 'play', kind: 'swap-branch', branch: '"set":["atEnd","paused","pending","position","timeOut","wantToPlay"],"emit":[],"outcome":"done"', swappedWith: '"set":["atEnd","canAutoplay","paused","pending","position","timeOut","wantToPlay"],"emit":[],"outcome":"done"', why: "a Play before a load, handed a playing video's patch: at the load the wanted Play starts what Autoplay would have" },
+    // the Group's row: a frame end that reports outcomes — they stand without its set, and only the next settle shows what it failed
+    // to keep; a sequence ending at that settle cannot show it
+    { reducer: 'afterInputs', kind: 'drop-set', branch: '"outcomes":["', why: 'a frame end that reports outcomes: they stand without its set, and only the next settle shows what it failed to keep; a sequence ending at that settle cannot show it' },
+    // a Source Object write on the page (null, an embed's, a value that is not a stream: nothing), handed the patch of one that waited
+    // off the page: the list it writes holds Source Object writes only (the twin's), which run at the next mount on a new `<video>`,
+    // where a reload changes nothing, and are the oldest in the list, so the cap pushes them out first, without a word
+    // a placing off the page draws the flags with no element to draw them on; the mount draws them again (PLACED_OFF_PAGE)
+    { reducer: 'world.place', kind: 'drop-set', branch: `"set":${JSON.stringify(VIDEO_PAINT)},"emit":[]`, why: 'a placing on a node placed off the page: its set holds the flags, which nothing reads before the frame end repaints them, and the element and media as they already stand' },
+    // a frame end that mounts the Video and runs a Reset that waited, with no chain under way, handed the twin whose chain check spent
+    // the last frame start: the twin writes chain 0 where it is 0 already, and a fresh element's flags and media, which nothing reads
+    // before the next paint draws them again (an action reads Muted only once the component has seen a load, and a new one has not)
+    { reducer: 'afterInputs', kind: 'swap-branch', branch: `"set":${JSON.stringify([...VIDEO_PAINT, 'canPlay', 'elementFocused', 'onPage', 'ran', 'timeOut', 'waiting', 'wantToPlay'].sort())},"emit":["didMount"],"outcome":null,"outcomes":["reset:done"]`, swappedWith: `"set":${JSON.stringify([...VIDEO_PAINT, 'canPlay', 'chain', 'elementFocused', 'onPage', 'ran', 'timeOut', 'waiting', 'wantToPlay'].sort())},"emit":["didMount"],"outcome":null,"outcomes":["reset:done"]`, why: 'a mount that runs a waiting Reset with no chain, handed the twin that spent the chain: chain 0 where it is 0, and a fresh element nothing reads before the next paint' },
+    // a drag from the desktop entering in the frame Mounted comes back, its paint making the element (and running what waited), handed a
+    // twin that makes none: the frame's end mounts it instead and runs what waited there, reporting at the same frame end; the element it
+    // makes is numbered one more, so the file bookkeeping the twin wrote names an element no longer there, and the next drag over the
+    // new one enters it as it would have (element numbers are only ever compared with each other)
+    { reducer: 'person.fileEnter', kind: 'swap-branch', branch: `"set":${JSON.stringify([...VIDEO_PAINT, 'canPlay', 'elementFocused', 'fileCarry', 'onPage', 'ran', 'timeOut', 'waiting', 'wantToPlay'].sort())},"emit":["didMount"]`, swappedWith: '"emit":[],"outcome":null,"outcomes":[]', why: 'a drag entering in the frame the Video mounts, handed a twin that does not mount: the frame end mounts it, and the twin names an element no longer there' },
+    // … and a card grabbed in that frame, handed a twin that grabs the SAME card without mounting (a twin that carries another card is
+    // killed: the card let go over the Video is the one dropped)
+    { reducer: 'person.grab', kind: 'swap-branch', branch: `"set":${JSON.stringify([...VIDEO_PAINT, 'activated', 'canPlay', 'cardFocused', 'carry', 'carryBy', 'elementFocused', 'onPage', 'ran', 'timeOut', 'waiting', 'wantToPlay'].sort())},"emit":["didMount"]`, swappedWith: `"set":${JSON.stringify([...VIDEO_PAINT, 'activated', 'cardFocused', 'carry', 'carryBy', 'elementFocused', 'ran'].sort())},"emit":[]`, why: 'a card grabbed in the frame the Video mounts, handed a twin that grabs the same card without mounting: the frame end mounts it' },
+    { reducer: 'srcObject', kind: 'swap-branch', branch: '"set":[],"emit":[]', swappedWith: '"set":["waiting"],"emit":[]', why: 'an on-page Source Object write handed a twin that left Source Object writes waiting: they run on a fresh element and are pushed out first, silently' }
+  ],
   // NSP-016 s52 — the Group runs the Text's machinery (group.ts docblock): the Text's rows, on the Group's shapes
   Group: [
     ...TEXT.flatMap(onGroupRows),

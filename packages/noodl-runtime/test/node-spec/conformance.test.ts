@@ -17,7 +17,7 @@ import * as ts from 'typescript';
 
 import type { NodeModule } from '@noodl/types';
 
-import { Counter, EQUIVALENT_MUTANTS, specs, runConformance, formatReport } from '../../../nodegx-node-spec/src';
+import { Counter, EQUIVALENT_MUTANTS, specs, runConformance, formatReport, poolFor } from '../../../nodegx-node-spec/src';
 import type { Divergence, KnownRow, Report, Withheld } from '../../../nodegx-node-spec/src';
 import { runtimeTarget, withViewerNodes, type RuntimeTarget } from '../helpers/node-spec-target';
 
@@ -87,8 +87,45 @@ const heldAt = (d: Divergence, port: string): unknown => {
  * NSP-016 s53 — values the generator does not draw on the runtime target (runner `withheld`), because the target cannot survive
  * them: a known row that takes the whole process down cannot be played, so it cannot be counted either. Printed in every report.
  */
+/**
+ * NSP-016 §6 C96–C100 (s54) — the Video. Each throw is narrowed by the message the runtime throws with and the input that leads to it:
+ *   - C96: Source Object on an embed — `setSourceObject` reads `this.video.srcObject`, and an embed has no `<video>` (`reading 'srcObject'`);
+ *   - C97: Play or Restart on an embed once the component has seen a `<video>` load — `startPlayback` calls `this.video.play()` (`reading 'play'`);
+ *   - C98: a Volume outside 0 to 1, or not a number — `componentDidUpdate` writes it to the element, whose setter throws (IndexSizeError, or a
+ *     TypeError for a value that is not a finite number); withheld below, so a generated play is not cut short by it;
+ *   - C99: a Source Object that is not a stream — the browser's setter refuses it (TypeError); withheld below too;
+ *   - C100: on a `<video>` the pointer outputs and the file drop never fire (`CachedVideo` is handed no `pointer` prop). Narrow: the first
+ *     difference is such an output on the REFERENCE's side, and the Source last held names a file, not an embed.
+ */
+const threwWith = (d: Divergence, text: string) => d.difference.threw !== undefined && d.difference.threw.includes(text);
+const sourceObjectOnEmbed = (d: Divergence) => threwWith(d, "reading 'srcObject'") && (d.params.srcObject !== undefined || 'srcObject' in d.params || d.reference.some((e) => e.t === 'set' && e.port === 'srcObject'));
+const playOnEmbed = (d: Divergence) => threwWith(d, "reading 'play'");
+const volumeOutOfRange = (d: Divergence) => threwWith(d, 'The index is not in the allowed range') || threwWith(d, "Failed to set the 'volume' property");
+const sourceObjectNotAStream = (d: Divergence) => threwWith(d, "Failed to set the 'srcObject' property");
+const EMBED = [/youtu\.be\/[A-Za-z0-9_-]{6,}/i, /(?:youtube\.com|youtube-nocookie\.com)\/(?:watch\?(?:[^#]*&)?v=|embed\/|v\/|shorts\/)[A-Za-z0-9_-]{6,}/i, /vimeo\.com\/(?:video\/|channels\/[^/]+\/)?\d+/i];
+const videoFileTakesNoPointer = (d: Divergence) => {
+  if (d.difference.threw !== undefined) return false;
+  const r = d.reference[d.difference.index];
+  if (!r) return false;
+  const missing = r.t === 'signal' ? POINTER_OUTPUTS.includes(r.port) : r.t === 'value' && (FILE_DROP_VALUES.includes(r.port) || r.port === 'isDragOver');
+  if (!missing) return false;
+  // the Source the person acted on: held at the last act before the difference — a frame reports its outputs after all its steps,
+  // so a Source switched to an embed after the act, in the same frame, is not the element the act landed on (s54's 10,000)
+  const lastAct = d.reference.slice(0, d.difference.index).map((e) => e.t).lastIndexOf('act');
+  const written = d.reference.slice(0, Math.max(lastAct, 0)).filter((e) => e.t === 'set' && e.port === 'src').pop() as { value?: unknown } | undefined;
+  const src = lastAct >= 0 ? (written ? written.value : d.params.src) : heldAt(d, 'src');
+  return !(typeof src === 'string' && EMBED.some((p) => p.test(src)));
+};
+/** C98 / C99 — every value of the port's pool the browser's setter refuses */
+const refusedVolume = poolFor(specs['Video'].inputs.volume).filter((v) => typeof v !== 'number' ? !(Number(v) >= 0 && Number(v) <= 1) : !(v >= 0 && v <= 1));
+const refusedSourceObject = poolFor(specs['Video'].inputs.srcObject).filter((v) => v !== null && v !== undefined);
+
 const WITHHELD: Record<string, Readonly<Record<string, Withheld>>> = {
-  // none: C92 (a Shape's Points of 1e9, 2^53 or Infinity ran the heap out) was fixed in P109 ISL-038 — Circle.tsx caps it at 500
+  // C92 (a Shape's Points of 1e9, 2^53 or Infinity ran the heap out) was fixed in P109 ISL-038 — Circle.tsx caps it at 500
+  Video: {
+    volume: { values: refusedVolume, row: 'NSP-016 §6 C98 — a Volume outside 0 to 1 throws while React draws the Video' },
+    srcObject: { values: refusedSourceObject, row: 'NSP-016 §6 C99 — a Source Object that is not a stream: the browser refuses it and the node throws' }
+  }
 };
 
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
@@ -103,6 +140,16 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   // s53 — the Image: the Text's rows (the same shared ports and drag module)
   Image: [
     { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer }
+  ],
+  // s54 — the Video's own rows (C96–C100). Not C79: on a video file no pointer act reaches the node at all while C100 stands, so an
+  // invisible one cannot take it either — the five C79 scenarios agree with the runtime for that reason, and diverge again once C100
+  // is fixed (measured with C100 fixed in memory): the fix carries C79's row back here and onto those five
+  Video: [
+    { row: 'NSP-016 §6 C96 — Source Object on an embed: the runtime throws (no `<video>`)', matches: sourceObjectOnEmbed },
+    { row: 'NSP-016 §6 C97 — Play or Restart on an embed after a `<video>` loaded: the runtime throws', matches: playOnEmbed },
+    { row: 'NSP-016 §6 C98 — a Volume outside 0 to 1 throws while React draws the Video', matches: volumeOutOfRange },
+    { row: 'NSP-016 §6 C99 — a Source Object that is not a stream: the browser refuses it and the node throws', matches: sourceObjectNotAStream },
+    { row: 'NSP-016 §6 C100 — a Video playing a file fires no pointer output and takes no file drop', matches: videoFileTakesNoPointer }
   ],
   // s52 — the Group: the Text's rows (the same shared ports and drag module); its own C86–C90 and C95 fixed in P109 ISL-038 (s29)
   Group: [

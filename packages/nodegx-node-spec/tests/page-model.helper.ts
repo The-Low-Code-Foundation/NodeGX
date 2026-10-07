@@ -48,7 +48,15 @@ import type { AnyNodeSpec } from '../src';
 export const KEEP = Symbol('not drawn now');
 
 /** The few things a browser keeps on an element that show no node value. A held key that is none of these `shows` one. */
-export type Keeps = 'the keyboard' | 'the caret' | 'what a module put on the element' | 'a drag from outside the page' | 'where the pointer is';
+export type Keeps =
+  | 'the keyboard'
+  | 'the caret'
+  | 'what a module put on the element'
+  | 'a drag from outside the page'
+  | 'where the pointer is'
+  // s54 — the Video: what a media element holds (playing or paused, its position, its load, its size) and the page's activation
+  | 'the media'
+  | "a person's activation";
 export type Held = { shows: (s: Readonly<Record<string, unknown>>) => unknown } | { keeps: Keeps };
 
 export interface PageModel {
@@ -70,6 +78,13 @@ const pageEnabled = { follows: (s: Readonly<Record<string, unknown>>) => s.enabl
 const pageVisible = { follows: (s: Readonly<Record<string, unknown>>) => s.visible };
 /** utils.ts :340-364 — the Focus and Blur actions call the element: they meet what is on the page */
 const keyboard = { keeps: 'the keyboard' } as const;
+/** s54 — the Video's media element (video.ts THE MEDIA ELEMENT) */
+const media = { keeps: 'the media' } as const;
+/** video.ts `kindOf` — a Source naming a YouTube or Vimeo video draws an embed (video-embed.ts) */
+const videoKind = (source: unknown): 'video' | 'embed' =>
+  typeof source === 'string' && [/youtu\.be\/[A-Za-z0-9_-]{6,}/i, /(?:youtube\.com|youtube-nocookie\.com)\/(?:watch\?(?:[^#]*&)?v=|embed\/|v\/|shorts\/)[A-Za-z0-9_-]{6,}/i, /player\.vimeo\.com\/video\/\d+/i, /vimeo\.com\/(?:channels\/[^/]+\/)?\d+/i].some((p) => p.test(source)) ? 'embed' : 'video';
+/** Video.tsx :129-201 — the component's calls meet the element: its kind, its media, whether it may play, its `src` (a reload) */
+const VIDEO_CALL = ['onPage', 'kind', 'srcAttr', 'elMuted', 'paused', 'position', 'ready', 'failed', 'pending', 'atEnd', 'activated', 'canAutoplay', 'loading', 'width', 'height'];
 const FOCUS_CALLS = {
   'on.focus': ['onPage', 'pageEnabled', 'pageVisible', 'elementFocused'],
   'on.blur': ['onPage', 'pageEnabled', 'pageVisible', 'elementFocused']
@@ -148,6 +163,45 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
     frameEnd: ['chain'],
     elementCalls: { 'on.draggable': ['onPage', 'elem', 'attrsOn'], 'on.acceptDrops': [], 'world.timer': ['onPage', 'elem', 'pointerAt', 'sourceElem'] }
   },
+  // s54 — the Image's model, and the Video's: the element a Source draws (an embed or a `<video>`: a new element without a mount, as the
+  // Text's Tag) with its `src` and flags, the media element the browser holds, and the component the node calls
+  Video: {
+    node: ['mounted', 'chain', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'dragValue', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'dragKind', 'phase', 'input', 'inZone', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'isDragOver', 'droppedFiles', 'droppedFile',
+      'source', 'startTime', 'endTime', 'muted', 'autoplay', 'loop', 'wantToPlay', 'canPlay', 'timeOut', 'videoWidth', 'videoHeight', 'playbackError', 'domElement', 'waiting', 'ran'],
+    attr: {
+      onPage,
+      // an element's type cannot change: presetting it would claim an element the page does not have
+      kind: { follows: (s) => (s.onPage ? videoKind(s.source) : KEEP), preset: false },
+      // the browser loads when the `src` changes: presetting it would claim a load that has not happened
+      srcAttr: { follows: (s) => (s.onPage && videoKind(s.source) === 'video' ? s.srcAttr : KEEP), preset: false, why: 'a `src` taken away stays as it was (HTML: removing it loads nothing), so it follows the Source only while there is one' },
+      elMuted: { follows: (s) => (s.onPage && videoKind(s.source) === 'video' ? !!s.muted : KEEP) },
+      elAutoplay: { follows: (s) => (s.onPage && videoKind(s.source) === 'video' ? !!s.autoplay : KEEP) },
+      elLoop: { follows: (s) => (s.onPage && videoKind(s.source) === 'video' ? !!s.loop : KEEP) }
+    },
+    element: { elem: { changesWith: ['onPage', 'kind'] } },
+    held: { elementFocused: keyboard, attrsOn: { keeps: 'what a module put on the element' }, fileCarry: { keeps: 'a drag from outside the page' }, fileOn: { keeps: 'a drag from outside the page' },
+      cardFocused: keyboard,
+      pointerAt: { keeps: 'where the pointer is' },
+      sourceElem: { keeps: 'what a module put on the element' },
+      paused: media, position: media, ready: media, loading: media, failed: media, pending: media, canAutoplay: media, atEnd: media, width: media, height: media,
+      activated: { keeps: "a person's activation" }
+    },
+    // `whenMounted`'s chain; at a mount a new component (Video.tsx :115-127: it wants nothing and has seen no load) runs what waited
+    // (`_flushPendingInnerActions`) and reports it in order; a new `<video>` is DOM Element (its ref), one that goes is nothing; a load
+    // puts the media at 0, which a `timeupdate` sends
+    frameEnd: ['chain', 'wantToPlay', 'canPlay', 'waiting', 'ran', 'domElement', 'timeOut'],
+    // the actions and Source Object call the component, which calls its element: what it is, whether it may play, where it is
+    elementCalls: {
+      'on.draggable': ['onPage', 'elem', 'attrsOn'],
+      'on.acceptDrops': [],
+      'world.timer': ['onPage', 'elem', 'pointerAt', 'sourceElem'],
+      'on.play': VIDEO_CALL,
+      'on.restart': VIDEO_CALL,
+      'on.pause': VIDEO_CALL,
+      'on.reset': VIDEO_CALL,
+      'on.srcObject': VIDEO_CALL
+    }
+  },
   // s52 — the Text's model with the Group's additions: the focus tracker's list (the viewer's, moved by Focus and by clicks), the
   // element the component mounted with (the tracker finds the node on it, C86), the gesture's index, Block Pointer Events, the scrolls
   Group: {
@@ -156,8 +210,8 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
       onPage,
       shownTag: { follows: (s) => (s.onPage ? s.tag : KEEP), preset: false }
     },
-    // Group.tsx componentDidMount puts the node on the element it mounted with: a mount makes it, a new Tag does not (C86)
-    element: { elem: { changesWith: ['onPage', 'shownTag'] }, stampOn: { changesWith: ['onPage'] } },
+    // Group.tsx's root ref puts the node on every element it meets: a mount, and since C86's fix (P109, the Group v3) a new Tag too
+    element: { elem: { changesWith: ['onPage', 'shownTag'] }, stampOn: { changesWith: ['onPage', 'shownTag'] } },
     held: { elementFocused: keyboard, attrsOn: { keeps: 'what a module put on the element' }, fileCarry: { keeps: 'a drag from outside the page' }, fileOn: { keeps: 'a drag from outside the page' },
       cardFocused: keyboard,
       pointerAt: { keeps: 'where the pointer is' },
