@@ -103,7 +103,8 @@ export const RadioButton = defineNode({
   type: 'net.noodl.controls.radiobutton',
   // v2 (NSP-023 step 5, 2026-10-06): the button shows its group's Value; Changed fires from a person's click; Enable Label leaves
   // the input where it is — v1 copied the group's selection, its "a person made it" flag and the label rebuild (rows C76, D37, C80)
-  version: 2,
+  // v3 (P109 ISL-031, P107-C64 ruled "Ignore touches, keep hover"): a finger on a disabled control reports nothing — no Pressed, no Pointer Down or Up — as Enabled promises; the pointer's hover still reports
+  version: 3,
   source: 'packages/noodl-viewer-react/src/nodes/controls/radiobutton.ts',
   needs: ['person', 'group'],
   // the page's syncs (spec.ts `synced`): not branches
@@ -321,8 +322,8 @@ export const RadioButton = defineNode({
           const up: Act = { set: { ...d.set, pressed: false }, send: [...d.send, 'pressedState'], emit: [...d.emit, 'pointerUp'] };
           return then(p, up, (q) => select(q, q.value, true));
         }),
-      touch: (s) => onPainted(s, () => ({ set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] })),
-      lift: (s) => onPainted(s, () => ({ set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] })),
+      touch: (s) => onPainted(s, (p) => (p.enabled ? { set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] } : NONE)),
+      lift: (s) => onPainted(s, (p) => (p.enabled ? { set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] } : NONE)),
       focus: (s) => onPainted(s, (p) => (p.enabled && !p.elementFocused ? { set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'] } : NONE)),
       blur: (s) => onPainted(s, (p) => (p.elementFocused && p.enabled ? { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'] } : NONE), true),
       // a sibling's click: the keyboard moves to it (ours blurs), then its activation — whether or not this button is on the page

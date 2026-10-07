@@ -107,7 +107,8 @@ export const Dropdown = defineNode({
   // v4 (P109 ISL-026, 2026-10-06, P107-C70 ruled "Read old text, else no options"): text on Items is read as the old stored list
   // (`readItems`), and an empty item in a list is skipped; v3 offered no options for text and drew an empty item as an empty
   // option (the runtime's render threw on both — row C70).
-  version: 4,
+  // v5 (P109 ISL-031, P107-C64 ruled "Ignore touches, keep hover"): a finger on a disabled control reports nothing — no Pressed, no Pointer Down or Up — as Enabled promises; the pointer's hover still reports
+  version: 5,
   source: 'packages/noodl-viewer-react/src/nodes/controls/options.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches — the browser's selection with them
@@ -364,8 +365,8 @@ export const Dropdown = defineNode({
           const d = pressed(p);
           return { set: { ...d.set, pressed: false }, send: d.send, emit: [...(d.emit ?? []), 'pointerUp'] };
         }),
-      touch: (s) => onPainted(s, () => ({ set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] })),
-      lift: (s) => onPainted(s, () => ({ set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] })),
+      touch: (s) => onPainted(s, (p) => (p.pageEnabled ? { set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] } : NONE)),
+      lift: (s) => onPainted(s, (p) => (p.pageEnabled ? { set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] } : NONE)),
       focus: (s) => onPainted(s, (p) => (p.pageEnabled && !p.elementFocused ? focusTaken() : NONE)),
       blur: (s) => onPainted(s, (p) => (p.elementFocused && p.pageEnabled ? { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'] } : NONE), 'blur'),
       // the pick (Select.tsx :212-215 the `<select>`'s `onChange`: the shown value, then `valueChanged`, options.ts :109-116). The

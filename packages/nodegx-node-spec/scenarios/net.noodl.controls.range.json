@@ -316,7 +316,7 @@
     ]
   },
   {
-    "name": "a disabled slider takes no slide and no click — the pointer still hovers it and a finger still lands",
+    "name": "a disabled slider takes no slide and no click — the pointer still hovers it, and a finger reports nothing (C64)",
     "because": "Slider.tsx :182 `disabled={!props.enabled}`; a disabled form control is dispatched no click, mousedown or mouseup and takes no keyboard (the face's rule, the browser's)",
     "params": {
       "enabled": false

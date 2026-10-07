@@ -76,7 +76,8 @@ export const Checkbox = defineNode({
   type: 'net.noodl.controls.checkbox',
   // v2 (NSP-023, 2026-10-05): Enable Label shows a label and leaves the box and the keyboard on it where they are (Richard ruled the
   // Text Input's C80 for all three controls); v1 rebuilt the box when the label changed, as the runtime did — row C80, fixed in P109 ISL-031.
-  version: 2,
+  // v3 (P109 ISL-031, P107-C64 ruled "Ignore touches, keep hover"): a finger on a disabled control reports nothing — no Pressed, no Pointer Down or Up — as Enabled promises; the pointer's hover still reports
+  version: 3,
   source: 'packages/noodl-viewer-react/src/nodes/controls/checkbox.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches
@@ -283,8 +284,8 @@ export const Checkbox = defineNode({
           const d = pressed(p);
           return { set: { ...d.set, pressed: false, checked: !p.checked }, send: ['pressedState', 'focusState', 'checked'], emit: [...d.emit, 'pointerUp', 'onChange'] };
         }),
-      touch: (s) => onPainted(s, () => ({ set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] })),
-      lift: (s) => onPainted(s, () => ({ set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] })),
+      touch: (s) => onPainted(s, (p) => (p.enabled ? { set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] } : NONE)),
+      lift: (s) => onPainted(s, (p) => (p.enabled ? { set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] } : NONE)),
       focus: (s) => onPainted(s, (p) => (p.enabled && !p.elementFocused ? { set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'] } : NONE)),
       blur: (s) => onPainted(s, (p) => (p.elementFocused && p.enabled ? { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'] } : NONE), true)
     }

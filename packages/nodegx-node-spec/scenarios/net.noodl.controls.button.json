@@ -72,8 +72,8 @@
     ]
   },
   {
-    "name": "a finger lands on a disabled button and lifts: Pressed goes true and false, Pointer Down and Pointer Up fire",
-    "because": "utils.ts :260-264, :270-275, :294-297, :305-311 — the touch handlers are not among the events React drops on a disabled control",
+    "name": "a finger lands on a disabled button and lifts: nothing — no Pressed, no Pointer Down or Pointer Up (C64: a finger on a disabled control reports nothing, as Enabled promises)",
+    "because": "P109 ISL-031 (P107-C64, ruled \"Ignore touches, keep hover\"): the shared touch handlers return at once on a disabled control (utils.ts), as a mouse press on one is never dispatched; hover still reports",
     "params": {
       "enabled": false
     },

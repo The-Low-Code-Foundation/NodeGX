@@ -450,7 +450,7 @@
     ]
   },
   {
-    "name": "a disabled field takes no typing, no Enter, no press, no release and no focus — the pointer still hovers it and a finger still lands (Pressed, Pointer Down, Pointer Up)",
+    "name": "a disabled field takes no typing, no Enter, no press, no release and no focus — the pointer still hovers it, and a finger reports nothing (C64)",
     "because": "TextInput.tsx :181 disabled: !props.enabled; a disabled control is dispatched no click, mousedown, mouseup or key and is not focusable; utils.ts :216-243, :260-275 — row C64 on this control too",
     "params": {
       "enabled": false
@@ -4075,7 +4075,7 @@
     ]
   },
   {
-    "name": "focused, then disabled; an act on the disabled field (a press, click, key or Tab takes nothing; a finger or the pointer still report); re-enabled, a Focus action is Done alone — the element still held the keyboard, the page never took it away — every act",
+    "name": "focused, then disabled; an act on the disabled field (a press, click, key, Tab or finger takes nothing; the pointer's hover still reports); re-enabled, a Focus action is Done alone — the element still held the keyboard, the page never took it away — every act",
     "because": "a disabled element gives the keyboard up to nobody (blur() on it is a no-op; the page keeps it as the element's); focus-tracker.ts :67 _hasFocus true → nothing to do — as the Button (NSP-016 §7.2)",
     "steps": [
       "settle",
@@ -23557,7 +23557,7 @@
     ]
   },
   {
-    "name": "Block Pointer Events on: a release, a touch or a lift drains the frame BEFORE its own report — a Set queued, the act, then a Clear: the Set lands at the act (Done, Value) before Pointer Up or Pointer Down, then the Clear — enabled, and disabled too (a disabled field reports no release, but the browser's pointer event still reaches the blocker)",
+    "name": "Block Pointer Events on: a release, a touch or a lift drains the frame BEFORE its own report — a Set queued, the act, then a Clear: the Set lands at the act (Done, Value) before Pointer Up or Pointer Down, then the Clear — enabled, and disabled too (a disabled field reports no release, touch or lift — C64 — but the browser's pointer event still reaches the blocker, which drains)",
     "because": "pointerlisteners.ts :113-133 a blocker on every pointer event, each wrapped with the drain (:180-183); the browser raises pointerdown / pointerup before mouseup / touchstart / touchend; found by the runtime's 10,000 run (s45, seed 20731), measured side by side in any frame",
     "params": {
       "blockTouch": true,

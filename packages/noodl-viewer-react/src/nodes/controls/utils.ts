@@ -250,6 +250,9 @@ function addControlEventsAndStates(definition, args?) {
           this._updateVisualState();
         },
         onTouchStart() {
+          // P107-C64 (P109 ISL-031, ruled "Ignore touches, keep hover"): a finger on a disabled control reports nothing, as a
+          // mouse press on one does (the browser delivers no mouse event to a disabled form control, but it does deliver touches)
+          if (!this._internal.enabled) return;
           this.outputPropValues.pressedState = true;
           this.flagOutputDirty('pressedState');
           this._updateVisualState();
@@ -260,11 +263,13 @@ function addControlEventsAndStates(definition, args?) {
           this._updateVisualState();
         },
         onTouchEnd() {
+          if (!this._internal.enabled) return; // P107-C64
           this.outputPropValues.pressedState = false;
           this.flagOutputDirty('pressedState');
           this._updateVisualState();
         },
         onTouchCancel() {
+          if (!this._internal.enabled) return; // P107-C64
           this.outputPropValues.pressedState = false;
           this.flagOutputDirty('pressedState');
           this._updateVisualState();
@@ -286,6 +291,7 @@ function addControlEventsAndStates(definition, args?) {
           this.sendSignalOnOutput('pointerDown');
         },
         onTouchStart() {
+          if (!this._internal.enabled) return; // P107-C64
           this.sendSignalOnOutput('pointerDown');
         }
       }
@@ -300,9 +306,11 @@ function addControlEventsAndStates(definition, args?) {
           this.sendSignalOnOutput('pointerUp');
         },
         onTouchEnd() {
+          if (!this._internal.enabled) return; // P107-C64
           this.sendSignalOnOutput('pointerUp');
         },
         onTouchCancel() {
+          if (!this._internal.enabled) return; // P107-C64
           this.sendSignalOnOutput('pointerUp');
         }
       }

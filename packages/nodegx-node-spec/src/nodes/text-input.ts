@@ -251,7 +251,8 @@ export const TextInput = defineNode({
   // the runtime target (conformance.test.ts), never in this spec — C69 and C72 until P109 ISL-031 fixed the runtime.
   // v3 (P109 ISL-031, P107-D32 "Always text"): off the page the value is made text before it is published.
   // v4 (P109 ISL-031, P107-D33 "Check the field's text"): Clear is Unchanged only when the field's text was empty too.
-  version: 4,
+  // v5 (P109 ISL-031, P107-C64 ruled "Ignore touches, keep hover"): a finger on a disabled control reports nothing — no Pressed, no Pointer Down or Up — as Enabled promises; the pointer's hover still reports
+  version: 5,
   source: 'packages/noodl-viewer-react/src/nodes/controls/text-input.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches — the page following the node at each paint, like the disabled
@@ -582,9 +583,10 @@ export const TextInput = defineNode({
             return join(d, thenDrained(q, { set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] }));
           })
         ),
-      // utils.ts :260-264, :294-297 — a finger is not dropped on a disabled control, and TextInput.tsx overrides no touch handler
-      touch: (s) => onPainted(s, (p) => blockerFirst(p, (q) => thenDrained(q, { set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] }))),
-      lift: (s) => onPainted(s, (p) => blockerFirst(p, (q) => thenDrained(q, { set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] }))),
+      // utils.ts — a finger on a disabled field reports nothing (v5, C64), and TextInput.tsx overrides no touch handler; the wrapped handler drains
+      // either way (pointerlisteners.ts: the drain follows the handler, which returns early)
+      touch: (s) => onPainted(s, (p) => blockerFirst(p, (q) => thenDrained(q, q.enabled ? { set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] } : NONE))),
+      lift: (s) => onPainted(s, (p) => blockerFirst(p, (q) => thenDrained(q, q.enabled ? { set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] } : NONE))),
       // utils.ts :157-195 — a disabled field is not a focusable area
       focus: (s) => onPainted(s, (p) => (p.enabled && !p.elementFocused ? focusTaken() : NONE), 'keyboard'),
       blur: (s) => onPainted(s, (p) => (p.elementFocused && p.enabled ? { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'] } : NONE), 'blur'),

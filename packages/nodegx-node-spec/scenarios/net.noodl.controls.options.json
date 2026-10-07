@@ -21096,7 +21096,7 @@
     ]
   },
   {
-    "name": "a disabled dropdown takes no click, press, release, focus or pick — the pointer still hovers it and a finger still lands",
+    "name": "a disabled dropdown takes no click, press, release, focus or pick — the pointer still hovers it, and a finger reports nothing (C64)",
     "because": "Select.tsx :57 `disabled: !props.enabled`; React drops onClick / onMouseDown / onMouseUp on a disabled control; the browser does not toggle a disabled dropdown; utils.ts :216-243, :260-275 — the Checkbox's scenario, on the `<select>`",
     "steps": [
       "settle",

@@ -279,12 +279,16 @@ class Dropdown {
       frame.sent('pressedState');
       frame.pulse('pointerUp');
     });
+    // Not the stranger's line: Dropdown v5 (P109 ISL-031, row C64) — a finger on a disabled control reports nothing, as a mouse
+    // press on one does; v4, the spec this round was handed, let the finger land
     on('touchstart', () => {
+      if (select.disabled) return;
       this.pressed = true;
       frame.sent('pressedState');
       frame.pulse('pointerDown');
     });
     on('touchend', () => {
+      if (select.disabled) return; // not the stranger's line (C64, above)
       this.pressed = false;
       frame.sent('pressedState');
       frame.pulse('pointerUp');

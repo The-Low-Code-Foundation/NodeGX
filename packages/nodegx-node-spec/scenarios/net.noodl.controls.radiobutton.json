@@ -369,7 +369,7 @@
     ]
   },
   {
-    "name": "a disabled button takes no click, press, release or focus — the pointer still hovers it and a finger still lands",
+    "name": "a disabled button takes no click, press, release or focus — the pointer still hovers it, and a finger reports nothing (C64)",
     "because": "RadioButton.tsx :57 `disabled: !props.enabled`; React drops onClick / onMouseDown / onMouseUp on a disabled control; the browser does not toggle a disabled radio button; utils.ts :216-243, :260-275 (carried from the Checkbox: the same page model, utils.ts)",
     "params": {
       "enabled": false

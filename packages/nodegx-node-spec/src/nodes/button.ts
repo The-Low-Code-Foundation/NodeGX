@@ -93,7 +93,8 @@ const NONE: Act = { send: [] };
 
 export const Button = defineNode({
   type: 'net.noodl.controls.button',
-  version: 1,
+  // v2 (P109 ISL-031, P107-C64 ruled "Ignore touches, keep hover"): a finger on a disabled control reports nothing — no Pressed, no Pointer Down or Up — as Enabled promises; the pointer's hover still reports
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/controls/button.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches
@@ -302,9 +303,9 @@ export const Button = defineNode({
           const d = pressed(p, i);
           return { set: { ...d.set, pressed: false }, send: ['pressedState', 'focusState'], emit: [...d.emit, 'pointerUp', 'onClick'] };
         }),
-      // utils.ts :260-264, :294-297 — a finger is not dropped on a disabled control
-      touch: (s) => onPainted(s, (p) => (p.pageVisible ? { set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] } : NONE)),
-      lift: (s) => onPainted(s, (p) => (p.pageVisible ? { set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] } : NONE)),
+      // utils.ts — a finger on a disabled control reports nothing (v2, C64), as a mouse press on one does
+      touch: (s) => onPainted(s, (p) => (p.enabled && p.pageVisible ? { set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] } : NONE)),
+      lift: (s) => onPainted(s, (p) => (p.enabled && p.pageVisible ? { set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] } : NONE)),
       // utils.ts :157-195 — a disabled button is not a focusable area
       focus: (s) => onPainted(s, (p) => (p.enabled && p.pageVisible && !p.elementFocused ? { set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'] } : NONE)),
       blur: (s) => onPainted(s, (p) => (p.elementFocused && p.enabled ? { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'] } : NONE))

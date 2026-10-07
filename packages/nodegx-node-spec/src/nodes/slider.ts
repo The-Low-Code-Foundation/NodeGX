@@ -101,7 +101,8 @@ const NONE: Act = { send: [] };
 
 export const Slider = defineNode({
   type: 'net.noodl.controls.range',
-  version: 3,
+  // v4 (P109 ISL-031, P107-C64 ruled "Ignore touches, keep hover"): a finger on a disabled control reports nothing — no Pressed, no Pointer Down or Up — as Enabled promises; the pointer's hover still reports
+  version: 4,
   source: 'packages/noodl-viewer-react/src/nodes/controls/slider.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches — the handle with them
@@ -327,8 +328,8 @@ export const Slider = defineNode({
           const d = pressed(p);
           return { set: { ...d.set, pressed: false }, send: d.send, emit: [...(d.emit ?? []), 'pointerUp'] };
         }),
-      touch: (s) => onPainted(s, () => ({ set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] })),
-      lift: (s) => onPainted(s, () => ({ set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] })),
+      touch: (s) => onPainted(s, (p) => (p.pageEnabled ? { set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] } : NONE)),
+      lift: (s) => onPainted(s, (p) => (p.pageEnabled ? { set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] } : NONE)),
       focus: (s) => onPainted(s, (p) => (p.pageEnabled && !p.elementFocused ? focusTaken() : NONE)),
       blur: (s) => onPainted(s, (p) => (p.elementFocused && p.pageEnabled ? { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'] } : NONE), 'blur'),
       // the slide (Slider.tsx :183 the `<input>`'s `onChange`: `Number(e.target.value)` into the shown value, then
