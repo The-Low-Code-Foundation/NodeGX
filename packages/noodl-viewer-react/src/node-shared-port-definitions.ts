@@ -1991,7 +1991,8 @@ export default {
           // ⚠️ `!url.startsWith(baseUrl)` is not belt-and-braces: without it, a value that already
           // carries the base gains it twice (`/x/y/x/y/…`). An author deploying to a sub-path can
           // reasonably type the full path into this port, and a wire can carry one. `Image.tsx`
-          // has no such guard and doubles in that case — a defect this port should not copy.
+          // carries the same guard since P107-C93, where its lack (and a write-back into the
+          // node's props) grew the base at every render.
           // Caught by exp018's "already carries the base" arm, which failed on the first version
           // of this fix.
           if (url && url.startsWith('/')) {

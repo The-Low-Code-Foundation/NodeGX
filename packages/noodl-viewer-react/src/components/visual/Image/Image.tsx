@@ -54,10 +54,15 @@ export function Image(props: ImageProps) {
     style.pointerEvents = 'none';
   }
 
-  if (props.dom?.src?.startsWith('/')) {
-    const baseUrl = Noodl.Env['BaseUrl'];
-    if (baseUrl) {
-      props.dom.src = baseUrl + props.dom.src.substring(1);
+  // P107-C93 — the based source goes in a local, never back into `props.dom`: that object is the
+  // node's stored value, and a sub-path base still starts with '/', so writing it back prepended
+  // the base again at every render (/x/a.png, /x/x/a.png, …). The `startsWith(baseUrl)` guard is
+  // the background image port's: a source that already carries the base keeps it once.
+  let src = props.dom?.src;
+  if (src?.startsWith('/')) {
+    const baseUrl = Noodl.Env && Noodl.Env['BaseUrl'];
+    if (baseUrl && !src.startsWith(baseUrl)) {
+      src = baseUrl + src.substring(1);
     }
   }
 
@@ -70,8 +75,9 @@ const defaultsClass = layerDefaults(style);
       className={withDefaultsClass(props.className, defaultsClass)}
       {...props.dom}
       {...PointerListeners(props)}
+      src={src}
       // After the `props.dom` spread, so it is this handler and not a stale forwarded one.
-      onError={() => reportImageError(props, props.dom?.src)}
+      onError={() => reportImageError(props, src)}
       style={style}
     />
   );
