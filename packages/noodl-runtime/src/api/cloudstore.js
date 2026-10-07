@@ -428,11 +428,15 @@ function _fromJSON(item, collectionName, modelScope) {
   return m;
 }
 
-/** Two plain lists with the same contents, in order (what JSON can carry). */
+/**
+ * Two lists with the same contents, in order (what JSON can carry). P109-S22-COLLECTIONCHURN: a list of objects arrives as a
+ * fresh Collection of fresh Models on every read (`_deserializeJSON`), whose own JSON differs by their generated ids, so the
+ * two are compared by what they hold (`_toJSON`) — the record keeps the Collection it had, and its items, when nothing moved.
+ */
 function sameList(held, value) {
   if (!Array.isArray(held) || held.length !== value.length) return false;
   try {
-    return JSON.stringify(held) === JSON.stringify(value);
+    return JSON.stringify(_toJSON(held)) === JSON.stringify(_toJSON(value));
   } catch (e) {
     return false;
   }
