@@ -132,16 +132,21 @@ describe('DG-1 — Drag abstains on a snap position it cannot read as a number',
 });
 
 describe('SL-2 — Slider tells null from 0 on Value', () => {
+  // P109 ISL-031 (P107-C74): the node keeps a Value as written and the paint clamps it, and rounds it to the step, against the
+  // attributes it draws — `drawHandle`, what the component's effect calls. These read the handle that paint draws, which is
+  // what the Value output reports; a value the node abstains on leaves the handle where the last paint put it.
+  const drawn = (p: Probe) => (p.drivable.props.drawHandle as () => number)();
+
   it('null abstains and leaves the handle where it was', async () => {
     const p = await build(SliderModule, { min: 10, max: 100 });
     p.drivable.setInputValue('value', 60);
-    expect(p.drivable.props.value).toBe(60);
+    expect(drawn(p)).toBe(60);
 
     p.drivable.setInputValue('value', null);
 
     // Before the fix `null || 0` clamped to Min, so a Slider with `Min = 10` fed `null` read 10
     // — indistinguishable from an author asking for 0, or for 10.
-    expect(p.drivable.props.value).toBe(60);
+    expect(drawn(p)).toBe(60);
   }, 30000);
 
   it('a legitimate 0 still clamps to Min, and that is a different outcome from null', async () => {
@@ -150,7 +155,7 @@ describe('SL-2 — Slider tells null from 0 on Value', () => {
 
     p.drivable.setInputValue('value', 0);
 
-    expect(p.drivable.props.value).toBe(10);
+    expect(drawn(p)).toBe(10);
   }, 30000);
 
   it('a value that is not a number is reported, not clamped', async () => {
@@ -161,7 +166,7 @@ describe('SL-2 — Slider tells null from 0 on Value', () => {
 
     // Before the fix `Math.min(100, 'nearly there')` was `NaN`, `Math.max(0, NaN)` was `NaN`,
     // and `props.value` became `NaN` with nothing said anywhere.
-    expect(p.drivable.props.value).toBe(40);
+    expect(drawn(p)).toBe(40);
     expect(p.graph.errors.map((e) => e.code)).toContain('slider/value-not-a-number');
   }, 30000);
 
@@ -185,7 +190,7 @@ describe('SL-2 — Slider tells null from 0 on Value', () => {
 
     p.drivable.setInputValue('value', value);
 
-    expect(p.drivable.props.value).toBe(expected);
+    expect(drawn(p)).toBe(expected);
   }, 30000);
 
   it('the control: an abstaining arrival raises nothing', async () => {

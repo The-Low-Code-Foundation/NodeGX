@@ -133,8 +133,8 @@
     ]
   },
   {
-    "name": "a slide to 80, then Max lowered to 60: nothing on the wire — Value still reads 80, past Max, while the browser draws the handle at 60 (row C74); slides to 70 and 60 land on 60, which the browser already holds: nothing; a slide to 30: Value 30 with Changed",
-    "because": "slider.ts :116-126 Max's `onChange` re-clamps only the author's Value (0, inside); the shown 80 is the component's state, sanitized by the browser against max=60 (HTML's overflow rule); nothing calls `updateOutputValue` — NSP-016 §6 C74",
+    "name": "a slide to 80, then Max lowered to 60: the frame's end draws the handle at 60, as the browser holds it — Value 60 and Value Percent 100, no Changed (v3, C74); slides to 70 and 60 land on 60, which the browser already holds: nothing; a slide to 30: Value 30 with Changed",
+    "because": "v3 (C74, ruled \"Follow the handle\"): every paint draws the handle as the browser holds it against the attributes now — clamped to Max — and reports it without Changed. v2 left Value at 80, past Max (Max re-clamped only the author's Value) — NSP-016 §6 C74",
     "steps": [
       "settle",
       {
@@ -165,8 +165,8 @@
     ]
   },
   {
-    "name": "Value 33.5 with Step 1: Value 33.5 (Value Percent 33), no Changed (row D36), while the browser rounds the handle to 34 (C74, the node's own); a slide to 34 lands where the browser already is: nothing; a slide to 33: Value 33 with Changed",
-    "because": "slider.ts :237-271 clamps but never steps; the browser's step-mismatch rule rounds 33.5 to 34 (a tie upwards) — NSP-016 §6 C74",
+    "name": "Value 33.5 with Step 1: the handle lands on 34, as the browser rounds it — Value 34 and Value Percent 34, no Changed (v3, C74); a slide to 34 lands where the browser already is: the keyboard alone; a slide to 33: Value 33 with Changed",
+    "because": "v3 (C74, ruled \"Follow the handle\": \"A Value of 33.5 with Step 1 then reads 34\"): the paint rounds the word to the step from Min, a tie upwards (HTML's step-mismatch rule) — v2 reported 33.5 — NSP-016 §6 C74",
     "steps": [
       "settle",
       {
@@ -187,8 +187,8 @@
     ]
   },
   {
-    "name": "Min equal to Max (40): the author's Value is clamped to 40; the first paint sends Value 40 and Value Percent NaN (0 / 0, C75 — the node's own), no Changed (row D36); a slide lands on 40: nothing; Value 10 clamps to 40: nothing",
-    "because": "slider.ts :220-236 `Math.floor((40 - 40) / (40 - 40) * 100)` is NaN; :117-140 the clamp",
+    "name": "Min equal to Max (40): the first paint draws the handle at 40 — Value 40 and Value Percent 0, where the browser draws it (v3, C75), no Changed; a slide lands on 40: the keyboard alone; Value 10 lands on 40: nothing",
+    "because": "v3 (C75, ruled \"Percent 0, defaults for blanks\"): Value Percent is 0 when Min equals Max — v2 read 0 / 0, NaN — NSP-016 §6 C75",
     "params": {
       "min": 40,
       "max": 40
@@ -236,8 +236,8 @@
     ]
   },
   {
-    "name": "Min written undefined: the clamp reads NaN, so the author's Value is NaN — Value NaN and Value Percent NaN, no Changed (row D36); a slide to 20 (the browser's min is its default 0 again): Value 20 with Changed; Value 5: clamped to NaN again — the handle takes it: Value NaN (the runtime's effect, keyed with `Object.is`, sees the NaN it last drew and drops it: row C73)",
-    "because": "react-component-node.ts :729-740 `undefined` deletes `props.min`; slider.ts :263 `Math.max(undefined, …)` is NaN, :265 `NaN !== NaN`; Slider.tsx :90 React compares dependencies with `Object.is`",
+    "name": "Min written undefined: the attribute is gone and the browser's min is its default, 0 — the handle stays at 0, nothing (v3, C75); a slide to 20: Value 20 with Changed; Value 5: Value 5, no Changed",
+    "because": "v3 (C75, ruled \"Percent 0, defaults for blanks\": a blank Min or Max counts as 0 or 100, as the browser does) — react-component-node.ts :729-740 `undefined` deletes `props.min`; v2 clamped the author's Value with `Math.max(undefined, …)`, NaN — NSP-016 §6 C75",
     "steps": [
       "settle",
       {
@@ -257,7 +257,7 @@
     ]
   },
   {
-    "name": "Step 0.5: a slide to 50.25 lands on 50.5 (a tie upwards); to 7: 7; Step 25 with Max 60: 60 lands on 50 (rounding to 50, 75 is past Max), 100 on 50, 30 on 25, 40 on 50; Step 0 is no step attribute (the browser's default, 1): 50.4 lands on 50",
+    "name": "Step 0.5: a slide to 50.25 lands on 50.5 (a tie upwards); to 7: 7; Step 25 with Max 60: the frame's end rounds the handle at 7 to 0 (v3, C74: Value 0, Value Percent 0, no Changed); 60 lands on 50 (rounding to 50, 75 is past Max), 100 on 50 (already there), 30 on 25, 40 on 50; Step 0 is no step attribute (the browser's default, 1): 50.4 lands on 50, where the handle is",
     "because": "Slider.tsx :120-122 `step` only when truthy; HTML's step-mismatch rule, step base Min; Chromium `StepRange::ClampValue` steps back inside",
     "params": {
       "step": 0.5
@@ -369,8 +369,8 @@
     ]
   },
   {
-    "name": "Value 20, then Min raised to 40: clamped — Value 40 and Value Percent 0, no Changed (row D36); Min lowered to 10: the author's Value stays 40 — nothing; Max lowered to 30: clamped down — Value 30",
-    "because": "slider.ts :105-126 the re-clamp in Min's and Max's `onChange`; the frame's end renders and the effect reports it",
+    "name": "Value 20, then Min raised to 40: the handle is clamped up — Value 40 and Value Percent 0, no Changed; Min lowered to 10: the handle stays at 40 and Value Percent follows it — 33 (v3, C74); Max lowered to 30: clamped down — Value 30, Value Percent 100",
+    "because": "v3 (C74): every paint draws the handle against the attributes now and recomputes Value Percent; Min, Max and Step are attributes, not words for the handle — NSP-016 §6 C74",
     "steps": [
       "settle",
       {
@@ -396,8 +396,8 @@
     ]
   },
   {
-    "name": "Min lowered to -100 under an unchanged Value 0: nothing (the author's Value did not move, so there is no word for the handle); a remount: Did Mount alone — the handle is where it was (row D36: the runtime's mount effect recomputes the falsy Value Percent and sends 50)",
-    "because": "slider.ts :51-53 `if (!this._internal.valuePercent)` recomputes on every call while the percent is 0; :249-265 over the props as written",
+    "name": "Min lowered to -100 under an unchanged Value 0: the handle stays at 0, now the middle — Value Percent 50 (v3, C74); a remount: Did Mount alone — the handle is where it was",
+    "because": "v3 (C74): Value Percent is recomputed at every paint, so a moved Min reaches it (v2 left it stale — the old \"falsy percent\" rule recomputed it only while it read 0)",
     "steps": [
       "settle",
       {
@@ -418,8 +418,8 @@
     ]
   },
   {
-    "name": "a slide to 50, then Max raised to 200: nothing — Value Percent still reads 50 with the handle at a quarter (row C74); a slide to 100: Value 100, Value Percent 50 with Changed",
-    "because": "slider.ts :116-126 Max re-clamps only the author's Value; Value Percent is computed only inside `updateOutputValue` (:39-54)",
+    "name": "a slide to 50, then Max raised to 200: the handle stays at 50, a quarter of the range — Value Percent 25 (v3, C74); a slide to 100: Value 100, Value Percent 50 with Changed",
+    "because": "v3 (C74, ruled \"Follow the handle\"): Value Percent is recomputed at every paint — v2 kept its old figure, 50, with the handle at a quarter — NSP-016 §6 C74",
     "steps": [
       "settle",
       {
@@ -493,8 +493,8 @@
     ]
   },
   {
-    "name": "Value from the graph as the number 0 after a Value of 50: Value 0, no Changed (row D36); a slide to 0: nothing; the string '7.5' (Step 1): Value 7.5 — the browser holds 8; a slide to 8: nothing",
-    "because": "slider.ts :253 `Number(newValue)`; the clamp; the browser's step rounding (a tie upwards) — row C74",
+    "name": "Value from the graph as the number 0 after a Value of 50: Value 0, no Changed; a slide to 0: the keyboard alone; the string '7.5' (Step 1): the handle lands on 8, as the browser rounds it — Value 8 (v3, C74); a slide to 8: nothing",
+    "because": "slider.ts `_setInputValue` `Number(newValue)`; v3 (C74): the paint rounds to the step, a tie upwards",
     "steps": [
       "settle",
       {
@@ -1823,8 +1823,8 @@
     ]
   },
   {
-    "name": "Max wired [1, 2]: the element carries the attribute \"1,2\", which HTML's lenient parse (jsdom's) reads as 1 — the author's Value is clamped with `Math.min([1, 2], n)`, NaN: Value NaN, no Changed (row D36); a slide to 150 lands on 1, where the browser already holds the handle (a NaN is the middle, 0.5, which the step rounds to 1): the keyboard alone — v1's name said Value 1 with Changed, and neither target ever sent it; Max 100 again: a slide to 40 lands on 40, Value 40 with Changed",
-    "because": "Slider.tsx :116-117 `max={props.max}` (React stringifies); a range input converts its attributes with the rules for parsing floating-point number values (a prefix parse) — the 10,000 run's ten divergences, s41; slider.ts :263 the clamp over the prop as written",
+    "name": "Max wired [1, 2]: the element carries the attribute \"1,2\", which HTML's lenient parse reads as 1 — the handle at 0 is inside [0, 1]: nothing; a slide to 150 lands on 1: Value 1, Value Percent 100 with Changed; Max 100 again: Value Percent 1 (v3, C74); a slide to 40: Value 40 with Changed",
+    "because": "Slider.tsx `max={props.max}` (React stringifies); a range input converts its attributes with the rules for parsing floating-point number values (a prefix parse), and so does the node (v3, slider.ts `rangeAttribute`) — v2 clamped with `Math.min([1, 2], n)`, NaN",
     "steps": [
       "settle",
       {
@@ -1853,8 +1853,8 @@
     ]
   },
   {
-    "name": "a reversed range (Min 50, Max 10): the author's Value is clamped to 50 (`Math.max(50, Math.min(10, 0))`) and the first paint sends it, no Changed (row D36); slides take nothing — not even the keyboard (the face does not play a slide on a reversed range: jsdom's sanitization of it does not settle where a browser's does); Max 100: a slide to 70 lands on 70",
-    "because": "slider.ts :263 the clamp; the face's choice for a reversed range (node-spec-target.ts PERSON `slide`, NSP-016 §7.6)",
+    "name": "a reversed range (Min 50, Max 10): the handle holds Min, as Chromium draws a reversed range — Value 50, Value Percent 0, no Changed (v3); slides take nothing — not even the keyboard (the face does not play a slide on a reversed range); Max 100: the handle stays at 50, Value Percent still 0; a slide to 70: Value 70, Value Percent 40 with Changed",
+    "because": "v3: the node draws a reversed range as Chromium does (it raises Max to Min, so the handle holds Min) — jsdom's clamp of one does not settle, and v3 paints the handle at every frame; v2 clamped with `Math.max(50, Math.min(10, 0))` — the face's choice for a reversed range (node-spec-target.ts PERSON `slide`, NSP-016 §7.6)",
     "params": {
       "min": 50,
       "max": 10
@@ -1884,8 +1884,8 @@
     ]
   },
   {
-    "name": "Step 0.5: a slide to 30.5, then Value 30.25 and an act in the same frame — the act's paint draws the graph's word first: Value 30.25, no Changed (row D36), Value Percent unchanged (30 either way), then the act, then a Blur action (enabled) or a Focus action (disabled) — every act, enabled and disabled",
-    "because": "Slider.tsx :88-90 the effect at the act's paint (the author's Value moved); slider.ts :39-54 — the percent recomputed to what it was",
+    "name": "Step 0.5: a slide to 30.5, then Value 30.25 and an act in the same frame — the act's paint draws the graph's word first, rounded to the step: 30.5, where the handle already is — nothing (v3, C74; v2 reported 30.25), then the act, then a Blur action (enabled) or a Focus action (disabled) — every act, enabled and disabled",
+    "because": "v2 (NSP-023): the act paints first and draws the graph's word; v3 (C74): the paint rounds it to the step as the browser does",
     "params": {
       "step": 0.5
     },
@@ -4723,7 +4723,7 @@
     ]
   },
   {
-    "name": "the matrix: every act (a slide to 70 and to 0 among them), enabled or disabled, with the keyboard off or on the element, remounting in the act's frame or not, after a slide to 80 or not, with Max lowered to 60 in the frame or not — then a Focus action in the same frame; every segment starts at Value 0 (a slide to 0 and Value 0, then a remount), the keyboard and the pointer off it — the 264 segments with no Value write and no remount after the slide",
+    "name": "the matrix: every act (a slide to 70 and to 0 among them), enabled or disabled, with the keyboard off or on the element, remounting in the act's frame or not, after a slide to 80 or not, with Max lowered to 60 in the frame or not — then a Focus action in the same frame; every segment starts at Value 0 (a slide to 0 and Value 0, then a remount), the keyboard and the pointer off it — the 264 segments with no Value write and no remount after the slide — v3 (C74): with Max lowered to 60 after the slide to 80, the paint draws the handle at 60 and reports Value 60 and Value Percent 100 without Changed",
     "because": "the deep runs of the Text Input and the Dropdown reached combinations no single-axis scenario did; each segment ends with a Focus action that reads the page the act left — 704 segments; v2 (NSP-023): the 440 segments in which the runtime fires Changed with nobody sliding (a Value write, a remount after the slide) are the row matrix beside it",
     "steps": [
       "settle",
@@ -23038,7 +23038,7 @@
     ]
   },
   {
-    "name": "the D36 matrix: the 440 segments of the matrix with Value written 50 in the act's frame, or a remount after the slide to 80 — the handle takes the graph's word without Changed, and a remount leaves it where it was (row D36: the runtime fires Changed and takes the author's Value back)",
+    "name": "the D36 matrix: the 440 segments of the matrix with Value written 50 in the act's frame, or a remount after the slide to 80 — the handle takes the graph's word without Changed, and a remount leaves it where it was (row D36: the runtime fires Changed and takes the author's Value back) — v3 (C74): with Max lowered to 60, the paint draws the handle against it and Value Percent follows",
     "because": "the deep runs of the Text Input and the Dropdown reached combinations no single-axis scenario did; each segment ends with a Focus action that reads the page the act left — 704 segments; v2 (NSP-023): the 440 segments in which the runtime fires Changed with nobody sliding (a Value write, a remount after the slide) are the row matrix beside it",
     "steps": [
       "settle",
@@ -56815,8 +56815,8 @@
     ]
   },
   {
-    "name": "Value 90, a slide to 30, then Max lowered to 60: the re-clamp moves the author's Value (90 → 60), a word for the handle — Value 60, no Changed (row D36); Max lowered to 50 again: 50",
-    "because": "slider.ts :116-126 — `_setInputValue(props.value)` after the prop, kept when it differs: the clamp that moved the author's Value is the graph's word — NSP-016 §6 D36",
+    "name": "Value 90, a slide to 30, then Max lowered to 60: the handle stays where the person put it, 30 — Value Percent 50 (v3: a Max is no word for the handle; v2 moved it to the author's re-clamped 60); Max lowered to 50: Value Percent 60",
+    "because": "v3 (C74, ruled \"Follow the handle\"): Min, Max and Step are attributes the paint draws the handle against; only a Value write is the graph's word for it (R14) — NSP-016 §6 C74",
     "steps": [
       "settle",
       {
@@ -56874,7 +56874,7 @@
     ]
   },
   {
-    "name": "the act-paint matrix: a word from the graph and an act in one frame, then a Focus action (after an act that cannot take the keyboard itself), Min -50 and Max 150 in the same frame — the act's paint (it comes first, whether the act reaches the slider or not) puts a remounting slider back, so the Focus finds it (Done), and draws the word against the Min and Max it found, so Value Percent stands as that paint computed it, and the Min and Max writes move nothing; the words Value 40, Value 0.5, Value 0 at 0 and Value 0 after Min -100; every act, on an enabled, a disabled or a hidden slider, the keyboard off or on, remounting in the act's frame or not — 528 segments, each from Value 0 (row D36: the runtime fires Changed for each word that moves Value)",
+    "name": "the act-paint matrix: a word from the graph and an act in one frame, then a Focus action (after an act that cannot take the keyboard itself), Min -50 and Max 150 in the same frame — the act's paint (it comes first, whether the act reaches the slider or not) puts a remounting slider back, so the Focus finds it (Done), and draws the word against the Min and Max it found, so Value Percent stands as that paint computed it, and the Min and Max writes move nothing; the words Value 40, Value 0.5, Value 0 at 0 and Value 0 after Min -100; every act, on an enabled, a disabled or a hidden slider, the keyboard off or on, remounting in the act's frame or not — 528 segments, each from Value 0 (row D36: the runtime fires Changed for each word that moves Value) — v3 (C74): the frame's end paints again, so the Min and Max writes reach Value Percent there, and a word is drawn rounded to the step",
     "because": "v2 (NSP-023): the act paints first (dropdown.ts `onPainted`) and the paint draws the graph's word (`pending`) without Changed; slider.ts :105-126 a Min or Max that leaves the author's Value where it is re-clamps nothing; :51-53 a falsy Value Percent is recomputed at every report. The runtime's 10,000 at 20731 reached this family on hidden sliders and remounting frames — NSP-016 §6 D36",
     "steps": [
       "settle",
@@ -106413,8 +106413,8 @@
     ]
   },
   {
-    "name": "Value 0 on a slider at 0 — a word that moves nothing — and an act in the same frame, then Min lowered to -100 in the next frame: nothing (the frame's end drew the word; Value Percent stays 0); the same with each act in the Value's frame and Min -100 in it after the act: nothing (the act's paint drew the word) — every act, the keyboard off then on",
-    "because": "v2 — the act paints first and the paint clears the graph's word once drawn; a Min that leaves the author's Value where it is is no word (slider.ts :105-115). The runtime agrees: it drops the equal Value (C73) and its Min re-clamp moves nothing",
+    "name": "Value 0 on a slider at 0 — a word that moves nothing — and an act in the same frame, then Min lowered to -100 in the next frame: Value Percent 50 (v3, C74: the handle at 0 is now the middle), and back to 0 with Min 0; the same with each act in the Value's frame and Min -100 in it after the act: Value Percent 50 at the frame's end — every act, the keyboard off then on",
+    "because": "v2 — the act paints first and the paint clears the graph's word once drawn; v3 (C74): every paint recomputes Value Percent against the attributes now",
     "steps": [
       "settle",
       {
@@ -107050,8 +107050,8 @@
     ]
   },
   {
-    "name": "placed with Min 10, then Min written 0 before the first frame: the placing drew the author's Value 10 against Min 10 — Value 10, Value Percent 0 — and Min 0 leaves the author's Value at 10, no word: nothing more, Value Percent stays 0 (C74's stale percent; row D36: the runtime announces the placing's Value with Changed)",
-    "because": "v2 — the placing is the first paint (spec.ts `WorldHandlers.place`), and draws the making's word; slider.ts :105-115 a Min that does not move the author's Value re-clamps nothing. The s46 seed-20731 run left the placing's draw swapped with an off-page placing alive — NSP-016 §6 D36",
+    "name": "placed with Min 10, then Min written 0 before the first frame: the placing drew the handle at 10 against Min 10 (Value 10, Value Percent 0), and the frame's end draws it against Min 0 — Value Percent 10 (v3, C74); no Changed",
+    "because": "the placing is the first paint (spec.ts `WorldHandlers.place`), and draws the making's word; v3 (C74): the next paint recomputes Value Percent against the Min it finds. The s46 seed-20731 run left the placing's draw swapped with an off-page placing alive — NSP-016 §6 D36",
     "params": {
       "min": 10
     },
@@ -107064,8 +107064,8 @@
     ]
   },
   {
-    "name": "Min lowered to -100 (the author's Value stays 0: no word), then Value 0 — the author's Value again, a word: the handle is at 0 already, but drawing it recomputes the falsy Value Percent against Min -100 — Value Percent 50 (row C73: the runtime drops the equal Value)",
-    "because": "v2 (R14) — every Value write is a word; slider.ts :51-53 `updateOutputValue` recomputes Value Percent while it reads falsy. The s46 runtime batch at seed 20730 reached the drawing that moves the percent alone — NSP-016 §6 C73",
+    "name": "Min lowered to -100: the handle at 0 is now the middle — Value Percent 50 (v3, C74); then Value 0, a word: the handle is at 0 already — nothing",
+    "because": "v2 (R14) — every Value write is a word; v3 (C74): Value Percent is recomputed at every paint, so the Min moved it already. The s46 runtime batch at seed 20730 reached the drawing that moves the percent alone — NSP-016 §6 C73",
     "steps": [
       "settle",
       {
@@ -107081,8 +107081,8 @@
     ]
   },
   {
-    "name": "Min lowered to -100, Mounted off, Value 0 written off the page, Mounted on: Did Mount, and drawing the word recomputes the falsy Value Percent — 50",
-    "because": "v2 — the remount draws the word that waited; the runtime agrees: its fresh component's mount effect calls `updateOutputValue(0)`, which finds the node's 0 unchanged (no Changed) and recomputes the falsy percent",
+    "name": "Min lowered to -100: Value Percent 50 (v3, C74); Mounted off, Value 0 written off the page, Mounted on: Did Mount, and drawing the word, where the handle already is, sends nothing",
+    "because": "v2 — the remount draws the word that waited; v3 (C74): the Min reached Value Percent at its own paint",
     "steps": [
       "settle",
       {
@@ -107108,8 +107108,8 @@
     ]
   },
   {
-    "name": "Mounted off; Value 0 (a word that moves nothing), Mounted on, an act and Min lowered to -100 in one frame: the act's paint puts the slider back and draws the word against Min 0 — Value Percent stays 0, and Min -100 is no word; every act",
-    "because": "v2 — the act paints first, the remount and the word with it; slider.ts :105-115. The runtime agrees: the act's paint mounts the fresh component, whose effect finds the node's 0 and recomputes the falsy percent against Min 0. The s46 runtime batch at seed 20730 left a press of this shape alive",
+    "name": "Mounted off; Value 0 (a word that moves nothing), Mounted on, an act and Min lowered to -100 in one frame: the act's paint puts the slider back and draws the word against Min 0 — nothing; the frame's end draws the handle against Min -100 — Value Percent 50 (v3, C74); every act",
+    "because": "v2 — the act paints first, the remount and the word with it; v3 (C74): the frame's end paints again and recomputes Value Percent against the Min it finds. The s46 runtime batch at seed 20730 left a press of this shape alive",
     "steps": [
       "settle",
       {
@@ -107724,8 +107724,8 @@
     ]
   },
   {
-    "name": "disabled, then hidden: Value 0 (a word that moves nothing) and an act in one frame, then Min lowered to -100 in it: the act's paint draws the word — nothing more (Value Percent stays 0); every act, both",
-    "because": "v2 — an act that reaches no element still paints first (a disabled element, a hidden one), and the paint draws the word. The s46 runtime batch at seed 20730 left a touch on a hidden slider of this shape alive. The runtime agrees: it drops the equal Value",
+    "name": "disabled, then hidden: Value 0 (a word that moves nothing) and an act in one frame, then Min lowered to -100 in it: the act's paint draws the word — nothing; the frame's end draws the handle against Min -100 — Value Percent 50 (v3, C74); every act, both",
+    "because": "v2 — an act that reaches no element still paints first (a disabled element, a hidden one), and the paint draws the word; v3 (C74): the frame's end recomputes Value Percent. The s46 runtime batch at seed 20730 left a touch on a hidden slider of this shape alive",
     "steps": [
       "settle",
       {
@@ -108087,8 +108087,8 @@
     ]
   },
   {
-    "name": "placed with Mounted off, then Mounted on: Did Mount, and the paint draws the making's Value (0, where the node already is — nothing sent); Min lowered to -100 after it: nothing (the word was drawn)",
-    "because": "v2 — the making's Value is a word for the first paint on the page (`pending` at the making); a Min that does not move the author's Value is none",
+    "name": "placed with Mounted off, then Mounted on: Did Mount, and the paint draws the making's Value (0, where the node already is — nothing sent); Min lowered to -100 after it: Value Percent 50 (v3, C74)",
+    "because": "v2 — the making's Value is a word for the first paint on the page (`pending` at the making); v3 (C74): a Min is no word, and the paint recomputes Value Percent against it",
     "params": {
       "mounted": false
     },
@@ -108129,6 +108129,405 @@
       {
         "act": "slide",
         "value": 0
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "v3 (C74) — a hidden slider at 80, then Max lowered to 60, an act and Max back to 100 in one frame: the act reaches nothing, but its paint draws the handle against Max 60, where the browser clamps it, so the handle stays at 60 when Max returns — Value 60, Value Percent 60, no Changed; Value 80 again; the same with Value 80 written first in the frame (the act's paint draws the word against Max 60: 60); every act",
+    "because": "the act paints first (dropdown.ts `onPainted`), whether it reaches the slider or not, and a paint draws the handle as the browser holds it against the attributes then (v3, C74); the browser keeps the clamped value when Max grows again. The s27 mutant run left an act's paint on a hidden slider ungraded (a paint dropped, or swapped for the off-page one, was redone by the frame's end against Max 100)",
+    "steps": [
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "max",
+        "value": 60
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "set": "max",
+        "value": 100
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      {
+        "set": "max",
+        "value": 60
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "set": "max",
+        "value": 100
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      "settle",
+      {
+        "set": "max",
+        "value": 60
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "set": "max",
+        "value": 100
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      {
+        "set": "max",
+        "value": 60
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "set": "max",
+        "value": 100
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      "settle",
+      {
+        "set": "max",
+        "value": 60
+      },
+      {
+        "act": "press"
+      },
+      {
+        "set": "max",
+        "value": 100
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      {
+        "set": "max",
+        "value": 60
+      },
+      {
+        "act": "press"
+      },
+      {
+        "set": "max",
+        "value": 100
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      "settle",
+      {
+        "set": "max",
+        "value": 60
+      },
+      {
+        "act": "release"
+      },
+      {
+        "set": "max",
+        "value": 100
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      {
+        "set": "max",
+        "value": 60
+      },
+      {
+        "act": "release"
+      },
+      {
+        "set": "max",
+        "value": 100
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      "settle",
+      {
+        "set": "max",
+        "value": 60
+      },
+      {
+        "act": "click"
+      },
+      {
+        "set": "max",
+        "value": 100
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      {
+        "set": "max",
+        "value": 60
+      },
+      {
+        "act": "click"
+      },
+      {
+        "set": "max",
+        "value": 100
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      "settle",
+      {
+        "set": "max",
+        "value": 60
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "set": "max",
+        "value": 100
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      {
+        "set": "max",
+        "value": 60
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "set": "max",
+        "value": 100
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      "settle",
+      {
+        "set": "max",
+        "value": 60
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "set": "max",
+        "value": 100
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      {
+        "set": "max",
+        "value": 60
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "set": "max",
+        "value": 100
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      "settle",
+      {
+        "set": "max",
+        "value": 60
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "max",
+        "value": 100
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      {
+        "set": "max",
+        "value": 60
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "max",
+        "value": 100
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      "settle",
+      {
+        "set": "max",
+        "value": 60
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "set": "max",
+        "value": 100
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      {
+        "set": "max",
+        "value": 60
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "set": "max",
+        "value": 100
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      "settle",
+      {
+        "set": "max",
+        "value": 60
+      },
+      {
+        "act": "slide",
+        "value": 30
+      },
+      {
+        "set": "max",
+        "value": 100
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
+      },
+      {
+        "set": "max",
+        "value": 60
+      },
+      {
+        "act": "slide",
+        "value": 30
+      },
+      {
+        "set": "max",
+        "value": 100
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 80
       },
       "settle"
     ]

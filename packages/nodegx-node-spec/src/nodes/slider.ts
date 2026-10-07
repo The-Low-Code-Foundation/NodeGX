@@ -13,27 +13,32 @@
  * (ruled the same day). What the runtime did instead only because of React was a known row on the runtime target (D36, C73),
  * until P109 ISL-031 fixed it: the node counts the graph's words and the component draws each one without announcing it.
  *
+ * v3 (P109 ISL-031, rows C74 and C75, ruled 2026-10-05 "Follow the handle" and "Percent 0, defaults for blanks"): **Value and
+ * Value Percent describe the handle as the browser draws it.** A word from the graph, and every paint after Min, Max or Step
+ * moved, puts the handle where the browser would hold it — clamped to the range and rounded to the step — and reports it
+ * without Changed. v2 copied the node: a Value of 33.5 with Step 1 read 33.5 where the handle sits at 34; a slid handle past a
+ * lowered Max kept its Value; Value Percent kept its old figure when Min or Max moved; Min equal to Max read Value Percent NaN;
+ * a Min written empty clamped the Value to NaN. A Min or Max re-clamp is no longer a word for the handle (v2: one that moved
+ * the author's Value moved a slid handle to it); the attributes are read as the browser reads them, a blank Min or Max as 0 or
+ * 100.
+ *
  * THE RULE, before the citations. A Slider is an `<input type="range">` drawn invisible (`opacity: 0`, Slider.tsx :108-111)
  * over a track and a thumb it paints itself (:147-175), in a wrapper (:173-186); a PERSON slides it. Four things hold the
  * value:
  *
- *   - **the author's Value** (`props.value`, slider.ts :237-271 `_setInputValue`): Min at the making (:33), then what the
- *     **Value** input writes — an empty value (`undefined`, `null`, `''`) is ignored, a value `Number` cannot make finite is
- *     reported on the runtime channel and ignored, anything else is clamped with `Math.max(Min, Math.min(Max, n))` over the
- *     props AS WRITTEN (a Min written `undefined` makes the clamp `NaN`). Every such write is the graph's word for the handle,
- *     the same value again included (R14; the runtime dropped one equal to the last it was given — row C73, fixed in P109 ISL-031). **Min** and
- *     **Max** (:105-126) re-clamp the author's Value after writing themselves, and that is a word for the handle only when the
- *     clamp moved it (`!==` — the node's own rule: a slid handle past a lowered Max stays, row C74 in the spec).
- *   - **the node's value** (`_internal.outputValue`, slider.ts :34, :39-54 `updateOutputValue`): 0 at the making; what the
- *     **Value** output reads (:79-87). A person's slide reports it: sent, and Changed fired, when it differs (`!==`, so a `NaN`
- *     every time). The graph's word reaches it at the next paint, sent the same way and **never with Changed** (D36: the
- *     runtime's component reported the graph's Value through the slide's own function and fired Changed, until P109 ISL-031). Value Percent
- *     (:220-236) is recomputed on that change and, while it reads falsy (0, `NaN`, never set), on every report:
- *     `Math.floor((v - Min) / (Max - Min) * 100)` over the props as written, sent when it differs (`!==`; Min equal to Max is
- *     `NaN`, row C75 in the spec).
- *   - **the handle** (`shown`: what the `<input>` is told to hold): a slide moves it; the graph's word moves it at the next
- *     paint (a frame's end, or the paint an act makes first); nothing else does — not a remount (the runtime's fresh component
- *     took the author's Value back and announced it, row D36, until P109 ISL-031).
+ *   - **the author's Value** (`props.value`, slider.ts `_setInputValue`): Min at the making, then what the **Value** input
+ *     writes — an empty value (`undefined`, `null`, `''`) is ignored, a value `Number` cannot make finite is reported on the
+ *     runtime channel and ignored, anything else is kept as the number. Every such write is the graph's word for the handle,
+ *     the same value again included (R14; C73, fixed in P109 ISL-031). **Min**, **Max** and **Step** are attributes the
+ *     next paint draws; they are no word (v3).
+ *   - **the node's value** (`_internal.outputValue`, slider.ts `_reportValue`): 0 at the making; what the **Value** output
+ *     reads. A person's slide reports it: sent, and Changed fired, when it differs (`!==`). The paint reports it the same way
+ *     and **never with Changed** (D36, fixed in P109 ISL-031). Value Percent is recomputed at every report — `Math.floor((v -
+ *     min) / (max - min) * 100)` over the attributes as the browser reads them, 0 when they are equal (v3, C75) — and sent when
+ *     it differs.
+ *   - **the handle** (`shown`: what the `<input>` is told to hold): a slide moves it; every paint on the page draws it as the
+ *     browser would hold it — the graph's word when one is waiting, else where it was — clamped and rounded to the step
+ *     against the attributes now (v3, C74), and reports it. A remount finds it where it was (D36).
  *   - **what the browser holds** (the `<input>`'s own value): the shown value sanitized by the BROWSER's range rules against
  *     the attributes as rendered (`min` / `max`, and `step` only when Step is truthy — :116-122): not a number → the middle
  *     (or Min when Max is below it); then clamped to [Min, Max] and rounded to the nearest step from Min (a tie upwards),
@@ -44,7 +49,8 @@
  *     a keyboard slide: it puts the keyboard on the element first (the focusing steps), as a Tab does, and a disabled element
  *     takes none — nor does a reversed range (Max below Min), whose sanitization jsdom and a browser disagree on (the face's
  *     choice). The attributes are read as jsdom reads them (HTML's lenient parse: Max wired `[1, 2]` is the attribute `"1,2"`,
- *     a Max of 1); jsdom clamps but never steps, and the face adds the browser's step rule. A click is a press and a release where the handle already is (the face has no geometry): it moves nothing.
+ *     a Max of 1); jsdom clamps but never steps, and the face adds the browser's step rule. The node reads the attributes the
+ *     same way (slider.ts `browserRangeValue`). A click is a press and a release where the handle already is (the face has no geometry): it moves nothing.
  */
 
 import { defineNode, type Patch } from '../spec';
@@ -72,12 +78,12 @@ type State = {
   min: unknown;
   max: unknown;
   step: unknown;
-  /** slider.ts :33, :267 `props.value` — the author's Value, clamped */
+  /** slider.ts `props.value` — the author's Value: the graph's last word, as the number */
   authorValue: number;
   /** slider.ts :34 `_internal.outputValue` — the Value output */
   out: number;
-  /** slider.ts :234 `_internal.valuePercent` — the Value Percent output; `undefined` until first computed */
-  percent: number | undefined;
+  /** slider.ts `_internal.valuePercent` — the Value Percent output */
+  percent: number;
   /** the handle: what the `<input>` is told to hold — kept off the page too (a remount finds it where it was) */
   shown: number;
   /** v2 — the graph gave the handle a word the page has not drawn yet (the author's Value, at the next paint) */
@@ -95,15 +101,14 @@ const NONE: Act = { send: [] };
 
 export const Slider = defineNode({
   type: 'net.noodl.controls.range',
-  version: 2,
+  version: 3,
   source: 'packages/noodl-viewer-react/src/nodes/controls/slider.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches — the handle with them
   synced: ['pageEnabled', 'pageVisible', 'shown'],
 
-  // react-component-node.ts :1274-1301 the defaults into props, then slider.ts :31-57 `initialize`: the author's Value is Min
-  // (0), `updateOutputValue(0)` finds the node's 0 unchanged and computes Value Percent (0); the making's Value is a word for
-  // the first paint (`pending`)
+  // react-component-node.ts :1274-1301 the defaults into props, then slider.ts `initialize`: the author's Value is Min (0),
+  // `_reportValue(0)` finds the node's 0 unchanged and Value Percent 0; the making's Value is a word for the first paint (`pending`)
   state: {
     enabled: true, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false,
     min: 0, max: 100, step: 1, authorValue: 0, out: 0, percent: 0, shown: 0, pending: true
@@ -132,7 +137,7 @@ export const Slider = defineNode({
     // utils.ts :75-89
     enabled: { type: 'boolean', default: true, coerce: 'none', displayName: 'Enabled', group: 'General', description: 'Lets the user interact with this control; when off it still renders and occupies its space but ignores clicks, touches and typing', portability: 'logic' },
     // slider.ts :62-77, :237-271
-    value: { type: 'number', coerce: 'none', displayName: 'Value', group: 'General', description: 'Moves the handle to this value, clamped to Min and Max; changing it from the graph does not fire Changed. An empty value leaves the handle where it is', portability: 'logic', examples: [30, 50, 0, 100, 120, -5, 33.5, '40', null, ''] },
+    value: { type: 'number', coerce: 'none', displayName: 'Value', group: 'General', description: 'Moves the handle to this value, clamped to Min and Max and rounded to the Step; changing it from the graph does not fire Changed. An empty value leaves the handle where it is', portability: 'logic', examples: [30, 50, 0, 100, 120, -5, 33.5, '40', null, ''] },
     // slider.ts :105-115
     min: { type: 'number', default: 0, coerce: 'none', displayName: 'Min', group: 'General', description: 'Value at the far left of the track; the current value is clamped up to it if it is below', portability: 'logic', examples: [0, 10, -20, 40] },
     // slider.ts :116-126
@@ -282,13 +287,11 @@ export const Slider = defineNode({
       if (enabled === s.enabled) return NOTHING;
       return { set: { enabled }, send: ['enabled'] };
     },
-    // slider.ts :73-75 → :237-271 `_setInputValue` — every write a word for the handle (R14); the next paint draws it (`painted`)
-    value: (s, v) => clampIn(s, v, {}, true),
-    // slider.ts :105-115 — the prop first (`undefined` deletes it), then the author's Value re-clamped against it
-    min: (s, v) => clampIn({ ...s, min: v }, s.authorValue, { min: v }, false),
-    // slider.ts :116-126
-    max: (s, v) => clampIn({ ...s, max: v }, s.authorValue, { max: v }, false),
-    // slider.ts :127-134 — on the element only: what the browser rounds a slide to
+    // slider.ts `_setInputValue` — every write a word for the handle (R14); the next paint draws it (`painted`)
+    value: (_s, v) => word(v),
+    // the attributes (`undefined` deletes the prop): the next paint draws the handle against them (v3, C74)
+    min: (_s, v) => ({ set: { min: v }, send: [] }),
+    max: (_s, v) => ({ set: { max: v }, send: [] }),
     step: (_s, v) => ({ set: { step: v }, send: [] }),
     // react-component-node.ts :2310-2320
     mounted: (_s, v) => ({ set: { mounted: !!v }, send: [] }),
@@ -348,49 +351,46 @@ export const Slider = defineNode({
 );
 
 /**
- * slider.ts :237-271 `_setInputValue(v)`: an empty value abstains; one `Number` cannot make finite abstains (reported on the
- * runtime channel, :254-260); else `Math.max(Min, Math.min(Max, n))` over the props as written. `word`: a Value write is the
- * graph's word for the handle whatever it equals (R14; C73, fixed in P109 ISL-031); a Min or Max re-clamp (`word` false) is one
- * only when it moves the author's Value (`!==`). `extra`: the prop the caller wrote first (Min / Max).
+ * slider.ts `_setInputValue(v)`: an empty value abstains; one `Number` cannot make finite abstains (reported on the runtime
+ * channel); else it is the graph's word for the handle whatever it equals (R14; C73), drawn by the next paint.
  */
-function clampIn(s: Readonly<State>, v: unknown, extra: Partial<State>, word: boolean): Send {
-  if (v === undefined || v === null || v === '') return { set: extra, send: [] };
+function word(v: unknown): Send {
+  if (v === undefined || v === null || v === '') return NOTHING;
   const n = Number(v);
-  if (!Number.isFinite(n)) return { set: extra, send: [] };
-  const value = Math.max(s.min as number, Math.min(s.max as number, n));
-  if (!word && value === s.authorValue) return { set: extra, send: [] };
-  return { set: { ...extra, authorValue: value, pending: true }, send: [] };
+  if (!Number.isFinite(n)) return NOTHING;
+  return { set: { authorValue: n, pending: true }, send: [] };
 }
 
-/** slider.ts :220-236 — `Math.floor((v - Min) / (Max - Min) * 100)` over the props as written */
-const percentOf = (s: Readonly<State>, v: number): number => Math.floor(((v - (s.min as number)) / ((s.max as number) - (s.min as number))) * 100);
+/**
+ * slider.ts `_percentOf` — where the handle sits from 0 to 100 over the attributes as the browser reads them (a blank Min or Max
+ * is 0 or 100), 0 when they are equal: the handle sits at the start (v3, C75 — v2 read `NaN` from 0 / 0 and `NaN` for a blank).
+ * A -0 (a reversed range at its start) is 0.
+ */
+function percentOf(s: Readonly<State>, v: number): number {
+  const min = attrNumber(s.min) ?? 0;
+  const max = attrNumber(s.max) ?? 100;
+  return max === min ? 0 : Math.floor(((v - min) / (max - min)) * 100) + 0;
+}
 
 /**
- * slider.ts :39-54 `updateOutputValue(v)`: a different value (`!==`, so `NaN` always) is kept, sent, Value Percent recomputed
- * and — for a person's slide (`announce`) — Changed fires; then, while Value Percent reads falsy, it is recomputed again. A
- * recomputed percent is kept whatever it is (a -0 replaces a 0 unsent) and sent when it differs (`!==`). The graph's word is
- * reported the same way with `announce` false (D36).
+ * slider.ts `_reportValue(v, announce)`: a different value (`!==`) is kept and sent, and — for a person's slide (`announce`) —
+ * Changed fires; Value Percent is recomputed at every report and sent when it differs (v3: v2 recomputed it only with the value,
+ * so a moved Min or Max left it stale — C74). The paint reports the same way with `announce` false (D36).
  */
 function reported(s: Readonly<State>, v: number, announce: boolean): Act {
   const set: Partial<State> = {};
   const send: ValueOut[] = [];
   const emit: Pulse[] = [];
-  let percent = s.percent;
-  // :232-235 the percent is STORED whatever the comparison says (`0 !== -0` is false, so a -0 is kept unsent, and read by the
-  // next send of the output), and flagged when it differs by `!==` (a NaN every time)
-  const recompute = () => {
-    const p = percentOf(s, v);
-    if (!Object.is(p, percent)) set.percent = p;
-    if (p !== percent && !send.includes('valuePercent')) send.push('valuePercent');
-    percent = p;
-  };
   if (s.out !== v) {
     set.out = v;
     send.push('value');
-    recompute();
     if (announce) emit.push('onChange');
   }
-  if (!percent) recompute();
+  const p = percentOf(s, v);
+  if (p !== s.percent) {
+    set.percent = p;
+    send.push('valuePercent');
+  }
   return { set, send, emit };
 }
 
@@ -437,7 +437,9 @@ function rangeValue(s: Readonly<State>, v: unknown): string {
   const parsed = valueNumber(v);
   const proposed = parsed === undefined ? (max < min ? min : (min + max) / 2) : parsed;
   const inRange = parsed === undefined ? proposed : proposed < min ? min : proposed > max ? max : proposed;
-  if (max < min) return String(inRange);
+  // v3 — a reversed range holds Min, as Chromium draws it (it raises Max to Min). jsdom's clamp of one does not settle (each
+  // re-sanitization flips a value between Min and Max), and the paint now draws the handle at every frame
+  if (max < min) return String(min);
   const stepAttr = s.step ? attrNumber(s.step) : undefined;
   const step = stepAttr !== undefined && stepAttr > 0 ? stepAttr : 1;
   const base = minAttr ?? attrNumber(s.shown) ?? 0;
@@ -450,8 +452,9 @@ function rangeValue(s: Readonly<State>, v: unknown): string {
  * The page follows what the node wants (dropdown.ts `painted`).
  *   - Enabled and Visible are painted onto the element.
  *   - Mounted off: the element leaves with the keyboard it held; Mounted on: Did Mount, the handle where it was.
- *   - the graph's word (`pending`), on the page: the handle takes the author's Value and the node reports it — Value and Value
- *     Percent sent when they differ, Changed never (D36).
+ *   - on the page, the handle: the graph's word when one is waiting (`pending`), else where it was, as the browser holds it
+ *     against the attributes now — clamped and rounded to the step (v3, C74) — and the node reports it: Value and Value Percent
+ *     sent when they differ, Changed never (D36).
  */
 function painted(s: Readonly<State>): { set: Partial<State>; send: ValueOut[]; emit: Pulse[] } {
   const set: Partial<State> = { ...(s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled }), ...(s.pageVisible === s.visible ? {} : { pageVisible: s.visible }) };
@@ -463,9 +466,11 @@ function painted(s: Readonly<State>): { set: Partial<State>; send: ValueOut[]; e
     set.onPage = true;
     emit.push('didMount');
   }
-  if (!s.pending) return { set, send: [], emit };
-  const r = reported({ ...s, ...set }, s.authorValue, false);
-  return { set: { ...set, shown: s.authorValue, pending: false, ...r.set }, send: r.send, emit: [...emit, ...(r.emit ?? [])] };
+  const shown = Number(rangeValue(s, s.pending ? s.authorValue : s.shown));
+  const r = reported({ ...s, ...set }, shown, false);
+  // every paint on the page writes the handle, the node's value, Value Percent and the word's flag — sent only when they move —
+  // so a paint that moved nothing is the same branch as one that did (a mutant swapping the two is then a real defect, not a twin)
+  return { set: { ...set, shown, pending: false, out: shown, percent: percentOf({ ...s, ...set }, shown), ...r.set }, send: r.send, emit: [...emit, ...(r.emit ?? [])] };
 }
 
 /**

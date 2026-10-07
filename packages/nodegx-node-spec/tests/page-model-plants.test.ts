@@ -61,11 +61,12 @@ const PLANTS: Plant[] = [
     edits: [
       ['  pending: boolean;\n};', '  pending: boolean;\n  paintedValue: number;\n};'],
       ['shown: 0, pending: true', 'shown: 0, pending: true, paintedValue: undefined'],
+      // v3 (P109 ISL-031): the paint draws the handle at every frame — the plant drops a word equal to the one it last drew
       [
-        '  if (!s.pending) return { set, send: [], emit };',
-        '  if (!s.pending) return { set: { ...set, paintedValue: s.authorValue }, send: [], emit };\n  if (Object.is(s.authorValue, s.paintedValue)) return { set: { ...set, pending: false }, send: [], emit };'
+        '  const shown = Number(rangeValue(s, s.pending ? s.authorValue : s.shown));',
+        '  const word = s.pending && !Object.is(s.authorValue, s.paintedValue);\n  const shown = Number(rangeValue(s, word ? s.authorValue : s.shown));'
       ],
-      ['shown: s.authorValue, pending: false, ...r.set }', 'shown: s.authorValue, pending: false, paintedValue: s.authorValue, ...r.set }']
+      ['set: { ...set, shown, pending: false, out: shown,', 'set: { ...set, shown, pending: false, paintedValue: s.pending ? s.authorValue : s.paintedValue, out: shown,']
     ]
   },
   {

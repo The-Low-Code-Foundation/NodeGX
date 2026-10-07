@@ -58228,7 +58228,7 @@
             "name": "number"
           },
           "isSignal": false,
-          "description": "Moves the handle to this value, clamped to Min and Max; changing it from the graph does not fire Changed. An empty value leaves the handle where it is",
+          "description": "Moves the handle to this value, clamped to Min and Max and rounded to the Step; changing it from the graph does not fire Changed. An empty value leaves the handle where it is",
           "index": 100
         },
         {

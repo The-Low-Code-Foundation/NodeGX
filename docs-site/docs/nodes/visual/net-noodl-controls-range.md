@@ -116,7 +116,7 @@ Continuous or stepped numeric input where feel matters more than precision: volu
 | `transformScale` | Number | `1` | Scales the element about its transform origin; 1 leaves it unscaled |
 | `transformX` | Number | `0` | Moves the element right after layout, without moving its siblings |
 | `transformY` | Number | `0` | Moves the element down after layout, without moving its siblings |
-| `value` | Number | — | Moves the handle to this value, clamped to Min and Max; changing it from the graph does not fire Changed. An empty value leaves the handle where it is |
+| `value` | Number | — | Moves the handle to this value, clamped to Min and Max and rounded to the Step; changing it from the graph does not fire Changed. An empty value leaves the handle where it is |
 | `variant` | String | — | Name of a saved variant of this node type to apply, replacing the styling set here |
 | `visible` | Boolean | `true` | Hides the element while keeping the space it occupies in the layout |
 | `width` | Number | `100` | Overall width of the slider, which is the length of the track plus the handle |

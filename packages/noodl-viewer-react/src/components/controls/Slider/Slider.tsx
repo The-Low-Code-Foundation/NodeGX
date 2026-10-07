@@ -29,8 +29,8 @@ export interface SliderProps extends Noodl.ReactProps {
   handle: number;
   /** counts the graph's words for the handle; the effect draws each one */
   valueWrites: number;
-  /** the graph's word waiting to be drawn (reported without Changed), or undefined when there is none */
-  takeGraphValue: () => number | undefined;
+  /** the handle as the browser holds it now — the graph's word when one waits — reported without Changed (C74, D36) */
+  drawHandle: () => number;
 }
 
 function _styleTemplate(_class: string, props: SliderProps) {
@@ -96,8 +96,7 @@ export function Slider(props: SliderProps) {
   // `props.value`, so a graph Value, a clamping Min or Max, the mount and a remount (a fresh `useState(props.value)`) all
   // fired Changed with nobody sliding.
   useEffect(() => {
-    const word = props.takeGraphValue();
-    if (word !== undefined) setValue(word);
+    setValue(props.drawHandle());
   }, [props.valueWrites]);
 
   function onValueChanged(value: number) {
