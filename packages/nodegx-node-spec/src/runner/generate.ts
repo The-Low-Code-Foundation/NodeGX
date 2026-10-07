@@ -104,6 +104,18 @@ export interface GenerateOptions {
    * from and the pinned digest in tests/runner.test.ts holds.
    */
   reach?: Reach;
+  /**
+   * NSP-016 s53 — values the generator does not draw for a port on THIS run, because the target cannot survive them: a known row
+   * that takes the whole process down (a heap run out) can be neither played nor counted. Per port, the values (compared with
+   * `Object.is`) and the row that withholds them; the report prints every one. Absent, every pool is what it was.
+   */
+  withheld?: Readonly<Record<string, Withheld>>;
+}
+
+/** NSP-016 s53 — values withheld from one port's pool, and the §6 row that is the reason (`GenerateOptions.withheld`). */
+export interface Withheld {
+  values: readonly unknown[];
+  row: string;
 }
 
 const CROSS_TYPE: readonly unknown[] = [null, undefined, '', 'abc', '3', 0, 1, -1, true, false, {}, [], { a: 1 }, [1, 2]];
@@ -155,9 +167,15 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
   const valuePorts = Object.entries(spec.inputs).filter(([, d]) => !isSignalInput(d) && poolFor(d).length > 0);
   let signalPorts = Object.entries(spec.inputs).filter(([name, d]) => isSignalInput(d) && inReachInputs(name));
 
+  // NSP-016 s53 — a port's pool less what this run withholds (the same pool when nothing is)
+  const withheld = options.withheld;
+  const drawFrom = (name: string, decl: InputDecl): readonly unknown[] => {
+    const out = withheld?.[name];
+    return out ? poolFor(decl).filter((v) => !out.values.some((w) => Object.is(w, v))) : poolFor(decl);
+  };
   const params: Record<string, unknown> = {};
   for (const [name, decl] of valuePorts) {
-    if (inReachParams(name) && rng.chance(paramChance)) params[name] = rng.pick(poolFor(decl));
+    if (inReachParams(name) && rng.chance(paramChance)) params[name] = rng.pick(drawFrom(name, decl));
   }
 
   // Derived ports (NSP-004): the ports an editor would draw for these params, plus the names the
@@ -174,7 +192,7 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
       if (decl && poolFor(decl).length > 0) drivable.push([name, decl]);
     }
     for (const [name, decl] of drivable.slice(valuePorts.length)) {
-      if (inReachParams(name) && rng.chance(paramChance)) params[name] = rng.pick(poolFor(decl));
+      if (inReachParams(name) && rng.chance(paramChance)) params[name] = rng.pick(drawFrom(name, decl));
     }
     // NSP-013 s14 — derived SIGNAL inputs (States' `To <state>`) are pulsed like declared ones: the
     // ports these params draw, then the candidates `discover` declares a signal. Appended only when
@@ -207,7 +225,7 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
 
   const n = minSteps + rng.int(maxSteps - minSteps + 1);
   const steps: Step[] = [];
-  for (let i = 0; i < n; i++) steps.push(oneStep(rng, steppable, signalPorts, settleChance, advances, acts, logicPorts));
+  for (let i = 0; i < n; i++) steps.push(oneStep(rng, steppable, signalPorts, settleChance, advances, acts, logicPorts, drawFrom));
   if (steps[steps.length - 1] !== 'settle') steps.push('settle');
   if (needs.length === 0) return { seed, params, steps };
 
@@ -281,7 +299,8 @@ function oneStep(
   settleChance: number,
   advances?: readonly number[],
   acts?: Array<[string, ActDecl]>,
-  logicPorts?: Array<[string, InputDecl]>
+  logicPorts?: Array<[string, InputDecl]>,
+  drawFrom: (name: string, decl: InputDecl) => readonly unknown[] = (_n, d) => poolFor(d)
 ): Step {
   if (rng.chance(settleChance)) return 'settle';
   // a node with no input port (Screen Resolution) is driven by the world alone: settle or advance. Drawn
@@ -300,7 +319,7 @@ function oneStep(
   // NSP-016 s37 — a classed spec draws its logic ports three times in four (only when it has both kinds)
   const pool = logicPorts && logicPorts.length > 0 && logicPorts.length < valuePorts.length && rng.chance(0.75) ? logicPorts : valuePorts;
   const [name, decl] = rng.pick(pool);
-  const value = rng.pick(poolFor(decl));
+  const value = rng.pick(drawFrom(name, decl));
   return value === undefined ? { set: name } : { set: name, value };
 }
 

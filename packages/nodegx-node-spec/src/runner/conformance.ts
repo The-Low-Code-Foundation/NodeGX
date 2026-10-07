@@ -31,7 +31,7 @@ import type { AnyNodeSpec } from '../spec';
 import type { TraceEvent } from '../trace';
 import { World, type WorldScript } from '../world';
 import { compareTraces, differenceWithThrow, formatDifference, hasObservation, type Difference } from './compare';
-import { generateSequence } from './generate';
+import { generateSequence, type Withheld } from './generate';
 import { discoverBranches, mutantsOf, type Branch, type MutationKind } from './mutants';
 import { outsideReach, projectTrace, type Reach } from './reach';
 import { scenarioIO, type Scenario } from './scenario';
@@ -61,6 +61,12 @@ export interface ConformanceOptions {
    * finding, and the report cannot tell.
    */
   known?: KnownRow[];
+  /**
+   * NSP-016 s53 — values the generator does not draw on this target (generate.ts `GenerateOptions.withheld`): a known row that
+   * takes the process down cannot be played, so it is withheld instead, per port with its row, and printed in the report. As
+   * narrow as `known`: the values only, never the port.
+   */
+  withheld?: Readonly<Record<string, Withheld>>;
   /**
    * NSP-005: the part of the node this target carries (reach.ts). Sequences are generated inside
    * it, hand scenarios outside it are marked `outside`, and the reference is projected onto it
@@ -145,7 +151,7 @@ export interface Report {
   target: string;
   refused?: string;
   scenarios: ScenarioResult[];
-  generated: { seed: number; requested: number; ran: number; divergences: Divergence[]; known: KnownCount[] };
+  generated: { seed: number; requested: number; ran: number; divergences: Divergence[]; known: KnownCount[]; withheld?: Readonly<Record<string, Withheld>> };
   mutants?: { total: number; killed: number; survivors: MutantResult[]; unreached: Branch[]; results: MutantResult[]; equivalent: Array<{ why: string; count: number }> };
   /** The reach this run was graded inside (NSP-005); absent for a full-surface target. */
   reach?: Reach;
@@ -209,7 +215,7 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
     version: spec.version,
     target: target.name,
     scenarios: [],
-    generated: { seed, requested, ran: 0, divergences: [], known: (options.known ?? []).map((k) => ({ row: k.row, count: 0 })) },
+    generated: { seed, requested, ran: 0, divergences: [], known: (options.known ?? []).map((k) => ({ row: k.row, count: 0 })), ...(options.withheld ? { withheld: options.withheld } : {}) },
     timeMs: 0,
     conforms: false
   };
@@ -249,7 +255,7 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
 
   // 2. generated sequences
   for (let i = 0; i < requested; i++) {
-    const seq = generateSequence(spec, seed, i, { reach });
+    const seq = generateSequence(spec, seed, i, { reach, withheld: options.withheld });
     const { reference, actual, difference } = await playBoth(spec, target, seq.params, seq.steps, reach, seq.world);
     report.generated.ran++;
     if (difference.index < 0) continue;
@@ -291,7 +297,7 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
         .map((s) => ({ name: `scenario ${s.name}`, params: s.params, steps: s.steps, world: s.world }))
     ];
     for (let i = 0; i < requested; i++) {
-      const seq = generateSequence(spec, seed, i, { reach });
+      const seq = generateSequence(spec, seed, i, { reach, withheld: options.withheld });
       suite.push({ name: `sequence ${i} (seed ${seq.seed})`, params: seq.params, steps: seq.steps, world: seq.world });
     }
     const discovered = discoverBranches(spec);
@@ -417,6 +423,9 @@ export function formatReport(report: Report): string {
     if (s.difference) lines.push('    ' + formatDifference(s.difference, 'interpreter', report.target).replace(/\n/g, '\n    '));
   }
   lines.push(`  generated: ${report.generated.ran} / ${report.generated.requested} ran, ${report.generated.divergences.length} divergence(s)`);
+  for (const [port, w] of Object.entries(report.generated.withheld ?? {})) {
+    lines.push(`    withheld: ${port} never drawn as ${w.values.map((v) => JSON.stringify(canonicalise(v))).join(', ')} — row ${w.row}`);
+  }
   for (const k of report.generated.known) {
     lines.push(`    known: ${k.count} attributed to row ${k.row}`);
     if (k.example) {

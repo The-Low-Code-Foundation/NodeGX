@@ -18,7 +18,7 @@ import * as ts from 'typescript';
 import type { NodeModule } from '@noodl/types';
 
 import { Counter, EQUIVALENT_MUTANTS, specs, runConformance, formatReport } from '../../../nodegx-node-spec/src';
-import type { Divergence, KnownRow, Report, TraceEvent } from '../../../nodegx-node-spec/src';
+import type { Divergence, KnownRow, Report, TraceEvent, Withheld } from '../../../nodegx-node-spec/src';
 import { runtimeTarget, withViewerNodes, type RuntimeTarget } from '../helpers/node-spec-target';
 
 import NodeDefinition = require('../../src/nodedefinition');
@@ -179,6 +179,42 @@ const scrollerBlocksClick = (d: Divergence) => {
   return !!heldAt(d, 'blockTouch') && !!heldAt(d, 'scrollEnabled') && heldAt(d, 'nativeScroll') !== true;
 };
 
+/**
+ * NSP-016 §6 C91 (s53) — a Shape (`Circle`) takes no children, so a card dropped on it lands at 0. With Shape Custom SVG, Circle.tsx
+ * draws the markup inside a `<span>`, and drag-drop.ts `slots` counts the zone element's HTML children (an `<svg>` is not one, a
+ * `<span>` is): a card picked up from the keyboard starts after it, at 1, and the arrow keys move it between 0 and 1. Narrow: the
+ * difference is Drop Index, with Shape Custom SVG held at it.
+ */
+const svgShapeIsASlot = (d: Divergence) => {
+  if (d.difference.threw !== undefined) return false;
+  const at = (e: TraceEvent | undefined) => !!e && e.t === 'value' && e.port === 'dropIndex';
+  if (!at(d.reference[d.difference.index]) && !at(d.actual[d.difference.index])) return false;
+  return heldAt(d, 'shape') === 'svg';
+};
+
+/**
+ * NSP-016 s53 — values the generator does not draw on the runtime target (runner `withheld`), because the target cannot survive
+ * them: a known row that takes the whole process down cannot be played, so it cannot be counted either. Printed in every report.
+ */
+/**
+ * NSP-016 §6 C94 (s53) — Source Set holds `true` (a boolean is no `srcset`: the spec fetches nothing), but React 19.0 creates the
+ * `<img>` with `srcset="true"` (an update to `true` removes it), so the runtime's browser fetches and the node reports a load or
+ * a failure. Narrow: the RUNTIME reports Error, On Error or On Load where the spec has something else, with no source and Source
+ * Set `true` held at the difference.
+ */
+const booleanSrcSetAtMount = (d: Divergence) => {
+  if (d.difference.threw !== undefined) return false;
+  const fetchedOutput = (e: TraceEvent | undefined) => !!e && ((e.t === 'value' && e.port === 'imageError') || (e.t === 'signal' && (e.port === 'onError' || e.port === 'onLoad')));
+  if (!fetchedOutput(d.actual[d.difference.index])) return false;
+  const src = heldAt(d, 'src');
+  return heldAt(d, 'srcSet') === true && (src === undefined || src === null || src === '');
+};
+
+const WITHHELD: Record<string, Readonly<Record<string, Withheld>>> = {
+  // C92 — Circle.tsx builds a Polygon or Star of `Math.round(Points)` vertices: 1e9, 2^53 or Infinity runs the heap out (measured)
+  Circle: { points: { values: [1e9, 2 ** 53, Infinity], row: 'NSP-016 §6 C92 — a Polygon or Star with a huge or infinite Points builds that many vertices and the page runs out of memory' } }
+};
+
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
   // s43 — the Text: a text style (C61) and the Placement and units-typed style setters; s44 — C79 (R11: the spec says the intent)
   Text: [
@@ -187,6 +223,22 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
     // s51 — the zone side's two: the drag controller reads Accept Kind and Zone Name as text and throws on anything else
     { row: 'NSP-016 §6 C84 — Accept Kind not text: the drag controller throws where it reads the kinds, so a drag that meets the zone dies there', matches: nonTextAcceptKind },
     { row: 'NSP-016 §6 C85 — Zone Name not text: a drop on the zone throws after Dropped, so the drag never ends', matches: nonTextZoneName }
+  ],
+  // s53 — the Shape: the Text's rows (the same shared ports and drag module), and Custom SVG's span
+  Circle: [
+    { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer },
+    { row: 'NSP-016 §6 C82 — Accepted file types not text: the drop handler throws, so the drop gives no File and no signal', matches: nonTextFileTypes },
+    { row: 'NSP-016 §6 C84 — Accept Kind not text: the drag controller throws where it reads the kinds, so a drag that meets the zone dies there', matches: nonTextAcceptKind },
+    { row: 'NSP-016 §6 C85 — Zone Name not text: a drop on the zone throws after Dropped, so the drag never ends', matches: nonTextZoneName },
+    { row: 'NSP-016 §6 C91 — Shape Custom SVG: the span holding the drawing counts as a child, so a keyboard drop lands at 1', matches: svgShapeIsASlot }
+  ],
+  // s53 — the Image: the Text's rows (the same shared ports and drag module)
+  Image: [
+    { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer },
+    { row: 'NSP-016 §6 C82 — Accepted file types not text: the drop handler throws, so the drop gives no File and no signal', matches: nonTextFileTypes },
+    { row: 'NSP-016 §6 C84 — Accept Kind not text: the drag controller throws where it reads the kinds, so a drag that meets the zone dies there', matches: nonTextAcceptKind },
+    { row: 'NSP-016 §6 C85 — Zone Name not text: a drop on the zone throws after Dropped, so the drag never ends', matches: nonTextZoneName },
+    { row: 'NSP-016 §6 C94 — Source Set true as the element is made: React writes srcset="true", so the browser fetches a picture called true', matches: booleanSrcSetAtMount }
   ],
   // s52 — the Group: the Text's rows (the same shared ports and drag module), and its own Tag
   Group: [
@@ -219,7 +271,7 @@ describe('NSP-004 / NSP-011 — every registered spec on the runtime, 200 sequen
   const daySeed = process.env.NSP_SEED ? Number(process.env.NSP_SEED) : undefined;
   beforeAll(async () => {
     for (const spec of pilot) {
-      const report = await runConformance(spec, batchTarget(), { sequences: 200, seed: daySeed, mutants: true, known: KNOWN_ROWS[spec.type] ?? [], equivalent: EQUIVALENT_MUTANTS[spec.type] });
+      const report = await runConformance(spec, batchTarget(), { sequences: 200, seed: daySeed, mutants: true, known: KNOWN_ROWS[spec.type] ?? [], withheld: WITHHELD[spec.type], equivalent: EQUIVALENT_MUTANTS[spec.type] });
       // eslint-disable-next-line no-console
       console.log(formatReport(report));
       reports.set(spec.type, report);
@@ -286,6 +338,7 @@ const deep = Number(process.env.NSP_DEEP || 0);
         mutants: true,
         replayDir: process.env.NSP_REPLAY_DIR,
         known: KNOWN_ROWS[spec.type] ?? [],
+        withheld: WITHHELD[spec.type],
         equivalent: EQUIVALENT_MUTANTS[spec.type]
       });
       // eslint-disable-next-line no-console

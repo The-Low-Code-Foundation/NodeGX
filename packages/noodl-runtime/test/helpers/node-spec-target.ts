@@ -881,7 +881,7 @@ export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 't
 export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back', 'router-navigate', 'page-inputs', 'showpopup', 'closepopup'] as const;
 
 /** NSP-016 s37 — the viewer's VISUAL nodes this phase has specced, from `src/nodes/` (their React components come with them; PERSON above). */
-export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox', 'controls/text-input', 'controls/options', 'controls/slider', 'visual/icon', 'controls/radiobuttongroup', 'controls/radiobutton', 'visual/text', 'visual/group'] as const;
+export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox', 'controls/text-input', 'controls/options', 'controls/slider', 'visual/icon', 'controls/radiobuttongroup', 'controls/radiobutton', 'visual/text', 'visual/group', 'visual/circle', 'visual/image'] as const;
 
 /**
  * Picker nodes whose SOURCE is in this package but which only the viewer's `register-nodes.js`
@@ -907,8 +907,11 @@ export function withViewerNodes(target: RuntimeTarget): RuntimeTarget {
   // PERSON (above) — a visual node's module reads `Noodl.deployed` at load (node-shared-port-definitions.ts :1435,
   // group.ts :541): the deploy bootstrap's global (static/deploy/index.js), which says the node is in a deployed app
   // and not under the editor — what a person's app is
-  const g = globalThis as { Noodl?: { deployed?: boolean } };
+  const g = globalThis as { Noodl?: { deployed?: boolean; Env?: Record<string, string> } };
   if (!g.Noodl) g.Noodl = { deployed: true };
+  // NSP-016 s53 — the app's environment, as the viewer's JavaScript API makes it (noodl-js-api.ts :48 `Noodl.Env = {}`): Image.tsx and
+  // Video.tsx read `Noodl.Env['BaseUrl']` for every source that starts with `/`. A project's Base URL is not on this page
+  if (!g.Noodl.Env) g.Noodl.Env = {};
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   for (const file of VIEWER_VISUAL_NODES) register(require('../../../noodl-viewer-react/src/nodes/' + file));
   // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -1720,6 +1723,13 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     // NSP-016 s51 — a card beside the node, and the pointer off everything: acts on the page, the node's element or not
     if (act === 'grab' || act === 'pickUp' || act === 'away') return cardActs(s, act, value);
     if (!el) return;
+    // NSP-016 s53 — the browser finishes fetching the picture an `<img>` names (image.ts `fetched`): its `load` or `error` event on the
+    // element, which React hears there. jsdom fetches nothing, so the face is the browser. Face choice, written down: a browser fetches
+    // only for an element with a `src`, or a `srcset` that is not empty — with neither there is no fetch to finish, and the act is nothing
+    if (act === 'fetched') {
+      if (el.getAttribute('src') || el.getAttribute('srcset')) el.dispatchEvent(new w.Event(value === 'load' ? 'load' : 'error'));
+      return;
+    }
     const KEYBOARD = new Set(['focus', 'blur', 'type', 'key', 'choose', 'slide']);
     const hit = KEYBOARD.has(act) ? el : underPointer(w, el);
     if (!KEYBOARD.has(act)) pointerAt = hit;

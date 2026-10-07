@@ -1,0 +1,28 @@
+---
+id: P107-C92
+title: A Shape set to Polygon or Star with a huge or infinite Points builds that many vertices, and the page runs out of memory
+status: open
+severity: medium
+area: runtime / Shape (Circle) (noodl-viewer-react/src/components/visual/Circle/Circle.tsx `polygonPoints`, `starPoints`, `render`)
+found: P107 NSP-016 s53, 2026-10-07
+evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.14; the runtime target's first 200 run of the Shape spec died after 56 s with "JavaScript heap out of memory" in `Array.from`; then measured with the heap capped at 700 MB: Polygon at Points 7 and Star at Points 100,000 play; Polygon at Points 1e9 runs the heap out in 7 s
+kit: node-spec
+---
+
+**What a person sees.** A Shape set to Polygon or Star has its Points wired from the graph. A value that is far too big arrives
+(Infinity from a division by zero, a count read from the wrong field). The tab freezes and then dies. Nothing in the editor says
+why, and the app cannot recover.
+
+**Where.** `render` reads `Math.max(3, Math.round(this.props.points ?? 5))` and builds the outline from it. `polygonPoints` calls
+`Array.from({ length: n })`, and `starPoints` loops `n` times pushing two vertices. With no upper bound, 1e9, 2^53 or Infinity asks
+for that many vertices, and then a path string from all of them. (NaN, strings that are not numbers, negatives and small values are
+already safe: `Math.max(3, …)` and `Array.from`'s length rules handle them.)
+
+**How to reproduce.** Render a Shape with Shape Polygon and Points 1e9 on the runtime target (the side-by-side probe with a one-scenario
+file, `NODE_OPTIONS=--max-old-space-size=700`): the worker dies. The runtime target cannot survive it, so it cannot be a known row: the
+runtime conformance run withholds those three values from Points (`WITHHELD` in noodl-runtime/test/node-spec/conformance.test.ts; the
+runner's `withheld`), and every report prints that it did.
+
+**Proposed fix.** Clamp the count where it is read: `Math.min(MAX_POINTS, Math.max(3, Math.round(points)))`, treating a value that is not
+finite as the default, with MAX_POINTS somewhere a person could still see (a few hundred). Add the cap to the Points description. When it
+is fixed, remove the `Circle` entry from `WITHHELD` and add a scenario at Points 1e9 to scenarios/Circle.json in the same commit.

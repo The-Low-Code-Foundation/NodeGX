@@ -1,7 +1,7 @@
 # NSP-016 — Visual nodes: research first, then layout semantics that are not CSS
 
 **Opened 2026-09-29.** **Depends on NSP-008.**
-**Status: 🟡 s52 (2026-10-07): the Group conforms on both targets at 200 and 10,000 (10 of 19; v1, 1,387 scenarios) — its children as drop slots, the focus tracker, the scroll actions and when a frame's work runs; rows C86–C90 (§7.13). s44 (2026-10-05): the Text v3 — C79 is a known row (R11: the spec says the intent, not React's redraw rules); 162 scenarios; s43's 47 deep-run survivors killed (§7.9). s43 (2026-10-05): drag and drop researched ([RESEARCH-DRAG-DROP.md](RESEARCH-DRAG-DROP.md)) and the Text conforms (9 of 19; rows C77, C78, §7.8) — its drag SOURCE graded on a lone node; the zone side and the file drop are step (b). The face learned the browser's hit test, and the 7 conforming specs it moved say what a browser lets a person do. s42 (2026-10-04): the Radio Button Group and the Radio Button conform on both targets at 200 and 10,000 (8 of 19; rows C76, D37, §7.7) — the visual tree, per node: a node's children are on its PAGE (the spec declares them; the face builds them with the node's own `addChild`; a person `pick`s one) and a node's parent is its WORLD (the GROUP seam). s41 (2026-10-04): Slider and Icon conform on both targets at 200 and 10,000 (6 of 19; rows D36, C73, C74, C75; C63 takes null, §7.6) — the face grew `slide` (jsdom's range sanitization, which it applies to every write, plus the browser's step rule, which jsdom lacks; a reversed range is not played); the 13 left each need infrastructure first (a visual tree with context, drag and drop, geometry, media — §7.6). s39 (2026-10-04): Dropdown conforms on both targets (4 of 19; rows C70, C71, D34 and instances of C65, C66, D30, §7.4) — the face grew `choose` (a keyboard pick: an enabled option the list offers, no `change` for the one already selected); the spec keeps the node's value, the author's Value, the shown value and the browser's selection apart because the component does. s38: Text Input conforms on both targets (3 of 19; rows C68, C69, D31–D33, §7.3) — the face grew `type` and `key`, the format a person patch that resolves deferred outcomes (the viewer's pointer drain). s37: AC3 begun — THE PERSON face (the real React component in a jsdom page; an act is the browser's events) and the format's `act` / `acts` / `person` / `place` / `portability`; Button and Checkbox conform on the runtime (rows C61–C66, D30, §7.2). s36: research done, R10 ruled — build the logic for all 19 with each input's portability class in the spec; geometry grading after NSP-017.**
+**Status: 🟡 s53 (2026-10-07): the Shape (`Circle`) and the Image conform on both targets (12 of 19; v1 each — the Text's machinery with no Tag; the Image adds the picture's fetch, a new act `fetched`); the runner can withhold a value a target cannot survive; rows C91 (Custom SVG's span is a drop slot), C92 (a huge Points runs the page out of memory), C93 (an Image adds a sub-path Base URL again at every render — high), C94 (Source Set true at placing fetches "true") (§7.14). s52 (2026-10-07): the Group conforms on both targets at 200 and 10,000 (10 of 19; v1, 1,387 scenarios) — its children as drop slots, the focus tracker, the scroll actions and when a frame's work runs; rows C86–C90 (§7.13). s44 (2026-10-05): the Text v3 — C79 is a known row (R11: the spec says the intent, not React's redraw rules); 162 scenarios; s43's 47 deep-run survivors killed (§7.9). s43 (2026-10-05): drag and drop researched ([RESEARCH-DRAG-DROP.md](RESEARCH-DRAG-DROP.md)) and the Text conforms (9 of 19; rows C77, C78, §7.8) — its drag SOURCE graded on a lone node; the zone side and the file drop are step (b). The face learned the browser's hit test, and the 7 conforming specs it moved say what a browser lets a person do. s42 (2026-10-04): the Radio Button Group and the Radio Button conform on both targets at 200 and 10,000 (8 of 19; rows C76, D37, §7.7) — the visual tree, per node: a node's children are on its PAGE (the spec declares them; the face builds them with the node's own `addChild`; a person `pick`s one) and a node's parent is its WORLD (the GROUP seam). s41 (2026-10-04): Slider and Icon conform on both targets at 200 and 10,000 (6 of 19; rows D36, C73, C74, C75; C63 takes null, §7.6) — the face grew `slide` (jsdom's range sanitization, which it applies to every write, plus the browser's step rule, which jsdom lacks; a reversed range is not played); the 13 left each need infrastructure first (a visual tree with context, drag and drop, geometry, media — §7.6). s39 (2026-10-04): Dropdown conforms on both targets (4 of 19; rows C70, C71, D34 and instances of C65, C66, D30, §7.4) — the face grew `choose` (a keyboard pick: an enabled option the list offers, no `change` for the one already selected); the spec keeps the node's value, the author's Value, the shown value and the browser's selection apart because the component does. s38: Text Input conforms on both targets (3 of 19; rows C68, C69, D31–D33, §7.3) — the face grew `type` and `key`, the format a person patch that resolves deferred outcomes (the viewer's pointer drain). s37: AC3 begun — THE PERSON face (the real React component in a jsdom page; an act is the browser's events) and the format's `act` / `acts` / `person` / `place` / `portability`; Button and Checkbox conform on the runtime (rows C61–C66, D30, §7.2). s36: research done, R10 ruled — build the logic for all 19 with each input's portability class in the spec; geometry grading after NSP-017.**
 
 ## 1. The person sentence
 
@@ -1170,3 +1170,85 @@ side with the cards, the drag from the desktop), because it shares the ports and
   graph and target suites 106 / 106; each other visual spec on the runtime at seed 13, one run each, all conform (the Text 141 s,
   was 550 s; the Slider 610 s, was about 29 minutes — the killer-first order); the package suite 22 suites, 925 passed, 18 skipped
   (828 s, the Group in `batch-visual`); `tsc --noEmit` clean. The stranger file was not run: no file it hashes changed.
+
+### 7.14 s53, 2026-10-07 — the Shape and the Image conform (12 of 19): the Text's machinery with no Tag, and the picture's fetch
+
+**The Shape** ([circle.ts](../../../packages/nodegx-node-spec/src/nodes/circle.ts), `Circle`, v1, 1,223 scenarios, 17 acts). It is the
+Text v5's machinery with no Tag: the element is always a `<div>`, so only a mount makes a new element. Its own inputs (the outline,
+Points, the fill, the stroke, Size, the angles, Custom SVG's source) are look (R10). A Shape takes no children, so Drop Index is 0.
+
+**The Image** ([image.ts](../../../packages/nodegx-node-spec/src/nodes/image.ts), v1, 1,235 scenarios, 18 acts). The Shape's machinery
+(no Tag; an `<img>` has no children), and the picture's outcome:
+- **Source** becomes the element's `src` as `resolveMediaSource` and `getAbsoluteUrl` make it: none for null, nothing, or anything
+  empty as text (`""`, `[]`); otherwise the value as text, after the app's base URL `/` unless it is already absolute, a URL or a
+  data URL. (The runtime's 10,000 found the `[]` case: `getAbsoluteUrl` returns an empty text as it is, and the spec had put `/`.)
+- **Source Set** goes onto the element as written. A boolean is no `srcset` (React 19 warns that it is not a value here), apart
+  from row C94 below.
+- **The browser's fetch** is a new act, `fetched` (`load` or `error`). The browser fetches only for an element on the page with a
+  `src` or a non-empty `srcset`; with neither, the act is nothing. A load fires On Load. A failure sets Error ("The image could not be
+  loaded: " and the `src`, or "— no Source was set" when only Source Set named one), then fires On Error. The fetch is not the
+  pointer's: hidden, Opacity 0 and Pointer Events off do not stop it.
+
+**How it was built** (the Group's way, carried over). Both specs are copies of text.ts with the Tag taken out. The Text's 1,203
+scenarios were converted (scratchpad `convert.py`): a Tag write to a new element type becomes a remount while the node is mounted
+(Mounted off, a settle, Mounted on), and is dropped otherwise; writes to ports the node lacks are dropped; "Text" becomes the node in
+names, except where the name means a string ("read as text"). 189 converted scenarios were duplicates and went. The Text's
+equivalent rows hold with `shownTag` taken out of each shape (`onCircle`).
+
+**What the Tag's twins had been doing.** The first interpreter run left 12 survivors, all on a file-drag act whose own paint mounts
+the element. For the Text, the Tag twin (a new element without a mount) had killed these swaps. Without it, the swap's sibling
+example carries its own element number, and nothing read the number afterwards. Two remount matrices kill them (in both scenario
+files): a drag from the desktop in the frame a remount makes element 2 or 3 (with the attributes on element 1 or 2), read by Space
+(which element has the tabindex), a leave, a new drag and a let go. The second matrix adds a Draggable write right after the act,
+and Opacity 0 as a second way to keep the drag off the element. Its Space comes before the next frame, so it reads whether the act's
+own paint made the element (the Text's recipe). The Image's 10,000 run then found one more: a fetch in the frame Mounted goes off,
+handed the twin that does nothing. Its killer needs a settle between the remount and the Space, because the chain puts the
+attributes on the next element only at the next frame's start.
+
+**The face** (node-spec-target.ts):
+- the Shape and the Image are registered;
+- `Noodl.Env` is `{}`, as the viewer's JavaScript API makes it (noodl-js-api.ts :48). Image.tsx reads `Noodl.Env['BaseUrl']` for
+  every source that starts with `/`, which is nearly every source;
+- `fetched` dispatches the `load` or `error` event on the `<img>`, which React hears there. jsdom fetches nothing, so the face is
+  the browser. Face choice, written down: only an element with a `src` or a non-empty `srcset` has a fetch to finish.
+
+**The runner: `withheld`** (generate.ts, conformance.ts). A known row that takes the whole process down can be neither played nor
+counted. The runtime target now withholds named values from one port's pool, per spec, with the row that is the reason, and every
+report prints a `withheld:` line. Without the option every pool is what it was, so every other spec draws exactly what it drew.
+
+**Findings.**
+- **P107-C91** (low, [the ledger](../../bugs/p107-c91-a-custom-svg-shape-counts-its-own-drawing-as-a-child-for-drop-index.md)): with
+  Shape Custom SVG, the `<span>` holding the drawing counts as a child, so a card dropped from the keyboard lands at 1. drag-drop.ts
+  `slots` keeps HTML elements only: an `<svg>` is not one, so every drawn shape gives 0 (measured, the twin scenarios). A known row on
+  the runtime (`svgShapeIsASlot`), with three row scenarios and two twins.
+- **P107-C92** (medium, [the ledger](../../bugs/p107-c92-a-polygon-or-star-with-a-huge-points-value-runs-the-page-out-of-memory.md)): a
+  Polygon or Star builds `Math.round(Points)` vertices with no upper bound, so 1e9, 2^53 or Infinity runs the heap out. Found by the
+  runtime's first 200 run, which died after 56 s in `Array.from`. Then measured with the heap capped at 700 MB: Points 7 and a Star of
+  100,000 play, and Points 1e9 dies in 7 s. The runtime run withholds the three values from Points (`WITHHELD`).
+- **P107-C93** (**high**, [the ledger](../../bugs/p107-c93-an-image-adds-the-base-url-again-at-every-render.md)): Image.tsx :57-62 puts
+  a project Base URL in front of the source by writing into the node's own props. A sub-path Base URL still starts with `/`, so every
+  render adds it again. Measured with `Noodl.Env.BaseUrl = '/x/'`: Error named `/x/x/x/a.png` after the first frame, then 5 copies,
+  then 7. Controls: no Base URL gives `/a.png`, and `https://cdn.example/` gives one prefix that stays. Every app deployed under a
+  sub-path is exposed. The face has no project Base URL, so the spec does not reach it.
+- **P107-C94** (low, [the ledger](../../bugs/p107-c94-an-image-placed-with-source-set-true-fetches-a-picture-called-true.md)): an Image
+  placed with Source Set `true` fetches a picture called "true". React 19.0 writes `srcset="true"` on an `<img>` it creates with `true`,
+  and removes the attribute when an update sets it to `true` (measured with React alone in jsdom). Found by the runtime's 10,000 (seed
+  20733: 7 of its 23 divergences; the other 16 were the spec's `[]` error). The spec says the intent (R11); a known row on the runtime
+  (`booleanSrcSetAtMount`), with a row scenario and two twins.
+- **The Text's rows reach both**: C79, C82, C84 and C85 are known rows for the Shape and the Image.
+
+**Readings.** 2026-10-07, load 3–5, one heavy job at a time (a peer's Slider run went first).
+- The interpreter, Shape: CONFORMS at 200 on seeds 13, 20729, 20730 and 7 (2,369 / 2,395 mutants killed, the rest declared, 0
+  survivors; about 40 s each) and at 10,000 (seed 20731, 136 s).
+- The interpreter, Image (1,239 scenarios, after its last fix): CONFORMS at 200 on seeds 13, 20729, 20730 and 7 (2,398 / 2,424 killed,
+  the rest declared; about 57 s each) and at 10,000 (seed 20731, 244 s, 2,410 / 2,436).
+- The side-by-side probe: every Shape scenario identical on both targets except its 12 row scenarios, and every Image scenario except
+  its 9. The fetch traces printed on both sides (On Load, Error, On Error).
+- The runtime, Shape: CONFORMS at 200 on seeds 13 and 20730 (122 s each, 0 divergences) and at 10,000 (seed 20733, 532 s; C79 ×1,
+  C82 ×1, C84 ×2, C85 ×1; the three Points values withheld).
+- The runtime, Image: CONFORMS at 200 on seeds 13 (129 s) and 20730 (143 s; C84 ×1), and at 10,000 (seed 20733, 461 s; C79 ×5, C84 ×2,
+  C85 ×2, C94 ×7; 2,428 / 2,454 killed). Its first 10,000 had 23 unattributed divergences: 16 the spec's `[]` error, 7 row C94.
+- The shared changes (the face's `Noodl.Env`, the runner's `withheld`), on the runtime at seed 13: the other 9 visual specs (with P109's
+  committed C64 control specs) and all 86 non-visual specs conform; the runner's own tests and the pinned digest pass.
+- The guard (page-model.test.ts, seeds 13 and 20731): all 14 visual specs green, the two new ones included. Catalog parity green for
+  both. `tsc --noEmit` clean in both packages.

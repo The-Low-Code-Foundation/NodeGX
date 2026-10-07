@@ -145,8 +145,21 @@ function onGroup(row: EquivalentMutant): EquivalentMutant {
   return { ...row, branch: onGroupShape(row.branch, frameEnd, actRow), ...(row.swappedWith !== undefined ? { swappedWith: onGroupShape(row.swappedWith, frameEnd, actRow) } : {}) };
 }
 
+/**
+ * NSP-016 s53 — the Shape (`Circle`) runs the Text's machinery with no Tag (circle.ts), so each Text row holds on the same patch
+ * without the element type a paint records (`shownTag`).
+ */
+function onCircle(row: EquivalentMutant): EquivalentMutant {
+  const shape = (b: string | undefined) => b?.replace(/,?"shownTag"/, '');
+  return { ...row, branch: shape(row.branch), ...(row.swappedWith !== undefined ? { swappedWith: shape(row.swappedWith) } : {}) };
+}
+
 export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = Object.freeze({
   Text: TEXT,
+  // NSP-016 s53 — the Shape runs the Text's machinery with no Tag
+  Circle: TEXT.map(onCircle),
+  // NSP-016 s53 — the Image runs the Shape's machinery (no Tag), and its fetch
+  Image: TEXT.map(onCircle),
   // NSP-016 s52 — the Group runs the Text's machinery (group.ts docblock): the Text's rows, on the Group's shapes
   Group: [
     ...TEXT.flatMap(onGroupRows),

@@ -1,73 +1,66 @@
 # P107 — next session
 
-**Written 2026-10-07 (s52).** Read the [README](README.md) §2–§7 (R15 is the newest ruling). s52's record is
-[NSP-016 §7.13](NSP-016-VISUAL-NODES.md) (the Group); s51's is §7.12 (the Text v5).
+**Written 2026-10-07 (s53).** Read the [README](README.md) §2–§7 (R15 is the newest ruling). s53's record is
+[NSP-016 §7.14](NSP-016-VISUAL-NODES.md) (the Shape and the Image); s52's is §7.13 (the Group).
 
 ## Board (from the task files)
 
 | task | built | committed |
 |---|---|---|
 | NSP-000 … NSP-015 | as s44 (NSP-013 left: AC2, the deep run for s11–s14; NSP-014 / NSP-015 left: AC2's export half, P18) | s1 … s44 |
-| **NSP-016 the visual nodes** | 🟡 **10 of 19 conform. The Group v1 (s52)** on both targets at 200 and 10,000. The other 9 need infrastructure (§7.6). AC4 waits for NSP-017 | `aa8abb06f` … s52 |
+| **NSP-016 the visual nodes** | 🟡 **12 of 19 conform. The Shape (`Circle`) and the Image v1 (s53)** on both targets at 200 and 10,000. The other 7 need infrastructure (§7.6). AC4 waits for NSP-017 | `aa8abb06f` … s53 |
 | NSP-023 the spec without React | ✅ all six ACs (s50) | s45 … s50 |
 | NSP-006 the stranger | ✅ rounds 1–4 | `649e6864d` |
 | NSP-020 ports without a viewer | rows only | s20 |
 | NSP-022 the cloud-only nodes | 📋 (needs a second runtime target) | s21 |
 
-**116 of 147 conform on the runtime (78.9%)** — T5 10/19. The census was not regenerated (it does not count conformance).
+**118 of 147 conform on the runtime (80.3%)** — T5 12/19. The census was not regenerated (it does not count conformance).
 
-## What s52 settled
+## What s53 settled
 
-1. **The Group** ([group.ts](../../../packages/nodegx-node-spec/src/nodes/group.ts), v1, 1,387 scenarios, 19 acts). It runs the
-   Text's machinery (a copy, graded on its own: both specs conform against the same runtime). Its own parts:
-   - three children (`CHILDREN`, the values of the new act `tap`) as drop slots, one at Position Absolute: a keyboard Drop Index (a card
-     starts after both slots, the Group's own lift at 0, ArrowUp / ArrowDown);
-   - the viewer's focus tracker: Focus, Focused and Focus Lost, and the new act `clickAway`;
-   - Scroll To Index and Scroll To Element: they run after the inputs, or wait for the component (at most 16);
-   - **when a frame's work runs**: every pointer handler on the page, and the drag module's `flush`, drains every dirty node.
-2. **The trick that made it converge: what an act resolves is held (`ran`) and reported at the frame's end.** The trace cannot tell
-   when inside a frame an outcome was resolved, only the order. Resolving it inside the act made every act's branch shapes double:
-   131 survivors and 51 minutes on the interpreter at 200, against 25 survivors and 2 minutes after. **Apply it to any visual spec
-   with outcomes.**
-3. **The runner tries first the plays that killed a reducer's recent mutants** (conformance.ts). The verdicts are unchanged. Every
-   spec's mutant run is faster.
-4. **The face** (node-spec-target.ts):
-   - `tap` / `clickAway` use the browser's focusing rule; jsdom's `blur()` refuses an element that lost its tabindex, so the face
-     lends it one;
-   - a callback a signal's rising edge schedules carries that signal's port (Scroll To Index's outcome had no port);
-   - the popup's `Group` stand-in has its own name (every play with a world was given it in place of the real Group);
-   - a placing that throws is torn down (a dead zone leaked into the next play);
-   - the runtime package's jest transforms the viewer's ES-module `.js` files.
-5. **Five rows, all open:** **C86** (low: a click after a Tag change counts as a click elsewhere — modelled, as C77), **C87**
-   (medium: a Tag of `""` / null / 0 / false crashes the render), **C88** (medium: with the non-native scroller, Drop Index counts the
-   wrapper — 0 or 1 whatever the Group holds), **C89** (low: Native platform scroll truthy but not `true` starts the scroller on
-   unwrapped children), **C90** (medium: the scroller and Block Pointer Events together lose Click). C87–C90 are known rows on the
-   runtime (`emptyTag`, `scrollerWrapsChildren`, `nativeScrollNotBoolean`, `scrollerBlocksClick`), each a row scenario plus a twin.
+1. **The Shape** ([circle.ts](../../../packages/nodegx-node-spec/src/nodes/circle.ts), 1,223 scenarios) and **the Image**
+   ([image.ts](../../../packages/nodegx-node-spec/src/nodes/image.ts), 1,239 scenarios) are copies of text.ts with the Tag removed. Only a
+   mount makes a new element. The Image adds Source, Source Set and **`fetched`**, a new act (the browser finishes fetching: `load` or
+   `error`). The face dispatches it on the `<img>` only when there is a `src` or a non-empty `srcset`.
+2. **Converting the Text's scenarios** (scratchpad `convert.py`, gone with the session; easy to rebuild): a Tag write to a new type is
+   a remount while mounted, dropped otherwise; writes to ports the node lacks are dropped; names say the node, except "as text".
+3. **Removing the Tag removed the twins that had killed 12 swap mutants.** A swap hands over the sibling's example, element number
+   included, so a mutant that mounts with the wrong number survives unless something reads the number later. Two remount matrices kill
+   them: Space reads which element has the tabindex, and a Draggable write right after the act reads whether the act's paint made the
+   element. **Expect the same for any spec that loses an input which replaces the element.**
+4. **The runner's `withheld`** (generate.ts, conformance.ts): per spec and port, values the generator does not draw on a target that
+   cannot survive them, each with its row, printed in every report. The runtime test's `WITHHELD` map holds the Shape's Points (C92).
+5. **The face:** `Noodl.Env = {}` (the viewer's API makes it; Image.tsx reads `Noodl.Env['BaseUrl']` for nearly every source), the
+   `fetched` act, and the Shape and Image registered.
+6. **Rows, all open:** **C91** (low: Custom SVG's span counts as a drop slot, so a keyboard drop lands at 1), **C92** (medium: a Polygon or
+   Star with a huge or infinite Points runs the page out of memory), **C93** (**high**: Image.tsx writes a sub-path Base URL back into the
+   node's props, so every render adds it again — `/x/x/x/a.png` after one frame; every app deployed under a sub-path), **C94** (low: an
+   Image placed with Source Set `true` fetches "true" — React 19.0 writes the boolean only on an element it creates).
 
-**Readings (2026-10-07).** Interpreter: 200 on seeds 13, 20729, 20730, 7 and 10,000 (20731) CONFORM, 0 divergences, 0 survivors
-(9,679 / 9,713 at seed 13; 170 s at 200, 394 s at 10,000). Runtime: 200 on seeds 13 and 20730 and 10,000 (seed 20733) CONFORM, 0
-unattributed divergences (10,000: C84 ×6, C85 ×1, C87 ×582, C89 ×87, C90 ×8; 820 s). The shared changes: every non-visual spec at
-seed 13 on the runtime (86, all conform, 190 s); graph and target suites 106 / 106; each other visual spec on the runtime at seed 13, one run each, all conform (the Text 141 s, was 550 s; the Slider 610 s, was ~29 min); the package suite 22 suites, 925 passed, 18 skipped (828 s); `tsc --noEmit` clean; the stranger file not run (no hashed file changed).
+**Readings (2026-10-07).** Interpreter: the Shape at 200 on seeds 13, 20729, 20730, 7 and at 10,000 (20731) CONFORM, 0 survivors; the
+Image the same (after its last fix: 2,398 / 2,424 killed at 200, 2,410 / 2,436 at 10,000, the rest declared). Runtime: the Shape at 200
+on seeds 13 and 20730 and at 10,000 (seed 20733; C79 ×1, C82 ×1, C84 ×2, C85 ×1; Points withheld) CONFORM, 0 unattributed; the Image at 200 on seeds 13 and 20730 and at 10,000 (C79 ×5, C84 ×2, C85 ×2, C94 ×7) CONFORM.
+The shared changes, on the runtime at seed 13: the 9 other visual specs (the peer's C64 control specs included) and all 86 non-visual
+specs conform; the guard (page-model.test.ts) green for all 14 visual specs; catalog parity green; `tsc --noEmit` clean. The full package suite was NOT run before the commit (P109 was waiting on it): runner, parity, types and reach tests 327 / 327.
+The stranger file was not run: no file it hashes changed (spec.ts untouched; `withheld` lives in the runner).
 
-## What s53 does
+## What s54 does
 
-1. **Image and Circle** (the Text's machinery with another look; NSP-016). Carry the Group's way of working over: copy the machinery,
-   carry the Text's scenarios over (scratchpad converter: `Text` → the node in names, Text-only inputs dropped), port the Text's
-   equivalents (`onGroup` in equivalent-mutants.ts is the pattern), then read the survivors. Each needs a page model (G1).
-2. **Ask Richard** (below), and hand the fixes to P109 if he wants them there.
-3. **Cost to watch:** the Group adds about 3 minutes to `batch-visual` (170 s) and about 6 minutes per runtime run (330 s).
+1. **Ask Richard** (below). C93 is the one to hand over first: it breaks pictures in deployed apps.
+2. **Video** (NSP-016): the nearest of the seven left — the Image's way (a copy of the machinery with no Tag) plus the media's own events
+   as acts (the browser plays, pauses, ends, fails). Read Video.tsx and video.ts first; its Base URL code is a local and does not grow.
+3. Then **Drag** (`visual/drag.ts`), after reading it: it may need geometry (NSP-017).
+4. **Cost to watch:** the Shape and the Image each add about 45 s to `batch-visual` and about 2 minutes per runtime run at 200 (the Image's
+   10,000 on the runtime is about 13 minutes).
 
 **Human decisions outstanding.** Ask in plain words (README §7 holds the earlier ones):
-- **C81–C90** (all open; C81–C85 from s50–s51, C86–C90 from s52). Each ledger file proposes a fix, and none needs a ruling on intent.
-  Ask whether to hand them to P109 beside ISL-031's drag-and-drop rows. C84, C85, C87 and C89 are one-line fixes.
-- **The Focus action on a Group that is not on the page** reports Focused and Done (a Group has no `_canFocus`). R13 says a Focus on
-  an unmounted field fails. Ask whether a Group's should fail too. The spec models the runtime for now; no row has been filed.
+- **C81–C94** (all open). Each ledger file proposes a fix, and none needs a ruling on intent. Ask whether to hand them to P109, C93 first.
+- **The Focus action on a Group that is not on the page** reports Focused and Done (s52). R13 says a Focus on an unmounted field fails.
+  Ask whether a Group's should fail too.
 - **R7, R8, R4's confirmation and G1**, and NSP-017's question about the templates' CSS sheets, as before.
 
-**Known face choices, written down (not gaps):** as s51's, plus:
-- every act's pointer is at (0, 0), so a pointer drop's Drop Index is 0 (geometry is graded after NSP-017);
-- a `tap` lands on the child it names, under the Group's hit test;
-- `clickAway` clicks the page's container beside the Group.
+**Known face choices, written down (not gaps):** as s52's, plus: the browser's fetch happens only when the element has a `src` or a
+non-empty `srcset`; the page has no project Base URL (so C93 is not graded by the spec).
 
 ## Before you start
 
@@ -81,6 +74,7 @@ seed 13 on the runtime (86, all conform, 190 s); graph and target suites 106 / 1
 - **After a `/clear`, a running suite or an uncommitted pile may be your own pre-clear session's**: read the `.jsonl` tail.
 - **Row scenarios are labels**: a scenario with a `row` counts as known on ANY divergence, and the matchers grade only the
   generated sequences. So a row scenario's name must say the intent, and a twin must grade what the row would hide.
+- **s53's probes** (all deleted): `zz-side` gained `ZZ_FILE` use for one-off scenario files (C91, C92, the Source Set measurements); `zz-conf` and `zz-branches` (which also prints the plays that reach each branch — read that before writing a killer). A capped heap (`NODE_OPTIONS=--max-old-space-size=700`) turns an OOM into a seconds-long measurement.
 - **The probes** (s47's; s48, s51 and s52 rebuilt `zz-side`; all deleted; each takes a minute to rebuild). s52 added `zz-bisect` (drop params, then steps, while the two targets still differ) and `zz-pair` (play the generated sequences before one on ONE runtime target, to find a play that leaks into the next — `ZZ_PICK` picks which). s51 added `zz-mut.test.ts`
   in the spec package: `discoverBranches` over the suite, then ONE mutant (`ZZ_M` = reducer||kind||branch||swappedWith) played on
   the scenarios whose names hold `ZZ_NAMES`, with the branch's and the sibling's recorded examples printed. Read the examples
