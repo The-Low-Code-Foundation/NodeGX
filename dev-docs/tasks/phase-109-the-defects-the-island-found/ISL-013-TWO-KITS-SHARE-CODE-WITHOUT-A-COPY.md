@@ -1,6 +1,6 @@
 # ISL-013 — Two kits share code and data without a copy
 
-**Status: 🟢 ruled s18 (2026-10-05), not built — "A kit says what it needs": a manifest `requires`, loaded first whatever its name, read through a public call, refused by name when missing (rulings 1 (a) and 2 (a)).** **Earlier status: ⬜ not started — scoped 2026-10-01 at `27d891bf3`.** **Source:** [the island audit](AUDIT-2026-10-01.md) row
+**Status: 🟡 s28 (2026-10-07): slice 1 built — `requires` and `Noodl.getModule` on every loader (page, SSR, the door's catalog reader, cloud functions); AC2 met at loader level, AC3 met but for Settings → Kits. Left: AC1's deployed drive, AC3's Settings → Kits, AC4 (the garden kits adopt it), AC5 (the job table), AC6 (the per-template byte census). Ruled s18 (2026-10-05): "A kit says what it needs" — a manifest `requires`, loaded first whatever its name, read through a public call, refused by name when missing (rulings 1 (a) and 2 (a)).** **Earlier status: ⬜ not started — scoped 2026-10-01 at `27d891bf3`.** **Source:** [the island audit](AUDIT-2026-10-01.md) row
 **F17** · found by P106 [IG-007](../phase-106-the-island-grows/IG-007-GARDEN-3D.md) (the 3D kit borrows the 2D
 kit's helpers) and P108 IW-002 (the job table), 2026-09-28 → 09-30 · **Side:** product (module manifest and injector,
 the runtime's module list, kit docs and types)
@@ -117,3 +117,40 @@ None yet.
   `dependencies`, so a node-less shared module listed as a dependency is invisible to the door's reader. (b) now needs a
   reader change Richard just declined; (a) (`requires`, the injector and the reader loading the needed kit first) does not.
 - Rulings 1–2 not asked.
+
+### Session 28 (2026-10-07) — slice 1: the mechanism, on every loader
+
+Built in a worktree (`p109-isl013`), one commit. The shape, choosing what the ruling left open:
+
+- **`requires` names a kit by its folder or its manifest `name`.** The garden kits' manifests are named "Garden Kit" and
+  "Garden 3D Kit"; the folder (`garden-kit`) is the stable id an author would write.
+- **`Noodl.getModule(id)` returns that kit's `exports`** (a new, optional field of the module object), by name or folder, or
+  `undefined`. A kit chooses what it shares, so the contract is not built on an undeclared property (§7's trap).
+- **Order:** `orderByRequires` in `@nodegx/module-inject`, depth first over the old alphabetical order inside `toInjectModules`.
+  A project that declares nothing comes back in exactly its own order.
+- **Refusal (ruling 2 (a)):** a kit whose required kit is missing, refused, or needs it back stays in the list with `refused` and
+  no script; the page gets a `console.error` naming it and why.
+- **Folder on the page:** only a kit some other kit requires gets a `__noodl_module_folder` marker (cleared after its script),
+  so no other kit's tags change.
+
+| Loader | How it got the order | `getModule` | A refusal says |
+|---|---|---|---|
+| page (deploy, editor viewer, render harness) | `buildInjectionTags` over `toInjectModules` | bootstrap | `console.error` in the page |
+| SSR | replays the page's tags (`kit-modules.js` reads the folder marker) | `runtime-globals.js` | the server log |
+| door's catalog reader | `toInjectModules(scanned)` instead of scan order | its `Noodl` stub | `failures` → `get_project_info` |
+| cloud functions | `readCloudModuleSources` (already `toInjectModules`) | per runtime | a load failure "it was not loaded: …" |
+
+Not changed: the editor's `verifyKitSource` (its `Noodl` is a no-op proxy, so a kit calling `getModule` passes its shape check);
+the exporter's two bootstraps (`parse/kitSource.ts`, `emit/kits.ts`), owed by P18.
+
+**AC1 RED, at loader level.** `requires.test.js`: at HEAD 6 of 8 red (the user sorted first), its two controls green. The deployed
+drive AC1 asks for is not done.
+**AC2.** One spec per loader, each with `aa-user` sorting before `zz-base`, a reverted arm (no `requires`: the user reads "nothing")
+and a missing arm: module-inject `requires.test.js` (9), viewer `isl-013-ssr-requires.test.js` (5), noodl-mcp `isl013KitRequires.test.ts`
+(4, the reader + `get_project_info`), viewer-cloud `isl-013-cloud-requires.test.ts` (4). Control: the base `entry.js`,
+`kit-modules.js` and `runtime-globals.js` red on all 9 reader and SSR arms.
+**AC3.** Refused by name in the page's console, the server log, the cloud load result and `get_project_info`. Settings → Kits not
+reached.
+**Types and docs.** `NoodlGlobal.getModule`, `NodeKitModule.exports` / `.folder`; seven graded kit copies refreshed (additions only;
+rocket-school's two stay out of the gate as before). custom-nodes.md "A kit that reads another kit" (content-authoring `written.py`
+and `closer.py` clean, against a firing control).
