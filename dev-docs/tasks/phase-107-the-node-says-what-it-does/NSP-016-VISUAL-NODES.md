@@ -1382,3 +1382,49 @@ graph and target suites 106 / 106; the 85 non-visual specs on the runtime at see
 CONFORMS; the guard and its plants 37 / 37 (after the Group's `stampOn` fix: it had been red at HEAD since P109's Group v3, 3364b47f6);
 the package suite 22 suites, 939 passed, 18 skipped, the one failure the guard's Group (602 s). No file the stranger hashes changed.
 
+
+### 7.16 s55, 2026-10-07 — the Drag read and measured: no geometry needed except Constrain to parent; four rows
+
+**What the Drag is.** It is not drag-drop.ts. The Drag node (`nodes/visual/drag.ts`, `components/visual/Drag/Drag.tsx`) wraps the
+`react-draggable` library (4.5.0) around its FIRST child and moves that child's element with a CSS `translate`. It has no element of its
+own (`noDataAttributes`). Its outputs come from the library's callbacks: Drag Started at the press, Drag Moved and Drag X / Y and Delta
+X / Y at every move, Drag X / Y and Drag Ended at the release. Start Drag X / Y set the position from the graph (and send Drag X / Y
+and Delta X / Y). Snap To Position X / Y animate the position with one scheduler timer per axis (`createTimer`, Ease Out), which is
+Animate To Value's machinery (animate-to-value.ts already models it); a press stops both timers.
+
+**What the face can play, measured on the real component in jsdom** (a throwaway probe, deleted):
+- A mouse drag: `mousedown` on the child's element, `mousemove` and `mouseup` on the document, with `clientX` / `clientY`. The
+  position is pure arithmetic: the library reads the pointer against `document.body` (jsdom has no `offsetParent`), so a move of
+  (dx, dy) moves the element by (dx, dy) / Scale (Scale 2: 100 px → 50; 0.5: → 200 — **correct, divided once**). A second drag
+  starts where the first stopped. A right-button press starts nothing; Enabled off starts nothing; a press and release with no move
+  fires Drag Started and Drag Ended and no Drag Moved.
+- **Constrain to parent is geometry, and jsdom silently skips it**: the bounds are `offsetLeft`, `clientWidth` and the paddings; jsdom
+  has no `offsetLeft`, the bounds come out NaN and the library's `isNum` drops them, so the element moves freely (40, 40 with the
+  constraint on). A spec would be grading jsdom. Face choice, to be written down: **the face lays nothing out, so Constrain to parent
+  constrains nothing**; its clamp (and the slack the library keeps past an edge) waits for geometry, with Columns.
+- A finger: the library reads `targetTouches` / `changedTouches` with an `identifier`, which the face's `touch` act does not carry. A
+  touch drag needs those on the event.
+
+**The face needs a pointer with a position**: every act so far has its pointer at (0, 0) and `move` is a fixed 10 px. The Drag needs
+a press at a point, moves to points and a release at a point, each its own act so graph writes can land between them.
+
+**Reach.** One product use: the Site Builder's `/Admin/SectionRow` wraps each section's row in a Drag (Axis Y, Constrain to parent
+off) to reorder sections; Drag Ended runs a Function that measures the row against its siblings and snaps it back. One catalog
+example (`vis-drag-snap-back`). No shelf template.
+
+**Findings** (all open; P109's under R16):
+- **P107-C101** (**high**, [the ledger](../../bugs/p107-c101-nothing-inside-a-drag-can-be-tapped-on-a-touch-screen.md)): on a touch
+  screen nothing inside a Drag can be tapped. The library cancels every `touchstart` on the dragged element (`defaultPrevented: true`
+  for a touch on a button inside; a `mousedown` is not cancelled), and **headless Chrome 154 with touch emulation** sends no `click`
+  and no focus for a tap inside a box whose `touchstart` is cancelled (both work in the same box uncancelled). The Site Builder's
+  section row holds its Save, Delete, Move and image buttons and four text fields inside its Drag.
+- **P107-C102** (medium, [the ledger](../../bugs/p107-c102-a-drag-locked-to-one-axis-reports-movement-on-the-other.md)): Axis X still
+  reports Drag Y and Delta Y (50, then 80, while the element is drawn at `translate(30px,0px)`); the next drag starts by sending Drag
+  Y 0. The library documents that `axis` only controls the drawing; Drag.tsx forwards both axes.
+- **P107-C103** (medium, [the ledger](../../bugs/p107-c103-a-drag-draws-only-its-first-child.md)): a Drag draws only its first child;
+  the rest are silently absent. The catalog example `vis-drag-snap-back` puts its "Offset readout" Text second, so it never appears.
+- **P107-C104** (low, [the ledger](../../bugs/p107-c104-css-class-and-css-style-on-a-drag-do-nothing.md)): CSS Class and CSS Style on
+  a Drag reach no element.
+
+**Withdrawn after measuring:** "Scale divides twice". `offsetXYFromParent` takes a `scale`, but `Draggable` keeps its own `scale` prop
+and the core is left at 1.
