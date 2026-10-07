@@ -10,6 +10,9 @@ module.exports = {
   testEnvironment: 'node',
   transform: {
     '^.+\\.tsx?$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.json' }],
+    // NSP-016 s52 — the Group's component imports three better-scroll plugins written as ES modules (Group.tsx :7-12); the
+    // node-spec runtime target loads the viewer's nodes from source, so their `export default` needs the CommonJS transform
+    '/noodl-viewer-react/src/.+\\.js$': ['babel-jest', { plugins: ['@babel/plugin-transform-modules-commonjs'] }],
     '^.+\\.jsx?$': 'babel-jest'
   },
   testMatch: ['**/?(*.)+(spec|test).[jt]s?(x)'],

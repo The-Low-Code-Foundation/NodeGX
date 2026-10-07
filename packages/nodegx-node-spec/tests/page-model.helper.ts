@@ -114,6 +114,29 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
     frameEnd: ['chain'],
     elementCalls: { 'on.draggable': ['onPage', 'elem', 'attrsOn'], 'on.acceptDrops': [], 'world.timer': ['onPage', 'elem', 'pointerAt', 'sourceElem'] }
   },
+  // s52 — the Text's model with the Group's additions: the focus tracker's list (the viewer's, moved by Focus and by clicks), the
+  // element the component mounted with (the tracker finds the node on it, C86), the gesture's index, Block Pointer Events, the scrolls
+  Group: {
+    node: ['mounted', 'tag', 'chain', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'blocks', 'draggable', 'dragValue', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'dragKind', 'phase', 'input', 'inZone', 'index', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'isDragOver', 'droppedFiles', 'droppedFile', 'scrollIndex', 'scrollElement', 'scheduled', 'waiting', 'ran'],
+    attr: {
+      onPage,
+      shownTag: { follows: (s) => (s.onPage ? s.tag : KEEP), preset: false }
+    },
+    // Group.tsx componentDidMount puts the node on the element it mounted with: a mount makes it, a new Tag does not (C86)
+    element: { elem: { changesWith: ['onPage', 'shownTag'] }, stampOn: { changesWith: ['onPage'] } },
+    held: { elementFocused: keyboard, attrsOn: { keeps: 'what a module put on the element' }, fileCarry: { keeps: 'a drag from outside the page' }, fileOn: { keeps: 'a drag from outside the page' },
+      cardFocused: keyboard,
+      pointerAt: { keeps: 'where the pointer is' },
+      sourceElem: { keeps: 'what a module put on the element' },
+      // focus-tracker.ts — the viewer's list of focused nodes: a Group is not focusable, so this is its keyboard focus
+      listed: keyboard
+    },
+    // `whenMounted`'s chain; the frame's scrolls (`scheduleAfterInputsHaveUpdated`), the ones waiting for the component, and the
+    // outcomes the frame resolved before its end (reported there, in order)
+    frameEnd: ['chain', 'scheduled', 'waiting', 'ran'],
+    // the Focus action asks the tracker's list; the hold timer's lift meets the page and drains the frame's scrolls
+    elementCalls: { 'on.draggable': ['onPage', 'elem', 'attrsOn'], 'on.acceptDrops': [], 'on.focus': ['listed'], 'world.timer': ['onPage', 'elem', 'pointerAt', 'sourceElem'] }
+  },
   'net.noodl.controls.textinput': {
     node: ['fieldType', 'runOnChange', 'maxLength', 'textToInsert', 'text', 'startValue', 'out', 'wire', 'announced', 'hasAnnounced', 'queue', 'blocksPointer', 'opacityZero', ...CONTROL_NODE],
     attr: { onPage, pageEnabled, pageVisible, pageOpacityZero: { follows: (s) => s.opacityZero }, pageType: { follows: (s) => (s.onPage ? s.fieldType : KEEP) } },

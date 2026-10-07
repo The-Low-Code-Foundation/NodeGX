@@ -1,7 +1,7 @@
 # NSP-016 — Visual nodes: research first, then layout semantics that are not CSS
 
 **Opened 2026-09-29.** **Depends on NSP-008.**
-**Status: 🟡 s44 (2026-10-05): the Text v3 — C79 is a known row (R11: the spec says the intent, not React's redraw rules); 162 scenarios; s43's 47 deep-run survivors killed (§7.9). s43 (2026-10-05): drag and drop researched ([RESEARCH-DRAG-DROP.md](RESEARCH-DRAG-DROP.md)) and the Text conforms (9 of 19; rows C77, C78, §7.8) — its drag SOURCE graded on a lone node; the zone side and the file drop are step (b). The face learned the browser's hit test, and the 7 conforming specs it moved say what a browser lets a person do. s42 (2026-10-04): the Radio Button Group and the Radio Button conform on both targets at 200 and 10,000 (8 of 19; rows C76, D37, §7.7) — the visual tree, per node: a node's children are on its PAGE (the spec declares them; the face builds them with the node's own `addChild`; a person `pick`s one) and a node's parent is its WORLD (the GROUP seam). s41 (2026-10-04): Slider and Icon conform on both targets at 200 and 10,000 (6 of 19; rows D36, C73, C74, C75; C63 takes null, §7.6) — the face grew `slide` (jsdom's range sanitization, which it applies to every write, plus the browser's step rule, which jsdom lacks; a reversed range is not played); the 13 left each need infrastructure first (a visual tree with context, drag and drop, geometry, media — §7.6). s39 (2026-10-04): Dropdown conforms on both targets (4 of 19; rows C70, C71, D34 and instances of C65, C66, D30, §7.4) — the face grew `choose` (a keyboard pick: an enabled option the list offers, no `change` for the one already selected); the spec keeps the node's value, the author's Value, the shown value and the browser's selection apart because the component does. s38: Text Input conforms on both targets (3 of 19; rows C68, C69, D31–D33, §7.3) — the face grew `type` and `key`, the format a person patch that resolves deferred outcomes (the viewer's pointer drain). s37: AC3 begun — THE PERSON face (the real React component in a jsdom page; an act is the browser's events) and the format's `act` / `acts` / `person` / `place` / `portability`; Button and Checkbox conform on the runtime (rows C61–C66, D30, §7.2). s36: research done, R10 ruled — build the logic for all 19 with each input's portability class in the spec; geometry grading after NSP-017.**
+**Status: 🟡 s52 (2026-10-07): the Group conforms on both targets at 200 and 10,000 (10 of 19; v1, 1,387 scenarios) — its children as drop slots, the focus tracker, the scroll actions and when a frame's work runs; rows C86–C90 (§7.13). s44 (2026-10-05): the Text v3 — C79 is a known row (R11: the spec says the intent, not React's redraw rules); 162 scenarios; s43's 47 deep-run survivors killed (§7.9). s43 (2026-10-05): drag and drop researched ([RESEARCH-DRAG-DROP.md](RESEARCH-DRAG-DROP.md)) and the Text conforms (9 of 19; rows C77, C78, §7.8) — its drag SOURCE graded on a lone node; the zone side and the file drop are step (b). The face learned the browser's hit test, and the 7 conforming specs it moved say what a browser lets a person do. s42 (2026-10-04): the Radio Button Group and the Radio Button conform on both targets at 200 and 10,000 (8 of 19; rows C76, D37, §7.7) — the visual tree, per node: a node's children are on its PAGE (the spec declares them; the face builds them with the node's own `addChild`; a person `pick`s one) and a node's parent is its WORLD (the GROUP seam). s41 (2026-10-04): Slider and Icon conform on both targets at 200 and 10,000 (6 of 19; rows D36, C73, C74, C75; C63 takes null, §7.6) — the face grew `slide` (jsdom's range sanitization, which it applies to every write, plus the browser's step rule, which jsdom lacks; a reversed range is not played); the 13 left each need infrastructure first (a visual tree with context, drag and drop, geometry, media — §7.6). s39 (2026-10-04): Dropdown conforms on both targets (4 of 19; rows C70, C71, D34 and instances of C65, C66, D30, §7.4) — the face grew `choose` (a keyboard pick: an enabled option the list offers, no `change` for the one already selected); the spec keeps the node's value, the author's Value, the shown value and the browser's selection apart because the component does. s38: Text Input conforms on both targets (3 of 19; rows C68, C69, D31–D33, §7.3) — the face grew `type` and `key`, the format a person patch that resolves deferred outcomes (the viewer's pointer drain). s37: AC3 begun — THE PERSON face (the real React component in a jsdom page; an act is the browser's events) and the format's `act` / `acts` / `person` / `place` / `portability`; Button and Checkbox conform on the runtime (rows C61–C66, D30, §7.2). s36: research done, R10 ruled — build the logic for all 19 with each input's portability class in the spec; geometry grading after NSP-017.**
 
 ## 1. The person sentence
 
@@ -1073,3 +1073,100 @@ matcher now counts a drag starting and a zone lighting.
   (565 s; C85 attributed once). The known-rows test is green: C79, C82, C84 and C85 each still fire.
 - The runtime at 10,000 (seed 20732): the first run had 10 of 11 divergences known (C79 ×3, C82, C84 ×5, C85) and one C79 the
   matcher missed. With the matcher widened: CONFORMS, 0 unattributed divergences (C79 ×4, C82, C84 ×5, C85), 1,516 s.
+
+### 7.13 s52, 2026-10-07 — the Group conforms (10 of 19): children, the focus tracker, the scroll actions
+
+**The spec** ([group.ts](../../../packages/nodegx-node-spec/src/nodes/group.ts), v1, 1,387 scenarios, 19 acts). The Group
+runs the Text's machinery word for word (the pointer and its hit test, Mounted, Tag, the keyboard, the drag source, the zone
+side with the cards, the drag from the desktop), because it shares the ports and `drag-drop.ts`. What it adds:
+
+- **Children.** The page puts three Texts inside it with the Group's own `addChild` before the first render (`CHILDREN`, the
+  values of the new act `tap`): `one`, `two` at Position Absolute, `three`. Children Count is 3 in the first frame.
+- **Drop Index counts the slots** (`slots`: laid-out children, Position Absolute left out, so two). A card picked up from the
+  keyboard starts after both slots (every slot comes before it on the page), the Group's own keyboard lift at 0, ArrowDown and
+  ArrowUp move one place between 0 and 2, and ArrowRight into the Group starts at 0. A pointer drop's index is geometry; every act's
+  pointer is at (0, 0), so it is 0 here (a face choice, written down; graded after NSP-017).
+- **The focus tracker** (`focus-tracker.ts`). A Group is not focusable, so Focused and Focus Lost come from the viewer's list. The
+  Focus action lists it (Focused unless listed) and reports Done, on the page or not. A click on the Group or a child lists it, a
+  click elsewhere drops it (`clickAway`, a new act: a click on the page beside it), and leaving the page drops it silently. A
+  click the drag module swallows reaches neither the list nor Click.
+- **Scroll To Index and Scroll To Element**, run after the frame's inputs, on the component when there is one, else waiting for it
+  (at most 16; the 17th pushes the oldest out with Failure). Scroll To Index is Done when the element has a child at Index as an
+  HTMLCollection reads it (a canonical array index below 3: `"1"` and `-0` are Done, `1.5` and `null` fail). Scroll To Element is
+  Done for nothing on Element, else Failure (a reference to another node is not yet a trace value).
+- **When the frame's work runs.** Every pointer handler on the page drains every dirty node (`pointerlisteners.ts`), and so does the
+  drag module's `flush`. An act that reaches the Group's handler, a child's or a card's, or that moves the drag, runs the frame's
+  scrolls at the act; any other act leaves them for the frame's end. Block Pointer Events adds blockers on every pointer event, so a
+  move drains too. The spec holds what an act resolves (`ran`) and reports it first at the frame's end, because the trace prints a
+  frame's outcomes together in the order they were resolved. A Focus that comes after waits behind it.
+
+**The face** (node-spec-target.ts):
+- the Group's children are built from `acts.tap.values`;
+- `tap` and `clickAway` use the browser's focusing rule: a press focuses the nearest focusable ancestor, else the page. jsdom's
+  `blur()` does nothing on an element that has lost its tabindex, so the face lends it one for the blur;
+- an outcome begun inside a callback that a signal's rising edge scheduled is that signal's invocation. Without this, Scroll To
+  Index's outcome had no port (`''`);
+- the popup's stand-in `Group` is registered under its own name and handed only to the popup's one `createPrimitiveNode('Group')`.
+  Before this, every play with a world was given the stand-in in place of the real Group;
+- a placing that throws (C87) now tears down what it made, as a dispose does. The play gets no handle to dispose, so the node
+  stayed in the drag module's registries, and a later play's card met its dead zone (found by one of the 200 at seed 20730 that
+  diverged only after sequence 52);
+- the runtime package's jest transforms the viewer's ES-module `.js` files (the Group's three better-scroll plugins).
+
+**Findings.**
+- **P107-C86** (low, [the ledger](../../bugs/p107-c86-a-click-on-a-group-after-a-tag-change-counts-as-a-click-elsewhere.md)): after
+  a Tag change, a click on the Group counts as a click elsewhere (Focus Lost, never Focused) until it remounts. The component puts
+  the node on the element only in `componentDidMount`. Modelled (`stampOn`), as C77 is.
+- **P107-C87** (medium, [the ledger](../../bugs/p107-c87-a-group-whose-tag-is-empty-crashes-its-render.md)): a Tag of `""`, null, 0
+  or false makes React throw drawing the Group (`const { as = 'div' }` covers only undefined). The spec draws a `div`, as the Text
+  does; a known row on the runtime (`emptyTag`), with a row scenario and its twin. Found by the first side-by-side run, from a Text
+  scenario carried over.
+- **P107-C88** (medium, [the ledger](../../bugs/p107-c88-a-scrolling-group-counts-its-scroller-as-its-only-child-for-drop-index.md)):
+  with Enable Scroll on and Native platform scroll off (what the Scroll To actions' description asks for), the children sit in the
+  scroller's wrapper, so Drop Index counts one slot: a card dropped from the keyboard lands at 0 or 1 whatever the Group holds.
+  Measured: Enter after a keyboard pick-up drops at 1 with the scroller, at 2 without it. The spec counts the children (the port's
+  words); a known row (`scrollerWrapsChildren`).
+- **P107-C89** (low, [the ledger](../../bugs/p107-c89-native-platform-scroll-wired-a-value-that-is-not-true-starts-the-scroller-on-unwrapped-children.md)):
+  Native platform scroll wired a truthy value that is not `true` (1, "false") — `render` reads it as native, `componentDidMount`
+  as not (`!== true`) — so the scroller runs on unwrapped children: Scroll To Index fails for every child, and the scroller takes
+  clicks. Found by the runtime's 200 (five sequences bisected to these two ports). A known row (`nativeScrollNotBoolean`).
+- **P107-C90** (medium, [the ledger](../../bugs/p107-c90-a-scrolling-group-with-block-pointer-events-fires-no-click.md)): the
+  JavaScript scroller and Block Pointer Events together: a click on the Group or a child fires no Click (Focused still does).
+  Found by the runtime's 10,000 (seed 20733, seven sequences), then measured with controls: either alone keeps Click. A known row
+  (`scrollerBlocksClick`).
+- **The Text's rows reach the Group**, as the C79 ledger said: C79, C82, C84 and C85 are known rows for the Group too.
+
+**How the mutants converged** (worth knowing for Image and Circle, which run the same machinery):
+1. The Text's 1,202 scenarios, carried over (`Text` → `Group` in their names; the one `text` write became Clip Content), killed
+   the shared machinery's mutants. The Text's 30 equivalent rows hold on the Group's shapes (`onGroup` in equivalent-mutants.ts adds
+   the keys the Group writes beside them), plus their twins for a click that lists the Group (Focused) or drops it (Focus Lost).
+2. **A drain inside an act doubled every act's shapes**, because a branch's shape includes its outcomes: 131 survivors, and 51
+   minutes on the interpreter at 200. Holding what an act resolves for the frame's end (`ran`; the trace cannot tell the
+   difference) and writing the scroll lists in every act took it to 25 survivors and 2 minutes. **Lesson: an outcome resolved
+   inside an act multiplies that act's branches. If the trace prints it with the frame anyway, resolve it at the frame's end.**
+3. **The runner now tries first the plays that killed the reducer's last mutants** (conformance.ts). The verdicts are the same,
+   because a mutant is killed exactly when some play tells it apart. The Group's killers sat at the end of its file.
+4. The matrices are joined plays (the s45 recipe): the drain (8 gestures × 2 paints × 2 directions, 22 acts per play), who holds
+   the keyboard after a press (24 plays), and the frame end's outcomes together (7 kinds of frame × 44 combinations of Focus and
+   the two scrolls, each read by who can take the keyboard, a Draggable write before any act — s44's recipe for a paint left to the
+   next act — the Group back on the page, a click and the next frame). The deep runs then found single shapes the matrices missed
+   (a mount that spends `whenMounted`'s last two frame starts; a held Focus with a failing scroll after a Tag change), each killed by
+   a play of its own.
+5. Declared equivalent, beyond the Text's: an act that moved nothing writes the lists it found; the frame end's drop-set when it
+   reports outcomes (States' and Pop Component Stack's reason: only the next settle shows it); a card's carry ended outside a zone by
+   a tap or a click beside it (the Text's reason); a click beside it nothing ate, handed the eaten twin; a mount with no chain, handed
+   the twin whose mount spent the chain (its example writes 0); and the Text's click row for a tap.
+
+**Readings.** 2026-10-07, load 3–6, one heavy job at a time; a peer's suite ran beside the first ones.
+- The interpreter at 200: CONFORMS on seeds 13, 20729, 20730 and 7 (1,387 scenarios, 0 divergences, 9,679 / 9,713 mutants killed
+  at seed 13, 34 declared, 0 survivors; 170 s each).
+- The interpreter at 10,000 (seed 20731): CONFORMS, 0 divergences, 10,301 / 10,324 killed, the rest declared (394 s).
+- The runtime at 200: CONFORMS on seeds 13 (9,679 / 9,713) and 20730 (9,678 / 9,713), 0 unattributed divergences; the known-rows test
+  is green (330 s each).
+- The runtime at 10,000 (seed 20733): CONFORMS, 0 unattributed divergences; known C84 ×6, C85 ×1, C87 ×582, C89 ×87, C90 ×8;
+  10,452 / 10,480 killed, the rest declared (820 s). (C87 so often because the generator draws an empty Tag often.)
+- The side-by-side probe: all 1,387 scenarios identical on both targets, the 16 row scenarios excepted.
+- The shared changes (the runner's order, the face): every non-visual spec on the runtime at seed 13 (86, all conform, 190 s); the
+  graph and target suites 106 / 106; each other visual spec on the runtime at seed 13, one run each, all conform (the Text 141 s,
+  was 550 s; the Slider 610 s, was about 29 minutes — the killer-first order); the package suite 22 suites, 925 passed, 18 skipped
+  (828 s, the Group in `batch-visual`); `tsc --noEmit` clean. The stranger file was not run: no file it hashes changed.

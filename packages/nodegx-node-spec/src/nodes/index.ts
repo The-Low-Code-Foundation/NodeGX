@@ -49,6 +49,7 @@ import { Dropdown } from './dropdown';
 import { Slider } from './slider';
 import { Icon } from './icon';
 import { Text } from './text';
+import { Group } from './group';
 import { RadioButtonGroup } from './radiobuttongroup';
 import { RadioButton } from './radiobutton';
 import { NavigateToPath } from './navigate-to-path';
@@ -160,6 +161,7 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [Slider.type]: Slider,
   [Icon.type]: Icon,
   [Text.type]: Text,
+  [Group.type]: Group,
   [RadioButtonGroup.type]: RadioButtonGroup,
   [RadioButton.type]: RadioButton,
   [NavigateToPath.type]: NavigateToPath,
@@ -251,6 +253,7 @@ export {
   Slider,
   Icon,
   Text,
+  Group,
   RadioButtonGroup,
   RadioButton,
   NavigateToPath,

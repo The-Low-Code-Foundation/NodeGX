@@ -122,6 +122,64 @@ const nonTextAcceptKind = nonTextDragInput('acceptKind');
 const nonTextZoneName = nonTextDragInput('dropZoneName');
 
 /**
+ * NSP-016 §6 C87 (s52) — Group.tsx takes its tag with a destructuring default (`const { as = 'div' }`), which covers only `undefined`:
+ * a Tag of `""`, null, 0 or false reaches `React.createElement` and the render throws. The spec draws a `div`, as the Text does
+ * (`props.as || 'div'`). Narrow: the runtime threw, and the Tag last written before the difference (a placing's param is a set too)
+ * is falsy and not undefined (NaN and -0 are falsy).
+ */
+const heldAt = (d: Divergence, port: string): unknown => {
+  const written = d.reference.slice(0, d.difference.index).filter((e) => e.t === 'set' && e.port === port).pop() as { value?: unknown } | undefined;
+  return written ? written.value : d.params[port];
+};
+const emptyTag = (d: Divergence) => {
+  if (d.difference.threw === undefined) return false;
+  // a placing's Tag throws at the placing, before any step: the param is the Tag then
+  const v = heldAt(d, 'as');
+  if (v === undefined) return false;
+  const falsyNum = typeof v === 'object' && v !== null && ['NaN', '-0'].includes(String((v as { $num?: unknown }).$num));
+  return v === '' || v === null || v === false || v === 0 || falsyNum;
+};
+
+/**
+ * NSP-016 §6 C88 (s52) — Enable Scroll on and Native platform scroll off (the setting the Scroll To actions ask for): Group.tsx wraps
+ * the children in the scroller's `scroll-wrapper-internal` div, and drag-drop.ts `slots` counts the zone element's own children — one,
+ * the wrapper. So a keyboard drop's index runs 0 to 1 whatever the children. The spec counts the children (the port's own words).
+ * Narrow: the difference is Drop Index, with Enable Scroll truthy and Native platform scroll falsy at it.
+ */
+const scrollerWrapsChildren = (d: Divergence) => {
+  if (d.difference.threw !== undefined) return false;
+  const at = (e: TraceEvent | undefined) => !!e && e.t === 'value' && e.port === 'dropIndex';
+  if (!at(d.reference[d.difference.index]) && !at(d.actual[d.difference.index])) return false;
+  return !!heldAt(d, 'scrollEnabled') && !heldAt(d, 'nativeScroll');
+};
+
+/**
+ * NSP-016 §6 C89 (s52) — Native platform scroll holding a truthy value that is not `true` (a wired 1, "false"): Group.tsx `render`
+ * reads it as native (`!props.nativeScroll`, no wrapper) and `componentDidMount` as not native (`!== true`), so the JavaScript scroller
+ * runs on the unwrapped children: Scroll To Index looks for the child inside the first child and fails, and the scroller takes the
+ * click (with Block Pointer Events, Click never fires). The spec reads it as native, as the render does. Narrow: Enable Scroll and such
+ * a Native platform scroll held at some point before the difference (the scroller started at the mount outlives the value).
+ */
+const nativeScrollNotBoolean = (d: Divergence) => {
+  if (d.difference.threw !== undefined) return false;
+  // s52's 10,000: the scroller on unwrapped children reaches further than the scroll and the click (a tap after a carry: Focused)
+  const odd = (v: unknown) => !!v && v !== true && !(typeof v === 'object' && v !== null && ['NaN', '-0'].includes(String((v as { $num?: unknown }).$num)));
+  return everHeld(d, 'nativeScroll', odd) && everHeld(d, 'scrollEnabled', (v) => !!v);
+};
+
+/**
+ * NSP-016 §6 C90 (s52) — the JavaScript scroller (Enable Scroll on, Native platform scroll not `true`) and Block Pointer Events
+ * together: a click on the Group or a child fires no Click (the focus walk still hears it). Either alone keeps Click. Narrow: the
+ * difference is at Click, with all three held at it.
+ */
+const scrollerBlocksClick = (d: Divergence) => {
+  if (d.difference.threw !== undefined) return false;
+  const at = (e: TraceEvent | undefined) => !!e && e.t === 'signal' && e.port === 'onClick';
+  if (!at(d.reference[d.difference.index]) && !at(d.actual[d.difference.index])) return false;
+  return !!heldAt(d, 'blockTouch') && !!heldAt(d, 'scrollEnabled') && heldAt(d, 'nativeScroll') !== true;
+};
+
+/**
  * NSP-023 (R12, ruled 2026-10-05) — the Text Input v2 states the intent; what the runtime does instead only because of how React
  * draws is these known rows. Shared shape: a frame (the steps since the last settle) and the group of events that settle prints.
  */
@@ -199,6 +257,17 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
     // s51 — the zone side's two: the drag controller reads Accept Kind and Zone Name as text and throws on anything else
     { row: 'NSP-016 §6 C84 — Accept Kind not text: the drag controller throws where it reads the kinds, so a drag that meets the zone dies there', matches: nonTextAcceptKind },
     { row: 'NSP-016 §6 C85 — Zone Name not text: a drop on the zone throws after Dropped, so the drag never ends', matches: nonTextZoneName }
+  ],
+  // s52 — the Group: the Text's rows (the same shared ports and drag module), and its own Tag
+  Group: [
+    { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer },
+    { row: 'NSP-016 §6 C82 — Accepted file types not text: the drop handler throws, so the drop gives no File and no signal', matches: nonTextFileTypes },
+    { row: 'NSP-016 §6 C84 — Accept Kind not text: the drag controller throws where it reads the kinds, so a drag that meets the zone dies there', matches: nonTextAcceptKind },
+    { row: 'NSP-016 §6 C85 — Zone Name not text: a drop on the zone throws after Dropped, so the drag never ends', matches: nonTextZoneName },
+    { row: 'NSP-016 §6 C87 — a Tag written empty, null, 0 or false: React throws drawing the element', matches: emptyTag },
+    { row: 'NSP-016 §6 C88 — Enable Scroll on and Native platform scroll off: the scroller wraps the children, so Drop Index counts the wrapper (0 or 1)', matches: scrollerWrapsChildren },
+    { row: 'NSP-016 §6 C89 — Native platform scroll truthy but not true: the scroller runs on unwrapped children (Scroll To Index fails, the click is taken)', matches: nativeScrollNotBoolean },
+    { row: 'NSP-016 §6 C90 — the JavaScript scroller and Block Pointer Events together: a click fires no Click', matches: scrollerBlocksClick }
   ],
 };
 

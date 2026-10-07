@@ -481,10 +481,12 @@ function installRouters(w: World, record: (e: TraceEvent) => void): () => void {
  * POPUP (world.ts, NSP-015 s20) — the stand-in for the viewer's popup container (`createPrimitiveNode('Group')`,
  * nodecontext.ts :1261): it takes the three inputs `showPopup` sets and keeps the popup it is handed (the rAF
  * attach, :1327-1331) as its child, so deleting it deletes the popup, as the real Group's teardown does. It
- * draws nothing; nothing a popup's opener observes reads it.
+ * draws nothing; nothing a popup's opener observes reads it. NSP-016 s52: registered under its own name and handed to the popup's
+ * one `createPrimitiveNode('Group')` (nodecontext.ts :1277, the only caller), so a play of the REAL Group (group.ts) is not given it.
  */
+const POPUP_GROUP = 'node-spec/popup-group';
 const GROUP_STAND_IN = NodeDefinition.defineNode({
-  name: 'Group',
+  name: POPUP_GROUP,
   category: 'node-spec',
   initialize(this: { _internal: { children: unknown[] } }) {
     this._internal.children = [];
@@ -879,7 +881,7 @@ export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 't
 export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back', 'router-navigate', 'page-inputs', 'showpopup', 'closepopup'] as const;
 
 /** NSP-016 s37 — the viewer's VISUAL nodes this phase has specced, from `src/nodes/` (their React components come with them; PERSON above). */
-export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox', 'controls/text-input', 'controls/options', 'controls/slider', 'visual/icon', 'controls/radiobuttongroup', 'controls/radiobutton', 'visual/text'] as const;
+export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox', 'controls/text-input', 'controls/options', 'controls/slider', 'visual/icon', 'controls/radiobuttongroup', 'controls/radiobutton', 'visual/text', 'visual/group'] as const;
 
 /**
  * Picker nodes whose SOURCE is in this package but which only the viewer's `register-nodes.js`
@@ -1089,7 +1091,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     // NSP-015 — `ComponentInstanceNode`'s prototype is built from property DESCRIPTORS
     // (componentinstance.ts `Object.create(Node.prototype, { update: { value } … })`), which are
     // read-only, so an assignment on the instance throws; an own writable property shadows them
-    for (const m of ['setInputValue', 'update', 'sendValue', 'sendSignalOnOutput', 'beginOutcome', 'reportOutcome'] as const) {
+    for (const m of ['setInputValue', 'update', 'sendValue', 'sendSignalOnOutput', 'beginOutcome', 'reportOutcome', 'scheduleAfterInputsHaveUpdated'] as const) {
       Object.defineProperty(node, m, { value: node[m], writable: true, configurable: true });
     }
     // The invoking input of an outcome (trace.ts: an outcome's `port` is the INPUT that was
@@ -1105,6 +1107,24 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       } finally {
         s.currentInput = previous;
       }
+    };
+    // NSP-016 s52 — work a signal's rising edge schedules for after the frame's inputs belongs to that signal: an outcome it begins
+    // there (Group's Scroll To Index, `outcomeOnInnerComponent` inside `scheduleAfterInputsHaveUpdated`) is that input's invocation,
+    // as it is when the node begins it at the edge itself. Without this the callback runs with no input in hand and the trace's
+    // port read `''`, an invocation no input opened.
+    const originalSchedule = node.scheduleAfterInputsHaveUpdated.bind(node);
+    node.scheduleAfterInputsHaveUpdated = (callback: (this: unknown) => void) => {
+      const by = s.currentInput;
+      if (by === undefined) return originalSchedule(callback);
+      return originalSchedule(function (this: unknown) {
+        const previous = s.currentInput;
+        s.currentInput = by;
+        try {
+          return callback.call(this);
+        } finally {
+          s.currentInput = previous;
+        }
+      });
     };
     // Which node is updating — an HTTP Request's fetch is reached from its after-inputs callback,
     // inside its update, through a promise chain (`conditionalHeaders(url).then(fetch)`): the
@@ -1301,8 +1321,13 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     };
     w.popup.onCall(recordPopup);
     const savedRoot = ctx.rootComponent;
-    const savedGroup = context.nodeRegister.peek('Group');
+    const savedGroup = context.nodeRegister.peek(POPUP_GROUP);
     context.nodeRegister.register(GROUP_STAND_IN);
+    const scopeProto = NodeScope.prototype as unknown as { createPrimitiveNode(name: string, ...rest: unknown[]): unknown };
+    const realPrimitive = scopeProto.createPrimitiveNode;
+    scopeProto.createPrimitiveNode = function (this: unknown, name: string, ...rest: unknown[]) {
+      return realPrimitive.call(this, name === 'Group' ? POPUP_GROUP : name, ...rest);
+    };
     const g = globalThis as unknown as { requestAnimationFrame?: unknown };
     const savedRaf = g.requestAnimationFrame;
     g.requestAnimationFrame = (cb: (t: number) => void) => {
@@ -1348,7 +1373,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       popups = [];
       if (savedRaf === undefined) delete g.requestAnimationFrame;
       else g.requestAnimationFrame = savedRaf;
-      context.nodeRegister.restore('Group', savedGroup);
+      scopeProto.createPrimitiveNode = realPrimitive;
+      context.nodeRegister.restore(POPUP_GROUP, savedGroup);
       ctx.rootComponent = savedRoot;
     };
   }
@@ -1448,7 +1474,16 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     const h = adopt(node, id, type, metadata, params, logs, made);
     // PERSON (above, NSP-016 s37) — a node a person acts on is put on the page, its params already applied as a
     // loaded project's are before the first render; its Did Mount lands in the first settle
-    if (spec?.needs?.includes('person')) putOnPage(states.get(id)!);
+    // NSP-016 s52 — a placing that throws (C87: a Group's Tag of null) tears down what it made, as a dispose does: the play gets no
+    // handle to dispose, and a node left alive stayed in the drag module's registries — the next play that lifted a card met its zone
+    if (spec?.needs?.includes('person')) {
+      try {
+        putOnPage(states.get(id)!);
+      } catch (e) {
+        target.dispose(h);
+        throw e;
+      }
+    }
     // ROUTE (world.ts, NSP-015 s19) — a Page Inputs in a page a Router built: the Router hands it the page's
     // params once the page's nodes exist (router.tsx :923-927), and again on a reset onto the same page (:528-531)
     if (type === 'PageInputs' && world) {
@@ -1483,6 +1518,9 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     // viewer.jsx :457 — the app root's click capture feeds the focus tracker
     container.addEventListener('click', (e: { target: unknown }) => focusTracker.onClickCapture(e.target), true);
     const page: Page = { container, root: d.createRoot(container), host: null };
+    // on the page at once, so a first render that throws can still be taken off it (`takeOffPage`)
+    s.page = page;
+    onPage.add(s);
     // NSP-016 s42 — the page's other nodes: a Radio Button Group's buttons (radiobuttongroup.ts `PAGE_VALUES`), or, for a node that
     // needs `group` (world.ts GROUP), the group it sits in and its siblings. Each button a real Radio Button made in the node's
     // scope, its Value set as a loaded project sets a parameter (none for `undefined`), added through the group's own `addChild`
@@ -1502,6 +1540,17 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
         const b = button(value, i);
         root.addChild(b.node);
         return b;
+      });
+    } else if (s.h.type === 'Group') {
+      // NSP-016 s52 — a Group's children (group.ts THE CHILDREN, `acts.tap.values`): each a real Text in the node's scope, its text and
+      // Position set as a loaded project sets parameters, added with the Group's own `addChild` before the first render
+      const children = (spec?.acts?.tap?.values ?? []) as ReadonlyArray<{ text?: unknown; position?: unknown }>;
+      page.children = children.map((value, i) => {
+        const child = context.nodeRegister.createNode('Text', `${s.h.id}/child${i}`, scope) as unknown as RuntimeNode;
+        if (value.text !== undefined) (child as unknown as NodeInstance).setInputValue('text', value.text);
+        if (value.position !== undefined) (child as unknown as NodeInstance).setInputValue('position', value.position);
+        root.addChild(child);
+        return { node: child, value };
       });
     } else if (spec?.needs?.includes('group') && world?.group.present) {
       const group = context.nodeRegister.createNode('Radio Button Group', `${s.h.id}/group`, scope) as unknown as RuntimeNode & Holder;
@@ -1664,7 +1713,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     const w = d.window;
     // NSP-016 s42 — a `pick` acts on the CHILD whose Value is the act's (a Radio Button Group's button): the control a person sees
     // inside it; a Value no child carries, or a child off the page, is nothing to act on
-    const el = act === 'pick' ? pickedElement(s, value) : ownElement(s);
+    // NSP-016 s52 — a `tap` acts on the CHILD it names (a Group's, group.ts THE CHILDREN); a `clickAway` on the page beside the node
+    const el = act === 'pick' ? pickedElement(s, value) : act === 'tap' ? childElement(s, value) : act === 'clickAway' ? s.page?.container : ownElement(s);
     // NSP-016 s50 — a drag from the desktop goes on over whatever is on the page, the node's element or not
     if (act === 'fileEnter' || act === 'fileLeave' || act === 'fileDrop') return fileActs(act, value, el ? underPointer(w, el) : d.document.body);
     // NSP-016 s51 — a card beside the node, and the pointer off everything: acts on the page, the node's element or not
@@ -1694,6 +1744,29 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       const notCancelled = mouse('mousedown');
       if (notCancelled) hit.focus();
     };
+    // NSP-016 s52 — a press as a BROWSER focuses (`tap`, `clickAway`): the mousedown's default action runs the focusing steps on the
+    // nearest focusable ancestor of what it landed on (here: one with a tabindex a person can see), else on the viewport — the
+    // keyboard comes off whatever held it. (`press` and `click` keep s37's rule — the element the act names, or nothing — which the
+    // specs before the Group were written against.)
+    const browserPress = () => {
+      pointer('pointerdown', 'mouse');
+      if (!mouse('mousedown')) return;
+      let f = hit.closest('[tabindex]');
+      while (f && w.getComputedStyle(f).visibility !== 'visible') f = f.parentElement?.closest('[tabindex]') ?? null;
+      if (f) {
+        f.focus();
+        return;
+      }
+      // the viewport takes it: jsdom's `blur()` does nothing on an element that is no longer focusable (its tabindex taken off
+      // since it took the keyboard), where a browser's focusing steps move the keyboard off it all the same — so the element is
+      // lent a tabindex for the blur
+      const held = d.document.activeElement as any;
+      if (!held || held === d.document.body) return;
+      const lent = !held.hasAttribute('tabindex');
+      if (lent) held.setAttribute('tabindex', '-1');
+      held.blur();
+      if (lent) held.removeAttribute('tabindex');
+    };
     /** The keyboard acts: the keys go to whatever holds the keyboard once the act has tried to put it on the element. */
     const focused = () => {
       if (d.document.activeElement !== el) el.focus();
@@ -1719,6 +1792,14 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
         press();
         pointer('pointerup', 'mouse');
         if (disabled) break;
+        mouse('mouseup');
+        mouse('click');
+        break;
+      // NSP-016 s52 — a click on a child inside the node, or on the page beside it: a click, with the browser's focusing rule
+      case 'tap':
+      case 'clickAway':
+        browserPress();
+        pointer('pointerup', 'mouse');
         mouse('mouseup');
         mouse('click');
         break;
@@ -1911,6 +1992,15 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     if (root && root.isConnected) return elementSeen(node);
     const id = node.props?.id;
     return typeof id === 'string' ? s.page.container.querySelector(`[id="${id}"]`) : null;
+  }
+
+  /** PERSON (above, NSP-016 s52) — the element of the page child made with `value` (a Group's child, by its JSON), if it is on the page. */
+  function childElement(s: State, value: unknown): any {
+    const named = JSON.stringify(value);
+    const child = s.page?.children?.find((c) => JSON.stringify(c.value) === named);
+    if (!child) return null;
+    const el = (child.node as unknown as { getDOMElement(): any }).getDOMElement();
+    return el && el.isConnected ? el : null;
   }
 
   /** PERSON (above, NSP-016 s42) — the control of the page child whose Value is `value` (`Object.is`), if it is on the page. */

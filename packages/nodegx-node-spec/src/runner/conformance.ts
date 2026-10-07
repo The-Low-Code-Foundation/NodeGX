@@ -300,10 +300,31 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
     for (const s of suite) referenceTraces.push(project(await play(probe, spec.type, s.params, s.steps, worldFor(spec, s.world))));
 
     const results: MutantResult[] = [];
+    // NSP-016 s52 — the order the suite is tried in, per mutant: first the plays that killed this reducer's mutants most recently,
+    // then those that killed any mutant, then the rest in file order. Only the speed changes: a mutant is killed exactly when some
+    // play of the suite tells it apart, so the verdicts are the same — `killedBy` names the first play that did, in this order.
+    // (s52's Group: 9,272 mutants over 1,306 scenarios took 51 minutes in file order, its killers sitting at the end of the file.)
+    const recentByReducer = new Map<string, number[]>();
+    const recent: number[] = [];
+    const remember = (list: number[], i: number) => {
+      const at = list.indexOf(i);
+      if (at >= 0) list.splice(at, 1);
+      list.unshift(i);
+      if (list.length > 8) list.pop();
+    };
+    const orderFor = (reducer: string): number[] => {
+      const first = [...(recentByReducer.get(reducer) ?? []), ...recent];
+      const seen = new Set<number>();
+      const order: number[] = [];
+      for (const i of first) if (!seen.has(i)) (seen.add(i), order.push(i));
+      for (let i = 0; i < suite.length; i++) if (!seen.has(i)) order.push(i);
+      return order;
+    };
     for (const m of mutantsOf(spec, discovered.branches)) {
       const mutantTarget = interpreterAdapter({ resolve: () => m.spec });
       const result: MutantResult = { reducer: m.reducer, branch: m.branch, kind: m.kind, swappedWith: m.swappedWith, killed: false };
-      for (let i = 0; i < suite.length; i++) {
+      let killer = -1;
+      for (const i of orderFor(m.reducer)) {
         let actual: TraceEvent[];
         try {
           actual = await play(mutantTarget, spec.type, suite[i].params, suite[i].steps, worldFor(spec, suite[i].world));
@@ -311,13 +332,20 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
           // a mutant that breaks a spec rule (an outcome input returning none) is caught by the interpreter itself
           result.killed = true;
           result.killedBy = `${suite[i].name}: ${(e as Error).message}`;
+          killer = i;
           break;
         }
         if (compareTraces(referenceTraces[i], project(actual)).index >= 0) {
           result.killed = true;
           result.killedBy = suite[i].name;
+          killer = i;
           break;
         }
+      }
+      if (killer >= 0) {
+        if (!recentByReducer.has(m.reducer)) recentByReducer.set(m.reducer, []);
+        remember(recentByReducer.get(m.reducer)!, killer);
+        remember(recent, killer);
       }
       results.push(result);
     }

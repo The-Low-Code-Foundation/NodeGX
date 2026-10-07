@@ -42,8 +42,8 @@ const PLACED_OFF_PAGE = 'a placing on a node placed off the page: its set holds 
 const NO_WORD_WAITING = "an act's paint or a mount on the page that found no graph's word waiting, handed the patch of its twin that drew one: it clears a word that is already clear, and the handle is this branch's (a swap keeps the page's syncs)";
 const ALREADY_HELD = (what: string) => `${what}: the twin's example writes a value this branch's state already holds, so the state is the same after either`;
 
-export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = Object.freeze({
-  Text: [
+/** NSP-016 s43 … s51 — the Text's rows (text.ts): patches handed a twin's example that writes only what the state already holds. */
+const TEXT: EquivalentMutant[] = [
     // NSP-016 s51, the zone side — a card's carry ended outside the zone (a cancel, a drop over nothing), handed the twin that also
     // left the zone: Drag Over and the zone go false where they are false (they move together), and the send meets a wire already false
     { reducer: 'person.key', kind: 'swap-branch', branch: '"set":["carry","carryBy"],"emit":[]', swappedWith: '"set":["carry","carryBy","inZone","isDropTarget"],"emit":[]', why: ALREADY_HELD("a card's carry ended outside a zone (Drag Over is false, and was sent false)") },
@@ -100,6 +100,103 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     { reducer: 'person.click', kind: 'swap-branch', branch: '"set":["cardFocused","elementFocused","inZone","input","phase","sourceElem","swallow"],"emit":["pointerDown","pointerUp"]', swappedWith: '"set":["cardFocused","carry","carryBy","elementFocused","swallow"],"emit":["pointerDown","pointerUp"]', why: "a click whose press starts its own pending gesture and whose release ends it, beside a twin that differs only there: the gesture is idle before and after (phase, input and the zone as they were), and the source element it records is written again by the next press before anything reads it (the twin's card is already none: a press starts a gesture only when none is under way)" },
     // a key that ends a card's carry outside a zone and takes the keyboard, handed the twin that also left the zone: false over false
     { reducer: 'person.key', kind: 'swap-branch', branch: '"set":["cardFocused","carry","carryBy","elementFocused"],"emit":[]', swappedWith: '"set":["cardFocused","carry","carryBy","elementFocused","inZone","isDropTarget"],"emit":[]', why: ALREADY_HELD("a card's carry ended outside a zone by a key that takes the keyboard (Drag Over is false, and was sent false)") },
+];
+
+/**
+ * NSP-016 s52 — the Group runs the Text's machinery (group.ts), so each Text row holds on the Group's shape of the same patch. That
+ * shape also writes the gesture's index wherever it writes the zone (`inZone`), drops the focus list at an unmount (`listed`), marks
+ * the element the component mounted with at a mount (`stampOn`), writes the scrolls' lists and the outcomes held for the frame's end (`ran`) at every frame end and every act, and resolves no
+ * scroll — the row is made exact on that last point,
+ * so a twin that also drained the frame's scrolls is never covered by it.
+ */
+function onGroupShape(shape: string | undefined, frameEnd: boolean, actRow = false): string | undefined {
+  const m = shape === undefined ? null : /^"set":\[(.*?)\],"emit":\[(.*?)\]$/.exec(shape);
+  if (!m) return shape;
+  const keys = new Set<string>(m[1] ? (JSON.parse(`[${m[1]}]`) as string[]) : []);
+  if (frameEnd) for (const k of ['ran', 'scheduled', 'waiting']) keys.add(k);
+  if (keys.has('inZone')) keys.add('index');
+  if (keys.has('onPage') && m[2].includes('"willUnmount"')) keys.add('listed');
+  if (keys.has('onPage') && m[2].includes('"didMount"')) keys.add('stampOn');
+  // an act's row is exact (no outcomes); a frame end's holds whatever the frame reports, its scrolls' outcomes being read from the
+  // state before its paint and its chain, and touching neither
+  return `"set":${JSON.stringify([...keys].sort())},"emit":[${m[2]}]${frameEnd && !actRow ? '' : ',"outcome":null,"outcomes":[]'}`;
+}
+/**
+ * A Text click row whose twins both reach Click, as the Group's first click on an element it carries the node on: the focus tracker
+ * lists it (`listed`) and Focused fires before Click — the same on both twins, so the row's reason holds unchanged.
+ */
+function listedFirst(row: EquivalentMutant, pulse: 'focused' | 'focusLost' = 'focused'): EquivalentMutant | undefined {
+  const both = [row.branch, row.swappedWith ?? row.branch];
+  if (row.reducer !== 'person.click' || !both.every((b) => b !== undefined && b.includes('"onClick"'))) return undefined;
+  const add = (shape: string | undefined) => {
+    const m = shape === undefined ? null : /^"set":\[(.*?)\],"emit":\[(.*?)\]$/.exec(shape);
+    if (!m) return shape;
+    const keys = [...(m[1] ? (JSON.parse(`[${m[1]}]`) as string[]) : []), 'listed'].sort();
+    return `"set":${JSON.stringify(keys)},"emit":[${m[2].replace('"onClick"', `"${pulse}","onClick"`)}]`;
+  };
+  return { ...row, branch: add(row.branch), ...(row.swappedWith !== undefined ? { swappedWith: add(row.swappedWith) } : {}) };
+}
+function onGroupRows(row: EquivalentMutant): EquivalentMutant[] {
+  // and the click after a new Tag (C86) that drops the Group from the list: Focus Lost before Click, on both twins
+  const twins = [listedFirst(row), listedFirst(row, 'focusLost')].filter((r): r is EquivalentMutant => r !== undefined);
+  return [onGroup(row), ...twins.map(onGroup)];
+}
+function onGroup(row: EquivalentMutant): EquivalentMutant {
+  // the frame's end and every act write the scrolls' two lists (group.ts `frameWork`, `withDrain`)
+  const frameEnd = row.reducer === 'afterInputs' || row.reducer.startsWith('person.');
+  const actRow = row.reducer.startsWith('person.');
+  return { ...row, branch: onGroupShape(row.branch, frameEnd, actRow), ...(row.swappedWith !== undefined ? { swappedWith: onGroupShape(row.swappedWith, frameEnd, actRow) } : {}) };
+}
+
+export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = Object.freeze({
+  Text: TEXT,
+  // NSP-016 s52 — the Group runs the Text's machinery (group.ts docblock): the Text's rows, on the Group's shapes
+  Group: [
+    ...TEXT.flatMap(onGroupRows),
+    // s52 — an act that moved nothing writes the scroll lists and the held outcomes as it found them (group.ts `withDrain`,
+    // `heldOver`): dropping that set leaves the same state
+    ...['click', 'focus', 'blur', 'key', 'fileDrop', 'fileLeave', 'tap'].map((act) => ({
+      reducer: `person.${act}`,
+      kind: 'drop-set' as const,
+      branch: `"set":["ran","scheduled","waiting"],"emit":[${act === 'click' ? '"pointerDown","pointerUp","onClick"' : ''}],"outcome":null,"outcomes":[]`,
+      why: ALREADY_HELD(`a ${act} that moved nothing: it writes the scroll lists and the held outcomes it found`)
+    })),
+    // a tap or a click beside it whose release ends a card's mouse carry outside a zone, handed the twin that ended one inside it: the
+    // zone, its index and Drag Over written where they are already none, -1 and false (the Text's row for a key or a let go)
+    ...['tap', 'clickAway'].flatMap((act) =>
+      ['', '"pointerDown","pointerUp"'].map((emit) => ({
+        reducer: `person.${act}`,
+        kind: 'swap-branch' as const,
+        branch: `"set":["cardFocused","carry","carryBy","elementFocused","ran","scheduled","swallow","waiting"],"emit":[${emit}],`,
+        swappedWith: '"set":["cardFocused","carry","carryBy","elementFocused","inZone","index","isDropTarget","ran","scheduled","swallow","waiting"],',
+        why: ALREADY_HELD(`a ${act === 'tap' ? 'tap' : 'click beside it'} ending a card's carry outside a zone (Drag Over is false, and was sent false)`)
+      }))
+    ),
+    // a tap whose press starts the Group's own pending gesture and whose release ends it, beside the twin whose press finds one pending
+    // and only ends it — the Text's click row: the gesture is idle before and after, and the source the first records is written
+    // again by the next press before anything reads it
+    ...[
+      ['"set":["cardFocused","elementFocused","inZone","index","input","listed","phase","ran","scheduled","sourceElem","waiting"],', '"set":["cardFocused","elementFocused","inZone","index","input","listed","phase","ran","scheduled","waiting"],'],
+      ['"set":["cardFocused","elementFocused","inZone","index","input","listed","phase","ran","scheduled","waiting"],', '"set":["cardFocused","elementFocused","inZone","index","input","listed","phase","ran","scheduled","sourceElem","waiting"],'],
+      ['"set":["cardFocused","elementFocused","inZone","index","input","phase","ran","scheduled","sourceElem","waiting"],', '"set":["cardFocused","elementFocused","inZone","index","input","phase","ran","scheduled","waiting"],'],
+      ['"set":["cardFocused","elementFocused","inZone","index","input","phase","ran","scheduled","waiting"],', '"set":["cardFocused","elementFocused","inZone","index","input","phase","ran","scheduled","sourceElem","waiting"],']
+    ].map(([branch, swappedWith]) => ({ reducer: 'person.tap', kind: 'swap-branch' as const, branch, swappedWith, why: "a tap whose press starts its own pending gesture and whose release ends it, beside a twin that differs only there: the gesture is idle before and after" })),
+    // a click beside it nothing eats, handed the twin a waiting swallow ate: that twin writes the swallow false, where it already is
+    { reducer: 'person.clickAway', kind: 'swap-branch', branch: '"set":["cardFocused","elementFocused","ran","scheduled","waiting"],"emit":[],', swappedWith: '"set":["cardFocused","elementFocused","ran","scheduled","swallow","waiting"],"emit":[],', why: ALREADY_HELD('a click beside it that nothing ate, handed the click a waiting swallow ate (the swallow false over false)') },
+    // a mount with no chain waiting, handed the twin whose mount spent the chain's last two frame starts: that twin's example writes the
+    // chain 0, which it is (a twin recorded with frames left would put the tabindex on, and every reader of the keyboard kills it)
+    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["elem","elementFocused","onPage","ran","scheduled","shownTag","stampOn","waiting"],"emit":["didMount"]', swappedWith: '"set":["chain","elem","elementFocused","onPage","ran","scheduled","shownTag","stampOn","waiting"],"emit":["didMount"]', why: ALREADY_HELD('a mount with no chain waiting, handed the mount that spent the chain (the chain 0 over 0)') },
+    // the frame end that reports outcomes — States' and Pop Component Stack's frame end exactly: its outcomes stand without its
+    // `set`, and only the NEXT settle shows what it failed to keep (the held outcomes and the scrolls reported again, which the
+    // interpreter refuses, or a paint not kept). The branch keys are combinations of outcome ports and answers, so which of them end a
+    // sequence moves with the seed (seed 13: 0, seeds 20729 / 20730 / 7: 2, 3, 2; the 10,000: more). Every hand scenario and every
+    // matrix segment with outcomes in a frame settles again after it, and a frame end reached there is killed
+    {
+      reducer: 'afterInputs',
+      kind: 'drop-set',
+      branch: '"outcomes":["',
+      why: "a frame end that reports outcomes: they stand without its set, and only the next settle shows what it failed to keep; a sequence ending at that settle cannot show it"
+    }
   ],
   'net.noodl.controls.button': [
     { reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE },
