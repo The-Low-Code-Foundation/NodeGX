@@ -17,9 +17,8 @@
  *     are reached by a remount alone.
  *   - **Drop Index is 0**: a Shape takes no children (`allowChildren: false`), so a card dropped on it — by the pointer or the
  *     keyboard — lands at 0, as on a Text. The runtime counts the zone element's laid-out HTML children (drag-drop.ts `slots`
- *     :529-540): the `<svg>` is not an HTML element, but Custom SVG's `<span>` is, so with Shape Custom SVG a card picked up from
- *     the keyboard starts after it, at 1, and the arrow keys move it between 0 and 1 — row **C91**, a known row on the runtime
- *     target (`svgShapeIsASlot`).
+ *     :529-540): the `<svg>` is not an HTML element, and Custom SVG's `<span>` is one but is marked as the node's drawing
+ *     (`data-ndl-drawing`), which `slots` skips — row **C91**, fixed in P109 ISL-038 (it started a keyboard card at 1).
  */
 
 import { defineNode, type Patch } from '../spec';

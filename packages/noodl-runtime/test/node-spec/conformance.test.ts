@@ -140,19 +140,6 @@ const scrollerBlocksClick = (d: Divergence) => {
 };
 
 /**
- * NSP-016 §6 C91 (s53) — a Shape (`Circle`) takes no children, so a card dropped on it lands at 0. With Shape Custom SVG, Circle.tsx
- * draws the markup inside a `<span>`, and drag-drop.ts `slots` counts the zone element's HTML children (an `<svg>` is not one, a
- * `<span>` is): a card picked up from the keyboard starts after it, at 1, and the arrow keys move it between 0 and 1. Narrow: the
- * difference is Drop Index, with Shape Custom SVG held at it.
- */
-const svgShapeIsASlot = (d: Divergence) => {
-  if (d.difference.threw !== undefined) return false;
-  const at = (e: TraceEvent | undefined) => !!e && e.t === 'value' && e.port === 'dropIndex';
-  if (!at(d.reference[d.difference.index]) && !at(d.actual[d.difference.index])) return false;
-  return heldAt(d, 'shape') === 'svg';
-};
-
-/**
  * NSP-016 s53 — values the generator does not draw on the runtime target (runner `withheld`), because the target cannot survive
  * them: a known row that takes the whole process down cannot be played, so it cannot be counted either. Printed in every report.
  */
@@ -187,10 +174,9 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   Text: [
     { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer }
   ],
-  // s53 — the Shape: the Text's rows (the same shared ports and drag module), and Custom SVG's span
+  // s53 — the Shape: the Text's rows (the same shared ports and drag module)
   Circle: [
-    { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer },
-    { row: 'NSP-016 §6 C91 — Shape Custom SVG: the span holding the drawing counts as a child, so a keyboard drop lands at 1', matches: svgShapeIsASlot }
+    { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer }
   ],
   // s53 — the Image: the Text's rows (the same shared ports and drag module)
   Image: [

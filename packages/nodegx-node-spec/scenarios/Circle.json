@@ -105572,7 +105572,7 @@
     ]
   },
   {
-    "name": "row C91 — Shape Custom SVG: a card picked up from the keyboard into it starts at 0, and Enter drops it at 0 (the runtime: at 1 — it counts the span holding the drawing as a child)",
+    "name": "row C91 — Shape Custom SVG: a card picked up from the keyboard into it starts at 0, and Enter drops it at 0",
     "because": "circle.ts allowChildren false: a Shape has no children; drag-drop.ts `slots` :529-540 counts the zone element's HTML children, and Custom SVG draws inside a <span> (Circle.tsx :327-334)",
     "params": {
       "acceptDrops": true,
@@ -105594,8 +105594,7 @@
         "value": "Enter"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C91"
+    ]
   },
   {
     "name": "Shape Circle (an <svg> drawing, not an HTML element): a card picked up from the keyboard into it drops at 0 — the twin of row C91, on both targets",
@@ -105622,7 +105621,7 @@
     ]
   },
   {
-    "name": "row C91 — Shape Custom SVG: ArrowDown keeps a card from the keyboard at 0 (no children to pass), so Enter drops it at 0 (the runtime: it starts at 1, after the span, and stays there)",
+    "name": "row C91 — Shape Custom SVG: ArrowDown keeps a card from the keyboard at 0 (no children to pass), so Enter drops it at 0",
     "because": "drag-drop.ts :803-807 holds the index between 0 and the slot count",
     "params": {
       "acceptDrops": true,
@@ -105649,8 +105648,7 @@
         "value": "Enter"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C91"
+    ]
   },
   {
     "name": "Shape Square, Star, Triangle and Polygon: an <svg> drawing — ArrowDown keeps a card from the keyboard at 0, Enter drops it at 0 (the twin of row C91 for every drawn shape)",
@@ -105747,7 +105745,7 @@
     ]
   },
   {
-    "name": "Shape Custom SVG with the Shape's own drag: Space lifts it into itself (C78) at 0, ArrowDown keeps it at 0, Enter drops it on itself at 0 (the runtime: ArrowDown moves it to 1)",
+    "name": "Shape Custom SVG with the Shape's own drag: Space lifts it into itself (C78) at 0, ArrowDown keeps it at 0, Enter drops it on itself at 0",
     "because": "drag-drop.ts keyboardLift :858-866 — its own children are inside it, not before it; :803-807 the arrow keys",
     "params": {
       "acceptDrops": true,
@@ -105777,7 +105775,6 @@
         "value": "Enter"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C91"
+    ]
   }
 ]

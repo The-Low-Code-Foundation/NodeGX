@@ -532,6 +532,8 @@ function slots(g: Gesture, zoneEl: HTMLElement): HTMLElement[] {
   const out: HTMLElement[] = [];
   for (const child of Array.from(zoneEl.children)) {
     if (!(child instanceof HTMLElement) || child === g.sourceEl) continue;
+    // A node's own drawing is no slot (P107-C91: Custom SVG's span held a Shape's Drop Index at 1)
+    if (child.hasAttribute('data-ndl-drawing')) continue;
     const style = getComputedStyle(child);
     if (style.display === 'none' || style.position === 'absolute' || style.position === 'fixed') continue;
     out.push(child);

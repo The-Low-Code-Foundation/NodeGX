@@ -327,6 +327,8 @@ export class Circle extends React.Component<CircleProps> {
     if (shape === 'svg') {
       custom = (
         <span
+          // the drawing, not a child: drag-drop.ts `slots` skips it, so a card dropped on the Shape lands at 0 (P107-C91)
+          data-ndl-drawing=""
           style={{ display: 'block', width: this.props.size, height: this.props.size }}
           dangerouslySetInnerHTML={{ __html: stripRootSvgDimensions(sanitizeInlineSvg(this.props.svgSource)) }}
         />
