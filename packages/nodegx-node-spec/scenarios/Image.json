@@ -106244,7 +106244,7 @@
     ]
   },
   {
-    "name": "row C94 — Source Set true as the image is placed: a boolean is no srcset, so a failure and a load are nothing (the runtime: React 19 creates the element with srcset=\"true\" — the browser fetches it, and Error says no Source was set)",
+    "name": "row C94 — Source Set true as the image is placed: a boolean is no srcset, so a failure and a load are nothing",
     "because": "image.ts :111-124 (Source Set on the element as written); React 19.0 writes `srcset=\"true\"` on an element it creates with `true`, and warns that a boolean is not a value here",
     "params": {
       "srcSet": true
@@ -106260,8 +106260,7 @@
         "value": "load"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C94"
+    ]
   },
   {
     "name": "Source Set true written after the image is on the page: nothing to fetch, on both targets (the twin of row C94 — React removes a srcset updated to a boolean)",

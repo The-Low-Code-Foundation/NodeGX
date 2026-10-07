@@ -505,7 +505,7 @@ function mediaSource(v: unknown): string | undefined {
 
 /**
  * The browser fetches for an element with a `src`, or a `srcset` attribute that is not empty (React 19 writes none for null, nothing
- * or a boolean — except `true` on an element it creates, row C94, a known row on the runtime).
+ * or a boolean; the runtime leaves a boolean off itself, since React would write `true` on an element it creates — P107-C94).
  */
 function fetches(s: Readonly<State>): boolean {
   if (s.src !== undefined) return true;

@@ -157,20 +157,6 @@ const svgShapeIsASlot = (d: Divergence) => {
  * them: a known row that takes the whole process down cannot be played, so it cannot be counted either. Printed in every report.
  */
 /**
- * NSP-016 §6 C94 (s53) — Source Set holds `true` (a boolean is no `srcset`: the spec fetches nothing), but React 19.0 creates the
- * `<img>` with `srcset="true"` (an update to `true` removes it), so the runtime's browser fetches and the node reports a load or
- * a failure. Narrow: the RUNTIME reports Error, On Error or On Load where the spec has something else, with no source and Source
- * Set `true` held at the difference.
- */
-const booleanSrcSetAtMount = (d: Divergence) => {
-  if (d.difference.threw !== undefined) return false;
-  const fetchedOutput = (e: TraceEvent | undefined) => !!e && ((e.t === 'value' && e.port === 'imageError') || (e.t === 'signal' && (e.port === 'onError' || e.port === 'onLoad')));
-  if (!fetchedOutput(d.actual[d.difference.index])) return false;
-  const src = heldAt(d, 'src');
-  return heldAt(d, 'srcSet') === true && (src === undefined || src === null || src === '');
-};
-
-/**
  * NSP-016 §6 C95 (s53, R16) — a Focus on a Group that is not on the page reports Unchanged and lists nothing (as a field's does,
  * R13); the runtime lists it (a Group has no `_canFocus`, focus-tracker.ts :60), fires Focused and reports Done. Narrow: the
  * difference is in the group of events a settle printed, and the reference's group holds the Focus action's Unchanged.
@@ -208,8 +194,7 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   ],
   // s53 — the Image: the Text's rows (the same shared ports and drag module)
   Image: [
-    { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer },
-    { row: 'NSP-016 §6 C94 — Source Set true as the element is made: React writes srcset="true", so the browser fetches a picture called true', matches: booleanSrcSetAtMount }
+    { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer }
   ],
   // s52 — the Group: the Text's rows (the same shared ports and drag module), and its own Tag
   Group: [
