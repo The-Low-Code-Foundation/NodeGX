@@ -187,6 +187,7 @@ Reach for Group whenever you need structure: rows, columns, cards, overlays, scr
 | `pointerDown` | Signal | — | Fires when a mouse button is pressed or a finger touches this element |
 | `pointerEnter` | Signal | — | Fires when the pointer moves onto this element, not counting its children |
 | `pointerUp` | Signal | — | Fires when the mouse button is released or the finger lifts over this element |
+| `unchanged` | Signal | — | Fires when Focus arrived while this group was not on the page, so nothing was focused |
 | `willUnmount` | Signal | — | Fires just before this element is removed from the page, while it still exists |
 
 ### Failure outputs

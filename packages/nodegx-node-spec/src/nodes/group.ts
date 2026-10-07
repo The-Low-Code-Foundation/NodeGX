@@ -29,12 +29,12 @@
  *   - **Focus, Focused, Focus Lost** (focus-tracker.ts; group.ts `focus`, `_focus`, `_blur`): a Group is not focusable, so the
  *     viewer keeps a LIST of the focused nodes. The Focus action lists it — Focused when it was not listed — and reports Done.
  *     Off the page it reports Unchanged and lists nothing, as a field's Focus does (R16, after R13: a Focus is not kept for later).
- *     The runtime lists a Group off the page too (it has no `_canFocus`, focus-tracker.ts :60) and reports Done: row **C95**, a
- *     known row on the runtime target (`groupFocusOffPage`). A person's click is walked from the element it landed on up through
+ *     (group.ts `_canFocus`, the inner component existing; the Unchanged port — v3. Row **C95**: the runtime listed it and
+ *     reported Done, fixed in P109 ISL-038.) A person's click is walked from the element it landed on up through
  *     its ancestors (`onClickCapture` :118-136): a click on the Group or a child lists it (Focused when it was not), a click
- *     anywhere else drops it (Focus Lost when it was listed). The walk finds the Group by the property its component puts on the
- *     element it MOUNTED with (Group.tsx `componentDidMount` — `this.scrollRef.current.noodlNode`): a new Tag makes a new element
- *     without it, so a click on the Group then counts as a click elsewhere — row **C86**, modelled (`stampOn`). Leaving the page
+ *     anywhere else drops it (Focus Lost when it was listed). The walk finds the Group by the property its component puts on
+ *     EVERY element it draws (Group.tsx `rootRef`), a new Tag's element too — v3 (row **C86**, fixed in P109 ISL-038: the
+ *     component stamped only the element it mounted with, so a click after a new Tag counted as a click elsewhere). Leaving the page
  *     drops it from the list without a Focus Lost (`nodeUnmounted`, react-component-node.ts :1013). A click the drag module
  *     swallows (text.ts) reaches neither the walk nor Click: the swallow is the window's, the walk the app root's.
  *   - **Scroll To Index, Scroll To Element** (group.ts :98-148): each runs after the frame's inputs (`scheduleAfterInputsHaveUpdated`,
@@ -70,7 +70,7 @@ type State = {
   shownTag: unknown;
   /** which element is on the page — a new one each time one is made (a mount, a new tag) */
   elem: number;
-  /** the element the Group component MOUNTED with, which carries the node for the focus tracker's walk (Group.tsx componentDidMount); -1: none */
+  /** the element that carries the node for the focus tracker's walk (Group.tsx `rootRef`: every element it draws); -1: none */
   stampOn: number;
   /** the focus tracker lists the Group (focus-tracker.ts `nodes`) */
   listed: boolean;
@@ -191,13 +191,14 @@ export const Group = defineNode({
   type: 'Group',
   // v1 (NSP-016 s52): the Text's rules (text.ts v5) on an element with children; the slots, the focus tracker, the scroll actions
   // v2 (s53, R16): a Focus off the page reports Unchanged and lists nothing, as a field's does (the runtime's Done is row C95)
-  version: 2,
+  // v3 (P109 ISL-038, s29): the Unchanged outcome port (C95: group.ts reports it now), and a new Tag's element carries the node (C86)
+  version: 3,
   source: 'packages/noodl-viewer-react/src/nodes/visual/group.ts',
   needs: ['person', 'clock'],
   worldPool: { advances: [0, 1, 499, 500, 1000] },
   synced: ['pointerAt'],
-  // group.ts :240-253 `outcomeOutputs({ done, failure })` — Focus, Scroll To Element and Scroll To Index share them
-  outcomes: ['done', 'failure'],
+  // group.ts `outcomeOutputs({ done, failure, unchanged })` — Focus, Scroll To Element and Scroll To Index share them; only Focus is Unchanged
+  outcomes: ['done', 'failure', 'unchanged'],
 
   state: {
     mounted: true,
@@ -717,7 +718,7 @@ function pointerAct(s: Readonly<State>, then: (painted: Readonly<State>) => Act)
 /**
  * A paint: the page follows what the node wants. A mount makes a new element the Group component mounts with (it carries the node for
  * the focus tracker) and runs the scrolls that waited; leaving the page drops the Group from the focus list (`nodeUnmounted`); a new Tag
- * makes a new element the component did not mount with (row C86).
+ * makes a new element, which carries the node too (Group.tsx `rootRef`; row C86 before P109).
  */
 function painted(s: Readonly<State>): { set: Partial<State>; emit: Pulse[]; outcomes?: Resolved[] } {
   if (s.mounted && !s.onPage) {
@@ -725,7 +726,7 @@ function painted(s: Readonly<State>): { set: Partial<State>; emit: Pulse[]; outc
     return { set: { onPage: true, elem: s.elem + 1, stampOn: s.elem + 1, shownTag: s.tag, elementFocused: false, ...f.set }, emit: ['didMount'], outcomes: f.outcomes };
   }
   if (!s.mounted && s.onPage) return { set: { onPage: false, elementFocused: false, listed: false }, emit: ['willUnmount'] };
-  if (s.onPage && s.tag !== s.shownTag) return { set: { elem: s.elem + 1, shownTag: s.tag, elementFocused: false }, emit: [] };
+  if (s.onPage && s.tag !== s.shownTag) return { set: { elem: s.elem + 1, stampOn: s.elem + 1, shownTag: s.tag, elementFocused: false }, emit: [] };
   return { set: {}, emit: [] };
 }
 

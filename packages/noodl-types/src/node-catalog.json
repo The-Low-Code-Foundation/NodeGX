@@ -14031,6 +14031,17 @@
           "description": "A reference to this node itself, for ports that take a node rather than a value"
         },
         {
+          "name": "unchanged",
+          "displayName": "Unchanged",
+          "group": "Events",
+          "plug": "output",
+          "type": {
+            "name": "signal"
+          },
+          "isSignal": true,
+          "description": "Fires when Focus arrived while this group was not on the page, so nothing was focused"
+        },
+        {
           "name": "willUnmount",
           "displayName": "Will Unmount",
           "group": "Mounted",

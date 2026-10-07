@@ -55,6 +55,9 @@ export class Group extends React.Component<GroupProps> {
   rootRef = (el: ScrollRef | null) => {
     (this.scrollRef as React.MutableRefObject<ScrollRef | null>).current = el;
     this.props.noodlNode?.setDOMElement(el);
+    // Plumbing for the focused signals: the focus tracker's click walk finds the Group by this property. Set on every element
+    // the ref meets, not once at the mount — a new Tag makes React draw a new element without mounting again (P107-C86).
+    if (el) el.noodlNode = this.props.noodlNode;
   };
 
   componentDidMount() {
@@ -63,9 +66,6 @@ export class Group extends React.Component<GroupProps> {
     if (this.props.scrollEnabled && !this.props.nativeScroll) {
       this.setupIScroll();
     }
-
-    //plumbing for the focused signals
-    this.scrollRef.current.noodlNode = this.props.noodlNode;
   }
 
   componentWillUnmount() {

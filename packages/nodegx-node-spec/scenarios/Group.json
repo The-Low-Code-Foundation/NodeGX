@@ -32,7 +32,7 @@
     ]
   },
   {
-    "name": "row C95 — a Focus on a Group placed off the page reports Unchanged and lists nothing (the runtime: Focused and Done — a Group has no `_canFocus`, so nothing checks it is mounted)",
+    "name": "C95 — a Focus on a Group placed off the page reports Unchanged and lists nothing",
     "because": "R16 (Richard, 2026-10-07: \"Unchanged, like the field\"); focus-tracker.ts :60",
     "params": {
       "mounted": false
@@ -43,8 +43,7 @@
         "signal": "focus"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C95"
+    ]
   },
   {
     "name": "a click on it: Pointer Down, Pointer Up, Focused, then Click; a second click: no Focused",
@@ -96,8 +95,8 @@
     ]
   },
   {
-    "name": "C86 — a new Tag, then a click on it: the walk does not find it, so Focus Lost and Click",
-    "because": "Group.tsx componentDidMount stamps only the element it mounted with",
+    "name": "C86 — a new Tag, then a click on it: the new element carries the node, so the walk finds it — no Focus Lost, Click",
+    "because": "Group.tsx rootRef stamps every element the Group draws (P107-C86, fixed in P109)",
     "steps": [
       "settle",
       {
@@ -120,7 +119,7 @@
     ]
   },
   {
-    "name": "C86 — a remount after the new Tag puts the node on the new element again: a click lists it",
+    "name": "C86 — a remount after the new Tag: the element carries the node as before, a click lists it",
     "because": "Group.tsx componentDidMount runs again at a remount",
     "steps": [
       "settle",
@@ -141431,7 +141430,7 @@
     ]
   },
   {
-    "name": "who holds the keyboard, and the list: a new Tag (its element has no tabindex, C77), then a first click: no Focused (C86), its press starts and ends but takes no keyboard — hidden, Space lifts nothing",
+    "name": "who holds the keyboard, and the list: a new Tag (its element has no tabindex, C77), then a first click: Focused (C86 fixed), its press starts and ends but takes no keyboard — hidden, Space lifts nothing",
     "because": "drag-drop.ts :83-110; Group.tsx componentDidMount",
     "params": {
       "draggable": true,
@@ -141467,7 +141466,7 @@
     ]
   },
   {
-    "name": "who holds the keyboard, and the list: C86 with a pending press: listed, a new Tag, then a click (Focus Lost; its press starts and ends), then another click: nothing more",
+    "name": "who holds the keyboard, and the list: C86 with a pending press: listed, a new Tag, then a click (still listed, no Focus Lost; its press starts and ends), then another click: nothing more",
     "because": "focus-tracker.ts :127; drag-drop.ts :232-323",
     "params": {
       "draggable": true,
@@ -141501,7 +141500,46 @@
     ]
   },
   {
-    "name": "who holds the keyboard, and the list: C86 during a card's keyboard carry: listed, a new Tag, a card picked up into it, a click (Focus Lost; the carry goes on), then Escape: Drag Over false",
+    "name": "who holds the keyboard, and the list: C86 fixed, a click ending a press already pending: listed, a new Tag (no tabindex on it, C77), a press, then a click — still listed, no Focused again, the press ends and the keyboard stays off it, so Space lifts nothing",
+    "because": "focus-tracker.ts :127 (a listed Group found again: nothing fires); drag-drop.ts :232-323 (the press already pending: the click's own press starts nothing); C77 (the new element has no tabindex, so it cannot take the keyboard)",
+    "params": {
+      "draggable": true,
+      "dragValue": "me"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "section"
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "who holds the keyboard, and the list: C86 during a card's keyboard carry: listed, a new Tag, a card picked up into it, a click (still listed, no Focus Lost; the carry goes on), then Escape: Drag Over false",
     "because": "drag-drop.ts :308-323 (a keyboard carry hears no pointerup)",
     "params": {
       "acceptDrops": true
@@ -153802,7 +153840,7 @@
     ]
   },
   {
-    "name": "row C95 — the frame end's outcomes together, matrix: the frame Mounted comes back, with one, two or three of Focus, Scroll To Index and Scroll To Element in it — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame (the runtime: a Focus in the frame Mounted comes back is Done and Focused, the Group not yet on the page)",
+    "name": "C95 — the frame end's outcomes together, matrix: the frame Mounted comes back, with one, two or three of Focus, Scroll To Index and Scroll To Element in it — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame",
     "because": "the trace prints a frame's outcomes together, in order (group.ts docblock); drag-drop.ts :136-145; focus-tracker.ts; Group.tsx componentDidMount",
     "params": {
       "draggable": true,
@@ -157939,8 +157977,7 @@
         "advance": 1
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C95"
+    ]
   },
   {
     "name": "the frame end's outcomes together, matrix: the frame Draggable's chain finds the element, with one, two or three of Focus, Scroll To Index and Scroll To Element in it — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame",
@@ -162567,7 +162604,7 @@
     ]
   },
   {
-    "name": "row C95 — the frame end's outcomes together, matrix: the frame Mounted comes back while Draggable's chain waits, with one, two or three of Focus, Scroll To Index and Scroll To Element in it — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame (the runtime: a Focus in the frame Mounted comes back is Done and Focused, the Group not yet on the page)",
+    "name": "C95 — the frame end's outcomes together, matrix: the frame Mounted comes back while Draggable's chain waits, with one, two or three of Focus, Scroll To Index and Scroll To Element in it — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame",
     "because": "the trace prints a frame's outcomes together, in order (group.ts docblock); drag-drop.ts :136-145; focus-tracker.ts; Group.tsx componentDidMount",
     "params": {
       "draggable": true,
@@ -167144,8 +167181,7 @@
         "advance": 1
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C95"
+    ]
   },
   {
     "name": "the frame end's outcomes together, matrix: the frame Draggable's chain finds the element and Mounted goes off, with one, two or three of Focus, Scroll To Index and Scroll To Element in it — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame",
@@ -173955,7 +173991,7 @@
     ]
   },
   {
-    "name": "row C95 — a Focus on a Group placed off the page (Mounted off) reports Unchanged and lists nothing: on the page later, a click beside it fires no Focus Lost (the runtime: Done and Focused, and the click beside it fires Focus Lost)",
+    "name": "C95 — a Focus on a Group placed off the page (Mounted off) reports Unchanged and lists nothing: on the page later, a click beside it fires no Focus Lost",
     "because": "R16 (Richard, 2026-10-07: \"Unchanged, like the field\"); focus-tracker.ts :56-75 lists a Group off the page (no `_canFocus`)",
     "params": {
       "mounted": false
@@ -173975,11 +174011,10 @@
         "act": "clickAway"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C95"
+    ]
   },
   {
-    "name": "row C95 — Mounted written on and Focus in the same frame: the Group is not on the page until the frame's end, so Unchanged (the runtime: Done and Focused)",
+    "name": "C95 — Mounted written on and Focus in the same frame: the Group is not on the page until the frame's end, so Unchanged",
     "because": "R16; the page follows Mounted at the frame's end",
     "params": {
       "mounted": false
@@ -173998,8 +174033,7 @@
         "act": "clickAway"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C95"
+    ]
   },
   {
     "name": "a Focus on a Group on the page: Done and Focused, and a click beside it fires Focus Lost — the twin of row C95, on both targets",
@@ -174048,7 +174082,7 @@
     ]
   },
   {
-    "name": "row C95 — off the page, sixteen Scroll To Element wait for the element; a seventeenth and a card's lift (its flush runs the frame's work) push the oldest out with Failure, and a Focus after it waits its turn: Failure, then Unchanged (the runtime: Failure, then Done and Focused)",
+    "name": "C95 — off the page, sixteen Scroll To Element wait for the element; a seventeenth and a card's lift (its flush runs the frame's work) push the oldest out with Failure, and a Focus after it waits its turn: Failure, then Unchanged",
     "because": "group.ts docblock (at most 16 wait; the held outcomes, `ran`); drag-drop.ts `flush`; R16",
     "params": {
       "mounted": false
@@ -174127,8 +174161,7 @@
         "act": "clickAway"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C95"
+    ]
   },
   {
     "name": "the frame end's outcomes together, matrix: the frame Mounted comes back, with Scroll To Index, Scroll To Element or both in it (no Focus) — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame — the twin of row C95's matrix, graded on both targets",
