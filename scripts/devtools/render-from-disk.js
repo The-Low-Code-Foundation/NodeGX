@@ -523,7 +523,7 @@ ${productHostStyle()}
 <script src="/react19/react.production.min.js"></script>
 <script src="/react19/react-dom.production.min.js"></script>
 ${dependencies}
-<script>window.__noodl_modules=[];window.Noodl={defineModule:function(m){if(m&&!m.name&&window.__noodl_module_name)m.name=window.__noodl_module_name;window.__noodl_modules.push(m)},deployed:false,Env:{}};</script>
+<script>window.__noodl_modules=[];window.Noodl={defineModule:function(m){if(m&&!m.name&&window.__noodl_module_name)m.name=window.__noodl_module_name;if(m&&!m.folder&&window.__noodl_module_folder)m.folder=window.__noodl_module_folder;window.__noodl_modules.push(m)},getModule:function(id){for(var i=window.__noodl_modules.length-1;i>=0;i--){var m=window.__noodl_modules[i];if(m&&(m.name===id||m.folder===id))return m.exports}},deployed:false,Env:{}};</script>
 ${modulesMain}
 <script src="/noodl.viewer.js"></script>
 <script>

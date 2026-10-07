@@ -726,6 +726,49 @@ during a server render, so that kit is skipped there and its nodes appear only a
 hydrates in the browser. Vendor the dependency into your kit folder to avoid it.
 :::
 
+## A kit that reads another kit
+
+Two kits sometimes need the same thing. A flat view and a 3D view of one world parse the same map. A chart kit and its legend
+kit share a colour scale. Put the shared code in one kit and let the other kit read it.
+
+The kit that shares names what it shares in `exports`:
+
+```js
+// noodl_modules/garden-kit/index.js
+Noodl.defineModule({
+  reactNodes: [Garden],
+  exports: { parseMap: parseMap, legend: LEGEND }
+});
+```
+
+The kit that reads lists the other kit in `requires`, in its own `manifest.json`. It then asks for it by that kit's folder or
+its manifest `name`:
+
+```json
+{ "name": "Garden 3D Kit", "main": "index.js", "requires": ["garden-kit"] }
+```
+
+```js
+// noodl_modules/garden-3d-kit/index.js
+var garden = Noodl.getModule('garden-kit');
+var world = garden.parseMap(rows);
+Noodl.defineModule({ reactNodes: [Garden3D] });
+```
+
+`requires` is what makes this safe. A kit named there loads before yours, whatever the folders are called. That holds in the
+browser, on a server render, in cloud functions and in the MCP server's list of node types. So you can call `getModule` at the
+top of your file, not only inside a render. Without the entry, kits load alphabetically by folder. Whether yours finds the
+other kit then depends on the names.
+
+If a kit you require is not installed, your kit is not loaded at all. The browser console, the server log and
+`get_project_info` name the kit it needed. If you want your kit to work alone, keep your own copy of what you need and leave
+`requires` out.
+
+:::caution Don't walk `window.__noodl_modules`
+It is the runtime's own list. Its order is the load order, which only `requires` guarantees. The MCP server's reader has no
+such list. Use `Noodl.getModule`.
+:::
+
 ## Autocomplete, without a build step
 
 NodeGX publishes the definition shape as a TypeScript declaration file, and you can have full

@@ -1071,6 +1071,16 @@ export interface NodeKitModule {
    * name itself. Provenance in the editor's property panel reads it.
    */
   name?: string;
+  /**
+   * ISL-013 — what this kit shares with a kit that `requires` it: a table, a parser, a helper. Another kit reads it with
+   * {@link NoodlGlobal.getModule}. Anything you like; nothing else reads it.
+   */
+  exports?: unknown;
+  /**
+   * Set by the bootstrap when another kit `requires` this one: the kit's folder under `noodl_modules/`, so
+   * {@link NoodlGlobal.getModule} finds it by folder as well as by name.
+   */
+  folder?: string;
   [extra: string]: unknown;
 }
 
@@ -1083,6 +1093,20 @@ export interface NodeKitModule {
 export interface NoodlGlobal {
   /** Registers the kit. Call it once, at the end of `index.js`. */
   defineModule(module: NodeKitModule): void;
+  /**
+   * ISL-013 — what another kit shares (its module's `exports`), by its manifest `name` or its folder under `noodl_modules/`;
+   * `undefined` when that kit is not loaded.
+   *
+   * Name the kit in your manifest's `requires` (`"requires": ["garden-kit"]`) and it loads BEFORE yours, whatever the folders
+   * are called, so reading it at definition is safe — in a browser, on a server render and in the MCP door's catalog. Without
+   * the entry, the order is alphabetical by folder and the answer depends on the names. If a required kit is missing, your kit
+   * is not loaded at all and the console (and `get_project_info`) says which kit it needed.
+   *
+   * @example
+   * var garden = Noodl.getModule('garden-kit');
+   * var world = garden.parseMap(rows);
+   */
+  getModule(id: string): unknown;
   /** `false` in the editor's local viewer, `true` in a deployed or SSR bundle. */
   deployed: boolean;
   /**
@@ -1129,7 +1153,10 @@ declare global {
     Noodl: NoodlGlobal;
     /** Browser only — see the note on the global {@link React}. */
     React: any;
-    /** The array `defineModule` pushes into. Runtime-internal. */
+    /**
+     * The array `defineModule` pushes into. Runtime-internal: to read another kit, name it in `requires` and call
+     * {@link NoodlGlobal.getModule} (ISL-013) — this array's order is the load order, which `requires` is what guarantees.
+     */
     __noodl_modules: NodeKitModule[];
   }
 }

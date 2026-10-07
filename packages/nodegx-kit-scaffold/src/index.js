@@ -764,6 +764,10 @@ own nodes* has the full version, with a sample, under "Wrapping a library".
 - **A dependency's global is not there when your file first runs.** An agent
   reads your kit by loading \`index.js\` alone, and a server render has no page.
   Read the library's global inside an effect, never at the top of the file.
+- **Another kit's code: name the kit in \`requires\`.** List it in
+  \`manifest.json\` (\`"requires": ["garden-kit"]\`) and read what it shares
+  with \`Noodl.getModule('garden-kit')\`. It then loads before yours. The top
+  of your file can read it. Never walk \`window.__noodl_modules\`.
 
 ## Autocomplete
 

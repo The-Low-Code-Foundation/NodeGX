@@ -12,9 +12,9 @@
  *
  * The README is read as the scaffold GENERATES it (`scaffoldKitFiles`), not from the template literal in its source.
  *
- * T6 and T7 are PENDING: their routes are ISL-013's and ISL-012's to rule, and writing today's workaround would read as
- * tomorrow's advice. They stay in the table, by name, so the table cannot lose them; a pending row that a surface
- * already carries fails, so the row is moved the day the words land.
+ * A trap whose route is not ruled yet is PENDING (`pending: '<task>'`): writing today's workaround would read as tomorrow's
+ * advice. It stays in the table, by name, so the table cannot lose it; a pending row that a surface already carries fails, so
+ * the row is moved the day the words land. T7 went live with ISL-012's ruling and T6 with ISL-013's slice 1; none is pending.
  */
 const fs = require('fs');
 const path = require('path');
@@ -81,7 +81,13 @@ const TRAPS = [
     section: true,
     tokenParagraph: /Default to design tokens, not to hex[\s\S]{0,1400}?exception is a colour your component hands to anything that is not CSS/i
   },
-  { id: 'T6', trap: "another kit's code, through window.__noodl_modules", pending: 'ISL-013', phrase: /__noodl_modules/ },
+  // Live since P109 ISL-013 slice 1 (2026-10-07, ruled "A kit says what it needs"): `requires`, then `Noodl.getModule`.
+  {
+    id: 'T6',
+    trap: "another kit's code: name it in requires and read it with Noodl.getModule, never through window.__noodl_modules",
+    docs: /"requires": \["garden-kit"\][\s\S]{0,400}?Noodl\.getModule\('garden-kit'\)[\s\S]{0,1600}?Don't walk `window\.__noodl_modules`/,
+    readme: /name the kit in `requires`[\s\S]{0,300}?Noodl\.getModule\('garden-kit'\)[\s\S]{0,200}?Never walk `window\.__noodl_modules`/
+  },
   // Live since P109 ISL-012 ruled "Recipe now, loader later" (2026-10-05): the route is "read the global at mount".
   {
     id: 'T7',
@@ -99,9 +105,9 @@ const TRAPS = [
 ];
 
 describe('ISL-015 — every kit trap is written where an author reads', () => {
-  test('the table holds eight traps, seven live and one pending by name (a shrinking table is a diff)', () => {
+  test('the table holds eight traps, all live (a shrinking table is a diff)', () => {
     expect(TRAPS.map((t) => t.id)).toEqual(['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8']);
-    expect(TRAPS.filter((t) => t.pending).map((t) => `${t.id} ${t.pending}`)).toEqual(['T6 ISL-013']);
+    expect(TRAPS.filter((t) => t.pending).map((t) => `${t.id} ${t.pending}`)).toEqual([]);
   });
 
   test('known-firing control: the scaffold generates a README, and the docs page carries T2 (GAM-017) and T8 (ISL-011)', () => {
@@ -129,7 +135,9 @@ describe('ISL-015 — every kit trap is written where an author reads', () => {
     expect({ id, present: t.readme.test(where) }).toEqual({ id, present: true });
   });
 
-  test.each(TRAPS.filter((t) => t.pending).map((t) => [t.id, t.pending, t]))('%s is pending %s: no surface carries its route yet', (id, _owner, t) => {
+  // jest refuses an empty table, and none is pending since ISL-013 — the block stays for the next one
+  const PENDING = TRAPS.filter((t) => t.pending).map((t) => [t.id, t.pending, t]);
+  (PENDING.length ? test.each(PENDING) : () => () => undefined)('%s is pending %s: no surface carries its route yet', (id, _owner, t) => {
     expect({ id, docs: t.phrase.test(DOCS), readme: t.phrase.test(README) }).toEqual({ id, docs: false, readme: false });
   });
 

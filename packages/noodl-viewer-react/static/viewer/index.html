@@ -97,7 +97,16 @@
           // time the runtime iterates this array the global holds the *last*
           // kit's name. See @nodegx/module-inject's `buildInjectionTags`.
           if (m && !m.name && window.__noodl_module_name) m.name = window.__noodl_module_name;
+          // ISL-013: a kit another kit requires is told its folder too, so `getModule` finds it by either
+          if (m && !m.folder && window.__noodl_module_folder) m.folder = window.__noodl_module_folder;
           window.__noodl_modules.push(m);
+        },
+        // ISL-013: what a kit you `require` shares (its module's `exports`), by its name or folder; undefined when it is not loaded
+        getModule: function (id) {
+          for (var i = window.__noodl_modules.length - 1; i >= 0; i--) {
+            var m = window.__noodl_modules[i];
+            if (m && (m.name === id || m.folder === id)) return m.exports;
+          }
         },
         deployed: false,
         Env: {}

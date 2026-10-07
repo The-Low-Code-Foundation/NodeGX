@@ -57,6 +57,8 @@
 export interface CloudKitModule {
   /** Manifest name. The handle every diagnostic below uses. */
   name: string;
+  /** ISL-013 — the kit's folder, which `Noodl.getModule` also answers to. Absent in a bundle made before it. */
+  folder?: string;
   /** The kit's entry script, verbatim. `null` for a module that is not cloud-enabled. */
   source?: string | null;
   /** The manifest's `runtimes`, already defaulted to `['browser']` by the producer. */
@@ -158,11 +160,21 @@ function isRequireReach(e: unknown): boolean {
  * browser bootstraps adopt `window.__noodl_module_name`; here the manifest name is in hand
  * directly, which is the same fix with one fewer indirection.
  */
-function makeKitNoodl(manifestName: string, captured: Record<string, unknown>[]) {
+function makeKitNoodl(manifestName: string, captured: Record<string, unknown>[], loaded: Record<string, unknown>[] = [], folder?: string) {
   return {
     defineModule(m: Record<string, unknown>) {
       if (m && !m.name && manifestName) m.name = manifestName;
+      if (m && !m.folder && folder) m.folder = folder;
       captured.push(m);
+    },
+    // ISL-013: the browser bootstrap's `getModule` — what a kit loaded before this one shares, by name or folder. The bundle's
+    // module order is the injector's, so a kit's `requires` are already in `loaded`.
+    getModule(id: string): unknown {
+      for (let i = loaded.length - 1; i >= 0; i--) {
+        const m = loaded[i];
+        if (m && (m.name === id || m.folder === id)) return m.exports;
+      }
+      return undefined;
     },
     deployed: true,
     Env: {}
@@ -176,13 +188,25 @@ function makeKitNoodl(manifestName: string, captured: Record<string, unknown>[])
  * bindings below and none of this module's, which is both what a `<script>` tag gives a kit and
  * what keeps esbuild from rewriting anything inside it.
  */
-function evaluateKit(name: string, source: string): Record<string, unknown>[] {
+function evaluateKit(name: string, source: string, loaded: Record<string, unknown>[] = [], folder?: string): Record<string, unknown>[] {
   const captured: Record<string, unknown>[] = [];
-  const Noodl = makeKitNoodl(name, captured);
+  const Noodl = makeKitNoodl(name, captured, loaded, folder);
   // eslint-disable-next-line no-new-func
   const run = new Function('Noodl', 'require', `${source}\n//# sourceURL=noodl_modules/${name}/index.js`);
   run(Noodl, cloudRequire);
   return captured;
+}
+
+/**
+ * ISL-013 — the modules each runtime's kits have defined so far, in load order: what `Noodl.getModule` reads. Per runtime,
+ * like `alreadyLoaded`, so one runner's kits never see another's.
+ */
+const LOADED = new WeakMap<object, Record<string, unknown>[]>();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function loadedModules(runtime: any): Record<string, unknown>[] {
+  let list = LOADED.get(runtime);
+  if (!list) LOADED.set(runtime, (list = []));
+  return list;
 }
 
 /**
@@ -240,7 +264,7 @@ export function loadCloudKitModules(
 
     let defined: Record<string, unknown>[];
     try {
-      defined = evaluateKit(name, m.source);
+      defined = evaluateKit(name, m.source, loadedModules(runtime), m.folder);
     } catch (e) {
       const message = e && typeof e === 'object' ? String((e as Error).message || e) : String(e);
       result.failures.push({
@@ -252,6 +276,8 @@ export function loadCloudKitModules(
       });
       continue;
     }
+
+    loadedModules(runtime).push(...defined);
 
     if (!defined.length) {
       result.failures.push({
