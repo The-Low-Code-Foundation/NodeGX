@@ -530,7 +530,7 @@ function axisOf(el: HTMLElement): 'x' | 'y' {
  */
 function slots(g: Gesture, zoneEl: HTMLElement): HTMLElement[] {
   const out: HTMLElement[] = [];
-  for (const child of Array.from(zoneEl.children)) {
+  for (const child of Array.from(slotParent(zoneEl).children)) {
     if (!(child instanceof HTMLElement) || child === g.sourceEl) continue;
     // A node's own drawing is no slot (P107-C91: Custom SVG's span held a Shape's Drop Index at 1)
     if (child.hasAttribute('data-ndl-drawing')) continue;
@@ -539,6 +539,17 @@ function slots(g: Gesture, zoneEl: HTMLElement): HTMLElement[] {
     out.push(child);
   }
   return out;
+}
+
+/**
+ * The element a zone's cards are laid out in: the zone's own element, or the child it marks `data-ndl-slots` — a scrolling
+ * Group draws its children inside the scroller's wrapper (P107-C88, ruled "count the cards": Drop Index counted the wrapper).
+ */
+function slotParent(zoneEl: HTMLElement): HTMLElement {
+  for (const child of Array.from(zoneEl.children)) {
+    if (child instanceof HTMLElement && child.hasAttribute('data-ndl-slots')) return child;
+  }
+  return zoneEl;
 }
 
 /** A child's box as it would be without this gesture's translate. */
@@ -592,7 +603,7 @@ function setIndex(g: Gesture, index: number): void {
  * one card lower than it aimed.
  */
 function homeIndex(g: Gesture, zoneEl: HTMLElement): number {
-  if (g.sourceEl.parentElement !== zoneEl) return -1;
+  if (g.sourceEl.parentElement !== slotParent(zoneEl)) return -1;
   return slots(g, zoneEl).filter((c) => c.compareDocumentPosition(g.sourceEl) & Node.DOCUMENT_POSITION_FOLLOWING).length;
 }
 

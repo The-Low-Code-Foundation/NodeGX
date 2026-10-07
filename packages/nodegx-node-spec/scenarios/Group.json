@@ -772,9 +772,8 @@
     ]
   },
   {
-    "name": "row C88 — Enable Scroll on and Native platform scroll off: a card picked up from the keyboard drops after both children, at 2 (the runtime: at 1 — it counts the scroller's wrapper)",
+    "name": "C88 — Enable Scroll on and Native platform scroll off: a card picked up from the keyboard drops after both children, at 2",
     "because": "Group.tsx renderIScroll wraps the children; drag-drop.ts `slots` counts the zone element's own children",
-    "row": "NSP-016 §6 C88",
     "params": {
       "scrollEnabled": true,
       "nativeScroll": false,
@@ -853,9 +852,8 @@
     ]
   },
   {
-    "name": "row C90 — Enable Scroll on, Native platform scroll off and Block Pointer Events on: a click fires Click (the runtime: no Click, though Focused comes)",
+    "name": "C90 — Enable Scroll on, Native platform scroll off and Block Pointer Events on: a click fires Click",
     "because": "Group.tsx setupIScroll `click: true`; pointerlisteners.ts :113-133 — measured: either alone keeps Click",
-    "row": "NSP-016 §6 C90",
     "params": {
       "blockTouch": true,
       "scrollEnabled": true,

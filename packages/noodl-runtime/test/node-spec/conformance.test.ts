@@ -84,31 +84,6 @@ const heldAt = (d: Divergence, port: string): unknown => {
 };
 
 /**
- * NSP-016 §6 C88 (s52) — Enable Scroll on and Native platform scroll off (the setting the Scroll To actions ask for): Group.tsx wraps
- * the children in the scroller's `scroll-wrapper-internal` div, and drag-drop.ts `slots` counts the zone element's own children — one,
- * the wrapper. So a keyboard drop's index runs 0 to 1 whatever the children. The spec counts the children (the port's own words).
- * Narrow: the difference is Drop Index, with Enable Scroll truthy and Native platform scroll falsy at it.
- */
-const scrollerWrapsChildren = (d: Divergence) => {
-  if (d.difference.threw !== undefined) return false;
-  const at = (e: TraceEvent | undefined) => !!e && e.t === 'value' && e.port === 'dropIndex';
-  if (!at(d.reference[d.difference.index]) && !at(d.actual[d.difference.index])) return false;
-  return !!heldAt(d, 'scrollEnabled') && !heldAt(d, 'nativeScroll');
-};
-
-/**
- * NSP-016 §6 C90 (s52) — the JavaScript scroller (Enable Scroll on, Native platform scroll not `true`) and Block Pointer Events
- * together: a click on the Group or a child fires no Click (the focus walk still hears it). Either alone keeps Click. Narrow: the
- * difference is at Click, with all three held at it.
- */
-const scrollerBlocksClick = (d: Divergence) => {
-  if (d.difference.threw !== undefined) return false;
-  const at = (e: TraceEvent | undefined) => !!e && e.t === 'signal' && e.port === 'onClick';
-  if (!at(d.reference[d.difference.index]) && !at(d.actual[d.difference.index])) return false;
-  return !!heldAt(d, 'blockTouch') && !!heldAt(d, 'scrollEnabled') && heldAt(d, 'nativeScroll') !== true;
-};
-
-/**
  * NSP-016 s53 — values the generator does not draw on the runtime target (runner `withheld`), because the target cannot survive
  * them: a known row that takes the whole process down cannot be played, so it cannot be counted either. Printed in every report.
  */
@@ -153,8 +128,6 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   // s52 — the Group: the Text's rows (the same shared ports and drag module), and its own Tag
   Group: [
     { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer },
-    { row: 'NSP-016 §6 C88 — Enable Scroll on and Native platform scroll off: the scroller wraps the children, so Drop Index counts the wrapper (0 or 1)', matches: scrollerWrapsChildren },
-    { row: 'NSP-016 §6 C90 — the JavaScript scroller and Block Pointer Events together: a click fires no Click', matches: scrollerBlocksClick },
     { row: 'NSP-016 §6 C95 — a Focus on a Group off the page: the runtime lists it, fires Focused and reports Done (R16: Unchanged)', matches: groupFocusOffPage }
   ],
 };

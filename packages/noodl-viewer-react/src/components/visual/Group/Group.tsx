@@ -29,6 +29,7 @@ export interface GroupProps extends Noodl.ReactProps {
   clip: boolean;
 
   layout: 'none' | 'row' | 'column';
+  blockTouch?: boolean;
   dom;
 
   onScrollPositionChanged?: (value: number) => void;
@@ -283,10 +284,35 @@ export class Group extends React.Component<GroupProps> {
     }
 
     return (
-      <div className="scroll-wrapper-internal" style={childStyle}>
+      // `data-ndl-slots`: the cards sit in here, not in the Group's own element — drag-drop.ts counts Drop Index among them (P107-C88)
+      <div className="scroll-wrapper-internal" data-ndl-slots="" style={childStyle}>
         {this.props.children}
       </div>
     );
+  }
+
+  /**
+   * P107-C90 (ruled "let the list's taps through"): the blocker stops a press after the list has seen it.
+   *
+   * The scroller hears a move and a release on the window, and Block Pointer Events stops both at the app root first, so a
+   * scroller with it on never followed a drag and never saw a tap end — it sent no click, and Click never fired. So the Group's
+   * own move and release handlers hand the event to the scroller after Noodl's callback and before the stop: Pointer Up, then
+   * the scroller's click (Focused, Click), as without the blocker. The page behind still hears nothing, and a release outside
+   * the Group still reaches the scroller on the window. A second delivery of one release is a no-op (`end` resets the gesture).
+   */
+  letScrollerSee(listeners: ReturnType<typeof PointerListeners>) {
+    const passes = { onMouseMove: 'move', onMouseUp: 'end', onTouchMove: 'move', onTouchEnd: 'end', onTouchCancel: 'end' } as const;
+    for (const name of Object.keys(passes) as (keyof typeof passes)[]) {
+      const blocker = listeners[name];
+      if (!blocker) continue;
+      listeners[name] = (e) => {
+        blocker(e);
+        // better-scroll types its gesture handlers private; they are what it registers on the window
+        const actions = this.iScroll?.scroller.actionsHandler as unknown as Record<'move' | 'end', (e: Event) => void> | undefined;
+        actions?.[passes[name]](e.nativeEvent);
+      };
+    }
+    return listeners;
   }
 
   getScrollDirection(): 'x' | 'y' | 'both' {
@@ -341,7 +367,7 @@ export class Group extends React.Component<GroupProps> {
       <Component
         className={withDefaultsClass(props.className, defaultsClass)}
         {...props.dom}
-        {...PointerListeners(props)}
+        {...(props.blockTouch ? this.letScrollerSee(PointerListeners(props)) : PointerListeners(props))}
         style={style}
         ref={this.rootRef}
       >
