@@ -77,49 +77,9 @@ const invisibleTakesPointer = (d: Divergence) => {
   return before.some((e) => e.t === 'set' && (e.port === 'pointerEventsEnabled' || e.port === 'pointerEventsMode'));
 };
 
-/**
- * NSP-016 §6 C82 (s50) — Accepted file types holding a truthy value that is not text (a wired number, an object) makes the drop
- * handler throw at `(accept || '').split` (node-shared-port-definitions.ts :294), after Is Dragging Over went false: no File value
- * and neither Files Dropped nor Files Rejected. The spec reads the value as text. Narrow: a file drop came before the difference, the
- * difference is at a file-drop output on either side, and the last Accepted file types (a write, else the placing's) is truthy and
- * not a string (NaN and -0 are falsy).
- */
-const FILE_DROP_OUTPUTS = [...FILE_DROP_VALUES, 'filesDropped', 'filesRejected', 'isDragOver'];
-const nonTextFileTypes = (d: Divergence) => {
-  if (d.difference.threw !== undefined) return false;
-  const atFile = (e: TraceEvent | undefined) => !!e && (e.t === 'value' || e.t === 'signal') && FILE_DROP_OUTPUTS.includes(e.port);
-  if (!atFile(d.reference[d.difference.index]) && !atFile(d.actual[d.difference.index])) return false;
-  const before = d.reference.slice(0, d.difference.index);
-  if (!before.some((e) => e.t === 'act' && e.act === 'fileDrop')) return false;
-  const written = before.filter((e) => e.t === 'set' && e.port === 'acceptedFileTypes').pop() as { value?: unknown } | undefined;
-  const v = written ? written.value : d.params.acceptedFileTypes;
-  const falsyNum = typeof v === 'object' && v !== null && ['NaN', '-0'].includes(String((v as { $num?: unknown }).$num));
-  return !!v && !falsyNum && typeof v !== 'string';
-};
-
-/**
- * NSP-016 §6 C84 and C85 (s51) — two more inputs drag-drop.ts reads as text with `(value || '').split` / `.trim()`: a truthy value
- * that is not text throws inside the controller. Accept Kind (`kindsOf` :155-160, from `accepts`, in `zoneAt` and `orderedZones`):
- * a drag that meets the zone dies there — a pointer let go before its swallow and its drop, so the gesture never ends; a keyboard
- * pick-up starts in no zone. Zone Name (`zoneName` :740-748, in `drop` :393 before `finish`): the drop fires Dropped and Landed, then
- * never ends — the zone stays lit, the source lifted, and no other drag can start. The spec reads both as text (the intent). Shared
- * shape: the difference is on a drag output, and the input held such a value at some point before it with Accept Drops on.
- */
-const DRAG_OUTPUTS = ['isDropTarget', 'droppedValue', 'dropIndex', 'isLifted', 'dropped', 'landed', 'pickedUp', 'dragCancelled', 'onClick'];
-const notText = (v: unknown) => {
-  const falsyNum = typeof v === 'object' && v !== null && ['NaN', '-0'].includes(String((v as { $num?: unknown }).$num));
-  return !!v && !falsyNum && typeof v !== 'string';
-};
+/** Did the input hold a value passing `test` at the placing or at any write before the difference? */
 const everHeld = (d: Divergence, port: string, test: (v: unknown) => boolean) =>
   test(d.params[port]) || d.reference.slice(0, d.difference.index).some((e) => e.t === 'set' && e.port === port && test((e as { value?: unknown }).value));
-const nonTextDragInput = (port: string) => (d: Divergence) => {
-  if (d.difference.threw !== undefined) return false;
-  const atDrag = (e: TraceEvent | undefined) => !!e && (e.t === 'value' || e.t === 'signal') && DRAG_OUTPUTS.includes(e.port);
-  if (!atDrag(d.reference[d.difference.index]) && !atDrag(d.actual[d.difference.index])) return false;
-  return everHeld(d, port, notText) && everHeld(d, 'acceptDrops', (v) => !!v);
-};
-const nonTextAcceptKind = nonTextDragInput('acceptKind');
-const nonTextZoneName = nonTextDragInput('dropZoneName');
 
 /**
  * NSP-016 §6 C87 (s52) — Group.tsx takes its tag with a destructuring default (`const { as = 'div' }`), which covers only `undefined`:
@@ -239,34 +199,21 @@ const WITHHELD: Record<string, Readonly<Record<string, Withheld>>> = {
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
   // s43 — the Text: a text style (C61) and the Placement and units-typed style setters; s44 — C79 (R11: the spec says the intent)
   Text: [
-    { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer },
-    { row: 'NSP-016 §6 C82 — Accepted file types not text: the drop handler throws, so the drop gives no File and no signal', matches: nonTextFileTypes },
-    // s51 — the zone side's two: the drag controller reads Accept Kind and Zone Name as text and throws on anything else
-    { row: 'NSP-016 §6 C84 — Accept Kind not text: the drag controller throws where it reads the kinds, so a drag that meets the zone dies there', matches: nonTextAcceptKind },
-    { row: 'NSP-016 §6 C85 — Zone Name not text: a drop on the zone throws after Dropped, so the drag never ends', matches: nonTextZoneName }
+    { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer }
   ],
   // s53 — the Shape: the Text's rows (the same shared ports and drag module), and Custom SVG's span
   Circle: [
     { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer },
-    { row: 'NSP-016 §6 C82 — Accepted file types not text: the drop handler throws, so the drop gives no File and no signal', matches: nonTextFileTypes },
-    { row: 'NSP-016 §6 C84 — Accept Kind not text: the drag controller throws where it reads the kinds, so a drag that meets the zone dies there', matches: nonTextAcceptKind },
-    { row: 'NSP-016 §6 C85 — Zone Name not text: a drop on the zone throws after Dropped, so the drag never ends', matches: nonTextZoneName },
     { row: 'NSP-016 §6 C91 — Shape Custom SVG: the span holding the drawing counts as a child, so a keyboard drop lands at 1', matches: svgShapeIsASlot }
   ],
   // s53 — the Image: the Text's rows (the same shared ports and drag module)
   Image: [
     { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer },
-    { row: 'NSP-016 §6 C82 — Accepted file types not text: the drop handler throws, so the drop gives no File and no signal', matches: nonTextFileTypes },
-    { row: 'NSP-016 §6 C84 — Accept Kind not text: the drag controller throws where it reads the kinds, so a drag that meets the zone dies there', matches: nonTextAcceptKind },
-    { row: 'NSP-016 §6 C85 — Zone Name not text: a drop on the zone throws after Dropped, so the drag never ends', matches: nonTextZoneName },
     { row: 'NSP-016 §6 C94 — Source Set true as the element is made: React writes srcset="true", so the browser fetches a picture called true', matches: booleanSrcSetAtMount }
   ],
   // s52 — the Group: the Text's rows (the same shared ports and drag module), and its own Tag
   Group: [
     { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer },
-    { row: 'NSP-016 §6 C82 — Accepted file types not text: the drop handler throws, so the drop gives no File and no signal', matches: nonTextFileTypes },
-    { row: 'NSP-016 §6 C84 — Accept Kind not text: the drag controller throws where it reads the kinds, so a drag that meets the zone dies there', matches: nonTextAcceptKind },
-    { row: 'NSP-016 §6 C85 — Zone Name not text: a drop on the zone throws after Dropped, so the drag never ends', matches: nonTextZoneName },
     { row: 'NSP-016 §6 C87 — a Tag written empty, null, 0 or false: React throws drawing the element', matches: emptyTag },
     { row: 'NSP-016 §6 C88 — Enable Scroll on and Native platform scroll off: the scroller wraps the children, so Drop Index counts the wrapper (0 or 1)', matches: scrollerWrapsChildren },
     { row: 'NSP-016 §6 C89 — Native platform scroll truthy but not true: the scroller runs on unwrapped children (Scroll To Index fails, the click is taken)', matches: nativeScrollNotBoolean },

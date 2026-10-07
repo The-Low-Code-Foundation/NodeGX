@@ -290,8 +290,9 @@ function flagFileDropOutputs(node: FileDropInstance): void {
  * blank port must mean: the alternative is a drop zone that silently refuses every file until
  * a field nobody filled in gets filled in.
  */
-function fileMatchesAcceptedTypes(file: File, accept: string | undefined): boolean {
-  const patterns = (accept || '')
+function fileMatchesAcceptedTypes(file: File, accept: unknown): boolean {
+  // Read as text (P107-C82): a wired number names a type no file has, so the drop is rejected out loud instead of throwing.
+  const patterns = String(accept || '')
     .split(',')
     .map((entry) => entry.trim().toLowerCase())
     .filter(Boolean);

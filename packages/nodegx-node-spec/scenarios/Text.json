@@ -8840,7 +8840,7 @@
     ]
   },
   {
-    "name": "row C82 — Accepted file types wired a number is read as text: a PDF dropped is rejected (Files empty, Files Rejected); written as text after it, a PDF is taken (the runtime: the drop throws — no File, no signal)",
+    "name": "row C82 — Accepted file types wired a number is read as text: a PDF dropped is rejected (Files empty, Files Rejected); written as text after it, a PDF is taken",
     "because": "node-shared-port-definitions.ts :293-299 — C82",
     "params": {
       "acceptFileDrops": true,
@@ -8887,8 +8887,7 @@
         "act": "fileDrop"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C82"
+    ]
   },
   {
     "name": "Accepted file types written false, 0 or the empty text: blank, so every file is taken (the control beside row C82)",
@@ -98801,9 +98800,8 @@
     ]
   },
   {
-    "name": "row C84 — Accept Kind wired a list is read as text (blank: it takes every card): a card picked up from the keyboard starts in it, and Enter drops it there (the runtime: the kinds throw — the card starts in no zone)",
+    "name": "row C84 — Accept Kind wired a list is read as text (blank: it takes every card): a card picked up from the keyboard starts in it, and Enter drops it there",
     "because": "drag-drop.ts :155-160 `kindsOf` — `(value || '').split` throws on a truthy value that is not text; called from `accepts` in `zoneAt` and `orderedZones`",
-    "row": "NSP-016 §6 C84",
     "params": {
       "acceptDrops": true,
       "acceptKind": []
@@ -98848,9 +98846,8 @@
     ]
   },
   {
-    "name": "row C84 — Accept Kind wired a number is read as text: a card carried over it and let go is refused and the drag ends, so the click after it is swallowed and the next card lifts and drops (the runtime: the let go throws — the drag never ends)",
+    "name": "row C84 — Accept Kind wired a number is read as text: a card carried over it and let go is refused and the drag ends, so the click after it is swallowed and the next card lifts and drops",
     "because": "drag-drop.ts :155-160 `kindsOf` — `(value || '').split` throws on a truthy value that is not text; called from `accepts` in `zoneAt` and `orderedZones`",
-    "row": "NSP-016 §6 C84",
     "params": {
       "acceptDrops": true,
       "acceptKind": 5
@@ -98951,9 +98948,8 @@
     ]
   },
   {
-    "name": "row C85 — Zone Name wired a number is read as text: a card dropped on it ends the drag (Drag Over false), and the next card lifts and drops (the runtime: the drop's announcement throws after Dropped — the zone stays lit and no drag starts again)",
+    "name": "row C85 — Zone Name wired a number is read as text: a card dropped on it ends the drag (Drag Over false), and the next card lifts and drops",
     "because": "drag-drop.ts :740-748 `zoneName` — `(dropZoneName || '').trim()` throws on a truthy value that is not text; called in `drop` :393 before `finish`",
-    "row": "NSP-016 §6 C85",
     "params": {
       "acceptDrops": true,
       "dropZoneName": 5

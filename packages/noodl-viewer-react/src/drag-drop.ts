@@ -152,8 +152,10 @@ function liveElement(node: DragDropNode): HTMLElement | null {
 
 // ── Reading a node ──────────────────────────────────────────────────────────
 
-function kindsOf(value: string | undefined): string[] {
-  return (value || '')
+// A wire can carry anything into Accept Kind, Drag Kind and Zone Name: read each as text, as the spec does, so a number or a
+// list never throws inside a drag (P107-C84, C85).
+function kindsOf(value: unknown): string[] {
+  return String(value || '')
     .split(',')
     .map((k) => k.trim())
     .filter(Boolean);
@@ -166,7 +168,7 @@ function kindsOf(value: string | undefined): string[] {
 function accepts(zone: DragDropNode, source: DragDropNode): boolean {
   const wanted = kindsOf(zone._internal.acceptKind);
   if (wanted.length === 0) return true;
-  const kind = (source._internal.dragKind || '').trim();
+  const kind = String(source._internal.dragKind || '').trim();
   return wanted.includes(kind);
 }
 
@@ -738,7 +740,7 @@ function sourceName(el: HTMLElement): string {
 }
 
 function zoneName(zone: DragDropNode, el: HTMLElement | undefined): string {
-  const named = (zone._internal.dropZoneName || '').trim();
+  const named = String(zone._internal.dropZoneName || '').trim();
   if (named) return named;
   const label = el && el.getAttribute('aria-label');
   if (label) return label;
