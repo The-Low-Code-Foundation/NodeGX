@@ -208,6 +208,11 @@ let pointerAt: any = null;
  * browser has as its target (`over`; null before the first act puts it anywhere). One play's.
  */
 let fileDrag: { files: unknown[]; over: any } | undefined;
+/**
+ * NSP-016 s55 — the element a finger went down on (the `pressAt` act `by: 'touch'`): a browser sends that touch's moves and its end
+ * to the element it started on, wherever the finger goes. One play's.
+ */
+let touchAt: any = null;
 
 // ---------------------------------------------------------------------------------------------
 // THE MEDIA ELEMENT (NSP-016 s54, the Video). jsdom has no media engine: `play()`, `pause()` and `load()` report "not
@@ -561,6 +566,7 @@ function installPage(): () => void {
   const d = ensureDom();
   pointerAt = null;
   fileDrag = undefined;
+  touchAt = null;
   activated = false;
   // the window outlives the play (one page per process): a listener the play's page left on it — drag-drop.ts `swallowNextClick`
   // takes its own off with a `setTimeout(0)` on the WORLD's clock, which a play that ends first never turns — ate a click in a
@@ -1152,7 +1158,7 @@ export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 't
 export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back', 'router-navigate', 'page-inputs', 'showpopup', 'closepopup'] as const;
 
 /** NSP-016 s37 — the viewer's VISUAL nodes this phase has specced, from `src/nodes/` (their React components come with them; PERSON above). */
-export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox', 'controls/text-input', 'controls/options', 'controls/slider', 'visual/icon', 'controls/radiobuttongroup', 'controls/radiobutton', 'visual/text', 'visual/group', 'visual/circle', 'visual/image', 'visual/video'] as const;
+export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox', 'controls/text-input', 'controls/options', 'controls/slider', 'visual/icon', 'controls/radiobuttongroup', 'controls/radiobutton', 'visual/text', 'visual/group', 'visual/circle', 'visual/image', 'visual/video', 'visual/drag'] as const;
 
 /**
  * Picker nodes whose SOURCE is in this package but which only the viewer's `register-nodes.js`
@@ -1826,6 +1832,12 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
         root.addChild(child);
         return { node: child, value };
       });
+    } else if (s.h.type === 'Drag') {
+      // NSP-016 s55 — the Drag's child (drag.ts THE CHILD): one real Group in the node's scope, added with the Drag's own `addChild`
+      // before the first render — the element the Drag moves. A Drag draws only its first child (row C103), so one is its page
+      const child = context.nodeRegister.createNode('Group', `${s.h.id}/child0`, scope) as unknown as RuntimeNode;
+      root.addChild(child);
+      page.children = [{ node: child, value: 'child' }];
     } else if (spec?.needs?.includes('group') && world?.group.present) {
       const group = context.nodeRegister.createNode('Radio Button Group', `${s.h.id}/group`, scope) as unknown as RuntimeNode & Holder;
       // the group's Value parameter at load, then the node, then its siblings — the order a loaded project builds them
@@ -1993,6 +2005,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     if (act === 'fileEnter' || act === 'fileLeave' || act === 'fileDrop') return fileActs(act, value, el ? underPointer(w, el) : d.document.body);
     // NSP-016 s51 — a card beside the node, and the pointer off everything: acts on the page, the node's element or not
     if (act === 'grab' || act === 'pickUp' || act === 'away') return cardActs(s, act, value);
+    // NSP-016 s55 — a pointer WITH A POSITION (drag.ts THE GESTURE): pressed on the node's element, moved and let go anywhere
+    if (act === 'pressAt' || act === 'moveTo' || act === 'releaseAt') return positionedAct(act, value, el);
     if (!el) return;
     // NSP-016 s53 — the browser finishes fetching the picture an `<img>` names (image.ts `fetched`): its `load` or `error` event on the
     // element, which React hears there. jsdom fetches nothing, so the face is the browser. Face choice, written down: a browser fetches
@@ -2277,6 +2291,56 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     if (act !== 'fileDrop') return;
     fire(taken ? 'drop' : 'dragleave', at);
     fileDrag = undefined;
+  }
+
+  /**
+   * PERSON (above, NSP-016 s55) — a pointer WITH A POSITION (drag.ts THE GESTURE), the browser's events for it:
+   * - `pressAt` (`{ x, y, by?, button? }`): a mouse button (0 unless `button` names another) or, `by: 'touch'`, a finger goes down at
+   *   (x, y) on the node's element, under the hit test (the page's body when the node has none on the page): `pointerdown`, then
+   *   `mousedown` — or `touchstart` with the touch in its lists;
+   * - `moveTo` (`{ x, y }`): the pointer that is down moves to (x, y): `pointermove`, then `mousemove` — or `touchmove`;
+   * - `releaseAt` (`{ x, y }`): it comes up at (x, y): `pointerup`, then `mouseup` — or `touchend`, the touch only in `changedTouches`.
+   * A mouse's move and release land on whatever is under the pointer and bubble to the document; the face has no geometry, so they are
+   * dispatched AT the document (where react-draggable listens). A finger's move and end go to the element the finger went down on
+   * (`touchAt`), as a browser sends them — so once that element has left the page the document hears neither. Face choices, written
+   * down: no hover, leave or click is raised (a press and release on the same element is a click in a browser; the Drag answers
+   * none); the mouse's `buttons` is 1 between a press and its release; a touch is touch identifier 0; one pointer at a time (a
+   * mouse press ends what a finger was doing, for the face).
+   */
+  function positionedAct(act: 'pressAt' | 'moveTo' | 'releaseAt', value: unknown, el: any): void {
+    const d = ensureDom();
+    const w = d.window;
+    const v = (value ?? {}) as { x?: unknown; y?: unknown; by?: unknown; button?: unknown };
+    const clientX = Number(v.x ?? 0);
+    const clientY = Number(v.y ?? 0);
+    const finger = act === 'pressAt' ? v.by === 'touch' : touchAt !== null;
+    const at = act === 'pressAt' ? (el ? underPointer(w, el) : d.document.body) : finger ? touchAt : d.document;
+    if (act === 'pressAt') pointerAt = at;
+    // one pointer at a time: a mouse press is not a finger, so what moves next is the mouse
+    if (act === 'pressAt' && !finger) touchAt = null;
+    const button = act === 'pressAt' && typeof v.button === 'number' ? v.button : 0;
+    const pointer = (type: string) => {
+      const e = new w.MouseEvent(type, { bubbles: true, cancelable: true, composed: true, button: act === 'moveTo' ? -1 : button, buttons: act === 'releaseAt' ? 0 : 1, clientX, clientY });
+      Object.defineProperty(e, 'pointerType', { value: finger ? 'touch' : 'mouse' });
+      Object.defineProperty(e, 'pointerId', { value: finger ? 2 : 1 });
+      Object.defineProperty(e, 'isPrimary', { value: true });
+      at.dispatchEvent(e);
+    };
+    pointer(act === 'pressAt' ? 'pointerdown' : act === 'moveTo' ? 'pointermove' : 'pointerup');
+    if (!finger) {
+      const type = act === 'pressAt' ? 'mousedown' : act === 'moveTo' ? 'mousemove' : 'mouseup';
+      at.dispatchEvent(new w.MouseEvent(type, { bubbles: true, cancelable: true, composed: true, button: act === 'moveTo' ? 0 : button, buttons: act === 'releaseAt' ? 0 : 1, clientX, clientY }));
+      return;
+    }
+    const touch = { identifier: 0, target: at, clientX, clientY, pageX: clientX, pageY: clientY, screenX: clientX, screenY: clientY };
+    const e = new w.TouchEvent(act === 'pressAt' ? 'touchstart' : act === 'moveTo' ? 'touchmove' : 'touchend', { bubbles: true, cancelable: true, composed: true });
+    const down = act === 'releaseAt' ? [] : [touch];
+    Object.defineProperty(e, 'touches', { value: down });
+    Object.defineProperty(e, 'targetTouches', { value: down });
+    Object.defineProperty(e, 'changedTouches', { value: [touch] });
+    if (act === 'pressAt') touchAt = at;
+    if (act === 'releaseAt') touchAt = null;
+    at.dispatchEvent(e);
   }
 
   /**

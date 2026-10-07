@@ -1,0 +1,884 @@
+[
+  {
+    "name": "a fresh Drag on the page: Did Mount, Drag X / Y 0, Delta X / Y 0, Children Count 1 in the first frame",
+    "because": "Drag.tsx `componentDidMount` (`setDragValues`), react-component-node.ts :982-990, :1599-1609",
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "placed with Start Drag X / Y: the element starts there; a falsy start is 0",
+    "because": "Drag.tsx `componentDidMount`: `inputPositionX ? inputPositionX : 0`",
+    "params": {
+      "inputPositionX": 40,
+      "inputPositionY": 0
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "a mouse drag on Axis Both: Drag Started, a Drag Moved per move, Drag Ended; the element ends where the pointer took it",
+    "because": "DraggableCore `handleDragStart` / `handleDrag` / `handleDragStop`; Drag.tsx `onStart` / `onDrag` / `onStop`",
+    "params": {
+      "axis": "both"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "settle",
+      {
+        "act": "moveTo",
+        "value": {
+          "x": 10,
+          "y": 50
+        }
+      },
+      "settle",
+      {
+        "act": "moveTo",
+        "value": {
+          "x": 30,
+          "y": 80
+        }
+      },
+      "settle",
+      {
+        "act": "releaseAt",
+        "value": {
+          "x": 30,
+          "y": 80
+        }
+      },
+      "settle",
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "act": "moveTo",
+        "value": {
+          "x": 5,
+          "y": 5
+        }
+      },
+      {
+        "act": "releaseAt",
+        "value": {
+          "x": 5,
+          "y": 5
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Axis X: the element moves on X only — Drag Y stays where the element is and Delta Y is 0 (row C102 on the runtime)",
+    "because": "Draggable `canDragX` / `canDragY`; R11 — the runtime reports the pointer's movement on the locked axis",
+    "row": "NSP-016 §6 C102",
+    "steps": [
+      "settle",
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "settle",
+      {
+        "act": "moveTo",
+        "value": {
+          "x": 10,
+          "y": 50
+        }
+      },
+      "settle",
+      {
+        "act": "releaseAt",
+        "value": {
+          "x": 10,
+          "y": 50
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Scale 2 halves the movement; 0.5 doubles it",
+    "because": "positionFns.js `createDraggableData`: `x + deltaX / scale`",
+    "params": {
+      "axis": "both",
+      "scale": 2
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "act": "moveTo",
+        "value": {
+          "x": 100,
+          "y": 0
+        }
+      },
+      {
+        "act": "releaseAt",
+        "value": {
+          "x": 100,
+          "y": 0
+        }
+      },
+      "settle",
+      {
+        "set": "scale",
+        "value": 0.5
+      },
+      "settle",
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "act": "moveTo",
+        "value": {
+          "x": 100,
+          "y": 0
+        }
+      },
+      {
+        "act": "releaseAt",
+        "value": {
+          "x": 100,
+          "y": 0
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Enabled false: a press starts nothing; Enabled true again: it drags",
+    "because": "Draggable `disabled={enabled === false}`",
+    "params": {
+      "axis": "both"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "act": "moveTo",
+        "value": {
+          "x": 10,
+          "y": 0
+        }
+      },
+      {
+        "act": "releaseAt",
+        "value": {
+          "x": 10,
+          "y": 0
+        }
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "act": "moveTo",
+        "value": {
+          "x": 10,
+          "y": 0
+        }
+      },
+      {
+        "act": "releaseAt",
+        "value": {
+          "x": 10,
+          "y": 0
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "another mouse button starts nothing; a finger drags",
+    "because": "DraggableCore `handleDragStart`: only the main button; a touch has no button",
+    "params": {
+      "axis": "both"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 5,
+          "y": 5,
+          "button": 2
+        }
+      },
+      {
+        "act": "moveTo",
+        "value": {
+          "x": 20,
+          "y": 5
+        }
+      },
+      {
+        "act": "releaseAt",
+        "value": {
+          "x": 20,
+          "y": 5
+        }
+      },
+      "settle",
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 0,
+          "y": 0,
+          "by": "touch"
+        }
+      },
+      {
+        "act": "moveTo",
+        "value": {
+          "x": 15,
+          "y": 0
+        }
+      },
+      {
+        "act": "releaseAt",
+        "value": {
+          "x": 15,
+          "y": 0
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Start Drag X written later: the element moves there; Delta X is the change from the last one painted (from nothing: NaN)",
+    "because": "Drag.tsx `componentDidUpdate`",
+    "steps": [
+      "settle",
+      {
+        "set": "inputPositionX",
+        "value": 20
+      },
+      "settle",
+      {
+        "set": "inputPositionX",
+        "value": 50
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Snap To Position X — Do: Done; the element animates from where it is to Value over Duration, Ease Out",
+    "because": "drag.ts :61-79; Drag.tsx `snapToPosition`; timerscheduler.ts `runTimers`",
+    "steps": [
+      "settle",
+      {
+        "set": "snapToPositionX.value",
+        "value": 100
+      },
+      {
+        "signal": "snapToPositionX.do"
+      },
+      "settle",
+      {
+        "advance": 100
+      },
+      "settle",
+      {
+        "advance": 100
+      },
+      "settle",
+      {
+        "advance": 100
+      },
+      "settle",
+      {
+        "advance": 100
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Do while the element is already at Value: Done, and nothing moves",
+    "because": "Drag.tsx `snapToPositionX`: `if (this.state.x === x) return`",
+    "steps": [
+      "settle",
+      {
+        "signal": "snapToPositionX.do"
+      },
+      "settle",
+      {
+        "signal": "snapToPositionY.do"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Mounted off: Will Unmount; a Do waits and runs at the mount, from where the element starts (row C105 on the runtime)",
+    "because": "react-component-node.ts :2014-2056 `withInnerComponent`; Drag.tsx `constructor`",
+    "row": "NSP-016 §6 C105",
+    "params": {
+      "inputPositionX": 30
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "snapToPositionX.value",
+        "value": 60
+      },
+      {
+        "signal": "snapToPositionX.do"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "advance": 150
+      },
+      "settle",
+      {
+        "advance": 200
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a press stops a snap under way",
+    "because": "Drag.tsx `onStart`: both timers stop",
+    "params": {
+      "axis": "both"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "snapToPositionX.value",
+        "value": 100
+      },
+      {
+        "signal": "snapToPositionX.do"
+      },
+      "settle",
+      {
+        "advance": 100
+      },
+      "settle",
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "settle",
+      {
+        "advance": 100
+      },
+      "settle",
+      {
+        "advance": 300
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Start Drag X written, then an act that does nothing, twice in one frame: each act's paint moves the element first, so the second Delta X is from the first start — every such act",
+    "because": "the face paints before the act (node-spec-target.ts PERSON); Drag.tsx `componentDidUpdate` at each paint, against the props it last rendered",
+    "steps": [
+      "settle",
+      {
+        "set": "inputPositionX",
+        "value": 25
+      },
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 5,
+          "y": 5,
+          "button": 2
+        }
+      },
+      {
+        "set": "inputPositionX",
+        "value": 60
+      },
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 5,
+          "y": 5,
+          "button": 2
+        }
+      },
+      "settle",
+      {
+        "set": "inputPositionX",
+        "value": -40
+      },
+      {
+        "act": "moveTo",
+        "value": {
+          "x": 10,
+          "y": 50
+        }
+      },
+      {
+        "set": "inputPositionX",
+        "value": 12
+      },
+      {
+        "act": "moveTo",
+        "value": {
+          "x": 10,
+          "y": 50
+        }
+      },
+      "settle",
+      {
+        "set": "inputPositionX",
+        "value": 7.5
+      },
+      {
+        "act": "releaseAt",
+        "value": {
+          "x": 10,
+          "y": 50
+        }
+      },
+      {
+        "set": "inputPositionX",
+        "value": 3
+      },
+      {
+        "act": "releaseAt",
+        "value": {
+          "x": 10,
+          "y": 50
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Start Drag X written NaN: the element is at NaN, and Drag X and Delta X say so (row C106 on the runtime: its update compares NaN with itself and loops until React throws)",
+    "because": "Drag.tsx `componentDidUpdate`: `prevProps.inputPositionX !== props.inputPositionX` is true for NaN at every update",
+    "row": "NSP-016 §6 C106",
+    "steps": [
+      "settle",
+      {
+        "set": "inputPositionX",
+        "value": {
+          "$num": "NaN"
+        }
+      },
+      "settle",
+      {
+        "set": "inputPositionX",
+        "value": 10
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Start Drag X that is text joins with the movement as text; with Constrain to parent on, the library's slack joins on too — off and on",
+    "because": "positionFns.js `createDraggableData` (`x + deltaX / scale`) and Draggable `onDrag` with bounds (`newState.x += slackX`): the start is kept as it came (Drag.tsx `componentDidMount`)",
+    "params": {
+      "inputPositionX": "50",
+      "axis": "both",
+      "useParentBounds": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "act": "moveTo",
+        "value": {
+          "x": 10,
+          "y": 50
+        }
+      },
+      "settle",
+      {
+        "act": "releaseAt",
+        "value": {
+          "x": 10,
+          "y": 50
+        }
+      },
+      "settle",
+      {
+        "set": "useParentBounds",
+        "value": true
+      },
+      {
+        "set": "inputPositionX",
+        "value": "7"
+      },
+      "settle",
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "act": "moveTo",
+        "value": {
+          "x": 10,
+          "y": 50
+        }
+      },
+      "settle",
+      {
+        "act": "releaseAt",
+        "value": {
+          "x": 10,
+          "y": 50
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Snap Value that is nothing, null or empty leaves the one before: 40, then null and empty, then Do — to 40; then -30 — to -30; both axes",
+    "because": "drag.ts :89-100 `readSnapCoordinate`: undefined, null and '' abstain",
+    "steps": [
+      "settle",
+      {
+        "set": "snapToPositionX.value",
+        "value": 40
+      },
+      {
+        "set": "snapToPositionX.value",
+        "value": null
+      },
+      {
+        "set": "snapToPositionX.value",
+        "value": ""
+      },
+      {
+        "signal": "snapToPositionX.do"
+      },
+      "settle",
+      {
+        "advance": 300
+      },
+      "settle",
+      {
+        "set": "snapToPositionX.value",
+        "value": -30
+      },
+      {
+        "signal": "snapToPositionX.do"
+      },
+      "settle",
+      {
+        "advance": 300
+      },
+      "settle",
+      {
+        "set": "snapToPositionY.value",
+        "value": 40
+      },
+      {
+        "set": "snapToPositionY.value",
+        "value": null
+      },
+      {
+        "set": "snapToPositionY.value",
+        "value": ""
+      },
+      {
+        "signal": "snapToPositionY.do"
+      },
+      "settle",
+      {
+        "advance": 300
+      },
+      "settle",
+      {
+        "set": "snapToPositionY.value",
+        "value": -30
+      },
+      {
+        "signal": "snapToPositionY.do"
+      },
+      "settle",
+      {
+        "advance": 300
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Mounted off and an act in the same frame: the act's paint takes the Drag off the page, so a Do after it in that frame waits for the mount — every act",
+    "because": "the face paints before the act; the Do's callback runs at the frame's end before its paint (nodecontext.ts :495-503), on no component: `withInnerComponent` waits",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "signal": "snapToPositionX.do"
+      },
+      {
+        "set": "snapToPositionX.value",
+        "value": 20
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "advance": 300
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "moveTo",
+        "value": {
+          "x": 10,
+          "y": 50
+        }
+      },
+      {
+        "signal": "snapToPositionX.do"
+      },
+      {
+        "set": "snapToPositionX.value",
+        "value": 20
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "advance": 300
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "releaseAt",
+        "value": {
+          "x": 10,
+          "y": 50
+        }
+      },
+      {
+        "signal": "snapToPositionX.do"
+      },
+      {
+        "set": "snapToPositionX.value",
+        "value": 20
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "advance": 300
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Do and then a mouse press in one frame: the press's handler drains the graph, so the Do runs at the press, after the drag has started — its snap is not stopped by it, and a let go before the frame's end is overtaken by it",
+    "because": "pointerlisteners.ts :170-186 — the library's `onMouseDown` on the child is wrapped with `updateDirtyNodes`; Drag.tsx `onStart` stops the snaps before the Do runs",
+    "params": {
+      "axis": "both",
+      "inputPositionY": 0.5
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "snapToPositionY.value",
+        "value": 10
+      },
+      "settle",
+      {
+        "signal": "snapToPositionY.do"
+      },
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "act": "releaseAt",
+        "value": {
+          "x": -20,
+          "y": 5
+        }
+      },
+      "settle",
+      {
+        "advance": 150
+      },
+      "settle",
+      {
+        "advance": 300
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Do and then a finger lifted on the child in one frame: the lift's handler drains the graph before React takes the drag's position, so the snap starts from where the element was before the drag ended",
+    "because": "DraggableCore hands the child `onTouchEnd`, wrapped with `updateDirtyNodes` (pointerlisteners.ts :170-186); Drag.tsx `onStop`'s `setState` lands after the handler",
+    "params": {
+      "axis": "both"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 0,
+          "y": 0,
+          "by": "touch"
+        }
+      },
+      {
+        "act": "moveTo",
+        "value": {
+          "x": 30,
+          "y": 80
+        }
+      },
+      "settle",
+      {
+        "signal": "snapToPositionX.do"
+      },
+      {
+        "act": "releaseAt",
+        "value": {
+          "x": 100,
+          "y": 0
+        }
+      },
+      "settle",
+      {
+        "advance": 150
+      },
+      "settle",
+      {
+        "advance": 300
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "both Dos and Mounted off in one frame: the Dos run on the component first (Done, Done), then the paint takes it off (Will Unmount); Mounted on again: Did Mount, and nothing snaps",
+    "because": "the Dos' callbacks run in the frame's drain, before its paint (nodecontext.ts :495-503); Drag.tsx `componentWillUnmount` stops both snaps",
+    "steps": [
+      "settle",
+      {
+        "set": "snapToPositionX.value",
+        "value": 40
+      },
+      {
+        "set": "snapToPositionY.value",
+        "value": -25
+      },
+      {
+        "signal": "snapToPositionX.do"
+      },
+      {
+        "signal": "snapToPositionY.do"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "advance": 300
+      },
+      "settle"
+    ]
+  }
+]

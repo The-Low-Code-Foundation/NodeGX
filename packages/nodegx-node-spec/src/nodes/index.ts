@@ -53,6 +53,7 @@ import { Group } from './group';
 import { Circle } from './circle';
 import { Image } from './image';
 import { Video, OWN_ELEMENT } from './video';
+import { Drag } from './drag';
 import { RadioButtonGroup } from './radiobuttongroup';
 import { RadioButton } from './radiobutton';
 import { NavigateToPath } from './navigate-to-path';
@@ -168,6 +169,7 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [Circle.type]: Circle,
   [Image.type]: Image,
   [Video.type]: Video,
+  [Drag.type]: Drag,
   [RadioButtonGroup.type]: RadioButtonGroup,
   [RadioButton.type]: RadioButton,
   [NavigateToPath.type]: NavigateToPath,
@@ -264,6 +266,7 @@ export {
   Circle,
   Image,
   Video,
+  Drag,
   RadioButtonGroup,
   RadioButton,
   NavigateToPath,

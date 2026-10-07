@@ -194,6 +194,9 @@ function leftUnpressed(acts: readonly string[]): EquivalentMutant[] {
 }
 
 export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = Object.freeze({
+  // NSP-016 s55 — the Drag writes its whole held state on every path (drag.ts `toPatch`); placed off the page, its paint records the
+  // props with no component to read them, and the next paint (an act's, or the frame's end) records them again before anything does
+  Drag: [{ reducer: 'world.place', kind: 'drop-set', branch: '"emit":[],"outcome":null', why: PLACED_OFF_PAGE }],
   Text: TEXT,
   // NSP-016 s53 — the Shape runs the Text's machinery with no Tag
   Circle: TEXT.map(onCircle),

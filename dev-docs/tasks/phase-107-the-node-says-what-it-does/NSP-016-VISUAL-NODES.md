@@ -1,7 +1,7 @@
 # NSP-016 — Visual nodes: research first, then layout semantics that are not CSS
 
 **Opened 2026-09-29.** **Depends on NSP-008.**
-**Status: 🟡 s54 (2026-10-07): the Video conforms on both targets at 200 and 10,000 (13 of 19; v1 — the Image's machinery, the browser's media element with four new acts, the autoplay rule, the four actions); every paint writes the element and its media as they stand, every action the playback; rows C96–C100 (C98 high: a Volume outside 0 to 1 blanks the page) (§7.15). s53 (2026-10-07): the Shape (`Circle`) and the Image conform on both targets (12 of 19; v1 each — the Text's machinery with no Tag; the Image adds the picture's fetch, a new act `fetched`); the runner can withhold a value a target cannot survive; rows C91 (Custom SVG's span is a drop slot), C92 (a huge Points runs the page out of memory), C93 (an Image adds a sub-path Base URL again at every render — high), C94 (Source Set true at placing fetches "true"); the Group v2 (R16: a Focus off the page reports Unchanged; row C95) (§7.14). s52 (2026-10-07): the Group conforms on both targets at 200 and 10,000 (10 of 19; v1, 1,387 scenarios) — its children as drop slots, the focus tracker, the scroll actions and when a frame's work runs; rows C86–C90 (§7.13). s44 (2026-10-05): the Text v3 — C79 is a known row (R11: the spec says the intent, not React's redraw rules); 162 scenarios; s43's 47 deep-run survivors killed (§7.9). s43 (2026-10-05): drag and drop researched ([RESEARCH-DRAG-DROP.md](RESEARCH-DRAG-DROP.md)) and the Text conforms (9 of 19; rows C77, C78, §7.8) — its drag SOURCE graded on a lone node; the zone side and the file drop are step (b). The face learned the browser's hit test, and the 7 conforming specs it moved say what a browser lets a person do. s42 (2026-10-04): the Radio Button Group and the Radio Button conform on both targets at 200 and 10,000 (8 of 19; rows C76, D37, §7.7) — the visual tree, per node: a node's children are on its PAGE (the spec declares them; the face builds them with the node's own `addChild`; a person `pick`s one) and a node's parent is its WORLD (the GROUP seam). s41 (2026-10-04): Slider and Icon conform on both targets at 200 and 10,000 (6 of 19; rows D36, C73, C74, C75; C63 takes null, §7.6) — the face grew `slide` (jsdom's range sanitization, which it applies to every write, plus the browser's step rule, which jsdom lacks; a reversed range is not played); the 13 left each need infrastructure first (a visual tree with context, drag and drop, geometry, media — §7.6). s39 (2026-10-04): Dropdown conforms on both targets (4 of 19; rows C70, C71, D34 and instances of C65, C66, D30, §7.4) — the face grew `choose` (a keyboard pick: an enabled option the list offers, no `change` for the one already selected); the spec keeps the node's value, the author's Value, the shown value and the browser's selection apart because the component does. s38: Text Input conforms on both targets (3 of 19; rows C68, C69, D31–D33, §7.3) — the face grew `type` and `key`, the format a person patch that resolves deferred outcomes (the viewer's pointer drain). s37: AC3 begun — THE PERSON face (the real React component in a jsdom page; an act is the browser's events) and the format's `act` / `acts` / `person` / `place` / `portability`; Button and Checkbox conform on the runtime (rows C61–C66, D30, §7.2). s36: research done, R10 ruled — build the logic for all 19 with each input's portability class in the spec; geometry grading after NSP-017.**
+**Status: 🟡 s55 (2026-10-07): the Drag conforms on both targets (14 of 19; v1 — react-draggable, not drag-drop.ts; the face's pointer WITH A POSITION: `pressAt` / `moveTo` / `releaseAt`; the snaps are Animate To Value's timer; only Constrain to parent needs geometry and waits); rows C101 (high: on a touch screen nothing inside a Drag can be tapped — measured in headless Chrome), C102–C106 (§7.16). s54 (2026-10-07): the Video conforms on both targets at 200 and 10,000 (13 of 19; v1 — the Image's machinery, the browser's media element with four new acts, the autoplay rule, the four actions); every paint writes the element and its media as they stand, every action the playback; rows C96–C100 (C98 high: a Volume outside 0 to 1 blanks the page) (§7.15). s53 (2026-10-07): the Shape (`Circle`) and the Image conform on both targets (12 of 19; v1 each — the Text's machinery with no Tag; the Image adds the picture's fetch, a new act `fetched`); the runner can withhold a value a target cannot survive; rows C91 (Custom SVG's span is a drop slot), C92 (a huge Points runs the page out of memory), C93 (an Image adds a sub-path Base URL again at every render — high), C94 (Source Set true at placing fetches "true"); the Group v2 (R16: a Focus off the page reports Unchanged; row C95) (§7.14). s52 (2026-10-07): the Group conforms on both targets at 200 and 10,000 (10 of 19; v1, 1,387 scenarios) — its children as drop slots, the focus tracker, the scroll actions and when a frame's work runs; rows C86–C90 (§7.13). s44 (2026-10-05): the Text v3 — C79 is a known row (R11: the spec says the intent, not React's redraw rules); 162 scenarios; s43's 47 deep-run survivors killed (§7.9). s43 (2026-10-05): drag and drop researched ([RESEARCH-DRAG-DROP.md](RESEARCH-DRAG-DROP.md)) and the Text conforms (9 of 19; rows C77, C78, §7.8) — its drag SOURCE graded on a lone node; the zone side and the file drop are step (b). The face learned the browser's hit test, and the 7 conforming specs it moved say what a browser lets a person do. s42 (2026-10-04): the Radio Button Group and the Radio Button conform on both targets at 200 and 10,000 (8 of 19; rows C76, D37, §7.7) — the visual tree, per node: a node's children are on its PAGE (the spec declares them; the face builds them with the node's own `addChild`; a person `pick`s one) and a node's parent is its WORLD (the GROUP seam). s41 (2026-10-04): Slider and Icon conform on both targets at 200 and 10,000 (6 of 19; rows D36, C73, C74, C75; C63 takes null, §7.6) — the face grew `slide` (jsdom's range sanitization, which it applies to every write, plus the browser's step rule, which jsdom lacks; a reversed range is not played); the 13 left each need infrastructure first (a visual tree with context, drag and drop, geometry, media — §7.6). s39 (2026-10-04): Dropdown conforms on both targets (4 of 19; rows C70, C71, D34 and instances of C65, C66, D30, §7.4) — the face grew `choose` (a keyboard pick: an enabled option the list offers, no `change` for the one already selected); the spec keeps the node's value, the author's Value, the shown value and the browser's selection apart because the component does. s38: Text Input conforms on both targets (3 of 19; rows C68, C69, D31–D33, §7.3) — the face grew `type` and `key`, the format a person patch that resolves deferred outcomes (the viewer's pointer drain). s37: AC3 begun — THE PERSON face (the real React component in a jsdom page; an act is the browser's events) and the format's `act` / `acts` / `person` / `place` / `portability`; Button and Checkbox conform on the runtime (rows C61–C66, D30, §7.2). s36: research done, R10 ruled — build the logic for all 19 with each input's portability class in the spec; geometry grading after NSP-017.**
 
 ## 1. The person sentence
 
@@ -1383,7 +1383,7 @@ CONFORMS; the guard and its plants 37 / 37 (after the Group's `stampOn` fix: it 
 the package suite 22 suites, 939 passed, 18 skipped, the one failure the guard's Group (602 s). No file the stranger hashes changed.
 
 
-### 7.16 s55, 2026-10-07 — the Drag read and measured: no geometry needed except Constrain to parent; four rows
+### 7.16 s55, 2026-10-07 — the Drag conforms (14 of 19): read and measured, a pointer with a position, six rows
 
 **What the Drag is.** It is not drag-drop.ts. The Drag node (`nodes/visual/drag.ts`, `components/visual/Drag/Drag.tsx`) wraps the
 `react-draggable` library (4.5.0) around its FIRST child and moves that child's element with a CSS `translate`. It has no element of its
@@ -1428,3 +1428,60 @@ example (`vis-drag-snap-back`). No shelf template.
 
 **Withdrawn after measuring:** "Scale divides twice". `offsetXYFromParent` takes a `scale`, but `Draggable` keeps its own `scale` prop
 and the core is left at 1.
+
+**The build** ([drag.ts](../../../packages/nodegx-node-spec/src/nodes/drag.ts), `Drag`, v1, 19 scenarios, three acts).
+- **The face** (node-spec-target.ts): the Drag's page holds one real Group as its child (a Drag draws only its first, C103), and three
+  new acts carry a POSITION — `pressAt` (`{ x, y, by?, button? }`: a mouse button, or a finger with `by: "touch"`), `moveTo` and
+  `releaseAt` (`{ x, y }`). A mouse's move and release are dispatched at the document (where react-draggable listens; the face has no
+  geometry); a finger's go to the element it went down on (`touchAt`), so once that element has left the page the document hears
+  neither. One pointer at a time: a mouse press ends what a finger was doing, for the face. Every other spec is untouched: the acts are
+  new names, and the Drag is the only node whose page holds a Group child.
+- **The spec** reads the library's own arithmetic: the pointer against the page, `x + deltaX / scale`, the slack Constrain to parent
+  keeps (with no layout the bounds are unreadable and clamp nothing, but a text position joins the slack as text — "50" moved 10 is
+  "5010", or "50100" with the constraint on; the runtime does exactly that, a scenario grades it), the controlled position the library
+  returns to at a let go, and `getDerivedStateFromProps` taking a changed (`!==`) position. The snaps are Animate To Value's timer
+  (Ease Out, joined at the frame's timer pass and run at 0 at once), started at the frame's end from where the element is; Done when
+  run, or at the mount for a Do that waited (16 wait; the 17th pushes the oldest out as Failure).
+- **Three runtime rules the first 200 found, modelled** (the library's, not React's): a press during a drag is not a fresh start — the
+  core still holds its last point, so the start reports the movement since it (`createCoreData`); the drag hears only the kind of
+  pointer that started it (its document listeners), a core started by a finger reads only a touch (a mouse event is ignored, so a mouse
+  release leaves the finger's drag going) and one started by a mouse reads a touch as NaN; the child's own `onTouchEnd` ends a drag too,
+  and sets the module's pointer kind (`dragEventFor`, shared by every Drag) to touch, which decides which listeners a stop takes off.
+- **The drain, found by the runtime's 10,000** (12 divergences, none a row): every pointer handler on the child's element is wrapped
+  to drain the graph after it runs (pointerlisteners.ts :170-186) — the library's own `onMouseDown` and `onTouchEnd`, which win over
+  the Group's, and the Group's `onTouchStart`. So a Do sent earlier in the frame runs AT a press or at a finger's lift on the child, not
+  at the frame's end — after the library's handler, before React commits that handler's `setState`: a Do drained at a lift snaps from
+  where the element was before the drag ended. A mouse's release lands on the document and drains nothing. Modelled (`drain`), with
+  two scenarios grading it; 9 of the 12 were it. Two were the wire's rule — within a frame the wire keeps the last DEFINED value (the
+  timer pass's Drag Y, then a paint's `undefined`), which a spec must apply inside its own one-patch frame (`join`). The last three were
+  C102, reached through a press the generator had shrunk away. **Judge the unshrunk sequence** (s54's lesson 4, again: every one of the
+  12 printed shrunk looked like C102).
+- **Write the whole state on every path, first** (s54's lesson, done from the start this time): every reducer's patch writes the held
+  state as it stands (`toPatch`). The first build, without it: 1,500 mutants, 30 survivors; with it: 141, then 4, then 0.
+- **Two probe traps met again.** *A skipped paint heals at the next one*: a killer for an act that does nothing must write Start Drag X
+  again between two such acts in one frame, so the second paint's Delta X reads what the first recorded. *A reader must sit between*: an
+  act whose paint takes the Drag off the page is told from its twin only by a Do after it in the same frame (the Do's callback runs
+  before the frame's paint, on no component: it waits).
+
+**More findings** (open; P109's under R16):
+- **P107-C105** (low, [the ledger](../../bugs/p107-c105-a-snap-that-waited-for-the-drag-to-mount-starts-from-0.md)): a Snap Do that waited
+  for the Drag to mount runs from 0, not from where the element starts (it reads the constructor's state before `componentDidMount`'s
+  write lands) — the element jumps to the edge and animates from there. A known row; the spec says the intent.
+- **P107-C106** (medium, [the ledger](../../bugs/p107-c106-a-start-drag-x-of-nan-blanks-the-page.md)): a Start Drag X or Y of NaN blanks
+  the page — `componentDidUpdate` compares NaN with itself and sets state until React throws. Withheld from the runtime's sequences
+  (conformance.test.ts `WITHHELD`), graded by its scenario as a known row.
+- C102 is a known row on the runtime (the spec says the intent: on a locked axis Drag X / Y say where the element is, Delta 0).
+
+**Face choices, written down:** no geometry — Constrain to parent constrains nothing (§ above); a mouse's move and release land on the
+document; a touch is identifier 0; one pointer at a time; a press raises no hover, leave or click. **Copied, not rowed (R3):** a text
+Start Drag X joins the movement as text.
+
+**Readings (2026-10-07, the final 20 scenarios).** Interpreter: at 200 on seeds 13, 20729, 20730 and 7, and at 10,000 on seeds 20731
+(before the drain: 336 / 337) and 20733 (312 / 313): CONFORMS, 0 divergences, 0 survivors (the one left each time declared: a placing
+off the page). Runtime: at 200 on seed 20733 (the day's; C102 ×24, C105 and C106 by their scenarios, NaN withheld on both start ports;
+127 / 128) and on seed 13 (C102 ×18, C105 ×1; 175 / 176), and at 10,000 on seed 20733 (C102 ×1,042, C105 ×4; 312 / 313): CONFORMS,
+0 unattributed divergences. Shared changes (the face's child, the three acts, the Drag registered): the runtime's target and graph
+suites 106 / 106; at 200 on seed 20733 the Button, Icon, Text, Group, Circle, Image and Radio Button Group CONFORM. The Text Input v6
+agrees on every scenario and sequence but leaves one mutant at that seed (`person.press` swap-branch on its willUnmount + onBlur
+branch) — the same survivor on the INTERPRETER, which never touches the face, so not this session's change: the branch is P109's D30
+fix (32e1856b0), and the day's seed rotation found its gap. Told P109.
