@@ -40,7 +40,7 @@ A kind enters this list only with an evidence row that names a file and a line, 
 
 *each {from} is attached to one {to}*
 
-- **The question it asks:** Must every one have one, or can it stand alone? Can it move to another later? When the one it belongs to goes, does this go with it, stay orphaned, or block the removal?
+- **The question it asks:** Must every one have one, or can it stand alone? Could it ever be attached to several at once, now or later (then it is 'is-on', and changing your mind after real data exists is a migration)? Can it move to another later? When the one it belongs to goes, does this go with it, stay orphaned, or block the removal?
 - **Told apart from its neighbours by:** one target, no details on the link itself; read the other way it is 'has many' (the same edge)
 - **Projects to (P104's tiles / the contract):** Link (Pointer) with required/optional and an on-delete rule; the reverse read is a query, not a column
 - **Private rows, held outside the repo:** acme 15, tirion 3, sentinel 21
@@ -133,7 +133,7 @@ A kind enters this list only with an evidence row that names a file and a line, 
 
 *a {from} carries a list of {to} on itself*
 
-- **The question it asks:** Will you ever ask it the other way round ('which {from}s name this one')? Will the list need details per entry? If either, each entry is its own link.
+- **The question it asks:** Will you ever ask it the other way round ('which {from}s name this one')? Will the list grow to dozens? Will the list need details per entry? If any, each entry is its own link — a parent carrying dozens of list entries is the query that falls apart.
 - **Told apart from its neighbours by:** ids or values stored as an array column, no record per entry
 - **Projects to (P104's tiles / the contract):** List (Array); the mutant is a list of ids that nobody can query from the other side
 - **Private rows, held outside the repo:** tirion 8
@@ -257,7 +257,7 @@ A kind enters this list only with an evidence row that names a file and a line, 
 
 *a {from} is extra detail about one {to}, at most one each*
 
-- **The question it asks:** Is there ever more than one? Does it exist without the thing it extends? Is it computed (then nobody edits it) or written by a person?
+- **The question it asks:** Is there ever more than one? Does it exist without the thing it extends? Is it computed (then nobody edits it) or written by a person? Which of its fields will you filter or sort the main thing by — those stay on the main thing, or every such query goes through the extension and you end up copying the field back by hand.
 - **Told apart from its neighbours by:** a one-to-one link, usually unique or the record's own key
 - **Projects to (P104's tiles / the contract):** a Link with a unique rule; or fields on the thing itself when it is small
 - **Private rows, held outside the repo:** acme 1, tirion 1, sentinel 7
@@ -323,5 +323,17 @@ A kind enters this list only with an evidence row that names a file and a line, 
 
 ## Richard's list (ONT-000 step 5, oral)
 
-**Status: not yet taken down — ONT-000 step 5 needs Richard in conversation.** Taken down in conversation, not read off a file; marked oral.
+**Status: taken down 2026-10-08 (s1), in Richard's words; each row names the kind it is a mutant of — ONT-005's seed.** 
+
+Richard: "a lot of the mistakes were about query efficacy … that mistake gets repeated until you have a DB of patchwork solutions and duplicate data." The mutant that produces the patchwork is a question not asked before real data existed; every row below was fine on day one.
+
+| the mistake, in his words | mutant of kind | why that kind |
+|---|---|---|
+| making a string field when it should have been a relation, to make product categories | **one-of** | a fixed list typed as free text; when categories need details or ordering it is a 'belongs-to' to a category record |
+| designing appointment systems with on and off days, breaks, public holidays all taken into consideration when showing the available time slots, and keeping it free of race conditions | **is-on** | a booking is a person on a slot at a time; without a unique-pair rule in time two people land on one slot — the availability calendar is the question 'what can it be on, and when' |
+| piling all the profile fields directly into the user table thinking there's only a few, when later the profiles needed a dozen fields and some users only use half of them | **extends** | extra detail folded into the thing it extends |
+| making relation fields where the parent record has dozens of relations, and later needing a nested query of relation objects to find the right parent — the query falls apart | **many-by-list** | a list on the parent that nobody can query from the other side |
+| putting a field inside the profile table that is later used very often to filter users and should have been in the user table from the start; too late once users have profile relations, so a nested relation query, and it sucks | **extends** | the field you filter or sort the main thing by was split off into the extension |
+| making a one-to-many thinking 'this user only belongs to one company', then realising they can belong to several — but the field exists and real data is in it | **belongs-to** | a 'belongs-to' that was an 'is-on'; the question 'could it ever be several at once' was not asked before data existed |
+| wanting to order users by the profile's last-updated date and having to choose between a nested query and a copied 'profile_updated' field on user kept in sync by hand — repeated until the DB is patchwork and duplicate data | **extends** | a derived field copied onto the parent and maintained by hand; the sort key belongs on the thing sorted, or the query goes through the path operation (ONT-004) |
 

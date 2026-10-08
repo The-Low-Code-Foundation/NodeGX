@@ -1,6 +1,8 @@
 # ONT-001 — The vocabulary as a package
 
-**Opened 2026-10-08.** **Depends on ONT-000, R1 and R2** (README §9). **Status: 📋 not started.**
+**Opened 2026-10-08.** **Depends on ONT-000 ✅, R1 and R2 — both ruled 2026-10-08** (README §9, ruled table). **Status: 📋 ready to start.**
+
+> **R1 amends §3.1:** the files live under the project's **`docs/`** folder (the project-docs folder the MCP already reads and writes, beside the backend schema and the data design), not in a new top-level `ontology/` folder — the ONT-001 session names the subfolder. **R2 adds to AC2:** nothing in the files names an engine *or a graph framework*; the format is plain JSON with its own schema. ONT-000's census found that every relation in the in-repo corpus is a string id and five kinds rest on one source: say so in each kind's declaration.
 
 ## 1. The person sentence
 

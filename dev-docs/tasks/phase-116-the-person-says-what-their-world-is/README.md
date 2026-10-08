@@ -1,7 +1,7 @@
 # Phase 116 — The person says what their world is
 
 **Scoped:** 2026-10-08, at HEAD `34c76830f`, from a conversation with Richard that started as a report of a chat with a
-colleague about the backend problem and ended as a phase. **Status: 🟡 s1 — ONT-000 built (14 kinds, 303 rows, 8 sources); R1–R7 open; ONT-000 step 5 (Richard's list) open.** §13 says what the census measured.
+colleague about the backend problem and ended as a phase. **Status: 🟡 s1 — ONT-000 ✅ (14 kinds, 303 rows, 8 sources, Richard's Bubble list taken); R1–R7 RULED (§9, ruled table); next ONT-001.** §13 says what the census measured.
 **Prefix: `ONT`.** Task files: [ONT-000](ONT-000-THE-CORPUS-MEASURED.md) … [ONT-010](ONT-010-THE-CLAIM-AND-ITS-GATE.md).
 The board is §7. Hand-off: [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).
 
@@ -164,7 +164,7 @@ graded against it. Three things make the difference measurable rather than rheto
 
 | id | task | side | needs |
 |---|---|---|---|
-| [ONT-000](ONT-000-THE-CORPUS-MEASURED.md) 🟡 | **The corpus, measured.** Every relation in Acme, four templates, the lessons backend and the two prototypes classified; 14 kinds with a count and evidence per kind (`KINDS.md`, `npm run ontology-census:check`); the two Acme notes and the incident attributed to kinds. **Left: step 5, Richard's list (oral).** | research | — |
+| [ONT-000](ONT-000-THE-CORPUS-MEASURED.md) ✅ | **The corpus, measured.** Every relation in Acme, four templates, the lessons backend and the two prototypes classified; 14 kinds with a count and evidence per kind (`KINDS.md`, `npm run ontology-census:check`); the two Acme notes and the incident attributed to kinds. Richard's Bubble list taken down (seven mutants, `kinds.hand.json` → `oral`). | research | — |
 | [ONT-001](ONT-001-THE-VOCABULARY-AS-A-PACKAGE.md) | **The vocabulary as a package.** The property graph in the project files; the kinds with `questions`, `projection`, `mutants`; a schema, a validator, a writer. | format | ONT-000, R1, R2 |
 | [ONT-002](ONT-002-THE-CONVERSATION-IS-A-RUNNER.md) | **The conversation is a runner.** The brief; the runner that reports surviving mutants as the next question; the question budget ranked by prevented incidents. | spec + MCP | ONT-001, ONT-005, R5 |
 | [ONT-003](ONT-003-THE-PROJECTION-IS-A-FUNCTION.md) | **The projection is a function.** Ontology → schema against the contract, deterministic; answers as claims; graded on two adapters through the conformance suite. | contract + backend | ONT-001 |
@@ -209,6 +209,18 @@ graded against it. Three things make the difference measurable rather than rheto
 | R5 | **Does the conversation run through MCP tools, or through a brief the agent reads and files it writes, with one tool that grades them?** The MCP tool list has a strict token budget (memory: the 8,200-token gate; five budgets). Every tool added here is taken from the authoring tools. | **A brief plus files plus one `validate` tool** that returns the surviving mutants and their questions. The agent does the talking; the runner does the grading. |
 | R6 | **May Acme be the thesis test?** Its schema shape and the two notes are the best corpus on this machine. Its repository holds real people's names and its own internal notes. | **Yes, with synthetic people and the schema's shape only.** No row, name, path or note of theirs is copied into this repo; the persona is "a two-person operations team with a membership business", and Richard plays it. |
 | R7 | **Is "framework independent, open source, full stack" a fifth reason in DIRECTION.md, or the sum of the four?** DIRECTION.md says a reason may be advertised only once the thing that makes it true exists and can be checked by anyone. | **The sum, and only once ONT-010's gate is green.** It is not a new reason; it is what restraint, testing, security and do-it-yourself add up to once the data layer is also a graded target. §10 lists what is true today and what is not. |
+
+### Ruled, 2026-10-08 (Richard, in his words, with the consequence)
+
+| # | Ruling | Consequence |
+|---|---|---|
+| R1 | **Files.** *"For a vibe coded project, like in my ai-coding-docs repo, we should have a folder specifically for project docs that the LLM needs to plan and execute tasks, keep track of bugs, learnings doc, etc. and that should be where things like backend schema, database design, description of the person's world should also be kept. This should be mandatory for every vibe coded project in general."* | The ontology lives under the project's docs folder (`docs/`, the one the MCP already reads and writes), beside the backend schema and the data design — not in a new top-level `ontology/` folder (ONT-001 §3.1 is amended). The general rule — a mandatory project-docs folder for every vibe-coded project — is a DIRECTION.md candidate; it is recorded here and not written into DIRECTION.md this session. |
+| R2 | **Graph**, *"as long as it doesn't tie us to one specific framework to express it, and we're still using the concept of a kind of meta framework."* | The format is plain JSON in the project files with a schema of its own, in the ISO GQL property-graph sense but naming no engine and no query language; every engine is a projection target. ONT-001 AC2 already says "nothing in it names an engine"; add: nothing in it names a graph framework either. |
+| R3 | **Yes.** | ONT-004: one path operation on the contract, a capability cell per backend, relational adapters first; the fixture is depth 5 (ONT-000 §6). |
+| R4 | **Not yet.** *"It's a very special use case and I haven't come across a project using a graph DB for real as a backend, rather than just a separate DB for data analysis."* | No seventh adapter. ONT-004 measures depth on Postgres. |
+| R5 | **Brief, then tool**, *"as long as it's not limiting the abilities of the LLM, and as long as the brief doesn't get accessed if the user isn't building a full stack project and just wants a landing page."* | ONT-002: the brief is loaded only when a project has (or asks for) a backend — a landing page never reads it; the validate tool grades files, it never gates what the agent may say or write. The loader's opt-in must be censused by caller (memory: an opt-out flag on a loader must be censused). |
+| R6 | **Yes.** | ONT-009 runs on the business's shape with synthetic people; Richard plays the persona. |
+| R7 | **The sum.** | ONT-010's gate; the sentence is said on nodegx.io only when it is green. |
 
 ## 10. The claim, taken apart
 
@@ -274,4 +286,5 @@ Read [KINDS.md](KINDS.md); the task file's §6 has the table. The corrections to
   backend's declared schema; every relation NodeGX has produced so far is a string id or an email. The vocabulary's
   first mutant is the whole in-repo corpus.
 - **The kind list is 14**, five of them on one source and one on one row (the task file says which).
+- **Richard's Bubble list is seven mutants** (`kinds.hand.json` → `oral`): three of `extends`, one each of `one-of`, `is-on`, `many-by-list`, `belongs-to`. His own reading: *"a lot of the mistakes were about query efficacy … until you have a DB of patchwork solutions and duplicate data"* — every one was a question not asked before real data existed. ONT-005's seed.
 

@@ -1,6 +1,6 @@
 # ONT-000 — The corpus, measured
 
-**Opened 2026-10-08.** Depends on nothing. **Status: 🟡 BUILT (s1, 2026-10-08) — steps 1–4 and AC1–AC4 green; step 5 (Richard's list, oral) open.** The corpus was widened from five sources to eight at Richard's word (§6).
+**Opened 2026-10-08.** Depends on nothing. **Status: ✅ BUILT (s1, 2026-10-08) — steps 1–5 done, AC1–AC4 green; the lessons live-schema drift check is owed (§6 item 5).** The corpus was widened from five sources to eight at Richard's word (§6).
 
 ## 1. The person sentence
 
@@ -135,6 +135,4 @@ real question this machine already asks, and the capability cell is `supported` 
 
 ### Left
 
-- **Step 5, Richard's list** — the Bubble mistakes, in conversation; `kinds.hand.json` → `oral.rows`, each with the
-  kind it is a mutant of. The oral list seeds ONT-005.
-- R1 and R2 before ONT-001 (README §9).
+- Step 5 taken down 2026-10-08 (seven mutants, `kinds.hand.json` → `oral`; rendered at the end of `KINDS.md`). R1–R7 ruled the same day (README §9, ruled table). Nothing of ONT-000 is open except the lessons live-schema drift check (item 5 above).

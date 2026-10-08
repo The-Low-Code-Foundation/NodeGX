@@ -676,11 +676,15 @@ function main() {
   md.push("## Richard's list (ONT-000 step 5, oral)");
   md.push('');
   md.push(`**Status: ${out.oral.status}.** ${out.oral.rows.length ? '' : 'Taken down in conversation, not read off a file; marked oral.'}`);
+  if (out.oral.theme) {
+    md.push('');
+    md.push(out.oral.theme);
+  }
   if (out.oral.rows.length) {
     md.push('');
-    md.push('| the mistake, in his words | mutant of kind |');
-    md.push('|---|---|');
-    for (const r of out.oral.rows) md.push(`| ${r.mistake} | **${r.kind}** |`);
+    md.push('| the mistake, in his words | mutant of kind | why that kind |');
+    md.push('|---|---|---|');
+    for (const r of out.oral.rows) md.push(`| ${r.mistake} | **${r.kind}** | ${r.why || ''} |`);
   }
   md.push('');
   if (warnings.length) {
