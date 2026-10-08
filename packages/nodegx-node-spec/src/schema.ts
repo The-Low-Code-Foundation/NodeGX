@@ -61,8 +61,9 @@ export const EVENT_FIELDS: Readonly<Record<(typeof EVENT_KINDS)[number], { requi
   // NSP-016 s37 — the person (spec.ts THE PERSON): a stimulus — which act, and the value it carries, if any
   act: { required: ['act'], optional: ['value'] },
   // NSP-016 s56 — the callers (spec.ts THE CALLERS): a Component Stack's answer to a push / replace / back (value, error?), or the
-  // back's action? and results handed to the node that pushed the page it popped (`returned`) — in the LOCATION group
-  answer: { required: ['op'], optional: ['value', 'error', 'action', 'results'] }
+  // back's action? and results handed to the node that pushed the page it popped (`returned`) — in the LOCATION group; s57 a Page
+  // Router's answer to a Navigate (`navigate`: value, error?) and the params it hands its page's Page Inputs (`page`: params)
+  answer: { required: ['op'], optional: ['value', 'error', 'action', 'results', 'params'] }
 });
 
 export type Validation = { ok: true; events: TraceEvent[] } | { ok: false; path: string; message: string };
@@ -149,8 +150,14 @@ export function validateTrace(input: unknown): Validation {
       if (typeof e.accept !== 'string') return bad(`${at}.accept`, 'accept is what the element held at the click, a string');
       if (typeof e.capture !== 'string') return bad(`${at}.capture`, 'capture is what the element held at the click, a string');
     } else if (t === 'answer') {
-      if (e.op === 'returned') {
-        if ('value' in e || 'error' in e) return bad(`${at}.value`, 'a returned carries the back\'s action and results, no value');
+      if (e.op === 'page') {
+        // NSP-016 s57 — what a Page Router hands its page's Page Inputs
+        if ('value' in e || 'error' in e || 'action' in e || 'results' in e) return bad(`${at}.value`, 'a page carries the params handed, nothing else');
+        if (!('params' in e)) return bad(`${at}.params`, 'a page carries the params handed');
+        const nc = findNonCanonical(e.params, `${at}.params`);
+        if (nc) return bad(nc, 'params is not in canonical form');
+      } else if (e.op === 'returned') {
+        if ('value' in e || 'error' in e || 'params' in e) return bad(`${at}.value`, 'a returned carries the back\'s action and results, no value');
         if (!('results' in e)) return bad(`${at}.results`, 'a returned carries the results handed');
         for (const f of ['action', 'results'] as const) {
           if (!(f in e)) continue;
@@ -158,10 +165,10 @@ export function validateTrace(input: unknown): Validation {
           if (nc) return bad(nc, `${f} is not in canonical form`);
         }
       } else {
-        if (e.op !== 'push' && e.op !== 'replace' && e.op !== 'back') return bad(`${at}.op`, 'op is push, replace, back or returned');
+        if (e.op !== 'push' && e.op !== 'replace' && e.op !== 'back' && e.op !== 'navigate') return bad(`${at}.op`, 'op is push, replace, back, navigate, returned or page');
         if (!(OUTCOME_VALUES as readonly unknown[]).includes(e.value)) return bad(`${at}.value`, 'value is done, unchanged or failure');
         if (e.value === 'failure' ? typeof e.error !== 'string' || e.error.length === 0 : 'error' in e) return bad(`${at}.error`, 'error is the failure\'s code, and only with a failure');
-        if ('action' in e || 'results' in e) return bad(`${at}.action`, 'only a returned carries action and results');
+        if ('action' in e || 'results' in e || 'params' in e) return bad(`${at}.action`, 'only a returned carries action and results, only a page params');
       }
     } else if (t === 'socket') {
       if (e.op !== 'connect' && e.op !== 'send' && e.op !== 'close') return bad(`${at}.op`, 'op is connect, send or close');

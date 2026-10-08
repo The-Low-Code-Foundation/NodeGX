@@ -55,6 +55,7 @@ import { Image } from './image';
 import { Video, OWN_ELEMENT } from './video';
 import { Drag } from './drag';
 import { ComponentStack } from './component-stack';
+import { PageRouter } from './page-router';
 import { RadioButtonGroup } from './radiobuttongroup';
 import { RadioButton } from './radiobutton';
 import { NavigateToPath } from './navigate-to-path';
@@ -172,6 +173,7 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [Video.type]: Video,
   [Drag.type]: Drag,
   [ComponentStack.type]: ComponentStack,
+  [PageRouter.type]: PageRouter,
   [RadioButtonGroup.type]: RadioButtonGroup,
   [RadioButton.type]: RadioButton,
   [NavigateToPath.type]: NavigateToPath,
@@ -216,6 +218,8 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
 
 export { EQUIVALENT_MUTANTS } from './equivalent-mutants';
 export { OWN_ELEMENT };
+// NSP-016 s57 — the play's project a Page Router reads; a target builds the same
+export { ROUTER_PAGES } from './page-router';
 
 export function specFor(typeName: string): AnyNodeSpec | undefined {
   return specs[typeName];
@@ -270,6 +274,7 @@ export {
   Video,
   Drag,
   ComponentStack,
+  PageRouter,
   RadioButtonGroup,
   RadioButton,
   NavigateToPath,

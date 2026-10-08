@@ -1,7 +1,7 @@
 # NSP-016 — Visual nodes: research first, then layout semantics that are not CSS
 
 **Opened 2026-09-29.** **Depends on NSP-008.**
-**Status: 🟡 s56 (2026-10-08): the Component Stack conforms on both targets (15 of 19; v1 — the callers' requests as three acts and one new trace event, `answer`; one request at a time, landing at the yield (`resume`); the transition is the only clock; Use Routes is v2); rows C107–C114 (§7.17). s55 (2026-10-07): the Drag conforms on both targets (14 of 19; v1 — react-draggable, not drag-drop.ts; the face's pointer WITH A POSITION: `pressAt` / `moveTo` / `releaseAt`; the snaps are Animate To Value's timer; only Constrain to parent needs geometry and waits); rows C101 (high: on a touch screen nothing inside a Drag can be tapped — measured in headless Chrome), C102–C106 (§7.16). s54 (2026-10-07): the Video conforms on both targets at 200 and 10,000 (13 of 19; v1 — the Image's machinery, the browser's media element with four new acts, the autoplay rule, the four actions); every paint writes the element and its media as they stand, every action the playback; rows C96–C100 (C98 high: a Volume outside 0 to 1 blanks the page) (§7.15). s53 (2026-10-07): the Shape (`Circle`) and the Image conform on both targets (12 of 19; v1 each — the Text's machinery with no Tag; the Image adds the picture's fetch, a new act `fetched`); the runner can withhold a value a target cannot survive; rows C91 (Custom SVG's span is a drop slot), C92 (a huge Points runs the page out of memory), C93 (an Image adds a sub-path Base URL again at every render — high), C94 (Source Set true at placing fetches "true"); the Group v2 (R16: a Focus off the page reports Unchanged; row C95) (§7.14). s52 (2026-10-07): the Group conforms on both targets at 200 and 10,000 (10 of 19; v1, 1,387 scenarios) — its children as drop slots, the focus tracker, the scroll actions and when a frame's work runs; rows C86–C90 (§7.13). s44 (2026-10-05): the Text v3 — C79 is a known row (R11: the spec says the intent, not React's redraw rules); 162 scenarios; s43's 47 deep-run survivors killed (§7.9). s43 (2026-10-05): drag and drop researched ([RESEARCH-DRAG-DROP.md](RESEARCH-DRAG-DROP.md)) and the Text conforms (9 of 19; rows C77, C78, §7.8) — its drag SOURCE graded on a lone node; the zone side and the file drop are step (b). The face learned the browser's hit test, and the 7 conforming specs it moved say what a browser lets a person do. s42 (2026-10-04): the Radio Button Group and the Radio Button conform on both targets at 200 and 10,000 (8 of 19; rows C76, D37, §7.7) — the visual tree, per node: a node's children are on its PAGE (the spec declares them; the face builds them with the node's own `addChild`; a person `pick`s one) and a node's parent is its WORLD (the GROUP seam). s41 (2026-10-04): Slider and Icon conform on both targets at 200 and 10,000 (6 of 19; rows D36, C73, C74, C75; C63 takes null, §7.6) — the face grew `slide` (jsdom's range sanitization, which it applies to every write, plus the browser's step rule, which jsdom lacks; a reversed range is not played); the 13 left each need infrastructure first (a visual tree with context, drag and drop, geometry, media — §7.6). s39 (2026-10-04): Dropdown conforms on both targets (4 of 19; rows C70, C71, D34 and instances of C65, C66, D30, §7.4) — the face grew `choose` (a keyboard pick: an enabled option the list offers, no `change` for the one already selected); the spec keeps the node's value, the author's Value, the shown value and the browser's selection apart because the component does. s38: Text Input conforms on both targets (3 of 19; rows C68, C69, D31–D33, §7.3) — the face grew `type` and `key`, the format a person patch that resolves deferred outcomes (the viewer's pointer drain). s37: AC3 begun — THE PERSON face (the real React component in a jsdom page; an act is the browser's events) and the format's `act` / `acts` / `person` / `place` / `portability`; Button and Checkbox conform on the runtime (rows C61–C66, D30, §7.2). s36: research done, R10 ruled — build the logic for all 19 with each input's portability class in the spec; geometry grading after NSP-017.**
+**Status: 🟡 s57 (2026-10-08): the Page Router conforms on both targets (16 of 19; v1 — the world's LOCATION is on a play's page now; two acts, `navigate` and `traverse` (Back / Forward); the router's answers and the parameters it hands its page in the `answer` event); rows C115–C118 (C117: after a Navigate, Back to the same page with other parameters keeps the old ones) (§7.18). s56 (2026-10-08): the Component Stack conforms on both targets (15 of 19; v1 — the callers' requests as three acts and one new trace event, `answer`; one request at a time, landing at the yield (`resume`); the transition is the only clock; Use Routes is v2); rows C107–C114 (§7.17). s55 (2026-10-07): the Drag conforms on both targets (14 of 19; v1 — react-draggable, not drag-drop.ts; the face's pointer WITH A POSITION: `pressAt` / `moveTo` / `releaseAt`; the snaps are Animate To Value's timer; only Constrain to parent needs geometry and waits); rows C101 (high: on a touch screen nothing inside a Drag can be tapped — measured in headless Chrome), C102–C106 (§7.16). s54 (2026-10-07): the Video conforms on both targets at 200 and 10,000 (13 of 19; v1 — the Image's machinery, the browser's media element with four new acts, the autoplay rule, the four actions); every paint writes the element and its media as they stand, every action the playback; rows C96–C100 (C98 high: a Volume outside 0 to 1 blanks the page) (§7.15). s53 (2026-10-07): the Shape (`Circle`) and the Image conform on both targets (12 of 19; v1 each — the Text's machinery with no Tag; the Image adds the picture's fetch, a new act `fetched`); the runner can withhold a value a target cannot survive; rows C91 (Custom SVG's span is a drop slot), C92 (a huge Points runs the page out of memory), C93 (an Image adds a sub-path Base URL again at every render — high), C94 (Source Set true at placing fetches "true"); the Group v2 (R16: a Focus off the page reports Unchanged; row C95) (§7.14). s52 (2026-10-07): the Group conforms on both targets at 200 and 10,000 (10 of 19; v1, 1,387 scenarios) — its children as drop slots, the focus tracker, the scroll actions and when a frame's work runs; rows C86–C90 (§7.13). s44 (2026-10-05): the Text v3 — C79 is a known row (R11: the spec says the intent, not React's redraw rules); 162 scenarios; s43's 47 deep-run survivors killed (§7.9). s43 (2026-10-05): drag and drop researched ([RESEARCH-DRAG-DROP.md](RESEARCH-DRAG-DROP.md)) and the Text conforms (9 of 19; rows C77, C78, §7.8) — its drag SOURCE graded on a lone node; the zone side and the file drop are step (b). The face learned the browser's hit test, and the 7 conforming specs it moved say what a browser lets a person do. s42 (2026-10-04): the Radio Button Group and the Radio Button conform on both targets at 200 and 10,000 (8 of 19; rows C76, D37, §7.7) — the visual tree, per node: a node's children are on its PAGE (the spec declares them; the face builds them with the node's own `addChild`; a person `pick`s one) and a node's parent is its WORLD (the GROUP seam). s41 (2026-10-04): Slider and Icon conform on both targets at 200 and 10,000 (6 of 19; rows D36, C73, C74, C75; C63 takes null, §7.6) — the face grew `slide` (jsdom's range sanitization, which it applies to every write, plus the browser's step rule, which jsdom lacks; a reversed range is not played); the 13 left each need infrastructure first (a visual tree with context, drag and drop, geometry, media — §7.6). s39 (2026-10-04): Dropdown conforms on both targets (4 of 19; rows C70, C71, D34 and instances of C65, C66, D30, §7.4) — the face grew `choose` (a keyboard pick: an enabled option the list offers, no `change` for the one already selected); the spec keeps the node's value, the author's Value, the shown value and the browser's selection apart because the component does. s38: Text Input conforms on both targets (3 of 19; rows C68, C69, D31–D33, §7.3) — the face grew `type` and `key`, the format a person patch that resolves deferred outcomes (the viewer's pointer drain). s37: AC3 begun — THE PERSON face (the real React component in a jsdom page; an act is the browser's events) and the format's `act` / `acts` / `person` / `place` / `portability`; Button and Checkbox conform on the runtime (rows C61–C66, D30, §7.2). s36: research done, R10 ruled — build the logic for all 19 with each input's portability class in the spec; geometry grading after NSP-017.**
 
 ## 1. The person sentence
 
@@ -1579,3 +1579,85 @@ at the yield and answers exactly what the lost one would have. A waiting REPLACE
 at 200 on seeds 13, 20733, 20729, 7 and 20734–20746, and at 10,000 on 20733 (796 mutants). Runtime: CONFORMS at 200 on 13 and 20733
 and at 10,000 on 20733 — 0 divergences; the runtime conformance test (`NSP_ONLY="Page Stack"`) CONFORMS, 643 / 644 mutants (the
 declared one). Cost: 200 sequences in ~3.5 s on the runtime, 10,000 in ~90 s; the interpreter with mutants at 10,000 in ~30 s.
+
+### 7.18 s57, 2026-10-08 — the Page Router conforms (16 of 19): the location on the page, two acts, four rows
+
+**Why this one.** The handoff offered the Page Router or the Repeater. The Router shares the Component Stack's machinery (an
+`ASyncQueue`, a page built by name, requests answered), and what it lacked — the world's LOCATION on a play's page — is also what the
+stack's Use Routes v2 needs. So the seam first, then the node.
+
+**The reading** (router.tsx, router-handler.ts, router-navigate.ts, page.ts, page-inputs.ts, async-queue.ts, and the editor's
+exporter `utils/exporter/router.ts`), then fifteen probe cases recorded on the runtime before a rule was trusted:
+- **The page index is the project's** (`graphModel.routerIndex`): one entry per Page node (`path`, `title`, `component`) and the
+  Routers — **only those whose saved Name is truthy** (`getRouterIndex` filters on it). An unnamed Router matches no URL and shows its
+  start page whatever the address says: P109-S18 from the runtime's side. The Router's own Pages input names its routes and start page.
+- **The URL.** The hash (`navigationPathType` unset or `hash`) or the path (`path`), and the query, which is decoded with
+  `decodeURIComponent` and THROWS on a malformed escape (row C115); the path's segments are decoded once and never throw (NDA-012 D1).
+  The page whose pattern differs least in length wins, the first on a tie; no match is the start page.
+- **The callers.** A Navigate hands its request at its frame's end; the handler hands it on 1 ms later, to the one registered router
+  whatever name it carries when exactly one is registered, else by the name as handed or into a queue — which a router registering as
+  `name || 'Main'` replays only when the queued name is `===` that (row C118). Answers: Failure (no target, a component with no page),
+  Done after a new tab (`window.open`), Unchanged for the page shown with `===` parameters, else a build: the Page Inputs handed the
+  parameters, the page on, the URL pushed, Done. A navigate builds a component whatever its Page nodes; only a reset refuses one.
+- **A reset** (the mount, Reset, a Pages edit, `popstate`) reads the URL and never pushes one. The page it shows with other parameters
+  is Done — and the parameters go to `_internal.currentPageComponent`, which only a reset writes: after a Navigate it is a page already
+  deleted, and the page on screen keeps the old parameters (row C117 — Back from product 2 to product 1 shows product 2).
+
+**THE LOCATION ON THE PAGE** (the seam; world.ts LOCATION, the face's `installPage`). A visual play's window is jsdom's, whose URL is
+`about:blank`. In a play whose world has a location, the page's window now IS that browser: its `history.pushState`, `open`, a
+`popstate` / `hashchange` dispatched on it and the listeners for them are the world's (`window.location` itself is jsdom's and cannot
+be replaced — it is [Unforgeable]; a page's bare `location`, `history` and `dispatchEvent` were the world's already). The person's
+Back and Forward is the world's new `traverse`: the href moves on the same origin, nothing is recorded (the node made no call), the
+`popstate` listeners run, then `hashchange` when the hash moved. The Component Stack's Use Routes v2 can stand on this.
+
+**The format, additively** (spec.ts, trace.ts, schema.ts, schema/trace.schema.json, interpreter.ts, world.ts, generate.ts; stranger
+hashes refreshed, rounds 1–4 green): `answer` gains `navigate` (a router's answer to a Navigate) and `page` (the parameters handed to
+a Page Inputs, a new `params` field); an `AnswerCall` may also be a `history` or an `open` call, recorded in its place among the answers
+— several builds can land at one yield, each making page → push → answer in turn, which one `push` slot per patch could not order;
+`WorldView.href()`; a patch's `traverse`; a pool's `locations` (drawn only when the pool names some, so no other spec's sequences move).
+
+**Face choices, written down:** the play's project has four page components — `Home` at `/`, `Product` at `/product/{id}` (a Page and
+a Page Inputs each), `About` at `/about` (a Page), `Twice` at `/twice` (two Pages; the index lists it once — the lookup takes the first
+of its twin entries). The index's router is the node by the Name it was PLACED with (a wired Name never moves the saved index) and its
+Pages as they are now (edit-only; the editor resends the index with every edit). `Noodl.SEO.setTitle` (the tab's title — the same
+string as Current Page Title) and `Noodl.Events.emit('NoodlApp_Navigated')` are taken by the face, not traced. No page is kept
+(ISL-004's Keep When Leaving is off on every page of the play).
+
+**What the runtime showed that the reading had not:** (1) a frame whose paint mounts the router counts Children Count late ONLY for
+what the mount starts — it runs in React's commit, after the frame's last update pass; what the frame's callbacks started before it
+(a Reset's build) lands before that pass and is counted at once (C114's frame, made precise: `early` in the spec). (2) Two builds landing
+at one yield flag Current Page Component "About" then `undefined`: the wire keeps "About" (C3), so the spec sends each output at its
+flag (`view.send`), not at the reducer's end. (3) The placing mounts — its reset reads the params as placed, before any step's write.
+
+**The build** ([page-router.ts](../../../packages/nodegx-node-spec/src/nodes/page-router.ts), `Router`, v1, 136 scenarios, two acts).
+The queue machinery is the Component Stack's; the URL code runs the runtime's own expressions on the same values (the match, the
+decode, `_trimUrlPart`, the query's throw). THE MATRIX first (s51, s56): nine requests (a Reset, a navigate, an Unchanged, a refused and
+a new-tab navigate, a Back, a malformed Back, a Name write, a Pages write) × no paint / Mounted off before or after / Mounted on before or
+after / after a Name write, each followed by an observer (a Reset, a navigate, a Reset). Each new seed then found one more frame-end
+combination; four scenarios closed them, and the 10,000 one more (a Reset answered Unchanged in the frame the router comes back).
+Equivalent mutants declared (counted): a placing off the page, and three refusals at the handler's millisecond (their hops are freed
+at the advance's yield, which the same patch asks for, with nothing in between).
+
+**Rows** (all open, ledger; the spec copies each, R3):
+- **P107-C115** (medium, [ledger](../../bugs/p107-c115-a-malformed-escape-in-the-query-blanks-every-page-router.md)): a link whose
+  query has a malformed escape blanks every Page Router, and its Reset is never answered.
+- **P107-C116** (low, [ledger](../../bugs/p107-c116-a-url-path-of-null-blanks-the-page-router.md)): Url path null — every reset
+  throws; a Navigate shows the page but never pushes its URL or answers.
+- **P107-C117** (medium, [ledger](../../bugs/p107-c117-back-to-the-same-page-with-new-parameters-after-a-navigate-keeps-the-old-ones.md)):
+  after a Navigate, Back or Forward to the same page with other parameters keeps the old ones.
+- **P107-C118** (low, [ledger](../../bugs/p107-c118-a-navigate-with-no-router-name-made-before-the-router-is-on-the-page-is-never-answered.md)):
+  a Navigate with no Router name, pressed while no router is on the page, waits for good.
+
+**And the Button** (not this node, the day's seed): seed 20734 left one Button mutant — `person.leave` swap-branch on a focused button
+held with no hover, Mounted off and a leave in one frame (P109's D30 branch, the Text Input's s56 twin). Two scenarios: the unhovered
+pointer acts with a Focus and a Blur after each (the Blur is the reader: a button still on the page with the keyboard would give it
+up), and the held twin (a finger, a press). Conforms at 20734, 20733, 13, 20735 on the interpreter and at 20734 on the runtime.
+
+**Readings (2026-10-08, 136 scenarios, two acts).** Interpreter with mutants (136 scenarios): at 200 on seeds 20734, 20733, 13, 20729,
+20735, 20736, 20741, 20742, 20745 — CONFORMS, every mutant killed or declared (4 declared) — and at 10,000 on 20733 and 20734 (369 /
+373, 393 / 397). Runtime: the 136 scenarios side by side with the interpreter, identical; CONFORMS at 200 on 20734 and 13 and at 10,000
+on 20734 (0 divergences, 105 s); the runtime conformance test (`NSP_ONLY` = Router, Page Stack, RouterNavigate, PageInputs,
+PageStackNavigateToPath, External Link, Show Popup, Button, Drag; seed 20734) all CONFORM — Router 349 / 353, Button 690 / 698 (the
+declared); runtime target + graph 106 / 106; the node-spec package suite 22 suites, 955 passed (stranger rounds 1–4, catalog parity,
+page model, visual batch); both packages' tsc clean. Cost: 200 sequences in ~4.5 s on the runtime, 10,000 in
+~105 s; the interpreter with mutants at 10,000 in ~15 s.

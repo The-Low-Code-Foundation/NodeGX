@@ -161,6 +161,11 @@ export interface WorldView {
    * with no window.
    */
   pushes(url: unknown): boolean;
+  /**
+   * NSP-016 s57 — the location's href now (world.ts LOCATION): what `location.href` reads — and `pathname`, `search`, `hash`, its
+   * parts. `undefined` with no window.
+   */
+  href(): string | undefined;
   /** NSP-015 s17 — the project's settings (world.ts PROJECT): what `NoodlRuntime.instance.getProjectSettings()` reads. */
   projectSettings(): Readonly<Record<string, unknown>>;
   /**
@@ -523,6 +528,13 @@ export interface Patch<S, O> {
   open?: { url: unknown; target?: unknown; features?: unknown };
   push?: { url: unknown };
   dispatch?: string;
+  /**
+   * NSP-016 s57 — the person's browser moves the location (Back, Forward): the href moves to `url`, resolved against it, and the
+   * location's `popstate` listeners run (then `hashchange`, when the hash moved) — a node's listening is its own spec's to model,
+   * so in a single-node play nothing else hears it. Nothing is recorded: the node made no call (the `act` is the trace's). A url on
+   * another origin is a page load, not a traversal — refused (a SpecError). Only with a window.
+   */
+  traverse?: { url: unknown };
   stack?: { op: 'push' | 'replace'; stack: unknown; target: unknown; params: unknown; transition: unknown };
   back?: ReadonlyArray<{ action: unknown; results: unknown }>;
   route?: { router: unknown; target: unknown; params: unknown; openInNewTab: unknown };
@@ -547,8 +559,19 @@ export interface Patch<S, O> {
   resume?: string;
 }
 
-/** NSP-016 s56 — one answer to a caller (spec.ts THE CALLERS; trace.ts `answer`). */
-export type AnswerCall = { op: 'push' | 'replace' | 'back'; value: Outcome; error?: string } | { op: 'returned'; action?: unknown; results: unknown };
+/**
+ * NSP-016 s56 — one answer to a caller (spec.ts THE CALLERS; trace.ts `answer`). s57: a Page Router's answer to a Navigate
+ * (`navigate`), and the params it hands each Page Inputs of the page it shows (`page`). And, so that what a node does between two
+ * answers keeps its place, the two LOCATION calls a Page Router makes while it answers: `history` — `history.pushState(…, url)`,
+ * recorded and moving the href as a patch's `push` — and `open` — `window.open(url, target, features)`, as a patch's `open`. A patch
+ * whose work answers several requests (builds landing at one yield) makes each call in its place among the answers. Only with a window.
+ */
+export type AnswerCall =
+  | { op: 'push' | 'replace' | 'back' | 'navigate'; value: Outcome; error?: string }
+  | { op: 'returned'; action?: unknown; results: unknown }
+  | { op: 'page'; params: unknown }
+  | { op: 'history'; url: unknown }
+  | { op: 'open'; url: unknown; target?: unknown; features?: unknown };
 
 export interface OutcomePatch<S, O> extends Patch<S, O> {
   /** Required — rule 3. `deferred` hands the decision to `afterInputs` (see `ReducerOutcome`). */
@@ -859,6 +882,8 @@ export interface WorldPool {
   viewports?: ReadonlyArray<import('./world').ViewportScript | null>;
   /** NSP-015 s16: the user activations a `location` spec's sequences play with (one is drawn per sequence; `null` is a browser with no `userActivation`). */
   activations?: ReadonlyArray<boolean | null>;
+  /** NSP-016 s57: the hrefs a `location` spec's sequences start at (one is drawn per sequence, only when the pool names them; `null` is the default `https://app.example/`). */
+  locations?: ReadonlyArray<string | null>;
   /** NSP-015 s17: the project settings a `project` spec's sequences play with (one is drawn per sequence; the default is `{}` alone). */
   projectSettings?: ReadonlyArray<Record<string, unknown>>;
   /** NSP-014 s32: the cloud services a `project` spec's sequences play with (one is drawn per sequence, only when the pool names them; `null` is none). */

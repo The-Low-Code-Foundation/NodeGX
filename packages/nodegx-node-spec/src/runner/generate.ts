@@ -254,6 +254,11 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
     }
     const activation = rng.pick(pool.activations ?? DEFAULT_WORLD_POOL.activations);
     if (activation !== null) world.activation = activation;
+    // NSP-016 s57 — where the location starts, drawn only when the pool names some: every `location` spec before s57 draws what it drew
+    if (pool.locations) {
+      const href = rng.pick(pool.locations);
+      if (href !== null) world.location = href;
+    }
   }
   // NSP-015 s17 — PROJECT: one of the pool's settings (the default pool is the project that set nothing)
   if (needs.includes('project')) {

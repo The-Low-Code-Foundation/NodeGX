@@ -12,7 +12,7 @@
   "scenarios/net.noodl.UUID.json": "f5aaa5d63702f97d8ce3de12517d3eb77708276e2dae69da5dcde3faf0fc0f40",
   "scenarios/net.noodl.animatetovalue.json": "08882c97382f9ccd1d3316af8d97371cc2e1c261e5111c36748dee013ade304c",
   "scenarios/net.noodl.controls.options.json": "f827632fc8a8ee0876e7d48e1bfae0a85c5b6bb1a3e335a96d73c68e981f9e0a",
-  "schema/trace.schema.json": "57ad91419f0a5985e97ebdde0b22aa4582b8ff9708e8a325356418af03edfcb7",
+  "schema/trace.schema.json": "95c333ca5d933639180fa0021695af606965ec1cf05fbeb6232183c9becb2acc",
   "src/adapter.ts": "5f5a95e038911151e6cb2bb7a788524d6fdb5990475c4f186cb1bd5087bb9457",
   "src/canonical.ts": "03fd83120750ef53e7c0f422a2588d4e1cfbf5af141e02eca77897bbc24ffa7c",
   "src/coerce.ts": "8cde509bfd132094d2f1d0a372d3cc258211ef917e99616157c4dc7fa02bafdd",
@@ -31,8 +31,8 @@
   "src/nodes/string-format.ts": "e62eb456aba8b2f37a98c569997146703b786bf13b3697be3ea2091d8f32c38e",
   "src/nodes/switch.ts": "15896daa7c22306f9a2220a1a0daf7cf71262db7e8b587c926bd27ea107d8680",
   "src/nodes/uuid.ts": "d5e2f60d7f81ca7ebee8083955d58b7534b5d4d2589bfc1716c0d0bdca03aadf",
-  "src/spec.ts": "a8f142d5e7df649757469ad7f16bb2908afa23b7891c4d88b3a9ace3b031e419",
-  "src/trace.ts": "a9197816f3b4a7730bb541e2e5f95de801d0f6158d12a10776131014e54017e8",
-  "src/world.ts": "9965ca24dd4880b8d70a27200ccdc9fc5e1d7b25f23c1f673d3b5c14802398af",
+  "src/spec.ts": "6e343f0ea9bb84ae80c5669110f97d6c88b4176c42a95a5019e73b6482389c14",
+  "src/trace.ts": "10ebfed327109f9c0a87adaf968be39ab6529f4fffc995a024d245e9acad87bb",
+  "src/world.ts": "28323490fd95674402a226b275ef0ead5affb12ede1df6d49883633983929b77",
   "tests/stranger-page.js": "b81ec9de4633acd8b3960e15fe9b461e64ca23bb520fafd6e38d2dcb25a15e35"
 }

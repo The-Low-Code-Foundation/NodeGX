@@ -126,6 +126,12 @@
  *               subscribed, as a DOM dispatch runs them. `PopStateEvent` is the play's too.
  *           The href STARTS at the script's `location` (absent: `https://app.example/`); a page
  *           reads it as `location.href` / `pathname` / `search` / `hash`, live.
+ *           (NSP-016 s57) THE PERSON'S BROWSER moves it too: Back or Forward (`traverse`, an act) takes
+ *           the href to a url resolved against it on the same origin, records nothing (the node made
+ *           no call), and runs the `popstate` listeners — then the `hashchange` ones when the hash
+ *           moved — in the order they subscribed. A visual node's page is the browser's: its window's
+ *           `history.pushState`, `open`, `dispatchEvent` and `popstate` / `hashchange` listeners ARE
+ *           this location's (a target with a page puts them there).
  *           USER ACTIVATION — whether the press came from a person — is a fact of the play, the
  *           script's `activation`: `true` / `false` is `navigator.userActivation.isActive` for
  *           the whole play; absent, the browser has no `userActivation` (Safari before 16.4,
@@ -2115,6 +2121,20 @@ export class WorldLocation {
       throw new DOMException(`Failed to execute 'pushState' on 'History': A history state object with URL '${String(url)}' cannot be created in a document with origin '${new URL(this.href).origin}'`, 'SecurityError');
     }
     this.href = next;
+  }
+
+  /**
+   * NSP-016 s57 — the person's Back or Forward (LOCATION above): the href moves to `url` resolved against it (`pushTarget` — another
+   * origin's, or none, throws: that is a page load, not a traversal), nothing is recorded, and the `popstate` listeners run, then the
+   * `hashchange` ones when the hash moved.
+   */
+  traverse(url: unknown): void {
+    const next = pushTarget(url, this.href);
+    if (next === null) throw new Error(`world: a traversal stays on the page's origin — ${String(url)} from ${this.href} is a page load`);
+    const hashMoved = new URL(next).hash !== new URL(this.href).hash;
+    this.href = next;
+    for (const l of this.eventListeners.filter((x) => x.type === 'popstate')) l.fn({ type: 'popstate', state: null });
+    if (hashMoved) for (const l of this.eventListeners.filter((x) => x.type === 'hashchange')) l.fn({ type: 'hashchange' });
   }
 
   /** `window.dispatchEvent`: records the event's type, then runs that type's listeners in subscription order. */

@@ -275,6 +275,7 @@ function viewOf(inst: Instance): WorldView {
     userActivation: () => world.location?.activation,
     opens: (target, features) => !!world.location && openReturnsWindow(target, features, world.location.activation),
     pushes: (url) => !!world.location && pushTarget(url, world.location.href) !== null,
+    href: () => world.location?.href,
     projectSettings: () => world.projectSettings,
     cloudServices: () => world.cloudServices,
     stackAnswer: (op, stack, target) => world.stack.answer(op, stack, target),
@@ -665,6 +666,7 @@ interface PatchLike {
   open?: { url: unknown; target?: unknown; features?: unknown };
   push?: { url: unknown };
   dispatch?: string;
+  traverse?: { url: unknown };
   stack?: { op: 'push' | 'replace'; stack: unknown; target: unknown; params: unknown; transition: unknown };
   back?: ReadonlyArray<{ action: unknown; results: unknown }>;
   route?: { router: unknown; target: unknown; params: unknown; openInNewTab: unknown };
@@ -884,7 +886,7 @@ function effects(inst: Instance, port: string, patch: PatchLike): void {
     for (const e of world.sockets.calls.slice(recordFrom)) inst.pending.requests.push(e);
   }
   // LOCATION (world.ts): only with a window — a spec reads `viewport()` first, as a node checks `typeof window`
-  if ((patch.open || patch.push || patch.dispatch !== undefined) && !world.location) {
+  if ((patch.open || patch.push || patch.dispatch !== undefined || patch.traverse) && !world.location) {
     throw new SpecError(`${spec.type}.${port}: used the location in a play with no window`);
   }
   if (!world.location) return stackEffects(inst, port, patch);
@@ -908,6 +910,14 @@ function effects(inst: Instance, port: string, patch: PatchLike): void {
     // recorded BEFORE the listeners run: a listener's own calls come after the dispatch, as they are made
     record({ call: 'dispatch', event: patch.dispatch });
     location.dispatch({ type: patch.dispatch });
+  }
+  // NSP-016 s57 — the person's Back or Forward: the href moves and the listeners run; nothing is recorded (the act is the trace's)
+  if (patch.traverse) {
+    try {
+      location.traverse(patch.traverse.url);
+    } catch (e) {
+      throw new SpecError(`${spec.type}.${port}: ${(e as Error).message}`);
+    }
   }
   stackEffects(inst, port, patch);
 }
@@ -943,10 +953,28 @@ function stackEffects(inst: Instance, port: string, patch: PatchLike): void {
       const e: TraceEvent = { t: 'answer', op: 'returned', results: canonicalise(a.results) };
       if (a.action !== undefined) e.action = canonicalise(a.action);
       inst.pending.location.push(e);
-    } else if (a.op === 'push' || a.op === 'replace' || a.op === 'back') {
+    } else if (a.op === 'history' || a.op === 'open') {
+      // NSP-016 s57 — a LOCATION call made between two answers, in its place (spec.ts `AnswerCall`)
+      const location = world.location;
+      if (!location) throw new SpecError(`${spec.type}.${port}: used the location in a play with no window`);
+      if (a.op === 'history') {
+        try {
+          location.push(a.url);
+        } catch {
+          /* recorded below; the href stays (world.ts LOCATION) */
+        }
+        inst.pending.location.push(locationEvent({ call: 'push', url: a.url }));
+      } else {
+        location.open(a.url, a.target, a.features);
+        inst.pending.location.push(locationEvent({ call: 'open', url: a.url, target: a.target, features: a.features }));
+      }
+    } else if (a.op === 'page') {
+      // NSP-016 s57 — the params a Page Router hands a Page Inputs of its page, canonical at the call
+      inst.pending.location.push({ t: 'answer', op: 'page', params: canonicalise(a.params) ?? null });
+    } else if (a.op === 'push' || a.op === 'replace' || a.op === 'back' || a.op === 'navigate') {
       if (a.value === 'failure' && (typeof a.error !== 'string' || a.error.length === 0)) throw new SpecError(`${spec.type}.${port}: a failure answer carries its code`);
       inst.pending.location.push(a.value === 'failure' ? { t: 'answer', op: a.op, value: a.value, error: a.error } : { t: 'answer', op: a.op, value: a.value });
-    } else throw new SpecError(`${spec.type}.${port}: an answer's op is push, replace, back or returned, not ${String((a as { op?: unknown }).op)}`);
+    } else throw new SpecError(`${spec.type}.${port}: an answer's op is push, replace, back, navigate, returned or page, not ${String((a as { op?: unknown }).op)}`);
   }
   // PICKER (world.ts, NSP-014 s31): a click recorded as the element holds it — a `picker` event in the same group; the
   // answer fires at its moment, as a DOM event's handler runs at its dispatch (inside the `advance` that reaches it)

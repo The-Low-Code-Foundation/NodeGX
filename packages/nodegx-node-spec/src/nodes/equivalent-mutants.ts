@@ -31,6 +31,10 @@ const GRAPH = (what: string, scenario: string) => `${what} is written onto the r
 /** The same for a pointer or a finger meeting no element (these four acts do nothing only when the node is off the page): the act's set holds only the page syncs. */
 const ACT_OFF_PAGE = 'a hover, leave, touch or lift on a node off the page: its set holds only the page syncs, which nothing reads before the frame end repaints them';
 const REBUILT_WHILE_DISABLED = 'a press or release on a disabled box during an Enable Label rebuild: the rebuild unfocuses the element, which no action can read while it is disabled, and the frame end that paints Enabled paints the rebuild too';
+/** NSP-016 s57 — the Page Router. */
+const ROUTER_PLACED_OFF_PAGE = 'a Page Router placed off the page: its placing does nothing — the set it drops is the state it was handed';
+const ROUTER_REFUSED_AT_TIMER =
+  "a navigate the router answers at the handler's millisecond without a build (refused, Unchanged, a new tab): its set spends the handed tag (never asked for again) and leaves the queue freeing (`hops`), which the advance's yield — asked for by the same patch — frees before the clock moves; no other request reaches the router in between";
 const PLACED_OFF_PAGE = 'a placing on a node placed off the page: its set holds only the page syncs, which nothing reads before the frame end repaints them';
 
 /** NSP-016 s43 — the Text: a patch handed a twin's example that writes only what the state already holds. */
@@ -199,6 +203,16 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
   Drag: [{ reducer: 'world.place', kind: 'drop-set', branch: '"emit":[],"outcome":null', why: PLACED_OFF_PAGE }],
   // NSP-016 s56 — the Component Stack: placed with Mounted off, nothing is painted and nothing registers — the whole state as it was
   'Page Stack': [{ reducer: 'world.place', kind: 'drop-set', branch: '"emit":[],"outcome":null,"outcomes":[],"request":false}', why: PLACED_OFF_PAGE }],
+  // NSP-016 s57 — the Page Router
+  Router: [
+    { reducer: 'world.place', kind: 'drop-set', branch: '"emit":[],"outcome":null,"outcomes":[],"request":false}', why: ROUTER_PLACED_OFF_PAGE },
+    ...(['["navigate:failure"]', '["navigate:done","open:undefined"]', '["navigate:unchanged"]'] as const).map((answers) => ({
+      reducer: 'world.timer',
+      kind: 'drop-set' as const,
+      branch: `"emit":[],"outcome":null,"outcomes":[],"request":false,"answers":${answers}}`,
+      why: ROUTER_REFUSED_AT_TIMER
+    }))
+  ],
   Text: TEXT,
   // NSP-016 s53 — the Shape runs the Text's machinery with no Tag
   Circle: TEXT.map(onCircle),

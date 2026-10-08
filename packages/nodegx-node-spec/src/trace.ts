@@ -115,9 +115,11 @@ export type TraceEvent =
    * observation (NSP-016 s56): the node answered a request another node handed it (spec.ts THE CALLERS) — a Component Stack's
    * answer to a `push`, a `replace` or a `back`: `value` done, unchanged or failure, `error` the failure's CODE (as an outcome's);
    * or `returned` — the page a back popped hands the node that pushed it the back's `action` (absent when none) and `results`
-   * (canonical at the call). In the LOCATION group, in the order made.
+   * (canonical at the call). In the LOCATION group, in the order made. NSP-016 s57 adds a Page Router's: `navigate` — its answer to
+   * a Navigate (`value`, `error` as a push's) — and `page`: the `params` it hands the Page Inputs of the page it shows (canonical at
+   * the call), one per Page Inputs.
    */
-  | (Base & { t: 'answer'; op: 'push' | 'replace' | 'back' | 'returned'; value?: Outcome; error?: string; action?: unknown; results?: unknown });
+  | (Base & { t: 'answer'; op: 'push' | 'replace' | 'back' | 'returned' | 'navigate' | 'page'; value?: Outcome; error?: string; action?: unknown; results?: unknown; params?: unknown });
 
 /**
  * NSP-016 s37 — the canonical form of a node's reference to ITSELF (a visual node's `This` output,

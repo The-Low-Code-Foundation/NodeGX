@@ -149,7 +149,7 @@ import type { NodeInstance, NodeMetadata, OutcomeFailureOptions, OutcomeToken, R
 
 import type { RuntimeNode } from '../../src/internal';
 import type { BackendCall, ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, LocationCall, RequestRecord, StackAnswer, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
-import { parseEndpoint, specFor } from '../../../nodegx-node-spec/src';
+import { parseEndpoint, ROUTER_PAGES, specFor, type WorldLocation } from '../../../nodegx-node-spec/src';
 import { AUTH_OPS, backendEvent, canonicalise, fileError, installWorld, isFileOp, locationEvent, OUTCOME_PORTS, OWN_ELEMENT, SELF_REFERENCE, type BackendDelivery } from '../../../nodegx-node-spec/src';
 
 import NoodlRuntime = require('../../noodl-runtime');
@@ -562,7 +562,7 @@ function installGlobals(globals: Record<string, unknown>): () => void {
  * `whenMounted`, which calls `window.requestAnimationFrame`) ran whenever the event loop got there: before the next settle in
  * one play, not in another.
  */
-function installPage(): () => void {
+function installPage(location?: WorldLocation): () => void {
   const d = ensureDom();
   pointerAt = null;
   fileDrag = undefined;
@@ -573,13 +573,48 @@ function installPage(): () => void {
   // LATER play. What the play added comes off with its page.
   const added: Array<[string, unknown, unknown]> = [];
   const add = d.window.addEventListener;
+  // NSP-016 s57 — THE LOCATION ON THE PAGE (world.ts LOCATION): in a play whose world has a location, the page's window IS the
+  // browser that location is — its `history.pushState`, `open`, a `popstate` / `hashchange` dispatched on it and the listeners for
+  // them are the world's. (`window.location` is jsdom's `about:blank` and cannot be replaced — [Unforgeable]; the page's bare
+  // `location`, `history` and `dispatchEvent` are the world's already, `installWorld`'s.)
+  const worldEvents = new Map<string, Map<unknown, () => void>>();
+  const isLocationEvent = (type: string) => !!location && (type === 'popstate' || type === 'hashchange');
   d.window.addEventListener = function (this: unknown, type: string, fn: unknown, opts?: unknown) {
+    if (isLocationEvent(type)) {
+      const byFn = worldEvents.get(type) ?? new Map<unknown, () => void>();
+      worldEvents.set(type, byFn);
+      if (!byFn.has(fn)) byFn.set(fn, location!.listen(type, fn as (e: unknown) => void));
+      return;
+    }
     added.push([type, fn, opts]);
     return add.call(this, type, fn, opts);
   };
+  const remove = d.window.removeEventListener;
+  const dispatch = d.window.dispatchEvent;
+  const history = d.window.history;
+  const open = d.window.open;
+  if (location) {
+    d.window.removeEventListener = function (this: unknown, type: string, fn: unknown, opts?: unknown) {
+      if (!isLocationEvent(type)) return remove.call(this, type, fn, opts);
+      worldEvents.get(type)?.get(fn)?.();
+      worldEvents.get(type)?.delete(fn);
+    };
+    d.window.dispatchEvent = function (this: unknown, event: { type: string }) {
+      return isLocationEvent(event.type) ? location.dispatch(event) : dispatch.call(this, event);
+    };
+    history.pushState = (_state: unknown, _title: unknown, url?: unknown) => location.push(url);
+    d.window.open = (url: unknown, target: unknown, features: unknown) => location.open(url, target, features);
+  }
   const leave = () => {
     d.window.addEventListener = add;
     for (const [type, fn, opts] of added) d.window.removeEventListener(type, fn, opts);
+    if (location) {
+      for (const byFn of worldEvents.values()) for (const off of byFn.values()) off();
+      d.window.removeEventListener = remove;
+      d.window.dispatchEvent = dispatch;
+      delete (history as { pushState?: unknown }).pushState;
+      d.window.open = open;
+    }
   };
   const g = globalThis as { requestAnimationFrame?: unknown };
   const frame = g.requestAnimationFrame;
@@ -627,6 +662,8 @@ interface Page {
   models?: string[];
   /** NSP-016 s56 — puts jsdom's `performance.now` back: a Component Stack's page runs on the world's clock. */
   restoreClock?: () => void;
+  /** NSP-016 s57 — puts the runtime's page index back: a Page Router's page reads the play's project. */
+  restoreIndex?: () => void;
 }
 
 /** NSP-016 s56 — the components a Component Stack can build in a play (navigation-stack.ts THE PAGES), each holding one Pop Component Stack. */
@@ -1165,10 +1202,10 @@ function resetRegistry(world: World): void {
 export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions', 'repeat', 'animate-to-value', 'screenresolution', 'states', 'componentutils/parentcomponentobject', 'componentutils/setparentcomponentobjectproperties', 'externallink', 'user/login', 'user/signup', 'user/logout', 'user/requestmagiclink', 'user/signinwith', 'uploadfile', 'openfilepicker', 'data/cloudfunction2'] as const;
 
 /** NSP-015 s17 — the viewer's navigation nodes this phase has specced, from `src/nodes/navigation/` (s17 Navigate To Path … s20 Show / Close Popup). */
-export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back', 'router-navigate', 'page-inputs', 'showpopup', 'closepopup'] as const;
+export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back', 'router-navigate', 'page-inputs', 'page', 'showpopup', 'closepopup'] as const;
 
 /** NSP-016 s37 — the viewer's VISUAL nodes this phase has specced, from `src/nodes/` (their React components come with them; PERSON above). */
-export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox', 'controls/text-input', 'controls/options', 'controls/slider', 'visual/icon', 'controls/radiobuttongroup', 'controls/radiobutton', 'visual/text', 'visual/group', 'visual/circle', 'visual/image', 'visual/video', 'visual/drag', 'navigation/navigation-stack'] as const;
+export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox', 'controls/text-input', 'controls/options', 'controls/slider', 'visual/icon', 'controls/radiobuttongroup', 'controls/radiobutton', 'visual/text', 'visual/group', 'visual/circle', 'visual/image', 'visual/video', 'visual/drag', 'navigation/navigation-stack', 'navigation/router'] as const;
 
 /**
  * Picker nodes whose SOURCE is in this package but which only the viewer's `register-nodes.js`
@@ -1199,6 +1236,12 @@ export function withViewerNodes(target: RuntimeTarget): RuntimeTarget {
   // NSP-016 s53 — the app's environment, as the viewer's JavaScript API makes it (noodl-js-api.ts :48 `Noodl.Env = {}`): Image.tsx and
   // Video.tsx read `Noodl.Env['BaseUrl']` for every source that starts with `/`. A project's Base URL is not on this page
   if (!g.Noodl.Env) g.Noodl.Env = {};
+  // NSP-016 s57 — what a Page Router calls on the app's API when it shows a page (router.tsx `Noodl.SEO.setTitle` — the tab's title,
+  // the same string as Current Page Title; router-handler.ts `onNavigated` → `Noodl.Events.emit('NoodlApp_Navigated')`, which an Event
+  // Receiver in the app hears). Neither reaches the trace yet: the face takes both
+  const api = g.Noodl as { SEO?: unknown; Events?: unknown };
+  if (!api.SEO) api.SEO = { setTitle: () => undefined };
+  if (!api.Events) api.Events = { emit: () => undefined };
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   for (const file of VIEWER_VISUAL_NODES) register(require('../../../noodl-viewer-react/src/nodes/' + file));
   // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -1720,14 +1763,14 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     const logs: LogLine[] = [];
     // NSP-016 s56 — a lone Component Stack builds its pages in its own scope (`createNode`, `createPrimitiveNode`, `deleteNode`):
     // a REAL scope, as the popup root has (`scopeFor`)
-    const nodeScope = scope ?? (type === 'Page Stack' ? scopeFor({ name: `node-spec/${id}`, getInstanceId: () => id, getRoots: () => [] as never[] }, logs) : loneScope(id, logs));
+    const nodeScope = scope ?? (type === 'Page Stack' || type === 'Router' ? scopeFor({ name: `node-spec/${id}`, getInstanceId: () => id, getRoots: () => [] as never[] }, logs) : loneScope(id, logs));
     // POPUP (world.ts, NSP-015 s20) — a lone Close Popup inside the script's popups
     if (!scope && type === 'NavigationClosePopup' && world && world.popup.inside.length > 0) insidePopups(nodeScope.componentOwner as { parentNodeScope?: unknown }, world.popup.inside);
     const metadata = context.nodeRegister.getNodeMetadata(type);
     // PERSON (above, NSP-016 s43) — a node a person acts on is made in a page that has a window: the app's params are set with
     // `window` and `document` present, as a loaded project sets them. A setter that reads the page at once (drag-drop.ts
     // `setDraggable` → `install`, `whenMounted`) found none here and did nothing — Draggable set at the placing never armed.
-    if (specFor(type)?.needs?.includes('person') && !domInstalled) domInstalled = installPage();
+    if (specFor(type)?.needs?.includes('person') && !domInstalled) domInstalled = installPage(world?.location);
     const { node, made } = createHooked(type, id, nodeScope, metadata, logs);
     if (!node.nodeScope) node.nodeScope = nodeScope as never;
     // a node in a component's scope is one of the scope's nodes — what `getNodesWithType` reads
@@ -1802,7 +1845,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
    */
   function putOnPage(s: State): void {
     const d = ensureDom();
-    if (!domInstalled) domInstalled = installPage();
+    if (!domInstalled) domInstalled = installPage(world?.location);
     const node = s.h.node as unknown as {
       render(): unknown;
       parent?: unknown;
@@ -1889,6 +1932,63 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
           else delete (perf as { now?: unknown }).now;
         };
       }
+    } else if (s.h.type === 'Router') {
+      // NSP-016 s57 — THE PROJECT a Page Router reads (page-router.ts): its page components, registered as the app's project
+      // registers one (the context's table) before the first render, each holding its Page nodes and Page Inputs; and its PAGE INDEX
+      // (`graphModel.routerIndex`, router-handler.ts :114-141) — the four pages, and this node by the Name it was placed with and its
+      // Pages as they are now (the editor sends the index again with every Pages edit). Gone with the page.
+      const models = (context as unknown as { componentModels: Record<string, unknown> }).componentModels;
+      page.models = [];
+      for (const p of ROUTER_PAGES) {
+        if (Object.prototype.hasOwnProperty.call(models, p.component)) continue;
+        const model = new ComponentModel(p.component) as unknown as { nodes: Record<string, unknown> };
+        const add = (id: string, type: string) => {
+          const n = NodeModel.createFromExportData({ id: `${p.component}/${id}`, type, parameters: {} } as never) as unknown as { component?: unknown; id: string };
+          n.component = model;
+          model.nodes[n.id] = n;
+        };
+        for (let i = 0; i < p.pageNodes; i++) add(`page${i}`, 'Page');
+        for (let i = 0; i < p.pageInputs; i++) add(`inputs${i}`, 'PageInputs');
+        models[p.component] = model;
+        page.models.push(p.component);
+      }
+      const graphModel = (rt as unknown as { graphModel: { routerIndex?: unknown } }).graphModel;
+      const savedIndex = Object.getOwnPropertyDescriptor(graphModel, 'routerIndex');
+      const placedName = (node as unknown as { model: { parameters: Record<string, unknown> } }).model.parameters.name;
+      const internal = (node as unknown as { _internal: { pages?: unknown } })._internal;
+      Object.defineProperty(graphModel, 'routerIndex', {
+        configurable: true,
+        // the exporter lists a Router only when its saved Name is truthy (noodl-editor utils/exporter/router.ts `getRouterIndex`), and a
+        // page once per Page node — `Twice`'s second entry is the first's twin, and the lookup takes the first
+        get: () => ({ routers: placedName ? [{ name: placedName, pages: internal.pages }] : [], pages: ROUTER_PAGES.map((x) => ({ component: x.component, path: x.path, title: x.title })) })
+      });
+      page.restoreIndex = () => {
+        if (savedIndex) Object.defineProperty(graphModel, 'routerIndex', savedIndex);
+        else delete graphModel.routerIndex;
+      };
+      // what the router hands each Page Inputs of a page it built (router.tsx :604, :926-931): an `answer` event, op `page`, at the call
+      const nodeScope = (node as unknown as { nodeScope: { createNode(...a: unknown[]): Promise<{ nodeScope: { getNodesWithType(t: string): Array<{ _setPageParams(p: unknown): void }> } }> } }).nodeScope;
+      const create = nodeScope.createNode.bind(nodeScope);
+      nodeScope.createNode = (...a: unknown[]) =>
+        create(...a).then((content) => {
+          for (const pi of content.nodeScope.getNodesWithType('PageInputs')) {
+            const set = pi._setPageParams.bind(pi);
+            pi._setPageParams = (params: unknown) => {
+              s.frame.location.push({ t: 'answer', op: 'page', params: canonicalise(params) ?? null });
+              set(params);
+            };
+          }
+          return content;
+        });
+      // a request that throws while it builds rejects the promise its `navigate` / `reset` never awaits (async-queue.ts :55-76): in a
+      // browser a console line, and the queue runs on. The face takes the line; nothing reaches the trace
+      const queue = (node as unknown as { _internal: { asyncQueue: { enqueue(t: unknown): Promise<unknown> } } })._internal.asyncQueue;
+      const enqueue = queue.enqueue.bind(queue);
+      queue.enqueue = (t: unknown) => {
+        const p = enqueue(t);
+        p.catch(() => undefined);
+        return p;
+      };
     } else if (spec?.needs?.includes('group') && world?.group.present) {
       const group = context.nodeRegister.createNode('Radio Button Group', `${s.h.id}/group`, scope) as unknown as RuntimeNode & Holder;
       // the group's Value parameter at load, then the node, then its siblings — the order a loaded project builds them
@@ -2001,6 +2101,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     const models = (context as unknown as { componentModels: Record<string, unknown> }).componentModels;
     for (const name of page.models ?? []) delete models[name];
     page.restoreClock?.();
+    page.restoreIndex?.();
     (s.h.node as unknown as { parent?: unknown }).parent = undefined;
     s.page = undefined;
     onPage.delete(s);
@@ -2054,6 +2155,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     const w = d.window;
     // NSP-016 s56 — THE CALLERS: another node's request to a Component Stack, not a person's gesture
     if (act === 'push' || act === 'replace' || act === 'back') return stackActs(s, act, value);
+    // NSP-016 s57 — a Navigate's request to a Page Router, and the person's Back or Forward
+    if (act === 'navigate' || act === 'traverse') return routerActs(s, act, value);
     // NSP-016 s42 — a `pick` acts on the CHILD whose Value is the act's (a Radio Button Group's button): the control a person sees
     // inside it; a Value no child carries, or a child off the page, is nothing to act on
     // NSP-016 s52 — a `tap` acts on the CHILD it names (a Group's, group.ts THE CHILDREN); a `clickAway` on the page beside the node
@@ -2413,6 +2516,36 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       hasFailed: (code: string) => answer(op, 'failure', code)
     };
     node.scheduleAfterInputsHaveUpdated(() => proto[act === 'push' ? 'navigate' : 'replace'].call(NavigationHandler.instance, v.stack, args));
+  }
+
+  /**
+   * NSP-016 s57 — THE CALLERS of a Page Router (page-router.ts): a `navigate` (`{ router?, target?, params?, openInNewTab? }`) is what
+   * a Navigate hands at ITS frame's end (router-navigate.ts `scheduleNavigate` → `navigate`), so the face schedules it on the router's
+   * own frame-end list; it goes through the play's REAL `RouterHandler` (`installRouters`) — past the handler's own recording, which is
+   * the CALLER's `route` event — with a copy of `params` (an object, as a Navigate hands one) and `openInNewTab` false unless handed.
+   * The router's answer is an `answer` event, op `navigate`, at the call. A `traverse` (a URL) is the person's Back or Forward: the
+   * world's location moves there and its `popstate` listeners — the page's — run (world.ts LOCATION).
+   */
+  function routerActs(s: State, act: 'navigate' | 'traverse', value: unknown): void {
+    if (act === 'traverse') {
+      if (!world?.location) throw new Error('runtime: a traverse moves the location, and the play has none');
+      world.location.traverse(value);
+      return;
+    }
+    const v = (value ?? {}) as { router?: unknown; target?: unknown; params?: Record<string, unknown>; openInNewTab?: unknown };
+    const node = s.h.node as unknown as { scheduleAfterInputsHaveUpdated(cb: () => void): void };
+    const answer = (outcome: 'done' | 'unchanged' | 'failure', code?: string) =>
+      s.frame.location.push(outcome === 'failure' ? { t: 'answer', op: 'navigate', value: outcome, error: code || OUTCOME_UNSPECIFIED } : { t: 'answer', op: 'navigate', value: outcome });
+    const args = {
+      target: v.target,
+      params: { ...(v.params ?? {}) },
+      openInNewTab: v.openInNewTab ?? false,
+      hasNavigated: () => answer('done'),
+      hasUnchanged: () => answer('unchanged'),
+      hasFailed: (code: string) => answer('failure', code)
+    };
+    const proto = (RouterHandler as unknown as { prototype: { navigate(name: unknown, args: unknown): void } }).prototype;
+    node.scheduleAfterInputsHaveUpdated(() => proto.navigate.call(RouterHandler.instance, v.router, args));
   }
 
   /**
