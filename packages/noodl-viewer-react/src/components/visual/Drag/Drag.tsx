@@ -33,6 +33,9 @@ function setDragValues(event, props) {
   props.deltaY && props.deltaY(event.deltaY);
 }
 
+/** P107-C101 — what a press inside a Drag operates instead of dragging. */
+const DRAG_CANCEL = 'input, textarea, select, button, a, [contenteditable]';
+
 type State = {
   x: number
   y: number
@@ -179,6 +182,14 @@ export class Drag extends React.Component<DragProps, State> {
         axis={props.axis}
         bounds={bounds}
         disabled={props.enabled === false}
+        /**
+         * P107-C101. react-draggable cancels every `touchstart` on the element it moves, and a browser
+         * that sees a cancelled `touchstart` sends no click and no focus for that touch — so on a phone
+         * nothing inside a Drag could be tapped (the Site Builder's section rows: Save, Delete, the
+         * fields). A press on something a person operates does not start a drag; the library checks
+         * `cancel` before it cancels the touch. A press on the rest still drags.
+         */
+        cancel={DRAG_CANCEL}
         /**
          * NDA-012 (Visual). `props.scale || 0` was a divide by zero waiting for an empty value.
          * `react-draggable` divides every pointer delta by `scale`, so a `0` makes each delta
