@@ -185,5 +185,16 @@ C113 and C127 landed after the six (`2cc6d1dd7`, `df238bd79`; landing tree viewe
 tsc 0, Page Stack 150 / 150 on the runtime at 20732). **C127 records the switch, not only the port:** the probe alone would have
 told an author every page always has a Path; `when` is the generic answer, and only Page Stack carries one today.
 
-**Left (8):** C120 and C126 (ruled; wait on the world), C114; the Drag's C102, C105, C106, and C103, C104 (ruled).
+**The Drag's three known rows** (built in worktree `p109-drag`, landed on `fd44ad2fc`):
+
+| Row | Commit | What changed | Grade |
+|---|---|---|---|
+| C106 | `a36403e21` | `componentDidUpdate` compares Start Drag X / Y with `Object.is`; the spec copied the `!==` (it set the element back to NaN at every paint), so Drag spec v2; the two `WITHHELD` entries go; one scenario added (placed NaN, dragged to 30, a paint with NaN held), since a NaN sent again is silent on the wire and no recorded scenario told the two apart | 20 / 22 (the other two known rows); control red on exactly 2 |
+| C102 | `c1623eec2` | `reportDrag` and `onStop` read the Axis rendered: a locked axis reports where the element is and a Delta of 0 | 21 / 22, 0 generated divergences (18 attributed to C102 at seed 13 before); control red on exactly 1 |
+| C105 | `3049f95d5` | `componentDidMount` keeps the position it set (`mountedAt`) until its `setState` lands; a waited snap and its "already there" check read it | 22 / 22, no known row left on the Drag; control red on exactly 1 |
+
+Every row: runtime at seeds 13 and 20732, interpreter mutants 0 survivors at both (the Drag survivor s30 reported at 20732 is gone
+too). Landing tree: viewer 1,815 / 1,815, page model and parity 332 / 332, spec and runtime tsc 0, Drag 22 / 22 at 20732.
+
+**Left (5):** C120 and C126 (ruled; wait on the world), C114; the Drag's C103 and C104 (ruled; built next).
 **The export:** not checked (P18's).

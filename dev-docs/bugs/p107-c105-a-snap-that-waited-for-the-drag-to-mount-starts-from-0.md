@@ -2,6 +2,7 @@
 id: P107-C105
 title: A Snap To Position that waited for the Drag to mount starts from 0 — the element jumps to the edge, then animates
 status: fixed
+commit: 3049f95d5
 phase: P109
 task: ISL-048
 severity: low

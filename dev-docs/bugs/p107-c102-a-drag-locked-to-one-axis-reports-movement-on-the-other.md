@@ -2,6 +2,7 @@
 id: P107-C102
 title: A Drag locked to one Axis still reports movement on the other — Drag Y moves while the element stays put, then jumps back to 0 at the next drag
 status: fixed
+commit: c1623eec2
 phase: P109
 task: ISL-048
 severity: medium

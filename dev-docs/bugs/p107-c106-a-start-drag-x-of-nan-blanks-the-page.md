@@ -2,6 +2,7 @@
 id: P107-C106
 title: A Start Drag X or Y of NaN blanks the page — the Drag's update compares NaN with itself and sets state until React gives up
 status: fixed
+commit: a36403e21
 phase: P109
 task: ISL-048
 severity: medium
