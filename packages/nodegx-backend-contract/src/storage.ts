@@ -299,6 +299,8 @@ export interface StorageTableSchema {
   indexes?: StorageIndexDecl[];
   /** HLT-016 — the rules every row must satisfy. */
   checks?: StorageCheckDecl[];
+  /** P116 ONT-003 — what the collection is, in the words of whoever said it. Kept, never interpreted. */
+  description?: string;
 }
 
 /** Options for `IStorageSchema.generatePostgresSQL`. */
@@ -348,7 +350,7 @@ export interface IStorageSchema {
   // --- tables and columns --------------------------------------------------
 
   /** `byob-admin.ts:352` (createTable route); `AdapterFacade.ts:383`. */
-  createTable(spec: { name: string; columns: StorageColumn[] }): boolean;
+  createTable(spec: { name: string; columns: StorageColumn[]; description?: string }): boolean;
   /** `byob-admin.ts:366`; `AdapterFacade.ts:390, 407`. */
   addColumn(table: string, column: StorageColumn): void;
   /** `byob-admin.ts:375` (renameColumn route). */

@@ -84,7 +84,10 @@ export interface MutantSeed {
   from: 'census' | 'note' | 'oral';
 }
 
-/** One field a relation becomes, in the eleven kinds. `on` says which record carries it. */
+/**
+ * One field a relation becomes, in the eleven kinds. `on` says which record carries it. A
+ * `link` with no `points` names whoever was signed in (the app's users), not a noun.
+ */
 export interface ProjectedField {
   on: 'from' | 'to' | 'own';
   name: string;
@@ -95,14 +98,51 @@ export interface ProjectedField {
   unique?: boolean;
   /** For a `link`: what happens when the record it points at goes. */
   whenTargetGoes?: 'goes-too' | 'stays-unlinked' | 'blocks';
+  /** For a `choice` the kind makes itself (not a property the person listed): its list. */
+  values?: readonly string[];
+}
+
+/**
+ * What a rule asks of the records, in a shape ONT-003 can hand to a store or say plainly that
+ * it cannot. Field names are the projected fields' `name`s, on the record the rule is `on`.
+ */
+export type RuleHold =
+  /** No two records share these values; with `whileEmpty`, only among those where that field is empty (still running). */
+  | { unique: readonly string[]; whileEmpty?: string }
+  /** A `links` field holds a pair once, however often it is made. */
+  | { pairOnce: string }
+  /** A pair the person said can be made twice, on a `links` field. */
+  | { pairTwice: string }
+  /** Written when the record is made, never changed after. */
+  | { setOnce: string }
+  /** A record of it is never changed once made. */
+  | { neverEdited: true }
+  /** A record of it is never deleted. */
+  | { neverDeleted: true }
+  /** Following this link never leads back to the record it starts from. */
+  | { notUnderItself: string }
+  /** Only the record this link names may see and change it; `path` when that is through a chain. */
+  | { onlyThrough: string; path?: boolean }
+  /** Every exchange with the other system is kept, and a skipped one says why. */
+  | { logged: string }
+  /** A retired value of this choice stays on the records holding it and is no longer offered. */
+  | { retiredStays: string }
+  /** A fact about the shape, not something a store is asked to keep. */
+  | { shape: true };
+
+export interface ProjectedRule {
+  on: 'from' | 'own';
+  /** The rule in words, as the person would read it back. */
+  says: string;
+  holds: RuleHold;
 }
 
 export interface Projection {
   /** A record of its own the relation becomes (`is-on`, `happened-to`), named after the relation. */
   ownRecord?: boolean;
   fields: ProjectedField[];
-  /** Rules that are not a field: "nobody may delete", "one pair once". In words. */
-  rules: string[];
+  /** Rules that are not a field: "nobody may delete", "one pair once". */
+  rules: ProjectedRule[];
 }
 
 /** What the projection is handed: the relation's ends and the person's answers. */

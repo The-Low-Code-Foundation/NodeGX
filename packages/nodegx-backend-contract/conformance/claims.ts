@@ -1,0 +1,226 @@
+/**
+ * Claims — a schema made from someone's words, and the sentences it must keep.
+ *
+ * P116 ONT-003. A person says what their world is ("a member is on an account, from the day
+ * they join"); `@nodegx/project-contract/world` projects that to a schema in this contract's
+ * neutral terms and writes each answer as a claim: steps in the data plane, and which of them
+ * says the rule. This module applies the schema through the schema surface (never SQL) and
+ * runs the steps, so the same claims grade every adapter.
+ *
+ * It names no world and imports nothing from the project contract: a claim is data. The
+ * shapes below are the projection's own, restated structurally; `nodegx-backend`'s ONT-003
+ * spec assigns one to the other, so the two cannot drift without a compile error.
+ *
+ * ## Three ways to grade a claim
+ *
+ * - **held** — the store keeps the rule: every step must pass.
+ * - **not held** — the projection says the store does not keep it (a link's target deleted,
+ *   a field set once). It must fail, and **at a step that says the rule** — a claim that
+ *   failed while making its rows measured nothing. A not-held claim that passes means the
+ *   label is wrong: the store keeps it, and the projection should say so.
+ * - **on its mutant** — the schema with the claim's one rule taken out. Must fail at a step
+ *   that says the rule; one that still passes grades nothing (the default equals the test
+ *   value).
+ *
+ * @module conformance/claims
+ */
+
+import type { StorageCheckDecl, StorageColumn, StorageIndexDecl } from '../src/storage';
+
+import { AdapterRefusal, ConformanceError, type ConformanceContext, type Row } from './context';
+import type { ConformanceCase } from './index';
+
+/** A column as a projected schema carries it: the storage column plus what the schema API also takes. */
+export interface ClaimColumn extends StorageColumn {
+  required?: boolean;
+  description?: string;
+}
+
+export interface ClaimCollection {
+  name: string;
+  columns: ClaimColumn[];
+  checks: StorageCheckDecl[];
+  indexes: StorageIndexDecl[];
+}
+
+export interface ClaimSchema {
+  collections: ClaimCollection[];
+}
+
+export type ClaimValue = string | number | boolean | { ref: string } | { date: string };
+export type ClaimData = Record<string, ClaimValue>;
+
+export type ClaimStep =
+  | { make: string; as: string; data: ClaimData }
+  | { refuse: string; data: ClaimData }
+  | { change: string; row: string; data: ClaimData; refused?: true }
+  | { remove: string; row: string; refused?: true }
+  | { pair: string; row: string; field: string; with: string }
+  | { paired: string; row: string; field: string; count: number }
+  | { gone: string; row: string }
+  | { empty: string; row: string; field: string };
+
+export interface Claim {
+  id: string;
+  says: string;
+  held: boolean;
+  steps: ClaimStep[];
+}
+
+/** Whether a step is one that says the rule, rather than one that makes the rows it needs. */
+export function saysTheRule(step: ClaimStep): boolean {
+  if ('refuse' in step || 'paired' in step || 'gone' in step || 'empty' in step) return true;
+  if ('change' in step || 'remove' in step) return step.refused === true;
+  return false;
+}
+
+/** Where a run of a claim's steps stopped. `at` is the failing step's index, or -1 when every step passed. */
+export interface ClaimRun {
+  at: number;
+  message?: string;
+}
+
+/** The collections a claim's steps reach, with every collection their links point at. */
+function reached(schema: ClaimSchema, claim: Claim): ClaimCollection[] {
+  const byName = new Map(schema.collections.map((c) => [c.name, c]));
+  const want = new Set<string>();
+  const add = (name: string): void => {
+    if (want.has(name) || !byName.has(name)) return;
+    want.add(name);
+    for (const col of byName.get(name)!.columns) if (col.targetClass) add(col.targetClass);
+  };
+  for (const step of claim.steps) {
+    const s = step as Record<string, unknown>;
+    for (const key of ['make', 'refuse', 'change', 'remove', 'pair', 'paired', 'gone', 'empty']) if (typeof s[key] === 'string') add(s[key] as string);
+  }
+  return schema.collections.filter((c) => want.has(c.name));
+}
+
+/**
+ * Applies the part of `schema` a claim reaches under fresh names, then runs its steps. Never
+ * throws for a step: the result says where it stopped. Throws only when the schema surface
+ * cannot take the schema at all.
+ */
+export async function runClaim(ctx: ConformanceContext, schema: ClaimSchema, claim: Claim): Promise<ClaimRun> {
+  const collections = reached(schema, claim);
+  const names = new Map<string, string>();
+  for (const c of collections) names.set(c.name, ctx.collection(c.name));
+  const real = (name: string): string => names.get(name) ?? name;
+  const byName = new Map(collections.map((c) => [c.name, c]));
+
+  for (const c of collections) {
+    const columns = c.columns.map((col) => (col.targetClass ? { ...col, targetClass: real(col.targetClass) } : { ...col }));
+    ctx.schema.createTable({ name: real(c.name), columns });
+    if (c.checks.length) {
+      if (typeof ctx.schema.reconcileChecks !== 'function') throw new AdapterRefusal('the schema surface has no reconcileChecks');
+      ctx.schema.reconcileChecks(real(c.name), c.checks);
+    }
+    if (c.indexes.length) {
+      if (typeof ctx.schema.reconcileIndexes !== 'function') throw new AdapterRefusal('the schema surface has no reconcileIndexes');
+      ctx.schema.reconcileIndexes(real(c.name), c.indexes);
+    }
+  }
+
+  const rows = new Map<string, string>();
+  const id = (row: string): string => {
+    const v = rows.get(row);
+    if (v === undefined) throw new ConformanceError(`no row called ${row} was made`);
+    return v;
+  };
+  const column = (coll: string, field: string): ClaimColumn | undefined => byName.get(coll)?.columns.find((c) => c.name === field);
+  const value = (coll: string, field: string, v: ClaimValue): unknown => {
+    if (typeof v !== 'object') return v;
+    if ('date' in v) return { __type: 'Date', iso: v.date };
+    const col = column(coll, field);
+    if (col && col.type === 'Pointer') return { __type: 'Pointer', className: real(col.targetClass || ''), objectId: id(v.ref) };
+    return id(v.ref);
+  };
+  const data = (coll: string, d: ClaimData): Row => {
+    const out: Row = {};
+    for (const k of Object.keys(d)) out[k] = value(coll, k, d[k]);
+    return out;
+  };
+  const idOf = (v: unknown): unknown => (v && typeof v === 'object' && 'objectId' in (v as Row) ? (v as Row).objectId : v);
+  const entries = async (coll: string, row: string, field: string): Promise<unknown[]> => {
+    if (column(coll, field)?.type === 'Relation') {
+      const related = ctx.schema.getRelatedIds(real(coll), id(row), field);
+      return Array.isArray(related) ? related : [];
+    }
+    const got = await ctx.fetch(real(coll), id(row));
+    return Array.isArray(got[field]) ? (got[field] as unknown[]) : [];
+  };
+
+  for (let i = 0; i < claim.steps.length; i++) {
+    const step = claim.steps[i];
+    try {
+      if ('make' in step) {
+        const made = await ctx.create(real(step.make), data(step.make, step.data));
+        rows.set(step.as, String(made.objectId));
+      } else if ('refuse' in step) {
+        await ctx.refused(() => ctx.create(real(step.refuse), data(step.refuse, step.data)));
+      } else if ('change' in step) {
+        const save = () => ctx.save(real(step.change), id(step.row), data(step.change, step.data));
+        if (step.refused) await ctx.refused(save);
+        else await save();
+      } else if ('remove' in step) {
+        const remove = () => ctx.remove(real(step.remove), id(step.row));
+        if (step.refused) await ctx.refused(remove);
+        else await remove();
+      } else if ('pair' in step) {
+        if (column(step.pair, step.field)?.type === 'Relation') await ctx.addRelation(real(step.pair), id(step.row), step.field, id(step.with));
+        else {
+          const now = await entries(step.pair, step.row, step.field);
+          await ctx.save(real(step.pair), id(step.row), { [step.field]: [...now, id(step.with)] });
+        }
+      } else if ('paired' in step) {
+        const now = await entries(step.paired, step.row, step.field);
+        if (now.length !== step.count) throw new ConformanceError(`${step.field} holds ${now.length} entries, not ${step.count}`);
+      } else if ('gone' in step) {
+        const left = await ctx.count(real(step.gone), { objectId: id(step.row) });
+        if (left !== 0) throw new ConformanceError(`the ${step.gone} row is still there`);
+      } else {
+        const got = await ctx.fetch(real(step.empty), id(step.row));
+        const v = idOf(got[step.field]);
+        if (v !== undefined && v !== null && v !== '') throw new ConformanceError(`${step.field} still holds ${JSON.stringify(v)}`);
+      }
+    } catch (err) {
+      return { at: i, message: err instanceof Error ? err.message : String(err) };
+    }
+  }
+  return { at: -1 };
+}
+
+const describeStep = (step: ClaimStep): string => JSON.stringify(step);
+
+/**
+ * The claims as conformance cases (area `claims`), for `runConformance(…, { cases })`.
+ *
+ * `against: 'schema'` grades each claim as it is labelled — a held claim passes, a not-held
+ * claim fails at a step that says the rule. `against: 'mutant'` grades a held claim on the
+ * schema with its rule taken out (the caller passes that schema): it must fail at such a step.
+ */
+export function claimCases(schema: ClaimSchema, claims: readonly Claim[], against: 'schema' | 'mutant' = 'schema'): ConformanceCase[] {
+  return claims.map((claim) => ({
+    id: `claims/${against === 'mutant' ? 'mutant/' : claim.held ? '' : 'not-held/'}${claim.id}`,
+    area: 'claims' as const,
+    pins: claim.says,
+    async run(ctx: ConformanceContext): Promise<void> {
+      const run = await runClaim(ctx, schema, claim);
+      const failedOnTheRule = run.at >= 0 && saysTheRule(claim.steps[run.at]);
+      if (against === 'schema' && claim.held) {
+        if (run.at >= 0) throw new ConformanceError(`"${claim.says}" is not kept: step ${run.at} ${describeStep(claim.steps[run.at])} — ${run.message}`);
+        return;
+      }
+      if (failedOnTheRule) return;
+      if (run.at >= 0)
+        throw new ConformanceError(
+          `"${claim.says}" failed at step ${run.at} ${describeStep(claim.steps[run.at])}, which makes a row rather than says the rule — it measured nothing: ${run.message}`
+        );
+      throw new ConformanceError(
+        against === 'mutant'
+          ? `"${claim.says}" passed on the schema without its rule — the claim grades nothing`
+          : `"${claim.says}" is labelled not held, and the store kept it — the label is wrong`
+      );
+    }
+  }));
+}

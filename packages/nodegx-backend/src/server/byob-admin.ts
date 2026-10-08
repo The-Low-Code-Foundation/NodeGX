@@ -55,6 +55,11 @@ function requiredNeedsDefault(e: unknown, table: string, column: StorageColumn |
 }
 
 /** Whether a declared check reads this column (BMG-003 — the drop refusal). */
+/** P116 ONT-003 — `{ description }` when it is words, `{}` otherwise: absent on the wire, never empty. */
+function describedAs(value: unknown): { description?: string } {
+  return typeof value === 'string' && value.trim() ? { description: value.trim() } : {};
+}
+
 function checkReads(rule: StorageCheckDecl, column: string): boolean {
   if ('exactlyOne' in rule) return rule.exactlyOne.includes(column);
   if ('allOrNone' in rule) return rule.allOrNone.includes(column);
@@ -156,6 +161,8 @@ export interface SchemaTable {
   indexes?: StorageIndexStatus[];
   /** HLT-016 — every declared check and whether it is enforced. Absent on an adapter too old to answer. */
   checks?: StorageCheckStatus[];
+  /** P116 ONT-003 — the collection's description, when it was created with one. */
+  description?: string;
 }
 
 /** `GET /admin/schema` and `GET /api/_schema`. */
@@ -171,6 +178,8 @@ export interface TableSchemaResponse {
   indexes?: StorageIndexStatus[];
   /** HLT-016 — see {@link SchemaTable.checks}. */
   checks?: StorageCheckStatus[];
+  /** P116 ONT-003 — see {@link SchemaTable.description}. */
+  description?: string;
 }
 
 /** `POST /admin/schema` — one of the five mutation actions. */
@@ -403,7 +412,7 @@ export class ByobAdminRoutes {
     if (!sm) throw new HttpError(500, 'Schema manager not available');
     const tables: string[] = sm.listTables();
     const accounts = withAccounts ? sm.getTableSchema('_User') : null;
-    const schemas: { name: string; columns?: unknown[]; createdAt?: string }[] = sm.exportSchemas();
+    const schemas: { name: string; columns?: unknown[]; createdAt?: string; description?: string }[] = sm.exportSchemas();
     sendJSON(res, 200, {
       tables: tables.map((name) => {
         const schema = schemas.find((s) => s.name === name);
@@ -411,6 +420,7 @@ export class ByobAdminRoutes {
           name,
           columns: schema?.columns || [],
           createdAt: schema?.createdAt || null,
+          ...describedAs(schema?.description),
           ...this.indexesOf(name),
           ...this.checksOf(name)
         };
@@ -439,6 +449,7 @@ export class ByobAdminRoutes {
     sendJSON(res, 200, {
       name: tableName,
       columns: tableName === '_User' ? columns.filter((c) => isVisibleAccountColumn(c.name)) : columns,
+      ...describedAs(schema.description),
       ...this.indexesOf(tableName),
       ...this.checksOf(tableName)
     } satisfies TableSchemaResponse);
@@ -501,9 +512,14 @@ export class ByobAdminRoutes {
         // `createTable` is create-if-absent, so the reconcile runs afterwards
         // either way: a push against a table that already exists is exactly the
         // case where a declaration has CHANGED.
+        // P116 ONT-003: a collection made from what a person said carries their sentence. It is
+        // kept with the table's declaration on both engines and never interpreted; like the rest
+        // of `createTable` it is written once — a changed description is ONT-007's migration.
+        const description = describedAs(body.description).description;
         const created = sm.createTable({
           name: table,
-          columns: (body.columns as StorageColumn[] | undefined) || []
+          columns: (body.columns as StorageColumn[] | undefined) || [],
+          ...(description ? { description } : {})
         });
         // HLT-016: `checks` rides along the same way, and is applied first: a
         // push refused by its rows is refused before any index is built.

@@ -1,28 +1,41 @@
 # Phase 116 — next session
 
-**Written 2026-10-08, end of s2.** ONT-000 ✅. R1–R7 ruled (README §9). **ONT-001 🟡 built**: the vocabulary is
-`@nodegx/project-contract/world` (an entry of the format's home, not a new package), the files are `docs/world/nouns.json`,
-`relations.json`, `vocabulary.json`; 14 kinds pinned to the census by test, 55 questions, 19 mutant seeds, a validator,
-the `if_revision` write rule (`planWorldWrite`), the ninth schema (`schemas/world.schema.json`). ONT-001 §6 has every
-decision and what measured it.
+**Written 2026-10-08, end of s3.** ONT-000 ✅. R1–R7 ruled (README §9). ONT-001 🟡 (AC4 → ONT-008). **ONT-003 ✅**:
+`projectWorld()` in `@nodegx/project-contract/world` turns `docs/world/` into a schema (collections, tiles, required,
+choice checks, unique indexes) plus claims; `@noodl/backend-contract/conformance/claims.ts` runs them on SQLite and
+PostgreSQL; every held claim fails on its mutant; `POST /admin/schema` now keeps a collection's description and the
+Schema card shows it. ONT-003 §6 has every decision and what measured it.
 
 ## Before anything
 
-0. **Model check.** Every task file names its model under the status line. ONT-003 wants Opus 5.5. ONT-004 wants
-   **Fable 5.1 for the operation's semantics and the capability cells**, Opus 5.5 for the adapters. On the wrong model,
-   stop and say so in one line before any work.
-1. `npm run ontology-census:check` and `npm test` in `packages/nodegx-project-contract` (36) — both green.
+0. **Model check.** Every task file names its model under the status line. **ONT-004 wants Fable 5.1 for the
+   operation's semantics and the capability cells**, Opus 5.5 for the adapters. ONT-005 wants Fable. On the wrong
+   model, stop and say so in one line before any work.
+1. Green before you start: `npm run ontology-census:check`; `npm test` in `packages/nodegx-project-contract` (53);
+   in `packages/nodegx-backend`, `npx jest --runInBand tests/ont-003 tests/admin-app/ont-003-card` (29, needs
+   `psql postgres:///nodegx_brg005` for the PostgreSQL half — it skips without one).
+
+## Ask Richard
+
+- **R8** (README §9): a person's word that SQL reserves (`plan`, `on`) — keep it as the field's name (built), or
+  rename it and keep the word in the description?
+- **Bug `P116-ONT-003-links`** (needs-ruling): a Link keeps pointing at a deleted record on both engines; nothing a
+  person says about "when it goes" can be kept. On-delete in the contract and each engine, or above the engine at
+  delete time? Seven claims on the every-kind fixture flip from not-held to held when it lands.
+
 ## The next tasks
 
-- **ONT-003, the projection is a function** (Opus). Each kind already has a `projection` into P104's eleven field kinds,
-  deterministic and tested — a sketch, not the contract mapping. ONT-003 maps it onto `@noodl/backend-contract` and grades
-  it on two adapters; it may replace any kind's sketch. Read `world/kind.ts` (`Projection`, `ProjectedField`) first.
-- **ONT-004, paths join the contract** (Fable for semantics). Needs only R3; fixture depth 5.
+- **ONT-004, paths join the contract** (Fable for the semantics). Needs only R3; fixture depth 5. The claims runner
+  (`claimCases`, `runConformance(…, { cases })`) is the place a path claim joins.
+- **ONT-005, the mistakes are mutants** (Fable). The machinery exists: `applyMutant`, and "fail at the rule's step".
+  The kinds' 19 mutant seeds are not executable yet; most are the projection made the other way.
 
-## Found in s2, owned elsewhere
+## Found in s3, owned elsewhere
 
-- **The MCP cannot write `docs/world/`** (`assertInsideDocs` refuses non-`.md`): ONT-002's call, written in its §5.
-- **ONT-001 AC4 moved to ONT-008:** the backend manager's tile has no long-text slot and no way to be handed a list.
+- **`typecheck:backend-tests` (a PR gate) is red at HEAD** — four errors in `isl010-ask-the-owl-drive.test.ts`
+  (P109 ISL-010). Filed `P116-ONT-003-tsc`; ~3 lines in that spec.
+- Untracked `.d.ts`/`.d.ts.map` files in `packages/nodegx-backend-contract/src/` (Oct 3, an old `tsc -p` emit, not
+  this phase's). Left alone.
 
 ## Not yet
 

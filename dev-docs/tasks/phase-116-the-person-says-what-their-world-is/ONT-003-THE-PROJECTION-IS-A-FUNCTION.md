@@ -1,6 +1,6 @@
 # ONT-003 — The projection is a function
 
-**Opened 2026-10-08.** **Depends on ONT-001.** **Status: 📋 not started.**
+**Opened 2026-10-08.** **Depends on ONT-001.** **Status: ✅ s3, 2026-10-08 — AC1–AC4 met on SQLite and PostgreSQL (§6).**
 
 > **Model check, before anything (Richard, 2026-10-08):** this task wants **Opus 5.5 is sufficient** — a deterministic projection graded by the existing conformance suite. Your system prompt says which model you are. If it is not the one named here, stop before any work and say so in one line ("this task is marked for Opus 5.5; you are on <model> — switch with /model, or say go"), and wait for Richard's word. Do not start on the wrong model because the check felt like a formality.
 
@@ -53,4 +53,87 @@ sentences give two databases.
 
 ## 6. Built
 
-*(empty)*
+**s3, 2026-10-08, Opus 5.5.** All four ACs met; the claims run on SQLite and on PostgreSQL 16 through the conformance
+runner, and the write goes through `POST /admin/schema` on a real `BackendService` on both.
+
+### 6.1 What it is
+
+| piece | where | what it does |
+|---|---|---|
+| the rules, as data | `nodegx-project-contract/world/kind.ts` | `Projection.rules` was `string[]`; it is now `ProjectedRule[]` — `{ on, says, holds }`, where `holds` is one of eleven shapes (`unique` with an optional `whileEmpty`, `pairOnce`, `pairTwice`, `setOnce`, `neverEdited`, `neverDeleted`, `notUnderItself`, `onlyThrough`, `logged`, `retiredStays`, `shape`). The words are unchanged; a shape is what lets the projection tell a rule a store can keep from one it cannot, without parsing a sentence. `ProjectedField` gained `values` (a choice the kind makes itself). |
+| the function | `nodegx-project-contract/world/project.ts` | `projectWorld(files) → { ok, schema } \| { ok: false, problems }`. Validates first (the validator's words), then: a collection per noun (`PascalCase` of its id) with its properties; a collection per relation that is a record of its own; every relation's fields onto the record the kind names; a unique rule as a declared index (partial, `where: { until: { exists: false } }`, for "one at a time" on a link that starts and ends); a choice as a `oneOf` check; everything else as a **not-held** rule with the reason, written into the collection's description. Each column carries its tile (`kind`) beside its storage type. `STORAGE_TYPE` is the tile → storage map, pinned to the manager's `KINDS` by test. |
+| the claims | same file | Generated, not hand-written: a required field (a row without it is refused; the whole row is made first, as the control), a choice (its first value made; a value off the list refused), a unique rule (one value made, another made, the first again refused; with `where`, a closed row with the same value made — so the claim also fails if the rule forgets its `where`), a pair kept once. Rows are seeded deterministically: every required field gets a value that fits, links get a row made first, unique values never collide by accident. Each held claim names its **mutant** (`dropRequired` · `dropIndex` · `dropCheck` · `linksAsList`); `applyMutant()` takes exactly that rule out and refuses a mutant that takes out nothing. Not-held rules that steps can say get a claim too (`setOnce`, `neverEdited`, `neverDeleted`, `notUnderItself`, `pairTwice`, and every `whenTargetGoes`). |
+| the runner | `nodegx-backend-contract/conformance/claims.ts` | `runClaim(ctx, schema, claim)` applies only the collections a claim reaches, under the run's fresh names (Pointer targets renamed with them), through `createTable` / `reconcileChecks` / `reconcileIndexes` — never SQL — and runs the steps. `claimCases(schema, claims, 'schema' \| 'mutant')` makes them conformance cases in a new area, `claims`; `runConformance(…, { cases })` runs a caller's cases instead of the fixed list. **A not-held claim, and a held claim on its mutant, must fail at a step that says the rule** (`saysTheRule`): one that failed while making its rows measured nothing, and the case says so. A not-held claim that passes reports "the label is wrong". It imports nothing from the project contract; the backend spec assigns the projection's types to the runner's, so the two cannot drift without a compile error. |
+| the write | `world/project.ts` `schemaPushes()`; `nodegx-backend/src/server/byob-admin.ts`; `src/admin/app/views/schema.tsx`; `nodegx-backend-contract/src/storage.ts` | One `createTable` body per collection, with its description, fields (tile left behind: the manager reads it back from type + rules), checks and indexes. **`createTable` now keeps a collection's `description`** (both engines already stored the whole declaration as JSON; the route dropped it), both schema routes return it, and the Schema card shows it under the collection's name. `StorageTableSchema.description` and `createTable`'s spec say so in the contract. |
+
+### 6.2 What it measured
+
+| fixture | kinds | collections | claims | held (by mutant) | measured not held | not-held rules (no claim) |
+|---|---|---|---|---|---|---|
+| `tests/fixtures/world` (ONT-001's) | 8 | 7 | 19 | 11 (7 required, 3 choice, 1 unique) | 8 | 10 (2) |
+| `tests/fixtures/world-every-kind` (new: nine nouns, fourteen relations, **every kind**) | 14 | 11 | 29 | 16 (9 required, 3 choice, 3 unique, 1 pair) | 13 | 17 (4) |
+
+On **both engines**: every held claim passes; every held claim fails on its mutant at the rule's step; every
+not-held claim fails at the rule's step. The four not-held rules with no claim are the ones the data plane cannot
+say: an exchange log (a workflow's), owner-only (the collection's permissions, BMG-006), a retired choice value (the
+screen's), and a link that may point at any of several kinds (`pointsAtId` is a text id, so there is no target
+collection to delete from).
+
+**The finding: no engine keeps what happens when a link's target goes.** On the every-kind fixture, seven claims
+measure it — `goes-too`, `stays-unlinked` and `blocks`, on `belongs-to`, `is-on`, `happened-to`, `part-of-tree`,
+`same-as` and `extends` — and six more measure `setOnce`, `neverEdited`, `neverDeleted` (three) and `notUnderItself`. A Link is a text id
+with no foreign key on SQLite and on PostgreSQL, and the contract has no on-delete rule. Filed:
+[`P116-ONT-003-links`](../../bugs/p116-ont-003-links-a-link-keeps-pointing-at-a-deleted-record.md) (needs-ruling).
+Until it lands, the description tells the person, e.g. *"A company is where people work … Not kept by the database
+yet: a company cannot go while any accounts are linked to it."* — and when it lands, these claims fail with "the label
+is wrong" until the projection moves them to held.
+
+### 6.3 Decisions this task left to its session
+
+| left open | decided | why |
+|---|---|---|
+| change ONT-001's rule strings? | **yes, to `{ on, says, holds }`**, same words | a rule's words cannot be graded; its shape can. The task allows replacing any sketch |
+| `happened-to` with `outlives: true` | the link is **no longer required** | ONT-001's sketch made it required *and* `stays-unlinked`, which no store can hold at once (the end empties a field that may not be empty) |
+| `happened-to`'s `by` | **`doneBy`** | BY is a word the database keeps for itself, and the manager refuses it |
+| a `link` with no `points` | the app's users (`_User`) | "who did it" is whoever was signed in, not a noun of the person's world |
+| the person's words that SQL keeps for itself (`plan`, `on`) | **kept as the names**, and listed by the write spec | the engines quote every name, so it works; renaming `plan` to `planValue` behind the person's back breaks "a view of the schema in their words". The manager refuses such a name for a field made by hand. **Asked as R8** (README §9) |
+| a description that changes later | written once, like the rest of `createTable` | a changed sentence is a changed world: ONT-007's |
+| two relations making one field (two `by-name` from a note to a person) | **refused**, naming both | the world format has no field-name override; naming the second after its relation would rename an existing field when a relation is added — a migration. ONT-002's conversation should ask "what do you call it?" |
+| two collections that need each other first (required links both ways) | **refused** at claim time | no row of either can ever be made |
+| AC1's "two machines" | a committed golden file per fixture (`projected.json`), compared byte for byte | CI is the second machine; the projection reads no clock, no locale and no randomness |
+
+### 6.4 The acceptance criteria
+
+1. ✅ **Byte-identical.** `tests/project.test.ts`: two projections, one from a re-parsed copy, and the committed
+   `projected.json` — equal as text, for both fixtures. `ONT003_WRITE_GOLDEN=1` rewrites them.
+2. ✅ **Every claim on two engines, each failing on its mutant.** `nodegx-backend/tests/ont-003-claims.test.ts`:
+   SQLite 19/19 + 11/11 mutants, 29/29 + 16/16; PostgreSQL the same. Sabotaged three ways, each red for its reason:
+   a not-held claim labelled held ("is not kept"), a held claim labelled not held ("the label is wrong"), a runner
+   whose refusal step never fails ("passed on the schema without its rule — the claim grades nothing"). Restored
+   byte-identical.
+3. ✅ **The manager shows it.** `nodegx-backend/tests/ont-003-write.test.ts`: every push answers 200 on both
+   engines; `GET /admin/schema` lists every projected collection with its description, every field with the tile
+   its kind named (read through the manager's own `kindOf`), its type, target and required flag, its rules and its
+   indexes. `tests/admin-app/ont-003-card.test.tsx`: the card, mounted with that shape for all eleven collections,
+   shows the sentence under the name and each row's tile (the dropdown's value, or the badge's icon — never the
+   cell's whole text, which holds every option). Sabotaged: the route without the pass-through, and the card
+   without the line — each red; restored.
+4. ✅ **No adapter.** `tests/project.test.ts`: every import in the package's sources stays inside it (a control
+   proves the pattern sees one); ONT-001's engine-name grep now walks `project.ts` and the second fixture too.
+
+**Neighbours run** (in band, beside a peer's suite): `bmg-003-schema`, `admin-app/schema-view`,
+`brg-003-conformance-*`, `brg-005-conformance-postgres`, `brg-004-*`, `fed-002-indexes`, `hlt016-*` — 16 suites,
+199 tests, green. `@noodl/backend-contract` 199/199; `@nodegx/project-contract` 53/53 (36 + 17).
+`typecheck:backend-tests` adds no error; it was already red at HEAD on four lines of the ISL-010 drive spec,
+filed as [`P116-ONT-003-tsc`](../../bugs/p116-ont-003-tsc-the-backend-spec-typecheck-is-red.md).
+
+### 6.5 Found, for other tasks
+
+- **ONT-005:** the machinery is here — a claim, its mutant, `applyMutant`, and the rule "fail at the rule's step".
+  The kinds' own mutant seeds (19) are not yet executable; most are a projection made the other way (a link stored
+  as text, a Links where an is-on belongs), which `applyMutant` can grow to.
+- **ONT-007:** `createTable` is create-if-absent, so a changed description, a new field or a dropped rule needs the
+  diff. The golden files are the "before" a diff can be read against.
+- **ONT-008:** each column carries its tile (`kind`); the card already shows the sentence. The relation's own
+  sentence is on each field it made (`description`).
+- **ONT-002:** the conversation should ask a field's name when a second relation would make the same one.

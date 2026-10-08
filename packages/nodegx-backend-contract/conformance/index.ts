@@ -40,13 +40,15 @@ import { AdapterRefusal, makeContext, type ConformanceContext } from './context'
 
 export type { ConformanceContext, Row, ReadResult } from './context';
 export { read, write, AdapterRefusal, ConformanceError } from './context';
+export { claimCases, runClaim, saysTheRule } from './claims';
+export type { Claim, ClaimCollection, ClaimColumn, ClaimData, ClaimRun, ClaimSchema, ClaimStep, ClaimValue } from './claims';
 
 /**
  * The areas of §3.2, each one in the promise because something real consumes
  * it. Kept as a closed union so a case cannot invent an area that no adapter
  * author has been told about.
  */
-export type ConformanceArea = 'records' | 'filters' | 'acl' | 'relations' | 'schema';
+export type ConformanceArea = 'records' | 'filters' | 'acl' | 'relations' | 'schema' | 'claims';
 
 /** One case: an id nobody else uses, the area it belongs to, and the body. */
 export interface ConformanceCase {
@@ -151,6 +153,11 @@ export interface RunOptions {
   areas?: ConformanceArea[];
   /** Run only these case ids. Omitted = all. */
   only?: string[];
+  /**
+   * Run these cases instead of the built-in suite — P116 ONT-003's claims (`claimCases`), which
+   * are made from a schema the caller holds and so cannot be in the fixed list.
+   */
+  cases?: readonly ConformanceCase[];
 }
 
 /**
@@ -169,7 +176,7 @@ export async function runConformance(
   const runId = `c${Date.now().toString(36)}${Math.floor(Math.random() * 1e6).toString(36)}`;
   const ctx = makeContext(adapter, runId);
 
-  const selected = CONFORMANCE_CASES.filter(
+  const selected = (options.cases ?? CONFORMANCE_CASES).filter(
     (c) => (!options.areas || options.areas.includes(c.area)) && (!options.only || options.only.includes(c.id))
   );
 

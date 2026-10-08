@@ -10,12 +10,14 @@
  * Every relation NodeGX itself has produced so far is a string id (ONT-000 §6): no template and
  * no lessons-backend field uses a Link. That is the first mutant of `belongs-to` below.
  */
-import { defineKind, type Kind, type ProjectedField } from './kind';
+import { defineKind, type Kind, type ProjectedField, type ProjectedRule } from './kind';
 
 const SOURCE = 'dev-docs/tasks/phase-116-the-person-says-what-their-world-is/kinds.json';
 const GOES = ['goes-too', 'stays-unlinked', 'blocks'] as const;
 
 const one = (to: string | readonly string[] | undefined): string => (Array.isArray(to) ? to[0] : (to as string)) || '';
+/** "a person", "an account": the article a rule's words need before a noun the person named. */
+const a = (word: string): string => (/^[aeiou]/i.test(word) ? 'an ' : 'a ') + word;
 
 export const belongsTo = defineKind({
   id: 'belongs-to',
@@ -62,7 +64,7 @@ export const belongsTo = defineKind({
   projection: ({ from, to, answers }) => {
     const field: ProjectedField = { on: 'from', name: one(to), kind: 'link', points: one(to), required: answers.required === true };
     if (typeof answers.whenTargetGoes === 'string') field.whenTargetGoes = answers.whenTargetGoes as ProjectedField['whenTargetGoes'];
-    return { fields: [field], rules: answers.moves === false ? [`a ${from}'s ${one(to)} is set once`] : [] };
+    return { fields: [field], rules: answers.moves === false ? [{ on: 'from', says: `${a(from)}'s ${one(to)} is set once`, holds: { setOnce: one(to) } }] : [] };
   },
   mutants: [
     {
@@ -142,9 +144,13 @@ export const isOn = defineKind({
       { on: 'own', name: one(to), kind: 'link', points: one(to), required: true, whenTargetGoes: 'goes-too' }
     ];
     if (answers.startsEnds === true) fields.push({ on: 'own', name: 'since', kind: 'date' }, { on: 'own', name: 'until', kind: 'date' });
-    const rules = [`'${id}' is a record of its own, never a Links field: a Links field cannot hold a date or a role`];
-    if (answers.several === false) rules.push(`a ${from} is on one ${one(to)} at a time`);
-    if (answers.sameTime === false) rules.push(`one ${from} on a ${one(to)} at a time`);
+    const rules: ProjectedRule[] = [
+      { on: 'own', says: `'${id}' is a record of its own, never a Links field: a Links field cannot hold a date or a role`, holds: { shape: true } }
+    ];
+    // "At a time": with a start and an end, only the links still running (no `until`) are counted.
+    const open = answers.startsEnds === true ? { whileEmpty: 'until' } : {};
+    if (answers.several === false) rules.push({ on: 'own', says: `${a(from)} is on one ${one(to)} at a time`, holds: { unique: [from], ...open } });
+    if (answers.sameTime === false) rules.push({ on: 'own', says: `one ${from} on ${a(one(to))} at a time`, holds: { unique: [one(to)], ...open } });
     return { ownRecord: true, fields, rules };
   },
   mutants: [
@@ -193,7 +199,12 @@ export const together = defineKind({
   ],
   projection: ({ from, to, answers }) => ({
     fields: [{ on: 'from', name: one(to), kind: 'links', points: one(to) }],
-    rules: answers.twice === false ? [`a ${from} and a ${one(to)} are paired once`] : []
+    rules:
+      answers.twice === false
+        ? [{ on: 'from', says: `${a(from)} and ${a(one(to))} are paired once`, holds: { pairOnce: one(to) } }]
+        : answers.twice === true
+          ? [{ on: 'from', says: `${a(from)} and ${a(one(to))} can be paired twice`, holds: { pairTwice: one(to) } }]
+          : []
   }),
   mutants: [
     {
@@ -249,7 +260,10 @@ export const oneOf = defineKind({
   ],
   projection: ({ property, answers }) => ({
     fields: [{ on: 'from', name: property || '', kind: 'choice' }],
-    rules: answers.retires === true ? ['a retired value stays on the records that hold it, and is no longer offered'] : []
+    rules:
+      answers.retires === true
+        ? [{ on: 'from', says: 'a retired value stays on the records that hold it, and is no longer offered', holds: { retiredStays: property || '' } }]
+        : []
   }),
   mutants: [
     {
@@ -305,7 +319,7 @@ export const manyByList = defineKind({
   ],
   projection: ({ to }) => ({
     fields: [{ on: 'from', name: one(to), kind: 'list' }],
-    rules: ['nobody can ask the list the other way round']
+    rules: [{ on: 'from', says: 'nobody can ask the list the other way round', holds: { shape: true } }]
   }),
   mutants: [
     {
@@ -360,7 +374,7 @@ export const partOfTree = defineKind({
   ],
   projection: ({ from, answers }) => ({
     fields: [{ on: 'from', name: 'parent', kind: 'link', points: from, whenTargetGoes: 'blocks' }],
-    rules: answers.ownAncestor === false ? [`no ${from} sits under itself`] : []
+    rules: answers.ownAncestor === false ? [{ on: 'from', says: `no ${from} sits under itself`, holds: { notUnderItself: 'parent' } }] : []
   }),
   mutants: [
     {
@@ -422,7 +436,7 @@ export const existsElsewhere = defineKind({
   ],
   projection: ({ to }) => ({
     fields: [{ on: 'from', name: 'idElsewhere', kind: 'text', unique: true }],
-    rules: [`every exchange with ${one(to)} is logged, and a skipped one says why`]
+    rules: [{ on: 'from', says: `every exchange with ${one(to)} is logged, and a skipped one says why`, holds: { logged: one(to) } }]
   }),
   mutants: [
     {
@@ -477,7 +491,7 @@ export const sameAs = defineKind({
   ],
   projection: ({ from }) => ({
     fields: [{ on: 'from', name: 'supersededBy', kind: 'link', points: from, whenTargetGoes: 'blocks' }],
-    rules: [`a merged ${from} is kept, never deleted`]
+    rules: [{ on: 'from', says: `a merged ${from} is kept, never deleted`, holds: { neverDeleted: true } }]
   }),
   mutants: [
     {
@@ -532,7 +546,7 @@ export const ends = defineKind({
   ],
   projection: ({ from }) => ({
     fields: [{ on: 'from', name: 'endedAt', kind: 'date' }],
-    rules: [`nobody deletes a ${from}; it ends`]
+    rules: [{ on: 'from', says: `nobody deletes ${a(from)}; it ends`, holds: { neverDeleted: true } }]
   }),
   mutants: [
     {
@@ -594,12 +608,19 @@ export const happenedTo = defineKind({
   ],
   projection: ({ from, to, answers }) => {
     const fields: ProjectedField[] = [
-      { on: 'own', name: from, kind: 'link', points: from, required: true, whenTargetGoes: answers.outlives === true ? 'stays-unlinked' : 'blocks' },
+      // ONT-003: a record that outlives its {from} keeps it as an empty link, so it cannot be
+      // required — ONT-001's sketch had both, which no store can hold at once.
+      answers.outlives === true
+        ? { on: 'own', name: from, kind: 'link', points: from, whenTargetGoes: 'stays-unlinked' }
+        : { on: 'own', name: from, kind: 'link', points: from, required: true, whenTargetGoes: 'blocks' },
       { on: 'own', name: 'at', kind: 'date', required: true }
     ];
     if (one(to)) fields.push({ on: 'own', name: one(to), kind: 'link', points: one(to) });
-    if (answers.who === true) fields.push({ on: 'own', name: 'by', kind: 'link' });
-    return { ownRecord: true, fields, rules: answers.undo === 'removing this one' ? ['nobody edits it'] : ['nobody edits or deletes it'] };
+    // `doneBy`, not `by`: BY is a word the database keeps for itself, and the manager refuses it.
+    if (answers.who === true) fields.push({ on: 'own', name: 'doneBy', kind: 'link' });
+    const rules: ProjectedRule[] = [{ on: 'own', says: 'nobody edits it', holds: { neverEdited: true } }];
+    if (answers.undo !== 'removing this one') rules.push({ on: 'own', says: 'nobody deletes it', holds: { neverDeleted: true } });
+    return { ownRecord: true, fields, rules };
   },
   mutants: [
     {
@@ -647,7 +668,13 @@ export const ownedBy = defineKind({
   ],
   projection: ({ from, to, answers }) => ({
     fields: [{ on: 'from', name: 'owner', kind: 'link', points: one(to), required: true }],
-    rules: [`only its ${one(to)} sees and changes a ${from}`].concat(answers.path === true ? ['the rule follows a path (ONT-004)'] : [])
+    rules: [
+      {
+        on: 'from',
+        says: `only its ${one(to)} sees and changes ${a(from)}` + (answers.path === true ? ', through a chain (ONT-004)' : ''),
+        holds: answers.path === true ? { onlyThrough: 'owner', path: true } : { onlyThrough: 'owner' }
+      }
+    ]
   }),
   mutants: [
     {
@@ -712,8 +739,8 @@ export const extendsKind = defineKind({
     fields: [
       { on: 'from', name: one(to), kind: 'link', points: one(to), required: true, unique: true, whenTargetGoes: answers.standsAlone === true ? 'stays-unlinked' : 'goes-too' }
     ],
-    rules: [`what a ${one(to)} is filtered or sorted by stays on the ${one(to)}, not on its ${from}`].concat(
-      answers.computed === 'worked out' ? ['nobody edits it by hand'] : []
+    rules: ([{ on: 'from', says: `what a ${one(to)} is filtered or sorted by stays on the ${one(to)}, not on its ${from}`, holds: { shape: true } }] as ProjectedRule[]).concat(
+      answers.computed === 'worked out' ? [{ on: 'from', says: 'nobody edits it by hand', holds: { neverEdited: true } }] : []
     )
   }),
   mutants: [
@@ -775,7 +802,7 @@ export const byName = defineKind({
   ],
   projection: ({ from, to }) => ({
     fields: [{ on: 'from', name: one(to), kind: 'link', points: one(to) }],
-    rules: [`a ${from} keeps the link; the email or code is read from the ${one(to)}`]
+    rules: [{ on: 'from', says: `${a(from)} keeps the link; the email or code is read from the ${one(to)}`, holds: { shape: true } }]
   }),
   mutants: [
     {
@@ -821,13 +848,18 @@ export const pointsAtOneOf = defineKind({
       from: 'census'
     }
   ],
-  projection: () => ({
-    fields: [
-      { on: 'from', name: 'pointsAtKind', kind: 'choice', required: true },
-      { on: 'from', name: 'pointsAtId', kind: 'text', required: true }
-    ],
-    rules: ['the kind is always set beside the id']
-  }),
+  projection: ({ to, answers }) => {
+    const kinds = Array.isArray(to) ? (to as readonly string[]) : to ? [to as string] : [];
+    const goes = typeof answers.whenTargetGoes === 'string' ? { whenTargetGoes: answers.whenTargetGoes as ProjectedField['whenTargetGoes'] } : {};
+    return {
+      fields: [
+        { on: 'from', name: 'pointsAtKind', kind: 'choice', required: true, values: kinds },
+        { on: 'from', name: 'pointsAtId', kind: 'text', required: true, ...goes }
+      ],
+      // Held by both fields being required: a rule of its own would grade nothing the two do not.
+      rules: [{ on: 'from', says: 'the kind is always set beside the id', holds: { shape: true } }]
+    };
+  },
   mutants: [
     {
       id: 'id-without-kind',

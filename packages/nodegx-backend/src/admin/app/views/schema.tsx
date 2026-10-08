@@ -53,6 +53,8 @@ interface Index {
 
 export interface TableDef {
   name: string;
+  /** P116 ONT-003: what the collection is, in the words of the person who said it. */
+  description?: string;
   columns?: Column[];
   indexes?: Index[];
   checks?: RuleStatus[];
@@ -223,6 +225,7 @@ export function TableCard({
           Indexes
         </WriteBtn>
       </Row>
+      {t.description ? <div class="shy collection-description">{t.description}</div> : null}
       <Gap h={8} />
       <Table
         columns={['Field', 'Kind', 'Required', 'Default', '']}
