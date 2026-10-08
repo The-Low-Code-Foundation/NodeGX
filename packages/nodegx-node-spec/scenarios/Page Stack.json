@@ -5637,7 +5637,7 @@
     }
   },
   {
-    "name": "ROUTES: Detail's Path null — every reset that reaches Detail's pattern throws: the stack is empty at its placing (row C125)",
+    "name": "row C125 — ROUTES: Detail's Path null is unset (the label's path): the stack is placed at Home",
     "because": "matchPageFromUrl :730 `pagePattern[0]` on null",
     "params": {
       "pages": [
@@ -5669,6 +5669,56 @@
         "width": 1280,
         "height": 800
       }
+    }
+  },
+  {
+    "name": "row C125 — ROUTES: Detail's Path null, placed at #/detail — the label's path matches: the stack starts at Detail; a push of Settings writes #/settings, and the person's Back to #/detail shows Detail again",
+    "because": "setPagePath — a Path that is not text is unset; matchPageFromUrl :683-742",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true,
+      "pagePath-p2": null
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "traverse",
+        "value": "#/detail"
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "location": "https://app.example/#/detail"
     }
   },
   {

@@ -1176,7 +1176,9 @@ const PageStack = {
     setPagePath(this: PageStackInstance, pageId: string, path: string) {
       const internal = this._internal;
       if (!internal.pageInfo[pageId]) internal.pageInfo[pageId] = {};
-      internal.pageInfo[pageId].path = path;
+      // P107-C125 — a Path that is not text (a wired null) is unset: the page takes its label's path. `matchPageFromUrl` read
+      // `pagePattern[0]` of null and threw inside every reset that reached it, and the URL written said "null"
+      internal.pageInfo[pageId].path = typeof path === 'string' ? path : undefined;
 
       //  this.scheduleRefresh();
     },

@@ -195,7 +195,8 @@ export const ComponentStack = defineNode({
   // whose entry outlives its row in the list is not found (row C111)
   // v9 (P109 ISL-048, s31): a malformed escape in the URL's query or path is kept as written, as the Page Router's (row C124)
   // v10 (P109 ISL-048, s31): a page's parameters go into the URL's query encoded (row C122)
-  version: 10,
+  // v11 (P109 ISL-048, s31): a page's Path that is not text is unset — the label's path (row C125)
+  version: 11,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx',
   needs: ['person', 'clock', 'location', 'project'],
   worldPool: {
@@ -348,7 +349,8 @@ export const ComponentStack = defineNode({
               s,
               (w) => {
                 if (port.startsWith('pageComp-')) setInfo(w, port.slice('pageComp-'.length), 'component', value);
-                else if (port.startsWith('pagePath-')) setInfo(w, port.slice('pagePath-'.length), 'path', value);
+                // a Path that is not text is unset: the label's path (row C125, fixed in P109 ISL-048)
+                else if (port.startsWith('pagePath-')) setInfo(w, port.slice('pagePath-'.length), 'path', typeof value === 'string' ? value : undefined);
                 else if (port === 'startPage') w.st.startPageId = value;
               },
               view
