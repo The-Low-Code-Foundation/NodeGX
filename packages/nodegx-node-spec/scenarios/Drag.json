@@ -880,5 +880,56 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "one Do and Mounted off in one frame, on each axis: the Do runs on the component first (Done), then the paint takes it off (Will Unmount); the next frame is quiet; Mounted on again: Did Mount, and nothing snaps",
+    "because": "the Do's callback runs in the frame's drain, before its paint (nodecontext.ts :495-503); Drag.tsx `componentWillUnmount` stops the snap — the frame that unmounts it must leave it off the page with nothing scheduled (P109's seed-20732 survivor: a lone Do's frame, which the both-Dos scenario does not reach)",
+    "steps": [
+      "settle",
+      {
+        "set": "snapToPositionX.value",
+        "value": 40
+      },
+      {
+        "signal": "snapToPositionX.do"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "advance": 300
+      },
+      "settle",
+      {
+        "set": "snapToPositionY.value",
+        "value": -25
+      },
+      {
+        "signal": "snapToPositionY.do"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "advance": 300
+      },
+      "settle"
+    ]
   }
 ]

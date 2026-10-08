@@ -30,7 +30,14 @@
  * TEMPLATE, TEMPLATE TYPE and REFRESH each ask for a REBUILD at the frame's end (`scheduleRefresh` :453-468) — one per frame, and none
  * while one is asked for and has not started. Placed, a Repeater asks for one before its parameters are set (it learns its parent
  * first: `setNodeModel` → `updateTarget` :436-452). Template Type Explicit (or never set) builds every row from Template; any other
- * value runs Script per item (`getTemplateForModel` :501-537), which v1 never sets — so no item has a component and no row is built.
+ * value runs Script per item (`getTemplateForModel` :501-537).
+ *
+ * SCRIPT (v2, :348-378). Compiled as it arrives — `new Function('item', 'var component;' + code + ';return component;')` — and the
+ * spec compiles and runs the same code on the same record. Code that does not compile leaves no function (the one before is dropped,
+ * NDA-012 D1); the declared default is never compiled (a default never runs its setter). Either way a rebuild is asked for. Per record,
+ * Template Type Dynamic runs the function: no function, a throw (raised, :507-520) or nothing set is no component — no row; a component
+ * that is not text throws at `startsWith` (:524), OUTSIDE the catch, and the queue stops for good as C128's does. A rebuild needs a
+ * Template or a compiled Script (:745) — whichever Template Type picks, so a Script that compiled lets a rebuild with no Template pass.
  *
  * THE FRAME'S END (node.ts :759-763). The Repeater's frame-end callbacks run in the order they were asked for — the copy and the
  * rebuild. A copy that throws ends the frame's callbacks there: a rebuild asked for after it is lost, and since it is still "asked for",
@@ -124,6 +131,23 @@ const ITEMS: readonly unknown[] = [
   [7, 'xy']
 ];
 const TEMPLATES: readonly unknown[] = ['Row', 'Card', 'Missing', '', null];
+/**
+ * v2 — Scripts that name a component outright, or pick none, or throw, or do not compile, or name one the project does not have, or
+ * hand back something that is not text. A name starting `./` or `../` is read against the Repeater's own component's name (:523-533):
+ * the play's Repeater sits in no named component, so it is not drawn here.
+ */
+const SCRIPTS: readonly unknown[] = [
+  "component = 'Row'",
+  "component = 'Card'",
+  "component = item.title ? 'Card' : 'Row'",
+  "component = item.getId() === 'a' ? 'Card' : 'Row'",
+  "if (item.label) component = 'Row'",
+  "if (!item.label) throw new Error('no label'); component = 'Row'",
+  'component = (',
+  "component = 'Missing'",
+  'component = 7',
+  ''
+];
 
 /** :1028 `templateScript`'s default (`defaultDynamicScript`) — the editor's; it never runs the setter */
 const DEFAULT_SCRIPT =
@@ -148,6 +172,9 @@ type State = {
   /** `_internal.template` / `_internal.templateType` — `undefined` until written (a declared default never runs its setter) */
   template: unknown;
   templateType: unknown;
+  /** v2 — Script as last written (`undefined` until then: the declared default is never compiled), and whether it compiled (`templateFunction`) */
+  script: unknown;
+  compiles: boolean;
   /** the outputs the editor drew for the PLACED Template: the value outputs' names, and whether `Tapped` is one (`itemOutputSignals`) */
   registered: { values: string[]; tapped: boolean };
   /** `hasScheduledCopyItems`, `hasScheduledRefresh` */
@@ -164,6 +191,11 @@ type State = {
   stuck: boolean;
   /** the act boundaries before the queue runs on, after an operation that did not build */
   hops: number;
+  /**
+   * v2 (row C137) — a rebuild that built nothing settles its Refreshes before the queue runs on: measured, after N records it looked
+   * at, N of its N + 1 act boundaries (one left). How many Refreshes it took at its start, or null
+   */
+  settling: number | null;
   /** an act ended: the next step starts one microtask later (one hop) */
   owed: boolean;
   building: Building | null;
@@ -196,7 +228,8 @@ function outputsOf(template: unknown): { values: string[]; tapped: boolean } {
 
 export const Repeater = defineNode({
   type: 'For Each',
-  version: 1,
+  // v2 (NSP-016 s61): Script is graded — Template Type Dynamic runs it per record, as v1 left undriven
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/data/foreach.tsx',
   needs: ['person', 'registry', 'project'],
   worldPool: {
@@ -211,6 +244,8 @@ export const Repeater = defineNode({
     items: undefined,
     template: undefined,
     templateType: undefined,
+    script: undefined,
+    compiles: false,
     registered: { values: [], tapped: false },
     copyScheduled: false,
     refreshScheduled: false,
@@ -220,6 +255,7 @@ export const Repeater = defineNode({
     running: false,
     stuck: false,
     hops: 0,
+    settling: null,
     owed: false,
     building: null,
     rows: [],
@@ -242,8 +278,8 @@ export const Repeater = defineNode({
     templateType: { type: 'enum', enums: ['explicit', 'dynamic'], default: 'explicit', coerce: 'none', displayName: 'Template Type', group: 'Appearance', description: 'Explicit uses one component for every item; Dynamic picks one per item by running Script', portability: 'logic' },
     // :338-347
     template: { type: 'component', coerce: 'none', displayName: 'Template', group: 'Appearance', description: 'Component to create once per item, with the item available to it as its Component Object', portability: 'logic', examples: TEMPLATES },
-    // :348-378 — JavaScript; v2
-    templateScript: { type: 'string', default: DEFAULT_SCRIPT, editOnly: true, coerce: 'none', displayName: 'Script', group: 'Appearance', description: 'JavaScript run per item that sets `component` to a component path; the item is available as `item`', portability: 'logic', undriven: 'JavaScript run per item: v2' },
+    // :348-378 — v2: JavaScript, run per record by Template Type Dynamic (the spec runs the same code on the same record)
+    templateScript: { type: 'string', default: DEFAULT_SCRIPT, editOnly: true, coerce: 'none', displayName: 'Script', group: 'Appearance', description: 'JavaScript run per item that sets `component` to a component path; the item is available as `item`', portability: 'logic', examples: SCRIPTS },
     // :379-391
     refresh: { type: 'signal', outcome: true, displayName: 'Refresh', group: 'Appearance', description: 'Rebuilds every item from the current Items, discarding any state the item components held', portability: 'logic' }
   },
@@ -267,6 +303,13 @@ export const Repeater = defineNode({
     templateType: (s, v, _i, view) => run(s, view, (w) => ((w.st.templateType = v), scheduleRefresh(w))),
     // :343-346
     template: (s, v, _i, view) => run(s, view, (w) => ((w.st.template = v), scheduleRefresh(w))),
+    // :352-376 — compiled as it arrives; what does not compile leaves no function (the one before is dropped); a rebuild either way
+    templateScript: (s, v, _i, view) =>
+      run(s, view, (w) => {
+        w.st.script = v;
+        w.st.compiles = compileScript(v) !== undefined;
+        scheduleRefresh(w);
+      }),
     // :384-390 — answered by the next rebuild
     refresh: (s, _i, view) => ({ ...run(s, view, (w) => ((w.st.tokens += 1), scheduleRefresh(w))), outcome: 'pending' })
   },
@@ -449,12 +492,26 @@ function next(w: Work): void {
 function hop(w: Work): void {
   if (w.st.hops === 0) return;
   w.st.hops -= 1;
+  if (w.st.hops <= 1) settleRebuild(w);
   if (w.st.hops === 0) next(w);
+}
+
+/**
+ * `settle` :731-734 — the rebuild's end: every Refresh it took at its start is Done, and it puts back only THOSE, so one pulsed
+ * while it ran is dropped, never answered (row C137)
+ */
+function settleRebuild(w: Work): void {
+  const tokens = w.st.settling;
+  if (tokens === null) return;
+  w.st.settling = null;
+  w.st.tokens = 0;
+  for (let i = 0; i < tokens; i++) w.outcomes.push({ port: 'refresh', outcome: 'done' });
 }
 
 /** The yield: the build lands, and the queue runs to its end */
 function atYield(w: Work): void {
   if (!w.st.running || w.st.stuck) return;
+  settleRebuild(w);
   w.st.hops = 0;
   for (;;) {
     const b = w.st.building;
@@ -466,6 +523,7 @@ function atYield(w: Work): void {
         continue;
       }
     }
+    settleRebuild(w);
     if (w.st.hops > 0) w.st.hops = 0;
     const op = w.st.queue.shift();
     if (op === undefined) {
@@ -491,9 +549,31 @@ function start(w: Work, op: Op): void {
   } else refresh(w);
 }
 
-/** `getTemplateForModel` (:501-537): Explicit (or never set) reads Template; anything else runs Script, which v1 never sets */
-function templateFor(st: State): unknown {
-  return st.templateType === undefined || st.templateType === 'explicit' ? st.template : undefined;
+/** :357-360 — the function Script compiles to, or `undefined` when it does not compile */
+function compileScript(code: unknown): ((item: unknown) => unknown) | undefined {
+  try {
+    return new Function('item', 'var component;' + code + ';return component;') as (item: unknown) => unknown;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * `getTemplateForModel` (:501-537): Explicit (or never set) reads Template; anything else runs Script on the record — no function, or
+ * a throw (raised, :507-520), is no component. A component that is not text throws at `startsWith` (:524), outside the catch.
+ */
+function templateFor(st: State, rec: RecordRef): unknown {
+  if (st.templateType === undefined || st.templateType === 'explicit') return st.template;
+  const fn = st.compiles ? compileScript(st.script) : undefined;
+  if (!fn) return undefined;
+  let template: unknown;
+  try {
+    template = fn(rec);
+  } catch {
+    return undefined;
+  }
+  if (template && typeof template !== 'string') return THROWS;
+  return template;
 }
 
 /**
@@ -501,7 +581,8 @@ function templateFor(st: State): unknown {
  * a component the project does not have throws (`getComponentModel`), one it has is the row to land.
  */
 function addItem(w: Work, rec: RecordRef, _index: number): Row | null | typeof THROWS {
-  const template = templateFor(w.st);
+  const template = templateFor(w.st, rec);
+  if (template === THROWS) return THROWS;
   if (!template) return null;
   for (let i = 0; i < 8; i++) w.view.random();
   const name = String(template);
@@ -532,8 +613,8 @@ function refresh(w: Work): void {
   const settle = (outcome: 'done' | 'failure', error?: string) => {
     for (let i = 0; i < tokens; i++) w.outcomes.push(error === undefined ? { port: 'refresh', outcome } : { port: 'refresh', outcome, error });
   };
-  // :745-752 — Script is never set in v1, so only Template counts
-  if (!st.template) {
+  // :745-752 — a Template, or a Script that compiled, whichever Template Type picks
+  if (!(st.template || st.compiles)) {
     settle('failure', 'repeater/no-template');
     st.hops = 1;
     return;
@@ -569,14 +650,16 @@ function rebuildFrom(w: Work, records: RecordRef[], k: number, tokens: number): 
       looked += 1;
       continue;
     }
-    // a build lands only at the yield (eleven microtasks), so the act boundaries the records before it cost are not counted here:
-    // within one rebuild every record has a component or none, unless Template Type is written while it runs
+    // a build lands only at the yield (eleven microtasks), so the act boundaries the records before it cost are not counted here
+    // (v2: a Script can give some records a component and not others — what is built still lands at the yield)
     w.st.building = { kind: 'refresh', row: b, index: i, rest: records, tokens };
     return;
   }
-  // :809 — every Refresh it answers is Done
-  for (let i = 0; i < tokens; i++) w.outcomes.push({ port: 'refresh', outcome: 'done' });
+  // :809 — every Refresh it took is Done (`settleRebuild`): at once after a build or when it looked at no record, else when one of
+  // its act boundaries is left
+  w.st.settling = tokens;
   w.st.hops = looked + 1;
+  if (w.st.hops <= 1) settleRebuild(w);
 }
 
 /** `itemOutputSignalTriggered` (:922-947), when the Repeater has a `Tapped` output: Item Id, the outputs it has, then the signal */

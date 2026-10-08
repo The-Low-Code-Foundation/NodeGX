@@ -1,76 +1,72 @@
 # P107 — next session
 
-**Written 2026-10-08 (s60).** Read the [README](README.md) §2–§7 (R16 is the newest ruling). s60's record is
-[NSP-016 §7.21](NSP-016-VISUAL-NODES.md) (the Columns); s59's is §7.20 (the Repeater).
+**Written 2026-10-08 (s61).** Read the [README](README.md) §2–§7 (R16 is the newest ruling). s61's record is
+[NSP-016 §7.22](NSP-016-VISUAL-NODES.md) (the Repeater v2: Script); s60's is §7.21 (the Columns).
 
 ## Board (from the task files)
 
 | task | built | committed |
 |---|---|---|
-| NSP-000 … NSP-015 | as s44 (NSP-013 left: AC2, the deep run for s11–s14; NSP-014 / NSP-015 left: AC2's export half, P18) | s1 … s44 |
-| **NSP-016 the visual nodes** | 🟡 **18 of 19 conform. The Columns v1 (s60)** on both targets. Left: Component Children — not a node (proposed exempt, a question for Richard). AC4 waits for NSP-017 | `aa8abb06f` … s60 |
+| NSP-000 … NSP-015 | as s44 (NSP-013 left: AC2 — the export half, no reach here — and the deep run for s11–s14; NSP-014 / NSP-015 left: AC2's export half, P18) | s1 … s44 |
+| **NSP-016 the visual nodes** | 🟡 **18 of 19 conform. The Repeater v2 (s61): Script graded.** Left: Component Children — not a node (proposed exempt, a question for Richard); the rest of the Repeater v2 (below). AC4 waits for NSP-017 | `aa8abb06f` … s61 |
 | NSP-023 the spec without React | ✅ all six ACs (s50) | s45 … s57 |
-| NSP-006 the stranger | ✅ rounds 1–4 (no format change in s60) | `649e6864d` |
+| NSP-006 the stranger | ✅ rounds 1–4 (no format change in s61) | `649e6864d` |
 | NSP-020 ports without a viewer | rows only | s20 |
 | NSP-022 the cloud-only nodes | 📋 (needs a second runtime target) | s21 |
 
-**124 of 147 conform on the runtime (84.4%)** — T1 46/46 · T2 11/11 · T3 22/39 · T4 27/27 · T5 18/19.
+**124 of 147 conform on the runtime (84.4%, unchanged)** — T1 46/46 · T2 11/11 · T3 22/39 · T4 27/27 · T5 18/19.
 
-## What s60 settled
+## What s61 settled
 
-1. **Component Children is not a node.** The runtime never makes one: `createNodeFromModel` (nodescope.ts :216-222) returns before
-   `createNode`, after telling the owning component which node is its child root (`setChildRoot`). No ports, no state, nothing on the
-   wire — what it does is where an instance's children are placed, a graph rule. Proposed: AC3's "exempt with a reason", its placement
-   graded as a graph scenario when the graph runner can place children. **Richard's call** (below).
-2. **The Columns conforms** (columns.ts, v1, 48 scenarios, one act — `resize`, the page laid out at a width). Its logic needs no
-   geometry: Breakpoint / At Medium / At Small are picked from one number, the container's width less the gap. The face stands in the
-   browser's `ResizeObserver` (THE LAYOUT in node-spec-target.ts): the page starts 1024 wide; an observation reports when it starts and
-   whenever the width differs from the last it reported; reports land at the end of a settle (after the commit) or at a `resize`.
-   Twenty probe cases matched the runtime before the matrix was written. No format change.
-3. **Rows C132, C133 and C134**, all open, ledger. C132 (medium — a number wired into Medium / Small Below is refused unless a size was
-   typed there first; on any size port, a number after a `var(--token)` is refused; the spec copies it). C133 (high — a Medium or Small
-   Layout that is truthy and not a string blanks the page when the band applies: `parseLayout` calls `.split` in render, and no boundary
-   holds a built-in node; R11, the spec says the band applies; a known row on the runtime target, withheld in generated sequences).
-   C134 (medium — found by the runtime's 10,000: Auto Fit with Min Column Width + Horizontal Gap = 0 divides by zero, `new Array(Infinity)`
-   throws in render; a known row). The 200-sequence runs at six seeds never met it: Min Column Width is a layout port, drawn at a quarter
-   of the rate — **the deep run is not optional for a visual spec**.
-4. **Two mutant lessons, both killed by scenarios, none declared.** A branch that returns an identity `set` (Mounted false at the
-   placing) is only ever an equivalent mutant: return no `set` there. And an act's outputs land in the next settle, so a `swap-branch`
-   that defers an act's report to the frame is invisible — UNLESS a write sits between the act and the frame and changes what the
-   frame reports (Medium Layout emptied after the resize: the act's At Medium has fired, the deferred one never would).
-5. **Where the handoff was wrong or stale:** at s60's start P109 had still not landed C77–C79, Router v2–v5 or C101; it landed C79,
-   C78, C101 and C115–C118 DURING s60 (7496d93f0..ddf76bce5, by CAS over s60's open edits to conformance.test.ts and
-   page-model.helper.ts — checked: the working tree held HEAD + exactly s60's delta). Specs moved: Text v8, Shape v4, Image v4, Group v6,
-   Video v4, Router v5. C77 is parked on `p109-c77-wip`: s60 told P109 to REMOVE the spec state C77 makes unobservable rather than
-   declare ~630 equivalent mutants (a declared class would be a hole shaped like C77). P109 reported a pre-existing Drag survivor on
-   HEAD at seed 20732 — `afterInputs` drop-set, emit `[willUnmount]`, outcomes `[snapToPositionX.do: done]` — not yet looked at.
+1. **P109's landed specs re-read:** Shape (`Circle`) v4, Image v4 and Video v4 CONFORM on the runtime at 20734 (s60 had run Text,
+   Group, Drag, Router). Video's 1,216 failing scenarios are its known rows C96–C100, attributed.
+2. **The Drag's seed-20732 survivor** (P109's report) was a LONE Snap Do + Mounted off in one frame — the both-Dos scenario reaches a
+   different branch shape. Scenario 21 kills it at 20732, 13, 20734, 20733 and 7.
+3. **The Repeater v2 — Script.** Template Type anything but Explicit runs Script per record; the spec compiles and runs the same code on
+   the same record (Array Map's precedent — no NSP-017 needed for this). Sixteen probe cases first, then a 52-scenario matrix; 145
+   scenarios in all. Rows **C135** (a Script whose component is not text stops the Repeater for good — `startsWith` outside the catch),
+   **C136** (a compiled Script lets an Explicit Refresh with no Template report Done), **C137** (a Refresh pulsed while a rebuild runs is
+   never answered — `settle` overwrites `pendingRefreshOutcomes`). C137 is a **v1 hole** the reshuffled draws found at seed 13, not the
+   Script's; when a no-build rebuild settles was measured (N records: after N of its N + 1 act boundaries).
+4. **The face, one change:** C135's throw, with chunked creation drawn, rejected `runOps`'s promise unheard and jest failed the suite at
+   three seeds while every report read CONFORMS. The face now takes it at its source (as C128's): `addItem` asks `getTemplateForModel`
+   first and hands back a never-settling promise when it throws. Gate on the exit status, not the report.
+5. **The interpreter's 10,000 found a survivor** (`tapRow` drop-resume, a click whose drain fails a Refresh) that looked equivalent and
+   was not: additions queued behind the failed Refresh can build if Template comes back first. The first killer scenario reached the
+   sibling shape (its click handed Tapped) — the second, on a Repeater with no Tapped output, killed it. Not declared.
+6. **Where the handoff was wrong or stale:** it called the Repeater's JavaScript "NSP-017's rule" — Array Map had already set the rule
+   (run the same code), so Script needed nothing from NSP-017. It listed NSP-013 AC2 as "the deep run" — AC2 is the export half (no
+   reach); the deep run is separate, and a box-quiet job.
 
-**Readings (2026-10-08, on the s60 tree; HEAD fff7cd4f0 + this session's files).** Interpreter with mutants (48 scenarios): CONFORMS at 200 on seeds 13, 20734, 20733, 20729, 20735, 20736, 20741, 20742, 20745 and 7 — every mutant killed (70–94 per seed), none declared — and at 10,000 on 20734 and 20733 (94 / 94). Runtime: twenty probe cases side by side with the interpreter, identical; `NSP_ONLY="net.noodl.visual.columns"` CONFORMS at 200 on 20734, 13, 20733, 20729, 7 and 20735 (47 scenarios then; 20734 and 13 again with 48) — 0 divergences, every mutant killed, C133's (and C134's) scenario counted as its known row, the known rows still firing — and at 10,000 on 20734: a first run found C134 (one divergence, shrunk to one step), the second CONFORMS (0 unattributed divergences, 1 attributed to C134, 94 / 94, 110 s). The page model (G1–G8) passes for every visual spec; the node-spec package suite 22 suites, 965 passed (`-w 2`); runtime target + graph 106 / 106; the node-spec tsc clean. The specs sharing the face at 20734 (Button 690 / 698, Icon 105 / 105, Drag 127 / 128, Page Stack 791 / 792, Router 349 / 353, Pop 1184 / 1193, For Each 81 / 81) CONFORM; Text and Group were read across P109's landing of C78 / C79 / C101 / C115–C118 (7496d93f0..ddf76bce5) — the run loaded the old spec versions and Group's five C79 scenarios failed — so that reading is void. Re-run on the post-landing tree (HEAD 5ef61dcfa + s60's files) at 20734: Text v8 1212 / 1212 scenarios, Group v6 1406 / 1406, Drag v1 17 / 20 (its known rows C102, C105, C106), Router v5 137 / 137 — 200 / 200 each, 0 unattributed divergences, mutants 2710 / 2717, 8944 / 8966, 127 / 128, 445 / 449 (the rest declared): all CONFORM.
+**Readings (2026-10-08, on HEAD 0c62957c9 + this session's files).** Interpreter with mutants (145 scenarios): CONFORMS at 200 on seeds 13, 20734, 20733, 20729, 20735, 20736, 20741, 20742, 20745 and 7 — 108 / 108 mutants killed, none declared — and at 10,000 on 20734 (109 / 109) and 20733 (108 / 108), no survivor (a first 10,000 on 144 scenarios left `tapRow` drop-resume — above). Runtime: 82 probe cases side by side with the interpreter, identical (sixteen Script, the N × K table, C137's E1–E3 and H1–H2, the seed-13 sequence and its variants, the survivor's two); `NSP_ONLY="For Each,Drag"` at 200 on 20734, 13, 20733, 20729, 7 and 20735, each exit 0: For Each v2 145 / 145 scenarios, 0 divergences, 108 / 108 mutants; Drag v1 18 / 21 (its known rows C102, C105, C106), 0 divergences, 167 / 168 – 198 / 199 (the one left declared) — all CONFORM; at 10,000 on 20734: For Each CONFORMS, 0 divergences, 109 / 109, 104 s. P109's Circle v4, Image v4, Video v4 at 20734: CONFORM (above). The node-spec package suite (`-w 2`, 585 s): 21 of 22 suites passed, the page model failed on the three new state keys unclassified (G1) — classified (`script`, `compiles` the node's; `settling` frame-end work) and re-run: 20 / 20; 965 tests in all. Runtime target + graph 106 / 106; the node-spec tsc clean.
 
-## What s61 does
+## What s62 does
 
-1. **P109's landed specs** (Text v8, Shape v4, Image v4, Group v6, Video v4, Router v5): s60's re-run of Text, Group, Drag and Router
-   at 20734 on the post-landing tree all CONFORM (Readings above); run Shape, Image and Video too, and the visual batch (`-w 2`),
-   before building on them. When one of C96–C134 is fixed, its scenario's behaviour moves with it (a spec version) in the same commit.
-2. **The Drag survivor at seed 20732** P109 reported (above): reproduce it with the interpreter mutant probe, find the scenario that
-   tells the branch apart (a Snap Do that runs in the frame the Drag unmounts), add it — not a declaration.
-3. **Then the next build.** With 18 of 19 visual nodes done and Component Children waiting on a ruling, the candidates are: the
-   **Repeater v2** (Script and the input mapping as JavaScript — NSP-017's rule; `For Each Actions`' Try Remove handshake; Items as a
-   registry array whose own changes the Repeater hears), or **NSP-013 AC2** (the deep run for s11–s14). Read both and propose; write
-   the matrix first (every request × how its frame ends × an observer), then mutants at ten seeds and 10,000.
+1. **The rest of the Repeater v2**, in this order (NSP-016 §7.22 "Left of the Repeater v2" has what each needs):
+   - **Items as a registry array whose own changes the Repeater hears.** First the SEAM: a lone node's play cannot change a registry
+     array after placing (no step kind, no world script writes one; Array Map's `world.change` is graded only by graph scenarios). Read
+     how graph scenarios write an array (`runner/graph.ts`, `scenarios/graph/`), and choose: a graph scenario, or a world seam of
+     scripted registry writes (GROUP's `writes` is the model). Then the node: `bindCollection` subscribes, and a change is a QUEUED
+     operation (`collection.set(items)`), not a frame-end copy; `repeaterDisabledWhenUnmounted` defers it.
+   - **The input mapping** (`inputMappingScript`, a dynamic input drawn with a Template): the row's inputs then come from the mapping
+     (and `id` is no longer set), so each row's inputs must become STATE — built at the landing, re-mapped by the CURRENT function at
+     each record change — where v1 reads the record live.
+   - **Try Remove** (`For Each Actions`): a third row template with a `For Each Actions` node; unwired, the removal moves to the item's
+     frame end (`scheduleAfterInputsHaveUpdated`).
+   Probe the runtime before every rule; the matrix first; mutants at ten seeds and 10,000 on both targets.
+2. **Or, when the box is quiet,** NSP-013's deep run for s11–s14 (`NSP_DEEP=10000 NSP_ONLY=…`, one spec at a time).
 
 **Human decisions outstanding.** Ask in plain words (README §7 holds the earlier ones):
-- **New (s60), Component Children:** it is not a node the app ever makes — it only marks where a component's children go. Count it
-  as done with a written reason (and grade where children land as part of the graph tests later), or build a special test for it now?
-- **New (s60), C132:** when a number arrives on a size input that holds no size yet (Medium Below, Small Below — or one that last
-  held a design token), should it be read in pixels, or refused as today?
-- **New (s60), C134:** Auto Fit with a gap that cancels the minimum column width: one column, or as many columns as there are items?
-- **New (s60), C133:** a Medium or Small Layout that arrives as a number: read it as text (`2` → one column), or ignore it? Today the
-  page goes blank.
-- **From s59:** C130 (a list with an empty entry: skip it, or refuse the list?), C131 (two items with one id: one row or two?), C129
-  (Items Rendered when a list is cleared?).
-- **From s58:** C120 (a Pop: step the browser's history back, or replace the entry?), C126 (with Use Routes, Reset: the start page or
-  the address?).
+- **New (s61), C137:** a Refresh pulsed while the Repeater is still rebuilding from an earlier one — answer it when its own rebuild
+  finishes (what the code's comment says it meant), or answer it together with the rebuild already running?
+- **New (s61), C135:** a Script that names its component with something that is not text (a number): skip that item with an error, as
+  a Script that throws does — yes?
+- **New (s61), C136:** on Explicit with no Template, should a Refresh fail with "no template" even when a Script is written? (Proposed:
+  yes — the Script is not used on Explicit.)
+- **From s60:** Component Children (count it as done with a written reason, or build a special test?); C132 (a number on a size input
+  that holds no size yet: pixels, or refused?); C134 (Auto Fit with a gap that cancels the minimum width: one column, or one per
+  item?); C133 (a breakpoint layout that arrives as a number: read as text, or ignored?).
+- **From s59:** C130, C131, C129. **From s58:** C120, C126.
 - **Older:** a Drag's Start Drag X as text (s55); a Component Stack's Mounted off and on keeping its pages (s56); an unnamed Page Router
   in the index (s57, with P109's S18); R7, R8, R4's confirmation and G1; NSP-017's question about the templates' CSS sheets.
 

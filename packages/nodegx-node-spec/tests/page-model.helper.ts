@@ -308,10 +308,11 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
   // element of its own to draw); the frame's end runs its callbacks (the copy, the rebuild) and the queue they start, which fires Items
   // Rendered and answers Refresh
   'For Each': {
-    node: ['own', 'items', 'template', 'templateType', 'registered', 'copyScheduled', 'refreshScheduled', 'callbacks', 'tokens', 'queue', 'running', 'stuck', 'hops', 'owed', 'building', 'rows', 'answered', 'itemId', 'outs'],
+    node: ['own', 'items', 'template', 'templateType', 'script', 'compiles', 'registered', 'copyScheduled', 'refreshScheduled', 'callbacks', 'tokens', 'queue', 'running', 'stuck', 'hops', 'settling', 'owed', 'building', 'rows', 'answered', 'itemId', 'outs'],
     attr: {},
     held: {},
-    frameEnd: ['copyScheduled', 'refreshScheduled', 'callbacks', 'tokens', 'queue', 'running', 'stuck', 'hops', 'owed', 'building', 'rows', 'answered'],
+    // s61 (v2) — Script and whether it compiled are the node's, written by the input; a rebuild's pending answers (`settling`) the queue's
+    frameEnd: ['copyScheduled', 'refreshScheduled', 'callbacks', 'tokens', 'queue', 'running', 'stuck', 'hops', 'settling', 'owed', 'building', 'rows', 'answered'],
     framePulses: ['itemsRendered']
   },
   // s60 — the Columns (columns.ts): the props and what each size port holds are the node's; the page's width is the layout's, moved only

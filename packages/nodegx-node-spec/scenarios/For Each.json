@@ -4839,5 +4839,4070 @@
    },
    "settle"
   ]
+ },
+ {
+  "name": "Dynamic: the Script picks each row's component from its record — Row for one, Card for the other; a click hands what that row's component has",
+  "because": "foreach.tsx `templateScript` :352-376 (compiled as it arrives), `getTemplateForModel` :501-537 (run per record), `refresh` :745",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    }
+   ]
+  },
+  "steps": [
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = item.title ? 'Card' : 'Row'"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a Script that throws for a record, or names nothing, leaves that record without a row; the rest are drawn in order",
+  "because": "foreach.tsx `templateScript` :352-376 (compiled as it arrives), `getTemplateForModel` :501-537 (run per record), `refresh` :745",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "if (!item.label) throw new Error('no label'); component = 'Row'"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "set": "templateScript",
+    "value": "if (item.label) component = 'Row'"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a Script that does not compile drops the one before it: no rows, and a Refresh with a Template is Done; with no Template it fails repeater/no-template",
+  "because": "foreach.tsx `templateScript` :352-376 (compiled as it arrives), `getTemplateForModel` :501-537 (run per record), `refresh` :745",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    }
+   ]
+  },
+  "steps": [
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Row'"
+   },
+   "settle",
+   {
+    "set": "templateScript",
+    "value": "component = ("
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "set": "template",
+    "value": ""
+   },
+   {
+    "signal": "refresh"
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "Script and Template Type at placing: the first rebuild runs the Script",
+  "because": "foreach.tsx `templateScript` :352-376 (compiled as it arrives), `getTemplateForModel` :501-537 (run per record), `refresh` :745",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    }
+   ],
+   "templateType": "dynamic",
+   "templateScript": "component = 'Card'"
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a Script whose component is not text stops the Repeater for good: its rows go, and a fixed Script and a Refresh change nothing (row C135)",
+  "because": "foreach.tsx :524 `template.startsWith` runs outside the Script's try; the queue catches nothing (:815-860)",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 7"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "templateScript",
+    "value": "component = 'Row'"
+   },
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "Template Type Explicit with Template empty: a Refresh fails repeater/no-template — until a Script compiles, then it is Done and draws nothing (row C136)",
+  "because": "foreach.tsx `refresh` :745 asks for a Template or a compiled Script, whichever Template Type uses",
+  "params": {
+   "template": "",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "set": "templateScript",
+    "value": "component = ("
+   },
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "set": "templateScript",
+    "value": "component = 'Row'"
+   },
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — Template Type Dynamic, Script naming Row for every item; its frame ends at a settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Row'"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — Template Type Dynamic, Script naming Row for every item; a click on row 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Row'"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — Template Type Dynamic, Script naming Row for every item; clicks on rows 1 and 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Row'"
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — Template Type Dynamic, Script naming Row for every item; a click, a new list, a click",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Row'"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "c",
+      "label": "C"
+     },
+     {
+      "id": "a",
+      "title": "T2"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script picking Card or Row per item; its frame ends at a settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = item.title ? 'Card' : 'Row'"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script picking Card or Row per item; a click on row 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = item.title ? 'Card' : 'Row'"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script picking Card or Row per item; clicks on rows 1 and 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = item.title ? 'Card' : 'Row'"
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script picking Card or Row per item; a click, a new list, a click",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = item.title ? 'Card' : 'Row'"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "c",
+      "label": "C"
+     },
+     {
+      "id": "a",
+      "title": "T2"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script picking by the record's id; its frame ends at a settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = item.getId() === 'a' ? 'Card' : 'Row'"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script picking by the record's id; a click on row 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = item.getId() === 'a' ? 'Card' : 'Row'"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script picking by the record's id; clicks on rows 1 and 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = item.getId() === 'a' ? 'Card' : 'Row'"
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script picking by the record's id; a click, a new list, a click",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = item.getId() === 'a' ? 'Card' : 'Row'"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "c",
+      "label": "C"
+     },
+     {
+      "id": "a",
+      "title": "T2"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script that names no component for some items; its frame ends at a settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "if (item.label) component = 'Row'"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script that names no component for some items; a click on row 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "if (item.label) component = 'Row'"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script that names no component for some items; clicks on rows 1 and 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "if (item.label) component = 'Row'"
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script that names no component for some items; a click, a new list, a click",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "if (item.label) component = 'Row'"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "c",
+      "label": "C"
+     },
+     {
+      "id": "a",
+      "title": "T2"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script that throws for some items (no row for those); its frame ends at a settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "if (!item.label) throw new Error('no label'); component = 'Row'"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script that throws for some items (no row for those); a click on row 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "if (!item.label) throw new Error('no label'); component = 'Row'"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script that throws for some items (no row for those); clicks on rows 1 and 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "if (!item.label) throw new Error('no label'); component = 'Row'"
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script that throws for some items (no row for those); a click, a new list, a click",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "if (!item.label) throw new Error('no label'); component = 'Row'"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "c",
+      "label": "C"
+     },
+     {
+      "id": "a",
+      "title": "T2"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script that does not compile (no rows); its frame ends at a settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = ("
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script that does not compile (no rows); a click on row 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = ("
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script that does not compile (no rows); clicks on rows 1 and 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = ("
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script that does not compile (no rows); a click, a new list, a click",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = ("
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "c",
+      "label": "C"
+     },
+     {
+      "id": "a",
+      "title": "T2"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — an empty Script (it compiles; no component); its frame ends at a settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": ""
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — an empty Script (it compiles; no component); a click on row 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": ""
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — an empty Script (it compiles; no component); clicks on rows 1 and 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": ""
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — an empty Script (it compiles; no component); a click, a new list, a click",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": ""
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "c",
+      "label": "C"
+     },
+     {
+      "id": "a",
+      "title": "T2"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script naming a component the project does not have (row C128); its frame ends at a settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Missing'"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script naming a component the project does not have (row C128); a click on row 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Missing'"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script naming a component the project does not have (row C128); clicks on rows 1 and 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Missing'"
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script naming a component the project does not have (row C128); a click, a new list, a click",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Missing'"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "c",
+      "label": "C"
+     },
+     {
+      "id": "a",
+      "title": "T2"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script whose component is not text (row C135); its frame ends at a settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 7"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script whose component is not text (row C135); a click on row 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 7"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script whose component is not text (row C135); clicks on rows 1 and 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 7"
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script whose component is not text (row C135); a click, a new list, a click",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 7"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "c",
+      "label": "C"
+     },
+     {
+      "id": "a",
+      "title": "T2"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — Template Type Dynamic with no Script written; its frame ends at a settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — Template Type Dynamic with no Script written; a click on row 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — Template Type Dynamic with no Script written; clicks on rows 1 and 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — Template Type Dynamic with no Script written; a click, a new list, a click",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "c",
+      "label": "C"
+     },
+     {
+      "id": "a",
+      "title": "T2"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script written while Template Type is Explicit and Template is empty: a rebuild passes, and draws nothing; its frame ends at a settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "template",
+    "value": ""
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Row'"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script written while Template Type is Explicit and Template is empty: a rebuild passes, and draws nothing; a click on row 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "template",
+    "value": ""
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Row'"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script written while Template Type is Explicit and Template is empty: a rebuild passes, and draws nothing; clicks on rows 1 and 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "template",
+    "value": ""
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Row'"
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — a Script written while Template Type is Explicit and Template is empty: a rebuild passes, and draws nothing; a click, a new list, a click",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "template",
+    "value": ""
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Row'"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "c",
+      "label": "C"
+     },
+     {
+      "id": "a",
+      "title": "T2"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — Dynamic, then the Script changed in the same frame; its frame ends at a settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Card'"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Row'"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — Dynamic, then the Script changed in the same frame; a click on row 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Card'"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Row'"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — Dynamic, then the Script changed in the same frame; clicks on rows 1 and 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Card'"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Row'"
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — Dynamic, then the Script changed in the same frame; a click, a new list, a click",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Card'"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Row'"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "c",
+      "label": "C"
+     },
+     {
+      "id": "a",
+      "title": "T2"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — Dynamic, then back to Explicit in the same frame; its frame ends at a settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Card'"
+   },
+   {
+    "set": "templateType",
+    "value": "explicit"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — Dynamic, then back to Explicit in the same frame; a click on row 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Card'"
+   },
+   {
+    "set": "templateType",
+    "value": "explicit"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — Dynamic, then back to Explicit in the same frame; clicks on rows 1 and 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Card'"
+   },
+   {
+    "set": "templateType",
+    "value": "explicit"
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the Script matrix — Dynamic, then back to Explicit in the same frame; a click, a new list, a click",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "title": "T"
+    },
+    {
+     "id": "c"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Card'"
+   },
+   {
+    "set": "templateType",
+    "value": "explicit"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "c",
+      "label": "C"
+     },
+     {
+      "id": "a",
+      "title": "T2"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a Refresh pulsed while a rebuild builds is dropped: never answered, though its rebuild runs; the next Refresh answers only itself (row C137)",
+  "because": "foreach.tsx `refresh` :729-734 — it takes the Refreshes waiting at its start and, at its end, `settle` puts back only those (`pendingRefreshOutcomes = answered`) before answering them; one pulsed while it ran is overwritten",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a rebuild that builds nothing, started by a click, settles when one of its act boundaries is left: a Refresh pulsed one act before that is dropped (row C137)",
+  "because": "foreach.tsx `refresh` :729-734 — it takes the Refreshes waiting at its start and, at its end, `settle` puts back only those (`pendingRefreshOutcomes = answered`) before answering them; one pulsed while it ran is overwritten; measured: N records looked at, N of its N + 1 boundaries",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "signal": "refresh"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   "settle"
+  ]
+ },
+ {
+  "name": "a rebuild that builds nothing, started by a click, settles when one of its act boundaries is left: a Refresh pulsed at that act is kept, and the next rebuild answers it",
+  "because": "foreach.tsx `refresh` :729-734 — it takes the Refreshes waiting at its start and, at its end, `settle` puts back only those (`pendingRefreshOutcomes = answered`) before answering them; one pulsed while it ran is overwritten; measured: N records looked at, N of its N + 1 boundaries",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "signal": "refresh"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   "settle"
+  ]
+ },
+ {
+  "name": "a Refresh before the click that starts the rebuild is answered by it; a second, after the click, is dropped (row C137)",
+  "because": "foreach.tsx `refresh` :729-734 — it takes the Refreshes waiting at its start and, at its end, `settle` puts back only those (`pendingRefreshOutcomes = answered`) before answering them; one pulsed while it ran is overwritten",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "templateType",
+    "value": "dynamic"
+   },
+   {
+    "signal": "refresh"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "signal": "refresh"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   "settle"
+  ]
+ },
+ {
+  "name": "a Refresh that fails in a click's drain, with additions queued behind it: Template written before the queue reaches the last — that one builds, and lands at the yield the click asked for",
+  "because": "foreach.tsx `_runQueueOperations` :815-860 — the click's drain starts the queue (one run, one yield); `refresh` :745-748 fails at once, the copy's additions wait behind it and read Template when each starts (`addItem` :560)",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "template",
+    "value": ""
+   },
+   {
+    "signal": "refresh"
+   },
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "a",
+      "label": "A"
+     },
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     },
+     {
+      "id": "d",
+      "label": "D"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "set": "template",
+    "value": "Row"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 3
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the same, on a Repeater placed with no Template (so it has no Tapped output, and a click hands nothing): the last addition builds and lands at the yield the click asked for",
+  "because": "foreach.tsx `_runQueueOperations` :815-860 — the click's drain starts the queue (one run, one yield); `refresh` :745-748 fails at once, the copy's additions wait behind it and read Template when each starts (`addItem` :560)",
+  "params": {
+   "template": "",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    }
+   ]
+  },
+  "steps": [
+   {
+    "set": "template",
+    "value": "Row"
+   },
+   "settle",
+   {
+    "set": "template",
+    "value": ""
+   },
+   {
+    "signal": "refresh"
+   },
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "a",
+      "label": "A"
+     },
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     },
+     {
+      "id": "d",
+      "label": "D"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "set": "template",
+    "value": "Row"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 3
+   },
+   "settle"
+  ]
  }
 ]

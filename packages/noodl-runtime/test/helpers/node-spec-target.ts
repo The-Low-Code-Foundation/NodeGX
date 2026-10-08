@@ -1921,6 +1921,20 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       const known = !context.nodeRegister.hasNode(name as string) && Object.prototype.hasOwnProperty.call(models, name as string);
       return known ? build(name as string, id as string, extra as Record<string, unknown>) : never();
     };
+    // s61 — the same at the third source (row C135): a Script whose component is not text throws at `startsWith` in
+    // `getTemplateForModel` (:524), before `addItem`'s first await. The face asks it first — the same synchronous call `addItem` makes
+    // next, on the same record — and hands back a promise that never settles when it throws; otherwise `addItem` runs untouched.
+    const n2 = node as unknown as { addItem(model: unknown, index: number): Promise<void>; getTemplateForModel(model: unknown): unknown };
+    const addItem = n2.addItem.bind(node);
+    const templateFor = n2.getTemplateForModel.bind(node);
+    n2.addItem = (model, index) => {
+      try {
+        templateFor(model);
+      } catch {
+        return never();
+      }
+      return addItem(model, index);
+    };
     const refresh = n.refresh.bind(node);
     n.refresh = () => {
       // foreach.tsx `refresh` :745-772 — past its two checks it copies Items again, and an item that is `null` throws there
