@@ -32,7 +32,7 @@
  *   - **a finger**: the same, from the touch's own point. Its moves and its end go to the element it went down on (the face's
  *     browser), so once that element has left the page the drag hears neither.
  *
- * **Start Drag X / Y** (inputProps, at the paint): a change moves the element there and sends Drag X / Y and Delta X / Y (the change
+ * **Start Drag X / Y** (inputProps, at the paint): a change (`Object.is`: NaN again is none, row C106) moves the element there and sends Drag X / Y and Delta X / Y (the change
  * from the last one painted — from nothing, NaN; Drag.tsx `componentDidUpdate`). At the mount the element starts at Start Drag X / Y,
  * or 0 when it is not truthy (`componentDidMount`), and all four are sent. A value that is not a number is kept as it came (text
  * joins onto the numbers the drag adds).
@@ -143,7 +143,8 @@ const LOOK = (displayName: string, group: string, description: string, extra: Re
 
 export const Drag = defineNode({
   type: 'Drag',
-  version: 1,
+  // v2 (P109 ISL-048, s31): a Start Drag X / Y that is NaN again is no change — `Object.is` (row C106)
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/visual/drag.ts; packages/noodl-viewer-react/src/components/visual/Drag/Drag.tsx; react-draggable 4.5.0',
   needs: ['person', 'clock'],
   worldPool: { advances: [0, 16, 100, 150, 300, 301, 1000] },
@@ -411,12 +412,13 @@ function painted(s: Readonly<State>): Act {
   // an update: `componentDidUpdate` against the props last rendered
   let acc: Act = { ...NONE, set: { shown: props } };
   let at: State = { ...s, shown: props };
-  if (s.shown.startX !== s.startX) {
+  // `Object.is` (row C106, fixed in P109 ISL-048: `!==` saw NaN change at every update, which looped the runtime's)
+  if (!Object.is(s.shown.startX, s.startX)) {
     const a: Act = { set: { x: s.startX, posX: s.startX, dX: (s.startX as number) - (s.shown.startX as number) }, send: ['positionX', 'deltaX'], emit: [] };
     acc = join(acc, a);
     at = { ...at, ...a.set };
   }
-  if (s.shown.startY !== s.startY) {
+  if (!Object.is(s.shown.startY, s.startY)) {
     const a: Act = { set: { y: s.startY, posY: s.startY, dY: (s.startY as number) - (s.shown.startY as number) }, send: ['positionY', 'deltaY'], emit: [] };
     acc = join(acc, a);
     at = { ...at, ...a.set };

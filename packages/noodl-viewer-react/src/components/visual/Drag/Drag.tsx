@@ -127,12 +127,14 @@ export class Drag extends React.Component<DragProps, State> {
   componentDidUpdate(prevProps: DragProps) {
     const props = this.props;
 
-    if (prevProps.inputPositionX !== props.inputPositionX) {
+    // P107-C106 — `Object.is`: a Start Drag X / Y of NaN is unchanged when it is NaN again; `!==` saw a change at every update and set
+    // state until React gave up, which blanked the page
+    if (!Object.is(prevProps.inputPositionX, props.inputPositionX)) {
       this.setState({ x: props.inputPositionX });
       props.positionX && props.positionX(props.inputPositionX);
       props.deltaX && props.deltaX(props.inputPositionX - prevProps.inputPositionX);
     }
-    if (prevProps.inputPositionY !== props.inputPositionY) {
+    if (!Object.is(prevProps.inputPositionY, props.inputPositionY)) {
       this.setState({ y: props.inputPositionY });
       props.positionY && props.positionY(props.inputPositionY);
       props.deltaY && props.deltaY(props.inputPositionY - prevProps.inputPositionY);

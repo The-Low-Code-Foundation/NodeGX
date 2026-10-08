@@ -510,9 +510,8 @@
     ]
   },
   {
-    "name": "Start Drag X written NaN: the element is at NaN, and Drag X and Delta X say so (row C106 on the runtime: its update compares NaN with itself and loops until React throws)",
-    "because": "Drag.tsx `componentDidUpdate`: `prevProps.inputPositionX !== props.inputPositionX` is true for NaN at every update",
-    "row": "NSP-016 §6 C106",
+    "name": "row C106 — Start Drag X written NaN: the element is at NaN, and Drag X and Delta X say so; a later 10 moves it there",
+    "because": "Drag.tsx `componentDidUpdate` compares with `Object.is`: NaN again is no change (row C106, fixed in P109 ISL-048: `!==` saw one at every update)",
     "steps": [
       "settle",
       {
@@ -525,6 +524,45 @@
       {
         "set": "inputPositionX",
         "value": 10
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C106 — Start Drag X placed NaN, the element dragged to 30, then Axis painted with NaN held: the element stays at 30 and Drag X is not sent",
+    "because": "Drag.tsx `componentDidUpdate` compares with `Object.is`: NaN held is no change (row C106, fixed in P109 ISL-048: `!==` set the element back to NaN at every update)",
+    "params": {
+      "inputPositionX": {
+        "$num": "NaN"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "act": "moveTo",
+        "value": {
+          "x": 30,
+          "y": 0
+        }
+      },
+      {
+        "act": "releaseAt",
+        "value": {
+          "x": 30,
+          "y": 0
+        }
+      },
+      "settle",
+      {
+        "set": "axis",
+        "value": "both"
       },
       "settle"
     ]

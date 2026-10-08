@@ -131,14 +131,8 @@ const refusedSourceObject = poolFor(specs['Video'].inputs.srcObject).filter((v) 
 /** C133 (s60) — a Medium or Small Layout that is truthy and not a string: picked for its band, it reaches `parseLayout`'s `split` in render */
 const unsplittableLayout = (port: 'mediumLayout' | 'smallLayout') => poolFor(specs['net.noodl.visual.columns'].inputs[port]).filter((v) => !!v && typeof v !== 'string');
 
-/** C106 (s55) — a Start Drag X / Y of NaN: `componentDidUpdate` compares it with itself (`NaN !== NaN`) and sets state at every update, until React gives up */
-const nanStart = (port: string) => poolFor(specs['Drag'].inputs[port as 'inputPositionX']).filter((v) => typeof v === 'number' && Number.isNaN(v));
-
 const WITHHELD: Record<string, Readonly<Record<string, Withheld>>> = {
-  Drag: {
-    inputPositionX: { values: nanStart('inputPositionX'), row: 'NSP-016 §6 C106 — a Start Drag X or Y of NaN loops the Drag\'s update until React throws' },
-    inputPositionY: { values: nanStart('inputPositionY'), row: 'NSP-016 §6 C106 — a Start Drag X or Y of NaN loops the Drag\'s update until React throws' }
-  },
+  // C106 (a Start Drag X or Y of NaN looped the Drag's update until React threw) was fixed in P109 ISL-048 — `Object.is`
   // s60 — C133: the throw takes the page down only once the band applies, so a sequence that holds the value is withheld
   'net.noodl.visual.columns': {
     mediumLayout: { values: unsplittableLayout('mediumLayout'), row: 'NSP-016 §6 C133 — a Medium or Small Layout that is not a string throws while React draws the Columns' },
@@ -167,11 +161,10 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
     { row: 'NSP-016 §6 C99 — a Source Object that is not a stream: the browser refuses it and the node throws', matches: sourceObjectNotAStream },
     { row: 'NSP-016 §6 C100 — a Video playing a file fires no pointer output and takes no file drop', matches: videoFileTakesNoPointer }
   ],
-  // s55 — the Drag's own rows: C102 (a locked axis reports the pointer's movement), C105 (a snap that waited runs from 0), C106 (a NaN start loops)
+  // s55 — the Drag's own rows: C102 (a locked axis reports the pointer's movement), C105 (a snap that waited runs from 0); C106 fixed in P109 ISL-048
   Drag: [
     { row: 'NSP-016 §6 C102 — a Drag locked to one Axis reports the pointer\'s movement on the other', matches: dragLockedAxisReported },
-    { row: 'NSP-016 §6 C105 — a Snap Do that waited for the Drag to mount runs from 0', matches: dragWaitedSnapFromZero },
-    { row: 'NSP-016 §6 C106 — a Start Drag X or Y of NaN loops the Drag\'s update until React throws', matches: (d: Divergence) => threwWith(d, 'Maximum update depth exceeded') }
+    { row: 'NSP-016 §6 C105 — a Snap Do that waited for the Drag to mount runs from 0', matches: dragWaitedSnapFromZero }
   ],
 };
 
