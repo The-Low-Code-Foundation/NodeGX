@@ -49,8 +49,10 @@ page model, visual batch); both packages' tsc clean.
 
 ## What s58 does
 
-1. **Tell P109 about C115–C118** once (R16 makes them theirs), and check its progress on C96–C114. When one is fixed, its scenario's
-   behaviour moves with it (a spec version) in the same commit.
+1. **P109 has C101–C118** (told in s57; it puts them in a new P109 task) and **fixed C81 after s57** (52fdaf088, on top of
+   afb4bffe6: Text v7, Shape v3, Image v3, Group v5, Video v3; the page model gained `depthOn` and `FILE_DROP_LEAVES`; TEXT's
+   file-act equivalents were rewritten). Re-run the visual batch once before building on those specs. When one of C96–C118 is fixed,
+   its scenario's behaviour moves with it (a spec version) in the same commit — P109 does that for its own fixes.
 2. **The next visual node**: the Repeater (`For Each` — DEFINITIONS + collections + per-item ports + its own async creation), or the
    Component Stack's Use Routes v2 now that the location is on the page (smaller: the stack reads `location` at a reset and pushes on a
    push — read navigation-stack.tsx's `useRoutes` paths first). Component Children has no ports.
