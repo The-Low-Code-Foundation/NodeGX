@@ -6099,7 +6099,7 @@
     }
   },
   {
-    "name": "ROUTES: path mode — a push with id 'a b&c': /detail?id=a b&c, unencoded (row C122)",
+    "name": "row C122 — ROUTES: path mode — a push with id 'a b&c' writes /detail?id=a%20b%26c; after a Reset the page has 'a b&c' back, so a push with id 'a b' is a new page — Done",
     "because": "_updateUrlWithTopPage :755 `q.name + '=' + q.value`",
     "params": {
       "pages": [
@@ -6165,7 +6165,7 @@
     }
   },
   {
-    "name": "ROUTES: a push with q '50%', then Reset — the address holds ?q=50% (unencoded, row C122), which is kept as written (C124): the Reset is Done at Detail",
+    "name": "row C122 — ROUTES: a push with q '50%' writes ?q=50%25#/detail, and a Reset reads it back — Done at Detail",
     "because": "the value is written unencoded; _getSearchParams throws on it",
     "params": {
       "pages": [

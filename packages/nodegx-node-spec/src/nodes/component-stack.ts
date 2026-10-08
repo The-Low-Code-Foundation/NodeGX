@@ -55,8 +55,8 @@
  * in the URL and reads its start page from it. THE URL a page has: its Path (`pagePath-<id>`, an input the editor draws only with Use
  * Routes on), else its label lowercased with each run of spaces a `-` — found by the entry's page id with `==` (`getRelativeURL`
  * :580-622), so a page pushed or started by its LABEL has none: the URL becomes `#` (row C123). `{name}` parts take the page's
- * parameters (`encodeURIComponent`); every other parameter goes in the query AS IT IS, unencoded (row C122). Hash mode (the project's
- * `navigationPathType` unset or `hash`) writes `?query#/path` — and with no parameters only `#/path`, which keeps the query already
+ * parameters (`encodeURIComponent`); every other parameter goes in the query encoded (row C122, fixed in P109 ISL-048: it went
+ * unencoded). Hash mode (the project's `navigationPathType` unset or `hash`) writes `?query#/path` — and with no parameters only `#/path`, which keeps the query already
  * in the address (row C121); path mode writes `/path?query`. A push and a replace push their URL (`history.pushState`) after naming
  * the page and before the transition; a back pushes the page below's at its transition's end — a new entry, not a step back (row
  * C120). A reset never pushes. A RESET with Use Routes on reads the URL (`matchPageFromUrl` :683-742): the hash's path (or the path)
@@ -194,7 +194,8 @@ export const ComponentStack = defineNode({
   // v8 (P109 ISL-048, s31): a back whose page below the Components list no longer has is refused before anything moves, and a page
   // whose entry outlives its row in the list is not found (row C111)
   // v9 (P109 ISL-048, s31): a malformed escape in the URL's query or path is kept as written, as the Page Router's (row C124)
-  version: 9,
+  // v10 (P109 ISL-048, s31): a page's parameters go into the URL's query encoded (row C122)
+  version: 10,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx',
   needs: ['person', 'clock', 'location', 'project'],
   worldPool: {
@@ -696,7 +697,8 @@ function pushUrl(w: Work): void | typeof THROWS {
       }
     }
     const path = rel === undefined ? '' : '/' + rel.path;
-    const query = (rel === undefined ? [] : rel.query).map((q) => q.name + '=' + q.value); // unencoded (row C122)
+    // encoded (row C122, fixed in P109 ISL-048: written as it was)
+    const query = (rel === undefined ? [] : rel.query).map((q) => encodeURIComponent(q.name) + '=' + encodeURIComponent(String(q.value)));
     const type = w.view.projectSettings().navigationPathType;
     const hash = type === undefined || type === 'hash';
     return (hash ? '' : path) + (query.length >= 1 ? '?' + query.join('&') : '') + (hash ? '#' + path : '');

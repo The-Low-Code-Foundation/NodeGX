@@ -791,7 +791,9 @@ const PageStack = {
         if (navigationPathType === undefined || navigationPathType === 'hash') hashPath = url.path;
         else urlPath = url.path;
 
-        const query = url.query.map((q) => q.name + '=' + q.value);
+        // P107-C122 — encoded, as the Page Router writes its query: a value with &, #, + or a space came back different, and one
+        // with % emptied the stack at the next reset
+        const query = url.query.map((q) => encodeURIComponent(q.name) + '=' + encodeURIComponent(String(q.value)));
         const compiledUrl =
           (urlPath !== undefined ? urlPath : '') +
           (query.length >= 1 ? '?' + query.join('&') : '') +
