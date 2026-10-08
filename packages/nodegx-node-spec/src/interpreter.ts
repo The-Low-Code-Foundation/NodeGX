@@ -97,7 +97,7 @@
 import type { Step } from './adapter';
 import { canonicalise, canonicalKey } from './canonical';
 import { coerce } from './coerce';
-import { isRegistryEntry } from './registry';
+import { isRegistryEntry, performRegistryWrite } from './registry';
 import type { AnswerCall, AnyNodeSpec, BackendAnswerEvent, ChangeEvent, Outcome, InputDecl, RealtimeEvent, ReducerOutcome, SignalOutputDecl, SocketEvent, SpecBackendCall, StreamEvent, SpecRequest, SpecSocketOp, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
 import { isSignalInput } from './spec';
 import type { TraceEvent } from './trace';
@@ -305,6 +305,7 @@ function instancesOf(world: World): { all: Instance[]; auth: Instance[] } {
   if (!entry) {
     worldInstances.set(world, (entry = { all: [], auth: [] }));
     hearWritesMadeElsewhere(world, entry.all);
+    hearRegistryWrites(world, entry.all);
   }
   return entry;
 }
@@ -407,6 +408,25 @@ function hearWritesMadeElsewhere(world: World, all: Instance[]): void {
       currentWriter = previous;
     }
     for (const i of [...listeners]) handleInbound(i, { kind: 'store', event });
+    for (const i of [...all]) deliverChanges(i);
+  });
+}
+
+/**
+ * NSP-016 s62 — the registry writes made elsewhere (world.ts REGISTRY `writes`), subscribed ONCE per world: at the firing
+ * every instance's inbox is delivered first (CLOCK, as s26's), the write lands in the registry with no instance the writer,
+ * and every instance hears what it changed on the entries it watches.
+ */
+function hearRegistryWrites(world: World, all: Instance[]): void {
+  world.onRegistryWrite((w) => {
+    for (const i of [...all]) deliver(i);
+    const previous = currentWriter;
+    currentWriter = undefined;
+    try {
+      performRegistryWrite(world.registry, w);
+    } finally {
+      currentWriter = previous;
+    }
     for (const i of [...all]) deliverChanges(i);
   });
 }

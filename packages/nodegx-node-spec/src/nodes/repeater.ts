@@ -27,6 +27,14 @@
  * value again — the same object, or `null` after `null` — is nothing. A string is evaluated by the port first (`array-literal`).
  * Anything that is not a list empties it (`set` reads no `length`), a list with a `null` in it throws (above).
  *
+ * A REGISTRY ARRAY AS ITEMS (v2, `bindCollection` :476-485, `onItemsCollectionChanged` :257-269). Written to Items, a registry
+ * array is LISTENED to (the one Items held before is not, whatever it was); its own `change` — the app adding, removing or
+ * replacing its members elsewhere (world.ts REGISTRY `writes`) — QUEUES a copy: an operation like any other, which copies Items as
+ * it is when the operation runs, its additions and removals queued behind whatever waits (it costs one act boundary, as a removal
+ * does). A `set` that moves nothing tells nothing. A record's own change needs nothing here: a row reads its record live (below).
+ * `repeaterDisabledWhenUnmounted` would hold the copies back while the Repeater is off the page; a play's Repeater is on it from
+ * its placing, so the setting defers nothing (measured, NSP-016 §7.23).
+ *
  * TEMPLATE, TEMPLATE TYPE and REFRESH each ask for a REBUILD at the frame's end (`scheduleRefresh` :453-468) — one per frame, and none
  * while one is asked for and has not started. Placed, a Repeater asks for one before its parameters are set (it learns its parent
  * first: `setNodeModel` → `updateTarget` :436-452). Template Type Explicit (or never set) builds every row from Template; any other
@@ -128,7 +136,42 @@ const ITEMS: readonly unknown[] = [
   [{ id: 'c', label: 'C' }, null],
   "[{id:'s',label:'S'}]",
   { id: 'z', label: 'Z' },
-  [7, 'xy']
+  [7, 'xy'],
+  // v2 — a registry array: bound, and its own changes heard (the play's registries below)
+  { $array: 'list' },
+  { $array: 'other' }
+];
+
+/**
+ * v2 — the play's registries: three records and two arrays, and the app writing them elsewhere at its times (world.ts REGISTRY):
+ * a row added, one removed, the list reordered, one record's label, and the other array emptied and added to at its head.
+ */
+const RECORDS = { a: { label: 'A' }, b: { label: 'B' }, c: { label: 'C', title: 'T' } };
+const ARRAYS = { list: ['a', 'b'], other: ['c'] };
+const REGISTRIES = [
+  {},
+  { models: RECORDS, collections: ARRAYS },
+  {
+    models: RECORDS,
+    collections: ARRAYS,
+    writes: [
+      { at: 1, array: 'list', add: 'c' },
+      { at: 10, array: 'list', remove: 'a' },
+      { at: 100, record: 'b', key: 'label', value: 'B2' },
+      { at: 1000, array: 'list', set: ['c', 'b', 'a'] },
+      { at: 30000, array: 'list', set: ['a', 'b'] }
+    ]
+  },
+  {
+    models: RECORDS,
+    collections: ARRAYS,
+    writes: [
+      { at: 1, array: 'other', set: [] },
+      { at: 99, array: 'other', add: 'a', index: 0 },
+      { at: 100, array: 'other', add: 'c', index: 0 },
+      { at: 1000, array: 'list', set: ['a', 'b'] }
+    ]
+  }
 ];
 const TEMPLATES: readonly unknown[] = ['Row', 'Card', 'Missing', '', null];
 /**
@@ -158,7 +201,7 @@ const DEFAULT_SCRIPT =
   "component = '/MyComponent';";
 
 /** One operation on the queue (:240-254, :465) */
-type Op = { kind: 'add'; rec: RecordRef; index: number } | { kind: 'remove'; rec: RecordRef } | { kind: 'refresh' };
+type Op = { kind: 'add'; rec: RecordRef; index: number } | { kind: 'remove'; rec: RecordRef } | { kind: 'refresh' } | { kind: 'copy' };
 /** A row: its record and the component it was built from */
 type Row = { rec: RecordRef; template: string };
 /** The operation waiting on a build (`await createNode`): it lands at the next yield */
@@ -212,7 +255,12 @@ type State = {
 };
 
 type Work = { st: State; view: View; pulses: string[]; send: Set<'itemActionItemId'>; sendDerived: Set<string>; outcomes: Array<{ port: 'refresh'; outcome: 'done' | 'failure'; error?: string }>; resume: boolean };
-type View = { random(): number; registry: { create(data?: unknown): RecordRef; collection(name?: unknown): CollectionRef; isRecord(v: unknown): v is RecordRef } };
+type View = {
+  random(): number;
+  registry: { create(data?: unknown): RecordRef; collection(name?: unknown): CollectionRef; isRecord(v: unknown): v is RecordRef; isCollection(v: unknown): v is CollectionRef };
+  watch(t: { collection: string }): void;
+  unwatch(t: { collection: string }): void;
+};
 
 /** The outputs the editor draws for a Template (setup :1036-1091) */
 function outputsOf(template: unknown): { values: string[]; tapped: boolean } {
@@ -233,8 +281,11 @@ export const Repeater = defineNode({
   source: 'packages/noodl-viewer-react/src/nodes/std-library/data/foreach.tsx',
   needs: ['person', 'registry', 'project'],
   worldPool: {
-    // :829-860 — chunked creation reads the page's clock, which does not move while the node works: the same as one run
-    projectSettings: [{}, { repeaterCreateComponentsAsync: true }]
+    // :829-860 — chunked creation reads the page's clock, which does not move while the node works: the same as one run. v2 —
+    // `repeaterDisabledWhenUnmounted` (:258-268, :911-919) holds the copies back while the Repeater is off the page; a play's
+    // Repeater is on it from its placing, so the setting defers nothing (measured, NSP-016 §7.23)
+    projectSettings: [{}, { repeaterCreateComponentsAsync: true }, { repeaterDisabledWhenUnmounted: true }],
+    registries: REGISTRIES
   },
   // ERG-001 §4 :426-433 — Refresh's: Done or Failure, never Unchanged
   outcomes: ['done', 'failure'],
@@ -292,10 +343,13 @@ export const Repeater = defineNode({
   }
 }).on(
   {
-    // :301-320 — the same value again is nothing; else it is copied at the frame's end
+    // :301-320 — the same value again is nothing; else it is bound (`bindCollection` :476-485: a registry array is listened to,
+    // the one before is not) and copied at the frame's end
     items: (s, v, _i, view) =>
       run(s, view, (w) => {
         if (v === w.st.items) return;
+        if (view.registry.isCollection(w.st.items)) view.unwatch({ collection: w.st.items.getId() });
+        if (view.registry.isCollection(v)) view.watch({ collection: v.getId() });
         w.st.items = v;
         scheduleCopy(w);
       }),
@@ -330,7 +384,10 @@ export const Repeater = defineNode({
     afterInputs: (s, _i, view) => run(s, view, (w) => frameWork(w), 'frame'),
     world: {
       // the yield: the build lands, and the queue runs to its end
-      resume: (s, _i, _tag, view) => run(s, view, (w) => atYield(w), 'yield')
+      resume: (s, _i, _tag, view) => run(s, view, (w) => atYield(w), 'yield'),
+      // v2 — the bound array changed (`onItemsCollectionChanged` :257-269): the copy is QUEUED, an operation like any other
+      change: (s, _i, e, view) =>
+        e.kind === 'collection' && view.registry.isCollection(s.items) && e.id === s.items.getId() ? run(s, view, (w) => enqueue(w, { kind: 'copy' }), 'world') : { send: [] }
     },
     person: {
       tapRow: (s, _i, v, view) =>
@@ -358,10 +415,11 @@ export const Repeater = defineNode({
 // ---------------------------------------------------------------------------------------------
 
 /** A reducer's patch: the whole state as the work leaves it (s54, s55), and what it sent */
-function run(s: Readonly<State>, view: View, f: (w: Work) => void, mode: 'step' | 'act' | 'frame' | 'yield' = 'step'): any { // eslint-disable-line @typescript-eslint/no-explicit-any
+function run(s: Readonly<State>, view: View, f: (w: Work) => void, mode: 'step' | 'act' | 'frame' | 'yield' | 'world' = 'step'): any { // eslint-disable-line @typescript-eslint/no-explicit-any
   const w: Work = { st: { ...s, rows: [...s.rows], queue: [...s.queue], callbacks: [...s.callbacks] }, view, pulses: [], send: new Set(), sendDerived: new Set(), outcomes: [], resume: false };
-  // a step after an act starts one microtask generation later — the settle's frame too (the act was awaited before it)
-  if (mode !== 'yield' && w.st.owed) hop(w);
+  // a step after an act starts one microtask generation later — the settle's frame too (the act was awaited before it); the
+  // world's hand-off comes after a yield (an `advance` lands what was owed first)
+  if (mode !== 'yield' && mode !== 'world' && w.st.owed) hop(w);
   w.st.owed = false;
   f(w);
   if (mode === 'act') w.st.owed = true;
@@ -541,6 +599,10 @@ function start(w: Work, op: Op): void {
   if (op.kind === 'remove') {
     removeItem(w, op.rec);
     w.st.hops = 1;
+  } else if (op.kind === 'copy') {
+    // v2 (:261-268) — Items as it is NOW copied into the list; what the diff adds and removes is queued behind what waits
+    if (copy(w, w.st.items) === THROWS) w.st.stuck = true;
+    else w.st.hops = 1;
   } else if (op.kind === 'add') {
     const b = addItem(w, op.rec, op.index);
     if (b === THROWS) w.st.stuck = true;

@@ -8904,5 +8904,3567 @@
    },
    "settle"
   ]
+ },
+ {
+  "name": "the heard-array matrix — a row added at the end; it lands on an idle Repeater",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "add": "c"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — a row added at the end; it lands while a Refresh waits for the frame's end",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "add": "c"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — a row added at the end; it lands after a click started a rebuild",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "add": "c"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — a row added at the end; it lands before the first settle",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "add": "c"
+     }
+    ]
+   }
+  },
+  "steps": [
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — a row added at the end; it lands after Items was set to a plain list in the same frame (the array is no longer bound)",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "add": "c"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "z",
+      "label": "Z"
+     }
+    ]
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — a row added at the head; it lands on an idle Repeater",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "add": "c",
+      "index": 0
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — a row added at the head; it lands while a Refresh waits for the frame's end",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "add": "c",
+      "index": 0
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — a row added at the head; it lands after a click started a rebuild",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "add": "c",
+      "index": 0
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — a row added at the head; it lands before the first settle",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "add": "c",
+      "index": 0
+     }
+    ]
+   }
+  },
+  "steps": [
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — a row added at the head; it lands after Items was set to a plain list in the same frame (the array is no longer bound)",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "add": "c",
+      "index": 0
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "z",
+      "label": "Z"
+     }
+    ]
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — a row removed; it lands on an idle Repeater",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "remove": "a"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — a row removed; it lands while a Refresh waits for the frame's end",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "remove": "a"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — a row removed; it lands after a click started a rebuild",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "remove": "a"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — a row removed; it lands before the first settle",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "remove": "a"
+     }
+    ]
+   }
+  },
+  "steps": [
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — a row removed; it lands after Items was set to a plain list in the same frame (the array is no longer bound)",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "remove": "a"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "z",
+      "label": "Z"
+     }
+    ]
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — the list replaced (one added, one removed, reordered); it lands on an idle Repeater",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "set": [
+       "c",
+       "a"
+      ]
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — the list replaced (one added, one removed, reordered); it lands while a Refresh waits for the frame's end",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "set": [
+       "c",
+       "a"
+      ]
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — the list replaced (one added, one removed, reordered); it lands after a click started a rebuild",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "set": [
+       "c",
+       "a"
+      ]
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — the list replaced (one added, one removed, reordered); it lands before the first settle",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "set": [
+       "c",
+       "a"
+      ]
+     }
+    ]
+   }
+  },
+  "steps": [
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — the list replaced (one added, one removed, reordered); it lands after Items was set to a plain list in the same frame (the array is no longer bound)",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "set": [
+       "c",
+       "a"
+      ]
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "z",
+      "label": "Z"
+     }
+    ]
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — the list set to the members it has (no change is told); it lands on an idle Repeater",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "set": [
+       "a",
+       "b"
+      ]
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — the list set to the members it has (no change is told); it lands while a Refresh waits for the frame's end",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "set": [
+       "a",
+       "b"
+      ]
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — the list set to the members it has (no change is told); it lands after a click started a rebuild",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "set": [
+       "a",
+       "b"
+      ]
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — the list set to the members it has (no change is told); it lands before the first settle",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "set": [
+       "a",
+       "b"
+      ]
+     }
+    ]
+   }
+  },
+  "steps": [
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — the list set to the members it has (no change is told); it lands after Items was set to a plain list in the same frame (the array is no longer bound)",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "set": [
+       "a",
+       "b"
+      ]
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "z",
+      "label": "Z"
+     }
+    ]
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — the list emptied; it lands on an idle Repeater",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "set": []
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — the list emptied; it lands while a Refresh waits for the frame's end",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "set": []
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — the list emptied; it lands after a click started a rebuild",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "set": []
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — the list emptied; it lands before the first settle",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "set": []
+     }
+    ]
+   }
+  },
+  "steps": [
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — the list emptied; it lands after Items was set to a plain list in the same frame (the array is no longer bound)",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "set": []
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "z",
+      "label": "Z"
+     }
+    ]
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — a record in the list written; it lands on an idle Repeater",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — a record in the list written; it lands while a Refresh waits for the frame's end",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — a record in the list written; it lands after a click started a rebuild",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — a record in the list written; it lands before the first settle",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the heard-array matrix — a record in the list written; it lands after Items was set to a plain list in the same frame (the array is no longer bound)",
+  "because": "NSP-016 §7.23 THE HEARD-ARRAY MATRIX: every write the app makes elsewhere to the bound array (or a record in it) × what the Repeater is doing when it lands, followed by an observer — clicks on each row and a Refresh — so each shape's mutants are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "z",
+      "label": "Z"
+     }
+    ]
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "two writes at one moment: each heard, each its own run of the queue (Items Rendered twice)",
+  "because": "NSP-016 §7.23 — the bound array's own changes, beside the matrix",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "add": "c"
+     },
+     {
+      "at": 1,
+      "array": "list",
+      "remove": "a"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "bound, then a plain list, then bound again: the array is heard once more, and only while bound",
+  "because": "NSP-016 §7.23 — the bound array's own changes, beside the matrix",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "add": "c"
+     },
+     {
+      "at": 3,
+      "array": "list",
+      "remove": "b"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "z",
+      "label": "Z"
+     }
+    ]
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": {
+     "$array": "list"
+    }
+   },
+   "settle",
+   {
+    "advance": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "moved to another array: the first is no longer heard, the second is",
+  "because": "NSP-016 §7.23 — the bound array's own changes, beside the matrix",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "add": "c"
+     },
+     {
+      "at": 2,
+      "array": "other",
+      "add": "a"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": {
+     "$array": "other"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "Items emptied (null), then the array it held written: nothing is heard",
+  "because": "NSP-016 §7.23 — the bound array's own changes, beside the matrix",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "add": "c"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": null
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "bound with no settle, written before the frame ends: the copy and the heard change both run",
+  "because": "NSP-016 §7.23 — the bound array's own changes, beside the matrix",
+  "params": {
+   "template": "Row"
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "add": "c"
+     }
+    ]
+   }
+  },
+  "steps": [
+   {
+    "set": "items",
+    "value": {
+     "$array": "list"
+    }
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "drawn, then a Template the project does not have: the rebuild stops the queue, a heard change queues behind it, and nothing is drawn again (row C128)",
+  "because": "NSP-016 §7.23 — the bound array's own changes, beside the matrix",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "add": "c"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "template",
+    "value": "Missing"
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "template",
+    "value": "Row"
+   },
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "Template Type Dynamic: the added record's component is picked by Script when it is heard",
+  "because": "NSP-016 §7.23 — the bound array's own changes, beside the matrix",
+  "params": {
+   "templateType": "dynamic",
+   "templateScript": "component = item.getId() === 'c' ? 'Card' : 'Row'",
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "add": "c",
+      "index": 1
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "chunked creation: a heard addition builds as one run",
+  "because": "NSP-016 §7.23 — the bound array's own changes, beside the matrix",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "set": [
+       "c",
+       "b",
+       "a"
+      ]
+     }
+    ]
+   },
+   "projectSettings": {
+    "repeaterCreateComponentsAsync": true
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a write while a click's rebuild waits and a Refresh is pulsed after it: the heard copy queues behind the rebuild (row C137)",
+  "because": "NSP-016 §7.23 — the bound array's own changes, beside the matrix",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "add": "c"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "signal": "refresh"
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "writes across the clock: removed, added in the middle, replaced — each heard at its time",
+  "because": "NSP-016 §7.23 — the bound array's own changes, beside the matrix",
+  "params": {
+   "template": "Card",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 5,
+      "array": "list",
+      "remove": "b"
+     },
+     {
+      "at": 50,
+      "array": "list",
+      "add": "c",
+      "index": 1
+     },
+     {
+      "at": 100,
+      "array": "list",
+      "set": [
+       "c"
+      ]
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 10
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 40
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "advance": 100
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
  }
 ]

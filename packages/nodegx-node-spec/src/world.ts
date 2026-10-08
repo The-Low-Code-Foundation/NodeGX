@@ -73,6 +73,13 @@
  *           entries draw their ids from the random stream above. The rule in full is the header
  *           of registry.ts; a target that has its own tables (the runtime's process-wide
  *           `Model` / `Collection`) empties them for the play and seeds them from the same script.
+ *           (NSP-016 s62) The script's `writes` are the app writing the registry ELSEWHERE — an array's
+ *           members (`set` the diff to the records named, `add` one — at `index` when given — `remove`
+ *           one) or one key of a record — each at its `at` ≥ 1 ms on the clock, in script order, world
+ *           timers scheduled before any node's. A target performs each on the tables its nodes hold,
+ *           through the verbs a node would call (`performRegistryWrite`), so every node watching the entry
+ *           hears it as it would hear another node's write: inside the `advance` that reaches it, no node
+ *           the writer. Not a trace event — the world's hand-off, as a timer's firing is not.
  *   TIME ZONE. (NSP-013) The play runs in ONE IANA zone, the script's `timeZone`, `UTC` when the
  *           script names none — never the machine's. Everything a node reads of a calendar in
  *           "the host's local zone" (`getHours`, `setMonth`, `new Date(y, m, d)`, an `Intl` call
@@ -520,7 +527,7 @@ import { HostFileCtor, type HostFile } from './host-file';
 import { sha256, sha384, sha512 } from './sha2';
 
 import { canonicalise } from './canonical';
-import { Registry, type RegistryScript } from './registry';
+import { Registry, type RegistryScript, type RegistryWrite } from './registry';
 import type { TraceEvent } from './trace';
 import { mulberry32, type Rng } from './runner/random';
 
@@ -2474,6 +2481,9 @@ export class World {
   readonly sockets: WorldSockets;
   /** The Radio Button Group the node sits in (GROUP above, s42) — always: a play with no script has one, never written. */
   readonly group: WorldGroup;
+  /** NSP-016 s62 — the registry writes made elsewhere (REGISTRY above), in script order. */
+  readonly registryWrites: readonly RegistryWrite[];
+  private readonly registryListeners: Array<(w: RegistryWrite) => void> = [];
 
   constructor(script: WorldScript = {}) {
     this.script = script;
@@ -2492,6 +2502,24 @@ export class World {
     this.cloudServices = script.cloudServices ? { ...script.cloudServices } : undefined;
     this.sockets = new WorldSockets(this.clock, script.sockets ?? {});
     this.group = new WorldGroup(script.group);
+    // NSP-016 s62 — writes made elsewhere to the registry: world timers, scheduled before any node's
+    this.registryWrites = (script.registry?.writes ?? []).map((w) => {
+      if (!(w.at >= 1)) throw new Error(`world: a registry write is at ≥ 1 ms on the clock, not ${JSON.stringify(w.at)} — what the play starts with is the script's \`models\` and \`collections\``);
+      return w;
+    });
+    for (const w of this.registryWrites) this.clock.schedule(w.at, () => [...this.registryListeners].forEach((l) => l(w)));
+  }
+
+  /**
+   * NSP-016 s62 — called at each registry write made elsewhere (REGISTRY above), in the order subscribed. A target subscribes
+   * ONCE per play and performs the write on the tables its nodes hold (`performRegistryWrite`). Returns the unsubscribe.
+   */
+  onRegistryWrite(listener: (w: RegistryWrite) => void): () => void {
+    this.registryListeners.push(listener);
+    return () => {
+      const i = this.registryListeners.indexOf(listener);
+      if (i >= 0) this.registryListeners.splice(i, 1);
+    };
   }
 
   /** The AC5 check: every way this play touched something the script did not answer. */

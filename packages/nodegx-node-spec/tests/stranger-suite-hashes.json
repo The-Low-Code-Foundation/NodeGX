@@ -33,6 +33,6 @@
   "src/nodes/uuid.ts": "d5e2f60d7f81ca7ebee8083955d58b7534b5d4d2589bfc1716c0d0bdca03aadf",
   "src/spec.ts": "6e343f0ea9bb84ae80c5669110f97d6c88b4176c42a95a5019e73b6482389c14",
   "src/trace.ts": "10ebfed327109f9c0a87adaf968be39ab6529f4fffc995a024d245e9acad87bb",
-  "src/world.ts": "28323490fd95674402a226b275ef0ead5affb12ede1df6d49883633983929b77",
+  "src/world.ts": "6dee832f6dcb167804aec3e5a131817e4904f483c863bdbef9bca39d08bbc806",
   "tests/stranger-page.js": "b81ec9de4633acd8b3960e15fe9b461e64ca23bb520fafd6e38d2dcb25a15e35"
 }

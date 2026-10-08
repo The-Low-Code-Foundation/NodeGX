@@ -717,3 +717,36 @@ describe('NETWORK — A STREAMED BODY (NSP-014 s34): the head lands, then the bo
     expect(() => toDelivery({ status: 200, body: 'a', chunks: [] })).toThrow(/not both/);
   });
 });
+
+describe('REGISTRY — WRITES MADE ELSEWHERE (NSP-016 s62): the app writing an array or a record at its time on the clock', () => {
+  const registry = { models: { a: { label: 'A' }, b: { label: 'B' }, c: { label: 'C' } }, collections: { list: ['a', 'b'] } };
+  const ids = (w: World) => [...w.registry.collection('list')].map((r) => r.getId());
+
+  test('each write lands at its `at`, in script order, through the verbs a node would call — and only when the clock reaches it', () => {
+    const w = new World({ registry: { ...registry, writes: [{ at: 5, array: 'list', add: 'c', index: 0 }, { at: 5, array: 'list', remove: 'b' }, { at: 9, record: 'a', key: 'label', value: 'A2' }, { at: 20, array: 'list', set: ['b'] }] } });
+    expect(ids(w)).toEqual(['a', 'b']);
+    w.clock.advance(4);
+    expect(ids(w)).toEqual(['a', 'b']);
+    const performed: unknown[] = [];
+    w.onRegistryWrite((x) => performed.push(x));
+    w.clock.advance(1);
+    expect(performed).toEqual([{ at: 5, array: 'list', add: 'c', index: 0 }, { at: 5, array: 'list', remove: 'b' }]);
+    // the world only TELLS: a target performs each on the tables its nodes hold (here, nobody did)
+    expect(ids(w)).toEqual(['a', 'b']);
+    w.clock.advance(100);
+    expect(performed).toHaveLength(4);
+  });
+
+  test('a write at the play\'s start is refused: what the play starts with is the script\'s models and collections', () => {
+    expect(() => new World({ registry: { ...registry, writes: [{ at: 0, array: 'list', add: 'c' }] } })).toThrow(/≥ 1 ms/);
+  });
+
+  test('on the interpreter, a node watching the array hears the write as another node\'s; one that does not, hears nothing', async () => {
+    const watched = [{ at: 1, array: 'list', add: 'c' }] as const;
+    const bound = await play(interpreterAdapter(), 'For Each', { template: 'Row', items: { $array: 'list' } }, ['settle', { advance: 1 }, { act: 'tapRow', value: 2 }, 'settle'], new World({ registry: { ...registry, writes: watched } }));
+    expect(bound.filter((e) => e.t === 'value' && e.port === 'itemActionItemId')).toEqual([{ t: 'value', port: 'itemActionItemId', value: 'c' }]);
+    // the control: the same play with no write — no third row to tap
+    const still = await play(interpreterAdapter(), 'For Each', { template: 'Row', items: { $array: 'list' } }, ['settle', { advance: 1 }, { act: 'tapRow', value: 2 }, 'settle'], new World({ registry }));
+    expect(still.filter((e) => e.t === 'value' && e.port === 'itemActionItemId')).toEqual([]);
+  });
+});

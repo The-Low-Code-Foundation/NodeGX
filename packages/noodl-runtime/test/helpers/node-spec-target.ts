@@ -150,7 +150,7 @@ import type { NodeInstance, NodeMetadata, OutcomeFailureOptions, OutcomeToken, R
 import type { RuntimeNode } from '../../src/internal';
 import type { BackendCall, ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, LocationCall, RequestRecord, StackAnswer, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
 import { parseEndpoint, REPEATER_TEMPLATES, ROUTER_PAGES, specFor, type WorldLocation } from '../../../nodegx-node-spec/src';
-import { AUTH_OPS, backendEvent, canonicalise, fileError, installWorld, isFileOp, locationEvent, OUTCOME_PORTS, OWN_ELEMENT, SELF_REFERENCE, type BackendDelivery } from '../../../nodegx-node-spec/src';
+import { AUTH_OPS, backendEvent, canonicalise, fileError, installWorld, isFileOp, locationEvent, OUTCOME_PORTS, OWN_ELEMENT, performRegistryWrite, SELF_REFERENCE, type BackendDelivery, type RegistryTables } from '../../../nodegx-node-spec/src';
 
 import NoodlRuntime = require('../../noodl-runtime');
 import NodeDefinition = require('../../src/nodedefinition');
@@ -3196,6 +3196,9 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       focusTracker.reset();
       stateHistoryManager.setClock(() => w.clock.now());
       resetRegistry(w);
+      // NSP-016 s62 — REGISTRY's writes made elsewhere (world.ts): performed on the runtime's own tables, through the verbs a
+      // node would call, so a node bound to the entry hears them as it would another node's write
+      const offRegistry = w.onRegistryWrite((write) => performRegistryWrite({ model: (id) => Model.get(id as string), collection: (name) => Collection.get(name as string) } as unknown as RegistryTables, write));
       // NSP-013 s12 — the last frame's time is the context's, so it outlived the play that ran the
       // frame: a Repeat started before a play's first settle read the PREVIOUS play's last frame time
       // (repeat.ts :120-122) and ticked early or late. Found only once the runner's sequences stopped
@@ -3211,6 +3214,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       for (const m of consoleMethods) console[m] = () => undefined;
       return () => {
         consoleMethods.forEach((m, i) => (console[m] = hostConsole[i]));
+        offRegistry();
         restoreStacks();
         restoreRouters();
         restorePopups();

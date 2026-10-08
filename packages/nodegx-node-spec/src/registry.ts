@@ -73,6 +73,42 @@ export interface RegistryScript {
    * none. Seeded after `models`, on the record of that id (made if absent).
    */
   classes?: Record<string, string>;
+  /**
+   * NSP-016 s62: writes the APP makes to the registry elsewhere, each at its time on the clock (world.ts REGISTRY). The
+   * registry itself is seeded from the three fields above only; the world fires these.
+   */
+  writes?: readonly RegistryWrite[];
+}
+
+/**
+ * NSP-016 s62 — one write made elsewhere in the app (world.ts REGISTRY): an array's members (`set` the diff to the records
+ * named, `add` one — at `index` when given — or `remove` one), or one key of a record. Records are reached by name,
+ * create-on-read, as every write here reaches them; `at` ≥ 1 ms on the clock.
+ */
+export type RegistryWrite =
+  | { at: number; array: string; set: readonly string[] }
+  | { at: number; array: string; add: string; index?: number }
+  | { at: number; array: string; remove: string }
+  | { at: number; record: string; key: string; value?: unknown };
+
+/** What a registry write needs of the tables it lands in: this registry, or a target's own (`Model.get`, `Collection.get`). */
+export interface RegistryTables {
+  model(id: unknown): { set(name: string, value: unknown): void };
+  collection(name: unknown): { set(src: unknown): unknown; add(item: unknown): void; addAtIndex(item: unknown, index: number): void; remove(item: unknown): void };
+}
+
+/** NSP-016 s62 — performs one write made elsewhere on `tables`, through the verbs a node would call (their notifications with them). */
+export function performRegistryWrite(tables: RegistryTables, w: RegistryWrite): void {
+  if ('record' in w) {
+    tables.model(w.record).set(w.key, w.value);
+    return;
+  }
+  const c = tables.collection(w.array);
+  if ('set' in w) c.set(w.set.map((id) => tables.model(id)));
+  else if ('add' in w) {
+    if (w.index === undefined) c.add(tables.model(w.add));
+    else c.addAtIndex(tables.model(w.add), w.index);
+  } else c.remove(tables.model(w.remove));
 }
 
 /** The change a record notifies: one key. */
