@@ -69,6 +69,8 @@ export type SqlDialect = 'sqlite' | 'postgres';
 export interface AclContext {
   access: 'read' | 'write';
   keys: string[];
+  /** P116 ONT-004: a collection rule's narrowing, applied beside the keys. See the contract's `StorageAclOption.only`. */
+  only?: { collection: string; where: Record<string, unknown> };
 }
 
 /** A built statement: the SQL text and its bound parameters, in order. */
@@ -90,6 +92,35 @@ interface QueryOptionsBase {
   collection: string;
   where?: Record<string, unknown>;
   acl?: AclContext;
+  /**
+   * P116 ONT-004: how a `$path` filter learns what another collection's
+   * fields are. Set by the adapter on every read; absent in the older callers
+   * and the unit specs, where a `$path` is then refused rather than guessed at.
+   */
+  lookup?: CollectionLookup;
+}
+
+/** What a path needs to know about a collection it walks through (P116 ONT-004). */
+export interface CollectionLookup {
+  (collection: string): {
+    /** The declared columns, by name — a Pointer's `targetClass` is what a `follow` with no `to` reads. */
+    properties?: Record<string, { type?: string; targetClass?: string }>;
+    /** The columns the table has right now; absent when the table does not exist. */
+    present?: ReadonlySet<string>;
+  } | null;
+}
+
+/** What `buildWhereClause` needs for a `$path`: the query it sits in. */
+export interface PathEnv {
+  /** The collection being queried — the one the path must end on. */
+  collection: string;
+  acl?: AclContext;
+  lookup?: CollectionLookup;
+}
+
+/** The env for a `$path` in this query's `where`. */
+function pathEnv(options: { collection: string; acl?: AclContext; lookup?: CollectionLookup }): PathEnv {
+  return { collection: options.collection, acl: options.acl, lookup: options.lookup };
 }
 
 interface SelectOptions extends QueryOptionsBase {
@@ -286,32 +317,49 @@ export function buildAclPredicate(
   tableName: string,
   acl: AclContext | undefined,
   params: unknown[],
-  dialect: SqlDialect = 'sqlite'
+  dialect: SqlDialect = 'sqlite',
+  env?: PathEnv
 ): string {
   if (!acl || !Array.isArray(acl.keys)) {
     return '';
   }
   const access = acl.access === 'write' ? 'write' : 'read';
   const aclCol = `${escapeTable(tableName)}."ACL"`;
+  let predicate: string;
   if (acl.keys.length === 0) {
     // No principal keys at all: only un-ACL'd (public) rows qualify.
-    return `(${aclCol} IS NULL)`;
+    predicate = `(${aclCol} IS NULL)`;
+  } else {
+    const placeholders = acl.keys.map(() => '?').join(', ');
+    params.push(...acl.keys);
+    predicate =
+      dialect === 'postgres'
+        ? // Same principal keys, same bind order, same number of markers — only the
+          // JSON operators and the flag comparison change. Both differences are
+          // measured against this SQLite expression over the same rows, and both are
+          // documented where the translation lives rather than here.
+          aclPredicateSql(aclCol, placeholders, access, '_acl_entry')
+        : `(${aclCol} IS NULL OR EXISTS (` +
+          `SELECT 1 FROM json_each(${aclCol}) AS _acl_entry ` +
+          `WHERE _acl_entry.key IN (${placeholders}) ` +
+          `AND json_extract(_acl_entry.value, '$.${access}') = 1))`;
   }
-  const placeholders = acl.keys.map(() => '?').join(', ');
-  params.push(...acl.keys);
-  if (dialect === 'postgres') {
-    // Same principal keys, same bind order, same number of markers — only the
-    // JSON operators and the flag comparison change. Both differences are
-    // measured against this SQLite expression over the same rows, and both are
-    // documented where the translation lives rather than here.
-    return aclPredicateSql(aclCol, placeholders, access, '_acl_entry');
+  // P116 ONT-004: a collection rule's narrowing, in the same predicate as the
+  // keys so no reader can apply one without the other. Scoped to its own
+  // collection — a path rule on Person says nothing about an included Account.
+  if (acl.only && acl.only.collection === tableName) {
+    const narrowing = buildWhereClause(
+      acl.only.where,
+      params,
+      undefined,
+      undefined,
+      undefined,
+      dialect,
+      env ?? { collection: tableName, acl: { access: acl.access, keys: acl.keys } }
+    );
+    if (narrowing) predicate = `(${predicate} AND ${narrowing})`;
   }
-  return (
-    `(${aclCol} IS NULL OR EXISTS (` +
-    `SELECT 1 FROM json_each(${aclCol}) AS _acl_entry ` +
-    `WHERE _acl_entry.key IN (${placeholders}) ` +
-    `AND json_extract(_acl_entry.value, '$.${access}') = 1))`
-  );
+  return predicate;
 }
 
 /**
@@ -397,7 +445,8 @@ export function buildWhereClause(
   schema?: unknown,
   tableAlias?: string,
   scope?: ColumnScope,
-  dialect: SqlDialect = 'sqlite'
+  dialect: SqlDialect = 'sqlite',
+  env?: PathEnv
 ): string {
   if (!where || Object.keys(where).length === 0) {
     return '';
@@ -409,7 +458,7 @@ export function buildWhereClause(
     // Handle logical operators
     if (key === '$and' && Array.isArray(condition)) {
       const subConditions = condition
-        .map((sub) => buildWhereClause(sub as Record<string, unknown>, params, schema, tableAlias, scope, dialect))
+        .map((sub) => buildWhereClause(sub as Record<string, unknown>, params, schema, tableAlias, scope, dialect, env))
         .filter((c) => c);
       if (subConditions.length > 0) {
         conditions.push(`(${subConditions.join(' AND ')})`);
@@ -419,11 +468,19 @@ export function buildWhereClause(
 
     if (key === '$or' && Array.isArray(condition)) {
       const subConditions = condition
-        .map((sub) => buildWhereClause(sub as Record<string, unknown>, params, schema, tableAlias, scope, dialect))
+        .map((sub) => buildWhereClause(sub as Record<string, unknown>, params, schema, tableAlias, scope, dialect, env))
         .filter((c) => c);
       if (subConditions.length > 0) {
         conditions.push(`(${subConditions.join(' OR ')})`);
       }
+      continue;
+    }
+
+    // P116 ONT-004: a path through several links, compiled to one subquery.
+    if (key === '$path') {
+      if (!env) throw new Error('A $path filter can only be read as part of a query (no query env was given)');
+      const idCol = tableAlias ? `${tableAlias}."objectId"` : '"objectId"';
+      conditions.push(`${idCol} IN (${buildPathSelect(condition, env, params, dialect)})`);
       continue;
     }
 
@@ -736,6 +793,319 @@ function translateOperator(
   }
 }
 
+// ===========================================================================
+// P116 ONT-004 — a path through several links, as one subquery
+// ===========================================================================
+
+/** The most hops any path may take; the contract's `MAX_PATH_DEPTH`, restated here because the runtime cannot import it at run time. */
+export const MAX_PATH_DEPTH = 8;
+
+const PATH_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
+interface PathHopFollow {
+  follow: string;
+  to?: string;
+  where?: Record<string, unknown>;
+  repeat?: boolean;
+}
+interface PathHopBack {
+  from: string;
+  by: string;
+  where?: Record<string, unknown>;
+  repeat?: boolean;
+}
+type PathHop = PathHopFollow | PathHopBack;
+
+interface PathShape {
+  from: { collection: string; where?: Record<string, unknown> };
+  hops: PathHop[];
+  maxDepth: number;
+}
+
+/** One hop, resolved against the schema: where it goes and how the edge is stored. */
+interface Edge {
+  /** The collection the hop lands on. */
+  to: string;
+  /** The collection it comes from. */
+  of: string;
+  storage: 'pointer' | 'relation' | 'list' | 'absent';
+  /** The field, on `of` for a `follow`, on `to` for a `from, by`. */
+  field: string;
+  back: boolean;
+  where?: Record<string, unknown>;
+  repeat: boolean;
+}
+
+/**
+ * Compile a `$path` to `SELECT "objectId" FROM <last collection> WHERE …`.
+ *
+ * The shape is the contract's `PathFilter` with every nested `where` in Parse
+ * spelling (`$eq`, not `equalTo`), which is how `ParseWireAdapter` writes it.
+ * Five things are pinned by `conformance/cases/paths.ts` on both engines, and
+ * every one is a decision rather than an accident:
+ *
+ * 1. **Fixed hops nest as id subqueries**; a repeated hop is a recursive common
+ *    table expression with a depth column. Both engines read both shapes, so
+ *    the SQL is one text with the two dialect seams (the ACL, nothing else)
+ *    taken from the functions that already own them.
+ * 2. **The caller's row ACL is applied at every hop**, through
+ *    `buildAclPredicate` on each hop's collection. Nothing a caller may not
+ *    read is walked through. Tables are referenced by name and never aliased,
+ *    so the predicate's `"Table"."ACL"` resolves to the nearest scope — the
+ *    one being walked.
+ * 3. **Depth is checked here, before any SQL runs**: `maxDepth` whole, 1 … 8,
+ *    at least as many as the hops; a repeated hop takes what the other hops
+ *    leave, and is bounded in the CTE by a parameter, so a cycle in the data
+ *    ends at the bound.
+ * 4. **A field is followed only when the schema says what it names**, or the
+ *    caller does with `to`. A text field holding ids (every relation in the
+ *    in-repo corpus) is followable with `to`; a list (`Array`) is followable
+ *    forwards and refused backwards, in the words the vocabulary uses for it.
+ * 5. **The last hop must land on the collection being queried**, or the path
+ *    answers a different question than the one asked. Refused by name.
+ *
+ * Refusals throw; the adapter's catch turns them into `options.error`, which
+ * the conformance context reads as an `AdapterRefusal` — a loud no, never
+ * wrong rows.
+ */
+function buildPathSelect(raw: unknown, env: PathEnv, params: unknown[], dialect: SqlDialect): string {
+  const path = checkPathShape(raw);
+  const lookup = env.lookup;
+  if (!lookup) throw new Error('A $path filter needs the schema, and this read was built without one');
+  const hopAcl: AclContext | undefined = env.acl ? { access: env.acl.access, keys: env.acl.keys } : undefined;
+
+  const scopeOf = (collection: string): ColumnScope | undefined => {
+    const info = lookup(collection);
+    return info?.present ? { present: info.present } : undefined;
+  };
+  // A hop's where is qualified by the hop's table: inside the recursive walk two
+  // tables carry an "objectId", and an unqualified name would be ambiguous.
+  const whereOf = (collection: string, where: Record<string, unknown> | undefined): string => {
+    if (!where) return '';
+    const nested: PathEnv = { collection, acl: hopAcl, lookup };
+    return buildWhereClause(where, params, undefined, escapeTable(collection), scopeOf(collection), dialect, nested);
+  };
+  // The keys apply at every hop; a rule's narrowing (`only`) applies to the
+  // end rows alone, where the outer predicate already puts it — repeating it on
+  // a hop through the same collection would recurse without end.
+  const guards = (collection: string, where: Record<string, unknown> | undefined): string => {
+    const parts = [whereOf(collection, where), buildAclPredicate(collection, hopAcl, params, dialect)].filter((c) => c);
+    return parts.length ? ` AND ${parts.join(' AND ')}` : '';
+  };
+  const exists = (collection: string): void => {
+    if (!lookup(collection)) throw new Error(`The path goes through "${collection}", and there is no such collection`);
+  };
+
+  // The start: the rows of `from` the caller may read, narrowed by its where.
+  exists(path.from.collection);
+  let frontier = `SELECT "objectId" FROM ${escapeTable(path.from.collection)}`;
+  const startGuards = guards(path.from.collection, path.from.where);
+  if (startGuards) frontier += ` WHERE ${startGuards.slice(5)}`;
+
+  // Resolve every hop against the schema before emitting anything, so a path
+  // that cannot be followed is refused whole, with the hop named.
+  let current = path.from.collection;
+  const edges: Edge[] = path.hops.map((hop, i) => {
+    const at = `hop ${i + 1}`;
+    const edge = resolveEdge(hop, current, lookup, at);
+    if (edge.repeat && edge.to !== edge.of) {
+      throw new Error(`${at} repeats, so it must land on the collection it starts from ("${edge.of}"), and it lands on "${edge.to}"`);
+    }
+    current = edge.to;
+    return edge;
+  });
+  if (current !== env.collection) {
+    throw new Error(`The path ends on "${current}", and the query is on "${env.collection}" — the last hop must land on the collection being queried`);
+  }
+
+  const fixed = edges.filter((e) => !e.repeat).length;
+  const left = path.maxDepth - fixed;
+  for (const edge of edges) {
+    frontier = edge.repeat ? repeatedHop(edge, frontier, left, guards, params, dialect) : oneHop(edge, frontier, guards, dialect);
+  }
+  return frontier;
+}
+
+/** Shape and bounds, checked before the schema is consulted. The contract's `pathProblem` says the same things. */
+function checkPathShape(raw: unknown): PathShape {
+  const bad = (why: string): never => {
+    throw new Error(`A $path filter is malformed: ${why}`);
+  };
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) bad('a path must be an object with from, hops and maxDepth');
+  const p = raw as Record<string, unknown>;
+  for (const k of Object.keys(p)) if (k !== 'from' && k !== 'hops' && k !== 'maxDepth') bad(`a path has no "${k}"`);
+  const from = p.from as Record<string, unknown> | undefined;
+  if (!from || typeof from !== 'object' || Array.isArray(from)) bad('a path needs "from": { collection, where? }');
+  const f = from as Record<string, unknown>;
+  if (typeof f.collection !== 'string' || !PATH_NAME.test(f.collection)) bad('the path\'s "from.collection" must name a collection');
+  for (const k of Object.keys(f)) if (k !== 'collection' && k !== 'where') bad(`"from" has no "${k}"`);
+  if (f.where !== undefined && (!f.where || typeof f.where !== 'object' || Array.isArray(f.where))) bad('"from.where" must be a filter object');
+  if (f.where && holdsPath(f.where as Record<string, unknown>)) bad('a path inside a path is not allowed');
+  const maxDepth = p.maxDepth;
+  if (!Number.isInteger(maxDepth) || (maxDepth as number) < 1 || (maxDepth as number) > MAX_PATH_DEPTH) {
+    bad(`"maxDepth" must be a whole number from 1 to ${MAX_PATH_DEPTH}`);
+  }
+  if (!Array.isArray(p.hops) || p.hops.length === 0) bad('a path needs at least one hop');
+  const hops = p.hops as unknown[];
+  if (hops.length > (maxDepth as number)) bad(`the path has ${hops.length} hops and "maxDepth" allows ${maxDepth}`);
+  let repeats = 0;
+  hops.forEach((h, i) => {
+    const at = `hop ${i + 1}`;
+    if (!h || typeof h !== 'object' || Array.isArray(h)) bad(`${at} must be an object`);
+    const hop = h as Record<string, unknown>;
+    const isFollow = 'follow' in hop;
+    const isBack = 'from' in hop || 'by' in hop;
+    if (isFollow === isBack) bad(`${at} must be { follow } or { from, by }, not both and not neither`);
+    const allowed = isFollow ? ['follow', 'to', 'where', 'repeat'] : ['from', 'by', 'where', 'repeat'];
+    for (const k of Object.keys(hop)) if (!allowed.includes(k)) bad(`${at} has no "${k}"`);
+    if (isFollow && (typeof hop.follow !== 'string' || !PATH_NAME.test(hop.follow))) bad(`${at}: "follow" must name a field`);
+    if (isFollow && hop.to !== undefined && (typeof hop.to !== 'string' || !PATH_NAME.test(hop.to))) bad(`${at}: "to" must name a collection`);
+    if (!isFollow && (typeof hop.from !== 'string' || !PATH_NAME.test(hop.from))) bad(`${at}: "from" must name a collection`);
+    if (!isFollow && (typeof hop.by !== 'string' || !PATH_NAME.test(hop.by))) bad(`${at}: "by" must name a field`);
+    if (hop.where !== undefined && (!hop.where || typeof hop.where !== 'object' || Array.isArray(hop.where))) bad(`${at}: "where" must be a filter object`);
+    if (hop.where && holdsPath(hop.where as Record<string, unknown>)) bad('a path inside a path is not allowed');
+    if (hop.repeat !== undefined && hop.repeat !== true) bad(`${at}: "repeat" is true or absent`);
+    if (hop.repeat === true) repeats += 1;
+  });
+  if (repeats > 1) bad('only one hop of a path may repeat');
+  return p as unknown as PathShape;
+}
+
+function holdsPath(where: Record<string, unknown>): boolean {
+  for (const [k, v] of Object.entries(where)) {
+    if (k === '$path' || k === 'path') return true;
+    if (Array.isArray(v)) {
+      for (const x of v) if (x && typeof x === 'object' && holdsPath(x as Record<string, unknown>)) return true;
+    } else if (v && typeof v === 'object' && holdsPath(v as Record<string, unknown>)) return true;
+  }
+  return false;
+}
+
+/** How a field is stored, read from the lookup; `absent` when the collection has no such column. */
+function storageOf(
+  lookup: CollectionLookup,
+  collection: string,
+  field: string
+): { storage: Edge['storage']; targetClass?: string; type?: string } {
+  const info = lookup(collection);
+  if (!info) throw new Error(`The path goes through "${collection}", and there is no such collection`);
+  const declared = info.properties?.[field];
+  const type = declared?.type;
+  if (type === 'Pointer') return { storage: 'pointer', targetClass: declared?.targetClass, type };
+  if (type === 'Relation') return { storage: 'relation', targetClass: declared?.targetClass, type };
+  if (type === 'Array') return { storage: 'list', type };
+  if (declared || info.present?.has(field)) return { storage: 'pointer', type: type || 'String' };
+  return { storage: 'absent' };
+}
+
+function resolveEdge(hop: PathHop, current: string, lookup: CollectionLookup, at: string): Edge {
+  if ('follow' in hop) {
+    const s = storageOf(lookup, current, hop.follow);
+    if (s.storage === 'absent') {
+      if (!hop.to) throw new Error(`${at}: "${current}" has no field "${hop.follow}" to follow; if it is meant to hold ids, say which collection with "to"`);
+      return { of: current, to: hop.to, storage: 'absent', field: hop.follow, back: false, where: hop.where, repeat: hop.repeat === true };
+    }
+    const to = hop.to || s.targetClass;
+    if (!to) {
+      throw new Error(
+        `${at}: "${hop.follow}" on "${current}" is not a declared link (it is ${s.type || 'untyped'}); say which collection it names with "to"`
+      );
+    }
+    if (!lookup(to)) throw new Error(`${at}: "${hop.follow}" leads to "${to}", and there is no such collection`);
+    return { of: current, to, storage: s.storage, field: hop.follow, back: false, where: hop.where, repeat: hop.repeat === true };
+  }
+  const s = storageOf(lookup, hop.from, hop.by);
+  if (s.storage === 'list') {
+    throw new Error(
+      `${at}: "${hop.by}" on "${hop.from}" is a list kept on the record itself, and a list cannot be read the other way round — make it a Links field, or a record of its own`
+    );
+  }
+  return { of: current, to: hop.from, storage: s.storage, field: hop.by, back: true, where: hop.where, repeat: hop.repeat === true };
+}
+
+/** The junction a Relation column is stored in — the SQLite adapter's private convention, reproduced by the Postgres one. */
+const junctionOf = (owning: string, field: string): string => escapeTable(`_Join_${field}_${owning}`);
+
+/** The ids the current rows' list field holds, as a subquery over `prev`. */
+function listValues(of: string, field: string, prev: string, dialect: SqlDialect): string {
+  const t = escapeTable(of);
+  const col = `${t}.${escapeColumn(field)}`;
+  if (dialect === 'postgres') {
+    return `SELECT jsonb_array_elements_text(${col}) FROM ${t} WHERE ${t}."objectId" IN (${prev}) AND jsonb_typeof(${col}) = 'array'`;
+  }
+  return `SELECT "value" FROM ${t}, json_each(${col}) WHERE ${t}."objectId" IN (${prev}) AND json_valid(${col})`;
+}
+
+/** One fixed hop: the ids of `edge.to` reached from the ids `prev` selects. */
+function oneHop(edge: Edge, prev: string, guards: (c: string, w?: Record<string, unknown>) => string, dialect: SqlDialect): string {
+  const to = escapeTable(edge.to);
+  const of = escapeTable(edge.of);
+  const field = escapeColumn(edge.field);
+  let ids: string;
+  if (edge.back) {
+    // The rows of `to` whose field names a current row.
+    ids =
+      edge.storage === 'relation'
+        ? `${to}."objectId" IN (SELECT "owningId" FROM ${junctionOf(edge.to, edge.field)} WHERE "relatedId" IN (${prev}))`
+        : edge.storage === 'absent'
+          ? 'FALSE'
+          : `${to}.${field} IN (${prev})`;
+  } else {
+    ids =
+      edge.storage === 'relation'
+        ? `${to}."objectId" IN (SELECT "relatedId" FROM ${junctionOf(edge.of, edge.field)} WHERE "owningId" IN (${prev}))`
+        : edge.storage === 'list'
+          ? `${to}."objectId" IN (${listValues(edge.of, edge.field, prev, dialect)})`
+          : edge.storage === 'absent'
+            ? 'FALSE'
+            : `${to}."objectId" IN (SELECT ${of}.${field} FROM ${of} WHERE ${of}."objectId" IN (${prev}) AND ${of}.${field} IS NOT NULL)`;
+  }
+  return `SELECT "objectId" FROM ${to} WHERE ${ids}${guards(edge.to, edge.where)}`;
+}
+
+/**
+ * A repeated hop: a recursive common table expression over one collection,
+ * bounded by `left` steps. `UNION` (not `UNION ALL`) so a cycle does not grow
+ * the working set, and the depth column so it ends at the bound regardless.
+ * Rows at depth 0 are the seeds and are not returned — "the topics under this
+ * one" does not include this one.
+ */
+function repeatedHop(
+  edge: Edge,
+  prev: string,
+  left: number,
+  guards: (c: string, w?: Record<string, unknown>) => string,
+  params: unknown[],
+  dialect: SqlDialect
+): string {
+  if (left < 1) throw new Error(`The repeated hop has no depth left: "maxDepth" covers only the ${edge.repeat ? 'other' : ''} hops`);
+  const t = escapeTable(edge.to);
+  const field = escapeColumn(edge.field);
+  let join: string;
+  if (edge.storage === 'absent') join = `JOIN ${t} ON FALSE`;
+  else if (edge.storage === 'relation') {
+    const j = junctionOf(edge.to, edge.field);
+    join = edge.back
+      ? `JOIN ${j} ON ${j}."relatedId" = "_walk"."objectId" JOIN ${t} ON ${t}."objectId" = ${j}."owningId"`
+      : `JOIN ${j} ON ${j}."owningId" = "_walk"."objectId" JOIN ${t} ON ${t}."objectId" = ${j}."relatedId"`;
+  } else if (edge.storage === 'list') {
+    throw new Error('A list field cannot be followed again and again; a tree is a Link to the same collection');
+  } else {
+    join = edge.back
+      ? `JOIN ${t} ON ${t}.${field} = "_walk"."objectId"`
+      : `JOIN ${t} AS "_from" ON "_from"."objectId" = "_walk"."objectId" JOIN ${t} ON ${t}."objectId" = "_from".${field}`;
+  }
+  // The seeds bind before the step's guards: SQL reads the CTE top to bottom,
+  // and the parameter order has to follow the text order.
+  const seeds = `SELECT "_seed"."objectId", 0 FROM (${prev}) AS "_seed"`;
+  params.push(left);
+  const step = `SELECT ${t}."objectId", "_walk"."_depth" + 1 FROM "_walk" ${join} WHERE "_walk"."_depth" < ?${guards(edge.to, edge.where)}`;
+  return (
+    `WITH RECURSIVE "_walk"("objectId", "_depth") AS (${seeds} UNION ${step}) ` +
+    `SELECT DISTINCT "objectId" FROM "_walk" WHERE "_depth" >= 1`
+  );
+}
+
 /**
  * Build ORDER BY clause from Parse-style sort
  *
@@ -806,12 +1176,12 @@ export function buildSelect(
   // Build WHERE clause (query filter AND row-level ACL predicate)
   const conditions: string[] = [];
   if (options.where) {
-    const whereClause = buildWhereClause(options.where, params, schema, undefined, scope, dialect);
+    const whereClause = buildWhereClause(options.where, params, schema, undefined, scope, dialect, pathEnv(options));
     if (whereClause) {
       conditions.push(whereClause);
     }
   }
-  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect);
+  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect, pathEnv(options));
   if (aclClause) {
     conditions.push(aclClause);
   }
@@ -857,12 +1227,12 @@ export function buildCount(
 
   const conditions: string[] = [];
   if (options.where) {
-    const whereClause = buildWhereClause(options.where, params, schema, undefined, scope, dialect);
+    const whereClause = buildWhereClause(options.where, params, schema, undefined, scope, dialect, pathEnv(options));
     if (whereClause) {
       conditions.push(whereClause);
     }
   }
-  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect);
+  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect, pathEnv(options));
   if (aclClause) {
     conditions.push(aclClause);
   }
@@ -1000,11 +1370,12 @@ export function buildRowExists(
   collection: string,
   objectId: string,
   acl: AclContext | undefined,
-  dialect: SqlDialect = 'sqlite'
+  dialect: SqlDialect = 'sqlite',
+  lookup?: CollectionLookup
 ): BuiltQuery {
   const params: unknown[] = [objectId];
   let sql = `SELECT 1 AS "one" FROM ${escapeTable(collection)} WHERE "objectId" = ?`;
-  const aclClause = buildAclPredicate(collection, acl, params, dialect);
+  const aclClause = buildAclPredicate(collection, acl, params, dialect, { collection, acl, lookup });
   if (aclClause) sql += ` AND ${aclClause}`;
   return { sql, params };
 }
@@ -1115,6 +1486,7 @@ export function buildUpdate(
     acl?: AclContext;
     /** HLT-016 — "only if unchanged". See {@link ExpectedValues}. */
     expect?: ExpectedValues;
+    lookup?: CollectionLookup;
   },
   dialect: SqlDialect = 'sqlite'
 ): BuiltQuery {
@@ -1155,7 +1527,7 @@ export function buildUpdate(
   // Row-level write check compiled into the statement itself: 0 rows changed
   // means not-found OR forbidden, indistinguishably (no read-then-write race,
   // no existence leak).
-  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect);
+  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect, pathEnv(options));
   if (aclClause) {
     sql += ` AND ${aclClause}`;
   }
@@ -1172,6 +1544,7 @@ export function buildDelete(
     id?: string;
     objectId?: string;
     acl?: AclContext;
+    lookup?: CollectionLookup;
   },
   dialect: SqlDialect = 'sqlite'
 ): BuiltQuery {
@@ -1180,7 +1553,7 @@ export function buildDelete(
   const recordId = options.id || options.objectId;
   const params: unknown[] = [recordId];
   let sql = `DELETE FROM ${table} WHERE "objectId" = ?`;
-  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect);
+  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect, pathEnv(options));
   if (aclClause) {
     sql += ` AND ${aclClause}`;
   }
@@ -1197,6 +1570,7 @@ export function buildIncrement(
     objectId?: string;
     properties: Record<string, number>;
     acl?: AclContext;
+    lookup?: CollectionLookup;
   },
   dialect: SqlDialect = 'sqlite'
 ): BuiltQuery {
@@ -1221,7 +1595,7 @@ export function buildIncrement(
 
   let sql = `UPDATE ${table} SET ${setClause.join(', ')} WHERE "objectId" = ?`;
 
-  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect);
+  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect, pathEnv(options));
   if (aclClause) {
     sql += ` AND ${aclClause}`;
   }
@@ -1329,10 +1703,10 @@ export function buildSearchSelect(
   }
 
   if (options.where) {
-    const whereClause = buildWhereClause(options.where, params, schema, table, scope, dialect);
+    const whereClause = buildWhereClause(options.where, params, schema, table, scope, dialect, pathEnv(options));
     if (whereClause) conditions.push(whereClause);
   }
-  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect);
+  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect, pathEnv(options));
   if (aclClause) conditions.push(aclClause);
 
   sql += ` WHERE ${conditions.join(' AND ')}`;
@@ -1386,10 +1760,10 @@ export function buildSearchCount(
   }
 
   if (options.where) {
-    const whereClause = buildWhereClause(options.where, params, schema, table, scope, dialect);
+    const whereClause = buildWhereClause(options.where, params, schema, table, scope, dialect, pathEnv(options));
     if (whereClause) conditions.push(whereClause);
   }
-  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect);
+  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect, pathEnv(options));
   if (aclClause) conditions.push(aclClause);
 
   sql += ` WHERE ${conditions.join(' AND ')}`;
@@ -1416,12 +1790,12 @@ export function buildDistinct(
 
   const conditions: string[] = [];
   if (options.where) {
-    const whereClause = buildWhereClause(options.where, params, undefined, undefined, scope, dialect);
+    const whereClause = buildWhereClause(options.where, params, undefined, undefined, scope, dialect, pathEnv(options));
     if (whereClause) {
       conditions.push(whereClause);
     }
   }
-  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect);
+  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect, pathEnv(options));
   if (aclClause) {
     conditions.push(aclClause);
   }
@@ -1471,12 +1845,12 @@ export function buildAggregate(
 
   const conditions: string[] = [];
   if (options.where) {
-    const whereClause = buildWhereClause(options.where, params, undefined, undefined, scope, dialect);
+    const whereClause = buildWhereClause(options.where, params, undefined, undefined, scope, dialect, pathEnv(options));
     if (whereClause) {
       conditions.push(whereClause);
     }
   }
-  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect);
+  const aclClause = buildAclPredicate(options.collection, options.acl, params, dialect, pathEnv(options));
   if (aclClause) {
     conditions.push(aclClause);
   }

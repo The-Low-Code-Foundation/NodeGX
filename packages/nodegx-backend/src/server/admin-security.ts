@@ -465,6 +465,9 @@ export class AdminSecurityRoutes {
       reason: decision.reason,
       devOpen: this.security.devOpenActive
     };
+    // P116 ONT-004: allowed, but only the rows a path rule reaches — the manager
+    // shows a short list with this beside it rather than as a mystery.
+    if (decision.narrow) result.narrow = decision.narrow;
     // Optional row-level answer when a record (or its ACL) is supplied.
     if (decision.allowed && body.record !== undefined && body.record !== null) {
       const access = op === 'find' || op === 'get' ? 'read' : 'write';

@@ -417,6 +417,16 @@ export class PostgresAdapter {
     }
   }
 
+  /** P116 ONT-004: the same lookup `LocalSQLAdapter._pathLookup` gives a `$path`, over this engine's schema model. */
+  private _pathLookup(): QueryBuilder.CollectionLookup {
+    return (collection: string) => {
+      const properties = declaredProperties(this._getSchema(collection));
+      const scope = this._columnScope(collection);
+      if (!properties && !scope) return null;
+      return { properties, present: scope?.present };
+    };
+  }
+
   private _getSchema(collection: string): AdapterSchema | null {
     if (this._collections[collection]) {
       return this._collections[collection].schema;
@@ -477,13 +487,13 @@ export class PostgresAdapter {
       await this._ready(options.collection);
       const schema = this._getSchema(options.collection);
       const scope = this._columnScope(options.collection);
-      const { sql, params } = QueryBuilder.buildSelect(options, schema, scope, 'postgres');
+      const { sql, params } = QueryBuilder.buildSelect({ ...options, lookup: this._pathLookup() }, schema, scope, 'postgres');
       const rows = await this._pool().query<AdapterRecord>(sql, params);
       const results = rows.map((row) => this._rowToRecord(row, options.collection));
 
       let count: number | undefined;
       if (options.count) {
-        const built = QueryBuilder.buildCount(options, schema, scope, 'postgres');
+        const built = QueryBuilder.buildCount({ ...options, lookup: this._pathLookup() }, schema, scope, 'postgres');
         const countRow = await this._pool().queryOne<{ count?: number }>(built.sql, built.params);
         count = Number(countRow?.count || 0);
       }
@@ -518,7 +528,7 @@ export class PostgresAdapter {
       const schema = this._getSchema(options.collection);
       const scope = this._columnScope(options.collection);
       const withFields = { ...options, fields };
-      const { sql, params } = QueryBuilder.buildSearchSelect(withFields, schema, scope, 'postgres');
+      const { sql, params } = QueryBuilder.buildSearchSelect({ ...withFields, lookup: this._pathLookup() }, schema, scope, 'postgres');
       const rows = await this._pool().query<AdapterRecord>(sql, params);
       const results = rows.map((row) => {
         const { _rank, _snippet, ...rest } = row;
@@ -532,7 +542,7 @@ export class PostgresAdapter {
 
       let count: number | undefined;
       if (options.count) {
-        const built = QueryBuilder.buildSearchCount(withFields, schema, scope, 'postgres');
+        const built = QueryBuilder.buildSearchCount({ ...withFields, lookup: this._pathLookup() }, schema, scope, 'postgres');
         const countRow = await this._pool().queryOne<{ count?: number }>(built.sql, built.params);
         count = Number(countRow?.count || 0);
       }
@@ -549,7 +559,11 @@ export class PostgresAdapter {
       let sql = `SELECT * FROM ${QueryBuilder.escapeTable(options.collection)} WHERE "objectId" = ?`;
       // Row-level read check: an unreadable row answers exactly like a missing
       // one (existence hiding).
-      const aclClause = QueryBuilder.buildAclPredicate(options.collection, options.acl, params, 'postgres');
+      const aclClause = QueryBuilder.buildAclPredicate(options.collection, options.acl, params, 'postgres', {
+        collection: options.collection,
+        acl: options.acl,
+        lookup: this._pathLookup()
+      });
       if (aclClause) sql += ` AND ${aclClause}`;
       const recordId = params[0] as string;
       const row = await this._pool().queryOne<AdapterRecord>(sql, params);
@@ -609,7 +623,7 @@ export class PostgresAdapter {
       await this._sm().barrier();
 
       const recordId = options.id || options.objectId;
-      const { sql, params } = QueryBuilder.buildUpdate(options, 'postgres');
+      const { sql, params } = QueryBuilder.buildUpdate({ ...options, lookup: this._pathLookup() }, 'postgres');
       let changed: number;
       try {
         changed = await this._pool().run(sql, params);
@@ -622,7 +636,7 @@ export class PostgresAdapter {
       // HLT-016 — see LocalSQLAdapter.save: the probe carries the ACL, so a forbidden row still
       // answers "not found", and a precondition failure is never an existence oracle.
       if (options.expect && changed === 0) {
-        const probe = QueryBuilder.buildRowExists(options.collection, recordId, options.acl, 'postgres');
+        const probe = QueryBuilder.buildRowExists(options.collection, recordId, options.acl, 'postgres', this._pathLookup());
         const exists = await this._pool().queryOne(probe.sql, probe.params);
         options.error(exists ? QueryBuilder.PRECONDITION_FAILED : 'Object not found');
         return;
@@ -657,7 +671,7 @@ export class PostgresAdapter {
         removedRecord = null;
       }
 
-      const { sql, params } = QueryBuilder.buildDelete(options, 'postgres');
+      const { sql, params } = QueryBuilder.buildDelete({ ...options, lookup: this._pathLookup() }, 'postgres');
       const changed = await this._pool().run(sql, params);
       if (options.acl && changed === 0) {
         options.error('Object not found');
@@ -679,7 +693,7 @@ export class PostgresAdapter {
       await this._ready(options.collection);
       const schema = this._getSchema(options.collection);
       const scope = this._columnScope(options.collection);
-      const { sql, params } = QueryBuilder.buildCount(options, schema, scope, 'postgres');
+      const { sql, params } = QueryBuilder.buildCount({ ...options, lookup: this._pathLookup() }, schema, scope, 'postgres');
       const row = await this._pool().queryOne<{ count?: number }>(sql, params);
       this._reportAbsentColumns(options.collection, scope);
       options.success(Number(row?.count || 0));
@@ -690,7 +704,7 @@ export class PostgresAdapter {
     this._run('aggregate', options, async () => {
       await this._ready(options.collection);
       const scope = this._columnScope(options.collection);
-      const { sql, params } = QueryBuilder.buildAggregate(options, scope, 'postgres');
+      const { sql, params } = QueryBuilder.buildAggregate({ ...options, lookup: this._pathLookup() }, scope, 'postgres');
       const row = await this._pool().queryOne<AdapterRecord>(sql, params);
       this._reportAbsentColumns(options.collection, scope);
 
@@ -708,7 +722,7 @@ export class PostgresAdapter {
     this._run('distinct', options, async () => {
       await this._ready(options.collection);
       const scope = this._columnScope(options.collection);
-      const { sql, params } = QueryBuilder.buildDistinct(options, scope, 'postgres');
+      const { sql, params } = QueryBuilder.buildDistinct({ ...options, lookup: this._pathLookup() }, scope, 'postgres');
       const rows = await this._pool().query<AdapterRecord>(sql, params);
       this._reportAbsentColumns(options.collection, scope);
       options.success(rows.map((r) => r[options.property]));
@@ -718,7 +732,7 @@ export class PostgresAdapter {
   increment(options: IncrementOptions): void {
     this._run('increment', options, async () => {
       await this._ready(options.collection);
-      const { sql, params } = QueryBuilder.buildIncrement(options, 'postgres');
+      const { sql, params } = QueryBuilder.buildIncrement({ ...options, lookup: this._pathLookup() }, 'postgres');
       const changed = await this._pool().run(sql, params);
       if (options.acl && changed === 0) {
         options.error('Object not found');

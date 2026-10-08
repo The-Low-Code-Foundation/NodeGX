@@ -28,8 +28,27 @@
  * splits on a comma.
  */
 
+import type { PathHop } from '@noodl/backend-contract';
+
+/**
+ * P116 ONT-004: the one object-shaped atom — a rule through a chain. The
+ * control cannot draw it (ONT-008's data manager will); it is kept verbatim
+ * through every round trip and named in words, never written back as text.
+ */
+export interface PathRuleAtom {
+  path: { hops: PathHop[]; maxDepth: number };
+}
+export type RuleAtom = string | PathRuleAtom;
+
 /** A rule as `security.json` stores it: one atom, or an array of them (OR). */
-export type RuleValue = string | string[];
+export type RuleValue = RuleAtom | RuleAtom[];
+
+/** The words for an atom the control cannot draw. */
+export function atomWords(atom: RuleAtom): string {
+  if (typeof atom === 'string') return atom;
+  const hops = Array.isArray(atom.path?.hops) ? atom.path.hops.length : 0;
+  return `Whoever reaches it (through ${hops} link${hops === 1 ? '' : 's'})`;
+}
 
 export const CLP_OPS = ['find', 'get', 'create', 'update', 'delete'] as const;
 export type ClpOp = (typeof CLP_OPS)[number];
@@ -75,14 +94,14 @@ export interface RuleSelection {
    * here means a round trip through the control never silently deletes a rule
    * it could not draw.
    */
-  unknown: string[];
+  unknown: RuleAtom[];
 }
 
 export const NOBODY: RuleSelection = { inherit: false, anyone: false, signedIn: false, roles: [], unknown: [] };
 export const INHERIT: RuleSelection = { ...NOBODY, inherit: true };
 
 /** Every atom of a rule, whichever shape it was stored in. */
-export function atomsOf(rule: RuleValue | undefined): string[] {
+export function atomsOf(rule: RuleValue | undefined): RuleAtom[] {
   if (rule === undefined || rule === null) return [];
   return Array.isArray(rule) ? rule : [rule];
 }
@@ -101,7 +120,8 @@ export function parseRule(rule: RuleValue | undefined): RuleSelection {
   const selection: RuleSelection = { inherit: false, anyone: false, signedIn: false, roles: [], unknown: [] };
   for (const atom of atomsOf(rule)) {
     if (typeof atom !== 'string') {
-      selection.unknown.push(String(atom));
+      // A path rule: kept as it is, so saving the page never turns it into text.
+      selection.unknown.push(atom);
       continue;
     }
     if (atom === 'public') selection.anyone = true;
@@ -128,7 +148,7 @@ export function parseRule(rule: RuleValue | undefined): RuleSelection {
  */
 export function selectionToRule(selection: RuleSelection): RuleValue | undefined {
   if (selection.inherit) return undefined;
-  const atoms: string[] = [];
+  const atoms: RuleAtom[] = [];
   if (selection.anyone) atoms.push('public');
   if (selection.signedIn) atoms.push('authenticated');
   for (const role of selection.roles) atoms.push(roleAtom(role));
@@ -209,7 +229,7 @@ export function withRole(selection: RuleSelection, role: string, on: boolean): R
 }
 
 /** Drop one atom the control could not draw (the escape hatch's only edit). */
-export function withoutUnknown(selection: RuleSelection, atom: string): RuleSelection {
+export function withoutUnknown(selection: RuleSelection, atom: RuleAtom): RuleSelection {
   return { ...selection, inherit: false, unknown: selection.unknown.filter((a) => a !== atom) };
 }
 

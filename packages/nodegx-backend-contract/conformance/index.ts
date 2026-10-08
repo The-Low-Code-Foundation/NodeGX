@@ -33,6 +33,7 @@ import type { IStorageAdapter } from '../src/storage';
 
 import { aclCases } from './cases/acl';
 import { filterCases } from './cases/filters';
+import { pathCases } from './cases/paths';
 import { recordCases } from './cases/records';
 import { relationCases } from './cases/relations';
 import { schemaCases } from './cases/schema';
@@ -48,7 +49,7 @@ export type { Claim, ClaimCollection, ClaimColumn, ClaimData, ClaimRun, ClaimSch
  * it. Kept as a closed union so a case cannot invent an area that no adapter
  * author has been told about.
  */
-export type ConformanceArea = 'records' | 'filters' | 'acl' | 'relations' | 'schema' | 'claims';
+export type ConformanceArea = 'records' | 'filters' | 'acl' | 'relations' | 'paths' | 'schema' | 'claims';
 
 /** One case: an id nobody else uses, the area it belongs to, and the body. */
 export interface ConformanceCase {
@@ -135,6 +136,7 @@ export const CONFORMANCE_CASES: readonly ConformanceCase[] = Object.freeze([
   ...filterCases,
   ...aclCases,
   ...relationCases,
+  ...pathCases,
   ...schemaCases
 ]);
 

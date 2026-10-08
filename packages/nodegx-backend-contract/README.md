@@ -32,7 +32,7 @@ one `--scope` entry in the root `test:packages` script.
 | `data.ts` | `IDataAdapter` — **fourteen** methods, extracted from `cloudstore.js`, not designed |
 | `auth.ts` | `IAuthAdapter` — ten methods, plus `TokenLifecycle`, the eleventh member that is not a method |
 | `events.ts` | `IAdapterEvents` — the local write events, which are **not** backend realtime |
-| `filter.ts` | The neutral filter model, its 31 operators, the operators that must be lowered rather than gated, and the 24-operator Directus migration map |
+| `filter.ts` | The neutral filter model, its 32 operators (the 32nd, `path`, is P116 ONT-004's — a path through several links, in one request), the operators that must be lowered rather than gated, and the 24-operator Directus migration map |
 | `capabilities.ts` | The four states, the 27 capability keys, and `BackendDescriptor` |
 | `descriptors/` | One descriptor per backend type. **This is the checklist for the rest of phase 34** |
 
@@ -50,6 +50,18 @@ converged. They had not: BYOB stores Directus's operator names (`_eq`, `_gt`)
 verbatim in project data. `DIRECTUS_OPERATOR_MIGRATION` is BCN-003's map, and
 its two interesting rows are `_null`/`_nnull`, which are nullary where the
 neutral `exists` is boolean-valued.
+
+**The `path` operator is designed, not extracted — and that is why it is an
+operator.** P116 ONT-004 needed "the members on my account's companies" to be
+one request. The fourteen methods are a transcription of `cloudstore.js` and
+stay fourteen; the filter model is the one part of this contract that was named
+here, so the path joined it as an operator (`PathFilter`, `MAX_PATH_DEPTH = 8`,
+`pathProblem`). An operator composes with sort, count, `include` and the row
+ACL, and a collection rule through a path (`security.json`'s `{ "path": … }`)
+is the same operator ANDed into the same statement. The capability keys stay 27:
+a path's cell is a filter cell, one per descriptor, and only the built-in
+backend's says `supported` — the conformance suite's `paths` area is what it
+rests on.
 
 **A cell is only `supported` if something proved it.** Every non-obvious cell
 carries an `evidence` string naming the file and line, the probe output, or the

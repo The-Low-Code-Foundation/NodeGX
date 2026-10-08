@@ -375,13 +375,13 @@ export class ByobAdminRoutes {
               collection,
               op.objectId as string,
               op.data as Record<string, unknown>,
-              ctx.acl('write')
+              ctx.acl('write', collection)
             );
             results.push({ success: true });
             break;
           case 'delete':
             ctx.checkData(collection, clpOp);
-            await this.facade.rawDelete(collection, op.objectId as string, ctx.acl('write'));
+            await this.facade.rawDelete(collection, op.objectId as string, ctx.acl('write', collection));
             results.push({ deleted: true });
             break;
           default:

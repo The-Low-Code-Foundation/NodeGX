@@ -148,7 +148,7 @@ describe('BMG-006 templates (AC3)', () => {
 
 describe('BMG-006 the ported vocabulary agrees with the backend model', () => {
   it('every selection a click can reach validates, and round-trips', () => {
-    const every: Array<string | string[]> = [];
+    const every: Array<NonNullable<ReturnType<typeof selectionToRule>>> = [];
     for (const signedIn of [false, true]) {
       for (const a of [false, true]) {
         for (const b of [false, true]) {

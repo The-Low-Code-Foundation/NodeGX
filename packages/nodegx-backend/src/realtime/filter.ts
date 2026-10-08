@@ -317,6 +317,11 @@ export function assertFilterSupported(where: Where | null | undefined): void {
     if (key === '$relatedTo') {
       throw new UnsupportedFilterError('$relatedTo is not supported in realtime subscription filters');
     }
+    if (key === '$path') {
+      // P116 ONT-004: a path crosses other collections, which a change frame
+      // of this one does not carry.
+      throw new UnsupportedFilterError('$path is not supported in realtime subscription filters');
+    }
     if ((key === '$and' || key === '$or') && Array.isArray(condition)) {
       for (const sub of condition) assertFilterSupported(sub as Where);
       continue;

@@ -139,6 +139,10 @@ function createDirectusDialect(): FilterDialect<DirectusFilter> {
       return ctx.fail('Directus cannot filter by Parse-style relations', { operator: 'relatedTo' });
     },
 
+    path(node, ctx) {
+      return ctx.fail('Directus cannot follow a path through several links in one request', { operator: 'path' });
+    },
+
     condition(node, ctx) {
       const { operator, value } = node;
       // Not `node.field`: a many-to-many prefix has to become its junction path

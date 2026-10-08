@@ -72,6 +72,18 @@ const SAMPLE: Readonly<Record<FilterOperator, unknown>> = Object.freeze({
   textSearch: 'lovelace',
   pointsTo: 'abc123',
   relatedTo: { id: 'abc123', key: 'members', className: 'Team' },
+  // P116 ONT-004: the members on my account's companies, from the person's side.
+  path: {
+    from: { collection: 'Person', where: { name: { equalTo: 'ann' } } },
+    hops: [
+      { from: 'Membership', by: 'person', where: { role: { equalTo: 'holder' } } },
+      { follow: 'account' },
+      { follow: 'company' },
+      { from: 'Employment', by: 'company' },
+      { follow: 'person' }
+    ],
+    maxDepth: 5
+  },
   idEqualTo: 'abc123',
   idContainedIn: ['abc123', 'def456'],
   nearSphere: { latitude: 51.5, longitude: -0.12, maxDistanceInKilometers: 5 },
@@ -97,7 +109,7 @@ const SCHEMA = {
 };
 
 function filterFor(operator: FilterOperator): Filter {
-  if (operator === 'idEqualTo' || operator === 'idContainedIn' || operator === 'relatedTo') {
+  if (operator === 'idEqualTo' || operator === 'idContainedIn' || operator === 'relatedTo' || operator === 'path') {
     return { [operator]: SAMPLE[operator] } as Filter;
   }
   const field = operator === 'pointsTo' ? 'team' : 'name';

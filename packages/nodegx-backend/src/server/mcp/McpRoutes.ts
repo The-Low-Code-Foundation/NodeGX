@@ -382,7 +382,7 @@ export class McpRoutes {
           limit: clampLimit(args.limit),
           skip: args.skip
         });
-        options.acl = ctx.acl('read');
+        options.acl = ctx.acl('read', collection);
         const result = (await this.deps.facade.wireQuery(collection, options)) as { results?: unknown[] };
         const rows = (result.results || []).map(plain);
         return {
@@ -395,7 +395,7 @@ export class McpRoutes {
         if (!id) throw new Error('objectId is required.');
         let record: Record<string, unknown>;
         try {
-          record = (await this.deps.facade.wireFetch(collection, id, undefined, ctx.acl('read'))) as Record<
+          record = (await this.deps.facade.wireFetch(collection, id, undefined, ctx.acl('read', collection))) as Record<
             string,
             unknown
           >;
@@ -426,7 +426,7 @@ export class McpRoutes {
         delete data.updatedAt;
         if (Object.keys(data).length === 0) throw new Error('Send at least one field to change.');
         try {
-          await this.deps.facade.rawSave(collection, id, data, ctx.acl('write'));
+          await this.deps.facade.rawSave(collection, id, data, ctx.acl('write', collection));
         } catch {
           throw new Error(`No row ${id} in ${collection} that you can change.`);
         }

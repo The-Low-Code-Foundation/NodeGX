@@ -124,9 +124,12 @@ interface PostgresExportOptions {
  * is below it. Only the two fields the policies are generated from are named,
  * so a change to the rest of the config cannot break the export by type alone.
  */
+/** A rule as `security.json` stores it; an object atom is P116 ONT-004's path rule, which the export refuses. */
+type RuleLike = string | object | Array<string | object>;
+
 interface SecurityRulesLike {
-  defaults: { permissions: Record<string, string | string[]>; creatorOwns?: boolean };
-  collections?: Record<string, { permissions?: Record<string, string | string[]>; creatorOwns?: boolean }>;
+  defaults: { permissions: Record<string, RuleLike>; creatorOwns?: boolean };
+  collections?: Record<string, { permissions?: Record<string, RuleLike>; creatorOwns?: boolean }>;
 }
 
 /** Options for the Supabase export. Both fields are required in practice — see `generateSupabaseSQL`. */
@@ -824,6 +827,17 @@ class SchemaManager {
         ? entry.permissions[op]
         : security.defaults.permissions[op];
     const atoms = raw === undefined ? [] : Array.isArray(raw) ? raw.slice() : [raw];
+    // P116 ONT-004: a rule through a path (an object atom) narrows rows by a
+    // chain across collections, which no PostgREST policy can express.
+    // Refused by name, like a role — never read as text.
+    if (atoms.some((a) => typeof a !== 'string')) {
+      throw new MigrationRefusal(
+        `"${collection}" lets callers ${op} what they reach through a path rule. A policy cannot follow a ` +
+          'path across collections, so it would either ignore the rule or deny everyone.',
+        'a path rule on a collection permission',
+        collection
+      );
+    }
     return atoms.map((a) => String(a)).sort();
   }
 

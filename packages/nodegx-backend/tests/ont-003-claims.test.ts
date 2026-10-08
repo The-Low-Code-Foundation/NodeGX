@@ -58,7 +58,7 @@ function project(fixture: string): WorldSchema {
 const asRunnerSchema = (s: WorldSchema): ClaimSchema => s;
 const asRunnerClaims = (s: WorldSchema): readonly Claim[] => s.claims;
 
-const WORLDS = ['world', 'world-every-kind'] as const;
+const WORLDS = ['world', 'world-every-kind', 'world-membership'] as const;
 
 /** The claims of a world as cases, and each held claim on its own mutant. */
 function casesFor(schema: WorldSchema): { claims: ConformanceCase[]; mutants: ConformanceCase[] } {

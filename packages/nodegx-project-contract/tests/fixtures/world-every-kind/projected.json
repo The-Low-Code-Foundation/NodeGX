@@ -33,20 +33,23 @@
           "name": "idElsewhere",
           "kind": "text",
           "type": "String",
-          "description": "A member also has a login on the course platform."
+          "description": "A member also has a login on the course platform.",
+          "relation": "on-the-course-platform"
         },
         {
           "name": "supersededBy",
           "kind": "link",
           "type": "Pointer",
           "targetClass": "Person",
-          "description": "Sometimes two people turn out to be one person, written down twice."
+          "description": "Sometimes two people turn out to be one person, written down twice.",
+          "relation": "same-person"
         },
         {
           "name": "endedAt",
           "kind": "date",
           "type": "Date",
-          "description": "A person can leave, and we keep what they did."
+          "description": "A person can leave, and we keep what they did.",
+          "relation": "leaves"
         }
       ],
       "checks": [],
@@ -76,7 +79,8 @@
           "name": "plan",
           "kind": "choice",
           "type": "String",
-          "description": "The size of membership they pay for."
+          "description": "The size of membership they pay for.",
+          "relation": "plan-size"
         },
         {
           "name": "company",
@@ -84,7 +88,8 @@
           "type": "Pointer",
           "targetClass": "Company",
           "required": true,
-          "description": "Every account is one company's, and stays that company's."
+          "description": "Every account is one company's, and stays that company's.",
+          "relation": "account-company"
         }
       ],
       "checks": [
@@ -141,13 +146,15 @@
           "kind": "links",
           "type": "Relation",
           "targetClass": "Tag",
-          "description": "A session has tags; a tag is on a session once."
+          "description": "A session has tags; a tag is on a session once.",
+          "relation": "session-tags"
         },
         {
           "name": "person",
           "kind": "list",
           "type": "Array",
-          "description": "A session lists who speaks at it."
+          "description": "A session lists who speaks at it.",
+          "relation": "session-speakers"
         }
       ],
       "checks": [],
@@ -193,7 +200,8 @@
           "kind": "link",
           "type": "Pointer",
           "targetClass": "Topic",
-          "description": "A topic can sit under a broader topic."
+          "description": "A topic can sit under a broader topic.",
+          "relation": "topic-tree"
         }
       ],
       "checks": [],
@@ -221,7 +229,8 @@
           "type": "Pointer",
           "targetClass": "Person",
           "required": true,
-          "description": "A person has one profile, and a profile is one person's."
+          "description": "A person has one profile, and a profile is one person's.",
+          "relation": "person-profile"
         }
       ],
       "checks": [],
@@ -253,7 +262,8 @@
           "kind": "link",
           "type": "Pointer",
           "targetClass": "Person",
-          "description": "An invite is for a person, by their email."
+          "description": "An invite is for a person, by their email.",
+          "relation": "invite-for"
         }
       ],
       "checks": [],
@@ -282,21 +292,24 @@
           "type": "Pointer",
           "targetClass": "Person",
           "required": true,
-          "description": "Only whoever wrote a note may change it; the two of us can read every note."
+          "description": "Only whoever wrote a note may change it; the two of us can read every note.",
+          "relation": "note-author"
         },
         {
           "name": "pointsAtKind",
           "kind": "choice",
           "type": "String",
           "required": true,
-          "description": "A note is about a person or about an account."
+          "description": "A note is about a person or about an account.",
+          "relation": "note-about"
         },
         {
           "name": "pointsAtId",
           "kind": "text",
           "type": "String",
           "required": true,
-          "description": "A note is about a person or about an account."
+          "description": "A note is about a person or about an account.",
+          "relation": "note-about"
         }
       ],
       "checks": [
@@ -328,7 +341,8 @@
           "type": "Pointer",
           "targetClass": "Person",
           "required": true,
-          "description": "A person is on one account at a time, as a member, from the day they join until they leave."
+          "description": "A person is on one account at a time, as a member, from the day they join until they leave.",
+          "relation": "membership"
         },
         {
           "name": "account",
@@ -336,19 +350,22 @@
           "type": "Pointer",
           "targetClass": "Account",
           "required": true,
-          "description": "A person is on one account at a time, as a member, from the day they join until they leave."
+          "description": "A person is on one account at a time, as a member, from the day they join until they leave.",
+          "relation": "membership"
         },
         {
           "name": "since",
           "kind": "date",
           "type": "Date",
-          "description": "A person is on one account at a time, as a member, from the day they join until they leave."
+          "description": "A person is on one account at a time, as a member, from the day they join until they leave.",
+          "relation": "membership"
         },
         {
           "name": "until",
           "kind": "date",
           "type": "Date",
-          "description": "A person is on one account at a time, as a member, from the day they join until they leave."
+          "description": "A person is on one account at a time, as a member, from the day they join until they leave.",
+          "relation": "membership"
         },
         {
           "name": "role",
@@ -398,28 +415,32 @@
           "type": "Pointer",
           "targetClass": "Person",
           "required": true,
-          "description": "A person came to a session."
+          "description": "A person came to a session.",
+          "relation": "attended"
         },
         {
           "name": "at",
           "kind": "date",
           "type": "Date",
           "required": true,
-          "description": "A person came to a session."
+          "description": "A person came to a session.",
+          "relation": "attended"
         },
         {
           "name": "session",
           "kind": "link",
           "type": "Pointer",
           "targetClass": "Session",
-          "description": "A person came to a session."
+          "description": "A person came to a session.",
+          "relation": "attended"
         },
         {
           "name": "doneBy",
           "kind": "link",
           "type": "Pointer",
           "targetClass": "_User",
-          "description": "A person came to a session."
+          "description": "A person came to a session.",
+          "relation": "attended"
         },
         {
           "name": "late",

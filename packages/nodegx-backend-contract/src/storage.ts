@@ -55,6 +55,16 @@
 export interface StorageAclOption {
   access: 'read' | 'write';
   keys: string[];
+  /**
+   * P116 ONT-004: a collection rule that narrows what this caller may reach —
+   * `{ "path": … }` in `security.json`, compiled to a `$path` from the caller's
+   * own `_User` row. It rides INSIDE the ACL option, and is ANDed into the same
+   * predicate as the keys (`buildAclPredicate`), so every reader that passes
+   * the ACL applies it and no reader can forget it. Scoped to one collection:
+   * a record `include`d from another collection is not narrowed by this
+   * collection's rule.
+   */
+  only?: { collection: string; where: Record<string, unknown> };
 }
 
 /**
@@ -66,6 +76,13 @@ export interface StorageAclOption {
  * on the canvas asks for, this one is what the database is asked for.
  */
 export interface StorageQueryOptions {
+  /**
+   * A Parse-wire `where`. P116 ONT-004 adds one top-level key to it, `$path`:
+   * the neutral `path` operator (`filter.ts` `PathFilter`) with every nested
+   * `where` in this same wire spelling. `conformance/cases/paths.ts` is what
+   * it means; `pathProblem` is its shape; `MAX_PATH_DEPTH` its ceiling. An
+   * adapter that cannot follow a path refuses it by name — never one hop.
+   */
   where?: Record<string, unknown>;
   sort?: string[] | string;
   limit?: number;
@@ -313,6 +330,9 @@ export interface StoragePostgresExportOptions {
   updatedAtTrigger?: boolean;
 }
 
+/** A collection rule as the Supabase export receives it: string atoms, or an object atom it must refuse. */
+export type StorageExportRule = string | object | Array<string | object>;
+
 /**
  * Options for `IStorageSchema.generateSupabaseSQL`.
  *
@@ -325,8 +345,13 @@ export interface StoragePostgresExportOptions {
  */
 export interface StorageSupabaseExportOptions {
   security?: {
-    defaults: { permissions: Record<string, string | string[]>; creatorOwns?: boolean };
-    collections?: Record<string, { permissions?: Record<string, string | string[]>; creatorOwns?: boolean }>;
+    /**
+     * A rule is a string atom or a list of them; P116 ONT-004 adds an
+     * object-shaped atom (a rule through a path), which no policy can express
+     * and which the generator refuses by name (`CANNOT_CROSS`).
+     */
+    defaults: { permissions: Record<string, StorageExportRule>; creatorOwns?: boolean };
+    collections?: Record<string, { permissions?: Record<string, StorageExportRule>; creatorOwns?: boolean }>;
   };
   userIdClaim?: string;
 }

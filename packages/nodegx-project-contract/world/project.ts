@@ -54,6 +54,8 @@ export interface WorldColumn {
   targetClass?: string;
   required?: true;
   description?: string;
+  /** The relation that made it, when one did (ONT-004: a path is compiled by reading these back). */
+  relation?: string;
 }
 export interface WorldCheck {
   field: string;
@@ -293,7 +295,10 @@ export function projectWorld(files: WorldFiles): WorldProjection {
         // relation adds the person's sentence to it.
         const col = d.collection.columns.find((c) => c.name === fieldName(f.name));
         if (col && !col.description) col.description = r.sentence;
-        if (col) d.madeBy.set(col.name, r.id);
+        if (col) {
+          d.madeBy.set(col.name, r.id);
+          col.relation = r.id;
+        }
         continue;
       }
       const col: WorldColumn = { name: fieldName(f.name), kind: f.kind, type: STORAGE_TYPE[f.kind] };
@@ -307,6 +312,7 @@ export function projectWorld(files: WorldFiles): WorldProjection {
       }
       if (f.required) col.required = true;
       col.description = r.sentence;
+      col.relation = r.id;
       d.madeBy.set(col.name, r.id);
       addColumn(d, by, col, f.kind === 'choice' ? f.values || [] : undefined);
       if (f.unique) d.collection.indexes.push({ fields: [col.name], unique: true });
@@ -636,7 +642,7 @@ export function schemaPushes(schema: WorldSchema): SchemaPush[] {
     action: 'createTable',
     table: c.name,
     description: c.description,
-    columns: c.columns.map(({ kind, ...col }) => (void kind, col)),
+    columns: c.columns.map(({ kind, relation, ...col }) => (void kind, void relation, col)),
     checks: c.checks.map((k) => ({ field: k.field, oneOf: k.oneOf.slice() })),
     indexes: c.indexes.map((i) => ({ ...i, fields: i.fields.slice() }))
   }));

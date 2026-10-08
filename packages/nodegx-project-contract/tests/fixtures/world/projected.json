@@ -31,13 +31,15 @@
           "name": "idElsewhere",
           "kind": "text",
           "type": "String",
-          "description": "A member also has a login on the course platform."
+          "description": "A member also has a login on the course platform.",
+          "relation": "on-the-course-platform"
         },
         {
           "name": "endedAt",
           "kind": "date",
           "type": "Date",
-          "description": "A person can leave, and we keep what they did."
+          "description": "A person can leave, and we keep what they did.",
+          "relation": "leaves"
         }
       ],
       "checks": [],
@@ -66,7 +68,8 @@
           "name": "plan",
           "kind": "choice",
           "type": "String",
-          "description": "The size of membership they pay for."
+          "description": "The size of membership they pay for.",
+          "relation": "plan-size"
         },
         {
           "name": "renews",
@@ -79,7 +82,8 @@
           "type": "Pointer",
           "targetClass": "Company",
           "required": true,
-          "description": "Every account is one company's."
+          "description": "Every account is one company's.",
+          "relation": "account-company"
         }
       ],
       "checks": [
@@ -156,14 +160,16 @@
           "kind": "choice",
           "type": "String",
           "required": true,
-          "description": "A note is about a person or about an account."
+          "description": "A note is about a person or about an account.",
+          "relation": "note-about"
         },
         {
           "name": "pointsAtId",
           "kind": "text",
           "type": "String",
           "required": true,
-          "description": "A note is about a person or about an account."
+          "description": "A note is about a person or about an account.",
+          "relation": "note-about"
         },
         {
           "name": "owner",
@@ -171,7 +177,8 @@
           "type": "Pointer",
           "targetClass": "Person",
           "required": true,
-          "description": "Only whoever wrote a note may change it; the two of us can read every note."
+          "description": "Only whoever wrote a note may change it; the two of us can read every note.",
+          "relation": "note-author"
         }
       ],
       "checks": [
@@ -203,7 +210,8 @@
           "type": "Pointer",
           "targetClass": "Person",
           "required": true,
-          "description": "A person is on an account as a member, from the day they join until they leave."
+          "description": "A person is on an account as a member, from the day they join until they leave.",
+          "relation": "membership"
         },
         {
           "name": "account",
@@ -211,19 +219,22 @@
           "type": "Pointer",
           "targetClass": "Account",
           "required": true,
-          "description": "A person is on an account as a member, from the day they join until they leave."
+          "description": "A person is on an account as a member, from the day they join until they leave.",
+          "relation": "membership"
         },
         {
           "name": "since",
           "kind": "date",
           "type": "Date",
-          "description": "A person is on an account as a member, from the day they join until they leave."
+          "description": "A person is on an account as a member, from the day they join until they leave.",
+          "relation": "membership"
         },
         {
           "name": "until",
           "kind": "date",
           "type": "Date",
-          "description": "A person is on an account as a member, from the day they join until they leave."
+          "description": "A person is on an account as a member, from the day they join until they leave.",
+          "relation": "membership"
         },
         {
           "name": "role",
@@ -260,28 +271,32 @@
           "kind": "link",
           "type": "Pointer",
           "targetClass": "Person",
-          "description": "A person came to a session."
+          "description": "A person came to a session.",
+          "relation": "attended"
         },
         {
           "name": "at",
           "kind": "date",
           "type": "Date",
           "required": true,
-          "description": "A person came to a session."
+          "description": "A person came to a session.",
+          "relation": "attended"
         },
         {
           "name": "session",
           "kind": "link",
           "type": "Pointer",
           "targetClass": "Session",
-          "description": "A person came to a session."
+          "description": "A person came to a session.",
+          "relation": "attended"
         },
         {
           "name": "doneBy",
           "kind": "link",
           "type": "Pointer",
           "targetClass": "_User",
-          "description": "A person came to a session."
+          "description": "A person came to a session.",
+          "relation": "attended"
         },
         {
           "name": "late",

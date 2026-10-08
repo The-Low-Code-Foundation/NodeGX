@@ -229,6 +229,15 @@ export const directusDescriptor: BackendDescriptor = {
       'BCN-003 live: the complement of the above'
     ),
 
+    // P116 ONT-004. Directus's deep filter IS a path filter, and BCN-005
+    // measured it one hop deep (and the junction spelling a many-to-many
+    // needs). A five-hop path has not been driven, and the translator does
+    // not write one; unsupported until it does.
+    path: unsupported(
+      'Following several links in one request is not available on Directus yet. Filter one link at a time with a nested field.',
+      'BCN-005 live: one hop works as a nested path ({author:{city:{_eq}}}); deeper paths not driven, no translator'
+    ),
+
     relatedTo: unsupported(
       'Filtering by "records related to this one" is not available on Directus yet.',
       'Needs a junction-table query. BCN-005.'

@@ -14,7 +14,7 @@ import * as path from 'path';
 import { applyMutant, collectionName, fieldName, projectWorld, schemaText, WORLD_FILES, WORLD_KINDS, type WorldFiles, type WorldSchema } from '../world';
 
 const FIXTURES = path.join(__dirname, 'fixtures');
-const WORLDS = ['world', 'world-every-kind'] as const;
+const WORLDS = ['world', 'world-every-kind', 'world-membership'] as const;
 
 function readWorld(fixture: string): WorldFiles {
   const read = (f: string) => JSON.parse(fs.readFileSync(path.join(FIXTURES, fixture, f), 'utf8'));

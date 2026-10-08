@@ -68,6 +68,10 @@ function createPocketBaseDialect(): FilterDialect<PocketBaseFilter> {
       return ctx.fail('PocketBase cannot filter by Parse-style relations', { operator: 'relatedTo' });
     },
 
+    path(node, ctx) {
+      return ctx.fail('PocketBase cannot follow a path through several links in one request', { operator: 'path' });
+    },
+
     condition(node, ctx) {
       return expr(conditionExpression(node, ctx, bind));
     }

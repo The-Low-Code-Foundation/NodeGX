@@ -738,6 +738,23 @@ class LocalSQLAdapter {
   }
 
   /**
+   * P116 ONT-004: what a `$path` filter may learn about any collection it
+   * walks through — the declared columns (a Pointer's target) and the columns
+   * the table has. `null` for a collection that does not exist, which the
+   * builder refuses by name rather than letting SQLite answer "no such table".
+   *
+   * @private
+   */
+  _pathLookup(): QueryBuilder.CollectionLookup {
+    return (collection: string) => {
+      const properties = declaredProperties(this._getSchema(collection));
+      const scope = this._columnScope(collection);
+      if (!properties && !scope) return null;
+      return { properties, present: scope?.present };
+    };
+  }
+
+  /**
    * Get schema for a collection
    *
    * @private
@@ -844,7 +861,7 @@ class LocalSQLAdapter {
 
       const schema = this._getSchema(options.collection);
       const scope = this._columnScope(options.collection);
-      const { sql, params } = QueryBuilder.buildSelect(options, schema, scope);
+      const { sql, params } = QueryBuilder.buildSelect({ ...options, lookup: this._pathLookup() }, schema, scope);
 
       const rows = this.db.prepare(sql).all(...params) as AdapterRecord[];
       const results = rows.map((row) => this._rowToRecord(row, options.collection));
@@ -852,7 +869,7 @@ class LocalSQLAdapter {
       // Handle count if requested
       let count;
       if (options.count) {
-        const { sql: countSQL, params: countParams } = QueryBuilder.buildCount(options, schema, scope);
+        const { sql: countSQL, params: countParams } = QueryBuilder.buildCount({ ...options, lookup: this._pathLookup() }, schema, scope);
         const countRow = this.db.prepare(countSQL).get(...countParams) as { count?: number } | undefined;
         count = countRow?.count || 0;
       }
@@ -905,7 +922,7 @@ class LocalSQLAdapter {
 
       const schema = this._getSchema(options.collection);
       const scope = this._columnScope(options.collection);
-      const { sql, params } = QueryBuilder.buildSearchSelect(options, schema, scope);
+      const { sql, params } = QueryBuilder.buildSearchSelect({ ...options, lookup: this._pathLookup() }, schema, scope);
 
       const rows = this.db.prepare(sql).all(...params) as AdapterRecord[];
       const results = rows.map((row) => {
@@ -920,7 +937,7 @@ class LocalSQLAdapter {
 
       let count;
       if (options.count) {
-        const { sql: countSQL, params: countParams } = QueryBuilder.buildSearchCount(options, schema, scope);
+        const { sql: countSQL, params: countParams } = QueryBuilder.buildSearchCount({ ...options, lookup: this._pathLookup() }, schema, scope);
         const countRow = this.db.prepare(countSQL).get(...countParams) as { count?: number } | undefined;
         count = countRow?.count || 0;
       }
@@ -952,7 +969,11 @@ class LocalSQLAdapter {
       let sql = `SELECT * FROM ${QueryBuilder.escapeTable(options.collection)} WHERE "objectId" = ?`;
       // Row-level read check: an unreadable row answers exactly like a missing
       // one (existence hiding).
-      const aclClause = QueryBuilder.buildAclPredicate(options.collection, options.acl, params);
+      const aclClause = QueryBuilder.buildAclPredicate(options.collection, options.acl, params, 'sqlite', {
+        collection: options.collection,
+        acl: options.acl,
+        lookup: this._pathLookup()
+      });
       if (aclClause) {
         sql += ` AND ${aclClause}`;
       }
@@ -1095,14 +1116,14 @@ class LocalSQLAdapter {
 
       this._guardAclSupport(options);
       const recordId = options.id || options.objectId;
-      const { sql, params } = QueryBuilder.buildUpdate(options);
+      const { sql, params } = QueryBuilder.buildUpdate({ ...options, lookup: this._pathLookup() });
       const result = this.db.prepare(sql).run(...params);
 
       // HLT-016: a precondition that matched nothing is "changed since read" only if the row is
       // there and this caller may write it. The probe carries the ACL, so a forbidden row still
       // answers "not found". Asked AFTER the write, which already did not happen, so it cannot race.
       if (options.expect && (!result || result.changes === 0)) {
-        const probe = QueryBuilder.buildRowExists(options.collection, recordId, options.acl);
+        const probe = QueryBuilder.buildRowExists(options.collection, recordId, options.acl, 'sqlite', this._pathLookup());
         const exists = this.db.prepare(probe.sql).get(...probe.params);
         options.error(exists ? QueryBuilder.PRECONDITION_FAILED : 'Object not found');
         return;
@@ -1169,7 +1190,7 @@ class LocalSQLAdapter {
         removedRecord = null;
       }
 
-      const { sql, params } = QueryBuilder.buildDelete(options);
+      const { sql, params } = QueryBuilder.buildDelete({ ...options, lookup: this._pathLookup() });
       const result = this.db.prepare(sql).run(...params);
 
       if (options.acl && (!result || result.changes === 0)) {
@@ -1201,7 +1222,7 @@ class LocalSQLAdapter {
 
       const schema = this._getSchema(options.collection);
       const scope = this._columnScope(options.collection);
-      const { sql, params } = QueryBuilder.buildCount(options, schema, scope);
+      const { sql, params } = QueryBuilder.buildCount({ ...options, lookup: this._pathLookup() }, schema, scope);
 
       const row = this.db.prepare(sql).get(...params) as { count?: number } | undefined;
       this._reportAbsentColumns(options.collection, scope);
@@ -1221,7 +1242,7 @@ class LocalSQLAdapter {
       this._guardAclSupport(options);
 
       const scope = this._columnScope(options.collection);
-      const { sql, params } = QueryBuilder.buildAggregate(options, scope);
+      const { sql, params } = QueryBuilder.buildAggregate({ ...options, lookup: this._pathLookup() }, scope);
       const row = this.db.prepare(sql).get(...params) as AdapterRecord | undefined;
       this._reportAbsentColumns(options.collection, scope);
 
@@ -1249,7 +1270,7 @@ class LocalSQLAdapter {
       this._guardAclSupport(options);
 
       const scope = this._columnScope(options.collection);
-      const { sql, params } = QueryBuilder.buildDistinct(options, scope);
+      const { sql, params } = QueryBuilder.buildDistinct({ ...options, lookup: this._pathLookup() }, scope);
       const rows = this.db.prepare(sql).all(...params) as AdapterRecord[];
 
       this._reportAbsentColumns(options.collection, scope);
@@ -1269,7 +1290,7 @@ class LocalSQLAdapter {
       this._ensureTable(options.collection);
       this._guardAclSupport(options);
 
-      const { sql, params } = QueryBuilder.buildIncrement(options);
+      const { sql, params } = QueryBuilder.buildIncrement({ ...options, lookup: this._pathLookup() });
       const result = this.db.prepare(sql).run(...params);
 
       if (options.acl && (!result || result.changes === 0)) {

@@ -20,6 +20,7 @@ import {
   CLP_OPS,
   RuleSelection,
   RuleValue,
+  atomWords,
   atomsOf,
   isNobody,
   parseRule,
@@ -64,7 +65,7 @@ export function audienceWords(sel: RuleSelection, defaultSel?: RuleSelection): s
   if (sel.anyone) return 'Everyone';
   const parts: string[] = [];
   if (sel.signedIn) parts.push('Signed in');
-  parts.push(...sel.roles, ...sel.unknown);
+  parts.push(...sel.roles, ...sel.unknown.map(atomWords));
   return parts.length ? parts.join(', ') : 'No one';
 }
 

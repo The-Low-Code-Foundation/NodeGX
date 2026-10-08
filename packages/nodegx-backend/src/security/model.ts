@@ -15,6 +15,7 @@
  * @module nodegx-backend/security/model
  */
 
+import { pathProblem, type PathHop } from '@noodl/backend-contract';
 import type { RateLimitPolicy } from '../ops/model';
 
 // ============================================================================
@@ -138,15 +139,59 @@ export type ClpOp = 'find' | 'get' | 'create' | 'update' | 'delete';
 export const CLP_OPS: ClpOp[] = ['find', 'get', 'create', 'update', 'delete'];
 
 /**
- * A single rule: 'public' | 'authenticated' | 'nobody' | 'role:<name>',
- * or an array of those (OR semantics).
+ * P116 ONT-004 — a rule through a chain: *"an account holder sees the members
+ * on their account"*. The caller may reach the rows this path reaches from
+ * their own `_User` row; nobody else is let in by it, and an anonymous caller
+ * never is. The hops are the contract's `PathHop`s (`@noodl/backend-contract`
+ * `PathFilter`), with every nested `where` in Parse-wire spelling; `maxDepth`
+ * is mandatory and at most `MAX_PATH_DEPTH`.
+ *
+ * It is an atom like `role:<name>`, so it ORs with the others: `['role:admin',
+ * { path }]` lets an admin see everything and everyone else what they reach.
+ * Allowed on `find`, `get`, `update` and `delete` — a row that is not there
+ * yet cannot be reached, so never on `create`, and never on a function, a
+ * file or signup.
+ *
+ * Enforced where the row ACL is enforced, in the SQL (`StorageAclOption.only`),
+ * so a reader that passes the caller's ACL applies the rule and a reader that
+ * cannot (live updates) refuses the subscription rather than streaming past it.
  */
-export type RuleValue = string | string[];
+export interface PathRule {
+  path: { hops: PathHop[]; maxDepth: number };
+}
+
+export type RuleAtom = string | PathRule;
+
+/**
+ * A single rule: 'public' | 'authenticated' | 'nobody' | 'role:<name>' or a
+ * {@link PathRule}, or an array of those (OR semantics).
+ */
+export type RuleValue = RuleAtom | RuleAtom[];
 
 const RULE_ATOMS = new Set(['public', 'authenticated', 'nobody']);
 
+/** True for the one object-shaped atom. */
+export function isPathRule(atom: unknown): atom is PathRule {
+  return !!atom && typeof atom === 'object' && !Array.isArray(atom) && 'path' in (atom as Record<string, unknown>);
+}
+
+/** The `$path` a {@link PathRule} compiles to for one signed-in caller. */
+export function pathRuleWhere(rule: PathRule, userId: string): Record<string, unknown> {
+  return { $path: { from: { collection: '_User', where: { objectId: userId } }, hops: rule.path.hops, maxDepth: rule.path.maxDepth } };
+}
+
 /** Validate one rule atom. Returns an error message or null. */
-function validateRuleAtom(atom: unknown): string | null {
+function validateRuleAtom(atom: unknown, paths: boolean): string | null {
+  if (isPathRule(atom)) {
+    if (!paths) return 'a path rule is allowed only on find, get, update and delete of a collection';
+    const keys = Object.keys(atom);
+    if (keys.length !== 1) return `a path rule has only "path", not ${keys.filter((k) => k !== 'path').join(', ')}`;
+    const inner = atom.path as unknown as Record<string, unknown>;
+    if (!inner || typeof inner !== 'object' || Array.isArray(inner)) return 'a path rule is { "path": { "hops": […], "maxDepth": n } }';
+    for (const k of Object.keys(inner)) if (k !== 'hops' && k !== 'maxDepth') return `a path rule has no "${k}"`;
+    const problem = pathProblem({ from: { collection: '_User' }, hops: inner.hops, maxDepth: inner.maxDepth });
+    return problem ? `path rule: ${problem}` : null;
+  }
   if (typeof atom !== 'string') return `rule must be a string, got ${typeof atom}`;
   if (RULE_ATOMS.has(atom)) return null;
   if (atom.startsWith('role:')) {
@@ -206,34 +251,67 @@ export function validateFunctionIdempotency(value: unknown): string | null {
   return null;
 }
 
-export function validateRuleValue(value: unknown): string | null {
+/**
+ * @param paths whether a {@link PathRule} atom may appear — true only for a
+ *   collection's `find`, `get`, `update` and `delete`.
+ */
+export function validateRuleValue(value: unknown, paths = false): string | null {
   if (Array.isArray(value)) {
     if (value.length === 0) return 'empty rule arrays are not allowed (use "nobody")';
     for (const atom of value) {
-      const err = validateRuleAtom(atom);
+      const err = validateRuleAtom(atom, paths);
       if (err) return err;
     }
     return null;
   }
-  return validateRuleAtom(value);
+  return validateRuleAtom(value, paths);
+}
+
+/** The atoms of a rule, whichever shape it was stored in. */
+export function ruleAtoms(rule: RuleValue): RuleAtom[] {
+  return Array.isArray(rule) ? rule : [rule];
+}
+
+/** Does one atom grant this principal outright (without narrowing)? */
+function atomGrants(atom: RuleAtom, principal: Principal): boolean {
+  if (isPathRule(atom)) return false;
+  if (atom === 'public') return true;
+  if (atom === 'nobody') return false;
+  if (atom === 'authenticated' && principal.kind === 'user') return true;
+  if (atom.startsWith('role:') && principal.kind === 'user') {
+    return principal.roles.includes(atom.slice('role:'.length));
+  }
+  return false;
 }
 
 /**
  * Does a rule grant this principal the operation? Admin/system is decided
  * before rules are consulted (bypass); API-key scope checks likewise — this
  * evaluates rules for users and anonymous callers only.
+ *
+ * A {@link PathRule} grants a signed-in caller — the rows they reach, which
+ * {@link ruleNarrowing} says and which may be none. An anonymous caller has no
+ * row to start from and is not granted.
  */
 export function ruleAllows(rule: RuleValue, principal: Principal): boolean {
-  const atoms = Array.isArray(rule) ? rule : [rule];
-  for (const atom of atoms) {
-    if (atom === 'public') return true;
-    if (atom === 'nobody') continue;
-    if (atom === 'authenticated' && principal.kind === 'user') return true;
-    if (atom.startsWith('role:') && principal.kind === 'user') {
-      if (principal.roles.includes(atom.slice('role:'.length))) return true;
-    }
+  for (const atom of ruleAtoms(rule)) {
+    if (atomGrants(atom, principal)) return true;
+    if (isPathRule(atom) && principal.kind === 'user') return true;
   }
   return false;
+}
+
+/**
+ * What a rule narrows a granted caller to, or `undefined` when an atom grants
+ * them outright. Several path atoms OR together: the rows any of them reaches.
+ */
+export function ruleNarrowing(rule: RuleValue, principal: Principal): Record<string, unknown> | undefined {
+  const atoms = ruleAtoms(rule);
+  if (atoms.some((a) => atomGrants(a, principal))) return undefined;
+  if (principal.kind !== 'user') return undefined;
+  const paths = atoms.filter(isPathRule).map((a) => pathRuleWhere(a, principal.userId));
+  if (paths.length === 0) return undefined;
+  return paths.length === 1 ? paths[0] : { $or: paths };
 }
 
 // ============================================================================
@@ -417,7 +495,7 @@ export function validateSecurityConfig(raw: unknown): string[] {
         if (perms[op] === undefined) {
           errors.push(`defaults.permissions.${op} is required`);
         } else {
-          const err = validateRuleValue(perms[op]);
+          const err = validateRuleValue(perms[op], op !== 'create');
           if (err) errors.push(`defaults.permissions.${op}: ${err}`);
         }
       }
@@ -454,7 +532,7 @@ export function validateSecurityConfig(raw: unknown): string[] {
             if (!CLP_OPS.includes(op as ClpOp)) {
               errors.push(`unknown operation "${op}" in collections.${name}.permissions`);
             } else {
-              const err = validateRuleValue(rule);
+              const err = validateRuleValue(rule, op !== 'create');
               if (err) errors.push(`collections.${name}.permissions.${op}: ${err}`);
             }
           }
@@ -578,6 +656,12 @@ export interface AccessDecision {
   /** The rule that decided, for check/debug surfaces. */
   rule: RuleValue;
   reason: string;
+  /**
+   * P116 ONT-004: present when the caller is let in by a {@link PathRule}
+   * alone — the `where` their rows are narrowed to. A reader that cannot apply
+   * it must refuse, never ignore it.
+   */
+  narrow?: Record<string, unknown>;
 }
 
 /** API-key scope check for data operations. */
@@ -657,7 +741,12 @@ export function checkClp(config: SecurityConfig, principal: Principal, collectio
     // branch below untouched, which is what every key does today.
     if (principal.actsAs) {
       return ruleAllows(rule, rulePrincipal(principal))
-        ? { allowed: true, rule, reason: `API key scope covers classes ${op}, and rule ${JSON.stringify(rule)} grants it to the user "${principal.name}" acts as` }
+        ? {
+            allowed: true,
+            rule,
+            reason: `API key scope covers classes ${op}, and rule ${JSON.stringify(rule)} grants it to the user "${principal.name}" acts as`,
+            ...narrowed(rule, rulePrincipal(principal))
+          }
         : {
             allowed: false,
             rule,
@@ -667,8 +756,14 @@ export function checkClp(config: SecurityConfig, principal: Principal, collectio
     return { allowed: true, rule, reason: `API key scope covers classes ${op}` };
   }
   return ruleAllows(rule, principal)
-    ? { allowed: true, rule, reason: `rule ${JSON.stringify(rule)} grants ${op} to ${principal.kind}` }
+    ? { allowed: true, rule, reason: `rule ${JSON.stringify(rule)} grants ${op} to ${principal.kind}`, ...narrowed(rule, principal) }
     : { allowed: false, rule, reason: `rule ${JSON.stringify(rule)} denies ${op} to ${principal.kind}` };
+}
+
+/** The `narrow` field of a decision, when the rule narrows. */
+function narrowed(rule: RuleValue, principal: Principal): { narrow?: Record<string, unknown> } {
+  const narrow = ruleNarrowing(rule, principal);
+  return narrow ? { narrow } : {};
 }
 
 // ============================================================================

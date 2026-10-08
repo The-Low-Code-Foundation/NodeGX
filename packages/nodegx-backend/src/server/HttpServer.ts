@@ -49,7 +49,8 @@ import {
   functionTimeoutMs,
   ruleAllows,
   rulePrincipal,
-  validateAclShape
+  validateAclShape,
+  type AccessDecision
 } from '../security/model';
 import type { TriggerSubsystem } from '../triggers/TriggerSubsystem';
 import type { WorkflowSubsystem } from '../workflow/WorkflowSubsystem';
@@ -144,9 +145,17 @@ export interface RequestContext {
   body: Record<string, unknown> | null;
   principal: Principal;
   security: SecurityState;
-  /** acl option for adapter calls; undefined = bypass (dev-open / admin / scoped key). */
-  acl(access: 'read' | 'write'): AclOption | undefined;
-  /** Throw 403/119 unless `op` on `collection` is allowed (used by /api/_batch). */
+  /**
+   * acl option for adapter calls; undefined = bypass (dev-open / admin / scoped key).
+   *
+   * P116 ONT-004: carries a path rule's narrowing for `collection` — the route's
+   * own collection when none is named, so the routes that declare one need no
+   * edit; a route that checks per item (`checkData`) names the collection it is
+   * about to read or write, or the narrowing is not applied and the rule is a
+   * hole shaped exactly like the one reader that forgot.
+   */
+  acl(access: 'read' | 'write', collection?: string): AclOption | undefined;
+  /** Throw 403/119 unless `op` on `collection` is allowed (used by /api/_batch); remembers the decision's narrowing for `acl()`. */
   checkData(collection: string, op: ClpOp): void;
   /** Owner + template-ACL stamping and client-ACL validation for creates. */
   stampCreate(collection: string, data: Record<string, unknown>): void;
@@ -1933,7 +1942,10 @@ export class HttpServer {
     }
 
     // Steps 2–3: dev-open fast-path, then the route gate.
-    this.checkAccess(route.access, principal, params, body, query);
+    const gated = this.checkAccess(route.access, principal, params, body, query);
+    // P116 ONT-004: what a path rule narrows this caller to, per collection.
+    const narrowings = new Map<string, AclOption['only']>();
+    if (gated?.narrow) narrowings.set(gated.collection, { collection: gated.collection, where: gated.narrow });
 
     const ctx: RequestContext = {
       req,
@@ -1945,8 +1957,13 @@ export class HttpServer {
       body,
       principal,
       security: this.security,
-      acl: (access) => this.security.aclFor(principal, access),
-      checkData: (collection, op) => this.assertDataAccess(principal, collection, op),
+      acl: (access, collection) =>
+        this.security.aclFor(principal, access, narrowings.get(collection ?? gated?.collection ?? '')),
+      checkData: (collection, op) => {
+        const decision = this.assertDataAccess(principal, collection, op);
+        if (decision?.narrow) narrowings.set(collection, { collection, where: decision.narrow });
+        else narrowings.delete(collection);
+      },
       stampCreate: (collection, data) => this.stampCreate(principal, collection, data),
       audit: (detail) => {
         // BMG-014: a handler that establishes WHO the caller is after the
@@ -1975,7 +1992,7 @@ export class HttpServer {
     params: Record<string, string>,
     body: Record<string, unknown> | null,
     query: Record<string, string> = {}
-  ): void {
+  ): { collection: string; narrow?: Record<string, unknown> } | undefined {
     if (access.kind === 'public') return;
 
     // Step 2a: the admin gate, which dev-open does NOT relax (FH-024).
@@ -2050,8 +2067,8 @@ export class HttpServer {
         const collection = params[access.collectionParam];
         const op: ClpOp =
           access.op === 'byBody' ? (body && body._method === 'GET' ? 'find' : 'create') : access.op;
-        this.assertDataAccess(principal, collection, op);
-        return;
+        const decision = this.assertDataAccess(principal, collection, op);
+        return { collection, narrow: decision?.narrow };
       }
 
       case 'data-perOp':
@@ -2162,12 +2179,13 @@ export class HttpServer {
    * own collections. That is the cost of dev-open, it is not what FH-024 closed,
    * and turning `devOpen` off is what removes it.
    */
-  private assertDataAccess(principal: Principal, collection: string, op: ClpOp): void {
-    if (this.security.devOpenActive) return;
+  private assertDataAccess(principal: Principal, collection: string, op: ClpOp): AccessDecision | undefined {
+    if (this.security.devOpenActive) return undefined;
     const decision = this.security.checkClp(principal, collection, op);
     if (!decision.allowed) {
       throw new HttpError(403, `Permission denied for this operation on "${collection}".`, 119);
     }
+    return decision;
   }
 
   /**

@@ -4,11 +4,18 @@
  * @module backend-contract/translators/walk
  */
 
-import { FILTER_OPERATORS, type Filter, type FilterOperator, type RelatedToFilter } from '../filter';
+import {
+  FILTER_OPERATORS,
+  pathProblem,
+  type Filter,
+  type FilterOperator,
+  type PathFilter,
+  type RelatedToFilter
+} from '../filter';
 import { FilterTranslationError, type FilterNode } from './types';
 
 /** Operator keys that may sit at the top level of a node rather than under a field. */
-const TOP_LEVEL_OPERATORS = ['idEqualTo', 'idContainedIn', 'relatedTo'] as const;
+const TOP_LEVEL_OPERATORS = ['idEqualTo', 'idContainedIn', 'relatedTo', 'path'] as const;
 
 const OPERATOR_SET = new Set<string>(FILTER_OPERATORS);
 
@@ -81,6 +88,12 @@ export function parseFilterNode(filter: Filter | null | undefined): FilterNode {
       throw new FilterTranslationError('Must provide key in relatedTo filter', { operator: 'relatedTo' });
     }
     return { kind: 'relatedTo', value: related };
+  }
+
+  if (key === 'path') {
+    const problem = pathProblem(value);
+    if (problem) throw new FilterTranslationError(`A path filter is malformed: ${problem}`, { operator: 'path' });
+    return { kind: 'path', value: value as PathFilter };
   }
 
   // Anything else is a leaf, keyed by field name.

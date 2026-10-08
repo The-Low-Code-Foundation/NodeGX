@@ -116,7 +116,8 @@ export function translateWith<T>(
     schema: options.schema,
     fail(message, details) {
       throw new FilterTranslationError(message, details);
-    }
+    },
+    translate: (nested) => visit(nested)
   };
 
   const gate = (operator: FilterOperator, field?: string): void => {
@@ -151,6 +152,10 @@ export function translateWith<T>(
       case 'relatedTo':
         gate('relatedTo');
         return dialect.relatedTo(node, ctx);
+
+      case 'path':
+        gate('path');
+        return dialect.path(node, ctx);
 
       case 'condition':
         gate(node.operator, node.field);

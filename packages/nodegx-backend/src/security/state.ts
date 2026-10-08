@@ -504,7 +504,15 @@ export class SecurityState {
    * row-level checks (dev-open, admin, or an API key whose scope covers the
    * access — scoped keys are data-plane tools, not users; model doc §6).
    */
-  aclFor(principal: Principal, access: 'read' | 'write'): AclOption | undefined {
+  aclFor(principal: Principal, access: 'read' | 'write', narrow?: AclOption['only']): AclOption | undefined {
+    const base = this.aclKeysFor(principal, access);
+    // P116 ONT-004: a path rule's narrowing rides in the ACL option, scoped to
+    // its collection. It arises only for a signed-in caller (or a key acting as
+    // one), for whom `base` is always an option — a bypass never narrows.
+    return base && narrow ? { ...base, only: narrow } : base;
+  }
+
+  private aclKeysFor(principal: Principal, access: 'read' | 'write'): AclOption | undefined {
     if (this.devOpenActive) return undefined;
     if (principal.kind === 'admin') return undefined;
     if (principal.kind === 'apiKey') {

@@ -169,6 +169,15 @@ export const parseDescriptor: BackendDescriptor = {
   }),
 
   filters: filterTable(supported(SHIPPED), {
+    // P116 ONT-004. Parse can nest inner queries ($inQuery, $select), which is a
+    // path one hop per nesting — but that lowering is not written, and a cell
+    // flipped on the strength of the documentation is the hole this table
+    // exists to close. Refused by name until a live pass proves it.
+    path: unsupported(
+      'Following several links in one request is not available on Parse yet. Filter one link at a time with "points to" or "related to".',
+      'Not driven. Parse spells it as nested $inQuery / $select; no translator writes that yet'
+    ),
+
     // Parse has no native contains/startsWith/endsWith or between. They are
     // NOT gated: `contains` is `$regex`, `between` is two comparisons under an
     // `and`, and Parse's regex is a real regex so the lowering is exact. See

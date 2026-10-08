@@ -43,7 +43,11 @@ export interface SSEResponse {
 /** The security surface the hub needs — structurally satisfied by SecurityState. */
 export interface HubSecurity {
   readonly devOpenActive: boolean;
-  checkClp(principal: Principal, collection: string, op: ClpOp): { allowed: boolean; reason: string };
+  checkClp(
+    principal: Principal,
+    collection: string,
+    op: ClpOp
+  ): { allowed: boolean; reason: string; narrow?: Record<string, unknown> };
 }
 
 export interface Subscription {
@@ -291,6 +295,16 @@ export class RealtimeHub {
         const decision = this.security.checkClp(conn.principal, collection, 'find');
         if (!decision.allowed) {
           rejected.push({ collection, reason: decision.reason });
+          continue;
+        }
+        // P116 ONT-004: a path rule narrows rows through a chain the matcher
+        // cannot follow on a change frame. Refused here, by name, rather than
+        // streamed past — a subscriber must never receive what a query excludes.
+        if (decision.narrow) {
+          rejected.push({
+            collection,
+            reason: `"${collection}" lets you see rows through a path rule, and live updates cannot follow a path yet — query it instead`
+          });
           continue;
         }
       }
