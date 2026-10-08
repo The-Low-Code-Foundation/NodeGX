@@ -2,6 +2,7 @@
 id: P107-C123
 title: With Use Routes, a page pushed (or started) by its label rather than its id gets no URL: the address becomes #, and a reload or Back shows the start page
 status: fixed
+commit: 52367365b
 phase: P109
 task: ISL-048
 severity: low

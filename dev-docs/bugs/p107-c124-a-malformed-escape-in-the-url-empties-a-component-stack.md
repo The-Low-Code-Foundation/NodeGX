@@ -2,6 +2,7 @@
 id: P107-C124
 title: With Use Routes, a URL whose query or path parameter has a malformed escape (%zz) empties the Component Stack, and its Reset is never answered
 status: fixed
+commit: f13a3d88f
 phase: P109
 task: ISL-048
 severity: medium

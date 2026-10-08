@@ -2,6 +2,7 @@
 id: P107-C119
 title: The browser's Back or Forward sends every Component Stack on the page back to its start page, Use Routes or not
 status: fixed
+commit: b5b06bcb6
 phase: P109
 task: ISL-048
 severity: medium

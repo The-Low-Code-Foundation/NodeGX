@@ -2,6 +2,7 @@
 id: P107-C125
 title: A Component Stack page whose Path is wired null empties the stack at every reset that reaches it
 status: fixed
+commit: 230565982
 phase: P109
 task: ISL-048
 severity: low

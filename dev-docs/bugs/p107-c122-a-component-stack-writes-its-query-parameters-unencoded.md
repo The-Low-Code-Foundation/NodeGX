@@ -2,6 +2,7 @@
 id: P107-C122
 title: With Use Routes, a page's parameters go into the URL's query unencoded: a value with &, #, + or a space comes back different, and one with % empties the stack at the next reset
 status: fixed
+commit: 159d0dfaf
 phase: P109
 task: ISL-048
 severity: medium

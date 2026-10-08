@@ -152,3 +152,32 @@ Every row: runtime at seeds 13 and 20732, interpreter mutants 0 survivors at bot
 
 **Left (16):** C119, C122, C124 (C115's twin), C120 (ruled), C121, C123, C125, C126 (ruled), C127, C113, C114; the Drag's C102,
 C105, C106, and C103, C104 (ruled). **The export:** not checked (P18's).
+
+## 10. Session 31, second batch (2026-10-08) — the Component Stack's address
+
+Built in worktree `p109-isl048` on `5f8fe659f`, each with the interpreter's trace of every scenario diffed before and after its
+spec version and the changed scenarios renamed where their names claimed the old outcome; cherry-picked onto `d5876f6b4` (P107
+s62, which changed `page-model.helper.ts`) and re-gated there.
+
+| Row | Commit | What changed | Grade |
+|---|---|---|---|
+| C124 | `f13a3d88f` | the address's query and `{name}` parts decode with `decodeOrKeep`: a malformed escape is kept as written (C115's twin); spec v9 | 149 / 149; control red on exactly 4 |
+| C122 | `159d0dfaf` | the query's names and values are written with `encodeURIComponent`, as the Page Router does; spec v10 | 149 / 149; control red on exactly 2 |
+| C125 | `230565982` | a Path that is not text is unset, so the page takes its label's path; spec v11, one scenario added | 150 / 150; control red on exactly 2 |
+| C123 | `52367365b` | `getRelativeURL` finds the page's row by the id `_findPage` found, so a page pushed or started by its label has its URL; spec v12 | 150 / 150; control red on exactly 2 |
+| C121 | `437a1bfaa` | in hash mode, a page with no parameters writes the address's path in front WHILE the address holds a query, so the query goes; spec v13 | 150 / 150; control red on exactly 2 |
+| C119 | `b5b06bcb6` | the `popstate` / `hashchange` listener returns at once with Use Routes off, read at the event; spec v14 | 150 / 150; control red on exactly 1 |
+
+Every row: runtime at seeds 13 and 20732, interpreter mutants 0 survivors at both. Batch (worktree): viewer 1,815 / 1,815, spec
+gates 505 / 523 (18 skipped), Push and Pop Component Stack conform on the runtime at 20732. Landing tree (`d5876f6b4` + the six):
+spec gates 505 / 523 (18 skipped), spec tsc 0.
+
+**What the batch found:**
+
+- **C121 was narrowed.** Writing the address's path in front of every hash-mode URL (the proposal) changed 22 traces and nothing a
+  browser shows: only the string handed to `pushState`. The fix writes it only while there is a query to clear.
+- **C120 and C126 (both ruled) wait on P107.** Building either needs the test world to model the browser's history stepping back
+  and an entry being replaced; that is P107's world file.
+
+**Left (10):** C120 and C126 (ruled; wait on the world), C113, C114, C127; the Drag's C102, C105, C106, and C103, C104 (ruled).
+**The export:** not checked (P18's).

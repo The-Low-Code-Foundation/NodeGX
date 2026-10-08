@@ -2,6 +2,7 @@
 id: P107-C121
 title: With Use Routes in hash mode, pushing a page with no parameters keeps the previous page's query in the address, and a reload or Back hands it those parameters
 status: fixed
+commit: 437a1bfaa
 phase: P109
 task: ISL-048
 severity: low
