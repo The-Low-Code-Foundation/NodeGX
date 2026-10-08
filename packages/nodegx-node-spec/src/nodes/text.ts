@@ -19,10 +19,10 @@
  *     Events Enabled off (:784-793; Pointer Events Mode `inherit` removes the style again, :772-781, any other value writes it
  *     from the last Enabled, `auto` when never written) leave the act to what is behind it. **Block Pointer Events** and **Click
  *     Bubbling** change what reaches the nodes AROUND it (pointerlisteners.ts) — nothing its own outputs show.
- *     That is the rule this spec states (R11: a spec says what a person gets, not how a renderer gets there). The runtime breaks
- *     it in one way, row **C79**: Pointer Events written after the element was drawn at Opacity 0 lets the invisible element
- *     take the pointer — a renderer detail (the write goes straight to the element; the opacity rule is re-applied only by a
- *     redraw that changes it), counted as a known row on the runtime target, not copied here.
+ *     That is the rule this spec states (R11: a spec says what a person gets, not how a renderer gets there). The runtime broke
+ *     it in one way, row **C79**: Pointer Events written after the element was drawn at Opacity 0 let the invisible element
+ *     take the pointer (the write went straight to the element, and the opacity rule was re-applied only by a redraw that
+ *     changed it) — fixed in P109 ISL-031: a Pointer Events write goes through the redraw.
  *   - **the keyboard**: a `<div>` takes none — until **Draggable** gives its ELEMENT `tabindex="0"` (drag-drop.ts :83-110):
  *     at once when the node has an element, else at the start of each of the next 60 frames until it has one (`whenMounted`
  *     :136-145; a settle is TWO frame starts here — its frame and its drain — and both come before the settle's paint commits). An element made later (a remount, a new Tag) has none: row **C77**. Draggable off takes them off
@@ -181,7 +181,7 @@ const CARDS: ReadonlyArray<{ readonly dragValue: unknown; readonly dragKind?: st
 export const Text = defineNode({
   type: 'Text',
   // v3 (NSP-016 s44, R11): v1's rule again — an element at Opacity 0, hidden, or with Pointer Events off takes no pointer, whatever
-  // order the writes came in; the runtime's exceptions are row C79, a known row. v2 (b4c997ed9) copied the renderer's redraw rules
+  // order the writes came in; the runtime's exceptions were row C79 (fixed in P109 ISL-031). v2 (b4c997ed9) copied the renderer's redraw rules
   // to reproduce C79 and was withdrawn the same day. Since v1: Mounted written the value it holds does nothing (:2285).
   // v4 (s50, NSP-016 step (b) of RESEARCH-DRAG-DROP.md §8): the file drop and the pointer's move — new acts, the rules above
   // v5 (s51, step (b)'s second half): THE ZONE SIDE — cards on the page, `grab`, `pickUp` and `away`; the one gesture is anyone's

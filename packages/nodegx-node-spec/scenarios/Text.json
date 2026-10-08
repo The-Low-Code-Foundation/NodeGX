@@ -5344,9 +5344,8 @@
     ]
   },
   {
-    "name": "row C79 — drawn at Opacity 0 a press meets nothing; after Pointer Events Enabled is written on, the invisible element still takes no pointer (the runtime: Pointer Down)",
-    "because": "Text.tsx :88-90 — an element at Opacity 0 takes no pointer; the runtime lets a later Pointer Events write through (row C79, known)",
-    "row": "NSP-016 §6 C79",
+    "name": "row C79 — drawn at Opacity 0 a press meets nothing; after Pointer Events Enabled is written on, the invisible element still takes no pointer",
+    "because": "Text.tsx :88-90 — an element at Opacity 0 takes no pointer; a later Pointer Events write goes through the render, so the rule has the last word (row C79, fixed in P109 ISL-031)",
     "params": {
       "opacity": 0
     },
@@ -5368,9 +5367,8 @@
     ]
   },
   {
-    "name": "row C79 — at Opacity 0, Pointer Events Mode Explicit and then Inherit leave the element taking no pointer (the runtime: Pointer Down both times)",
-    "because": "node-shared-port-definitions.ts :772-781; Text.tsx :88-90 (row C79, known)",
-    "row": "NSP-016 §6 C79",
+    "name": "row C79 — at Opacity 0, Pointer Events Mode Explicit and then Inherit leave the element taking no pointer",
+    "because": "node-shared-port-definitions.ts :772-781; Text.tsx :88-90 (row C79, fixed in P109 ISL-031)",
     "params": {
       "opacity": 0
     },
@@ -5400,9 +5398,8 @@
     ]
   },
   {
-    "name": "row C79 — Opacity 0 written later, then Pointer Events Enabled in a later frame: still no pointer (the runtime: Pointer Down)",
-    "because": "Text.tsx :88-90 (row C79, known)",
-    "row": "NSP-016 §6 C79",
+    "name": "row C79 — Opacity 0 written later, then Pointer Events Enabled in a later frame: still no pointer",
+    "because": "Text.tsx :88-90 (row C79, fixed in P109 ISL-031)",
     "steps": [
       "settle",
       {
@@ -5426,9 +5423,8 @@
     ]
   },
   {
-    "name": "row C79 — Pointer Events Enabled off then on, then Opacity 0: no pointer (the runtime: Pointer Down)",
-    "because": "Text.tsx :88-90 (row C79, known)",
-    "row": "NSP-016 §6 C79",
+    "name": "row C79 — Pointer Events Enabled off then on, then Opacity 0: no pointer",
+    "because": "Text.tsx :88-90 (row C79, fixed in P109 ISL-031)",
     "params": {
       "pointerEventsEnabled": false
     },
@@ -6276,8 +6272,8 @@
     ]
   },
   {
-    "name": "row C79 — a file drag at Opacity 0 written after Pointer Events: never over it (the runtime: Is Dragging Over true, and the drop)",
-    "because": "Text.tsx :88-90; node-shared-port-definitions.ts :784-793 — C79",
+    "name": "row C79 — a file drag at Opacity 0 written after Pointer Events: never over it",
+    "because": "Text.tsx :88-90; node-shared-port-definitions.ts :784-793 — row C79, fixed in P109 ISL-031",
     "params": {
       "acceptFileDrops": true,
       "pointerEventsEnabled": false
@@ -6310,8 +6306,7 @@
         "act": "fileDrop"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C79"
+    ]
   },
   {
     "name": "Mounted off and on under a drag: leaving the page turns Is Dragging Over off (C81); the let go enters the new element, the count 1, and drops",

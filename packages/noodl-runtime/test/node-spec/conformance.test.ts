@@ -52,30 +52,11 @@ function copyOfCounterWith(find: string, replace: string): NodeModule {
  * below must read 0 in the same commit.
  */
 /**
- * NSP-016 §6 C79 — a Text (Group, Image, Circle, Video) at Opacity exactly 0 takes no pointer (Text.tsx :88-90), but a Pointer Events
- * Enabled / Mode write after it was drawn reaches the element directly and the opacity rule is not re-applied — the runtime raises a
- * pointer output the spec does not. Narrow: the first difference is a pointer output on the RUNTIME's side, the last Opacity written
- * before it is the number 0, and a Pointer Events input was written before it. s50: a drag from the desktop is under the same hit test,
- * so what it raises on the element counts too — Files Dropped / Files Rejected, Is Dragging Over going true, a dropped file's values.
+ * The pointer outputs and a file drop's values (C79 was fixed in P109 ISL-031: Pointer Events goes through the render, so the
+ * opacity rule has the last word; the Video's C100 below reads these).
  */
 const POINTER_OUTPUTS = ['pointerDown', 'pointerUp', 'onClick', 'hoverStart', 'pointerEnter', 'hoverEnd', 'filesDropped', 'filesRejected'];
 const FILE_DROP_VALUES = ['droppedFile', 'droppedFiles', 'droppedFileName', 'droppedFileType', 'droppedFileSizeInBytes'];
-const isZero = (v: unknown) => v === 0 || (typeof v === 'object' && v !== null && (v as { $num?: unknown }).$num === '-0');
-const invisibleTakesPointer = (d: Divergence) => {
-  if (d.difference.threw !== undefined) return false;
-  const a = d.actual[d.difference.index];
-  if (!a) return false;
-  // s51 — and the drag: the invisible element takes the press that starts its own drag (Is Lifted, Picked Up), or lights as a card's zone
-  const raised =
-    a.t === 'signal'
-      ? POINTER_OUTPUTS.includes(a.port) || a.port === 'pickedUp'
-      : a.t === 'value' && ((['isDragOver', 'isLifted', 'isDropTarget'].includes(a.port) && a.value === true) || FILE_DROP_VALUES.includes(a.port));
-  if (!raised) return false;
-  const before = d.reference.slice(0, d.difference.index);
-  const opacity = before.filter((e) => e.t === 'set' && e.port === 'opacity').pop() as { value?: unknown } | undefined;
-  if (!opacity || !isZero(opacity.value)) return false;
-  return before.some((e) => e.t === 'set' && (e.port === 'pointerEventsEnabled' || e.port === 'pointerEventsMode'));
-};
 
 /** The value the input held at the difference: the last write before it, else the placing's param. */
 const heldAt = (d: Divergence, port: string): unknown => {
@@ -163,21 +144,8 @@ const WITHHELD: Record<string, Readonly<Record<string, Withheld>>> = {
 };
 
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
-  // s43 — the Text: a text style (C61) and the Placement and units-typed style setters; s44 — C79 (R11: the spec says the intent)
-  Text: [
-    { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer }
-  ],
-  // s53 — the Shape: the Text's rows (the same shared ports and drag module)
-  Circle: [
-    { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer }
-  ],
-  // s53 — the Image: the Text's rows (the same shared ports and drag module)
-  Image: [
-    { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer }
-  ],
-  // s54 — the Video's own rows (C96–C100). Not C79: on a video file no pointer act reaches the node at all while C100 stands, so an
-  // invisible one cannot take it either — the five C79 scenarios agree with the runtime for that reason, and diverge again once C100
-  // is fixed (measured with C100 fixed in memory): the fix carries C79's row back here and onto those five
+  // s54 — the Video's own rows (C96–C100). The Text, Shape, Image and Group carry none: their C79 (Pointer Events written after Opacity
+  // 0 let the invisible element take the pointer) was fixed in P109 ISL-031, the C86–C90 and C95 of the Group in ISL-038
   Video: [
     { row: 'NSP-016 §6 C96 — Source Object on an embed: the runtime throws (no `<video>`)', matches: sourceObjectOnEmbed },
     { row: 'NSP-016 §6 C97 — Play or Restart on an embed after a `<video>` loaded: the runtime throws', matches: playOnEmbed },
@@ -190,10 +158,6 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
     { row: 'NSP-016 §6 C102 — a Drag locked to one Axis reports the pointer\'s movement on the other', matches: dragLockedAxisReported },
     { row: 'NSP-016 §6 C105 — a Snap Do that waited for the Drag to mount runs from 0', matches: dragWaitedSnapFromZero },
     { row: 'NSP-016 §6 C106 — a Start Drag X or Y of NaN loops the Drag\'s update until React throws', matches: (d: Divergence) => threwWith(d, 'Maximum update depth exceeded') }
-  ],
-  // s52 — the Group: the Text's rows (the same shared ports and drag module); its own C86–C90 and C95 fixed in P109 ISL-038 (s29)
-  Group: [
-    { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer }
   ],
 };
 

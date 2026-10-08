@@ -1916,6 +1916,13 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
           if (newStyles.position || newStyles.flexDirection || newStyles.clip) {
             forceUpdate = true;
           }
+
+          // P107-C79: Pointer Events goes through the render, so the component's own rule (an element at Opacity 0 takes no
+          // pointer) has the last word. A patch here was never written back: React writes a style only when ITS value changes,
+          // and at Opacity 0 it renders `none` before and after, so an invisible element kept the patched `auto`.
+          if (newStyles.hasOwnProperty('pointerEvents')) {
+            forceUpdate = true;
+          }
         } else {
           /**
            * DEF-037 — a tagged port has no safety net at all, so it gets a render.
@@ -1963,10 +1970,16 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
           }
         }
 
+        // P107-C79: a removed Pointer Events is left to the render too (see setStyle) — blanking it on the element would undo
+        // the `none` the component draws at Opacity 0.
+        const rendered = !styleTag && styles.includes('pointerEvents');
+        if (rendered && domElement) forceUpdate = true;
+
         if (domElement) {
           //deleting styles is done by setting them to an empty string
           const newStyles = {};
           for (const p of styles) {
+            if (rendered && p === 'pointerEvents') continue;
             newStyles[p] = '';
           }
           setStylesOnDOMNode(domElement, newStyles, styleTag);
