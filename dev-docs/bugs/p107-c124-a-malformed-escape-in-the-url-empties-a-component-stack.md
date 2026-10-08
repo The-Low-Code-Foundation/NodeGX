@@ -1,7 +1,9 @@
 ---
 id: P107-C124
 title: With Use Routes, a URL whose query or path parameter has a malformed escape (%zz) empties the Component Stack, and its Reset is never answered
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: medium
 area: runtime / Component Stack (navigation-stack.tsx `_getSearchParams` :663-680 and `_matchPathParts` :713 call `decodeURIComponent`, which throws; `resetAsync` has deleted every page first, :507-511)
 found: P107 NSP-016 s58, 2026-10-08

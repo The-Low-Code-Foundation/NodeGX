@@ -1,7 +1,9 @@
 ---
 id: P107-C119
 title: The browser's Back or Forward sends every Component Stack on the page back to its start page, Use Routes or not
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: medium
 area: runtime / Component Stack (noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx `didMount` :182-198 adds the `popstate` listener whatever `_internal.useRoutes` says; `onScheduleReset` → `scheduleReset`)
 found: P107 NSP-016 s58, 2026-10-08

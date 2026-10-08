@@ -1,7 +1,9 @@
 ---
 id: P107-C126
 title: With Use Routes, a Component Stack's Reset (and a Components edit) rebuilds the page in the URL, not the start page its Reset port promises
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: low
 area: runtime / Component Stack (navigation-stack.tsx `resetAsync` :523-531 reads `matchPageFromUrl` for every reset; the Reset port :315-326 says 'Empties the stack and rebuilds the start component')
 found: P107 NSP-016 s58, 2026-10-08

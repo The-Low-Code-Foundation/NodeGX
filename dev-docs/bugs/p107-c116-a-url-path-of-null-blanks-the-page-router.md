@@ -1,7 +1,8 @@
 ---
 id: P107-C116
 title: A Page Router whose Url path is null shows nothing and never answers a Reset; a Navigate to it shows the page but never pushes its URL or answers
-status: scheduled
+status: fixed
+commit: 34218468a
 phase: P109
 task: ISL-048
 severity: low
@@ -9,7 +10,7 @@ area: runtime / Page Router (noodl-viewer-react/src/nodes/navigation/router.tsx 
 found: P107 NSP-016 s57, 2026-10-08
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.18; recorded on the runtime target (NSP-016 s57 probe traces), and the spec copies it (R3)
 kit: node-spec
-regression: packages/nodegx-node-spec/scenarios/Router.json "Url path null: every match throws — the router shows nothing and its Reset is never answered (row C116)"
+regression: packages/nodegx-node-spec/scenarios/Router.json "Url path null is no Url path: the router shows its page and answers its Reset (row C116, fixed in P109 ISL-048)"
 ---
 
 **What a person sees.** Url path is wired, and the wire carries null (an empty record field, a cleared value). The Page Router goes

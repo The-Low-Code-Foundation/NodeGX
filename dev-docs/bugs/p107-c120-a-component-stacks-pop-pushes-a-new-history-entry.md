@@ -1,7 +1,9 @@
 ---
 id: P107-C120
 title: With Use Routes, a Pop pushes the page below as a new history entry, so the browser's Back then shows the page just popped, as the only page, with a Pop that does nothing
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: medium
 area: runtime / Component Stack (navigation-stack.tsx `back` end callback :1068-1078 calls `_updateUrlWithTopPage`, which always calls `history.pushState`; `replaceAsync` :889 the same)
 found: P107 NSP-016 s58, 2026-10-08

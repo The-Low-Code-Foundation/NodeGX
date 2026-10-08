@@ -1,7 +1,9 @@
 ---
 id: P107-C121
 title: With Use Routes in hash mode, pushing a page with no parameters keeps the previous page's query in the address, and a reload or Back hands it those parameters
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: low
 area: runtime / Component Stack (navigation-stack.tsx `_updateUrlWithTopPage` :749-763: with no query the URL is only `#/path`, which `pushState` resolves against the current address, keeping its `?query`)
 found: P107 NSP-016 s58, 2026-10-08

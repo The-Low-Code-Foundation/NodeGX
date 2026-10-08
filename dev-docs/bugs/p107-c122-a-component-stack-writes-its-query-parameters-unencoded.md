@@ -1,7 +1,9 @@
 ---
 id: P107-C122
 title: With Use Routes, a page's parameters go into the URL's query unencoded: a value with &, #, + or a space comes back different, and one with % empties the stack at the next reset
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: medium
 area: runtime / Component Stack (navigation-stack.tsx `_updateUrlWithTopPage` :755 `q.name + '=' + q.value`; `_getSearchParams` :663-680 decodes with `decodeURIComponent`)
 found: P107 NSP-016 s58, 2026-10-08

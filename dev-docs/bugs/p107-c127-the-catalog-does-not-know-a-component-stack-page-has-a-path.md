@@ -1,7 +1,9 @@
 ---
 id: P107-C127
 title: The node catalog does not know a Component Stack page has a Path — `pagePath-<pageId>` is missing, so the MCP cannot set one
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: low
 area: catalog / node-catalog (scripts/node-catalog/lib/derive-encoding.js seeds the list and text parameters only; navigation-stack.tsx `_updatePorts` :1153-1166 draws `pagePath-<id>` only when `useRoutes === true`)
 found: P107 NSP-016 s58, 2026-10-08

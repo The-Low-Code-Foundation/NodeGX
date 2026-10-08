@@ -1,6 +1,6 @@
 # ISL-031 — A control shows and reports what the person did
 
-**Status: 🟡 s28 (2026-10-07): 20 of 23 fixed — D30 landed as `32e1856b0` (built s27 on `p109-d30`; rebased over P107's Group v2 and re-graded, then fast-forwarded). s27: 19 of 23 fixed — the Slider's four in two commits (§10: C73 + D36 `21b27462d`, C74 + C75 `c92fa2afa`, Slider spec v3) and the shared C64 (`d8a9f0069`, six control specs); D30 built and graded on worktree branch `p109-d30`; left: the Text's drag rows C77, C78, C79. s26 (2026-10-06/07): 14 of 23 fixed, each with a control (§9) — the Text Input's eight, the label work on four controls (C80, C66), the Checkbox's C67, the Dropdown's C71 + D34, the radio pair's C76 + D37. ✅ AC2: all 15 rulings taken 2026-10-05 (1 against the recommendation). Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 23 bugs from
+**Status: 🟡 s30 (2026-10-08): 22 of 23 fixed — C79 (`7496d93f0`) and C78 (`23d91e383`) landed, each graded on the runtime at seeds 13 and 20732 with a control (§11); C77 built and parked on branch `p109-c77-wip` (its spec change strands ~630 mutants; P107 ruled: remove the dead model, §11). s28 (2026-10-07): 20 of 23 fixed — D30 landed as `32e1856b0` (built s27 on `p109-d30`; rebased over P107's Group v2 and re-graded, then fast-forwarded). s27: 19 of 23 fixed — the Slider's four in two commits (§10: C73 + D36 `21b27462d`, C74 + C75 `c92fa2afa`, Slider spec v3) and the shared C64 (`d8a9f0069`, six control specs); D30 built and graded on worktree branch `p109-d30`; left: the Text's drag rows C77, C78, C79. s26 (2026-10-06/07): 14 of 23 fixed, each with a control (§9) — the Text Input's eight, the label work on four controls (C80, C66), the Checkbox's C67, the Dropdown's C71 + D34, the radio pair's C76 + D37. ✅ AC2: all 15 rulings taken 2026-10-05 (1 against the recommendation). Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 23 bugs from
 the ledger (`dev-docs/bugs/`) that had no task: 1 high · 14 medium · 8 low, **15 awaiting a ruling**. **Side:** noodl-viewer-react (Text Input, Checkbox, Dropdown, Slider, Radio Button (Group), drag and drop, the shared control states)
 
 ## 1. The person sentence
@@ -32,7 +32,7 @@ to ask. This table is generated from the ledger headers. **The ledger file is th
 | [P107-C73](../../bugs/p107-c73-a-sliders-value-written-back-after-a-slide-leaves-the-handle-where-the-person-put-it.md) | medium | fixed `21b27462d` | A Slider's Value written from the graph after a person's slide does nothing when it equals the last Value the author wrote — the handle stays where the person put it |
 | [P107-C76](../../bugs/p107-c76-a-radio-groups-value-written-back-in-the-pick-frame-leaves-the-pick-selected.md) | medium | fixed `8dbeb8f33` | A Radio Button Group's Value written back in the same frame as a person's pick leaves the picked button selected under a Value that names another — picking it again raises nothing, and picking the named one raises no Changed |
 | [P107-C77](../../bugs/p107-c77-a-draggable-element-loses-its-keyboard-pickup-when-its-element-is-replaced.md) | medium | open | A Draggable element can no longer be picked up from the keyboard once its element is replaced — after Mounted goes off and on, after its Tag changes, or when it mounts more than about a second after Draggable was set |
-| [P107-C79](../../bugs/p107-c79-an-invisible-element-catches-clicks-after-a-pointer-events-write.md) | medium | open | A Text at Opacity 0 catches clicks once Pointer Events Enabled or Pointer Events Mode is written after it was drawn — the style write goes straight to the DOM and the component's "opacity 0 takes no pointer" rule is never re-applied |
+| [P107-C79](../../bugs/p107-c79-an-invisible-element-catches-clicks-after-a-pointer-events-write.md) | medium | fixed `7496d93f0` | A Text at Opacity 0 catches clicks once Pointer Events Enabled or Pointer Events Mode is written after it was drawn — the style write goes straight to the DOM and the component's "opacity 0 takes no pointer" rule is never re-applied |
 | [P107-C80](../../bugs/p107-c80-enable-label-takes-the-keyboard-away-from-a-text-input.md) | medium | fixed `94b83d7ea` | Turning Enable Label on or off while someone is typing in a Text Input takes the keyboard away from them, silently — React builds a new field under the label, and Focused still says true |
 | [P107-D30](../../bugs/p107-d30-focused-stays-true-after-a-control-leaves-the-page.md) | medium | fixed `32e1856b0` | Focused (and Hover, Pressed) stay as they were after a control leaves the page with Mounted off — the element that comes back holds no keyboard while Focused still reads true |
 | [P107-D34](../../bugs/p107-d34-a-dropdown-fires-changed-with-nobody-picking-after-a-remount-or-an-items-write.md) | medium | fixed `5d40a7aa3` | A Dropdown fires Changed with nobody picking — a remount, or Items written again after a person's pick, takes the author's Value back and announces it as a change |
@@ -41,7 +41,7 @@ to ask. This table is generated from the ledger headers. **The ledger file is th
 | [P107-C72](../../bugs/p107-c72-a-text-input-converts-and-measures-with-the-props-it-last-rendered.md) | low | fixed `580ce9e27` | A Text Input's Clear, Backspace and frame-end writes convert with the Type, and measure room with the Max length, the component LAST RENDERED — a Type turned Number with a Clear in the same frame publishes '' where the next frame says null |
 | [P107-C74](../../bugs/p107-c74-a-sliders-value-output-leaves-the-handle-past-a-lowered-max-and-off-the-step.md) | low | fixed `c92fa2afa` | A Slider's Value output disagrees with the handle — it keeps a slid value past a lowered Max, holds a graph value the browser rounds to the step, and Value Percent keeps its old figure when Min or Max moves |
 | [P107-C75](../../bugs/p107-c75-a-slider-with-min-equal-to-max-reports-value-percent-nan.md) | low | fixed `c92fa2afa` | A Slider with Min equal to Max reports Value Percent NaN, and every report fires Changed |
-| [P107-C78](../../bugs/p107-c78-a-keyboard-drag-drops-an-element-on-itself.md) | low | open | An element that is both Draggable and a drop zone, picked up with the keyboard, starts inside itself — Enter drops it on itself (Dropped and Landed on the same node, its own Drag Value), which the pointer can never do |
+| [P107-C78](../../bugs/p107-c78-a-keyboard-drag-drops-an-element-on-itself.md) | low | fixed `23d91e383` | An element that is both Draggable and a drop zone, picked up with the keyboard, starts inside itself — Enter drops it on itself (Dropped and Landed on the same node, its own Drag Value), which the pointer can never do |
 | [P107-D31](../../bugs/p107-d31-set-fires-value-changed-with-nothing-changed.md) | low | fixed `a969b4b31` | Text Input's Set fires Value Changed and reports Done when the field already holds the Value — "Fires whenever the Value output changes" is not what it does |
 | [P107-D32](../../bugs/p107-d32-a-text-fields-value-output-keeps-the-type-it-was-given-while-off-the-page.md) | low | fixed `0a6bb1d90` | A text-type Text Input given a number publishes '5' (text) while on the page and 5 (a number) while off it — the Value output's type depends on whether the field is mounted |
 | [P107-D33](../../bugs/p107-d33-clear-on-a-number-field-reports-unchanged-while-it-empties-the-field.md) | low | fixed `70621abcc` | Clear on a Number field reports Unchanged while it empties text the field was holding — it reads the author's Value and the output, not the field |
@@ -179,3 +179,35 @@ the runtime), so they needed a spec version, not a row drop.
 (`emit/component.ts` role `range`); whether it reports the drawn value, clamps on a Min / Max change or fires a change for a graph
 write was not checked — P18's to read.
 
+## 11. Session 30 (2026-10-08) — C79 and C78 landed, twenty-two of twenty-three; C77 built, parked
+
+**AC1, re-measured** at `a6caefdde`: C79 was still a known row on the Text, Shape, Image and Group (twenty marked scenarios). C77 and
+C78 were not known rows but MODELLED: the five specs that share drag-drop.ts copied the runtime (R3), so each fix needed new spec
+versions and scenario renames, not a row dropped. Built in worktrees, graded on the runtime at seeds 13 and 20732, landed by
+fast-forward.
+
+| Row | Commit | What changed | Grade |
+|---|---|---|---|
+| C79 | `7496d93f0` | `setStyle` sends a Pointer Events write through the render, `removeStyle` leaves the removal to it, so "Opacity 0 takes no pointer" has the last word; known row dropped with `invisibleTakesPointer`; the 20 scenarios unmarked; no spec version (the spec already said it) | probe 20 / 20; control (react-component-node.ts before) red on exactly the 20; runtime: Text, Shape, Image, Group conform at 13 and 20732 |
+| C78 | `23d91e383` | one rule, `insideSource`: never the source node, nor inside the element the gesture started on or the one it has now — the pointer (`zoneAt`) and the keyboard's zone list both ask it. Text v8, Shape v4, Image v4, Group v6, Video v4: `zoneFor` is a card's only; `sourceElem`, `drop`, `pointerAt` and the own gesture's `inZone` writes removed; Drag Value and Drag Kind inert on this page | 1,389 scenarios read differently, 613 renamed; control red on 27 / 28 / 27 / 28 / 9 of those naming it; interpreter mutants at 13 and 20732 all killed or declared; runtime: all five conform at 13 and 20732 |
+
+**C77 is built and NOT landed** (branch `p109-c77-wip`, commit `a133d19b6`). The runtime half is right (`elementChanged` from
+`setDOMElement`, `whenMounted` gone; its control red on 14 / 110 / 110 / 23 / 12 scenarios). The spec half strands ~630 mutants
+(Text 215 at seed 13): with the tabindex on every element, whether an act's paint or the frame end made the new element is visible
+nowhere. Keeping `attrsOn` (set at every new element) did not help (`c77-attrsOn-remodel.diff`, scratchpad, not kept). **P107's
+ruling (s30, by message): remove the state the fix made unobservable in the spec version that lands C77; declare individually only
+a field another output still reads, and name that output.**
+
+**What s30 taught:**
+
+- **A modelled row is not a known row.** Find the changed scenarios by diffing every scenario's interpreter trace before and after
+  the spec change; rename only those whose names claim the old outcome (a matrix name that describes the setup stays true).
+- **Fixing a modelled row strands mutants, and the probe is cheap.** `runConformance(spec, interpreterAdapter(...), { mutants: true,
+  sequences: 200, seed, equivalent })` per node is 45 s on the Text; run it at two seeds before any runtime grade. C78 stranded 27 on
+  the Text; most were dead state (`pointerAt`, an `inZone: false` written where it was always false), and the rest were killed by
+  scenarios that read them (a click a swallow eats while it ends a pending press; a held finger, then a mouse click; the second card,
+  so a swapped example is not the same card).
+- **A swap-branch mutant returns the sibling's whole recorded patch**, values and all (`runner/mutants.ts` `mutatePatch`). Two
+  branches that write the same values in a state where they already hold are equivalent; a scenario cannot kill that.
+
+**The export:** not checked (P18's).

@@ -1,7 +1,9 @@
 ---
 id: P107-C130
 title: Items holding a null keep a Repeater's old rows on screen, and a Refresh, Template or Template Type change made after it in the same frame is lost — with every later Refresh, which is never answered again
-status: open
+status: scheduled
+phase: P109
+task: ISL-049
 severity: medium
 area: runtime / Repeater (noodl-viewer-react/src/nodes/std-library/data/foreach.tsx `scheduleCopyItems` :895-921 → `collection.set` throws on a null item (collection.ts :597, model.ts `instanceOf` :265); node.ts `update` :759-763 runs a node's frame-end callbacks in one loop, so the throw drops the rest; `scheduleRefresh` :453-468 then sees `hasScheduledRefresh` still true for good)
 found: P107 NSP-016 s59, 2026-10-08

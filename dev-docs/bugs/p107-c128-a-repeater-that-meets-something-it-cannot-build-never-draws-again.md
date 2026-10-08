@@ -1,7 +1,9 @@
 ---
 id: P107-C128
 title: A Repeater that meets something it cannot build stops for good — a Template the project does not have, or Items holding a null when it rebuilds — and no later Items, Template or Refresh is ever drawn or answered
-status: open
+status: scheduled
+phase: P109
+task: ISL-049
 severity: high
 area: runtime / Repeater (noodl-viewer-react/src/nodes/std-library/data/foreach.tsx `_runQueueOperations` :815-860 awaits each operation with no catch, so a throw leaves `runningOperations` true; `addItem` :576 `await this.nodeScope.createNode(template, …)` rejects for a component the project does not have (nodecontext.ts `getComponentModel` :616-636); `refresh` :771 `collection.set(items)` throws on a null item (model.ts `instanceOf` :265))
 found: P107 NSP-016 s59, 2026-10-08

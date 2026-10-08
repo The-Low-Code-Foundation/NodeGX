@@ -1,7 +1,9 @@
 ---
 id: P107-C123
 title: With Use Routes, a page pushed (or started) by its label rather than its id gets no URL: the address becomes #, and a reload or Back shows the start page
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: low
 area: runtime / Component Stack (navigation-stack.tsx `getRelativeURL` :583-588 finds the page's row by `p.id == top.pageId`; an entry made by a label carries the label as its page id)
 found: P107 NSP-016 s58, 2026-10-08

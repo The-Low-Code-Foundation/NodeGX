@@ -1,6 +1,6 @@
 # ISL-048 — A drag, a stack and a router answer every request
 
-**Status: ⬜ scoped s30 (2026-10-08) at `a6caefdde`, nothing built.** **Source:** 18 bugs P107 NSP-016 filed in s55–s57 after
+**Status: 🟡 s30 (2026-10-08): 5 of 27 fixed — C101, C115, C116, C117, C118 (§8); C119–C127 joined from P107 s58; 4 to ask (C103, C104, C120, C126).** Scoped s30 at `a6caefdde`. **Source:** 27 bugs P107 NSP-016 filed (18 at scoping, C119–C127 from s58) in s55–s57 after
 ISL-038 was scoped (the Drag C101–C106, §7.16; the Component Stack C107–C114, §7.17; the Page Router C115–C118, §7.18), handed to
 P109 under R16 ("Hand all to P109"): 1 high · 7 medium · 10 low, **2 to ask** (C103, C104). **Side:** noodl-viewer-react
 (`components/visual/Drag/Drag.tsx`, `nodes/navigation/navigation-stack.tsx`, `router.tsx`, `router-handler.ts`), the Drag,
@@ -29,14 +29,14 @@ the fix has two reasonable answers that a person would see differently: ask in p
 
 | bug | node | severity | status | build | what a person sees |
 |---|---|---|---|---|---|
-| [P107-C101](../../bugs/p107-c101-nothing-inside-a-drag-can-be-tapped-on-a-touch-screen.md) | Drag | high | scheduled | as proposed | On a touch screen nothing inside a Drag can be tapped — its buttons never click and its text fields never take the keyboard |
+| [P107-C101](../../bugs/p107-c101-nothing-inside-a-drag-can-be-tapped-on-a-touch-screen.md) | Drag | high | fixed `534203afc` | as proposed | On a touch screen nothing inside a Drag can be tapped — its buttons never click and its text fields never take the keyboard |
 | [P107-C102](../../bugs/p107-c102-a-drag-locked-to-one-axis-reports-movement-on-the-other.md) | Drag | medium | scheduled | as proposed | A Drag locked to one Axis still reports movement on the other — Drag Y moves while the element stays put, then jumps back to 0 at the next drag |
 | [P107-C103](../../bugs/p107-c103-a-drag-draws-only-its-first-child.md) | Drag | medium | scheduled | **ask first** | A Drag draws only its first child — every other child vanishes without a word, and the catalog's drag example teaches a readout that never appears |
 | [P107-C106](../../bugs/p107-c106-a-start-drag-x-of-nan-blanks-the-page.md) | Drag | medium | scheduled | as proposed | A Start Drag X or Y of NaN blanks the page — the Drag's update compares NaN with itself and sets state until React gives up |
 | [P107-C107](../../bugs/p107-c107-a-push-to-a-component-the-project-does-not-have-is-never-answered.md) | Component Stack | medium | scheduled | as proposed | A push, replace or Reset to a page whose component the project does not have is never answered — the caller's Navigate hangs with no Done and no Failure |
 | [P107-C110](../../bugs/p107-c110-a-reset-during-a-backs-animation-empties-the-stack.md) | Component Stack | medium | scheduled | as proposed | A Reset during a back's animation empties the stack: the animation's end takes the new start page off it, and every push after is never answered |
-| [P107-C115](../../bugs/p107-c115-a-malformed-escape-in-the-query-blanks-every-page-router.md) | Page Router | medium | scheduled | as proposed | A link whose query has a malformed escape (`?q=%zz`, `?off=50%`) blanks every Page Router — nothing is shown, and its Reset is never answered |
-| [P107-C117](../../bugs/p107-c117-back-to-the-same-page-with-new-parameters-after-a-navigate-keeps-the-old-ones.md) | Page Router | medium | scheduled | as proposed | After a Navigate, Back or Forward to the same page with other parameters keeps showing the old ones — the Page Router hands the new parameters to a page it already deleted |
+| [P107-C115](../../bugs/p107-c115-a-malformed-escape-in-the-query-blanks-every-page-router.md) | Page Router | medium | fixed `6096fadae` | as proposed | A link whose query has a malformed escape (`?q=%zz`, `?off=50%`) blanks every Page Router — nothing is shown, and its Reset is never answered |
+| [P107-C117](../../bugs/p107-c117-back-to-the-same-page-with-new-parameters-after-a-navigate-keeps-the-old-ones.md) | Page Router | medium | fixed `47f987ef6` | as proposed | After a Navigate, Back or Forward to the same page with other parameters keeps showing the old ones — the Page Router hands the new parameters to a page it already deleted |
 | [P107-C104](../../bugs/p107-c104-css-class-and-css-style-on-a-drag-do-nothing.md) | Drag | low | scheduled | **ask first** | CSS Class and CSS Style on a Drag do nothing — the Drag has no element and passes neither to the child it moves |
 | [P107-C105](../../bugs/p107-c105-a-snap-that-waited-for-the-drag-to-mount-starts-from-0.md) | Drag | low | scheduled | as proposed | A Snap To Position that waited for the Drag to mount starts from 0 — the element jumps to the edge, then animates |
 | [P107-C108](../../bugs/p107-c108-a-push-with-a-transition-the-stack-does-not-know-is-never-answered.md) | Component Stack | low | scheduled | as proposed | A push with a transition the stack does not know (a wired Transition such as "Fade") is never answered, and the page it built is dropped |
@@ -45,8 +45,21 @@ the fix has two reasonable answers that a person would see differently: ask in p
 | [P107-C112](../../bugs/p107-c112-a-reset-that-finds-no-components-keeps-naming-the-old-page.md) | Component Stack | low | scheduled | as proposed | A reset that finds no components (or no start page) deletes every page but leaves Top Component Name and Stack Depth naming what was there |
 | [P107-C113](../../bugs/p107-c113-writing-a-stacks-name-rebuilds-it.md) | Component Stack | low | scheduled | as proposed | Writing a Component Stack's Name — even the name it already has — rebuilds it at its start page, losing every page pushed |
 | [P107-C114](../../bugs/p107-c114-children-count-lags-a-frame-after-a-remount.md) | Component Stack | low | scheduled | as proposed | A Component Stack mounted again at a frame sends no Children Count in that frame — the page it builds is counted a frame late |
-| [P107-C116](../../bugs/p107-c116-a-url-path-of-null-blanks-the-page-router.md) | Page Router | low | scheduled | as proposed | A Page Router whose Url path is null shows nothing and never answers a Reset; a Navigate to it shows the page but never pushes its URL or answers |
-| [P107-C118](../../bugs/p107-c118-a-navigate-with-no-router-name-made-before-the-router-is-on-the-page-is-never-answered.md) | Page Router | low | scheduled | as proposed | A Navigate with no Router name, pressed while no Page Router is on the page, waits for good — a router registering as Main never takes it |
+| [P107-C116](../../bugs/p107-c116-a-url-path-of-null-blanks-the-page-router.md) | Page Router | low | fixed `34218468a` | as proposed | A Page Router whose Url path is null shows nothing and never answers a Reset; a Navigate to it shows the page but never pushes its URL or answers |
+| [P107-C118](../../bugs/p107-c118-a-navigate-with-no-router-name-made-before-the-router-is-on-the-page-is-never-answered.md) | Page Router | low | fixed `d85e4e6d9` | as proposed | A Navigate with no Router name, pressed while no Page Router is on the page, waits for good — a router registering as Main never takes it |
+| [P107-C119](../../bugs/p107-c119-the-browsers-back-resets-a-component-stack-without-use-routes.md) | Component Stack | medium | scheduled | as proposed | The browser's Back or Forward sends every Component Stack on the page back to its start page, Use Routes or not |
+| [P107-C120](../../bugs/p107-c120-a-component-stacks-pop-pushes-a-new-history-entry.md) | Component Stack | medium | scheduled | **ask first** | With Use Routes, a Pop pushes the page below as a new history entry, so the browser's Back then shows the page just popped, as the only page, with a Pop that does nothing |
+| [P107-C122](../../bugs/p107-c122-a-component-stack-writes-its-query-parameters-unencoded.md) | Component Stack | medium | scheduled | as proposed | With Use Routes, a page's parameters go into the URL's query unencoded: a value with &, #, + or a space comes back different, and one with % empties the stack at the next reset |
+| [P107-C124](../../bugs/p107-c124-a-malformed-escape-in-the-url-empties-a-component-stack.md) | Component Stack | medium | scheduled | as proposed | With Use Routes, a URL whose query or path parameter has a malformed escape (%zz) empties the Component Stack, and its Reset is never answered |
+| [P107-C121](../../bugs/p107-c121-a-component-stack-keeps-the-last-pages-query-in-the-address.md) | Component Stack | low | scheduled | as proposed | With Use Routes in hash mode, pushing a page with no parameters keeps the previous page's query in the address, and a reload or Back hands it those parameters |
+| [P107-C123](../../bugs/p107-c123-a-page-pushed-by-its-label-has-no-url.md) | Component Stack | low | scheduled | as proposed | With Use Routes, a page pushed (or started) by its label rather than its id gets no URL: the address becomes #, and a reload or Back shows the start page |
+| [P107-C125](../../bugs/p107-c125-a-page-path-of-null-empties-a-component-stack.md) | Component Stack | low | scheduled | as proposed | A Component Stack page whose Path is wired null empties the stack at every reset that reaches it |
+| [P107-C126](../../bugs/p107-c126-a-component-stacks-reset-shows-the-url-page-not-the-start-page.md) | Component Stack | low | scheduled | **ask first** | With Use Routes, a Component Stack's Reset (and a Components edit) rebuilds the page in the URL, not the start page its Reset port promises |
+| [P107-C127](../../bugs/p107-c127-the-catalog-does-not-know-a-component-stack-page-has-a-path.md) | catalog | low | scheduled | as proposed | The node catalog does not know a Component Stack page has a Path — `pagePath-<pageId>` is missing, so the MCP cannot set one |
+
+**Added s30 (P107 s58, `841f0dfe3`):** C119–C127, the Component Stack with Use Routes (NSP-016 §7.19) and one catalog row — 4
+medium, 5 low; C120 (which history a Pop leaves) and C126 (whether a Reset with Use Routes re-reads the address) carry "ruling
+needed" in their ledger files. C124 is C115's twin on the stack: fix both the same way.
 
 **The two to ask.** C103: draw every child (wrap them in one element the library moves), or keep one child and say so (a
 validation warning, the catalog example fixed to put the Circle and the Text in one Group). C104: pass CSS Class and CSS Style
@@ -90,3 +103,19 @@ row in the same commit; a control on every fix (the file before the fix, red on 
 - **AC3** — every row ruled or marked "as proposed" is fixed, one commit each (or one per shared mechanism), with its regression
   green, its known row (or modelled behaviour) gone and a control red on exactly its scenarios.
 - **AC4** — `node scripts/bugs.js --from P107` lists none of this task's rows as `open` or `needs-ruling`.
+
+## 8. Session 30 (2026-10-08) — five rows
+
+Built in worktree `p109-c101`, landed by fast-forward with ISL-031's C78 and C79. **AC1:** each row re-measured at `34c76830f`
+by its regression scenario on the runtime target before it was built.
+
+| Row | Commit | What changed | Grade |
+|---|---|---|---|
+| C101 | `534203afc` | Drag.tsx passes react-draggable `cancel` (input, textarea, select, button, a, [contenteditable]): the library checks it before it cancels the touch | jsdom regression 8 arms (7 controls + the row's background as control), red on exactly the 7 without the prop; Drag 20 / 20 with the old Drag tests |
+| C115 | `6096fadae` | `_getSearchParams` decodes like `_decodePathSegment` (kept as written on a malformed escape); Router v2 | runtime 136 / 136; control red on exactly 8 |
+| C116 | `34218468a` | the Url path setter stores null as none (only null threw); Router v3 | 136 / 136; control red on exactly 2 |
+| C118 | `d85e4e6d9` | `RouterHandler.navigate` reads a blank name as Main, as `registerRouter` does; Router v4 | 136 / 136; control red on exactly 17 (the matrix's queued blank navigate) |
+| C117 | `47f987ef6` | `_buildPage` writes `currentPageComponent`; Router v5 (`built` by both); one scenario added for the two mutants it stranded | 137 / 137; control red on exactly 29 (every Reset after a Navigate) |
+
+Router interpreter mutants at 13 and 20732: 445 / 449, 0 survivors. Runtime, Router and Drag at 13 and 20732: conform; the Drag's
+one survivor at 20732 (afterInputs drop-set, `willUnmount`, `snapToPositionX.do:done`) is there before any change (told P107).

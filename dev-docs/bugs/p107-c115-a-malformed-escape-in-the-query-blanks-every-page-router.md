@@ -1,7 +1,8 @@
 ---
 id: P107-C115
 title: A link whose query has a malformed escape (`?q=%zz`, `?off=50%`) blanks every Page Router — nothing is shown, and its Reset is never answered
-status: scheduled
+status: fixed
+commit: 6096fadae
 phase: P109
 task: ISL-048
 severity: medium
@@ -9,7 +10,7 @@ area: runtime / Page Router (noodl-viewer-react/src/nodes/navigation/router.tsx 
 found: P107 NSP-016 s57, 2026-10-08
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.18; recorded on the runtime target (NSP-016 s57 probe traces), and the spec copies it (R3)
 kit: node-spec
-regression: packages/nodegx-node-spec/scenarios/Router.json "a malformed query: the reset throws — nothing shown, a Reset never answered (row C115)"
+regression: packages/nodegx-node-spec/scenarios/Router.json "a malformed query is kept as written: the router shows its start page (row C115, fixed in P109 ISL-048)"
 ---
 
 **What a person sees.** Someone opens a shared link whose query carries a raw `%` — `https://app.example/?off=50%#/product/3`,

@@ -1,7 +1,8 @@
 ---
 id: P107-C117
 title: After a Navigate, Back or Forward to the same page with other parameters keeps showing the old ones — the Page Router hands the new parameters to a page it already deleted
-status: scheduled
+status: fixed
+commit: 47f987ef6
 phase: P109
 task: ISL-048
 severity: medium
@@ -9,7 +10,7 @@ area: runtime / Page Router (noodl-viewer-react/src/nodes/navigation/router.tsx 
 found: P107 NSP-016 s57, 2026-10-08
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.18; recorded on the runtime target (NSP-016 s57 probe traces), and the spec copies it (R3)
 kit: node-spec
-regression: packages/nodegx-node-spec/scenarios/Router.json "after a navigate built Product 1, Back to #/product/2: the reset takes it as the page it shows with new parameters, but its Page Inputs are never handed id 2 — the router hands them to the page the last reset built, deleted (row C117)"
+regression: packages/nodegx-node-spec/scenarios/Router.json "after a navigate built Product 1, Back to #/product/2: the reset takes it as the page it shows with new parameters, and its Page Inputs are handed id 2 (row C117, fixed in P109 ISL-048)"
 ---
 
 **What a person sees.** A shop: a Navigate opens product 1, another opens product 2. The person presses the browser's Back. The

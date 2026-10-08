@@ -1,7 +1,9 @@
 ---
 id: P107-C131
 title: A list whose items repeat an id draws that item's row after the row that follows it, and every later copy of the same list (a Refresh) takes that row down and builds it again
-status: open
+status: scheduled
+phase: P109
+task: ISL-049
 severity: low
 area: runtime / Repeater and Array (packages/noodl-runtime/src/collection.ts `set` :584-700 — one record per id; the same plain object is the same record (F50) and its fields are written back on every copy, so a second copy finds the record out of place and removes and re-adds it; foreach.tsx copies a placed list twice, its start-up rebuild :771 and `scheduleCopyItems` :895-921)
 found: P107 NSP-016 s59, 2026-10-08

@@ -1,7 +1,9 @@
 ---
 id: P107-C125
 title: A Component Stack page whose Path is wired null empties the stack at every reset that reaches it
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: low
 area: runtime / Component Stack (navigation-stack.tsx `matchPageFromUrl` :730 `pagePattern[0]` on null throws; `_findPage` turns it into the text 'null' for the URL it writes)
 found: P107 NSP-016 s58, 2026-10-08

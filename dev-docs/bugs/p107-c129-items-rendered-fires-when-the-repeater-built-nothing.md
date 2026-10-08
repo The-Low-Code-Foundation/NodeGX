@@ -1,7 +1,9 @@
 ---
 id: P107-C129
 title: A Repeater's Items Rendered fires after every run of its queue, including one that built nothing — at load with no Items bound, after a Refresh that failed, after a Dynamic rebuild with no Script
-status: open
+status: scheduled
+phase: P109
+task: ISL-049
 severity: low
 area: runtime / Repeater (noodl-viewer-react/src/nodes/std-library/data/foreach.tsx `_runQueueOperations` :823-860 counts any operation as work; `_signalItemsRendered` :868-871; the placing's rebuild from `updateTarget` :436-439)
 found: P107 NSP-016 s59, 2026-10-08

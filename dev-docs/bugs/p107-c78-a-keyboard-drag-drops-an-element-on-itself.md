@@ -1,7 +1,8 @@
 ---
 id: P107-C78
 title: An element that is both Draggable and a drop zone, picked up with the keyboard, starts inside itself — Enter drops it on itself (Dropped and Landed on the same node, its own Drag Value), which the pointer can never do
-status: scheduled
+status: fixed
+commit: 23d91e383
 phase: P109
 task: ISL-031
 severity: low
@@ -9,7 +10,7 @@ area: runtime / drag and drop (noodl-viewer-react/src/drag-drop.ts `keyboardLift
 found: P107 NSP-016 s43, 2026-10-05
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.8; the four "row C78" scenarios in packages/nodegx-node-spec/scenarios/Text.json, identical on the interpreter and the runtime target
 kit: node-spec
-regression: packages/nodegx-node-spec/scenarios/Text.json "row C78 — Draggable and Accept Drops: a keyboard lift starts IN ITSELF (Drag Over true); Enter drops it on itself — its own Drag Value, Drop Index 0, Dropped, Landed"
+regression: packages/nodegx-node-spec/scenarios/Text.json "row C78 — Draggable and Accept Drops: a keyboard lift never starts in itself (no Drag Over); Enter cancels — nothing Dropped, no Landed" (and its twins on the Shape, Image, Group and Video; the pointer's way: the "where the pointer is" scenarios)
 ---
 
 **What a person sees.** A column that can be dragged (to reorder columns) and that also takes cards. Someone moves

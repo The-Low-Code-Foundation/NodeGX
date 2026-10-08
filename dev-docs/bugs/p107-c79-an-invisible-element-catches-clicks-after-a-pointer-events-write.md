@@ -1,7 +1,8 @@
 ---
 id: P107-C79
 title: A Text at Opacity 0 catches clicks once Pointer Events Enabled or Pointer Events Mode is written after it was drawn — the style write goes straight to the DOM and the component's "opacity 0 takes no pointer" rule is never re-applied
-status: scheduled
+status: fixed
+commit: 7496d93f0
 phase: P109
 task: ISL-031
 severity: medium
@@ -9,6 +10,7 @@ area: runtime / every visual node with both the opacity rule and the Pointer Eve
 found: P107 NSP-016 s43, 2026-10-05
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.8 (the Text's 10,000 run, seed 20731, shrunk to 3 steps; isolated with the side-by-side probe)
 kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/Text.json "row C79 — drawn at Opacity 0 a press meets nothing; after Pointer Events Enabled is written on, the invisible element still takes no pointer" (and its four twins, on the Shape, Image and Group too)
 ---
 
 **What a person sees.** A Text faded out to Opacity 0 is meant to let clicks pass through to whatever is behind it
