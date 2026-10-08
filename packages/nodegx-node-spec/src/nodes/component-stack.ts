@@ -185,7 +185,8 @@ const pagePathPort = (): ValueInputDecl => ({ type: 'string', coerce: 'none', di
 
 export const ComponentStack = defineNode({
   type: 'Page Stack',
-  version: 2,
+  // v3 (P109 ISL-048, s31): a reset that fails leaves the stack empty and says so — Top Component Name '' and Stack Depth 0 (row C112)
+  version: 3,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx',
   needs: ['person', 'clock', 'location', 'project'],
   worldPool: {
@@ -892,8 +893,11 @@ function answer(w: Work, op: 'push' | 'replace', value: 'done' | 'unchanged' | '
   w.answers.push(error === undefined ? { op, value } : { op, value, error });
   return null;
 }
-/** `_reportReset` (:480-494): every Reset of the frame alike; the mount's reports to no one */
+/** `_reportReset` (:480-494): every Reset of the frame alike; the mount's reports to no one. The pages are gone already (:507-511),
+ * so the stack is empty and says so — Top Component Name '' and Stack Depth 0 (row C112, fixed in P109 ISL-048) */
 function failReset(w: Work, tokens: number, error: string): null {
+  w.st.stack = [];
+  outputs(w, '', 0);
   for (let i = 0; i < tokens; i++) w.outcomes.push({ port: 'reset', outcome: 'failure', error });
   return null;
 }

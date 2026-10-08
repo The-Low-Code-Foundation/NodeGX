@@ -134,6 +134,8 @@ interface PageStackInstance extends ReactNodeInstance {
   scheduleReset(outcome?: OutcomeToken): void;
   /** ERG-001 §4 — end a `Reset` invocation, or on the mount path end none. */
   _reportReset(outcomes: OutcomeToken[] | undefined, outcome: NodeOutcome, options?: OutcomeFailureOptions): void;
+  /** P107-C112 — a failed reset leaves the stack empty, and says so. */
+  _resetLeftEmpty(): void;
   createPageContainer(): ReactNodeInstance;
   reset(outcomes?: OutcomeToken[]): void;
   resetAsync(outcomes?: OutcomeToken[]): Promise<void>;
@@ -513,6 +515,7 @@ const PageStack = {
       // ERG-001 §4 — both of `resetAsync`'s exits were bare returns, so an unconfigured
       // Component Stack was silent on the one code path that always runs.
       if (this._internal.pages === undefined || this._internal.pages.length === 0) {
+        this._resetLeftEmpty();
         this._reportReset(outcomes, 'failure', {
           code: 'component-stack/no-components',
           message: `The Component Stack "${this._internal.name || 'Main'}" has no components to show — add them to its Components list`
@@ -538,6 +541,7 @@ const PageStack = {
       const pageInfo = this._findPage(startPageId);
       if (pageInfo === undefined || pageInfo.component === undefined) {
         // No page was found
+        this._resetLeftEmpty();
         this._reportReset(outcomes, 'failure', {
           code: 'component-stack/component-not-found',
           message: `The Component Stack "${this._internal.name || 'Main'}" cannot show "${startPageId}" — check its Start Page against its Components list`
@@ -575,6 +579,14 @@ const PageStack = {
 
       // Last, after the outputs it describes.
       this._reportReset(outcomes, 'done');
+    },
+    /**
+     * P107-C112 — a reset that fails has already deleted every page (above), so the stack is empty: say so. Top Component
+     * Name and Stack Depth kept naming the page that was there, and the stack's entries pointed at deleted pages.
+     */
+    _resetLeftEmpty(this: PageStackInstance) {
+      this._internal.stack = [];
+      this.setPageOutputs({ topPageName: '', stackDepth: 0 });
     },
     getRelativeURL(this: PageStackInstance) {
       const top = this._internal.stack[this._internal.stack.length - 1];

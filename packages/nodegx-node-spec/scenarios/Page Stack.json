@@ -1747,7 +1747,7 @@
     ]
   },
   {
-    "name": "Components emptied after a push: the pages go, but Top Component Name and Stack Depth still name Detail (row C112); a Reset is Failure",
+    "name": "row C112 — Components emptied after a push: the pages go, and Top Component Name '' and Stack Depth 0 say the stack is empty; a Reset is Failure",
     "because": "resetAsync deletes first, then finds nothing; setPageOutputs is never called",
     "params": {
       "pages": [
@@ -2936,7 +2936,7 @@
     ]
   },
   {
-    "name": "a refused push, a push, and Components emptied in one frame: refused, Done — then the reset finds no components and the outputs keep naming Detail",
+    "name": "a refused push, a push, and Components emptied in one frame: refused, Done — then the reset finds no components and the outputs say the stack is empty (row C112)",
     "because": "queue order at the frame's end",
     "params": {
       "pages": [
