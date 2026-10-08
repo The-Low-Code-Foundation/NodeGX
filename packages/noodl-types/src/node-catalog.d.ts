@@ -310,6 +310,11 @@ export interface ParameterPattern {
    * `value-<state>-<value>` is chosen by the matching `type-<value>` parameter.
    */
   valueType?: string;
+  /**
+   * Parameters these ports need, set as given, to exist at all — observed by driving the hook with
+   * them unset. The Component Stack's `pagePath-<pageId>` needs `{ useRoutes: true }` (P107-C127).
+   */
+  when?: Record<string, unknown>;
   /** A real emitted port name, preferring one that shows verbatim interpolation. */
   example: string;
 }

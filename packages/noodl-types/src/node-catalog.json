@@ -22886,7 +22886,7 @@
           "declared-port-groups",
           "runtime-discovered"
         ],
-        "description": "Per-page signal outputs and transition parameters are generated from the \"pages\" parameter.",
+        "description": "Each page in the \"pages\" parameter adds a Component input (`pageComp-<pageId>`) and, with \"useRoutes\" on, a Path input (`pagePath-<pageId>`: the page's URL path, by default its label in lower case with dashes); \"startPage\" picks one of the pages.",
         "declaredPortGroups": [
           {
             "accept": {
@@ -22923,6 +22923,19 @@
             "group": "Pages",
             "valueType": "component",
             "example": "pageComp-Sa1Id"
+          },
+          {
+            "pattern": "pagePath-<pageId>",
+            "plug": "input",
+            "when": {
+              "useRoutes": true
+            },
+            "variables": {
+              "pageId": "the `id` of a row in the `pages` parameter — an editor-generated identifier, not a name you choose"
+            },
+            "group": "Pages",
+            "valueType": "string",
+            "example": "pagePath-Sa1Id"
           },
           {
             "pattern": "startPage",

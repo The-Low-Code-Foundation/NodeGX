@@ -123,6 +123,20 @@ describe('catalog parity — every spec draws the same ports the editor draws', 
           };
           for (const p of patterns) {
             const name = p.pattern.replace(/<[^>]+>/g, tokenFor(p as { variables?: Record<string, string> }));
+            // P107-C127 — a pattern drawn only behind a switch (`when`: the Component Stack's `pagePath-<pageId>` needs Use
+            // Routes on) is probed with it set, and must be absent without it
+            const when = (p as { when?: Record<string, unknown> }).when;
+            if (when) {
+              if (p.plug === 'input' || p.plug === 'input/output') {
+                expect(Object.keys(spec.derived!.inputs({ ...probe, ...when }))).toContain(name);
+                expect(inputs).not.toContain(name);
+              }
+              if (p.plug === 'output' || p.plug === 'input/output') {
+                expect(Object.keys(spec.derived!.outputs?.({ ...probe, ...when }) ?? {})).toContain(name);
+                expect(outputs).not.toContain(name);
+              }
+              continue;
+            }
             if ((node.parameterEncoding as { seededByProjectMetadata?: string[] }).seededByProjectMetadata && !fromParameter(p as { variables?: Record<string, string> })) {
               if (p.plug === 'input') expect(spec.derived!.discover?.(name)).toBeDefined();
               continue;

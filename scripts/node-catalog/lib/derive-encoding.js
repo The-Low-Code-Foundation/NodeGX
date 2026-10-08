@@ -13,6 +13,7 @@
 
 const {
   TOKEN_SETS,
+  ENABLING_PARAMETERS,
   seedRunFor,
   numberedSeedRunFor,
   templatize,
@@ -168,6 +169,8 @@ function deriveEncoding(typeName, metadata, rawDef, dynamicPorts) {
 
   // The type-selector pass: does any pattern's value type follow another parameter?
   applyTypeDependencies(typeName, rawDef, runs[0], entries);
+  // The enabling pass: does any pattern appear only with an enabling parameter on?
+  if (!numberedInputs) applyEnablingConditions(typeName, rawDef, runs[0], entries);
 
   const encoding = {
     known: true,
@@ -338,6 +341,28 @@ function applyTypeDependencies(typeName, rawDef, runA, patterns) {
   }
 }
 
+/**
+ * P107-C127 — re-run seed A with the node's enabling parameters left unset, and mark each pattern
+ * that no longer appears with the parameters it needs (`when`). Every seed run sets them, so
+ * without this pass a port drawn only behind a switch reads as always there: the Component Stack's
+ * `pagePath-<pageId>` exists only with Use Routes on.
+ */
+function applyEnablingConditions(typeName, rawDef, runA, patterns) {
+  const enabling = ENABLING_PARAMETERS[typeName];
+  if (!enabling) return;
+
+  const off = { ...runA.seed.parameters };
+  for (const name of Object.keys(enabling)) delete off[name];
+  const observed = driveSetup(typeName, rawDef, off, runA.seed.projectMetadata);
+  const namesOff = (observed.ports || []).map((p) => p.name);
+
+  for (const entry of patterns) {
+    const re = patternToRegExp(entry.pattern);
+    if (!runA.ports.some((p) => re.test(p.name))) continue;
+    if (!namesOff.some((name) => re.test(name))) entry.when = { ...enabling };
+  }
+}
+
 function noteFor(entries, numberedInputs) {
   const notes = [];
   if (numberedInputs) {
@@ -454,6 +479,7 @@ function residueFor(typeName, dynamicPorts, runs, error) {
 /** Shape the derived entry into its catalog form. */
 function toCatalogPattern(entry, tokenMap) {
   const pattern = { pattern: entry.pattern, plug: entry.plug };
+  if (entry.when) pattern.when = entry.when;
 
   if (entry.variables.length) {
     pattern.variables = {};

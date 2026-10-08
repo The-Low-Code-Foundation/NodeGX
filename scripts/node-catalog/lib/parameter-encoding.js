@@ -135,7 +135,9 @@ const METADATA_DRIVEN = {
 /** Parameters that must be present for a hook to do anything, but that contribute no names. */
 const ENABLING_PARAMETERS = {
   States: { useTransitions: true },
-  'For Each': { templateType: 'explicit' }
+  'For Each': { templateType: 'explicit' },
+  // P107-C127 — a page's Path (`pagePath-<pageId>`) is drawn only with Use Routes on; probed off, the catalog never knew it
+  'Page Stack': { useRoutes: true }
 };
 
 /** `states` → `state`, `properties` → `property`, `payload` → `payload`. */

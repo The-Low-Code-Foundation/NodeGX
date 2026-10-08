@@ -111,7 +111,7 @@ const NOTES = {
   PageInputs:
     'Output ports are the path/query parameters declared on the containing page component (PageInputsAdapter).',
   'Page Stack':
-    'Per-page signal outputs and transition parameters are generated from the "pages" parameter.',
+    'Each page in the "pages" parameter adds a Component input (`pageComp-<pageId>`) and, with "useRoutes" on, a Path input (`pagePath-<pageId>`: the page\'s URL path, by default its label in lower case with dashes); "startPage" picks one of the pages.',
   PageStackNavigate:
     'Input ports for target-page parameters are derived from the target page component of the containing Page Stack.',
   PageStackNavigateBack: 'Result ports depend on the "backActions" style parameters of the containing Page Stack.',
