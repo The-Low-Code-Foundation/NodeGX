@@ -56,7 +56,12 @@
    Probe the runtime before every rule; the matrix first; mutants at ten seeds and 10,000 on both targets.
 2. **Or, when the box is quiet,** NSP-013's deep run for s11–s14 (`NSP_DEEP=10000 NSP_ONLY=…`, one spec at a time).
 
-**Human decisions outstanding.** Ask in plain words (README §7 holds the earlier ones):
+**Human decisions outstanding — all seventeen are on one page for Richard: "Phase 107 Rulings",
+https://claude.ai/artifact/6XW6QYo9cdgMvZmp16SAbr (made 2026-10-08, after s61).** He records a ruling per question there. **Read them
+first:** `ArtifactData` `list`, collection `rulings`, on that URL (one document per question: `choice`, `choiceLabel`, `note`, `at`);
+copy each into README §7 and the row's ledger file, then build. Twelve are filed as "recommendation probably right", five as "worth
+weighing". **R7, R8 and G1 are NOT open** — ruled 2026-10-05 on P109's Track F page ("Only on size inputs"; "Yes, correct the docs
+sentence") and fixed in `ebeefb060` / `8a177580d`; s61's handoff carried them by mistake. The questions, for reference:
 - **New (s61), C137:** a Refresh pulsed while the Repeater is still rebuilding from an earlier one — answer it when its own rebuild
   finishes (what the code's comment says it meant), or answer it together with the rebuild already running?
 - **New (s61), C135:** a Script that names its component with something that is not text (a number): skip that item with an error, as
@@ -68,7 +73,7 @@
   item?); C133 (a breakpoint layout that arrives as a number: read as text, or ignored?).
 - **From s59:** C130, C131, C129. **From s58:** C120, C126.
 - **Older:** a Drag's Start Drag X as text (s55); a Component Stack's Mounted off and on keeping its pages (s56); an unnamed Page Router
-  in the index (s57, with P109's S18); R7, R8, R4's confirmation and G1; NSP-017's question about the templates' CSS sheets.
+  in the index (s57, with P109's S18); R4's confirmation; NSP-017's question about the templates' CSS sheets.
 
 ## Before you start
 

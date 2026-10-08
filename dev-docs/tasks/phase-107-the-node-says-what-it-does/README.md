@@ -316,7 +316,7 @@ target must copy, or a runtime quirk to narrow to the ports that declare units?"
   stranger's included) must implement it. Cost: every spec of a node with a `*` or `number` port inherits a behaviour no
   author can predict from the node.
 
-Until ruled, the runtime suite counts the rows (C6) every run and goes red the day they stop firing.
+Until ruled, the runtime suite counts the rows (C6) every run and goes red the day they stop firing. **Ruled 2026-10-05 (P109 Track F page), as recommended: "Only on size inputs"; fixed in `ebeefb060`.**
 
 **Also for a ruling, the batch's rows** (NSP-011 §6.2): C4 (four `.toString()` setters throw on null), C5 (the Variables'
 seed of 0), D6, D7, D8 — each a proposed answer; C5 and D8 are the ones an author meets first.
@@ -338,7 +338,7 @@ never does."*
   change in node.ts's drain touching every node with two or more value inputs, shipped alone after the ruling, with the
   scenario's claims flipped to green as its test.
 
-Until ruled, both suites count the scenario under row G1 (known on the runtime, known-from-the-other-side on the export)
+**Ruled 2026-10-05 (P109 Track F page), as recommended: "Yes, correct the docs sentence"; fixed in `8a177580d`.** Until ruled, both suites counted the scenario under row G1 (known on the runtime, known-from-the-other-side on the export)
 and go red the day either stops.
 
 **Also for a ruling, the world's rows** ([NSP-007 §5.4](NSP-007-THE-WORLD.md), s8, 2026-09-30 — each a proposed answer,
