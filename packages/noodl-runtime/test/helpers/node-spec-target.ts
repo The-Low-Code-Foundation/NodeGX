@@ -149,7 +149,7 @@ import type { NodeInstance, NodeMetadata, OutcomeFailureOptions, OutcomeToken, R
 
 import type { RuntimeNode } from '../../src/internal';
 import type { BackendCall, ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, LocationCall, RequestRecord, StackAnswer, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
-import { parseEndpoint, ROUTER_PAGES, specFor, type WorldLocation } from '../../../nodegx-node-spec/src';
+import { parseEndpoint, REPEATER_TEMPLATES, ROUTER_PAGES, specFor, type WorldLocation } from '../../../nodegx-node-spec/src';
 import { AUTH_OPS, backendEvent, canonicalise, fileError, installWorld, isFileOp, locationEvent, OUTCOME_PORTS, OWN_ELEMENT, SELF_REFERENCE, type BackendDelivery } from '../../../nodegx-node-spec/src';
 
 import NoodlRuntime = require('../../noodl-runtime');
@@ -1205,7 +1205,7 @@ export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 't
 export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back', 'router-navigate', 'page-inputs', 'page', 'showpopup', 'closepopup'] as const;
 
 /** NSP-016 s37 — the viewer's VISUAL nodes this phase has specced, from `src/nodes/` (their React components come with them; PERSON above). */
-export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox', 'controls/text-input', 'controls/options', 'controls/slider', 'visual/icon', 'controls/radiobuttongroup', 'controls/radiobutton', 'visual/text', 'visual/group', 'visual/circle', 'visual/image', 'visual/video', 'visual/drag', 'navigation/navigation-stack', 'navigation/router'] as const;
+export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox', 'controls/text-input', 'controls/options', 'controls/slider', 'visual/icon', 'controls/radiobuttongroup', 'controls/radiobutton', 'visual/text', 'visual/group', 'visual/circle', 'visual/image', 'visual/video', 'visual/drag', 'navigation/navigation-stack', 'navigation/router', 'std-library/data/foreach'] as const;
 
 /**
  * Picker nodes whose SOURCE is in this package but which only the viewer's `register-nodes.js`
@@ -1763,7 +1763,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     const logs: LogLine[] = [];
     // NSP-016 s56 — a lone Component Stack builds its pages in its own scope (`createNode`, `createPrimitiveNode`, `deleteNode`):
     // a REAL scope, as the popup root has (`scopeFor`)
-    const nodeScope = scope ?? (type === 'Page Stack' || type === 'Router' ? scopeFor({ name: `node-spec/${id}`, getInstanceId: () => id, getRoots: () => [] as never[] }, logs) : loneScope(id, logs));
+    const nodeScope = scope ?? (type === 'Page Stack' || type === 'Router' || type === 'For Each' ? scopeFor({ name: `node-spec/${id}`, getInstanceId: () => id, getRoots: () => [] as never[] }, logs) : loneScope(id, logs));
     // POPUP (world.ts, NSP-015 s20) — a lone Close Popup inside the script's popups
     if (!scope && type === 'NavigationClosePopup' && world && world.popup.inside.length > 0) insidePopups(nodeScope.componentOwner as { parentNodeScope?: unknown }, world.popup.inside);
     const metadata = context.nodeRegister.getNodeMetadata(type);
@@ -1809,6 +1809,10 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
         return r;
       };
     }
+    // NSP-016 s59 — a Repeater's parent: placed as a loaded project places it (nodescope.ts `createNodeFromModel`), its parent is known
+    // BEFORE its parameters are set (`setNodeModel` → `updateTarget`, which schedules a rebuild) and it joins the parent's children after
+    // (`insertNodeInTree`, in `putOnPage`). The row templates are the play's project's (repeater.ts THE PLAY'S PROJECT)
+    if (type === 'For Each' && !scope) repeaterParent(node, nodeScope as unknown as InstanceType<typeof NodeScope>, id);
     const h = adopt(node, id, type, metadata, params, logs, made);
     // PERSON (above, NSP-016 s37) — a node a person acts on is put on the page, its params already applied as a
     // loaded project's are before the first render; its Did Mount lands in the first settle
@@ -1837,6 +1841,92 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
 
   /** PERSON (above): the nodes on the page right now. */
   const onPage = new Set<State>();
+
+  /**
+   * NSP-016 s59 — a Repeater's page, by handle id: the Group it sits in (a real one in its scope — the `target` it adds its rows to,
+   * foreach.tsx `updateTarget`) and the row templates its placing registered (repeater.ts THE PLAY'S PROJECT).
+   */
+  const repeaters = new Map<string, { group: RuntimeNode & { cachedChildren?: unknown }; models: string[] }>();
+
+  /**
+   * NSP-016 s59 — THE PLAY'S PROJECT a Repeater builds rows from: each row template registered as the app's project registers a
+   * component (the context's table, as `installPopups` and a Component Stack's page do) — its ports, its nodes with their parameters,
+   * its wires and its roots — and the Group it sits in, made in its scope and named its parent (`setNodeModel` → `updateTarget`)
+   * before its parameters are set, as a loaded project does.
+   *
+   * What throws inside the Repeater's queue — building a component the project does not have (`getComponentModel` throws), or a rebuild
+   * whose Items hold a `null` (`Model.instanceOf(null)`) — rejects a promise nothing hears: in a browser a console line, and the queue's
+   * runner stops with `runningOperations` still true (repeater.ts, row C128). With chunked creation that promise is `runOps`'s, which
+   * the face cannot reach, and jest fails the suite on it. So the face takes the line at its source: the build of a component the
+   * project does not have, and such a rebuild, each hand back a promise that never settles — the runner stops at the same `await`, as
+   * the rejection stops it. Every other build and rebuild is the runtime's own promise, untouched (its microtasks are the spec's act
+   * boundaries).
+   */
+  function repeaterParent(node: RuntimeNode, scope: InstanceType<typeof NodeScope>, id: string): void {
+    const models = (context as unknown as { componentModels: Record<string, unknown> }).componentModels;
+    const made: string[] = [];
+    type Model = { nodes: Record<string, unknown>; connections: unknown[]; roots: string[]; addInputPort(p: unknown): void; addOutputPort(p: unknown): void };
+    const port = (plug: 'input' | 'output', [name, kind]: [string, string]) => ({ name, plug, type: kind === 'signal' ? { name: 'signal' } : '*' });
+    for (const [name, t] of Object.entries(REPEATER_TEMPLATES)) {
+      if (Object.prototype.hasOwnProperty.call(models, name)) continue;
+      const model = new ComponentModel(name) as unknown as Model;
+      for (const e of Object.entries(t.inputs)) model.addInputPort(port('input', e));
+      for (const e of Object.entries(t.outputs)) model.addOutputPort(port('output', e));
+      for (const [nid, n] of Object.entries(t.nodes)) {
+        const nm = NodeModel.createFromExportData({ id: nid, type: n.type, parameters: { ...(n.params ?? {}) } } as never) as unknown as { component?: unknown; id: string };
+        nm.component = model;
+        model.nodes[nm.id] = nm;
+      }
+      for (const w of t.wires) {
+        const from = parseEndpoint(w.from);
+        const to = parseEndpoint(w.to);
+        model.connections.push({ sourceId: from.node, sourcePort: from.port, targetId: to.node, targetPort: to.port });
+      }
+      for (const r of t.roots) model.roots.push(r);
+      models[name] = model;
+      made.push(name);
+    }
+    const group = context.nodeRegister.createNode('Group', `${id}/parent`, scope as never) as unknown as RuntimeNode & { cachedChildren?: unknown };
+    scope.nodes[group.id] = group as never;
+    type Internal = { template?: unknown; templateFunction?: unknown; items?: unknown };
+    const n = node as unknown as { updateTarget(id: string): void; _runQueueOperations(): Promise<void>; refresh(): Promise<void>; _internal: Internal };
+    const run = n._runQueueOperations.bind(node);
+    n._runQueueOperations = () => {
+      const p = run();
+      p.catch(() => undefined);
+      return p;
+    };
+    const never = () => new Promise<never>(() => undefined);
+    const build = scope.createNode.bind(scope);
+    (scope as unknown as { createNode(name: unknown, id?: unknown, extra?: unknown): Promise<unknown> }).createNode = (name, id, extra) => {
+      // nodescope.ts `createNode` → nodecontext.ts `getComponentModel` (:616-636): a node type, or a component the project has
+      const known = !context.nodeRegister.hasNode(name as string) && Object.prototype.hasOwnProperty.call(models, name as string);
+      return known ? build(name as string, id as string, extra as Record<string, unknown>) : never();
+    };
+    const refresh = n.refresh.bind(node);
+    n.refresh = () => {
+      // foreach.tsx `refresh` :745-772 — past its two checks it copies Items again, and an item that is `null` throws there
+      const i = n._internal;
+      const src = (i.items || []) as ArrayLike<unknown>;
+      let hole = false;
+      for (let k = 0; k < src.length; k++) if (src[k] === null || src[k] === undefined) hole = true;
+      const p = refresh();
+      if (!((i.template || i.templateFunction) && i.items && hole)) return p;
+      p.catch(() => undefined);
+      return never();
+    };
+    n.updateTarget(group.id);
+    repeaters.set(id, { group, models: made });
+  }
+
+  /** PERSON (above, NSP-016 s59) — the element of the row a Repeater drew at place `value` in its parent, if it is on the page. */
+  function rowElement(s: State, value: unknown): any {
+    const r = repeaters.get(s.h.id);
+    if (!r || typeof value !== 'number') return null;
+    const el = (r.group as unknown as { getDOMElement(): any }).getDOMElement();
+    if (!el || !el.isConnected) return null;
+    return el.children[value] ?? null;
+  }
 
   /**
    * PERSON (above) — renders the node's real component into the page, under a holder standing for the
@@ -1989,6 +2079,25 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
         p.catch(() => undefined);
         return p;
       };
+    } else if (s.h.type === 'For Each') {
+      // NSP-016 s59 — the Repeater joins its parent's children (nodescope.ts `insertNodeInTree`, after its parameters), and the page
+      // renders the parent: the Repeater draws nothing itself (`ForEachComponent`), its rows are the parent's children after it. And the
+      // page's clock: chunked creation reads `performance.now()` (foreach.tsx `_runQueueOperations`) — jsdom's runs on the wall clock,
+      // so for the play it is the world's, which does not move while the node works
+      const r = repeaters.get(s.h.id)!;
+      (r.group as unknown as Holder).addChild(node);
+      root = r.group as unknown as Holder;
+      page.models = r.models;
+      const perf = d.window.performance as { now(): number };
+      if (world) {
+        const w = world;
+        const own = Object.getOwnPropertyDescriptor(perf, 'now');
+        perf.now = () => w.clock.now();
+        page.restoreClock = () => {
+          if (own) Object.defineProperty(perf, 'now', own);
+          else delete (perf as { now?: unknown }).now;
+        };
+      }
     } else if (spec?.needs?.includes('group') && world?.group.present) {
       const group = context.nodeRegister.createNode('Radio Button Group', `${s.h.id}/group`, scope) as unknown as RuntimeNode & Holder;
       // the group's Value parameter at load, then the node, then its siblings — the order a loaded project builds them
@@ -2128,6 +2237,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
   function paint(s: State): void {
     const d = ensureDom();
     if (s.page?.group) s.page.group.cachedChildren = undefined;
+    const r = repeaters.get(s.h.id);
+    if (r) r.group.cachedChildren = undefined;
     void d.act(() => {
       s.page?.host?.forceUpdate();
     });
@@ -2160,7 +2271,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     // NSP-016 s42 — a `pick` acts on the CHILD whose Value is the act's (a Radio Button Group's button): the control a person sees
     // inside it; a Value no child carries, or a child off the page, is nothing to act on
     // NSP-016 s52 — a `tap` acts on the CHILD it names (a Group's, group.ts THE CHILDREN); a `clickAway` on the page beside the node
-    const el = act === 'pick' ? pickedElement(s, value) : act === 'tap' ? childElement(s, value) : act === 'clickAway' ? s.page?.container : ownElement(s);
+    const el = act === 'pick' ? pickedElement(s, value) : act === 'tap' ? childElement(s, value) : act === 'tapRow' ? rowElement(s, value) : act === 'clickAway' ? s.page?.container : ownElement(s);
     // NSP-016 s50 — a drag from the desktop goes on over whatever is on the page, the node's element or not
     if (act === 'fileEnter' || act === 'fileLeave' || act === 'fileDrop') return fileActs(act, value, el ? underPointer(w, el) : d.document.body);
     // NSP-016 s51 — a card beside the node, and the pointer off everything: acts on the page, the node's element or not
@@ -2271,6 +2382,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
         break;
       // NSP-016 s52 — a click on a child inside the node, or on the page beside it: a click, with the browser's focusing rule
       case 'tap':
+      // NSP-016 s59 — a click on a row a Repeater drew, as a click on a Group's child
+      case 'tapRow':
       case 'clickAway':
         browserPress();
         pointer('pointerup', 'mouse');
@@ -3077,6 +3190,18 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
         else h.node._onNodeDeleted();
       } catch {
         // a node whose teardown assumes a scope it never had; the instance is unreachable anyway
+      }
+      // NSP-016 s59 — a Repeater's parent goes after it (its teardown takes its rows out of the parent), and its templates with it
+      const rep = repeaters.get(h.id);
+      if (rep) {
+        repeaters.delete(h.id);
+        try {
+          rep.group._onNodeDeleted();
+        } catch {
+          // the parent's own teardown assumes nothing of the play
+        }
+        const models = (context as unknown as { componentModels: Record<string, unknown> }).componentModels;
+        for (const name of rep.models) delete models[name];
       }
       releasePage();
       // NSP-013 s12 (T7) — the play is over, so is its work. A disposed node left in the context's

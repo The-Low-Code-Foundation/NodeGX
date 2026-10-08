@@ -55,6 +55,7 @@ import { Image } from './image';
 import { Video, OWN_ELEMENT } from './video';
 import { Drag } from './drag';
 import { ComponentStack } from './component-stack';
+import { Repeater } from './repeater';
 import { PageRouter } from './page-router';
 import { RadioButtonGroup } from './radiobuttongroup';
 import { RadioButton } from './radiobutton';
@@ -174,6 +175,7 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [Drag.type]: Drag,
   [ComponentStack.type]: ComponentStack,
   [PageRouter.type]: PageRouter,
+  [Repeater.type]: Repeater,
   [RadioButtonGroup.type]: RadioButtonGroup,
   [RadioButton.type]: RadioButton,
   [NavigateToPath.type]: NavigateToPath,
@@ -220,6 +222,8 @@ export { EQUIVALENT_MUTANTS } from './equivalent-mutants';
 export { OWN_ELEMENT };
 // NSP-016 s57 — the play's project a Page Router reads; a target builds the same
 export { ROUTER_PAGES } from './page-router';
+// NSP-016 s59 — the play's row templates a Repeater builds; a target registers the same
+export { REPEATER_TEMPLATES, type RowTemplate } from './repeater';
 
 export function specFor(typeName: string): AnyNodeSpec | undefined {
   return specs[typeName];
@@ -275,6 +279,7 @@ export {
   Drag,
   ComponentStack,
   PageRouter,
+  Repeater,
   RadioButtonGroup,
   RadioButton,
   NavigateToPath,

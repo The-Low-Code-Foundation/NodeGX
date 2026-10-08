@@ -311,6 +311,16 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
     attr: { onPage },
     held: {},
     frameEnd: ['isMounted', 'regKey', 'waiting', 'handed', 'nextHand', 'currentParams', 'deleted', 'children', 'queue', 'busy', 'hops', 'owed', 'callbacks', 'resetScheduled', 'resetTokens', 'countLate', 'early', 'count']
+  },
+  // s59 — the Repeater (repeater.ts): everything is the node's own — its list, its queue, its rows (its parent's children, which it has no
+  // element of its own to draw); the frame's end runs its callbacks (the copy, the rebuild) and the queue they start, which fires Items
+  // Rendered and answers Refresh
+  'For Each': {
+    node: ['own', 'items', 'template', 'templateType', 'registered', 'copyScheduled', 'refreshScheduled', 'callbacks', 'tokens', 'queue', 'running', 'stuck', 'hops', 'owed', 'building', 'rows', 'answered', 'itemId', 'outs'],
+    attr: {},
+    held: {},
+    frameEnd: ['copyScheduled', 'refreshScheduled', 'callbacks', 'tokens', 'queue', 'running', 'stuck', 'hops', 'owed', 'building', 'rows', 'answered'],
+    framePulses: ['itemsRendered']
   }
 };
 
@@ -393,19 +403,25 @@ export function guarded(spec: AnyNodeSpec, model: PageModel, findings: Map<strin
         if (v !== KEEP && !same(next[k], v)) find('G4', k, where, () => `${canon(next[k])}, shows ${canon(v)}`);
       }
       for (const [k, e] of Object.entries(model.element ?? {})) if (!Object.is(next[k], s[k]) && !e.changesWith.some((c) => !Object.is(next[c], s[c]))) find('G4', k, where, () => 'changed alone');
-      // G5
+      // G5 — s59: only when some attribute is presettable. With none, the second run is the first again, and for a spec that writes
+      // the registry (the Repeater's own list) or draws from the world it would write and draw twice — noise, and a world the rest of
+      // the run did not have
       const drawn: S = { ...s };
+      let presettable = false;
       for (const [k, a] of Object.entries(model.attr)) {
         if (a.preset === false) continue;
+        presettable = true;
         const v = a.follows(s);
         if (v !== KEEP) drawn[k] = v;
       }
-      const r2 = f(drawn, ...rest) as Patch | undefined;
-      const next2 = after(drawn, r2);
-      for (const k of node) if (canon(next[k]) !== canon(next2[k])) find('G5', k, where, () => `${canon(next[k])} vs ${canon(next2[k])} with the page already drawn`);
-      const emits = (p: Patch | undefined) => (p?.emit ?? []).filter((e) => !LIFECYCLE.has(e));
-      if (canon(r?.send ?? []) !== canon(r2?.send ?? [])) find('G5', 'send', where, () => `${canon(r?.send)} vs ${canon(r2?.send)}`);
-      if (canon(emits(r)) !== canon(emits(r2))) find('G5', 'emit', where, () => `${canon(emits(r))} vs ${canon(emits(r2))}`);
+      if (presettable) {
+        const r2 = f(drawn, ...rest) as Patch | undefined;
+        const next2 = after(drawn, r2);
+        for (const k of node) if (canon(next[k]) !== canon(next2[k])) find('G5', k, where, () => `${canon(next[k])} vs ${canon(next2[k])} with the page already drawn`);
+        const emits = (p: Patch | undefined) => (p?.emit ?? []).filter((e) => !LIFECYCLE.has(e));
+        if (canon(r?.send ?? []) !== canon(r2?.send ?? [])) find('G5', 'send', where, () => `${canon(r?.send)} vs ${canon(r2?.send)}`);
+        if (canon(emits(r)) !== canon(emits(r2))) find('G5', 'emit', where, () => `${canon(emits(r))} vs ${canon(emits(r2))}`);
+      }
       // G7
       for (const e of r?.emit ?? []) if (!pulses.has(e)) find('G7', e, where);
       return r;
