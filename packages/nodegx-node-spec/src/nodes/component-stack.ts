@@ -191,7 +191,9 @@ export const ComponentStack = defineNode({
   // v5 (P109 ISL-048, s31): a Components value that is not a list is none (Failure, no components), and a page found by its label with no component is not found (row C109)
   // v6 (P109 ISL-048, s31): a push with a transition there is no such thing as plays none and is Done (row C108)
   // v7 (P109 ISL-048, s31): a back's end takes the entry it animated off the stack, and a push onto an empty stack is Failure (row C110)
-  version: 7,
+  // v8 (P109 ISL-048, s31): a back whose page below the Components list no longer has is refused before anything moves, and a page
+  // whose entry outlives its row in the list is not found (row C111)
+  version: 8,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx',
   needs: ['person', 'clock', 'location', 'project'],
   worldPool: {
@@ -536,9 +538,11 @@ function findPage(s: State, key: unknown): Found | undefined | typeof THROWS {
   return attempt(() => {
     const info = Object.assign({}, s.pageInfo) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
     const pages = s.pages as any; // eslint-disable-line @typescript-eslint/no-explicit-any
-    if (info[key as any]) { // eslint-disable-line @typescript-eslint/no-explicit-any
+    // an id whose entry outlives its row in the Components list is not found (row C111, fixed in P109 ISL-048: `pageRef.label` threw)
+    const byId = info[key as any] ? pages.find((x: any) => x.id === key) : undefined; // eslint-disable-line @typescript-eslint/no-explicit-any
+    if (byId) {
       const pageInfo = info[key as any]; // eslint-disable-line @typescript-eslint/no-explicit-any
-      const pageRef = pages.find((x: any) => x.id === key); // eslint-disable-line @typescript-eslint/no-explicit-any
+      const pageRef = byId;
       return { component: String(pageInfo.component), label: String(pageRef.label), id: String(key), path: pageInfo.path !== undefined ? String(pageInfo.path) : undefined };
     }
     const pageRef = pages.find((x: any) => x.label === key); // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -970,8 +974,9 @@ function finishBusy(w: Work): void {
 
 /**
  * The top page's Pop asks (`back` :1041-1083), when the stack pushed that page and it is still there. The page below comes back, the
- * node that pushed the top page hears the action and results, the page below is named — a page the Components list no longer has
- * throws there, and the Pop's asking ends unanswered (row C111) — and the transition plays back.
+ * node that pushed the top page hears the action and results, the page below is named, and the transition plays back. A page below
+ * that the Components list no longer has is looked up first and refuses the back: Failure, nothing moves (row C111, fixed in P109
+ * ISL-048 — it threw after the page below came back, and the stack never popped).
  */
 function back(w: Work, v: Req): void {
   const s = w.st;
@@ -979,10 +984,12 @@ function back(w: Work, v: Req): void {
   if (!top || !top.pushed || s.deleted.includes(top.page)) return;
   if (s.stack.length <= 1) return void w.answers.push({ op: 'back', value: 'unchanged' });
   if (s.running) return void w.answers.push({ op: 'back', value: 'failure', error: 'pop-component-stack/transition-in-progress' });
+  // the page below first: one the Components list no longer has refuses the back before anything moves (row C111, fixed in P109 ISL-048)
+  const below = findPage(s, s.stack[s.stack.length - 2].pageId);
+  if (below === THROWS) return;
+  if (below === undefined) return void w.answers.push({ op: 'back', value: 'failure', error: 'pop-component-stack/page-not-found' });
   addChild(w, top.from as number, 0);
   w.answers.push(v.action === undefined ? { op: 'returned', results: v.results ?? {} } : { op: 'returned', action: v.action, results: v.results ?? {} });
-  const below = findPage(s, s.stack[s.stack.length - 2].pageId);
-  if (below === THROWS || below === undefined) return;
   outputs(w, below.label, s.stack.length - 1);
   startTransition(w, top.tr, { kind: 'back', page: top.page });
   w.answers.push({ op: 'back', value: 'done' });

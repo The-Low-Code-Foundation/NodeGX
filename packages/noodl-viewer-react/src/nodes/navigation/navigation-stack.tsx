@@ -388,9 +388,11 @@ const PageStack = {
       args.hasFailed && args.hasFailed(code, message);
     },
     _findPage(this: PageStackInstance, pageIdOrLabel: string): FoundPage | undefined {
-      if (this._internal.pageInfo[pageIdOrLabel]) {
+      // P107-C111 — an id whose entry outlives its row in the Components list (the list changed) is not found: `pageRef.label` threw
+      const byId = this._internal.pageInfo[pageIdOrLabel] ? this._internal.pages.find((x) => x.id === pageIdOrLabel) : undefined;
+      if (byId) {
         const pageInfo = this._internal.pageInfo[pageIdOrLabel];
-        const pageRef = this._internal.pages.find((x) => x.id === pageIdOrLabel);
+        const pageRef = byId;
         return {
           component: String(pageInfo.component),
           label: String(pageRef.label),
@@ -1109,13 +1111,22 @@ const PageStack = {
 
       const top = this._internal.stack[this._internal.stack.length - 1];
 
+      // P107-C111 — the page below first: one the Components list no longer has refuses the back before anything moves (it threw
+      // after the page below came back and the pusher heard the results, and the stack never popped)
+      const belowId = this._internal.stack[this._internal.stack.length - 2].pageId;
+      const pageInfo = this._findPage(belowId);
+      if (pageInfo === undefined) {
+        return {
+          ok: false,
+          code: 'pop-component-stack/page-not-found',
+          message: `The Component Stack "${this._internal.name || 'Main'}" no longer has the page below ("${belowId}") in its Components list — the Pop was refused`
+        };
+      }
+
       top.page.setInputValue('position', 'absolute');
       // Insert the destination in the stack again
       this.addChild(top.from, 0);
       top.backCallback && top.backCallback(args.backAction, args.results);
-
-      // Find the page by either ID or by Label
-      const pageInfo = this._findPage(this._internal.stack[this._internal.stack.length - 2].pageId);
 
       this.setPageOutputs({
         topPageName: pageInfo.label,

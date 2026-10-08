@@ -2080,7 +2080,7 @@
     ]
   },
   {
-    "name": "Components changed to leave out the page below, and a Pop in the same frame: the pusher hears the results, the page below comes back, but the stack never pops (row C111)",
+    "name": "Components changed to leave out the page below, then a Pop in the same frame: the reset the Components write scheduled runs first, so the Pop finds no page the stack pushed and asks nothing; the stack starts again at Detail",
     "because": "back :1060 `_findPage` of the page below throws",
     "params": {
       "pages": [
@@ -2125,6 +2125,61 @@
       {
         "act": "back",
         "value": {}
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C111 — a Pop, then Components changed to leave out the page below, in one frame: the Pop is refused (Failure, page not found) before anything moves — the pusher hears nothing — and the reset starts the stack at Detail",
+    "because": "back :1041-1083 — the page below is looked up first",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "back",
+        "value": {
+          "action": "save",
+          "results": {
+            "n": 1
+          }
+        }
+      },
+      {
+        "set": "pages",
+        "value": [
+          {
+            "id": "p2",
+            "label": "Detail"
+          }
+        ]
       },
       "settle"
     ]
