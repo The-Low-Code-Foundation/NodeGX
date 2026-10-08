@@ -25,8 +25,8 @@
  *
  * THE CALLERS (spec.ts; the acts `navigate`, `traverse`). A Navigate hands the router a navigate at ITS frame's end (`scheduleNavigate`
  * → `RouterHandler.navigate`), which hands it on ONE MILLISECOND later (`setTimeout`, the world's clock): to the one router registered,
- * whatever name the Navigate gave, when exactly one is; else to the routers under the name as handed, or into the handler's queue — where
- * it waits for a router to register under that name (`name || 'Main'`, compared with `===`). The router answers it (an `answer` event,
+ * whatever name the Navigate gave, when exactly one is; else to the routers under the name, or into the handler's queue — where it
+ * waits for a router to register under that name. A blank name is Main on both sides (`name || 'Main'`; row C118, fixed in P109 ISL-048). The router answers it (an `answer` event,
  * op `navigate`): Failure when it names no page (`navigate/no-target-page`) or a component the index has no page for
  * (`navigate/page-not-found`); Done after opening a new tab (`window.open(url, '_blank')`); Unchanged when it shows that page with those
  * parameters already (shallow, `===`); else it builds the page, hands its Page Inputs the parameters (an `answer` event, op `page`, one
@@ -152,9 +152,10 @@ const LOOK = (displayName: string, group: string, description: string, extra: Re
 
 export const PageRouter = defineNode({
   type: 'Router',
+  // v4 (P109 ISL-048, s30): a blank-named Navigate queued before the router is on the page waits as Main, so a router registering as Main takes it (row C118)
   // v3 (P109 ISL-048, s30): a Url path of null is none — the router matches and pushes its URLs as with no Url path (row C116)
   // v2 (P109 ISL-048, s30): a malformed escape in the query is kept as written, as a path segment's is — the router shows its page and answers (row C115)
-  version: 3,
+  version: 4,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/router.tsx',
   needs: ['person', 'clock', 'location', 'project'],
   worldPool: {
@@ -330,9 +331,9 @@ export const PageRouter = defineNode({
             const handed = { ...w.st.handed };
             delete handed[tag];
             w.st.handed = handed;
-            // the one router registered takes it, whatever the name; else the name as handed, or the handler's queue
+            // the one router registered takes it, whatever the name; else the handler's queue, a blank name as Main (row C118, fixed in P109 ISL-048)
             if (w.st.regKey !== null) enqueue(w, { kind: 'navigate', v: h.v });
-            else w.st.waiting = [...w.st.waiting, { name: h.name, v: h.v }];
+            else w.st.waiting = [...w.st.waiting, { name: norm(h.name), v: h.v }];
           },
           view,
           'yield'

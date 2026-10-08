@@ -2383,8 +2383,8 @@
   }
  },
  {
-  "name": "unmounted: a navigate queued under its name; mounted, a Main one replays, a blank one never does (row C118)",
-  "because": "registerRouter compares name || 'Main' with ===",
+  "name": "unmounted: a navigate queued under its name; mounted, a Main one replays, and a blank one too — a blank name is Main (row C118, fixed in P109 ISL-048)",
+  "because": "router-handler.ts navigate and registerRouter both read a blank name as Main (row C118, fixed in P109 ISL-048)",
   "params": {
    "name": "Main",
    "pages": {
