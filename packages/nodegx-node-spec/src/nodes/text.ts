@@ -181,7 +181,8 @@ export const Text = defineNode({
   // to reproduce C79 and was withdrawn the same day. Since v1: Mounted written the value it holds does nothing (:2285).
   // v4 (s50, NSP-016 step (b) of RESEARCH-DRAG-DROP.md §8): the file drop and the pointer's move — new acts, the rules above
   // v5 (s51, step (b)'s second half): THE ZONE SIDE — cards on the page, `grab`, `pickUp` and `away`; the one gesture is anyone's
-  version: 5,
+  // v6 (P109 ISL-038, s29): a key during a keyboard carry leaves a zone taken off the page first, so Space cancels (row C83)
+  version: 6,
   source: 'packages/noodl-viewer-react/src/nodes/visual/text.ts',
   needs: ['person', 'clock'],
   // the hold timer: the default half second, either side of it, a second (Hold Time 1), and the turn that unswallows a click
@@ -812,6 +813,12 @@ function keyDuringGesture(s: Readonly<State>, key: string): Act {
   const input = card ? s.carryBy : s.input;
   const lifted = card || s.phase === 'lifted';
   if (input !== 'keyboard') return key === 'Escape' && lifted ? (card ? cardCancelled(s) : cancelled(s)) : NONE;
+  // C83 (fixed in P109 ISL-038): a zone taken off the page under the carried card is left at the next key (drag-drop.ts
+  // `onKeyDown`, `liveElement`) — Drag Over false — so Enter or Space cancels and an arrow key looks only at the zones on the page
+  if (s.inZone && !s.onPage) {
+    const gone: Act = { set: { inZone: false, isDropTarget: false }, send: ['isDropTarget'], emit: [] };
+    return join(gone, keyDuringGesture({ ...s, ...gone.set }, key));
+  }
   switch (key) {
     case 'Enter':
     case ' ':

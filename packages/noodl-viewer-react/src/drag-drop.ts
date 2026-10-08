@@ -805,6 +805,10 @@ function onKeyDown(e: KeyboardEvent): void {
     return;
   }
 
+  // P107-C83: a zone taken off the page under the carried card (Mounted off) is left at the next key, so Drag Over goes false,
+  // Enter or Space cancels instead of dropping into a zone nobody can see, and an arrow key moves among the zones still there.
+  if (g.zone && !liveElement(g.zone)) leaveZone(g);
+
   const list = orderedZones(g.source);
   const at = list.findIndex((z) => z.node === g.zone);
   const count = (z: HTMLElement) => slots(g, z).length;

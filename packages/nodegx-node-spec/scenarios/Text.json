@@ -10003,7 +10003,7 @@
     ]
   },
   {
-    "name": "the zone side: from the keyboard, the Text taken off the page under the carried card — Space on the card still drops it there: Dropped on a Text not on the page",
+    "name": "the zone side: from the keyboard, the Text taken off the page under the carried card — Space on the card leaves it first (Drag Over false) and cancels: nothing is Dropped on a Text not on the page (C83)",
     "because": "drag-drop.ts :446-512 (zoneAt, track, enterZone, leaveZone), :379-399 (drop); :817-822, :112-130 (no leave without a delete)",
     "params": {
       "acceptDrops": true

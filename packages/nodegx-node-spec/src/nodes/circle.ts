@@ -112,7 +112,8 @@ const CARDS: ReadonlyArray<{ readonly dragValue: unknown; readonly dragKind?: st
 export const Circle = defineNode({
   type: 'Circle',
   // v1 (NSP-016 s53): the Text v5's machinery (text.ts), with no Tag
-  version: 1,
+  // v2 (P109 ISL-038, s29): a key during a keyboard carry leaves a zone taken off the page first, so Space cancels (row C83)
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/visual/circle.ts',
   needs: ['person', 'clock'],
   // the hold timer: the default half second, either side of it, a second (Hold Time 1), and the turn that unswallows a click
@@ -727,6 +728,12 @@ function keyDuringGesture(s: Readonly<State>, key: string): Act {
   const input = card ? s.carryBy : s.input;
   const lifted = card || s.phase === 'lifted';
   if (input !== 'keyboard') return key === 'Escape' && lifted ? (card ? cardCancelled(s) : cancelled(s)) : NONE;
+  // C83 (fixed in P109 ISL-038): a zone taken off the page under the carried card is left at the next key (drag-drop.ts
+  // `onKeyDown`, `liveElement`) — Drag Over false — so Enter or Space cancels and an arrow key looks only at the zones on the page
+  if (s.inZone && !s.onPage) {
+    const gone: Act = { set: { inZone: false, isDropTarget: false }, send: ['isDropTarget'], emit: [] };
+    return join(gone, keyDuringGesture({ ...s, ...gone.set }, key));
+  }
   switch (key) {
     case 'Enter':
     case ' ':
