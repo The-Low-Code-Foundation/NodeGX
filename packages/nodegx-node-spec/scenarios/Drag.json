@@ -356,9 +356,8 @@
     ]
   },
   {
-    "name": "Mounted off: Will Unmount; a Do waits and runs at the mount, from where the element starts (row C105 on the runtime)",
-    "because": "react-component-node.ts :2014-2056 `withInnerComponent`; Drag.tsx `constructor`",
-    "row": "NSP-016 §6 C105",
+    "name": "row C105 — Mounted off: Will Unmount; a Do waits and runs at the mount, from where the element starts",
+    "because": "react-component-node.ts :2014-2056 `withInnerComponent`; Drag.tsx `mountedAt` (row C105, fixed in P109 ISL-048: the snap read the constructor's 0)",
     "params": {
       "inputPositionX": 30
     },

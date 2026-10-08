@@ -58,6 +58,13 @@ export class Drag extends React.Component<DragProps, State> {
    */
   draggableNodeRef: React.RefObject<HTMLElement>;
 
+  /**
+   * P107-C105 — where `componentDidMount` put the element, until that `setState` lands. A Snap Do that waited for the component
+   * runs at the child's ref, after the mount queued its position and before React commits it: read from `this.state`, it started
+   * from the constructor's 0 and the element jumped to the edge first.
+   */
+  mountedAt?: State;
+
   constructor(props: DragProps) {
     super(props);
     this.state = { x: 0, y: 0 } satisfies State;
@@ -91,12 +98,17 @@ export class Drag extends React.Component<DragProps, State> {
     );
   }
 
+  /** Where the element is on an axis: the mount's position until it lands (P107-C105), then the state. */
+  positionOn(axis: 'x' | 'y') {
+    return this.mountedAt ? this.mountedAt[axis] : this.state[axis];
+  }
+
   snapToPosition({ timerScheduler, propCallback, duration, axis, endValue }) {
     const _this = this;
     return timerScheduler
       .createTimer({
         duration: duration === undefined ? 300 : duration,
-        startValue: this.state[axis],
+        startValue: this.positionOn(axis),
         endValue: endValue,
         ease: EaseCurves.easeOut,
         onRunning: function (t) {
@@ -144,7 +156,10 @@ export class Drag extends React.Component<DragProps, State> {
     const x = this.props.inputPositionX ? this.props.inputPositionX : 0;
     const y = this.props.inputPositionY ? this.props.inputPositionY : 0;
 
-    this.setState({ x, y });
+    this.mountedAt = { x, y };
+    this.setState({ x, y }, () => {
+      this.mountedAt = undefined;
+    });
     setDragValues({ x, y, deltaX: 0, deltaY: 0 }, this.props);
   }
 
@@ -166,7 +181,7 @@ export class Drag extends React.Component<DragProps, State> {
   }
 
   snapToPositionX(x, duration) {
-    if (this.state.x === x) return;
+    if (this.positionOn('x') === x) return;
 
     this.snapToPositionXTimer && this.snapToPositionXTimer.stop();
     this.snapToPositionXTimer = this.snapToPosition({
@@ -179,7 +194,7 @@ export class Drag extends React.Component<DragProps, State> {
   }
 
   snapToPositionY(y, duration) {
-    if (this.state.y === y) return;
+    if (this.positionOn('y') === y) return;
 
     this.snapToPositionYTimer && this.snapToPositionYTimer.stop();
     this.snapToPositionYTimer = this.snapToPosition({

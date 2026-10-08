@@ -6,7 +6,7 @@
  * `addChild`, `outcomeOnInnerComponent` :2014-2056) on 2026-10-07 (NSP-016 s55; the reading is NSP-016 §7.16).
  *
  * R3 (a): the runtime wins by default. Every rule below cites the line it was read from. R11: the spec says what a person gets;
- * where the runtime does otherwise only because of how it is built, that is a known row on the runtime target (C105; C102 and C106
+ * where the runtime does otherwise only because of how it is built, that is a known row on the runtime target (C102, C105 and C106
  * were, until P109 ISL-048 fixed them).
  *
  * THE CHILD. A Drag has no element of its own (drag.ts `noDataAttributes`); it moves its FIRST child's element with a CSS
@@ -49,8 +49,8 @@
  *
  * **Mounted** off takes the Drag and its child off the page at the next paint — Will Unmount; both snaps stop and a drag under way
  * ends with no Drag Ended (DraggableCore removes its listeners). On again: a NEW component — Did Mount, the element back at Start
- * Drag X / Y, all four outputs sent, and what waited runs from there (row C105: the runtime runs it before the mount's own write
- * lands, from the constructor's 0, so the element jumps to 0 first — a known row on the runtime target, R11).
+ * Drag X / Y, all four outputs sent, and what waited runs from there (row C105, fixed in P109 ISL-048: the runtime ran it before
+ * the mount's own write landed, from the constructor's 0, so the element jumped to 0 first).
  *
  * **Child Index** 0, **Children Count** 1 (its child, scheduled for the frame's end by `addChild`), **This**, the **Bounding Box**
  * never measured here, **Scroll Into View** nothing on the wire. CSS Class, CSS Style and Variant are stored and reach no element
@@ -398,8 +398,8 @@ function painted(s: Readonly<State>): Act {
     const x = s.startX ? s.startX : 0;
     const y = s.startY ? s.startY : 0;
     let acc: Act = { set: { ...diff(s, fresh), posX: x, posY: y, dX: 0, dY: 0 }, send: [...POSITIONS], emit: ['didMount'] };
-    // what waited runs on the new component, from where the element starts (row C105: the runtime runs it before the mount's own
-    // write lands, from the constructor's 0 — the element jumps to 0 and animates from there)
+    // what waited runs on the new component, from where the element starts (row C105, fixed in P109 ISL-048: the runtime ran it
+    // before the mount's own write landed, from the constructor's 0 — the element jumped to 0 and animated from there)
     let at: State = { ...fresh, x, y };
     for (const axis of s.waiting) {
       const a = snap(at, axis);

@@ -97,18 +97,6 @@ const videoFileTakesNoPointer = (d: Divergence) => {
   const src = lastAct >= 0 ? (written ? written.value : d.params.src) : heldAt(d, 'src');
   return !(typeof src === 'string' && EMBED.some((p) => p.test(src)));
 };
-/** NSP-016 §6 C105 (s55) — a Snap Do that waited for the Drag to mount runs from 0: Drag X / Y differ after a Do sent while it was off the page. */
-const dragWaitedSnapFromZero = (d: Divergence) => {
-  if (d.difference.threw !== undefined) return false;
-  const at = [d.reference[d.difference.index], d.actual[d.difference.index]];
-  if (!at.some((e) => e && e.t === 'value' && (e.port === 'positionX' || e.port === 'positionY'))) return false;
-  let wanted = 'mounted' in d.params ? !!d.params.mounted : true;
-  for (const e of d.reference.slice(0, d.difference.index)) {
-    if (e.t === 'set' && e.port === 'mounted') wanted = !!(e as { value?: unknown }).value;
-    if (e.t === 'in' && (e.port === 'snapToPositionX.do' || e.port === 'snapToPositionY.do') && !wanted) return true;
-  }
-  return false;
-};
 /** C98 / C99 — every value of the port's pool the browser's setter refuses */
 const refusedVolume = poolFor(specs['Video'].inputs.volume).filter((v) => typeof v !== 'number' ? !(Number(v) >= 0 && Number(v) <= 1) : !(v >= 0 && v <= 1));
 const refusedSourceObject = poolFor(specs['Video'].inputs.srcObject).filter((v) => v !== null && v !== undefined);
@@ -146,10 +134,7 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
     { row: 'NSP-016 §6 C99 — a Source Object that is not a stream: the browser refuses it and the node throws', matches: sourceObjectNotAStream },
     { row: 'NSP-016 §6 C100 — a Video playing a file fires no pointer output and takes no file drop', matches: videoFileTakesNoPointer }
   ],
-  // s55 — the Drag's own row: C105 (a snap that waited runs from 0); C102 and C106 fixed in P109 ISL-048
-  Drag: [
-    { row: 'NSP-016 §6 C105 — a Snap Do that waited for the Drag to mount runs from 0', matches: dragWaitedSnapFromZero }
-  ],
+  // the Drag's own rows (C102, C105, C106, s55) were fixed in P109 ISL-048
 };
 
 /**
