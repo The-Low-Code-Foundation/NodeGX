@@ -1,7 +1,7 @@
 # NSP-009 — The ratchet: spec coverage in PR CI
 
 **Opened 2026-09-29.** **Depends on NSP-004.**
-**Status: 📋 not started.**
+**Status: 🟡 begun (s63, 2026-10-08): `exemptions.json` exists beside `tiers.json` — name → reason, ruling, what grades it later — and the census (`scripts/node-spec/census.js`) reads it: an entry that names no picker node, or has no reason, fails the census; each exemption is written on its row (`exempt`), in `totals.exempt`, in CENSUS.md's "Exempt" table and on the script's own line. One entry: Component Children (ruled 2026-10-08, NSP-016 §7.24). Left: `spec-ledger.js`, the floor, the new-node gate, CI (§2–§3).**
 
 ## 1. The person sentence
 

@@ -10,8 +10,10 @@
  *
  * THE PLAY'S PROJECT (`REPEATER_TEMPLATES`). A Repeater builds one component per item and adds it to its PARENT, after itself: the
  * rows are the parent's children, in order, and a person sees them there. In a play the Repeater sits alone in a Group, and the project
- * has two row templates — `Row` shows its `label` and hands back `Id` and `Label`; `Card` shows its `title` and hands it back as `Label`;
- * a click on either is `Tapped`. Any other name is a component the project does not have. What a person does is click a row
+ * has four row templates — `Row` shows its `label` and hands back `Id` and `Label`; `Card` shows its `title` and hands it back as `Label`;
+ * a click on any is `Tapped`. v2: `Leaving` and `Quiet` show their `label` and hold a `For Each Actions` (the Repeater Item) whose Added
+ * is the row's `Added` and which a click tells Remove Completed; `Leaving` wires its Try Remove to the row's `Leaving`, `Quiet` leaves it
+ * unwired (ON ITS WAY OUT, below). Any other name is a component the project does not have. What a person does is click a row
  * (`tapRow`, the row at that place in the list, from 0). The editor draws the Repeater an output per output of its Template
  * (`itemOutput-<name>`, `itemOutputSignal-<name>` for a signal, setup :1036-1091); the ones it has are the PLACED Template's.
  *
@@ -83,9 +85,26 @@
  * (one microtask), a set or a signal is not. So the queue a frame's end starts is done by that settle; one a CLICK starts (below) can
  * still be running at the next act.
  *
- * A PERSON (`tapRow`). A click on a row: the row's own click handler drains the graph (pointerlisteners.ts :173-186) — the Repeater's
- * frame-end work waiting from earlier steps runs THERE, before the row's click is delivered (the Repeater was dirty first); a row that
- * work deleted delivers nothing. Then the row's `Tapped` (`creatorCallbacks.onOutputChanged` :633-639 → `itemOutputSignalTriggered`
+ * ON ITS WAY OUT (v2, `removeItem` :658-685, foreachactions.ts `tryRemove` :133-147; measured, NSP-016 §7.24). A row whose component
+ * holds a `For Each Actions` is not deleted when its record leaves the list. Its Try Remove WIRED: the row is marked (`findChild` skips
+ * it), says Try Remove, and stays until its Remove Completed; UNWIRED: it goes at the next drain. Either way the Repeater lets go of it
+ * at once (`itemNodes`) — a rebuild leaves it, and lands its rows before it — while it is still the parent's child: a person sees it and
+ * taps it, and an addition counts it, so a row added beside one on its way out lands one place early (row C143).
+ *
+ * THE ROWS' SIGNALS (v2, `creatorCallbacks.onOutputChanged` :633-639, `itemOutputSignalTriggered` :922-947; nodecontext.ts
+ * `updateDirtyNodes` :453-490). A row's output signal — `Added` at its landing, `Leaving` at its Try Remove, `Tapped` at a click —
+ * reaches the Repeater only when it has that output (the PLACED Template's), and only where the row's graph updates: in a DRAIN. A drain
+ * is passes over the nodes waiting to update; Item Id is set as each row's signal is heard, and ONE report ends the pass — the outputs
+ * the Repeater has, read from the FIRST row heard, and the signal of the LAST (row C142). A signal raised outside a drain (at a yield,
+ * at an act boundary, by a write made elsewhere) waits for the next drain: those raised before the Repeater had an input since the
+ * last drain are heard before its frame-end work, the rest after it (a row the Repeater's rebuild deleted says nothing); among them,
+ * the rows are heard in the order they were MADE, not the order they spoke (measured). A signal the frame-end work raises (the copy's
+ * first removal) is heard alone, in the next pass. The drains: a settle's frame, and a second after its yield (node-spec-target
+ * `settle`); a press, before its click lands; the click's own. An `advance` does not drain.
+ *
+ * A PERSON (`tapRow`). A click on a row (one on its way out too): the press drains the graph before the click lands (pointerlisteners.ts
+ * :173-186) — the Repeater's frame-end work waiting from earlier steps runs THERE (the Repeater was dirty first), with the rows' waiting
+ * signals; a row that drain deleted delivers nothing. Then the row's `Tapped` (`creatorCallbacks.onOutputChanged` :633-639 → `itemOutputSignalTriggered`
  * :922-947): **Item Id** the record's id; each `itemOutput-<name>` the Repeater has, the row's output of that name; then
  * **itemOutputSignal-Tapped** — only when the Repeater has that output. A place with no row is nothing to click.
  */
@@ -132,13 +151,42 @@ export const REPEATER_TEMPLATES: Readonly<Record<string, RowTemplate>> = {
       { from: 'text.onClick', to: 'out.Tapped' }
     ],
     roots: ['text']
+  },
+  Leaving: {
+    inputs: { label: 'value' },
+    outputs: { Label: 'value', Tapped: 'signal', Added: 'signal', Leaving: 'signal' },
+    nodes: { in: { type: 'Component Inputs' }, text: { type: 'Text' }, out: { type: 'Component Outputs' }, actions: { type: 'For Each Actions' } },
+    wires: [
+      { from: 'in.label', to: 'text.text' },
+      { from: 'in.label', to: 'out.Label' },
+      { from: 'text.onClick', to: 'out.Tapped' },
+      { from: 'text.onClick', to: 'actions.removeCompleted' },
+      { from: 'actions.added', to: 'out.Added' },
+      { from: 'actions.tryRemove', to: 'out.Leaving' }
+    ],
+    roots: ['text']
+  },
+  Quiet: {
+    inputs: { label: 'value' },
+    outputs: { Label: 'value', Tapped: 'signal', Added: 'signal' },
+    nodes: { in: { type: 'Component Inputs' }, text: { type: 'Text' }, out: { type: 'Component Outputs' }, actions: { type: 'For Each Actions' } },
+    wires: [
+      { from: 'in.label', to: 'text.text' },
+      { from: 'in.label', to: 'out.Label' },
+      { from: 'text.onClick', to: 'out.Tapped' },
+      { from: 'text.onClick', to: 'actions.removeCompleted' },
+      { from: 'actions.added', to: 'out.Added' }
+    ],
+    roots: ['text']
   }
 };
 
 /** What each output of a row reads: the component input wired to it (the templates' `wires`). */
 const ROW_OUTPUT: Readonly<Record<string, Readonly<Record<string, string>>>> = {
   Row: { Id: 'id', Label: 'label' },
-  Card: { Label: 'title' }
+  Card: { Label: 'title' },
+  Leaving: { Label: 'label' },
+  Quiet: { Label: 'label' }
 };
 
 /**
@@ -224,7 +272,8 @@ const REGISTRIES = [
     ]
   }
 ];
-const TEMPLATES: readonly unknown[] = ['Row', 'Card', 'Missing', '', null];
+// v2 — `Leaving` and `Quiet` hold a `For Each Actions` (Try Remove wired and not)
+const TEMPLATES: readonly unknown[] = ['Row', 'Card', 'Leaving', 'Quiet', 'Missing', '', null];
 /**
  * v2 — Scripts that name a component outright, or pick none, or throw, or do not compile, or name one the project does not have, or
  * hand back something that is not text. A name starting `./` or `../` is read against the Repeater's own component's name (:523-533):
@@ -235,6 +284,7 @@ const SCRIPTS: readonly unknown[] = [
   "component = 'Card'",
   "component = item.title ? 'Card' : 'Row'",
   "component = item.getId() === 'a' ? 'Card' : 'Row'",
+  "component = item.getId() === 'b' ? 'Quiet' : 'Leaving'",
   "if (item.label) component = 'Row'",
   "if (!item.label) throw new Error('no label'); component = 'Row'",
   'component = (',
@@ -284,7 +334,25 @@ const DEFAULT_SCRIPT =
 /** One operation on the queue (:240-254, :465) */
 type Op = { kind: 'add'; rec: RecordRef; index: number } | { kind: 'remove'; rec: RecordRef } | { kind: 'refresh' } | { kind: 'copy' };
 /** A row: its record, the component it was built from, and — v2 — whether a mapping set its inputs, and its inputs as last given */
-type Row = { rec: RecordRef; template: string; mapped: boolean; inputs: Readonly<Record<string, unknown>> };
+type Row = {
+  rec: RecordRef;
+  template: string;
+  mapped: boolean;
+  inputs: Readonly<Record<string, unknown>>;
+  /** v2 — the order the rows were made in (a drain hears its rows' signals in this order, measured — NSP-016 §7.24) */
+  born: number;
+  /**
+   * v2 — a row whose removal waits (`removeItem` :658-685): `wired` holds it until its Remove Completed (`findChild` skips it); `frame`
+   * goes at the next drain (Try Remove unwired: `scheduleAfterInputsHaveUpdated`). Either way it is no longer the Repeater's — a rebuild
+   * leaves it — and it is still the parent's child, so a person sees it and an addition counts it.
+   */
+  leaving?: 'wired' | 'frame';
+};
+/**
+ * v2 — a row's signal the Repeater forwards (`creatorCallbacks.onOutputChanged` :633-639): raised outside a drain it waits for the next
+ * one. `late`: raised once the Repeater was already waiting to update, so the drain reaches it after the Repeater's own frame-end work.
+ */
+type Raised = { born: number; name: string; late: boolean };
 /** The operation waiting on a build (`await createNode`): it lands at the next yield */
 type Building = { kind: 'add'; row: Row; index: number } | { kind: 'refresh'; row: Row; index: number; rest: RecordRef[]; tokens: number };
 
@@ -303,7 +371,7 @@ type State = {
   mapping: unknown;
   mapCompiles: boolean;
   /** the outputs the editor drew for the PLACED Template: the value outputs' names, and whether `Tapped` is one (`itemOutputSignals`) */
-  registered: { values: string[]; tapped: boolean };
+  registered: { values: string[]; tapped: boolean; signals: string[] };
   /** `hasScheduledCopyItems`, `hasScheduledRefresh` */
   copyScheduled: boolean;
   refreshScheduled: boolean;
@@ -333,12 +401,31 @@ type State = {
    * answer an invocation (a frame's end, an act, the yield) — the same settle, in the order made
    */
   answered: ReadonlyArray<{ port: 'refresh'; outcome: 'done' | 'failure'; error?: string }>;
+  /** v2 — row signals raised outside a drain, waiting for the next */
+  pending: Raised[];
+  /** v2 — the Repeater has had an input since the last drain (it is in the drain's list, at its place) */
+  dirty: boolean;
+  /** v2 — the last thing that ran was a settle's frame: a yield now is the settle's, and the settle drains again after it */
+  afterFrame: boolean;
+  /** v2 — rows made so far */
+  made: number;
   // ---- the outputs as last written ----
   itemId: unknown;
   outs: Readonly<Record<string, unknown>>;
 };
 
-type Work = { st: State; view: View; pulses: string[]; send: Set<'itemActionItemId'>; sendDerived: Set<string>; outcomes: Array<{ port: 'refresh'; outcome: 'done' | 'failure'; error?: string }>; resume: boolean };
+type Work = {
+  st: State;
+  view: View;
+  pulses: string[];
+  send: Set<'itemActionItemId'>;
+  sendDerived: Set<string>;
+  outcomes: Array<{ port: 'refresh'; outcome: 'done' | 'failure'; error?: string }>;
+  resume: boolean;
+  /** v2 — inside a drain; and the row signals raised in it, heard in its next pass */
+  inDrain: boolean;
+  raisedInDrain: Raised[];
+};
 type View = {
   random(): number;
   registry: { create(data?: unknown): RecordRef; collection(name?: unknown): CollectionRef; isRecord(v: unknown): v is RecordRef; isCollection(v: unknown): v is CollectionRef };
@@ -347,15 +434,18 @@ type View = {
 };
 
 /** The outputs the editor draws for a Template (setup :1036-1091) */
-function outputsOf(template: unknown): { values: string[]; tapped: boolean } {
+function outputsOf(template: unknown): { values: string[]; tapped: boolean; signals: string[] } {
   const t = typeof template === 'string' && Object.prototype.hasOwnProperty.call(REPEATER_TEMPLATES, template) ? REPEATER_TEMPLATES[template] : undefined;
   const values: string[] = [];
+  const signals: string[] = [];
   let tapped = false;
   for (const [name, kind] of Object.entries(t?.outputs ?? {})) {
-    if (kind === 'signal') tapped = tapped || name === 'Tapped';
-    else values.push(name);
+    if (kind === 'signal') {
+      tapped = tapped || name === 'Tapped';
+      signals.push(name);
+    } else values.push(name);
   }
-  return { values, tapped };
+  return { values, tapped, signals };
 }
 
 export const Repeater = defineNode({
@@ -383,7 +473,7 @@ export const Repeater = defineNode({
     compiles: false,
     mapping: undefined,
     mapCompiles: false,
-    registered: { values: [], tapped: false },
+    registered: { values: [], tapped: false, signals: [] },
     copyScheduled: false,
     refreshScheduled: false,
     callbacks: [],
@@ -397,6 +487,10 @@ export const Repeater = defineNode({
     building: null,
     rows: [],
     answered: [],
+    pending: [],
+    dirty: false,
+    afterFrame: false,
+    made: 0,
     itemId: undefined,
     outs: {}
   } as State,
@@ -464,6 +558,7 @@ export const Repeater = defineNode({
         const out: Record<string, unknown> = {};
         for (const name of r.values) out[`itemOutput-${name}`] = { type: '*', from: (s: State) => s.outs[name], displayName: name, group: 'Item Outputs' };
         if (r.tapped) out['itemOutputSignal-Tapped'] = { type: 'signal', displayName: 'Tapped', group: 'Item Signals' };
+        for (const name of r.signals) if (name !== 'Tapped') out[`itemOutputSignal-${name}`] = { type: 'signal', displayName: name, group: 'Item Signals' };
         return out as never;
       },
       // :970-1000 — compiled as it arrives when it is text that is not empty (what does not compile leaves none); a rebuild either way
@@ -476,8 +571,8 @@ export const Repeater = defineNode({
             })
           : { send: [] }
     },
-    // the frame's end: the callbacks asked for, in order; what they queue starts at once
-    afterInputs: (s, _i, view) => run(s, view, (w) => frameWork(w), 'frame'),
+    // the frame's end: a drain — the callbacks asked for, in order; what they queue starts at once (v2: the rows' signals with them)
+    afterInputs: (s, _i, view) => run(s, view, (w) => drain(w, true), 'frame'),
     world: {
       // the yield: the build lands, and the queue runs to its end
       resume: (s, _i, _tag, view) => run(s, view, (w) => atYield(w), 'yield'),
@@ -495,13 +590,14 @@ export const Repeater = defineNode({
           s,
           view,
           (w) => {
-            // the row at that place as painted; no row, no click
+            // the row at that place as painted (v2: a row on its way out too); no row, no click
             const row = typeof v === 'number' ? w.st.rows[v] : undefined;
             if (!row) return;
-            // the click's handler drains the graph: the Repeater's waiting frame-end work first (it was dirty first)
-            frameWork(w);
-            // a row that work deleted delivers nothing (the row as that work left it: a mapping may have run again)
-            const now = w.st.rows.find((r) => r.rec === row.rec);
+            // the press drains the graph before the click lands (pointerlisteners.ts :173-186, the handler of the pointer's down):
+            // the Repeater's waiting frame-end work, and what waited for a drain
+            drain(w, true);
+            // a row that drain deleted delivers nothing (the row as that work left it: a mapping may have run again)
+            const now = w.st.rows.find((r) => r.born === row.born);
             if (!now) return;
             tapped(w, now);
           },
@@ -517,12 +613,29 @@ export const Repeater = defineNode({
 
 /** A reducer's patch: the whole state as the work leaves it (s54, s55), and what it sent */
 function run(s: Readonly<State>, view: View, f: (w: Work) => void, mode: 'step' | 'act' | 'frame' | 'yield' | 'world' = 'step'): any { // eslint-disable-line @typescript-eslint/no-explicit-any
-  const w: Work = { st: { ...s, rows: [...s.rows], queue: [...s.queue], callbacks: [...s.callbacks] }, view, pulses: [], send: new Set(), sendDerived: new Set(), outcomes: [], resume: false };
+  const w: Work = {
+    st: { ...s, rows: [...s.rows], queue: [...s.queue], callbacks: [...s.callbacks], pending: [...s.pending] },
+    view,
+    pulses: [],
+    send: new Set(),
+    sendDerived: new Set(),
+    outcomes: [],
+    resume: false,
+    inDrain: false,
+    raisedInDrain: []
+  };
+  // v2 — a yield right after a settle's frame is that settle's: it drains again after it (the face's `settle`)
+  const afterFrame = w.st.afterFrame;
+  w.st.afterFrame = mode === 'frame';
   // a step after an act starts one microtask generation later — the settle's frame too (the act was awaited before it); the
   // world's hand-off comes after a yield (an `advance` lands what was owed first)
   if (mode !== 'yield' && mode !== 'world' && w.st.owed) hop(w);
   w.st.owed = false;
   f(w);
+  // v2 — the settle's second drain (node-spec-target `settle`: frame, yield, drain): what the yield raised, and the rows it let go
+  if (mode === 'yield' && afterFrame) drain(w, false);
+  // v2 — an input puts the Repeater in the next drain's list, at its place (an input step is the only `step`)
+  if (mode === 'step') w.st.dirty = true;
   if (mode === 'act') w.st.owed = true;
   // the answers made: held in a step, handed over by a frame's end, an act or the yield
   const answers = [...w.st.answered, ...w.outcomes];
@@ -810,7 +923,7 @@ function addItem(w: Work, rec: RecordRef, _index: number): Row | null | typeof T
   for (let i = 0; i < 8; i++) w.view.random();
   const name = String(template);
   if (!Object.prototype.hasOwnProperty.call(REPEATER_TEMPLATES, name)) return THROWS;
-  return { rec, template: name, mapped: false, inputs: {} };
+  return { rec, template: name, mapped: false, inputs: {}, born: -1 };
 }
 
 /** The row lands (:592-656): added at its place among the parent's children (after the Repeater, so its place in the list) */
@@ -829,16 +942,131 @@ function land(w: Work, b: Building): void {
   } else row = { ...row, inputs: directInputs(row.rec, row.template) };
   // the row listens to its record (:610, :628): what is written elsewhere reaches it (`world.change`)
   w.view.watch({ model: row.rec.getId() });
+  row = { ...row, born: w.st.made };
+  w.st.made += 1;
+  // v2 (:647-651) — a `For Each Actions` in the row says Added; then the row goes in at its place among the parent's children,
+  // counting a row on its way out (an addition lands one place early beside one: row C143)
+  raise(w, row, forwardOf(row.template, 'added'));
   w.st.rows.splice(b.index, 0, row);
   if (b.kind === 'add') return;
   // a rebuild goes on: the next record's row
   rebuildFrom(w, b.rest, b.index + 1, b.tokens);
 }
 
-/** `removeItem` (:658-685): the record's row goes */
+/**
+ * `removeItem` (:658-685): the record's FIRST row among the parent's children that is not waiting on its Remove Completed
+ * (`findChild`). With no `For Each Actions` it goes. With one (v2, foreachactions.ts `tryRemove` :133-147) it is no longer the
+ * Repeater's and goes later: Try Remove WIRED — the row is marked and says Try Remove, and waits for its Remove Completed (a person's
+ * tap here); UNWIRED — it goes at the next drain. One already going at the next drain is asked again: nothing more happens.
+ */
 function removeItem(w: Work, rec: RecordRef): void {
-  const i = w.st.rows.findIndex((r) => r.rec === rec);
-  if (i >= 0) w.st.rows.splice(i, 1);
+  const i = w.st.rows.findIndex((r) => r.rec === rec && r.leaving !== 'wired');
+  if (i < 0) return;
+  const row = w.st.rows[i];
+  const t = REPEATER_TEMPLATES[row.template];
+  if (!Object.values(t.nodes).some((n) => n.type === 'For Each Actions')) {
+    w.st.rows.splice(i, 1);
+    return;
+  }
+  if (row.leaving === 'frame') return;
+  const leaving = forwardOf(row.template, 'tryRemove');
+  const wired = t.wires.some((x) => parseLocal(x.from).port === 'tryRemove');
+  w.st.rows[i] = { ...row, leaving: wired ? 'wired' : 'frame' };
+  if (wired) raise(w, w.st.rows[i], leaving);
+}
+
+/** `"<local id>.<port>"` */
+function parseLocal(end: string): { node: string; port: string } {
+  const dot = end.indexOf('.');
+  return { node: end.slice(0, dot), port: end.slice(dot + 1) };
+}
+
+/** v2 — the component output a row template wires its `For Each Actions`' `port` to (none: the Repeater never hears it) */
+function forwardOf(template: string, port: 'added' | 'tryRemove'): string | undefined {
+  const t = REPEATER_TEMPLATES[template];
+  const actions = Object.entries(t.nodes).find(([, n]) => n.type === 'For Each Actions')?.[0];
+  if (actions === undefined) return undefined;
+  for (const x of t.wires) {
+    const from = parseLocal(x.from);
+    const to = parseLocal(x.to);
+    if (from.node === actions && from.port === port && t.nodes[to.node]?.type === 'Component Outputs') return to.port;
+  }
+  return undefined;
+}
+
+// ---------------------------------------------------------------------------------------------
+// v2 — THE ROWS' SIGNALS: raised, heard at a drain, reported once per pass (NSP-016 §7.24)
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * A row's output signal reaches the Repeater only when it has the output (`itemOutputSignals`); then it is heard where the row's
+ * graph updates — in a drain. Raised in one, it is heard in the drain's next pass; raised outside, at the next drain.
+ */
+function raise(w: Work, row: Row, name: string | undefined): void {
+  if (name === undefined || !w.st.registered.signals.includes(name)) return;
+  const r: Raised = { born: row.born, name, late: w.st.dirty };
+  if (w.inDrain) w.raisedInDrain.push(r);
+  else w.st.pending.push(r);
+}
+
+/**
+ * A drain (nodecontext.ts `updateDirtyNodes` :453-490): passes over the nodes waiting to update, each pass ending with what was
+ * asked to run after it. In its first pass, the rows whose signals waited since before the Repeater was waiting to update, the
+ * Repeater's frame-end work (`withFrame`), then the rows whose signals waited after it — one the Repeater's rebuild deleted says
+ * nothing; then the pass's end reports what was heard. A signal the Repeater's work raised is heard in the next pass. A row whose
+ * Try Remove is not wired goes in the drain.
+ */
+function drain(w: Work, withFrame: boolean): void {
+  const pending = w.st.pending;
+  w.st.pending = [];
+  const heard: Array<{ row: Row; name: string }> = [];
+  hear(w, pending.filter((r) => !r.late), heard);
+  if (withFrame) {
+    w.inDrain = true;
+    frameWork(w);
+    w.inDrain = false;
+  }
+  hear(w, pending.filter((r) => r.late), heard);
+  report(w, heard);
+  // the next pass: what the frame-end work raised (one removal at most — the queue's next operation waits an act boundary)
+  const again: Array<{ row: Row; name: string }> = [];
+  hear(w, w.raisedInDrain, again);
+  w.raisedInDrain = [];
+  report(w, again);
+  // a row whose Try Remove is not wired goes in the drain after it was asked to
+  w.st.rows = w.st.rows.filter((r) => r.leaving !== 'frame');
+  if (withFrame) w.st.dirty = false;
+}
+
+/** The rows' signals heard in a pass, in the order the rows were made; a row no longer drawn says nothing */
+function hear(w: Work, list: readonly Raised[], into: Array<{ row: Row; name: string }>): void {
+  for (const r of [...list].sort((a, b) => a.born - b.born)) {
+    const row = w.st.rows.find((x) => x.born === r.born);
+    if (!row) continue;
+    // `itemOutputSignalTriggered` :922-930 — Item Id at once; the outputs and the signal after the pass
+    w.st.itemId = row.rec.getId();
+    w.send.add('itemActionItemId');
+    into.push({ row, name: r.name });
+  }
+}
+
+/**
+ * The pass's end (`itemOutputSignalTriggered` :931-944): ONE report for every signal heard in the pass — the outputs it has read from
+ * the FIRST row heard, then the signal of the LAST (row C142: a second row's signal in a pass is reported with the first row's outputs,
+ * and the first's signal is lost when the names differ). The row is read as it was when it was heard.
+ */
+function report(w: Work, heard: ReadonlyArray<{ row: Row; name: string }>): void {
+  if (heard.length === 0) return;
+  const row = heard[0].row;
+  const reads = ROW_OUTPUT[row.template];
+  const outs = { ...w.st.outs };
+  for (const name of Object.keys(REPEATER_TEMPLATES[row.template].outputs)) {
+    if (!w.st.registered.values.includes(name)) continue;
+    outs[name] = row.inputs[reads[name]];
+    w.sendDerived.add(`itemOutput-${name}`);
+  }
+  w.st.outs = outs;
+  w.pulses.push(`itemOutputSignal-${heard[heard.length - 1].name}`);
 }
 
 /** `refresh` (:723-810) */
@@ -868,8 +1096,8 @@ function refresh(w: Work): void {
     return;
   }
   st.queue.length = before;
-  // :779 — every row goes
-  st.rows = [];
+  // :779 — every row the Repeater holds goes (`itemNodes`): v2 — not one on its way out, which stays where it is
+  st.rows = st.rows.filter((r) => r.leaving);
   // :797-805 — a row per record of the list, in order
   rebuildFrom(w, [...(st.own as CollectionRef)], 0, tokens);
 }
@@ -899,18 +1127,16 @@ function rebuildFrom(w: Work, records: RecordRef[], k: number, tokens: number): 
   if (w.st.hops <= 1) settleRebuild(w);
 }
 
-/** `itemOutputSignalTriggered` (:922-947), when the Repeater has a `Tapped` output: Item Id, the outputs it has, then the signal */
+/**
+ * A click on a row (:633-639 → `itemOutputSignalTriggered` :922-947): its `Tapped`, when the Repeater has that output, heard in the
+ * drain the click ends with — alone. v2: the templates with a `For Each Actions` wire the click to its Remove Completed too, so a row
+ * waiting on it goes in that drain (after its `Tapped` is heard); one nothing waits on is Unchanged.
+ */
 function tapped(w: Work, row: Row): void {
-  if (!w.st.registered.tapped) return;
-  w.st.itemId = row.rec.getId();
-  w.send.add('itemActionItemId');
-  const reads = ROW_OUTPUT[row.template];
-  const outs = { ...w.st.outs };
-  for (const name of Object.keys(REPEATER_TEMPLATES[row.template].outputs)) {
-    if (!w.st.registered.values.includes(name)) continue;
-    outs[name] = row.inputs[reads[name]];
-    w.sendDerived.add(`itemOutput-${name}`);
+  if (w.st.registered.signals.includes('Tapped')) {
+    w.st.itemId = row.rec.getId();
+    w.send.add('itemActionItemId');
+    report(w, [{ row, name: 'Tapped' }]);
   }
-  w.st.outs = outs;
-  w.pulses.push('itemOutputSignal-Tapped');
+  if (row.leaving === 'wired') w.st.rows = w.st.rows.filter((r) => r.born !== row.born);
 }

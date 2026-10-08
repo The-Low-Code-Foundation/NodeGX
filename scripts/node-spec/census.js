@@ -7,7 +7,9 @@
  *   census.json   one row per picker, non-deprecated node (cardinality checked both ways)
  *   CENSUS.md     the totals by tier and by batch, the ten most-written nodes, the exclusions
  *
- * The only hand-kept input is `tiers.json` beside them: { typeName → { tier, batch, note? } }.
+ * The only hand-kept input is `tiers.json` beside them: { typeName → { tier, batch, note? } }. And `exemptions.json` (NSP-009 §2):
+ * { typeName → { reason, ruled?, graded? } } — a picker node that owes no spec, with the reason; every exemption is printed, never
+ * hidden, and one that names no picker node, or has no reason, fails the script as an untiered node does.
  * The script FAILS (exit 1) when a picker node has no tier or batch, when tiers.json names a node
  * that is not in the picker population, or when a tier/batch value is not one of the known ones.
  * That failure is the ratchet NSP-009 later hangs coverage on: a node added to the picker without
@@ -59,6 +61,7 @@ const ledgerPath = path.join(root, 'packages', 'nodegx-export', 'coverage-ledger
 const planPath = path.join(root, 'packages', 'nodegx-export', 'src', 'analyze', 'plan.ts');
 const emitDir = path.join(root, 'packages', 'nodegx-export', 'src', 'emit');
 const tiersPath = path.join(phaseDir, 'tiers.json');
+const exemptionsPath = path.join(phaseDir, 'exemptions.json');
 const jsonOut = path.join(phaseDir, 'census.json');
 const mdOut = path.join(phaseDir, 'CENSUS.md');
 
@@ -162,8 +165,17 @@ for (const name of Object.keys(tierRows)) {
     );
   }
 }
+// exemptions.json (NSP-009 §2) — every entry a picker node with a reason
+const exemptionsRaw = fs.existsSync(exemptionsPath) ? JSON.parse(fs.readFileSync(exemptionsPath, 'utf8')) : {};
+const exemptions = {};
+for (const [name, e] of Object.entries(exemptionsRaw)) {
+  if (name.startsWith('$')) continue;
+  if (!popNames.has(name)) errors.push(`${rel(exemptionsPath)} exempts "${name}", which is not a picker node`);
+  else if (!e || typeof e.reason !== 'string' || !e.reason.trim()) errors.push(`${rel(exemptionsPath)} exempts "${name}" with no reason`);
+  else exemptions[name] = e;
+}
 if (errors.length) {
-  console.error(`\nnode-spec census: ${errors.length} problem(s) in ${rel(tiersPath)}:\n`);
+  console.error(`\nnode-spec census: ${errors.length} problem(s) in ${rel(tiersPath)} / ${rel(exemptionsPath)}:\n`);
   for (const e of errors) console.error('  • ' + e);
   console.error('\n  → Every picker node has exactly one tier and one batch; nothing else is listed.\n');
   process.exit(1);
@@ -224,6 +236,7 @@ const rows = population
       dynamicPorts: dyn > 0,
       dynamicPortMechanisms: dyn,
       placesWritten: 1 + exportPlanLines.length + libs.length + typedTotal,
+      exempt: exemptions[n.typeName] ? exemptions[n.typeName].reason : null,
       warnings
     };
   })
@@ -251,6 +264,7 @@ const untested = rows.filter((r) => r.tests.total === 0);
 const usesOutcomeCount = rows.filter((r) => r.usesOutcome).length;
 const dynamicCount = rows.filter((r) => r.dynamicPorts).length;
 const planNamedCount = rows.filter((r) => r.exportPlanLines.length).length;
+const exempted = rows.filter((r) => r.exempt);
 const byExportStatus = rows.reduce((m, r) => ((m[r.exportStatus || 'none'] = (m[r.exportStatus || 'none'] || 0) + 1), m), {});
 
 const census = {
@@ -266,7 +280,8 @@ const census = {
     dynamicPorts: dynamicCount,
     namedInPlanTs: planNamedCount,
     noTestNamesThem: untested.map((r) => r.typeName),
-    byExportStatus
+    byExportStatus,
+    exempt: exempted.map((r) => r.typeName)
   },
   rows,
   exclusions
@@ -282,7 +297,7 @@ if (CHECK) {
     console.error(`\nnode-spec census: ${rel(jsonOut)} is STALE — regenerate with \`node scripts/node-spec/census.js\` and commit it.\n`);
     process.exit(1);
   }
-  console.log(`node-spec census: fresh — ${rows.length} picker nodes, ${exclusions.length} excluded, all tiered.`);
+  console.log(`node-spec census: fresh — ${rows.length} picker nodes, ${exclusions.length} excluded, all tiered; ${exempted.length} exempt${exempted.length ? ` (${exempted.map((r) => r.typeName).join(', ')})` : ''}.`);
   process.exit(0);
 }
 
@@ -305,6 +320,7 @@ md.push(`- **${usesOutcomeCount}** of ${rows.length} nodes call \`beginOutcome\`
 md.push(`- **${dynamicCount}** have dynamic ports — NSP-001's derived-port design is not a corner case.`);
 md.push(`- **${planNamedCount}** are named as a string literal somewhere in \`plan.ts\` (the exporter's special cases).`);
 md.push(`- P18 export status over the population: ${Object.entries(byExportStatus).map(([k, v]) => `${k} ${v}`).join(' · ')}.`);
+md.push(`- **${exempted.length}** exempt — no spec owed, each with its reason (NSP-009 §2, \`exemptions.json\`; listed below): ${exempted.map((r) => `${r.displayName} (\`${r.typeName}\`)`).join(', ') || 'none'}.`);
 md.push(`- **${untested.length}** nodes are named by **no test file at all**, even loosely: ${untested.map((r) => `${r.displayName} (\`${r.typeName}\`)`).join(', ') || 'none'}. For these the spec would be the first test.`);
 md.push('');
 md.push('## Totals by tier');
@@ -355,6 +371,15 @@ for (const b of BATCHES) {
   }
   md.push('');
 }
+md.push(`## Exempt — in the population, no spec owed (${exempted.length})`);
+md.push('');
+md.push('| node | type name | batch | reason | ruled | graded |');
+md.push('|---|---|---|---|---|---|');
+for (const r of exempted) {
+  const e = exemptions[r.typeName];
+  md.push(`| **${r.displayName}** | \`${r.typeName}\` | ${r.batch} | ${e.reason} | ${e.ruled || '—'} | ${e.graded || '—'} |`);
+}
+md.push('');
 md.push(`## Excluded from the population (${exclusions.length})`);
 md.push('');
 md.push('| type name | display name | category | reason |');
@@ -383,5 +408,6 @@ fs.writeFileSync(mdOut, md.join('\n') + '\n');
 console.log(`node-spec census: ${rows.length} picker nodes (${catalog.nodes.length} in the catalog, ${exclusions.length} excluded)`);
 console.log('  by tier : ' + TIERS.map((t) => `${t}=${byTier[t]}`).join('  '));
 console.log('  by batch: ' + BATCHES.map((b) => `${b}=${byBatch[b]}`).join('  '));
+for (const r of exempted) console.log(`  exempt  : ${r.typeName} — ${r.exempt}`);
 if (warned.length) console.log(`  ⚠️  ${warned.length} row(s) with warnings — see CENSUS.md`);
 console.log(`  wrote ${rel(jsonOut)} and ${rel(mdOut)}`);

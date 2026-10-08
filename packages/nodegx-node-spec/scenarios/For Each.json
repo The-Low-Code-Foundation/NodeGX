@@ -16375,5 +16375,3288 @@
    },
    "settle"
   ]
+ },
+ {
+  "name": "the way-out matrix — Try Remove wired (Leaving); its record leaves the list, at the frame's end",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Leaving",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — Try Remove wired (Leaving); its record leaves the list, in a click's drain (the click on that row)",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Leaving",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — Try Remove wired (Leaving); its record removed elsewhere, and a click before any drain",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Leaving",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "remove": "a"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — Try Remove wired (Leaving); every record leaves (an empty list)",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Leaving",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": []
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — Try Remove wired (Leaving); its record leaves, then one is added at the end",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Leaving",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     },
+     {
+      "id": "d",
+      "label": "D"
+     }
+    ]
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — Try Remove wired (Leaving); its record leaves, then a Refresh",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Leaving",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — Try Remove wired (Leaving); its record leaves, then comes back",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Leaving",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "a",
+      "label": "A"
+     },
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — Try Remove wired (Leaving); its record leaves, then the Template is Row (a rebuild)",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Leaving",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "set": "template",
+    "value": "Row"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — Try Remove unwired (Quiet); its record leaves the list, at the frame's end",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Quiet",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — Try Remove unwired (Quiet); its record leaves the list, in a click's drain (the click on that row)",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Quiet",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — Try Remove unwired (Quiet); its record removed elsewhere, and a click before any drain",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Quiet",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "remove": "a"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — Try Remove unwired (Quiet); every record leaves (an empty list)",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Quiet",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": []
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — Try Remove unwired (Quiet); its record leaves, then one is added at the end",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Quiet",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     },
+     {
+      "id": "d",
+      "label": "D"
+     }
+    ]
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — Try Remove unwired (Quiet); its record leaves, then a Refresh",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Quiet",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — Try Remove unwired (Quiet); its record leaves, then comes back",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Quiet",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "a",
+      "label": "A"
+     },
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — Try Remove unwired (Quiet); its record leaves, then the Template is Row (a rebuild)",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Quiet",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "set": "template",
+    "value": "Row"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — no Repeater Item (Row); its record leaves the list, at the frame's end",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — no Repeater Item (Row); its record leaves the list, in a click's drain (the click on that row)",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — no Repeater Item (Row); its record removed elsewhere, and a click before any drain",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "remove": "a"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — no Repeater Item (Row); every record leaves (an empty list)",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": []
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — no Repeater Item (Row); its record leaves, then one is added at the end",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     },
+     {
+      "id": "d",
+      "label": "D"
+     }
+    ]
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — no Repeater Item (Row); its record leaves, then a Refresh",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — no Repeater Item (Row); its record leaves, then comes back",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "a",
+      "label": "A"
+     },
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — no Repeater Item (Row); its record leaves, then the Template is Row (a rebuild)",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "set": "template",
+    "value": "Row"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — rows from Script as Leaving, the Repeater placed with Row (it has no Added or Leaving); its record leaves the list, at the frame's end",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "templateType": "dynamic",
+   "templateScript": "component = 'Leaving'",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — rows from Script as Leaving, the Repeater placed with Row (it has no Added or Leaving); its record leaves the list, in a click's drain (the click on that row)",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "templateType": "dynamic",
+   "templateScript": "component = 'Leaving'",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — rows from Script as Leaving, the Repeater placed with Row (it has no Added or Leaving); its record removed elsewhere, and a click before any drain",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "templateType": "dynamic",
+   "templateScript": "component = 'Leaving'",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "remove": "a"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — rows from Script as Leaving, the Repeater placed with Row (it has no Added or Leaving); every record leaves (an empty list)",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "templateType": "dynamic",
+   "templateScript": "component = 'Leaving'",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": []
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — rows from Script as Leaving, the Repeater placed with Row (it has no Added or Leaving); its record leaves, then one is added at the end",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "templateType": "dynamic",
+   "templateScript": "component = 'Leaving'",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     },
+     {
+      "id": "d",
+      "label": "D"
+     }
+    ]
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — rows from Script as Leaving, the Repeater placed with Row (it has no Added or Leaving); its record leaves, then a Refresh",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "templateType": "dynamic",
+   "templateScript": "component = 'Leaving'",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — rows from Script as Leaving, the Repeater placed with Row (it has no Added or Leaving); its record leaves, then comes back",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "templateType": "dynamic",
+   "templateScript": "component = 'Leaving'",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "a",
+      "label": "A"
+     },
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the way-out matrix — rows from Script as Leaving, the Repeater placed with Row (it has no Added or Leaving); its record leaves, then the Template is Row (a rebuild)",
+  "because": "NSP-016 §7.24 THE MATRIX (v2, Try Remove): each way a row leaves × a row template with Try Remove wired, one with it unwired, one with no Repeater Item, and a Repeater that lacks the row's signals — then a click on each place, so a row on its way out is seen where it stands and the mutants of each shape are killed here, not by a seed",
+  "params": {
+   "template": "Row",
+   "templateType": "dynamic",
+   "templateScript": "component = 'Leaving'",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "set": "template",
+    "value": "Row"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "two rows land in one rebuild: one Added, the second row's Item Id with the first row's Label (row C142)",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case L1)",
+  "params": {
+   "template": "Leaving",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a row on its way out (Try Remove wired) says Leaving, stays where it is, and a click on it is its Tapped and its Remove Completed",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case L1)",
+  "params": {
+   "template": "Leaving",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     }
+    ]
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a row added while another is on its way out lands one place early, and stays there (row C143)",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case L3)",
+  "params": {
+   "template": "Leaving",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     }
+    ]
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a Refresh while a row is on its way out: the rebuild leaves it, and lands its rows before it",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case L4)",
+  "params": {
+   "template": "Leaving",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     }
+    ]
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a record back while its old row is on its way out: a new row before the old one; a second removal finds the new one",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case Q10)",
+  "params": {
+   "template": "Leaving",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     }
+    ]
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "a",
+      "label": "A"
+     },
+     {
+      "id": "b",
+      "label": "B"
+     }
+    ]
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     }
+    ]
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a removal in a click's drain, on the row clicked: Leaving, then the click lands on it — Tapped, and it goes",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case L6b)",
+  "params": {
+   "template": "Leaving",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a click on a row nothing waits on: Tapped, and the row stays (its Remove Completed is Unchanged)",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case L9)",
+  "params": {
+   "template": "Leaving",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "Try Remove unwired, removed outside a drain: the row is still drawn, and a click on it delivers nothing (the press's drain deletes it)",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case Q1)",
+  "params": {
+   "template": "Quiet",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "add": "c"
+     },
+     {
+      "at": 2,
+      "array": "list",
+      "remove": "a"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 2
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "Try Remove unwired, removed in a click's drain: the clicked row is gone before the click lands",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case Q12)",
+  "params": {
+   "template": "Quiet",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a row's Leaving and a new row's Added waiting for one drain: one report — Added, read from the leaving row (row C142)",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case Q1L)",
+  "params": {
+   "template": "Leaving",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "add": "c"
+     },
+     {
+      "at": 2,
+      "array": "list",
+      "remove": "a"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 2
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "every row leaves at once: the first removal is heard in its own drain, the other two together — two Leaving (row C142)",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case Q3)",
+  "params": {
+   "template": "Leaving",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    },
+    {
+     "id": "c",
+     "label": "C"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": []
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a row added by a click's drain lands at the next yield; its Added waits for the drain after it",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case Q6)",
+  "params": {
+   "template": "Leaving",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "a",
+      "label": "A"
+     },
+     {
+      "id": "b",
+      "label": "B"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "Items cleared: every row on its way out; the records back: new rows before the old",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case Q9)",
+  "params": {
+   "template": "Leaving",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": null
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "a",
+      "label": "A"
+     },
+     {
+      "id": "b",
+      "label": "B"
+     }
+    ]
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "Script: one row with Try Remove wired, one with no Repeater Item; both leave",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case Q11)",
+  "params": {
+   "template": "Leaving",
+   "templateType": "dynamic",
+   "templateScript": "component = item.getId() === 'a' ? 'Leaving' : 'Row'",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": []
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "two rows leave between drains: heard in the order they were made, not the order they spoke — b says it first, a is read (row C142)",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case T4)",
+  "params": {
+   "template": "Leaving",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "remove": "b"
+     },
+     {
+      "at": 2,
+      "array": "list",
+      "remove": "a"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "two rows leave between drains: heard in the order they were made, not the order they spoke — a says it first, b is read (row C142)",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case T4b)",
+  "params": {
+   "template": "Leaving",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "b",
+      "a"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "remove": "a"
+     },
+     {
+      "at": 2,
+      "array": "list",
+      "remove": "b"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a row added at the head while another leaves: the older row is heard first (row C142)",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case T5)",
+  "params": {
+   "template": "Leaving",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "add": "c",
+      "index": 0
+     },
+     {
+      "at": 2,
+      "array": "list",
+      "remove": "a"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a row's Added waiting since before a Refresh: heard before the rebuild deletes it",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case R2)",
+  "params": {
+   "template": "Leaving",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "add": "c"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 1
+   },
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a row's Added raised after a Refresh was asked for: the rebuild deletes the row first, and its Added is never heard",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case R3)",
+  "params": {
+   "template": "Leaving",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "add": "c"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a row leaving since before a Refresh: its Leaving heard, then the rebuild lands the rest before it",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case R4)",
+  "params": {
+   "template": "Leaving",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "remove": "a"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 1
+   },
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a removal and an addition in a click's drain, on the row clicked: Leaving, then its Tapped; the addition queued behind lands at the yield",
+  "because": "NSP-016 §7.24 — the mutant `person.tapRow` drop-resume on the branch that says Leaving and Tapped: only work queued behind the removal shows a dropped resume",
+  "params": {
+   "template": "Leaving",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B"
+     },
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a Script written right after a click whose queue still owes an act boundary: the step runs the queue to its end (Items Rendered), and the Script is the one a later rebuild uses",
+  "because": "NSP-016 §7.24 — the interpreter's 10,000 at seed 20733: `templateScript` drop-set survived on the branch whose hop empties the queue; read off its shape — the dropped write loses both the Script and the queue's end",
+  "params": {
+   "template": "Row",
+   "templateType": "dynamic",
+   "templateScript": "component = 'Row'",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B",
+     "title": "T"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "b",
+      "label": "B",
+      "title": "T"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   {
+    "set": "templateScript",
+    "value": "component = 'Card'"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
  }
 ]

@@ -1,6 +1,6 @@
 # The census — every picker node, its tier, and where its behaviour is written
 
-**Generated 2026-10-04 by `scripts/node-spec/census.js` — do not edit by hand; edit `tiers.json` and regenerate.**
+**Generated 2026-10-08 by `scripts/node-spec/census.js` — do not edit by hand; edit `tiers.json` and regenerate.**
 
 Catalog format 1.1.0: **180** node types, of which **147** are in the picker and not deprecated (the population), **33** excluded (listed at the end). Cardinality checked both ways by the script.
 
@@ -10,8 +10,9 @@ How every column is found is in the header of the script. `tests` is an upper bo
 
 - **91** of 147 nodes call `beginOutcome` (the ERG-001 outcome contract) — their specs carry an outcome on every signal path.
 - **69** have dynamic ports — NSP-001's derived-port design is not a corner case.
-- **99** are named as a string literal somewhere in `plan.ts` (the exporter's special cases).
-- P18 export status over the population: translated 122 · stubbed 1 · deferred 7 · backend-only 17.
+- **97** are named as a string literal somewhere in `plan.ts` (the exporter's special cases).
+- P18 export status over the population: translated 121 · stubbed 1 · deferred 8 · backend-only 17.
+- **1** exempt — no spec owed, each with its reason (NSP-009 §2, `exemptions.json`; listed below): Component Children (`Component Children`).
 - **9** nodes are named by **no test file at all**, even loosely: Delete User (`noodl.cloud.deleteuser`), HMAC (`noodl.cloud.hmac`), JWT Sign (`noodl.cloud.jwtsign`), JWT Verify (`noodl.cloud.jwtverify`), List Users In Role (`noodl.cloud.listusersinrole`), Model Request (`noodl.cloud.modelrequest`), Remove User From Role (`noodl.cloud.removeuserfromrole`), Update User (`noodl.cloud.updateuser`), Verify Session Token (`noodl.cloud.verifysessiontoken`). For these the spec would be the first test.
 
 ## Totals by tier
@@ -47,16 +48,16 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 
 | # | node | tier | batch | places | plan.ts lines | emit libs | tests typed | tests loose |
 |---:|---|---|---|---:|---:|---|---:|---:|
-| 1 | **Text** | T5 | NSP-016 | 63 | 1 | sseLib.ts | 60 | 97 |
-| 2 | **Group** | T5 | NSP-016 | 60 | 0 | — | 59 | 96 |
-| 3 | **Set Variable** | T1 | NSP-012 | 49 | 12 | — | 36 | 43 |
-| 4 | **Repeater** (`For Each`) | T5 | NSP-016 | 47 | 24 | — | 22 | 49 |
+| 1 | **Group** | T5 | NSP-016 | 65 | 0 | — | 64 | 101 |
+| 2 | **Text** | T5 | NSP-016 | 64 | 0 | sseLib.ts | 62 | 98 |
+| 3 | **Set Variable** | T1 | NSP-012 | 49 | 12 | — | 36 | 42 |
+| 4 | **Repeater** (`For Each`) | T5 | NSP-016 | 46 | 24 | — | 21 | 48 |
 | 5 | **Component Inputs** | T4 | NSP-015 | 35 | 10 | — | 24 | 48 |
 | 6 | **Component Outputs** | T4 | NSP-015 | 34 | 20 | — | 13 | 25 |
 | 7 | **String** | T1 | NSP-011 | 27 | 1 | — | 25 | 36 |
-| 8 | **Button** (`net.noodl.controls.button`) | T5 | NSP-016 | 25 | 0 | — | 24 | 41 |
-| 9 | **Variable** (`Variable2`) | T1 | NSP-012 | 22 | 5 | — | 16 | 24 |
-| 10 | **States** | T2 | NSP-013 | 21 | 10 | statesLib.ts | 9 | 25 |
+| 8 | **Function** (`JavaScriptFunction`) | T6 | NSP-017 | 25 | 0 | — | 24 | 44 |
+| 9 | **Button** (`net.noodl.controls.button`) | T5 | NSP-016 | 25 | 0 | — | 24 | 40 |
+| 10 | **Variable** (`Variable2`) | T1 | NSP-012 | 23 | 5 | — | 17 | 26 |
 
 ## Every node
 
@@ -86,9 +87,9 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | **Number Remapper** | `Number Remapper` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/numberremapper.ts` |  |  | 4 | utilLib | translated | 2 / 2 | first node where units (C10) matter |
 | **Or** | `Or` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/or.ts` |  | ✓ | 2 |  | translated | 0 / 1 |  |
 | **String** | `String` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/variables/string.ts` |  |  | 1 |  | translated | 25 / 36 | carries the coercion table — spec first |
-| **String Mapper** | `String Mapper` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/stringmapper.ts` |  | ✓ | 7 | utilLib | translated | 1 / 2 |  |
+| **String Mapper** | `String Mapper` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/stringmapper.ts` |  | ✓ | 7 | utilLib | translated | 1 / 1 |  |
 | **Substring** | `Substring` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/substring.ts` |  |  | 6 | utilLib | translated | 1 / 2 |  |
-| **Value Changed** | `Value Changed` | T1 | browser | `noodl-viewer-react/src/nodes/std-library/valuechanged.ts` |  |  | 6 |  | translated | 5 / 10 | defined by equality; the rule for objects, NaN and -0 feeds the canonicaliser |
+| **Value Changed** | `Value Changed` | T1 | browser | `noodl-viewer-react/src/nodes/std-library/valuechanged.ts` |  |  | 6 |  | translated | 4 / 8 | defined by equality; the rule for objects, NaN and -0 feeds the canonicaliser |
 
 ### NSP-012 — arrays, objects, variables, stores, events (26)
 
@@ -101,9 +102,9 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | **Remove Object From Array** | `CollectionRemove` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/collectionnode-remove.ts` | ✓ |  | 3 |  | translated | 3 / 3 | mutates a shared array |
 | **Receive Event** | `Event Receiver` | T4 | browser | `noodl-viewer-react/src/nodes/std-library/eventreceiver.ts` |  | ✓ | 3 |  | translated | 3 / 3 |  |
 | **Send Event** | `Event Sender` | T4 | browser | `noodl-viewer-react/src/nodes/std-library/eventsender.ts` | ✓ | ✓ | 6 |  | translated | 6 / 6 | channel names and propagation scope — each scope is a graph scenario |
-| **Array Filter** | `Filter Collection` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/filtercollectionnode.ts` | ✓ | ✓ | 2 |  | translated | 5 / 9 |  |
+| **Array Filter** | `Filter Collection` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/filtercollectionnode.ts` | ✓ | ✓ | 2 |  | translated | 6 / 9 |  |
 | **Repeater Item** | `For Each Actions` | T4 | browser | `noodl-viewer-react/src/nodes/std-library/data/foreachactions.ts` | ✓ |  | 2 |  | translated | 2 / 3 | reads the surrounding Repeater's row |
-| **Array Map** | `Map Collection` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/mapcollectionnode.ts` | ✓ |  | 4 |  | translated | 3 / 7 |  |
+| **Array Map** | `Map Collection` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/mapcollectionnode.ts` | ✓ |  | 4 |  | translated | 3 / 6 |  |
 | **Object** | `Model2` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/modelnode2.ts` | ✓ | ✓ | 3 |  | translated | 7 / 14 | an Object with id x in two components is the same object — graph scenario; the node alone is pure |
 | **Action Dispatcher** | `net.noodl.ActionDispatcher` | T4 | browser | `noodl-runtime/src/nodes/std-library/agent/actiondispatchernode.ts` | ✓ |  | 0 |  | deferred | 0 / 3 | dispatcher and handler are one behaviour across two nodes |
 | **Action Handler** | `net.noodl.ActionHandler` | T4 | browser | `noodl-runtime/src/nodes/std-library/agent/actionhandlernode.ts` | ✓ |  | 0 |  | deferred | 1 / 4 |  |
@@ -116,10 +117,10 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | **State Snapshot** | `net.noodl.StateSnapshot` | T4 | browser | `noodl-runtime/src/nodes/std-library/agent/statesnapshotnode.ts` | ✓ |  | 0 |  | deferred | 1 / 3 |  |
 | **Create New Object** | `NewModel` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/newmodelnode.ts` | ✓ | ✓ | 2 |  | translated | 0 / 2 |  |
 | **Run Tasks** | `RunTasks` | T4 | browser+cloud | `noodl-runtime/src/nodes/std-library/runtasks.ts` | ✓ |  | 4 | errorsLib, runTasksLib | translated | 11 / 13 | runs a template component per item — graph by construction |
-| **Set Variable** | `Set Variable` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/setvariablenode.ts` | ✓ | ✓ | 12 |  | translated | 36 / 43 |  |
+| **Set Variable** | `Set Variable` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/setvariablenode.ts` | ✓ | ✓ | 12 |  | translated | 36 / 42 |  |
 | **Set Object Properties** | `SetModelProperties` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/setmodelpropertiesnode.ts` |  | ✓ | 1 |  | translated | 2 / 6 |  |
 | **Static Array** | `Static Data` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/staticdata.ts` |  | ✓ | 8 |  | translated | 6 / 16 |  |
-| **Variable** | `Variable2` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/variablenode2.ts` | ✓ |  | 5 |  | translated | 16 / 24 |  |
+| **Variable** | `Variable2` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/variablenode2.ts` | ✓ |  | 5 |  | translated | 17 / 26 |  |
 
 ### NSP-013 — dates, time, randomness, parsers, animation (24)
 
@@ -127,7 +128,7 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 |---|---|---|---|---|:-:|:-:|---:|---|---|---:|---|
 | **Date To String** | `Date To String` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/datetostring.ts` |  |  | 3 | dateLib | translated | 3 / 8 |  |
 | **Animate To Value** | `net.noodl.animatetovalue` | T2 | browser | `noodl-viewer-react/src/nodes/std-library/animate-to-value.ts` |  |  | 1 |  | translated | 1 / 4 |  |
-| **Date Add** | `net.noodl.DateAdd` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/date/dateadd.ts` |  |  | 1 |  | translated | 1 / 3 | pure given its inputs; the zone and locale come from the world |
+| **Date Add** | `net.noodl.DateAdd` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/date/dateadd.ts` |  |  | 1 |  | translated | 1 / 2 | pure given its inputs; the zone and locale come from the world |
 | **Date Compare** | `net.noodl.DateCompare` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/date/datecompare.ts` |  |  | 1 |  | translated | 1 / 2 |  |
 | **Date Difference** | `net.noodl.DateDifference` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/date/datedifference.ts` |  |  | 1 |  | translated | 1 / 2 |  |
 | **Date Parts** | `net.noodl.DateParts` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/date/dateparts.ts` |  |  | 1 |  | translated | 1 / 2 |  |
@@ -137,9 +138,9 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | **Parse CSV** | `net.noodl.ParseCSV` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/parsecsv.ts` |  |  | 1 |  | translated | 1 / 4 |  |
 | **Parse Feed** | `net.noodl.ParseFeed` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/parsefeed.ts` |  |  | 1 |  | translated | 1 / 2 |  |
 | **Parse XML** | `net.noodl.ParseXML` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/parsexml.ts` |  |  | 1 |  | translated | 1 / 2 |  |
-| **Pattern Extractor** | `net.noodl.PatternExtractor` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/agent/pattern-extractor.ts` | ✓ |  | 1 |  | translated | 2 / 4 |  |
+| **Pattern Extractor** | `net.noodl.PatternExtractor` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/agent/pattern-extractor.ts` | ✓ |  | 0 |  | deferred | 7 / 11 |  |
 | **Random Bytes** | `net.noodl.RandomBytes` | T2 | browser+cloud | `noodl-runtime/src/nodes/std-library/crypto/randombytes.ts` | ✓ |  | 1 |  | translated | 1 / 2 |  |
-| **Stream Buffer** | `net.noodl.StreamBuffer` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/agent/stream-buffer.ts` | ✓ |  | 1 | streamingLib | translated | 2 / 5 |  |
+| **Stream Buffer** | `net.noodl.StreamBuffer` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/agent/stream-buffer.ts` | ✓ |  | 1 | streamingLib | translated | 2 / 4 |  |
 | **Text Accumulator** | `net.noodl.TextAccumulator` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/agent/text-accumulator.ts` | ✓ |  | 1 | streamingLib | translated | 2 / 7 |  |
 | **To CSV** | `net.noodl.ToCSV` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/tocsv.ts` |  |  | 2 |  | translated | 1 / 4 |  |
 | **UUID** | `net.noodl.UUID` | T2 | browser+cloud | `noodl-runtime/src/nodes/std-library/crypto/uuid.ts` | ✓ |  | 1 |  | translated | 2 / 3 |  |
@@ -161,15 +162,15 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | **Record** | `DbModel2` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/dbmodelnode2.ts` | ✓ | ✓ | 4 |  | translated | 6 / 12 |  |
 | **Delete Record** | `DeleteDbModelProperties` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/deletedbmodelpropertiesnode.ts` | ✓ | ✓ | 0 |  | translated | 3 / 12 |  |
 | **Filter Records** | `FilterDBModels` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/filterdbmodelsnode.ts` | ✓ | ✓ | 2 |  | translated | 3 / 5 | client-side over the store ('one subscription, no requests' — filterdbmodelsnode.ts:42), so T1 with the store as a world fake |
-| **HTTP Request** | `net.noodl.HTTP` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/httpnode.ts` | ✓ | ✓ | 1 |  | translated | 6 / 10 |  |
-| **Server-Sent Events** | `net.noodl.SSE` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/agent/sse.ts` | ✓ |  | 1 | sseLib | translated | 3 / 8 |  |
+| **HTTP Request** | `net.noodl.HTTP` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/httpnode.ts` | ✓ | ✓ | 1 |  | translated | 6 / 9 |  |
+| **Server-Sent Events** | `net.noodl.SSE` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/agent/sse.ts` | ✓ |  | 1 | sseLib | translated | 3 / 7 |  |
 | **Log In** | `net.noodl.user.LogIn` | T3 | browser | `noodl-viewer-react/src/nodes/std-library/user/login.ts` | ✓ |  | 2 |  | translated | 3 / 6 |  |
 | **Log Out** | `net.noodl.user.LogOut` | T3 | browser | `noodl-viewer-react/src/nodes/std-library/user/logout.ts` | ✓ |  | 2 |  | translated | 3 / 6 |  |
 | **Request Magic Link** | `net.noodl.user.RequestMagicLink` | T3 | browser | `noodl-viewer-react/src/nodes/std-library/user/requestmagiclink.ts` | ✓ |  | 2 |  | translated | 2 / 3 |  |
 | **Set User Properties** | `net.noodl.user.SetUserProperties` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/user/setuserproperties.ts` | ✓ | ✓ | 3 |  | translated | 3 / 4 |  |
-| **Sign In With** | `net.noodl.user.SignInWith` | T3 | browser | `noodl-viewer-react/src/nodes/std-library/user/signinwith.ts` | ✓ |  | 0 |  | deferred | 8 / 10 |  |
+| **Sign In With** | `net.noodl.user.SignInWith` | T3 | browser | `noodl-viewer-react/src/nodes/std-library/user/signinwith.ts` | ✓ |  | 0 |  | deferred | 2 / 2 |  |
 | **Sign Up** | `net.noodl.user.SignUp` | T3 | browser | `noodl-viewer-react/src/nodes/std-library/user/signup.ts` | ✓ | ✓ | 2 |  | translated | 3 / 6 |  |
-| **User** | `net.noodl.user.User` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/user/user.ts` | ✓ | ✓ | 3 |  | translated | 3 / 5 |  |
+| **User** | `net.noodl.user.User` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/user/user.ts` | ✓ | ✓ | 3 |  | translated | 3 / 4 |  |
 | **WebSocket** | `net.noodl.WebSocket` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/agent/websocket.ts` | ✓ |  | 1 | websocketLib | translated | 2 / 9 |  |
 | **Create Record** | `NewDbModelProperties` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/newdbmodelpropertiesnode.ts` | ✓ | ✓ | 0 |  | translated | 6 / 18 |  |
 | **Open File Picker** | `Open File Picker` | T2 | browser | `noodl-viewer-react/src/nodes/std-library/openfilepicker.ts` | ✓ |  | 5 |  | translated | 2 / 4 | no network — a DOM input and a user gesture; environment-fed, so T2, kept with the file family |
@@ -185,18 +186,18 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 |---|---|---|---|---|:-:|:-:|---:|---|---|---:|---|
 | **Component Inputs** | `Component Inputs` | T4 | browser+cloud | `noodl-runtime/src/nodes/componentinputs.ts` |  | ✓ | 10 |  | translated | 24 / 48 | the interface every component depends on — parent + child scenarios, placed more than once |
 | **Component Outputs** | `Component Outputs` | T4 | browser+cloud | `noodl-runtime/src/nodes/componentoutputs.ts` |  | ✓ | 20 |  | translated | 13 / 25 |  |
-| **Close Popup** | `NavigationClosePopup` | T4 | browser | `noodl-viewer-react/src/nodes/navigation/closepopup.ts` | ✓ | ✓ | 5 |  | translated | 4 / 6 | returns values to the Show Popup that opened it — the round trip is the scenario |
-| **Show Popup** | `NavigationShowPopup` | T4 | browser | `noodl-viewer-react/src/nodes/navigation/showpopup.ts` | ✓ | ✓ | 7 |  | translated | 9 / 12 |  |
+| **Close Popup** | `NavigationClosePopup` | T4 | browser | `noodl-viewer-react/src/nodes/navigation/closepopup.ts` | ✓ | ✓ | 5 |  | translated | 5 / 7 | returns values to the Show Popup that opened it — the round trip is the scenario |
+| **Show Popup** | `NavigationShowPopup` | T4 | browser | `noodl-viewer-react/src/nodes/navigation/showpopup.ts` | ✓ | ✓ | 7 |  | translated | 10 / 13 |  |
 | **Component Object** | `net.noodl.ComponentObject` | T4 | browser+cloud | `noodl-runtime/src/nodes/std-library/componentutils/componentobject.ts` | ✓ | ✓ | 1 |  | translated | 7 / 9 |  |
 | **External Link** | `net.noodl.externallink` | T4 | browser | `noodl-viewer-react/src/nodes/std-library/externallink.ts` | ✓ |  | 1 |  | translated | 3 / 6 | the world records the last external URL opened |
 | **Parent Component Object** | `net.noodl.ParentComponentObject` | T4 | browser | `noodl-viewer-react/src/nodes/std-library/componentutils/parentcomponentobject.ts` | ✓ | ✓ | 2 |  | translated | 5 / 6 |  |
 | **Set Component Object Properties** | `net.noodl.SetComponentObjectProperties` | T4 | browser+cloud | `noodl-runtime/src/nodes/std-library/componentutils/setcomponentobjectproperties.ts` |  | ✓ | 1 |  | translated | 3 / 4 |  |
 | **Set Parent Component Object Properties** | `net.noodl.SetParentComponentObjectProperties` | T4 | browser | `noodl-viewer-react/src/nodes/std-library/componentutils/setparentcomponentobjectproperties.ts` |  | ✓ | 2 |  | translated | 4 / 4 |  |
-| **Page Inputs** | `PageInputs` | T4 | browser | `noodl-viewer-react/src/nodes/navigation/page-inputs.ts` |  | ✓ | 5 |  | translated | 3 / 6 |  |
-| **Push Component To Stack** | `PageStackNavigate` | T4 | browser | `noodl-viewer-react/src/nodes/navigation/navigate.ts` | ✓ | ✓ | 1 |  | translated | 2 / 4 |  |
+| **Page Inputs** | `PageInputs` | T4 | browser | `noodl-viewer-react/src/nodes/navigation/page-inputs.ts` |  | ✓ | 5 |  | translated | 3 / 7 |  |
+| **Push Component To Stack** | `PageStackNavigate` | T4 | browser | `noodl-viewer-react/src/nodes/navigation/navigate.ts` | ✓ | ✓ | 1 |  | translated | 3 / 6 |  |
 | **Pop Component Stack** | `PageStackNavigateBack` | T4 | browser | `noodl-viewer-react/src/nodes/navigation/navigate-back.ts` | ✓ | ✓ | 1 |  | translated | 4 / 5 |  |
 | **Navigate To Path** | `PageStackNavigateToPath` | T4 | browser | `noodl-viewer-react/src/nodes/navigation/navigate-to-path.ts` | ✓ | ✓ | 1 |  | translated | 3 / 5 |  |
-| **Navigate** | `RouterNavigate` | T4 | browser | `noodl-viewer-react/src/nodes/navigation/router-navigate.ts` | ✓ | ✓ | 4 |  | translated | 12 / 20 | observable as a location change in the world, not a rendered page |
+| **Navigate** | `RouterNavigate` | T4 | browser | `noodl-viewer-react/src/nodes/navigation/router-navigate.ts` | ✓ | ✓ | 4 |  | translated | 12 / 21 | observable as a location change in the world, not a rendered page |
 
 ### NSP-016 — visual nodes (19)
 
@@ -204,23 +205,23 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 |---|---|---|---|---|:-:|:-:|---:|---|---|---:|---|
 | **Shape** | `Circle` | T5 | browser | `noodl-viewer-react/src/nodes/visual/circle.ts` |  | ✓ | 0 |  | translated | 0 / 8 |  |
 | **Component Children** | `Component Children` | T5 | browser | `noodl-runtime/src/nodelibraryexport.ts` |  |  | 4 |  | translated | 1 / 5 | providedBy noodl-editor in the catalog |
-| **Drag** | `Drag` | T5 | browser | `noodl-viewer-react/src/nodes/visual/drag.ts` |  |  | 10 | dragLib | translated | 3 / 10 |  |
-| **Repeater** | `For Each` | T5 | browser | `noodl-viewer-react/src/nodes/std-library/data/foreach.tsx` | ✓ | ✓ | 24 |  | translated | 22 / 49 |  |
-| **Group** | `Group` | T5 | browser | `noodl-viewer-react/src/nodes/visual/group.ts` | ✓ | ✓ | 0 |  | translated | 59 / 96 |  |
+| **Drag** | `Drag` | T5 | browser | `noodl-viewer-react/src/nodes/visual/drag.ts` |  |  | 10 | dragLib | translated | 3 / 11 |  |
+| **Repeater** | `For Each` | T5 | browser | `noodl-viewer-react/src/nodes/std-library/data/foreach.tsx` | ✓ | ✓ | 24 |  | translated | 21 / 48 |  |
+| **Group** | `Group` | T5 | browser | `noodl-viewer-react/src/nodes/visual/group.ts` | ✓ | ✓ | 0 |  | translated | 64 / 101 |  |
 | **Image** | `Image` | T5 | browser | `noodl-viewer-react/src/nodes/visual/image.ts` |  | ✓ | 0 |  | translated | 2 / 11 |  |
-| **Button** | `net.noodl.controls.button` | T5 | browser | `noodl-viewer-react/src/nodes/controls/button.ts` |  | ✓ | 0 |  | translated | 24 / 41 |  |
-| **Checkbox** | `net.noodl.controls.checkbox` | T5 | browser | `noodl-viewer-react/src/nodes/controls/checkbox.ts` | ✓ | ✓ | 1 |  | translated | 2 / 11 |  |
-| **Dropdown** | `net.noodl.controls.options` | T5 | browser | `noodl-viewer-react/src/nodes/controls/options.ts` |  | ✓ | 0 |  | translated | 1 / 6 |  |
+| **Button** | `net.noodl.controls.button` | T5 | browser | `noodl-viewer-react/src/nodes/controls/button.ts` |  | ✓ | 0 |  | translated | 24 / 40 |  |
+| **Checkbox** | `net.noodl.controls.checkbox` | T5 | browser | `noodl-viewer-react/src/nodes/controls/checkbox.ts` | ✓ | ✓ | 1 |  | translated | 2 / 10 |  |
+| **Dropdown** | `net.noodl.controls.options` | T5 | browser | `noodl-viewer-react/src/nodes/controls/options.ts` |  | ✓ | 0 |  | translated | 1 / 5 |  |
 | **Radio Button** | `net.noodl.controls.radiobutton` | T5 | browser | `noodl-viewer-react/src/nodes/controls/radiobutton.ts` |  | ✓ | 0 |  | translated | 1 / 7 |  |
 | **Slider** | `net.noodl.controls.range` | T5 | browser | `noodl-viewer-react/src/nodes/controls/slider.ts` |  | ✓ | 0 |  | translated | 1 / 4 |  |
-| **Text Input** | `net.noodl.controls.textinput` | T5 | browser | `noodl-viewer-react/src/nodes/controls/text-input.ts` | ✓ | ✓ | 0 |  | translated | 8 / 20 |  |
-| **Columns** | `net.noodl.visual.columns` | T5 | browser | `noodl-viewer-react/src/nodes/visual/columns.ts` |  | ✓ | 0 |  | translated | 3 / 10 |  |
+| **Text Input** | `net.noodl.controls.textinput` | T5 | browser | `noodl-viewer-react/src/nodes/controls/text-input.ts` | ✓ | ✓ | 0 |  | translated | 8 / 19 |  |
+| **Columns** | `net.noodl.visual.columns` | T5 | browser | `noodl-viewer-react/src/nodes/visual/columns.ts` |  | ✓ | 0 |  | translated | 3 / 11 |  |
 | **Icon** | `net.noodl.visual.icon` | T5 | browser | `noodl-viewer-react/src/nodes/visual/icon.ts` |  | ✓ | 0 |  | translated | 0 / 4 |  |
 | **Component Stack** | `Page Stack` | T5 | browser | `noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx` | ✓ | ✓ | 4 |  | translated | 1 / 5 |  |
 | **Radio Button Group** | `Radio Button Group` | T5 | browser | `noodl-viewer-react/src/nodes/controls/radiobuttongroup.ts` |  | ✓ | 0 |  | translated | 0 / 5 |  |
 | **Page Router** | `Router` | T5 | browser | `noodl-viewer-react/src/nodes/navigation/router.tsx` | ✓ | ✓ | 5 |  | translated | 2 / 20 |  |
-| **Text** | `Text` | T5 | browser | `noodl-viewer-react/src/nodes/visual/text.ts` |  | ✓ | 1 | sseLib | translated | 60 / 97 |  |
-| **Video** | `Video` | T5 | browser | `noodl-viewer-react/src/nodes/visual/video.ts` |  | ✓ | 0 |  | translated | 0 / 8 |  |
+| **Text** | `Text` | T5 | browser | `noodl-viewer-react/src/nodes/visual/text.ts` |  | ✓ | 0 | sseLib | translated | 62 / 98 |  |
+| **Video** | `Video` | T5 | browser | `noodl-viewer-react/src/nodes/visual/video.ts` |  | ✓ | 0 |  | translated | 0 / 9 |  |
 
 ### NSP-017 — the escape hatches (5)
 
@@ -229,7 +230,7 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | **CSS Definition** | `CSS Definition` | T6 | browser | `noodl-viewer-react/src/nodes/visual/css-definition.ts` |  |  | 5 |  | translated | 1 / 5 | web-only by nature — exempt with that reason, or spec only its outputs |
 | **Expression** | `Expression` | T6 | browser+cloud | `noodl-runtime/src/nodes/std-library/expression.ts` | ✓ | ✓ | 0 |  | translated | 13 / 24 | not really an escape hatch — its grammar is ours; the most valuable spec in the batch |
 | **Script** | `Javascript2` | T6 | browser | `noodl-viewer-react/src/nodes/std-library/javascript.ts` |  | ✓ | 1 | scriptLib | translated | 2 / 6 |  |
-| **Function** | `JavaScriptFunction` | T6 | browser+cloud | `noodl-runtime/src/nodes/std-library/simplejavascript.ts` | ✓ | ✓ | 0 |  | translated | 18 / 37 |  |
+| **Function** | `JavaScriptFunction` | T6 | browser+cloud | `noodl-runtime/src/nodes/std-library/simplejavascript.ts` | ✓ | ✓ | 0 |  | translated | 24 / 44 |  |
 | **Visual Function** | `Logic Builder` | T6 | browser+cloud | `noodl-runtime/src/nodes/std-library/logic-builder.ts` | ✓ | ✓ | 0 |  | translated | 4 / 11 | the Blockly node; the user's blocks are the behaviour |
 
 ### NSP-022 — the cloud-only nodes (split from NSP-014, s21) (17)
@@ -247,12 +248,18 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | **List Users In Role** | `noodl.cloud.listusersinrole` | T3 | cloud | `noodl-viewer-cloud/src/nodes/cloud/listusersinrole.ts` | ✓ |  | 0 |  | backend-only | 0 / 0 |  |
 | **Model Request** | `noodl.cloud.modelrequest` | T3 | cloud | `noodl-viewer-cloud/src/nodes/cloud/modelrequest.ts` | ✓ |  | 0 |  | backend-only | 0 / 0 |  |
 | **Remove User From Role** | `noodl.cloud.removeuserfromrole` | T3 | cloud | `noodl-viewer-cloud/src/nodes/cloud/removeuserfromrole.ts` | ✓ |  | 0 |  | backend-only | 0 / 0 |  |
-| **Request** | `noodl.cloud.request` | T3 | cloud | `noodl-viewer-cloud/src/nodes/cloud/request.ts` |  | ✓ | 0 |  | backend-only | 10 / 16 | the inbound request — a protocol's first event |
+| **Request** | `noodl.cloud.request` | T3 | cloud | `noodl-viewer-cloud/src/nodes/cloud/request.ts` |  | ✓ | 0 |  | backend-only | 10 / 15 | the inbound request — a protocol's first event |
 | **Response** | `noodl.cloud.response` | T3 | cloud | `noodl-viewer-cloud/src/nodes/cloud/response.ts` | ✓ | ✓ | 0 |  | backend-only | 9 / 14 | the outbound response — a protocol's last event |
 | **Secret** | `noodl.cloud.secret` | T3 | cloud | `noodl-viewer-cloud/src/nodes/cloud/secret.ts` | ✓ |  | 0 |  | backend-only | 0 / 3 |  |
 | **Send Email** | `noodl.cloud.sendemail` | T3 | cloud | `noodl-viewer-cloud/src/nodes/cloud/sendemail.ts` | ✓ |  | 0 |  | backend-only | 0 / 2 |  |
 | **Update User** | `noodl.cloud.updateuser` | T3 | cloud | `noodl-viewer-cloud/src/nodes/cloud/updateuser.ts` | ✓ | ✓ | 0 |  | backend-only | 0 / 0 |  |
 | **Verify Session Token** | `noodl.cloud.verifysessiontoken` | T3 | cloud | `noodl-viewer-cloud/src/nodes/cloud/verifysessiontoken.ts` | ✓ |  | 0 |  | backend-only | 0 / 0 |  |
+
+## Exempt — in the population, no spec owed (1)
+
+| node | type name | batch | reason | ruled | graded |
+|---|---|---|---|---|---|
+| **Component Children** | `Component Children` | NSP-016 | Not a node: the runtime never makes one — nodescope.ts createNodeFromModel returns before createNode, after telling the owning component instance which node is its child root (setChildRoot). It has no ports, no state and nothing on the wire; what it does is where a component instance's children are placed, a graph rule. | Richard, 2026-10-08 (README §7): count it as done, with the reason written down | its placement, by a graph scenario once the graph runner places children (NSP-008) |
 
 ## Excluded from the population (33)
 
