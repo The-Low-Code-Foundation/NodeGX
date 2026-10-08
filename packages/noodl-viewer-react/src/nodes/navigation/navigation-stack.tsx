@@ -23,6 +23,15 @@ import NavigationHandler, { StackNavigateArgs } from './navigation-handler';
 import Transitions from './transitions';
 import type Transition from './transitions/transition';
 
+
+/** P107-C124 — `decodeURIComponent`, keeping the text as written on a malformed escape (router.tsx `_decodePathSegment`). */
+function decodeOrKeep(text: string): string {
+  try {
+    return decodeURIComponent(text);
+  } catch (e) {
+    return text;
+  }
+}
 interface PageStackReactComponentProps extends Noodl.ReactProps {
   didMount: () => void;
   willUnmount: () => void;
@@ -691,8 +700,10 @@ const PageStack = {
     _getSearchParams: function (this: PageStackInstance) {
       const pl = /\+/g, // Regex for replacing addition symbol with a space
         search = /([^&=]+)=?([^&]*)/g,
+        // P107-C124 — a malformed escape (`?q=%zz`, `?off=50%`) is kept as written, as the Page Router keeps it (C115):
+        // decodeURIComponent threw inside the reset, after every page was deleted, and the Reset was never answered
         decode = function (s: string) {
-          return decodeURIComponent(s.replace(pl, ' '));
+          return decodeOrKeep(s.replace(pl, ' '));
         },
         // Bare `location` (not window.location): the SSR server shims
         // globalThis.location, so URL matching also works server-side.
@@ -738,7 +749,7 @@ const PageStack = {
           const _p = pattern[i];
           if (_p[0] === '{' && _p[_p.length - 1] === '}') {
             // This is a param, collect it
-            params[_p.substring(1, _p.length - 1)] = decodeURIComponent(path[i]);
+            params[_p.substring(1, _p.length - 1)] = decodeOrKeep(path[i]); // P107-C124
           } else if (_p !== path[i]) return;
         }
         return {

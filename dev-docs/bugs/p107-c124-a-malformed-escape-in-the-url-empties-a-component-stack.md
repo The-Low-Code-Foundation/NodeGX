@@ -1,7 +1,7 @@
 ---
 id: P107-C124
 title: With Use Routes, a URL whose query or path parameter has a malformed escape (%zz) empties the Component Stack, and its Reset is never answered
-status: scheduled
+status: fixed
 phase: P109
 task: ISL-048
 severity: medium
@@ -9,7 +9,7 @@ area: runtime / Component Stack (navigation-stack.tsx `_getSearchParams` :663-68
 found: P107 NSP-016 s58, 2026-10-08
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.19; recorded on the runtime target (NSP-016 s58 probe traces, each beside a control), and the spec copies it (R3)
 kit: node-spec
-regression: packages/nodegx-node-spec/scenarios/Page Stack.json "ROUTES: placed at ?q=%zz#/home — a malformed escape in the query throws in the reset: the stack is empty, and a Reset is never answered (row C124)"
+regression: packages/nodegx-node-spec/scenarios/Page Stack.json "row C124 — ROUTES: placed at ?q=%zz#/home — the malformed escape is kept as written: the stack shows Home, and a Reset is Done" (and its two Back twins, a query and a path part)
 ---
 
 **What a person sees.** A link from outside (an email, a QR code) to `?q=%zz#/home`, or a path parameter like `#/detail/%zz`: the
@@ -23,3 +23,7 @@ Back to #/detail/%zz …" and "ROUTES: the person's Back to ?q=%zz#/detail …".
 
 **Proposed fix.** Decode with a guard that keeps the raw text on a malformed escape, as the Router's `_decodePathSegment` does. Fix both
 nodes together (C115).
+
+**Fixed (P109 ISL-048, s31, 2026-10-08), as proposed.** `_getSearchParams` and the path's `{name}` parts decode with `decodeOrKeep`:
+a malformed escape is kept as written, as the Page Router's C115. Page Stack spec v9. Runtime 149 / 149 at seeds 13 and 20732;
+control red on exactly the 4 scenarios whose trace changed.

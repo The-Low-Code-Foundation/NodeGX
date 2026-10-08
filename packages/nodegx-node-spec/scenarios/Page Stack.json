@@ -5543,7 +5543,7 @@
     }
   },
   {
-    "name": "ROUTES: placed at ?q=%zz#/home — a malformed escape in the query throws in the reset: the stack is empty, and a Reset is never answered (row C124)",
+    "name": "row C124 — ROUTES: placed at ?q=%zz#/home — the malformed escape is kept as written: the stack shows Home, and a Reset is Done",
     "because": "_getSearchParams :663-680 decodeURIComponent throws; resetAsync has deleted every page first (:507-511)",
     "params": {
       "pages": [
@@ -5583,7 +5583,7 @@
     }
   },
   {
-    "name": "ROUTES: Detail's Path /detail/{id}, the person's Back to #/detail/%zz — a malformed escape in a path part throws: the stack empties, Top Component Name and Stack Depth keep naming Detail (row C124)",
+    "name": "row C124 — ROUTES: Detail's Path /detail/{id}, the person's Back to #/detail/%zz — the malformed escape in the path part is kept as written: the stack starts again at Detail (Stack Depth 1)",
     "because": "_matchPathParts :713 decodeURIComponent throws",
     "params": {
       "pages": [
@@ -6165,7 +6165,7 @@
     }
   },
   {
-    "name": "ROUTES: a push with q '50%', then Reset — the URL's query cannot be decoded: the stack empties, the Reset unanswered (row C122)",
+    "name": "ROUTES: a push with q '50%', then Reset — the address holds ?q=50% (unencoded, row C122), which is kept as written (C124): the Reset is Done at Detail",
     "because": "the value is written unencoded; _getSearchParams throws on it",
     "params": {
       "pages": [
@@ -6936,7 +6936,7 @@
     }
   },
   {
-    "name": "ROUTES: the person's Back to ?q=%zz#/detail — the reset throws: the stack is empty (row C124)",
+    "name": "row C124 — ROUTES: the person's Back to ?q=%zz#/detail — the malformed escape is kept as written: the stack starts again at Detail",
     "because": "_getSearchParams throws",
     "params": {
       "pages": [

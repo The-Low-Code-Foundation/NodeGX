@@ -61,8 +61,8 @@
  * the page and before the transition; a back pushes the page below's at its transition's end — a new entry, not a step back (row
  * C120). A reset never pushes. A RESET with Use Routes on reads the URL (`matchPageFromUrl` :683-742): the hash's path (or the path)
  * against each page's pattern in Components order, the first whose parts all match from the start wins (a longer URL matches too);
- * its `{name}` parts are decoded with `decodeURIComponent`, and so is the whole query — either THROWS on a malformed escape, and the
- * reset ends there with the stack empty (row C124). The page found is the start page, with the query and the path's parameters; none
+ * its `{name}` parts are decoded with `decodeURIComponent`, and so is the whole query — a malformed escape is kept as written (row
+ * C124, fixed in P109 ISL-048: it threw, and the reset ended there with the stack empty). The page found is the start page, with the query and the path's parameters; none
  * found, the Start Page. So a Reset, or a Components edit, shows the page in the URL, not the start page (row C126). THE BROWSER'S
  * BACK AND FORWARD (the act `traverse`): the stack listens for `popstate` from its mount to its unmount WHATEVER Use Routes says
  * (:182-214), and resets at the frame's end — a stack with Use Routes off goes back to its start page too (row C119).
@@ -193,7 +193,8 @@ export const ComponentStack = defineNode({
   // v7 (P109 ISL-048, s31): a back's end takes the entry it animated off the stack, and a push onto an empty stack is Failure (row C110)
   // v8 (P109 ISL-048, s31): a back whose page below the Components list no longer has is refused before anything moves, and a page
   // whose entry outlives its row in the list is not found (row C111)
-  version: 8,
+  // v9 (P109 ISL-048, s31): a malformed escape in the URL's query or path is kept as written, as the Page Router's (row C124)
+  version: 9,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx',
   needs: ['person', 'clock', 'location', 'project'],
   worldPool: {
@@ -605,11 +606,19 @@ function locationPath(href: string, settings: Readonly<Record<string, unknown>>)
   if (path && path[0] === '/') path = path.substring(1);
   return path;
 }
-/** `_getSearchParams` (:663-680) — decodes with `decodeURIComponent`, which throws on a malformed escape (row C124) */
+/** `decodeURIComponent`, the text kept as written on a malformed escape (row C124, fixed in P109 ISL-048, as the Router's C115) */
+function decodeOrKeep(text: string): string {
+  try {
+    return decodeURIComponent(text);
+  } catch {
+    return text;
+  }
+}
+/** `_getSearchParams` (:663-680) */
 function searchParams(href: string): Record<string, string> {
   const pl = /\+/g;
   const search = /([^&=]+)=?([^&]*)/g;
-  const decode = (x: string) => decodeURIComponent(x.replace(pl, ' '));
+  const decode = (x: string) => decodeOrKeep(x.replace(pl, ' '));
   const query = new URL(href).search.substring(1);
   let match: RegExpExecArray | null;
   const out: Record<string, string> = {};
@@ -633,7 +642,7 @@ function matchPageFromUrl(w: Work): FromUrl | undefined | typeof THROWS {
       for (let i = 0; i < pattern.length; i++) {
         if (path[i] === undefined) return undefined;
         const p = pattern[i];
-        if (p[0] === '{' && p[p.length - 1] === '}') params[p.substring(1, p.length - 1)] = decodeURIComponent(path[i]);
+        if (p[0] === '{' && p[p.length - 1] === '}') params[p.substring(1, p.length - 1)] = decodeOrKeep(path[i]);
         else if (p !== path[i]) return undefined;
       }
       return params;
