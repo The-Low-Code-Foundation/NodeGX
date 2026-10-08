@@ -1230,7 +1230,7 @@
     ]
   },
   {
-    "name": "writing Name — even the name it has — rebuilds the stack at its start page (row C113)",
+    "name": "row C113 — writing Name, the name the stack already has, keeps its pages: Detail stays on top, Stack Depth 2",
     "because": "the Name setter deregisters and registers again, and registering resets (:255-269)",
     "params": {
       "pages": [
@@ -1870,7 +1870,7 @@
     ]
   },
   {
-    "name": "Name blank or null is Main: writing either rebuilds the stack",
+    "name": "Name blank or null is Main: a push to a blank name reaches it, and writing either keeps the stack — Settings on top, Stack Depth 3 (row C113)",
     "because": "navigation-handler.ts `name || 'Main'`",
     "params": {
       "pages": [
@@ -5868,7 +5868,7 @@
     }
   },
   {
-    "name": "ROUTES: placed at #/settings, then Name written (the same) — registering resets at once and reads the URL: Settings (row C113)",
+    "name": "ROUTES: placed at #/settings, the stack starts on Settings; Name written (the same) keeps it (row C113)",
     "because": "name :258-268 → registerPageStack → reset",
     "params": {
       "pages": [
@@ -7460,7 +7460,7 @@
     }
   },
   {
-    "name": "ROUTES: Name written, then the person's Back, in one frame — the register's reset at once, then popstate's at the frame's end",
+    "name": "ROUTES: Name written (another), then the person's Back, in one frame — the register's reset at once, then popstate's at the frame's end",
     "because": "name :258-268; onScheduleReset",
     "params": {
       "pages": [
@@ -7486,7 +7486,7 @@
       "settle",
       {
         "set": "name",
-        "value": "Main"
+        "value": "Other"
       },
       {
         "act": "traverse",

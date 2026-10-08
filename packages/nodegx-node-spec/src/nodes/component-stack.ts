@@ -33,7 +33,8 @@
  * is not queued.
  *
  * A RESET (`resetAsync` :503-578) — at the mount (registering), at a Reset (Done or Failure, every Reset of the frame alike), when
- * Components change while the stack is on the page, and when the Name changes while it is — deletes every page, then (no components:
+ * Components change while the stack is on the page, and when the Name changes to another key while it is (row C113, fixed in P109
+ * ISL-048: the same name again reset it too) — deletes every page, then (no components:
  * Failure `component-stack/no-components`; its start page not found: `component-stack/component-not-found`) builds the start page:
  * Top Component Name its label, Stack Depth 1. A reset at the mount reports to no one.
  *
@@ -199,7 +200,8 @@ export const ComponentStack = defineNode({
   // v12 (P109 ISL-048, s31): a page pushed or started by its label has its URL (row C123)
   // v13 (P109 ISL-048, s31): in hash mode a page with no parameters clears the query in the address (row C121)
   // v14 (P109 ISL-048, s31): the browser's Back or Forward resets only a stack with Use Routes on (row C119)
-  version: 14,
+  // v15 (P109 ISL-048, s31): a Name written that keeps the stack's key does not reset it (row C113)
+  version: 15,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx',
   needs: ['person', 'clock', 'location', 'project'],
   worldPool: {
@@ -293,11 +295,18 @@ export const ComponentStack = defineNode({
   }
 }).on(
   {
-    // :255-269 — off the handler under the old name; on under the new one if on the page (which resets, or replays what waited)
+    // :255-269 — off the handler under the old name; on under the new one if on the page (which resets, or replays what waited);
+    // the same key: stored only (row C113)
     name: (s, v, _i, view) =>
       run(
         s,
         (w) => {
+          // a write that keeps the handler's key is stored and nothing more (row C113, fixed in P109 ISL-048: it registered again,
+          // which resets)
+          if (keyOf(norm(v)) === keyOf(norm(w.st.name))) {
+            w.st.name = v;
+            return;
+          }
           deregister(w);
           w.st.name = v;
           if (w.st.isMounted) register(w);

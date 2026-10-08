@@ -273,6 +273,12 @@ const PageStack = {
       description: 'Name the Push and Pop nodes address this stack by; leave it as Main if there is only one',
       default: 'Main',
       set: function (this: PageStackInstance, value: string) {
+        // P107-C113 — the handler holds the stack under `name || 'Main'` as a key: a write that keeps the key is stored and nothing
+        // more. Registering again reset the stack to its start page, so a wire sending the same name again lost every page pushed
+        if (String(value || 'Main') === String(this._internal.name || 'Main')) {
+          this._internal.name = value;
+          return;
+        }
         this._deregisterPageStack();
         this._internal.name = value;
 
