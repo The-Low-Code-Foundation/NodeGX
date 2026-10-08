@@ -5155,5 +5155,2323 @@
       "settle",
       "settle"
     ]
+  },
+  {
+    "name": "ROUTES: placed at #/detail — the start page is the page in the URL: Detail, Stack Depth 1",
+    "because": "resetAsync :523-531 matchPageFromUrl (:683-742): the hash's path against each page's pattern (its label, lowercased)",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "location": "https://app.example/#/detail"
+    }
+  },
+  {
+    "name": "ROUTES: placed at ?id=1#/settings — Settings, handed the query's id '1': a push of Settings with no parameters is Done, not Unchanged (row C121's consequence)",
+    "because": "resetAsync :530 params = query + path params; _isAlreadyShowing compares them (:430-455)",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "location": "https://app.example/?id=1#/settings"
+    }
+  },
+  {
+    "name": "ROUTES: placed at #/settings — the control: a push of Settings is Unchanged",
+    "because": "the reset's page has no parameters, the push none",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "location": "https://app.example/#/settings"
+    }
+  },
+  {
+    "name": "ROUTES: placed at #/detail/7 with Detail's Path /detail/{id} — Detail, handed id '7' (text): a push of Detail with id '7' is Unchanged, with id 7 Done",
+    "because": "_matchPathParts decodes the part (:713); the comparison is by identity",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true,
+      "pagePath-p2": "/detail/{id}"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          },
+          "params": {
+            "id": "7"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          },
+          "params": {
+            "id": 7
+          }
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "location": "https://app.example/#/detail/7"
+    }
+  },
+  {
+    "name": "ROUTES: Use Routes off, placed at #/settings — the URL is not read: Home",
+    "because": "matchPageFromUrl :684 returns at once",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": false
+    },
+    "steps": [
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "location": "https://app.example/#/settings"
+    }
+  },
+  {
+    "name": "ROUTES: path mode, placed at /settings — the path is read, not the hash: Settings",
+    "because": "_getLocationPath :654-661 (navigationPathType path)",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "location": "https://app.example/settings",
+      "projectSettings": {
+        "navigationPathType": "path"
+      }
+    }
+  },
+  {
+    "name": "ROUTES: placed at #/home/more — a pattern matches from the start, a longer URL too: Home",
+    "because": "_matchPathParts :702-716 checks the pattern's parts only",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "location": "https://app.example/#/home/more"
+    }
+  },
+  {
+    "name": "ROUTES: placed at #/nowhere with Start Page Settings — no page matches: the Start Page",
+    "because": "resetAsync :532-535",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true,
+      "startPage": "p3"
+    },
+    "steps": [
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "location": "https://app.example/#/nowhere"
+    }
+  },
+  {
+    "name": "ROUTES: placed at ?q=%zz#/home — a malformed escape in the query throws in the reset: the stack is empty, and a Reset is never answered (row C124)",
+    "because": "_getSearchParams :663-680 decodeURIComponent throws; resetAsync has deleted every page first (:507-511)",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "location": "https://app.example/?q=%zz#/home"
+    }
+  },
+  {
+    "name": "ROUTES: Detail's Path /detail/{id}, the person's Back to #/detail/%zz — a malformed escape in a path part throws: the stack empties, Top Component Name and Stack Depth keep naming Detail (row C124)",
+    "because": "_matchPathParts :713 decodeURIComponent throws",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true,
+      "pagePath-p2": "/detail/{id}"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          },
+          "params": {
+            "id": 7,
+            "t": "x"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "traverse",
+        "value": "#/detail/%zz"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: Detail's Path null — every reset that reaches Detail's pattern throws: the stack is empty at its placing (row C125)",
+    "because": "matchPageFromUrl :730 `pagePattern[0]` on null",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true,
+      "pagePath-p2": null
+    },
+    "steps": [
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: Detail's Path null, placed at #/home — Home's pattern matches first and the reset never reaches Detail's: Home",
+    "because": "the loop returns at the first match (:735-740)",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true,
+      "pagePath-p2": null
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "location": "https://app.example/#/home"
+    }
+  },
+  {
+    "name": "ROUTES: a push of Detail, then Reset — the reset reads #/detail: Detail is rebuilt as the only page, Done (row C126)",
+    "because": "resetAsync reads the URL whatever asked for the reset",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p1",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: placed at #/detail, then Components edited — the rebuild reads the URL: Detail (row C126)",
+    "because": "pages :308-313 schedules a reset",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pages",
+        "value": [
+          {
+            "id": "p1",
+            "label": "Home"
+          },
+          {
+            "id": "p2",
+            "label": "Detail"
+          }
+        ]
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "location": "https://app.example/#/detail"
+    }
+  },
+  {
+    "name": "ROUTES: placed at #/settings, then Name written (the same) — registering resets at once and reads the URL: Settings (row C113)",
+    "because": "name :258-268 → registerPageStack → reset",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "name",
+        "value": "Main"
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "location": "https://app.example/#/settings"
+    }
+  },
+  {
+    "name": "ROUTES: a push of Detail — named, then its URL pushed (#/detail), then Done",
+    "because": "navigateAsync :1006-1010 setPageOutputs, _updateUrlWithTopPage, then hasNavigated",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: a push of Detail with id 1, then of Settings — ?id=1#/detail, then #/settings, which keeps ?id=1 in the address (row C121)",
+    "because": "_updateUrlWithTopPage :749-763: hash mode writes ?query#/path, and with no query only #/path",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          },
+          "params": {
+            "id": 1
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: a push by the page's label, Detail — the URL is # (row C123)",
+    "because": "getRelativeURL :585-587 finds the row by `p.id == top.pageId`, and the entry's page id is the label",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "Detail",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: Detail's Path /detail/{id} — a push with id 'a/b c' and t x: ?t=x#/detail/a%2Fb%20c, and the person's Back and Forward read it back",
+    "because": "getRelativeURL :592-602 encodes a path parameter, not a query one",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true,
+      "pagePath-p2": "/detail/{id}"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          },
+          "params": {
+            "id": "a/b c",
+            "t": "x"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "traverse",
+        "value": "#/"
+      },
+      "settle",
+      {
+        "act": "traverse",
+        "value": "?t=x#/detail/a%2Fb%20c"
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          },
+          "params": {
+            "id": "a/b c",
+            "t": "x"
+          }
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: path mode — a push with id 'a b&c': /detail?id=a b&c, unencoded (row C122)",
+    "because": "_updateUrlWithTopPage :755 `q.name + '=' + q.value`",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          },
+          "params": {
+            "id": "a b&c"
+          }
+        }
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          },
+          "params": {
+            "id": "a b"
+          }
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "projectSettings": {
+        "navigationPathType": "path"
+      }
+    }
+  },
+  {
+    "name": "ROUTES: a push with q '50%', then Reset — the URL's query cannot be decoded: the stack empties, the Reset unanswered (row C122)",
+    "because": "the value is written unencoded; _getSearchParams throws on it",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          },
+          "params": {
+            "q": "50%"
+          }
+        }
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: a push with q '50', then Reset — the control: Detail rebuilt, Done",
+    "because": "the same URL, decodable",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          },
+          "params": {
+            "q": "50"
+          }
+        }
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: a replace with Settings — its URL is pushed, a new entry (row C120)",
+    "because": "replaceAsync :889",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "replace",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: an animated replace (Push) — the URL is pushed at the build, before the transition",
+    "because": "replaceAsync :885-893",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "replace",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "Push"
+          }
+        }
+      },
+      "settle",
+      {
+        "advance": 400
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: a push, then its Pop — the page below's URL is pushed at the transition's end: #/home, a new entry (row C120)",
+    "because": "back :1068-1078 _updateUrlWithTopPage in the end callback",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: a timed push, then its Pop — #/home is pushed in the first frame past the back's end",
+    "because": "transition.ts `frame`; back's end :1068",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2"
+        }
+      },
+      "settle",
+      {
+        "advance": 400
+      },
+      "settle",
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle",
+      {
+        "advance": 400
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: Start Page given by its label, Home — after a push and a Pop the URL is # (row C123)",
+    "because": "the reset's entry page id is the label (:564)",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true,
+      "startPage": "Home"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: Home's Path '' and Settings' Path 'Settings' — a push and a Pop: #/Settings, then #/",
+    "because": "the Path as written, a leading / removed (:614)",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true,
+      "pagePath-p1": "",
+      "pagePath-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: Use Routes off — a push and a Pop push no URL",
+    "because": "_updateUrlWithTopPage :747",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: Use Routes turned on after the placing — the next push pushes its URL",
+    "because": "useRoutes :285-287 stores; read at the next push",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "useRoutes",
+        "value": true
+      },
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: an Unchanged push and a refused one push no URL",
+    "because": "navigateAsync returns before _updateUrlWithTopPage",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p1",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "nope",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: a push, then the person's Back to the bare address — popstate resets: Home, Stack Depth 1",
+    "because": "didMount :193-196 listens for popstate; onScheduleReset",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "traverse",
+        "value": "https://app.example/"
+      },
+      "settle",
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: Use Routes OFF — a push, then the person's Back: the stack still resets to Home (row C119)",
+    "because": "the popstate listener is added whatever Use Routes says (:182-198)",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "traverse",
+        "value": "#/x"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: a push and its Pop, then the person's Back to #/detail — Detail alone, Stack Depth 1, and its Pop asks nothing (row C120)",
+    "because": "the Pop pushed #/home; Back lands on #/detail, a reset's page has no back callback",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle",
+      {
+        "act": "traverse",
+        "value": "#/detail"
+      },
+      "settle",
+      "settle",
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: the person's Back to ?id=1#/detail — Detail handed id '1': a push of Detail with id '1' is Unchanged",
+    "because": "resetAsync :530",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "traverse",
+        "value": "?id=1#/detail"
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          },
+          "params": {
+            "id": "1"
+          }
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: the person's Back to ?q=%zz#/detail — the reset throws: the stack is empty (row C124)",
+    "because": "_getSearchParams throws",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "traverse",
+        "value": "?q=%zz#/detail"
+      },
+      "settle",
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: Mounted off, then the person's Back — nothing hears it; Mounted on rebuilds the page in the URL",
+    "because": "willUnmount :205-211 removes the listener; the mount's reset reads the URL",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "traverse",
+        "value": "#/settings"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: the person's Back, then Mounted off, in one frame — the reset is the frame's: it runs, then the paint unmounts; Mounted on rebuilds",
+    "because": "scheduleReset → scheduleAfterInputsHaveUpdated runs before the paint",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "traverse",
+        "value": "#/settings"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: Mounted off, the person's Back and Mounted on, in one frame — the act paints first: the stack unmounts, hears nothing, and remounts at the frame's end",
+    "because": "a person's act is on a painted page (adapter.ts `act`)",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "traverse",
+        "value": "#/settings"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: Mounted on, the person's Back, in one frame after an unmount — the act paints the mount, then popstate",
+    "because": "the mount registers and resets; the popstate schedules one more",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "traverse",
+        "value": "#/detail"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: the person's Back, then a push, in one frame — the reset to #/detail runs first, then Settings is pushed on it",
+    "because": "the frame-end list in step order",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "traverse",
+        "value": "#/detail"
+      },
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      "settle",
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: a push, then the person's Back, in one frame — the push first, then the reset at the URL the push wrote",
+    "because": "the frame-end list in step order; the push lands at the yield, the reset behind it",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "act": "traverse",
+        "value": "#/detail"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: the person's Back during a timed push — the reset rebuilds Settings at once; the push's end, later, removes a page already gone, and a push after it is Done",
+    "because": "row C110's machinery, reached by popstate",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2"
+        }
+      },
+      "settle",
+      {
+        "advance": 100
+      },
+      {
+        "act": "traverse",
+        "value": "#/settings"
+      },
+      "settle",
+      {
+        "advance": 400
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: the person's Back twice and a Reset in one frame — one reset, the Reset answered Done",
+    "because": "scheduleReset :463-479: one callback per frame",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "traverse",
+        "value": "#/detail"
+      },
+      {
+        "act": "traverse",
+        "value": "#/settings"
+      },
+      {
+        "signal": "reset"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: Name written, then the person's Back, in one frame — the register's reset at once, then popstate's at the frame's end",
+    "because": "name :258-268; onScheduleReset",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "name",
+        "value": "Main"
+      },
+      {
+        "act": "traverse",
+        "value": "#/settings"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: no components, then the person's Back — the reset finds none and reports to no one",
+    "because": "resetAsync :515-521",
+    "params": {
+      "pages": [],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "traverse",
+        "value": "#/detail"
+      },
+      "settle",
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "ROUTES: path mode — the person's Back to /detail/5: Detail; Forward to /settings: Settings",
+    "because": "_getLocationPath :654-661",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "traverse",
+        "value": "/detail/5"
+      },
+      "settle",
+      {
+        "act": "traverse",
+        "value": "/settings"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "projectSettings": {
+        "navigationPathType": "path"
+      }
+    }
   }
 ]

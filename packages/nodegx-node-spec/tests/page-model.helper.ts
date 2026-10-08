@@ -298,7 +298,7 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
   // s56 — the Component Stack (component-stack.ts): everything is the node's own — its pages, its queue, the handler's names; the frame's
   // end runs its callbacks (a reset, the callers' requests), the transition's tick, and the paint, which registers and so resets
   'Page Stack': {
-    node: ['mounted', 'isMounted', 'name', 'regKey', 'waiting', 'pages', 'pageInfo', 'startPageId', 'stack', 'children', 'deleted', 'nextPage', 'running', 'queue', 'busy', 'hops', 'owed', 'callbacks', 'resetScheduled', 'resetTokens', 'countLate', 'top', 'depth', 'count'],
+    node: ['mounted', 'isMounted', 'name', 'useRoutes', 'regKey', 'waiting', 'pages', 'pageInfo', 'startPageId', 'stack', 'children', 'deleted', 'nextPage', 'running', 'queue', 'busy', 'hops', 'owed', 'callbacks', 'resetScheduled', 'resetTokens', 'countLate', 'top', 'depth', 'count'],
     attr: { onPage },
     held: {},
     frameEnd: ['isMounted', 'regKey', 'waiting', 'stack', 'children', 'deleted', 'nextPage', 'running', 'queue', 'busy', 'hops', 'owed', 'callbacks', 'resetScheduled', 'resetTokens', 'countLate', 'top', 'depth', 'count']

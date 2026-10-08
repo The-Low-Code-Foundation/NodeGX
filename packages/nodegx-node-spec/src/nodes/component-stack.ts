@@ -47,12 +47,29 @@
  * frame's start); while it runs the stack refuses a push, a replace and a back. A reset does not stop it.
  *
  * **Children Count** is the stack's page containers, counted at the frame's end — except in a frame whose paint mounted the stack,
- * which sends none: the next frame counts (row C114, measured; a mount at the placing or at an act counts at once). Use Routes is v2 (`undriven`). The look reaches
- * the element only.
+ * which sends none: the next frame counts (row C114, measured; a mount at the placing or at an act counts at once). The look reaches the
+ * element only.
+ *
+ * USE ROUTES (v2, s58; world.ts LOCATION — the page's window is the world's browser). With Use Routes on, the stack puts its top page
+ * in the URL and reads its start page from it. THE URL a page has: its Path (`pagePath-<id>`, an input the editor draws only with Use
+ * Routes on), else its label lowercased with each run of spaces a `-` — found by the entry's page id with `==` (`getRelativeURL`
+ * :580-622), so a page pushed or started by its LABEL has none: the URL becomes `#` (row C123). `{name}` parts take the page's
+ * parameters (`encodeURIComponent`); every other parameter goes in the query AS IT IS, unencoded (row C122). Hash mode (the project's
+ * `navigationPathType` unset or `hash`) writes `?query#/path` — and with no parameters only `#/path`, which keeps the query already
+ * in the address (row C121); path mode writes `/path?query`. A push and a replace push their URL (`history.pushState`) after naming
+ * the page and before the transition; a back pushes the page below's at its transition's end — a new entry, not a step back (row
+ * C120). A reset never pushes. A RESET with Use Routes on reads the URL (`matchPageFromUrl` :683-742): the hash's path (or the path)
+ * against each page's pattern in Components order, the first whose parts all match from the start wins (a longer URL matches too);
+ * its `{name}` parts are decoded with `decodeURIComponent`, and so is the whole query — either THROWS on a malformed escape, and the
+ * reset ends there with the stack empty (row C124). The page found is the start page, with the query and the path's parameters; none
+ * found, the Start Page. So a Reset, or a Components edit, shows the page in the URL, not the start page (row C126). THE BROWSER'S
+ * BACK AND FORWARD (the act `traverse`): the stack listens for `popstate` from its mount to its unmount WHATEVER Use Routes says
+ * (:182-214), and resets at the frame's end — a stack with Use Routes off goes back to its start page too (row C119).
  */
 
 import { defineNode, type AnswerCall, type InputDecl, type ValueInputDecl } from '../spec';
 import { SELF_REFERENCE } from '../trace';
+import { pushTarget } from '../world';
 import { dataAttributeInput, dataAttributeNames } from './data-attributes';
 
 /** The components the play's project has (THE PAGES): each holds one Pop Component Stack. */
@@ -88,6 +105,8 @@ export const REPLACES: readonly unknown[] = [
 ];
 /** What the top page's Pop Component Stack hands (navigate-back.ts :154-157): the act `back`. */
 export const BACKS: readonly unknown[] = [{}, { action: 'saved', results: { n: 1 } }];
+/** Where the person's Back or Forward takes the location (USE ROUTES): the act `traverse`. */
+export const TRAVERSES: readonly unknown[] = ['#/detail', '#/settings', '#/', 'https://app.example/', '#/home/more', '?id=1#/detail', '#/detail/5?t=x', '#/nowhere', '/settings', '/detail/5', '?q=%zz#/detail', '#/detail/%zz'];
 
 /** transitions.ts — the transitions there are */
 const TRANSITIONS = ['None', 'Push', 'Popup'];
@@ -97,16 +116,16 @@ const DEFAULT_TIMING = { dur: 300, delay: 0 };
 type Rec = Readonly<Record<string, unknown>>;
 type Req = { stack?: unknown; target?: unknown; params?: Rec; transition?: Rec; action?: unknown; results?: unknown };
 /** What a page found by `_findPage` is (:56-68) */
-type Found = { component: string; label: string; id: string };
+type Found = { component: string; label: string; id: string; path: string | undefined };
 /** An entry's transition: `none` ends at once; a timed one runs; `undefined` — an entry no push made (reset, unanimated replace) */
 type Tr = 'none' | { dur: number; delay: number } | undefined;
 /** A stack entry (:70-79): its page container, the one below it (a push's), the page, its parameters, its transition */
-type Entry = { page: number; from: number | null; pageId: unknown; id: string; label: string; params: Rec; tr: Tr; pushed: boolean };
+type Entry = { page: number; from: number | null; pageId: unknown; id: string; label: string; path: string | undefined; params: Rec; tr: Tr; pushed: boolean };
 /** What a running transition does at its end */
 type End = { kind: 'push'; below: number | null } | { kind: 'replace'; outgoing: number[] } | { kind: 'back'; page: number };
 type Item = { kind: 'reset'; tokens: number } | { kind: 'push' | 'replace'; v: Req };
 /** The request whose page is being built (awaiting `createNode`), with what its checks found — it lands at the next yield */
-type Busy = { item: Item; pageId: unknown; found: Found; outgoing: number[]; from: number | null; animate: boolean };
+type Busy = { item: Item; pageId: unknown; found: Found; params: Rec; outgoing: number[]; from: number | null; animate: boolean };
 /** The stack's frame-end list (`scheduleAfterInputsHaveUpdated`): its scheduled reset, and the callers' requests, in step order */
 type Callback = { kind: 'reset' } | { kind: 'push' | 'replace'; v: Req } | { kind: 'back'; page: number; v: Req };
 
@@ -119,6 +138,8 @@ type State = {
   isMounted: boolean;
   /** `_internal.name` — `undefined` until written (a declared default never runs its setter) */
   name: unknown;
+  /** `_internal.useRoutes` (:279-288) — `!!value` */
+  useRoutes: boolean;
   /** the handler's key this stack is registered under, or none (`_pageStacks[name]`) */
   regKey: string | null;
   /** the handler's queue (`_navigationQueue`): requests to a name no stack held */
@@ -159,13 +180,22 @@ const LOOK = (displayName: string, group: string, description: string, extra: Re
 
 const pageCompPort = (): ValueInputDecl => ({ type: 'component', coerce: 'none', displayName: 'Component', group: 'Pages', examples: ['Home', 'Detail', 'Settings', 'Missing', '', null] });
 const startPagePort = (ids: string[]): ValueInputDecl => ({ type: 'enum', enums: ids, editOnly: true, coerce: 'none', displayName: 'Start Page', group: 'General', examples: ['Home', 'nope'] });
+/** :1153-1166 — drawn only with Use Routes on; its default (the label, lowercased, dashed) is the editor's and never runs the setter */
+const pagePathPort = (): ValueInputDecl => ({ type: 'string', coerce: 'none', displayName: 'Path', group: 'Pages', examples: ['detail', '/detail/{id}', 'settings/', '', 'Home', null] });
 
 export const ComponentStack = defineNode({
   type: 'Page Stack',
-  version: 1,
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx',
-  needs: ['person', 'clock'],
-  worldPool: { advances: [0, 16, 100, 149, 150, 151, 300, 301, 1000] },
+  needs: ['person', 'clock', 'location', 'project'],
+  worldPool: {
+    advances: [0, 16, 100, 149, 150, 151, 300, 301, 1000],
+    // a browser: Use Routes reads and writes its location
+    viewports: [{ width: 1280, height: 800 }],
+    activations: [null],
+    locations: [null, 'https://app.example/#/detail', 'https://app.example/?id=1#/settings', 'https://app.example/#/detail/7', 'https://app.example/settings', 'https://app.example/?q=%zz#/home'],
+    projectSettings: [{}, { navigationPathType: 'path' }]
+  },
   // :347-350 `outcomeOutputs({ done, failure })` — Reset's
   outcomes: ['done', 'failure'],
 
@@ -174,6 +204,7 @@ export const ComponentStack = defineNode({
     onPage: false,
     isMounted: false,
     name: undefined,
+    useRoutes: false,
     regKey: null,
     waiting: [],
     pages: undefined,
@@ -200,7 +231,8 @@ export const ComponentStack = defineNode({
   acts: {
     push: { description: 'a Push Component To Stack hands the stack a push: the page to show on top, its parameters and the transition', values: PUSHES },
     replace: { description: 'a Push Component To Stack in Replace mode hands the stack a replace: the page to show instead of every page on it', values: REPLACES },
-    back: { description: "the Pop Component Stack in the top page asks the stack to pop it, with the back's action and results", values: BACKS }
+    back: { description: "the Pop Component Stack in the top page asks the stack to pop it, with the back's action and results", values: BACKS },
+    traverse: { description: "the person's browser goes Back or Forward: the location moves to this URL and the page hears popstate", values: TRAVERSES }
   },
 
   inputs: {
@@ -208,7 +240,7 @@ export const ComponentStack = defineNode({
     // :255-269
     name: { type: 'string', default: 'Main', coerce: 'none', displayName: 'Name', group: 'General', description: 'Name the Push and Pop nodes address this stack by; leave it as Main if there is only one', portability: 'logic', examples: ['Main', 'Other', '', null] },
     // :279-288
-    useRoutes: { type: 'boolean', default: false, coerce: 'none', displayName: 'Use Routes', group: 'General', description: 'Puts the top component in the browser URL, so back and forward move through the stack', portability: 'logic', undriven: "v2 — the URL is the world's LOCATION, which a page in a play does not have yet (NSP-016 §7.17)" },
+    useRoutes: { type: 'boolean', default: false, coerce: 'none', displayName: 'Use Routes', group: 'General', description: 'Puts the top component in the browser URL, so back and forward move through the stack', portability: 'logic' },
     // :303-314
     pages: { type: 'proplist', coerce: 'none', displayName: 'Components', group: 'Components', description: 'The components this stack can show, and which of them it starts on', portability: 'logic', examples: [THREE, THREE.slice(0, 1), THREE.slice(0, 2), THREE.slice(1), []] },
     // :315-326
@@ -248,29 +280,40 @@ export const ComponentStack = defineNode({
 }).on(
   {
     // :255-269 — off the handler under the old name; on under the new one if on the page (which resets, or replays what waited)
-    name: (s, v) =>
-      run(s, (w) => {
-        deregister(w);
-        w.st.name = v;
-        if (w.st.isMounted) register(w);
-      }),
+    name: (s, v, _i, view) =>
+      run(
+        s,
+        (w) => {
+          deregister(w);
+          w.st.name = v;
+          if (w.st.isMounted) register(w);
+        },
+        view
+      ),
     // :303-314
-    pages: (s, v) =>
-      run(s, (w) => {
-        w.st.pages = v;
-        if (w.st.isMounted) scheduleReset(w);
-      }),
+    pages: (s, v, _i, view) =>
+      run(
+        s,
+        (w) => {
+          w.st.pages = v;
+          if (w.st.isMounted) scheduleReset(w);
+        },
+        view
+      ),
+    // :279-288 — stored; read by the next reset and the next URL pushed
+    useRoutes: (s, v, _i, view) => run(s, (w) => void (w.st.useRoutes = !!v), view),
     // :315-326, :463-479 — every Reset of the frame is answered by the one reset at the frame's end
-    reset: (s) => ({ ...run(s, (w) => (scheduleReset(w), void (w.st.resetTokens += 1))), outcome: 'pending' }),
+    reset: (s, _i, view) => ({ ...run(s, (w) => (scheduleReset(w), void (w.st.resetTokens += 1)), view), outcome: 'pending' }),
     // react-component-node.ts :2310-2320
-    mounted: (s, v) => run(s, (w) => void (w.st.mounted = !!v)),
+    mounted: (s, v, _i, view) => run(s, (w) => void (w.st.mounted = !!v), view),
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire, nothing the queue reads (an owed hop waits for the next step
-    // that can see it, which applies it first). Use Routes (v2) and the look have no reducer: stored, and read by nothing here
+    // that can see it, which applies it first). The look has no reducer: stored, and read by nothing here
     scrollIntoView: () => NOTHING
   },
   {
     derived: {
-      // the editor's ports (:1128-1189): per page its component (and its path, with Use Routes), then Start Page; and the Data Attributes'
+      // the editor's ports (:1128-1189): per page its component (and its path, with Use Routes — `=== true`), then Start Page; and the
+      // Data Attributes'
       inputs: (params) => {
         const out: Record<string, InputDecl> = Object.fromEntries(dataAttributeNames(params.dataAttributes).map((name) => [name, dataAttributeInput(name)]));
         const pages = params.pages;
@@ -280,24 +323,31 @@ export const ComponentStack = defineNode({
             const id = String((p as { id?: unknown } | null)?.id);
             ids.push(id);
             out[`pageComp-${id}`] = pageCompPort();
+            if (params.useRoutes === true) out[`pagePath-${id}`] = pagePathPort();
           }
           out.startPage = startPagePort(ids);
         }
         return out;
       },
       // :1084-1120 `registerInputIfNeeded` — stored; nothing until a reset or a request reads them
-      on: (s, port, value) =>
-        port.startsWith('data-') ? NOTHING : run(s, (w) => {
-          if (port.startsWith('pageComp-')) setInfo(w, port.slice('pageComp-'.length), 'component', value);
-          else if (port.startsWith('pagePath-')) setInfo(w, port.slice('pagePath-'.length), 'path', value);
-          else if (port === 'startPage') w.st.startPageId = value;
-        }),
-      discover: (port) => (port.startsWith('pageComp-') ? pageCompPort() : port === 'startPage' ? startPagePort(THREE.map((p) => p.id)) : undefined),
-      candidates: ['pageComp-p1', 'pageComp-p2', 'pageComp-p3', 'startPage']
+      on: (s, port, value, _d, view) =>
+        port.startsWith('data-')
+          ? NOTHING
+          : run(
+              s,
+              (w) => {
+                if (port.startsWith('pageComp-')) setInfo(w, port.slice('pageComp-'.length), 'component', value);
+                else if (port.startsWith('pagePath-')) setInfo(w, port.slice('pagePath-'.length), 'path', value);
+                else if (port === 'startPage') w.st.startPageId = value;
+              },
+              view
+            ),
+      discover: (port) => (port.startsWith('pageComp-') ? pageCompPort() : port.startsWith('pagePath-') ? pagePathPort() : port === 'startPage' ? startPagePort(THREE.map((p) => p.id)) : undefined),
+      candidates: ['pageComp-p1', 'pageComp-p2', 'pageComp-p3', 'pagePath-p1', 'pagePath-p2', 'pagePath-p3', 'startPage']
     },
     world: {
       // placed on the page with its params set — the first render mounts it: Did Mount, and it registers (react-component-node.ts)
-      place: (s, _i, view) => run(s, (w) => void paint(w), view.now(), 'place'),
+      place: (s, _i, view) => run(s, (w) => void paint(w), view, 'place'),
       // the yield: the page being built lands, and what waited behind it runs
       resume: (s, _i, _tag, view) =>
         run(
@@ -306,7 +356,7 @@ export const ComponentStack = defineNode({
             atYield(w);
             if (!w.st.countLate) countChildren(w);
           },
-          view.now(),
+          view,
           'yield'
         )
     },
@@ -334,13 +384,13 @@ export const ComponentStack = defineNode({
           w.st.countLate = paint(w);
           if (!w.st.countLate) countChildren(w);
         },
-        view.now(),
+        view,
         'frame'
       ),
     // the callers' requests, on a PAINTED page (adapter.ts `act`)
     person: {
-      push: (s, _i, v, view) => run(s, (w) => void (paint(w), call(w, { kind: 'push', v: (v ?? {}) as Req })), view.now(), 'act'),
-      replace: (s, _i, v, view) => run(s, (w) => void (paint(w), call(w, { kind: 'replace', v: (v ?? {}) as Req })), view.now(), 'act'),
+      push: (s, _i, v, view) => run(s, (w) => void (paint(w), call(w, { kind: 'push', v: (v ?? {}) as Req })), view, 'act'),
+      replace: (s, _i, v, view) => run(s, (w) => void (paint(w), call(w, { kind: 'replace', v: (v ?? {}) as Req })), view, 'act'),
       // the Pop in the top page as the person sees it — only a page the stack pushed has one that can ask
       back: (s, _i, v, view) =>
         run(
@@ -350,7 +400,20 @@ export const ComponentStack = defineNode({
             const top = w.st.stack[w.st.stack.length - 1];
             if (top && top.pushed) call(w, { kind: 'back', page: top.page, v: (v ?? {}) as Req });
           },
-          view.now(),
+          view,
+          'act'
+        ),
+      // Back or Forward (USE ROUTES): the location moves; a stack on the page hears popstate (:182-214) — whatever Use Routes says
+      // (row C119) — and resets at the frame's end
+      traverse: (s, _i, v, view) =>
+        run(
+          s,
+          (w) => {
+            paint(w);
+            w.traverse = v;
+            if (w.st.isMounted) scheduleReset(w);
+          },
+          view,
           'act'
         )
     }
@@ -361,23 +424,29 @@ export const ComponentStack = defineNode({
 // the work: a draft of the whole state, and what the work said
 // ---------------------------------------------------------------------------------------------
 
+type View = { now(): number; href(): string | undefined; projectSettings(): Readonly<Record<string, unknown>> };
+
 type Work = {
   st: State;
   /** the world's clock at this work (a transition starts at it) */
   now: number;
+  view: View;
   answers: AnswerCall[];
   outcomes: Array<{ port: 'reset'; outcome: 'done' | 'failure'; error?: string }>;
   emit: Array<'didMount' | 'willUnmount'>;
   send: Set<'topPageName' | 'stackDepth' | 'childrenCount'>;
   resume: boolean;
+  traverse: unknown;
+  /** the href as the work leaves it (a push moves it): what a later reset in the same work reads */
+  href: string | undefined;
 };
 
 /**
  * A reducer's patch: the whole state as the work leaves it — so a branch is what it emits, answers and resolves, never which keys a
  * path happened to change (s54, s55) — and what it sent.
  */
-function run(s: Readonly<State>, f: (w: Work) => void, now = NaN, mode: 'step' | 'act' | 'frame' | 'place' | 'yield' = 'step'): any { // eslint-disable-line @typescript-eslint/no-explicit-any
-  const w: Work = { st: { ...s }, now, answers: [], outcomes: [], emit: [], send: new Set(), resume: false };
+function run(s: Readonly<State>, f: (w: Work) => void, view: View, mode: 'step' | 'act' | 'frame' | 'place' | 'yield' = 'step'): any { // eslint-disable-line @typescript-eslint/no-explicit-any
+  const w: Work = { st: { ...s }, now: view.now(), view, answers: [], outcomes: [], emit: [], send: new Set(), resume: false, traverse: undefined, href: view.href() };
   // a step after an act starts one microtask generation later (`hops`); a frame's work runs before its yield, which lands it all
   if (mode === 'step' || mode === 'act') {
     if (w.st.owed) hop(w);
@@ -391,7 +460,8 @@ function run(s: Readonly<State>, f: (w: Work) => void, now = NaN, mode: 'step' |
     emit: w.emit,
     ...(w.answers.length > 0 ? { answers: w.answers } : {}),
     ...(w.outcomes.length > 0 ? { outcomes: w.outcomes } : {}),
-    ...(w.resume ? { resume: 'build' } : {})
+    ...(w.resume ? { resume: 'build' } : {}),
+    ...(w.traverse !== undefined ? { traverse: { url: w.traverse } } : {})
   };
 }
 
@@ -462,12 +532,12 @@ function findPage(s: State, key: unknown): Found | undefined | typeof THROWS {
     if (info[key as any]) { // eslint-disable-line @typescript-eslint/no-explicit-any
       const pageInfo = info[key as any]; // eslint-disable-line @typescript-eslint/no-explicit-any
       const pageRef = pages.find((x: any) => x.id === key); // eslint-disable-line @typescript-eslint/no-explicit-any
-      return { component: String(pageInfo.component), label: String(pageRef.label), id: String(key) };
+      return { component: String(pageInfo.component), label: String(pageRef.label), id: String(key), path: pageInfo.path !== undefined ? String(pageInfo.path) : undefined };
     }
     const pageRef = pages.find((x: any) => x.label === key); // eslint-disable-line @typescript-eslint/no-explicit-any
     if (pageRef) {
       const pageInfo = info[pageRef.id];
-      return { component: String(pageInfo.component), label: String(pageRef.label), id: String(pageRef.id) };
+      return { component: String(pageInfo.component), label: String(pageRef.label), id: String(pageRef.id), path: pageInfo.path !== undefined ? String(pageInfo.path) : undefined };
     }
     return undefined;
   });
@@ -501,6 +571,120 @@ function timingOf(type: string, tr: Rec | undefined): Tr | typeof THROWS {
 /** `start` (transition.ts :50-61): no time ends at once */
 function instant(tr: Tr): boolean {
   return tr === 'none' || tr === undefined || tr.delay + tr.dur === 0;
+}
+
+// ---------------------------------------------------------------------------------------------
+// USE ROUTES — the URL (world.ts LOCATION), the runtime's expressions on the same values
+// ---------------------------------------------------------------------------------------------
+
+/** `_getLocationPath` (:644-662): the hash (`navigationPathType` unset or `hash`) or the path, one leading `/` off */
+function locationPath(href: string, settings: Readonly<Record<string, unknown>>): string {
+  const u = new URL(href);
+  const type = settings.navigationPathType;
+  if (type === undefined || type === 'hash') {
+    let hash = u.hash;
+    if (hash) {
+      if (hash[0] === '#') hash = hash.substring(1);
+      if (hash[0] === '/') hash = hash.substring(1);
+    }
+    return hash;
+  }
+  let path = u.pathname;
+  if (path && path[0] === '/') path = path.substring(1);
+  return path;
+}
+/** `_getSearchParams` (:663-680) — decodes with `decodeURIComponent`, which throws on a malformed escape (row C124) */
+function searchParams(href: string): Record<string, string> {
+  const pl = /\+/g;
+  const search = /([^&=]+)=?([^&]*)/g;
+  const decode = (x: string) => decodeURIComponent(x.replace(pl, ' '));
+  const query = new URL(href).search.substring(1);
+  let match: RegExpExecArray | null;
+  const out: Record<string, string> = {};
+  while ((match = search.exec(query))) out[decode(match[1])] = decode(match[2]);
+  return out;
+}
+type FromUrl = { pageId: unknown; params: Record<string, string>; query: Record<string, string> };
+/** `matchPageFromUrl` (:683-742), with no navigation parent: the first page in Components order whose pattern matches from the start */
+function matchPageFromUrl(w: Work): FromUrl | undefined | typeof THROWS {
+  const s = w.st;
+  return attempt(() => {
+    if (!s.useRoutes) return undefined;
+    const pages = s.pages as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    if (pages === undefined || pages.length === 0) return undefined;
+    let urlPath = locationPath(w.href as string, w.view.projectSettings());
+    if (urlPath[0] === '/') urlPath = urlPath.substring(1);
+    const pathParts = urlPath.split('/');
+    const urlQuery = searchParams(w.href as string);
+    const matchParts = (path: string[], pattern: string[]) => {
+      const params: Record<string, string> = {};
+      for (let i = 0; i < pattern.length; i++) {
+        if (path[i] === undefined) return undefined;
+        const p = pattern[i];
+        if (p[0] === '{' && p[p.length - 1] === '}') params[p.substring(1, p.length - 1)] = decodeURIComponent(path[i]);
+        else if (p !== path[i]) return undefined;
+      }
+      return params;
+    };
+    const info = Object.assign({}, s.pageInfo) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    for (const page of pages) {
+      const pageInfo = info[page.id];
+      if (pageInfo === undefined) continue;
+      let pattern = pageInfo.path;
+      if (pattern === undefined) pattern = page.label.replace(/\s+/g, '-').toLowerCase();
+      if (pattern[0] === '/') pattern = pattern.substring(1);
+      const params = matchParts(pathParts, pattern.split('/'));
+      if (params) return { pageId: page.id, params, query: urlQuery };
+    }
+    return undefined;
+  });
+}
+/**
+ * `_updateUrlWithTopPage` (:744-765) with `getNavigationAbsoluteURL` and `getRelativeURL` (:580-643), no navigation parent: the URL
+ * the top page has, pushed. A URL the browser refuses (another origin) throws there, after the call is recorded.
+ */
+function pushUrl(w: Work): void | typeof THROWS {
+  const s = w.st;
+  if (!s.useRoutes) return;
+  const url = attempt(() => {
+    let rel: { path: string; query: Array<{ name: string; value: unknown }> } | undefined;
+    const top = s.stack[s.stack.length - 1];
+    if (top !== undefined) {
+      let urlPath: any = top.path; // eslint-disable-line @typescript-eslint/no-explicit-any
+      if (urlPath === undefined) {
+        // `==` — an entry made by a page's LABEL finds no row, and the page has no URL (row C123)
+        const item = (s.pages as any).find((p: any) => p.id == top.pageId); // eslint-disable-line @typescript-eslint/no-explicit-any, eqeqeq
+        if (item !== undefined) urlPath = item.label.replace(/\s+/g, '-').toLowerCase();
+      }
+      if (urlPath !== undefined) {
+        const inPath = urlPath.match(/{([^}]+)}/g);
+        const params: Record<string, unknown> = Object.assign({}, top.params);
+        if (inPath) {
+          for (const param of inPath) {
+            const key = param.replace(/[{}]/g, '');
+            if ((top.params as Record<string, unknown>)[key] !== undefined) {
+              urlPath = urlPath.replace(param, encodeURIComponent(String(params[key])));
+              delete params[key];
+            }
+          }
+        }
+        const query: Array<{ name: string; value: unknown }> = [];
+        for (const key in params) query.push({ name: key, value: params[key] });
+        if (urlPath.startsWith('/')) urlPath = urlPath.substring(1);
+        rel = { path: urlPath, query };
+      }
+    }
+    const path = rel === undefined ? '' : '/' + rel.path;
+    const query = (rel === undefined ? [] : rel.query).map((q) => q.name + '=' + q.value); // unencoded (row C122)
+    const type = w.view.projectSettings().navigationPathType;
+    const hash = type === undefined || type === 'hash';
+    return (hash ? '' : path) + (query.length >= 1 ? '?' + query.join('&') : '') + (hash ? '#' + path : '');
+  });
+  if (url === THROWS) return THROWS;
+  w.answers.push({ op: 'history', url });
+  const next = pushTarget(url, w.href as string);
+  if (next === null) return THROWS;
+  w.href = next;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -590,6 +774,8 @@ function endOf(w: Work, end: End): void {
     removeChild(w, end.page);
     deleteNode(w, end.page);
     w.st.stack = w.st.stack.slice(0, -1);
+    // :1077 — the page below's URL, pushed: a new entry, not a step back (row C120)
+    pushUrl(w);
   }
 }
 /** `start` (transition.ts :50-61): at once, or until the first frame past start + Duration + Delay */
@@ -660,13 +846,16 @@ function checks(w: Work, item: Item): Busy | null | typeof THROWS {
     const none = noComponents(s);
     if (none === THROWS) return THROWS;
     if (none) return failReset(w, item.tokens, 'component-stack/no-components');
-    // :533-534 (no routes: no page from the URL)
-    const startPageId = s.startPageId !== undefined ? s.startPageId : firstId(s);
+    // :523-535 — with Use Routes, the page in the URL with the query's and the path's parameters; else the Start Page, else the first
+    const fromUrl = matchPageFromUrl(w);
+    if (fromUrl === THROWS) return THROWS;
+    const startPageId = fromUrl !== undefined ? fromUrl.pageId : s.startPageId !== undefined ? s.startPageId : firstId(s);
     if (startPageId === THROWS) return THROWS;
     const found = findPage(s, startPageId);
     if (found === THROWS) return THROWS;
     if (found === undefined) return failReset(w, item.tokens, 'component-stack/component-not-found');
-    return { item, pageId: startPageId, found, outgoing: [], from: null, animate: false };
+    const params: Rec = fromUrl !== undefined ? Object.assign({}, fromUrl.query, fromUrl.params) : {};
+    return { item, pageId: startPageId, found, params, outgoing: [], from: null, animate: false };
   }
   const op = item.kind;
   const v = item.v;
@@ -682,7 +871,7 @@ function checks(w: Work, item: Item): Busy | null | typeof THROWS {
   if (op === 'push') {
     // :964-967
     if (alreadyShowing(s, found, v.params)) return answer(w, op, 'unchanged');
-    return { item, pageId, found, outgoing: [], from: null, animate: true };
+    return { item, pageId, found, params: {}, outgoing: [], from: null, animate: true };
   }
   // :831-834 — only when the stack is one deep
   if (s.stack.length === 1 && alreadyShowing(s, found, v.params)) return answer(w, op, 'unchanged');
@@ -697,7 +886,7 @@ function checks(w: Work, item: Item): Busy | null | typeof THROWS {
       deleteNode(w, p);
     }
   }
-  return { item, pageId, found, outgoing, from, animate };
+  return { item, pageId, found, params: {}, outgoing, from, animate };
 }
 function answer(w: Work, op: 'push' | 'replace', value: 'done' | 'unchanged' | 'failure', error?: string): null {
   w.answers.push(error === undefined ? { op, value } : { op, value, error });
@@ -721,7 +910,7 @@ function finishBusy(w: Work): void {
     // :550-577
     const page = newPage(w);
     addChild(w, page);
-    s.stack = [{ page, from: null, pageId: b.pageId, id: b.found.id, label: b.found.label, params: {}, tr: undefined, pushed: false }];
+    s.stack = [{ page, from: null, pageId: b.pageId, id: b.found.id, label: b.found.label, path: b.found.path, params: b.params, tr: undefined, pushed: false }];
     outputs(w, b.found.label, 1);
     for (let i = 0; i < item.tokens; i++) w.outcomes.push({ port: 'reset', outcome: 'done' });
     return;
@@ -737,8 +926,10 @@ function finishBusy(w: Work): void {
     const tr = timingOf(type, v.transition);
     if (tr === THROWS) return;
     const page = newPage(w);
-    s.stack = [...s.stack, { page, from: top.page, pageId: b.pageId, id: b.found.id, label: b.found.label, params, tr, pushed: true }];
+    s.stack = [...s.stack, { page, from: top.page, pageId: b.pageId, id: b.found.id, label: b.found.label, path: b.found.path, params, tr, pushed: true }];
     outputs(w, b.found.label, s.stack.length);
+    // :1010 — the URL, before the transition; a URL the browser refuses throws: no transition, no page added, nothing answered
+    if (pushUrl(w) === THROWS) return;
     startTransition(w, tr, { kind: 'push', below: top.page });
     addChild(w, page);
     w.answers.push({ op: 'push', value: 'done' });
@@ -749,8 +940,10 @@ function finishBusy(w: Work): void {
   const tr = b.animate ? timingOf(type, v.transition) : undefined;
   if (tr === THROWS) return;
   const page = newPage(w);
-  s.stack = [{ page, from: null, pageId: b.pageId, id: b.found.id, label: b.found.label, params, tr, pushed: false }];
+  s.stack = [{ page, from: null, pageId: b.pageId, id: b.found.id, label: b.found.label, path: b.found.path, params, tr, pushed: false }];
   outputs(w, b.found.label, 1);
+  // :889 — the URL, a new entry (row C120); refused, it throws as a push's does
+  if (pushUrl(w) === THROWS) return;
   if (b.animate) startTransition(w, tr, { kind: 'replace', outgoing: b.outgoing });
   addChild(w, page);
   w.answers.push({ op: 'replace', value: 'done' });
