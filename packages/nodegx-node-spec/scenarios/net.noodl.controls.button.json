@@ -2151,5 +2151,234 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "the keyboard on the button with no pointer over it (a Tab put it there), then Mounted off and a pointer act in the same frame: the act's paint takes the element, Will Unmount and Blurred, and a Focus and a Blur after it are Unchanged — every pointer act",
+    "because": "the paint inside the act unmounts (P109 ISL-031, D30: controls/utils.ts `_leftPage`); the hovered twin of this shape is the scenario before. Seed 20734 left the unhovered leave ungraded (the Text Input's twin, s56: 8f82a3cf7) — the Blur is the reader: a button still on the page with the keyboard would give it up",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the keyboard on the button and a finger or a button held on it with no hover, then Mounted off and a leave in the same frame: the leave's paint takes the element, the press and the keyboard — Will Unmount and Blurred; a Focus and a Blur after it are Unchanged and Done with nothing to blur",
+    "because": "the pressed twin of the scenario before (seed 20734): the leave's paint unmounts (P109 ISL-031, D30) and clears Pressed; only an action between the act and the frame's end tells it from a leave that did nothing",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "touch"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
   }
 ]
