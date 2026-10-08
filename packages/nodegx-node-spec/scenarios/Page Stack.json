@@ -1453,7 +1453,7 @@
     ]
   },
   {
-    "name": "a Reset during a back's animation: when the animation ends it takes the NEW start page off the stack, and every push after is never answered (row C110)",
+    "name": "row C110 — a Reset during a back's animation: when the animation ends it takes only the page it popped off the stack — the new start page stays, a push after is Done, and the same push again Unchanged",
     "because": "back's end :1075 `stack.pop()` pops whatever is last",
     "params": {
       "pages": [
@@ -2267,7 +2267,7 @@
     ]
   },
   {
-    "name": "a push onto a stack with nothing on it is never answered (row C110); the reset Components schedule then rebuilds the start page",
+    "name": "a stack with nothing on it, then Components and a push in one frame: the reset the Components write schedules builds the start page first, and the push lands on it — Done, Stack Depth 2",
     "because": "navigateAsync :996 `top.page` of nothing",
     "params": {
       "pages": "abc",
@@ -7555,6 +7555,43 @@
       },
       {
         "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C110 — a Start Page the stack does not have: the mount's reset leaves the stack empty, and a push onto it is Failure (stack empty)",
+    "because": "navigateAsync — the entry below is read after the build; an empty stack has none",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "startPage": "nope"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
       },
       "settle"
     ]

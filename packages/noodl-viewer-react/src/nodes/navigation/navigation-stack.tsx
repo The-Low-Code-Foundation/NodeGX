@@ -1038,8 +1038,16 @@ const PageStack = {
         }
       }
 
-      // Push the new top
+      // Push the new top. P107-C110 — a stack with nothing on it (a reset that failed) has no page to push from: answer it
       const top = this._internal.stack[this._internal.stack.length - 1];
+      if (top === undefined) {
+        this.nodeScope.deleteNode(group);
+        return this._reportNavigationFailure(
+          args,
+          'push-component-stack/stack-empty',
+          `The Component Stack "${this._internal.name || 'Main'}" has no page to push "${pageId}" onto — Reset it first`
+        );
+      }
       const newTop: StackEntry = {
         from: top.page,
         page: group,
@@ -1122,7 +1130,10 @@ const PageStack = {
           top.page.setInputValue('position', 'relative');
           this.removeChild(top.page);
           this.nodeScope.deleteNode(top.page);
-          this._internal.stack.pop();
+          // P107-C110 — the entry this back animated, not whatever is last by now: a Reset during the animation put a new start
+          // page on the stack, and popping the last took THAT off, leaving the stack empty for every push after
+          const at = this._internal.stack.indexOf(top);
+          if (at >= 0) this._internal.stack.splice(at, 1);
 
           this._updateUrlWithTopPage();
         },

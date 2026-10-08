@@ -28,9 +28,9 @@
  * (`await createNode`), which lands at the next yield to the event loop: a settle, after the frame's end, or an advance, before the
  * clock moves (spec.ts `resume`). Whatever waits behind it runs then, all of it. A request whose checks ended without a build frees
  * the queue a microtask later (a throw: two) — at a yield, or at the next act boundary for what started outside a frame (`hops`). A
- * build of a component the project does not have is answered as not found (row C107, fixed in P109 ISL-048), and a transition
- * there is no such thing as plays none (row C108, fixed); one that throws (a stack with nothing on it) answers nothing, and the
- * next one runs (row C110). A back is not queued.
+ * build of a component the project does not have is answered as not found (row C107, fixed in P109 ISL-048), a transition there
+ * is no such thing as plays none (row C108, fixed), and a push onto a stack with nothing on it is Failure (row C110, fixed). A back
+ * is not queued.
  *
  * A RESET (`resetAsync` :503-578) — at the mount (registering), at a Reset (Done or Failure, every Reset of the frame alike), when
  * Components change while the stack is on the page, and when the Name changes while it is — deletes every page, then (no components:
@@ -41,7 +41,7 @@
  * the page below leaves the stack's children (it stays on the stack, to come back). A REPLACE (:787-910) builds the page as the only
  * one: unanimated, every page is deleted first; animated, they are deleted at the transition's end. A BACK (:1041-1083) puts the page
  * below back, hands the node that pushed the top page the back's action and results (`returned`), names the page below at once, and at
- * the transition's end deletes the top page and takes the LAST entry off the stack — whatever it is by then (row C110).
+ * the transition's end deletes the top page and takes its entry off the stack (row C110, fixed in P109 ISL-048: it took the LAST).
  *
  * THE TRANSITION (transitions/transition.ts). None, or a Push or Popup with no time (`dur + delay` 0), ends at once. A timed one ends
  * at the first frame whose clock is past its start + Duration + Delay (`frame` :63-72: a `requestAnimationFrame` chain, run at a
@@ -190,7 +190,8 @@ export const ComponentStack = defineNode({
   // v4 (P109 ISL-048, s31): a page whose component the project does not have is answered — a push or replace Failure, a reset Failure that leaves the stack empty (row C107)
   // v5 (P109 ISL-048, s31): a Components value that is not a list is none (Failure, no components), and a page found by its label with no component is not found (row C109)
   // v6 (P109 ISL-048, s31): a push with a transition there is no such thing as plays none and is Done (row C108)
-  version: 6,
+  // v7 (P109 ISL-048, s31): a back's end takes the entry it animated off the stack, and a push onto an empty stack is Failure (row C110)
+  version: 7,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx',
   needs: ['person', 'clock', 'location', 'project'],
   worldPool: {
@@ -777,10 +778,11 @@ function endOf(w: Work, end: End): void {
       deleteNode(w, p);
     }
   } else {
-    // :1068-1078 — the popped page goes, and the LAST entry comes off the stack, whatever it is by now (row C110)
+    // :1068-1078 — the popped page goes, and the entry it animated comes off the stack (row C110, fixed in P109 ISL-048: it took
+    // the LAST, which after a Reset during the animation was the new start page)
     removeChild(w, end.page);
     deleteNode(w, end.page);
-    w.st.stack = w.st.stack.slice(0, -1);
+    w.st.stack = w.st.stack.filter((e) => e.page !== end.page);
     // :1077 — the page below's URL, pushed: a new entry, not a step back (row C120)
     pushUrl(w);
   }
@@ -933,9 +935,10 @@ function finishBusy(w: Work): void {
   const v = item.v;
   const params: Rec = { ...(v.params ?? {}) };
   if (item.kind === 'push') {
-    // :993-1027 — the entry below (none: `top.page` throws, row C110), the transition
+    // :993-1027 — the entry below, the transition
     const top = s.stack[s.stack.length - 1];
-    if (!top) return;
+    // a stack with nothing on it has no page to push from: Failure (row C110, fixed in P109 ISL-048)
+    if (!top) return void answer(w, 'push', 'failure', 'push-component-stack/stack-empty');
     // a type there is no such thing as plays no animation, as a replace's (row C108, fixed in P109 ISL-048)
     const asked = ((v.transition ?? {}).type as string) || 'Push';
     const type = TRANSITIONS.includes(asked) ? asked : 'None';
