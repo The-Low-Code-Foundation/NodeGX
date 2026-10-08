@@ -619,7 +619,9 @@ const PageStack = {
 
       let urlPath = top.pageInfo.path;
       if (urlPath === undefined) {
-        const pageItem = this._internal.pages.find((p) => p.id == top.pageId);
+        // P107-C123 — by the page's id as found: an entry made by its LABEL carries the label as its page id, found no row, and the
+        // URL became #
+        const pageItem = this._internal.pages.find((p) => p.id == top.pageInfo.id);
         if (pageItem === undefined) return;
 
         urlPath = pageItem.label.replace(/\s+/g, '-').toLowerCase();

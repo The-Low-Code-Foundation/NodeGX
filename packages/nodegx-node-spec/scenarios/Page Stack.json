@@ -6030,7 +6030,7 @@
     }
   },
   {
-    "name": "ROUTES: a push by the page's label, Detail — the URL is # (row C123)",
+    "name": "row C123 — ROUTES: a push by the page's label, Detail — the URL is #/detail, and a Reset reads Detail back from it",
     "because": "getRelativeURL :585-587 finds the row by `p.id == top.pageId`, and the entry's page id is the label",
     "params": {
       "pages": [
@@ -6508,7 +6508,7 @@
     }
   },
   {
-    "name": "ROUTES: Start Page given by its label, Home — after a push and a Pop the URL is # (row C123)",
+    "name": "row C123 — ROUTES: Start Page given by its label, Home — after a push and a Pop the URL is #/home",
     "because": "the reset's entry page id is the label (:564)",
     "params": {
       "pages": [

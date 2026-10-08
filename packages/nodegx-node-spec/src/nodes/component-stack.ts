@@ -53,8 +53,8 @@
  *
  * USE ROUTES (v2, s58; world.ts LOCATION — the page's window is the world's browser). With Use Routes on, the stack puts its top page
  * in the URL and reads its start page from it. THE URL a page has: its Path (`pagePath-<id>`, an input the editor draws only with Use
- * Routes on), else its label lowercased with each run of spaces a `-` — found by the entry's page id with `==` (`getRelativeURL`
- * :580-622), so a page pushed or started by its LABEL has none: the URL becomes `#` (row C123). `{name}` parts take the page's
+ * Routes on), else its label lowercased with each run of spaces a `-` — found by the page's id (`getRelativeURL` :580-622; row
+ * C123, fixed in P109 ISL-048: a page pushed or started by its LABEL had none, and the URL became `#`). `{name}` parts take the page's
  * parameters (`encodeURIComponent`); every other parameter goes in the query encoded (row C122, fixed in P109 ISL-048: it went
  * unencoded). Hash mode (the project's `navigationPathType` unset or `hash`) writes `?query#/path` — and with no parameters only `#/path`, which keeps the query already
  * in the address (row C121); path mode writes `/path?query`. A push and a replace push their URL (`history.pushState`) after naming
@@ -196,7 +196,8 @@ export const ComponentStack = defineNode({
   // v9 (P109 ISL-048, s31): a malformed escape in the URL's query or path is kept as written, as the Page Router's (row C124)
   // v10 (P109 ISL-048, s31): a page's parameters go into the URL's query encoded (row C122)
   // v11 (P109 ISL-048, s31): a page's Path that is not text is unset — the label's path (row C125)
-  version: 11,
+  // v12 (P109 ISL-048, s31): a page pushed or started by its label has its URL (row C123)
+  version: 12,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx',
   needs: ['person', 'clock', 'location', 'project'],
   worldPool: {
@@ -676,8 +677,8 @@ function pushUrl(w: Work): void | typeof THROWS {
     if (top !== undefined) {
       let urlPath: any = top.path; // eslint-disable-line @typescript-eslint/no-explicit-any
       if (urlPath === undefined) {
-        // `==` — an entry made by a page's LABEL finds no row, and the page has no URL (row C123)
-        const item = (s.pages as any).find((p: any) => p.id == top.pageId); // eslint-disable-line @typescript-eslint/no-explicit-any, eqeqeq
+        // by the page's id as found (row C123, fixed in P109 ISL-048: by the entry's page id, which an entry made by a LABEL carries)
+        const item = (s.pages as any).find((p: any) => p.id == top.id); // eslint-disable-line @typescript-eslint/no-explicit-any, eqeqeq
         if (item !== undefined) urlPath = item.label.replace(/\s+/g, '-').toLowerCase();
       }
       if (urlPath !== undefined) {
