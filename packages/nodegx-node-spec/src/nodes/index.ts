@@ -56,6 +56,7 @@ import { Video, OWN_ELEMENT } from './video';
 import { Drag } from './drag';
 import { ComponentStack } from './component-stack';
 import { Repeater } from './repeater';
+import { Columns } from './columns';
 import { PageRouter } from './page-router';
 import { RadioButtonGroup } from './radiobuttongroup';
 import { RadioButton } from './radiobutton';
@@ -176,6 +177,7 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [ComponentStack.type]: ComponentStack,
   [PageRouter.type]: PageRouter,
   [Repeater.type]: Repeater,
+  [Columns.type]: Columns,
   [RadioButtonGroup.type]: RadioButtonGroup,
   [RadioButton.type]: RadioButton,
   [NavigateToPath.type]: NavigateToPath,
@@ -280,6 +282,7 @@ export {
   ComponentStack,
   PageRouter,
   Repeater,
+  Columns,
   RadioButtonGroup,
   RadioButton,
   NavigateToPath,

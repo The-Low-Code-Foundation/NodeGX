@@ -128,6 +128,9 @@ const dragWaitedSnapFromZero = (d: Divergence) => {
 const refusedVolume = poolFor(specs['Video'].inputs.volume).filter((v) => typeof v !== 'number' ? !(Number(v) >= 0 && Number(v) <= 1) : !(v >= 0 && v <= 1));
 const refusedSourceObject = poolFor(specs['Video'].inputs.srcObject).filter((v) => v !== null && v !== undefined);
 
+/** C133 (s60) — a Medium or Small Layout that is truthy and not a string: picked for its band, it reaches `parseLayout`'s `split` in render */
+const unsplittableLayout = (port: 'mediumLayout' | 'smallLayout') => poolFor(specs['net.noodl.visual.columns'].inputs[port]).filter((v) => !!v && typeof v !== 'string');
+
 /** C106 (s55) — a Start Drag X / Y of NaN: `componentDidUpdate` compares it with itself (`NaN !== NaN`) and sets state at every update, until React gives up */
 const nanStart = (port: string) => poolFor(specs['Drag'].inputs[port as 'inputPositionX']).filter((v) => typeof v === 'number' && Number.isNaN(v));
 
@@ -135,6 +138,11 @@ const WITHHELD: Record<string, Readonly<Record<string, Withheld>>> = {
   Drag: {
     inputPositionX: { values: nanStart('inputPositionX'), row: 'NSP-016 §6 C106 — a Start Drag X or Y of NaN loops the Drag\'s update until React throws' },
     inputPositionY: { values: nanStart('inputPositionY'), row: 'NSP-016 §6 C106 — a Start Drag X or Y of NaN loops the Drag\'s update until React throws' }
+  },
+  // s60 — C133: the throw takes the page down only once the band applies, so a sequence that holds the value is withheld
+  'net.noodl.visual.columns': {
+    mediumLayout: { values: unsplittableLayout('mediumLayout'), row: 'NSP-016 §6 C133 — a Medium or Small Layout that is not a string throws while React draws the Columns' },
+    smallLayout: { values: unsplittableLayout('smallLayout'), row: 'NSP-016 §6 C133 — a Medium or Small Layout that is not a string throws while React draws the Columns' }
   },
   // C92 (a Shape's Points of 1e9, 2^53 or Infinity ran the heap out) was fixed in P109 ISL-038 — Circle.tsx caps it at 500
   Video: {
@@ -144,6 +152,12 @@ const WITHHELD: Record<string, Readonly<Record<string, Withheld>>> = {
 };
 
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
+  // s60 — the Columns' own row: a breakpoint layout that is not a string throws in render (C133)
+  'net.noodl.visual.columns': [
+    { row: 'NSP-016 §6 C133 — a Medium or Small Layout that is not a string throws while React draws the Columns', matches: (d: Divergence) => threwWith(d, 'columnLayout.split is not a function') },
+    // s60 deep run (seed 3455271128, shrunk to one step: Auto Fit, Min Column Width 1, Horizontal Gap −1) — C134
+    { row: 'NSP-016 §6 C134 — Auto Fit with Min Column Width + Horizontal Gap = 0 divides by zero and throws while React draws the Columns', matches: (d: Divergence) => threwWith(d, 'Invalid array length') }
+  ],
   // s54 — the Video's own rows (C96–C100). The Text, Shape, Image and Group carry none: their C79 (Pointer Events written after Opacity
   // 0 let the invisible element take the pointer) was fixed in P109 ISL-031, the C86–C90 and C95 of the Group in ISL-038
   Video: [

@@ -56,7 +56,9 @@ export type Keeps =
   | 'where the pointer is'
   // s54 — the Video: what a media element holds (playing or paused, its position, its load, its size) and the page's activation
   | 'the media'
-  | "a person's activation";
+  | "a person's activation"
+  // s60 — the Columns: the width the page lays its container out at (columns.ts THE WIDTH), which only a `resize` moves
+  | 'the layout';
 export type Held = { shows: (s: Readonly<Record<string, unknown>>) => unknown } | { keeps: Keeps };
 
 export interface PageModel {
@@ -311,6 +313,16 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
     held: {},
     frameEnd: ['copyScheduled', 'refreshScheduled', 'callbacks', 'tokens', 'queue', 'running', 'stuck', 'hops', 'owed', 'building', 'rows', 'answered'],
     framePulses: ['itemsRendered']
+  },
+  // s60 — the Columns (columns.ts): the props and what each size port holds are the node's; the page's width is the layout's, moved only
+  // by a `resize`. At a frame's end the node measures its container (whether there is one to measure, the measurement that is due, the
+  // width read) and reports the band — Breakpoint, and At Medium or At Small for a band entered: its own frame-end work and pulses
+  'net.noodl.visual.columns': {
+    node: ['mounted', 'layout', 'sizing', 'mediumLayout', 'smallLayout', 'mediumBelow', 'smallBelow', 'gap', 'mediumHeld', 'smallHeld', 'gapHeld', 'container', 'observer', 'measured', 'band', 'out'],
+    attr: { onPage },
+    held: { width: { keeps: 'the layout' } },
+    frameEnd: ['container', 'observer', 'measured', 'band', 'out'],
+    framePulses: ['onAtMedium', 'onAtSmall']
   }
 };
 

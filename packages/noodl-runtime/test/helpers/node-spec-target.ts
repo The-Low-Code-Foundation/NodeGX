@@ -664,7 +664,25 @@ interface Page {
   restoreClock?: () => void;
   /** NSP-016 s57 — puts the runtime's page index back: a Page Router's page reads the play's project. */
   restoreIndex?: () => void;
+  /** NSP-016 s60 — THE LAYOUT a Columns page has (`layOut` below): the container's width and what observes it. Gone with the page. */
+  layout?: Layout;
 }
+
+/**
+ * NSP-016 s60 — THE LAYOUT (columns.ts THE WIDTH). jsdom lays nothing out and has no `ResizeObserver`; on a Columns page the face is
+ * the browser's layout for one number — the width the Columns container is laid out at — and the observer that reports it. Face
+ * choices, written down: the page starts `START_WIDTH` wide; the container's `offsetWidth` is that width; an observation reports when it
+ * starts (in a browser the container has a height, so its first observation always reports) and then whenever the width differs from
+ * the one it last reported; a report is delivered at the browser's next rendering step — the end of a settle, or a `resize` act.
+ */
+interface Layout {
+  width: number;
+  observations: Array<{ observer: { callback(entries: unknown[], observer: unknown): void }; el: any; last?: number }>;
+  restore(): void;
+}
+
+/** NSP-016 s60 — the width a Columns page is laid out at before any `resize` (THE LAYOUT above): a desktop window. */
+const START_WIDTH = 1024;
 
 /** NSP-016 s56 — the components a Component Stack can build in a play (navigation-stack.ts THE PAGES), each holding one Pop Component Stack. */
 const STACK_PAGES = ['Home', 'Detail', 'Settings'] as const;
@@ -1205,7 +1223,7 @@ export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 't
 export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back', 'router-navigate', 'page-inputs', 'page', 'showpopup', 'closepopup'] as const;
 
 /** NSP-016 s37 — the viewer's VISUAL nodes this phase has specced, from `src/nodes/` (their React components come with them; PERSON above). */
-export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox', 'controls/text-input', 'controls/options', 'controls/slider', 'visual/icon', 'controls/radiobuttongroup', 'controls/radiobutton', 'visual/text', 'visual/group', 'visual/circle', 'visual/image', 'visual/video', 'visual/drag', 'navigation/navigation-stack', 'navigation/router', 'std-library/data/foreach'] as const;
+export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox', 'controls/text-input', 'controls/options', 'controls/slider', 'visual/icon', 'controls/radiobuttongroup', 'controls/radiobutton', 'visual/text', 'visual/group', 'visual/circle', 'visual/image', 'visual/video', 'visual/drag', 'navigation/navigation-stack', 'navigation/router', 'std-library/data/foreach', 'visual/columns'] as const;
 
 /**
  * Picker nodes whose SOURCE is in this package but which only the viewer's `register-nodes.js`
@@ -2098,6 +2116,30 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
           else delete (perf as { now?: unknown }).now;
         };
       }
+    } else if (s.h.type === 'net.noodl.visual.columns') {
+      // NSP-016 s60 — two children (columns.ts THE CHILDREN): real Groups in the node's scope, added with its own `addChild` before the
+      // first render — a Columns with none draws nothing to lay out. And THE LAYOUT (above): the page's width and the observer that reports it
+      for (let i = 0; i < 2; i++) {
+        const child = context.nodeRegister.createNode('Group', `${s.h.id}/child${i}`, scope) as unknown as RuntimeNode;
+        root.addChild(child);
+        (page.children ??= []).push({ node: child, value: i });
+      }
+      const layout: Layout = { width: START_WIDTH, observations: [], restore: () => undefined };
+      class PageResizeObserver {
+        constructor(readonly callback: (entries: unknown[], observer: unknown) => void) {}
+        observe(el: any) {
+          Object.defineProperty(el, 'offsetWidth', { configurable: true, get: () => layout.width });
+          layout.observations.push({ observer: this, el });
+        }
+        unobserve(el: unknown) {
+          layout.observations = layout.observations.filter((o) => !(o.observer === this && o.el === el));
+        }
+        disconnect() {
+          layout.observations = layout.observations.filter((o) => o.observer !== this);
+        }
+      }
+      layout.restore = installGlobals({ ResizeObserver: PageResizeObserver });
+      page.layout = layout;
     } else if (spec?.needs?.includes('group') && world?.group.present) {
       const group = context.nodeRegister.createNode('Radio Button Group', `${s.h.id}/group`, scope) as unknown as RuntimeNode & Holder;
       // the group's Value parameter at load, then the node, then its siblings — the order a loaded project builds them
@@ -2211,6 +2253,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     for (const name of page.models ?? []) delete models[name];
     page.restoreClock?.();
     page.restoreIndex?.();
+    page.layout?.restore();
     (s.h.node as unknown as { parent?: unknown }).parent = undefined;
     s.page = undefined;
     onPage.delete(s);
@@ -2242,6 +2285,21 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     void d.act(() => {
       s.page?.host?.forceUpdate();
     });
+  }
+
+  /**
+   * NSP-016 s60 — THE LAYOUT (above): the browser's rendering step reports each observation whose width it has not reported yet — one
+   * callback per observer, with its entries, as a browser delivers them.
+   */
+  function layOut(s: State): void {
+    const layout = s.page?.layout;
+    if (!layout) return;
+    const due = layout.observations.filter((o) => o.last !== layout.width);
+    for (const o of due) o.last = layout.width;
+    for (const observer of new Set(due.map((o) => o.observer))) {
+      const entries = due.filter((o) => o.observer === observer).map((o) => ({ target: o.el, contentRect: { width: layout.width, height: 0 } }));
+      observer.callback(entries, observer);
+    }
   }
 
   /**
@@ -2278,6 +2336,11 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     if (act === 'grab' || act === 'pickUp' || act === 'away') return cardActs(s, act, value);
     // NSP-016 s55 — a pointer WITH A POSITION (drag.ts THE GESTURE): pressed on the node's element, moved and let go anywhere
     if (act === 'pressAt' || act === 'moveTo' || act === 'releaseAt') return positionedAct(act, value, el);
+    // NSP-016 s60 — the page laid out again at another width (THE LAYOUT above): not a person's gesture on an element
+    if (act === 'resize') {
+      if (s.page?.layout && typeof value === 'number') s.page.layout.width = value;
+      return layOut(s);
+    }
     if (!el) return;
     // NSP-016 s53 — the browser finishes fetching the picture an `<img>` names (image.ts `fetched`): its `load` or `error` event on the
     // element, which React hears there. jsdom fetches nothing, so the face is the browser. Face choice, written down: a browser fetches
@@ -3054,6 +3117,13 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
           await yieldToEventLoop();
           drain();
         });
+        // NSP-016 s60 — THE LAYOUT (above): the rendering step after the frame's commit reports what the page's observers have not
+        for (const p of onPage) {
+          if (!p.page?.layout) continue;
+          await ensureDom().act(async () => {
+            layOut(p);
+          });
+        }
       } else {
         frame();
         await yieldToEventLoop();
