@@ -134,6 +134,8 @@
     "spec-census:check": "node scripts/node-spec/census.js --check",
     "own-census": "node scripts/own/census.js",
     "own-census:check": "node scripts/own/census.js --check",
+    "ontology-census": "node scripts/ontology/census.js",
+    "ontology-census:check": "node scripts/ontology/census.js --check",
     "canvas-look": "node scripts/canvas-look/generate.js",
     "canvas-look:check": "node scripts/canvas-look/generate.js --check",
     "build:node-spec": "npm --prefix packages/nodegx-node-spec run build",

@@ -1,0 +1,54 @@
+# ONT-008 — Your own data manager
+
+**Opened 2026-10-08.** **Depends on ONT-001, ONT-003 and P112 OWN-007** (the brief). **Status: 📋 not started.**
+
+## 1. The person sentence
+
+> **My agent built me a page for my data in my own words, from a kit, and a suite told it when it was right. Richard
+> opens the same files in the backend manager and sees the tables. Nothing was translated between us.**
+
+## 2. Why
+
+Richard: *"A seasoned dev can wrap their heads around the NodeGX inbuilt SQLite backend explorer we built, but I can't
+present that to the [ops] team."* P112 proved the method: a kit, a brief, a suite and strangers. The ontology is a
+graph, so the canvas look already draws it. The dev's view (P104) and the ops view are the same files at different
+reach, which is NSP-005's word.
+
+## 3. What to build
+
+1. **The kit's data half.** The ontology files and `describe()` (ONT-001), the projection (ONT-003), the backend's admin
+   routes already used by the manager, and `@nodegx/canvas-look` for the picture. No new package if the P112 kit can
+   carry it; measured.
+2. **The brief's chapter.** What a data manager is in NodeGX terms: it reads the sentences, shows nouns as cards and
+   relations as wires with their questions and answers, lists and edits records through the admin routes in the
+   person's field names, and runs verbs (ONT-006) as buttons with the sentence under them.
+3. **The suite.** An adapter (`open(project)`, `show(noun)`, `edit(record)`, `run(verb)`), fixtures, and checks: every
+   noun and relation in the files is reachable on the page by its sentence; a record edited through the page is the
+   record the backend holds; a verb run through the page takes the arm the engine records; nothing on the page names a
+   storage type unless the view declares full depth.
+4. **The picture.** The ontology drawn with the canvas look: cards for nouns, wires for relations labelled with the
+   kind's sentence, the answers on the wire's panel, and the collection each card became one click away in the
+   backend manager (a deep link, as BMG-012's are).
+5. **Strangers.** Three fresh agents, the kit and a persona each (a two-person ops team; a shop owner; a teacher), each
+   building the view from the brief alone and passing the suite on the ONT-009 fixture. Their questions become
+   sentences in the brief.
+
+## 4. Acceptance criteria
+
+1. Three strangers pass the suite on the same fixture; the official backend manager opens the project and shows the
+   projected schema unchanged.
+2. On the ops persona's view, `grep` of the rendered page for the storage type names finds none; on the dev view, the
+   badges are there.
+3. A verb run from a stranger's page and the same verb run from the backend manager produce the same run record.
+
+## 5. Watch for
+
+- **A working wireframe is not the mockup** (memory). The suite grades reach and correctness; Richard grades whether he
+  could put it in front of the ops team, in ONT-009.
+- **The project token paints nothing on an editor surface** (memory). A home-made page draws with the canvas look's
+  tokens, not the app's.
+- **Two surfaces called the bench** (memory). Name the view by what it is for; "manager" is taken by P104.
+
+## 6. Built
+
+*(empty)*

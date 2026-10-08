@@ -1,0 +1,277 @@
+# Phase 116 — The person says what their world is
+
+**Scoped:** 2026-10-08, at HEAD `34c76830f`, from a conversation with Richard that started as a report of a chat with a
+colleague about the backend problem and ended as a phase. **Status: 🟡 s1 — ONT-000 built (14 kinds, 303 rows, 8 sources); R1–R7 open; ONT-000 step 5 (Richard's list) open.** §13 says what the census measured.
+**Prefix: `ONT`.** Task files: [ONT-000](ONT-000-THE-CORPUS-MEASURED.md) … [ONT-010](ONT-010-THE-CLAIM-AND-ITS-GATE.md).
+The board is §7. Hand-off: [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).
+
+> "Whenever work with Directus or n8n goes deeper than the surface level stuff like adding records, when they hit
+> relational fields or having to change DB schema stuff, they're presented with language and options that puts them
+> miles out of their depth and they end up having to call us to help. That wasn't the point."
+> — Richard, 2026-10-08, about a two-person operations team
+
+> "Claude solves this problem with vibe coding, and makes very good databases for users without these kinds of
+> mistakes. BUT it's not pushing the user to predict what things might come up, what edge cases might sink the design
+> when they drop the bombshell on Claude 2 days after the app is already in production."
+> — Richard, 2026-10-08
+
+> "I think if I'm not wrong it turns this into one of the only fully framework independent open source full stack app
+> systems in existence." — Richard, 2026-10-08, asking for this phase. §10 says what that claim rests on and when it
+> may be said.
+
+Richard's colleague's idea, in his words as Richard relayed them: Claude must first talk to the person about what the
+real-world or conceptual objects in their head are (what a customer is, how a customer relates to a product, how a
+product relates to a category) before touching a database; then show them a picture of the ontology mapped onto the
+tables, the workflows and the processes, described in the terms the person was able to use. Not educating the person
+about schemas, but showing them a view of their schema at the level their understanding allows.
+
+## 0. The idea in one paragraph
+
+Phase 107 says *the node says what it does*: one spec, and every implementation (the runtime, the exporter, the editor,
+a stranger's build) is graded against it. This phase says **the person says what their world is**, and everything
+below that sentence is a graded target: the schema, the database engine it lands on, the workflows, the admin view the
+person uses, the screens. The person's sentences are a property graph: nouns, typed relations between them, and
+properties on the relations ("a member is on an account since March"). The vocabulary of relation kinds is small and
+derived from real projects, not invented. Each kind carries three things: the **questions** an experienced designer
+asks reflexively and nobody asked Richard in Bubble; its **projection** onto the backend contract; and its **mutants**,
+the classic beginner mistakes, which the suite must kill. The conversation is not free-form: when a mutant survives,
+the one question that kills it is the next question asked. Two days after launch, a new sentence is a diff of the
+graph, and the diff names what it reaches and what the migration is. Acme Association wrote two notes by hand after two
+incidents; both are the answers to questions this vocabulary would have asked before a single collection existed.
+
+## 1. What was measured before scoping
+
+Read on 2026-10-08 from the working tree at `34c76830f` and from the Acme Association project, a membership business run by a two-person operations team on a hosted
+headless CMS with a learning platform and a mailing system beside it (its repository is outside this one and is not
+cited by path).
+
+| # | fact | consequence |
+|---|---|---|
+| 1 | **The "do not choose the database" layer exists.** `@noodl/backend-contract` (phase 34) is a neutral data, auth and filter contract: six backend types (`nodegx`, `parse`, `directus`, `supabase`, `pocketbase`, `custom`), fourteen data methods extracted from `cloudstore.js`, a 31-operator neutral filter model, capability descriptors whose every non-obvious cell carries evidence, and BRG-003's conformance suite that returns a report and proves each case can fail with mutants (`conformance/index.ts`, `mutants.ts`) | The schema this phase projects lands on the contract, never on an engine. An engine is chosen at deploy. **This phase does not build that layer; it builds the layer above it** |
+| 2 | **Relations in the contract are one hop.** `addRelation` / `removeRelation` are two of the fourteen methods; `relatedTo` is *"the one filter shape that names a Parse concept in the contract"*, kept because Parse's `Relation` has no junction table to query, and BCN-005 was to decide whether the other backends implement it over junction tables or declare it `unsupported` (`filter.ts:175-181`). No method traverses a path | A person's question is a path (reading 6). The contract needs a path operation with a capability cell per backend, or every such question stays in application code (ONT-004, R3) |
+| 3 | **The dev's view of a schema exists.** P104's Schema page offers eleven field kinds as tiles (Text, Number, Yes / No, Date & time, Choice, **Link**, **Links**, Picture or file, Location, List, Anything), each mapped to a storage type, with rules in words and a *who can see this record* control (BMG-003, BMG-006) | *Choice* is "is a kind of, fixed list"; *Link* is "belongs to"; *Links* is "has many". The tiles are the projection's target vocabulary. What the tiles cannot hold is the question behind the choice: a *Links* tile does not ask whether the link has a start date |
+| 4 | **The workflow verbs are specced.** NSP-014's 24 backend nodes conform on the runtime; ruling R9 made a record node's trace carry the contract operation, not the HTTP. The backend's workflow engine has fifteen step kinds (`call-function`, `branch`, `switch`, `for-each`, `merge`, `transform`, `validate`, `filter`, `sort`, `deduplicate`, `split`, `stop`, `return`, `wait`, `wait-until`) with success edges, named routes and error edges (`workflow/types.ts`). The 17 cloud-only nodes wait on NSP-022 | A workflow's failure arm exists as a structure (an error edge). What does not exist is the workflow as a sentence in the person's words with its failure arm named, which is what Acme's enrolment note is (reading 7). ONT-006 |
+| 5 | **The project format carries no data model.** The eight v2 schemas (`project-v2`, `component`, `nodes`, `connections`, `model`, `registry`, `routes`, `styles`) name no collection; the schema lives only in the running backend and is read back by schema sync. `docs/` is *"the project's own written context"*, three template files, read and written by the MCP (`docsTools.ts`) | An agent that writes a project today writes no data model; it creates collections ad hoc through the admin schema API. The ontology needs a home in the files (R1) so that the agent, the editor, the backend manager and a home-made view read one thing |
+| 6 | **Acme's questions are paths.** Counting dotted relation paths in its code and its permissions guide (names generalised): `account.company.name` 13 uses, `account_people.person.last_name` 7, `account.company.admins.person_id` 4 (the account-holder permission, four hops), `person.employment.company.name` 2. Fourteen collections around companies, people, employment and paid accounts | The person thinks in paths and the system answers in joins. A four-hop permission rule is a sentence ("an account holder sees the members on their account"), and the relational engine can compile it. Reading 2 says the contract cannot carry it today |
+| 7 | **Two Acme notes are answers to unasked questions.** The archive note ("what stays, what ends" when a person is archived: the record and its history stay, the paid account membership and the library access end) and the enrolment note (enrolment in the learning platform silently skipped when a person is added here before existing there). Both written by hand after the fact; the second after an incident in which a paying member was invisible for an unknown period | The first is the *ends* kind's question ("when this stops, what stays and what goes?"). The second is the *exists elsewhere* kind's question ("can a thing exist here before it exists there?"). **Both are questions a vocabulary asks before the schema exists.** This is the phase's thesis, and ONT-009 grades it |
+| 8 | **The in-repo corpus is thin.** Of the thirteen templates, four name collections: planning 11, members-area 5, nightbook 5, todo-list 5; nine name none. A NodeGX backend runs in production for the lessons MCP (`dbt-lessons`) | Acme is the richest corpus on this machine. The relation-kind list must be derived from Acme plus the four templates plus the lessons backend, with a count per kind (ONT-000). A kind with no evidence is not in the list |
+| 9 | **The method for "your own view" exists.** P112: a kit, a brief, a suite, three strangers; `@nodegx/canvas-look` generated from the editor's theme | "Your own data manager" is P112's method pointed at the ontology instead of the node graph (ONT-008). The ontology is a graph, so the canvas look draws it as it draws everything else |
+| 10 | **The claims-from-the-clause discipline exists.** NSP-008 wrote each contract clause as a checkable claim *before* recording the runtime, and 13 of 14 bore out; the 14th was a false sentence. Memory: *a claim written into a doc can grade the code it describes* | A person's sentence about their world is a clause. Written as a claim before projection, the projected schema is graded by it on every adapter (ONT-003) |
+| 11 | **Outside the repo, not measured here:** relational engines have grown graph query over tables (SQL/PGQ in SQL:2023; Apache AGE on Postgres), and the ISO GQL standard (2024) fixes the property-graph model. Directus's own deep filters are path filters | Graph at the spec and query layer over tables at the storage layer is where the industry landed. A graph engine is a seventh adapter when a project's measured depth needs it, not a default (R4) |
+
+## 2. The person sentences
+
+> **Say it:** "I told my agent what a member is, what an account is, and that a member is on an account from a date
+> until a date. It asked me four things I had not thought about. The database came out of that, and I never saw the
+> word *junction*."
+
+> **See it:** "There is a picture of my world: my words on the cards, my sentences on the wires. I click a wire and I
+> see what it asked me and what I said. I click a card and I see the collection it became and the screens that show
+> it."
+
+> **Change it:** "Two days after launch I said *some members are on two accounts*. It told me that changes one thing I
+> said, touches three screens and one workflow, and what the people already on an account will see. Then it did it."
+
+> **Run it:** "The thing I do every week, *archive a contact*, is one button, and the sentence under it says what stays
+> and what ends, in my words. When it cannot do a step, it says which and why, in my words too."
+
+> **Own it:** "My manager page was built for what I understand. Richard opens the same files in his and sees the
+> tables. Nothing was translated between us; we are at different depths of one thing."
+
+And the one the phase exists to make possible, graded by [ONT-009](ONT-009-ACME-FROM-THE-SENTENCES.md):
+
+> **A two-person ops team describes their membership world in their own words, and the questions they are asked
+> surface, before any collection exists, the two answers Acme only wrote down after two incidents.**
+
+## 3. What an ontology is, in NodeGX terms
+
+A **property graph**, in the ISO GQL sense, held in the project's files (R1):
+
+| part | in the person's words | formally | projects onto |
+|---|---|---|---|
+| **noun** | "a member", "an account", "a company" | a node type with properties | a collection with fields (P104's tiles) |
+| **relation** | "a member is on an account" | a typed edge between two node types | a *Link*, a *Links*, or a junction collection, as the kind's projection says |
+| **relation kind** | *belongs to · has many · is a kind of · is on · ends · exists elsewhere · …* | an edge type from the vocabulary, with its questions, projection and mutants | the shape and the rules of the above |
+| **answer** | "yes, it can move to another account", "the list of kinds is fixed", "the history stays" | a constraint on the edge type: cardinality, ownership, lifecycle, a fixed or open domain | uniqueness, cascade, soft delete, an enum table, an end date |
+| **adverb** | "since March", "as an admin" | a property on the edge | a column on the junction collection |
+| **verb** | "archive a contact", "enrol a member" | a workflow sentence over the graph, with its failure arms named | a workflow definition over the fifteen step kinds and the specced backend nodes |
+| **path** | "the members on my account", "companies with a member who attended" | a traversal | the contract's path operation (ONT-004), compiled to joins or a graph query by the adapter |
+
+The vocabulary is a node library in the P107 sense: each relation kind is specced once, and the projection, the
+questions and the mutants are its spec. **The relation kinds are the product.** Schema generation itself is table
+stakes for an agent in 2026; the questions are what nobody asks.
+
+## 4. The design, in brief
+
+1. **The corpus decides the vocabulary** (ONT-000). Every relation sentence in Acme, the four templates with
+   collections and the lessons backend, classified; a kind enters the list with a count and an evidence row. The two
+   Acme notes and the incident are read as *questions that were not asked*, and each is attributed to a kind.
+2. **The vocabulary is a package** (ONT-001). Nouns, relation kinds, answers and adverbs as a property graph in the
+   project's files, with a schema, a validator and a writer in the format package; each kind declared as `questions`,
+   `projection`, `mutants`. Nothing in it names an engine.
+3. **The conversation is a runner** (ONT-002). The agent reads the brief and writes sentences into the graph. The runner
+   projects, generates the kind's mutants, and reports the ones that survive; each survivor names the question that
+   kills it. The agent asks that question and no other. Question fatigue is a budget: a kind's questions are ranked by
+   the incidents in the corpus that each would have prevented.
+4. **The projection is a function** (ONT-003). Ontology in, a schema against the contract out, deterministic. Every
+   answer becomes a claim (NSP-008's discipline), and the claims are graded on at least two adapters through the
+   existing conformance suite, extended with the claims.
+5. **Paths join the contract** (ONT-004, R3). One traversal operation, a capability cell per backend, the relational
+   adapters first. The person's path sentences compile to it. Acme's four-hop permission rule is the first fixture.
+6. **The mistakes are mutants** (ONT-005). "Category as free text" is a mutant of "is a kind of, fixed list". The list of
+   classic mistakes is written from the corpus and from Richard's Bubble years; each must be killed by the claims or it
+   names a missing question.
+7. **Workflows are sentences** (ONT-006). A verb over the graph, with its failure arms, bound to step kinds and the
+   specced nodes. Acme's enrolment note is the first fixture: the skipped enrolment is a named arm, counted, never
+   hidden, which is P107's known-row rule for a person.
+8. **The diff is the migration** (ONT-007). A changed answer, the reach it has (collections, workflows, screens), the
+   migration in the person's words, and the data surviving it on a fixture with records.
+9. **Your own data manager** (ONT-008). P112's method against the ontology: a brief, a suite, strangers; the official
+   backend manager is the view at full depth over the same files.
+10. **Acme from the sentences** (ONT-009). The thesis test, with synthetic people.
+11. **The claim and its gate** (ONT-010). §10.
+
+## 5. Why this is not Directus with a chatbot
+
+Directus, Supabase, PocketBase and n8n each expose *their* model and ask the person to learn it; a chatbot in front
+changes the voice, not the model. Here the model is the person's, written once, and every engine and every view is
+graded against it. Three things make the difference measurable rather than rhetorical:
+
+- **A question is asked only when a mutant survives.** The system has a reason for every question, and the reason is
+  on the record. Directus asks nothing and lets the mistake happen; a chatbot asks whatever it thinks of.
+- **The depth is a reach, not a translation.** The ops view and the dev view read the same files at different reach
+  (NSP-005's word). Nothing is explained down to the person; the view simply stops where their sentences stop.
+- **The engine is a target.** Memory's rule for P107 holds here: *ask what shapes the target translates before asking
+  how to drive it.* SQLite, Postgres and a graph engine each carry a declared reach of the ontology, and the unseen
+  part is the number.
+
+## 6. Depends on
+
+| On | Why | State at scoping |
+|---|---|---|
+| P34 `@noodl/backend-contract` | the projection's target; the conformance suite the claims extend | ✅ built; `relatedTo` one hop |
+| P104 the backend manager | the dev's view; the schema API the projection writes through; the eleven tiles | ✅ built (BMG-013 Richard's drive closes it) |
+| P107 NSP-014 | the specced backend nodes workflows bind to | ✅ 24 of 24 on the runtime |
+| P107 NSP-022 | the cloud-only nodes, for workflows that run on the server | 📋 not started; ONT-006 binds to step kinds until then |
+| P112 OWN-001 | the format package the ontology files join | 🟡 `@nodegx/project-contract` exists; the v2 format is still inside the editor |
+| P112 OWN-007 / OWN-008 | the brief and the stranger method ONT-008 reuses | 📋 not started |
+| P111 SEE-012 | the security report; permissions projected from the ontology are its input | 📋 not started |
+| P111 SEE-001 | the honesty number; nouns and relations outside the vocabulary are its backend half | 📋 not started |
+
+**ONT-000 needs none of these.** ONT-001 needs only a folder in the project and the MCP's docs tools' write rules.
+
+## 7. Tasks
+
+| id | task | side | needs |
+|---|---|---|---|
+| [ONT-000](ONT-000-THE-CORPUS-MEASURED.md) 🟡 | **The corpus, measured.** Every relation in Acme, four templates, the lessons backend and the two prototypes classified; 14 kinds with a count and evidence per kind (`KINDS.md`, `npm run ontology-census:check`); the two Acme notes and the incident attributed to kinds. **Left: step 5, Richard's list (oral).** | research | — |
+| [ONT-001](ONT-001-THE-VOCABULARY-AS-A-PACKAGE.md) | **The vocabulary as a package.** The property graph in the project files; the kinds with `questions`, `projection`, `mutants`; a schema, a validator, a writer. | format | ONT-000, R1, R2 |
+| [ONT-002](ONT-002-THE-CONVERSATION-IS-A-RUNNER.md) | **The conversation is a runner.** The brief; the runner that reports surviving mutants as the next question; the question budget ranked by prevented incidents. | spec + MCP | ONT-001, ONT-005, R5 |
+| [ONT-003](ONT-003-THE-PROJECTION-IS-A-FUNCTION.md) | **The projection is a function.** Ontology → schema against the contract, deterministic; answers as claims; graded on two adapters through the conformance suite. | contract + backend | ONT-001 |
+| [ONT-004](ONT-004-PATHS-JOIN-THE-CONTRACT.md) | **Paths join the contract.** One traversal operation, a capability cell per backend, relational adapters first; Acme's four-hop rule as the fixture. | contract + adapters | R3 |
+| [ONT-005](ONT-005-THE-MISTAKES-ARE-MUTANTS.md) | **The mistakes are mutants.** The classic mistakes as mutants of projections; each killed by a claim or naming a missing question. | spec | ONT-003 |
+| [ONT-006](ONT-006-WORKFLOWS-ARE-SENTENCES.md) | **Workflows are sentences.** A verb over the graph with failure arms, bound to step kinds and specced nodes; Acme's enrolment note as the fixture. | backend + spec | ONT-001, NSP-014 |
+| [ONT-007](ONT-007-THE-DIFF-IS-THE-MIGRATION.md) | **The diff is the migration.** A changed answer → reach → migration in the person's words → data survives, on a fixture with records. | contract + backend | ONT-003 |
+| [ONT-008](ONT-008-YOUR-OWN-DATA-MANAGER.md) | **Your own data manager.** P112's method against the ontology; strangers build the ops persona's view; the backend manager shows the same files at full depth. | proof | ONT-001, ONT-003, OWN-007 |
+| [ONT-009](ONT-009-ACME-FROM-THE-SENTENCES.md) | **Acme from the sentences.** The thesis test: the ops persona's world described in sentences, with synthetic people; the two notes' answers must surface as questions before any collection exists. | proof | ONT-002…008, R6 |
+| [ONT-010](ONT-010-THE-CLAIM-AND-ITS-GATE.md) | **The claim and its gate.** Each word of "framework independent, open source, full stack" bound to a check, and the sentence said on nodegx.io only when every check passes. | docs + site | ONT-003, ONT-008, R7 |
+
+**Order:** ONT-000 → R1, R2 → ONT-001 → ONT-003 and ONT-004 in parallel → ONT-005 → ONT-002 → ONT-006 and ONT-007
+→ ONT-008 → ONT-009 → ONT-010.
+
+## 8. Acceptance criteria for the phase
+
+1. The relation-kind list is derived, not invented: every kind has a count and an evidence row from the corpus, and a
+   kind proposed without one is refused by the census script (ONT-000).
+2. The ontology lives in the project's files, validated and written by the format package, and nothing in it names an
+   engine (ONT-001).
+3. The projection is deterministic, and every answer in a fixture ontology is a claim that passes on at least two
+   adapters through the conformance suite, including one path claim at depth four (ONT-003, ONT-004).
+4. Every mutant on ONT-005's list is killed by a claim, or the surviving mutant names a question that then appears in
+   its kind's `questions`; the list of survivors is the honesty number of the vocabulary.
+5. A changed answer on a fixture with records produces a migration plan that names its reach, and the records survive
+   the migration on both adapters (ONT-007).
+6. A stranger builds the ops persona's data manager from the brief alone and passes the suite; the official backend
+   manager opens the same project and shows the projected schema (ONT-008).
+7. On the Acme world described in sentences, the record shows the *ends* question and the *exists elsewhere*
+   question asked before any collection exists, and the answers match the two notes (ONT-009).
+8. The claim's gate exists and is red until the checks pass; nodegx.io carries the sentence only when it is green
+   (ONT-010).
+
+## 9. Rulings to ask (plain words)
+
+| # | Question | Recommendation |
+|---|---|---|
+| R1 | **Where does the person's description of their world live?** Two choices. In the project's files, next to the components and `docs/`, so the agent writes it, the editor and any home-made view read it, and it travels with the project. Or in the running backend, next to the schema it produced, so there is one source for the data model. | **In the project's files.** DIRECTION.md D5 says the app lives in the project format; a backend is a target, and a person may move backends. The backend keeps the projected schema as it does today; the files keep the sentences. |
+| R2 | **Should the description formally be a graph (things, typed links between them, details on the links), or tables with links between them?** The person's sentences map one to one onto the graph ("a member is on an account since March" is two things, one link, one detail on the link). Tables would make the person meet the junction table. | **A graph, in the ISO GQL property-graph sense.** It removes one whole class of mistake (the missing junction table) by construction, and it is what the canvas already draws. |
+| R3 | **Should the backend contract learn to follow a path ("the members on my account's companies"), which every adapter must then answer or declare unsupported?** Today the contract follows one link. Acme's permission rule is four links deep. | **Yes, one operation, with a capability cell per backend, the relational adapters first** (recursive queries). Mongo's graph lookup and a graph engine come later. The capability table already exists for exactly this: a cell is `supported` only when something proved it. |
+| R4 | **Should a graph database become a seventh backend type now?** It answers paths natively and holds links with details well; it is worse at lists, counts and CSV exports, which is most of an ops team's day, and the hosting story is weaker. | **Not now.** Measure the depth and volume of real paths (Acme first) with R3's operation on Postgres. Add the adapter when a measured project needs it. |
+| R5 | **Does the conversation run through MCP tools, or through a brief the agent reads and files it writes, with one tool that grades them?** The MCP tool list has a strict token budget (memory: the 8,200-token gate; five budgets). Every tool added here is taken from the authoring tools. | **A brief plus files plus one `validate` tool** that returns the surviving mutants and their questions. The agent does the talking; the runner does the grading. |
+| R6 | **May Acme be the thesis test?** Its schema shape and the two notes are the best corpus on this machine. Its repository holds real people's names and its own internal notes. | **Yes, with synthetic people and the schema's shape only.** No row, name, path or note of theirs is copied into this repo; the persona is "a two-person operations team with a membership business", and Richard plays it. |
+| R7 | **Is "framework independent, open source, full stack" a fifth reason in DIRECTION.md, or the sum of the four?** DIRECTION.md says a reason may be advertised only once the thing that makes it true exists and can be checked by anyone. | **The sum, and only once ONT-010's gate is green.** It is not a new reason; it is what restraint, testing, security and do-it-yourself add up to once the data layer is also a graded target. §10 lists what is true today and what is not. |
+
+## 10. The claim, taken apart
+
+Richard's sentence: *one of the only fully framework independent open source full stack app systems in existence.*
+Each word is bound to a check in ONT-010. What is true at scoping, read from the repo:
+
+| word | what would make it true | state on 2026-10-08 |
+|---|---|---|
+| **full stack** | the screens, the logic, the data model, the workflows and the permissions are all expressed in one project format, each as a graded target of a spec | screens and logic: yes (v2 format, P107 specs). Workflows: the engine exists, the sentence does not. **Data model: no** (reading 5). Permissions: in the backend, projected from nothing |
+| **framework independent** | the project depends on no UI framework, no engine and no vendor; each implementation is one client of the spec | the *definition* is independent: a graph of specced nodes in plain files. The *implementations* are not: the runtime is JavaScript, the only export target is React, the editor is Electron, the backend is Node. P107's thesis test (a stranger builds a target from the spec alone) is the evidence that others could exist; one has: the stranger's targets. The honest word today is **implementation independent at the definition layer** |
+| **open source** | the licence, and nothing load-bearing behind a vendor | yes, with one caveat ONT-010 must name: the agent that does the talking is a vendor's model. The specs, the runner and the files do not need it; the conversation does |
+| **one of the only** | prior art read and named | Directus, Supabase, PocketBase and Hasura are backends with their own model, not specs. Bubble and Anvil are closed. Wasp and Redwood are bound to their framework. LinkML, OWL and the ontology tradition describe worlds and build nothing. **Nothing read at scoping combines a person-readable spec of the world, graded engines beneath it, and a kit for your own view.** ONT-010 writes the comparison with sources, and it is a claim about what was read, not about the world |
+
+So the sentence may be said when ONT-003, ONT-004 and ONT-008 are green, in the form ONT-010 settles, and not before.
+Until then the repo's own rule applies (memory: *a claim written into a doc can grade the code it describes*): the
+sentence is in this README as the thing the phase is for, not as a fact.
+
+## 11. Not this phase
+
+- **A graph database adapter.** R4. The contract's path operation is this phase; an engine that answers it natively is
+  a later adapter with its own capability column.
+- **Specs for the cloud-only nodes.** NSP-022 owns them; ONT-006 binds to step kinds and the 24 specced nodes.
+- **The security report.** SEE-012 owns it; this phase gives it an input (permissions projected from answers).
+- **Replacing the backend manager.** It is the dev's view at full depth. ONT-008 adds views beside it.
+- **Migrating Acme for real.** ONT-009 is a thesis test on the schema's shape with synthetic people. Anything beyond
+  that is a separate piece of work.
+- **The text form of the project** (P111 SEE-002). The ontology is JSON in the files until R1 of P111 rules on text.
+
+## 12. Risks and what to watch
+
+- **Vocabulary bloat.** Too many kinds and it is Directus with a chatbot. The census script refuses a kind without
+  evidence (AC1), and ONT-000 reports the count per kind so the long tail is visible.
+- **The agent invents kinds.** A relation outside the vocabulary is the backend half of the honesty number (SEE-001):
+  counted, named, never hidden. The validator refuses to project it.
+- **Question fatigue.** A person asked twelve things about one link stops answering. ONT-002's budget ranks questions by
+  the incidents in the corpus each would have prevented; a question with no incident behind it waits until a mutant
+  survives.
+- **The person's word and the stored name drift.** A noun renamed in the sentences must not silently rename a
+  collection with records in it. Memory: *a rename of a built-in port ships no migration.* A rename is a diff (ONT-007).
+- **Self-healing mistakes.** A projection that happens to work for the fixture data hides the mutant (memory: *a
+  self-healing defect is invisible to every arm that completes*). ONT-005's fixtures carry the data shape that breaks
+  each mutant, not only the schema.
+- **Measuring on a fixture.** The question budget and the depth numbers measured on Acme are numbers about Acme
+  (memory: *a budget measured on a fixture is a budget on the fixture*). ONT-000 says so beside every number.
+- **Correct is not usable.** ONT-009 is the ops persona describing their world and using the result, not Richard
+  watching a demo. The phase closes on their sentences.
+- **Personal data and internal workings.** Acme's repository names real people and describes its own operations.
+  Nothing of it is copied into this repo (R6): the fixture is the schema's shape with synthetic names, and ONT-000's
+  evidence rows for Acme are kept outside this repo and cited by kind and count only.
+
+## 13. What ONT-000 measured (s1, 2026-10-08)
+
+Read [KINDS.md](KINDS.md); the task file's §6 has the table. The corrections to §1:
+
+- **Reading 6:** the business has 24 collections, not fourteen (ten are sync and import machinery); its deepest real
+  path is **five** hops (the company a session's attendee works for), and the account-holder rule is four hops, used
+  eight times. ONT-004's fixture is depth 5.
+- **Reading 8:** the corpus is eight sources, not five — Richard added the tirion and sentinel prototypes (private,
+  like Acme). The in-repo corpus is 108 rows; the private corpus 195.
+- **New, for R1:** planning reads collections it does not declare (the todo list's). A project's model can span
+  projects.
+- **New, for ONT-001 and ONT-005:** not one Link, Links or Choice tile is used by any template or by the lessons
+  backend's declared schema; every relation NodeGX has produced so far is a string id or an email. The vocabulary's
+  first mutant is the whole in-repo corpus.
+- **The kind list is 14**, five of them on one source and one on one row (the task file says which).
+
