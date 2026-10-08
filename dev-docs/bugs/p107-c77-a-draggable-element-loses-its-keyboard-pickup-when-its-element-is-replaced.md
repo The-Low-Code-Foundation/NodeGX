@@ -2,7 +2,7 @@
 id: P107-C77
 title: A Draggable element can no longer be picked up from the keyboard once its element is replaced — after Mounted goes off and on, after its Tag changes, or when it mounts more than about a second after Draggable was set
 status: fixed
-commit: (this commit)
+commit: 167c40e9c
 phase: P109
 task: ISL-031
 severity: medium
@@ -49,4 +49,4 @@ rather than declared: which element is on the page (`onPage`, `elem`, `shownTag`
 sync (`synced`), and the keyboard is the element that holds it (`focusedElem`, replacing the `elementFocused` flag), so
 a paint writes nothing about the keyboard. 118 scenarios read what is left (a focused element given a new Tag and its old
 one back in one frame; Draggable off and on around an act; a card picked up during the node's own drag; …). Interpreter
-mutants: 0 survivors on all five at seeds 13 and 20732. Runtime: see ISL-031 §12.
+mutants: 0 survivors on all five at seeds 13 and 20732. Runtime: all five conform at 13 and 20732; control (drag-drop.ts and react-component-node.ts before) red on 21 / 117 / 117 / 30 / 16 of the C77 scenarios (ISL-031 §12).

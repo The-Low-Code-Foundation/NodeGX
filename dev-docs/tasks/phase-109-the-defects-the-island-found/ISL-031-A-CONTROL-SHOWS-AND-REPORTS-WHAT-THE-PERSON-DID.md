@@ -1,6 +1,6 @@
 # ISL-031 — A control shows and reports what the person did
 
-**Status: 🟡 s30 (2026-10-08): 22 of 23 fixed — C79 (`7496d93f0`) and C78 (`23d91e383`) landed, each graded on the runtime at seeds 13 and 20732 with a control (§11); C77 built and parked on branch `p109-c77-wip` (its spec change strands ~630 mutants; P107 ruled: remove the dead model, §11). s28 (2026-10-07): 20 of 23 fixed — D30 landed as `32e1856b0` (built s27 on `p109-d30`; rebased over P107's Group v2 and re-graded, then fast-forwarded). s27: 19 of 23 fixed — the Slider's four in two commits (§10: C73 + D36 `21b27462d`, C74 + C75 `c92fa2afa`, Slider spec v3) and the shared C64 (`d8a9f0069`, six control specs); D30 built and graded on worktree branch `p109-d30`; left: the Text's drag rows C77, C78, C79. s26 (2026-10-06/07): 14 of 23 fixed, each with a control (§9) — the Text Input's eight, the label work on four controls (C80, C66), the Checkbox's C67, the Dropdown's C71 + D34, the radio pair's C76 + D37. ✅ AC2: all 15 rulings taken 2026-10-05 (1 against the recommendation). Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 23 bugs from
+**Status: ✅ s31 (2026-10-08): 23 of 23 fixed — C77 landed (`167c40e9c`), the spec remodelled as P107 ruled, graded on the runtime at seeds 13 and 20732 with a control (§12). s30 (2026-10-08): 22 of 23 fixed — C79 (`7496d93f0`) and C78 (`23d91e383`) landed, each graded on the runtime at seeds 13 and 20732 with a control (§11); C77 built and parked on branch `p109-c77-wip` (its spec change strands ~630 mutants; P107 ruled: remove the dead model, §11). s28 (2026-10-07): 20 of 23 fixed — D30 landed as `32e1856b0` (built s27 on `p109-d30`; rebased over P107's Group v2 and re-graded, then fast-forwarded). s27: 19 of 23 fixed — the Slider's four in two commits (§10: C73 + D36 `21b27462d`, C74 + C75 `c92fa2afa`, Slider spec v3) and the shared C64 (`d8a9f0069`, six control specs); D30 built and graded on worktree branch `p109-d30`; left: the Text's drag rows C77, C78, C79. s26 (2026-10-06/07): 14 of 23 fixed, each with a control (§9) — the Text Input's eight, the label work on four controls (C80, C66), the Checkbox's C67, the Dropdown's C71 + D34, the radio pair's C76 + D37. ✅ AC2: all 15 rulings taken 2026-10-05 (1 against the recommendation). Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 23 bugs from
 the ledger (`dev-docs/bugs/`) that had no task: 1 high · 14 medium · 8 low, **15 awaiting a ruling**. **Side:** noodl-viewer-react (Text Input, Checkbox, Dropdown, Slider, Radio Button (Group), drag and drop, the shared control states)
 
 ## 1. The person sentence
@@ -31,7 +31,7 @@ to ask. This table is generated from the ledger headers. **The ledger file is th
 | [P107-C71](../../bugs/p107-c71-a-dropdowns-value-written-back-after-a-pick-leaves-the-pick-on-the-screen.md) | medium | fixed `5d40a7aa3` | A Dropdown's Value written back to the value React last rendered, after a person's pick, changes the output but not the selection shown — picking the shown option again then raises nothing |
 | [P107-C73](../../bugs/p107-c73-a-sliders-value-written-back-after-a-slide-leaves-the-handle-where-the-person-put-it.md) | medium | fixed `21b27462d` | A Slider's Value written from the graph after a person's slide does nothing when it equals the last Value the author wrote — the handle stays where the person put it |
 | [P107-C76](../../bugs/p107-c76-a-radio-groups-value-written-back-in-the-pick-frame-leaves-the-pick-selected.md) | medium | fixed `8dbeb8f33` | A Radio Button Group's Value written back in the same frame as a person's pick leaves the picked button selected under a Value that names another — picking it again raises nothing, and picking the named one raises no Changed |
-| [P107-C77](../../bugs/p107-c77-a-draggable-element-loses-its-keyboard-pickup-when-its-element-is-replaced.md) | medium | open | A Draggable element can no longer be picked up from the keyboard once its element is replaced — after Mounted goes off and on, after its Tag changes, or when it mounts more than about a second after Draggable was set |
+| [P107-C77](../../bugs/p107-c77-a-draggable-element-loses-its-keyboard-pickup-when-its-element-is-replaced.md) | medium | fixed `167c40e9c` | A Draggable element can no longer be picked up from the keyboard once its element is replaced — after Mounted goes off and on, after its Tag changes, or when it mounts more than about a second after Draggable was set |
 | [P107-C79](../../bugs/p107-c79-an-invisible-element-catches-clicks-after-a-pointer-events-write.md) | medium | fixed `7496d93f0` | A Text at Opacity 0 catches clicks once Pointer Events Enabled or Pointer Events Mode is written after it was drawn — the style write goes straight to the DOM and the component's "opacity 0 takes no pointer" rule is never re-applied |
 | [P107-C80](../../bugs/p107-c80-enable-label-takes-the-keyboard-away-from-a-text-input.md) | medium | fixed `94b83d7ea` | Turning Enable Label on or off while someone is typing in a Text Input takes the keyboard away from them, silently — React builds a new field under the label, and Focused still says true |
 | [P107-D30](../../bugs/p107-d30-focused-stays-true-after-a-control-leaves-the-page.md) | medium | fixed `32e1856b0` | Focused (and Hover, Pressed) stay as they were after a control leaves the page with Mounted off — the element that comes back holds no keyboard while Focused still reads true |
@@ -209,5 +209,46 @@ a field another output still reads, and name that output.**
   so a swapped example is not the same card).
 - **A swap-branch mutant returns the sibling's whole recorded patch**, values and all (`runner/mutants.ts` `mutatePatch`). Two
   branches that write the same values in a state where they already hold are equivalent; a scenario cannot kill that.
+
+**The export:** not checked (P18's).
+
+## 12. Session 31 (2026-10-08) — C77 landed; twenty-three of twenty-three
+
+**C77** (`167c40e9c`): the runtime half as s30 built it (`elementChanged` from `setDOMElement`; `whenMounted` gone). The spec
+half, as P107 ruled: the state the fix made unobservable is removed, not declared as a class.
+
+- **What was unobservable.** With every element of a Draggable taking the keyboard, nothing outside tells whether an act's
+  paint or the frame end made a new element. The specs still split every act's branch on it, because the paint wrote
+  `elem`, `shownTag`, `onPage` and `elementFocused: false` only when it made or dropped an element (Text 216 survivors at 13).
+- **What changed, on all five (Text v9, Shape v5, Image v5, Group v7, Video v5).** Which element is on the page (`onPage`,
+  `elem`, `shownTag`, the Group's `stampOn`) is the paint's sync, `synced` (spec.ts, P107's NSP-016 s37 mechanism: left out
+  of a branch's shape, kept through a swap). The keyboard is the element that holds it, `focusedElem` (replacing the
+  `elementFocused` flag; `holdsKeyboard` reads `onPage && focusedElem === elem`): a new element simply is not that one, so a
+  paint writes nothing about the keyboard. Survivors fell 216 → 39 on the Text from these two alone.
+- **Declared.** The rows' shapes follow (no synced keys; `focusedElem`). The three rows naming `chain` / `attrsOn` were
+  dropped (they matched nothing since C77 removed the chain). One new row, alone: a file leave or let go with no drag whose
+  paint mounts the element (the unmount left the count 0 and Is Dragging Over false; the twin writes them as they stand).
+- **Killed.** 118 scenarios (Text 40, Shape 16, Image 16, Video 18, Group 28), found by generating ~1,000 candidates per
+  node and keeping only those that killed a mutant nothing else did. Their reader is a key act while the node is hidden (a
+  visible node takes the keyboard back at every key act, which is why the generated sequences never told these apart): a
+  focused element given a new Tag and its old one back in one frame; Draggable off and on around an act; a card grabbed during
+  the node's own keyboard lift; a press or a click that mounts the element during a keyboard carry; a second element clicked
+  while it holds the keyboard (the twin's example names element 1). Each name's outcome is asserted against its trace. Nine
+  Video ones need a pointer and are marked C100, as the Video's others are.
+- **Grades.** Interpreter mutants, seeds 13 and 20732: 0 survivors on all five (Text 1,886 / 1,893, Shape 1,906 / 1,916,
+  Image 1,935 / 1,945, Video 2,781 / 2,789, Group 3,662 / 3,668 and 3,661 / 3,668; the rest declared). Runtime at 13 and
+  20732: Text 1,252, Shape 1,248, Image 1,263, Group 1,434 scenarios conform, the Video with its known rows; 200 / 200
+  generated, 0 divergences. Control (drag-drop.ts and react-component-node.ts before): red on 21 / 117 / 117 / 30 / 16 of the
+  C77 scenarios. Spec gates 502 / 520 (18 skipped), spec tsc 0; viewer 1,815 / 1,815, viewer tsc 0. Rebased once over P107's
+  Repeater v2 (`page-model.helper.ts`), gates re-run green.
+
+**What s31 taught:**
+
+- **A flag that a paint resets splits every act.** A boolean the paint clears when it makes an element (`elementFocused:
+  false`) doubles every branch by whether a paint made one. Naming WHICH element holds it removes the write without removing
+  what it tells: a new element is never the one named.
+- **A reader that is also a writer hides a hole.** The key act puts the keyboard on a visible Draggable node before it reads
+  it, so every focus mutant survived the generated sequences; the reader that sees them is a key on a hidden node.
+- **A candidate that reaches a new branch and does not kill it adds survivors.** Keep only the killers; re-run with only them.
 
 **The export:** not checked (P18's).
