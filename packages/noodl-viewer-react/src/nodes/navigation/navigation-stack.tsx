@@ -796,6 +796,9 @@ const PageStack = {
         // P107-C122 — encoded, as the Page Router writes its query: a value with &, #, + or a space came back different, and one
         // with % emptied the stack at the next reset
         const query = url.query.map((q) => encodeURIComponent(q.name) + '=' + encodeURIComponent(String(q.value)));
+        // P107-C121 — in hash mode with no query, while the address holds one, the address's path goes in front: `#/path` alone
+        // resolves against the current address and kept its `?query`, which a reload or Back then handed to the page
+        if (urlPath === undefined && query.length === 0 && location.search !== '') urlPath = location.pathname;
         const compiledUrl =
           (urlPath !== undefined ? urlPath : '') +
           (query.length >= 1 ? '?' + query.join('&') : '') +

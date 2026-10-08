@@ -5960,7 +5960,7 @@
     }
   },
   {
-    "name": "ROUTES: a push of Detail with id 1, then of Settings — ?id=1#/detail, then #/settings, which keeps ?id=1 in the address (row C121)",
+    "name": "row C121 — ROUTES: a push of Detail with id 1, then of Settings — ?id=1#/detail, then /#/settings, which clears ?id=1: after a Reset Settings has no id, so the same push is Unchanged",
     "because": "_updateUrlWithTopPage :749-763: hash mode writes ?query#/path, and with no query only #/path",
     "params": {
       "pages": [

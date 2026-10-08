@@ -56,8 +56,8 @@
  * Routes on), else its label lowercased with each run of spaces a `-` — found by the page's id (`getRelativeURL` :580-622; row
  * C123, fixed in P109 ISL-048: a page pushed or started by its LABEL had none, and the URL became `#`). `{name}` parts take the page's
  * parameters (`encodeURIComponent`); every other parameter goes in the query encoded (row C122, fixed in P109 ISL-048: it went
- * unencoded). Hash mode (the project's `navigationPathType` unset or `hash`) writes `?query#/path` — and with no parameters only `#/path`, which keeps the query already
- * in the address (row C121); path mode writes `/path?query`. A push and a replace push their URL (`history.pushState`) after naming
+ * unencoded). Hash mode (the project's `navigationPathType` unset or `hash`) writes `?query#/path` — and with no parameters `#/path`, with the address's path in front
+ * while the address holds a query, so it goes (row C121, fixed in P109 ISL-048: `#/path` alone kept it); path mode writes `/path?query`. A push and a replace push their URL (`history.pushState`) after naming
  * the page and before the transition; a back pushes the page below's at its transition's end — a new entry, not a step back (row
  * C120). A reset never pushes. A RESET with Use Routes on reads the URL (`matchPageFromUrl` :683-742): the hash's path (or the path)
  * against each page's pattern in Components order, the first whose parts all match from the start wins (a longer URL matches too);
@@ -197,7 +197,8 @@ export const ComponentStack = defineNode({
   // v10 (P109 ISL-048, s31): a page's parameters go into the URL's query encoded (row C122)
   // v11 (P109 ISL-048, s31): a page's Path that is not text is unset — the label's path (row C125)
   // v12 (P109 ISL-048, s31): a page pushed or started by its label has its URL (row C123)
-  version: 12,
+  // v13 (P109 ISL-048, s31): in hash mode a page with no parameters clears the query in the address (row C121)
+  version: 13,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx',
   needs: ['person', 'clock', 'location', 'project'],
   worldPool: {
@@ -704,7 +705,11 @@ function pushUrl(w: Work): void | typeof THROWS {
     const query = (rel === undefined ? [] : rel.query).map((q) => encodeURIComponent(q.name) + '=' + encodeURIComponent(String(q.value)));
     const type = w.view.projectSettings().navigationPathType;
     const hash = type === undefined || type === 'hash';
-    return (hash ? '' : path) + (query.length >= 1 ? '?' + query.join('&') : '') + (hash ? '#' + path : '');
+    // hash mode with no query, while the address holds one: the address's path in front, so that query goes (row C121, fixed in
+    // P109 ISL-048)
+    const here = new URL(w.href as string);
+    const front = hash ? (query.length === 0 && here.search !== '' ? here.pathname : '') : path;
+    return front + (query.length >= 1 ? '?' + query.join('&') : '') + (hash ? '#' + path : '');
   });
   if (url === THROWS) return THROWS;
   w.answers.push({ op: 'history', url });
