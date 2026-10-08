@@ -261,7 +261,17 @@ export class Drag extends React.Component<DragProps, State> {
           props.onDrag && props.onDrag();
         }}
       >
-        {React.cloneElement(child, { parentLayout: props.parentLayout })}
+        {React.cloneElement(child, {
+          parentLayout: props.parentLayout,
+          /**
+           * P107-C104 — the Drag has no element of its own, so its CSS Class and CSS Style go on the element it moves (Richard,
+           * 2026-10-08: "Apply to what it moves"). react-draggable adds `react-draggable` to this class and its transform to this
+           * style; the child's wrapper adds both to the node's own (DEF-027 for the class; on a style property both set, the Drag's
+           * wins, as a React parent's always does). Unset, nothing is passed and the child is exactly as before.
+           */
+          ...(props.className ? { className: props.className } : {}),
+          ...(props.style && Object.keys(props.style).length > 0 ? { style: props.style } : {})
+        })}
       </Draggable>
     );
   }

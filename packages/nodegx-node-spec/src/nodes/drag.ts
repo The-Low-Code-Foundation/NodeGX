@@ -53,8 +53,8 @@
  * the mount's own write landed, from the constructor's 0, so the element jumped to 0 first).
  *
  * **Child Index** 0, **Children Count** 1 (its child, scheduled for the frame's end by `addChild`), **This**, the **Bounding Box**
- * never measured here, **Scroll Into View** nothing on the wire. CSS Class, CSS Style and Variant are stored and reach no element
- * (row C104; ledger only).
+ * never measured here, **Scroll Into View** nothing on the wire. CSS Class and CSS Style go on the element the Drag moves (row C104,
+ * fixed in P109 ISL-048: they reached no element) — the look (R10), graded in the viewer's tests; Variant is stored.
  */
 
 import { defineNode, type Patch } from '../spec';
@@ -223,7 +223,7 @@ export const Drag = defineNode({
     scrollIntoView: { type: 'signal', displayName: 'Scroll Into View', group: 'Scroll Into View', description: 'Scrolls the page, or the scrolling Group holding this element, until the element can be seen', portability: 'logic' },
     scrollIntoViewAlign: { type: 'enum', enums: ['nearest', 'start', 'center', 'end'], default: 'nearest', coerce: 'none', displayName: 'Scroll Align', group: 'Scroll Into View', description: 'Where Scroll Into View leaves the element: Nearest edge moves only as far as needed', portability: 'logic' },
 
-    // ---- look (R10): stored, reach no element (row C104) ----
+    // ---- look (R10): CSS Class and CSS Style go on the element moved (row C104, fixed in P109 ISL-048) ----
     cssClassName: { type: 'string', default: '', ...LOOK('CSS Class', 'Advanced HTML', 'Extra CSS class names to put on this element, for styling from a stylesheet you supply'), portability: 'web-only' },
     styleCss: { type: 'string', default: '/* background-color: red; */', editOnly: true, ...LOOK('CSS Style', 'Advanced HTML', 'Raw CSS declarations applied to this element, overriding the styling ports above'), portability: 'web-only' },
     variant: { type: 'string', ...LOOK('Variant', 'General', 'Name of a saved variant of this node type to apply, replacing the styling set here'), portability: 'look-shared' }
