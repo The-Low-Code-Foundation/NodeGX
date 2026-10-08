@@ -1,7 +1,9 @@
 ---
 id: P107-C105
 title: A Snap To Position that waited for the Drag to mount starts from 0 — the element jumps to the edge, then animates
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: low
 area: runtime / Drag (noodl-viewer-react/src/components/visual/Drag/Drag.tsx `snapToPosition` reads `this.state[axis]`; react-component-node.ts `_flushPendingInnerActions` runs the waiting action at the inner component's ref, after `componentDidMount` queued its `setState` and before it lands — the `constructor`'s `{ x: 0, y: 0 }`)
 found: P107 NSP-016 s55, 2026-10-07

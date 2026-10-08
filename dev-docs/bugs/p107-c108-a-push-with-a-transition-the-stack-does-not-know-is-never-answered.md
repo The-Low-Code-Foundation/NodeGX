@@ -1,7 +1,9 @@
 ---
 id: P107-C108
 title: A push with a transition the stack does not know (a wired Transition such as "Fade") is never answered, and the page it built is dropped
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: low
 area: runtime / Component Stack (noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx `navigateAsync` :1001 — `new Transitions[args.transition.type || 'Push'](…)` throws for a type the registry (transitions.ts) has not)
 found: P107 NSP-016 s56, 2026-10-08

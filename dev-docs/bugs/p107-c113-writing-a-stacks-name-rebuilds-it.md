@@ -1,7 +1,9 @@
 ---
 id: P107-C113
 title: Writing a Component Stack's Name — even the name it already has — rebuilds it at its start page, losing every page pushed
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: low
 area: runtime / Component Stack (noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx Name setter :255-269 — deregisters and registers again; `registerPageStack` (navigation-handler.ts :62-104) resets a stack nothing waits for)
 found: P107 NSP-016 s56, 2026-10-08

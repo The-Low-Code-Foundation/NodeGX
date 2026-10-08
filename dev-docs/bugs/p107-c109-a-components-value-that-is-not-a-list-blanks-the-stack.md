@@ -1,7 +1,9 @@
 ---
 id: P107-C109
 title: A Components value that is not a list blanks the stack and its Reset is never answered; a page looked up by its label whose component was never set throws the same way
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: low
 area: runtime / Component Stack (noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx `resetAsync` :507-546 deletes every page before `_findPage` :386-410 calls `pages.find`; `_findPage` :398-406 reads `pageInfo[pageRef.id].component` for a page with no component)
 found: P107 NSP-016 s56, 2026-10-08

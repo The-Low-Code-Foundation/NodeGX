@@ -147,6 +147,7 @@ the work:
 | [ISL-045](ISL-045-A-NODE-DOES-WHAT-ITS-INPUTS-SAY.md) | A node does what its inputs say, and one node's failure stays its own — **5 bugs** (2 medium · 3 low; 3 to ask) | ledger | viewer, runtime, node-spec | 🔒 some rows |
 | [ISL-046](ISL-046-THE-TEMPLATES-AND-KITS-CARRY-NO-DEFECT-OF-THEIR-OWN.md) | The templates and the garden kits carry no defect of their own — **7 bugs** (2 high · 1 medium · 4 low) | ledger | templates, library | — |
 | [ISL-047](ISL-047-THE-REPOSITORY-INSTALLS-AND-THE-DEV-STACK-LEAVES-OTHERS-RUNNING.md) | The repository installs, and the dev stack leaves other people's work running — **2 bugs** (1 high · 1 medium) | ledger | repo tooling | — |
+| [ISL-048](ISL-048-A-DRAG-A-STACK-AND-A-ROUTER-ANSWER-EVERY-REQUEST.md) | A drag, a stack and a router answer every request — **18 bugs** (1 high · 7 medium · 10 low; handed over by P107 R16 after ISL-038 was scoped: the Drag C101–C106, the Component Stack C107–C114, the Page Router C115–C118; 2 to ask: C103, C104) — **⬜ s30: scoped** | ledger (P107 NSP-016 s55–s57) | noodl-viewer-react | 🔒 2 rows |
 
 🔒 = the task asks Richard something before it builds. "after AC1" = the ruling waits on a measurement.
 

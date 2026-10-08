@@ -1,7 +1,9 @@
 ---
 id: P107-C101
 title: On a touch screen nothing inside a Drag can be tapped — its buttons never click and its text fields never take the keyboard
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: high
 area: runtime / Drag (noodl-viewer-react/src/components/visual/Drag/Drag.tsx `render` — `<Draggable>` with no `allowMobileScroll` and no `cancel`; react-draggable 4.5.0 DraggableCore.js `handleDragStart`: `if (e.type === 'touchstart' && !this.props.allowMobileScroll) e.preventDefault()`)
 found: P107 NSP-016 s55, 2026-10-07

@@ -1,7 +1,9 @@
 ---
 id: P107-C114
 title: A Component Stack mounted again at a frame sends no Children Count in that frame — the page it builds is counted a frame late
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: low
 area: runtime / Component Stack and react-component-node.ts (`scheduleUpdateChildCountAndIndicies` :1670-1680): in a frame whose paint mounts the stack, the count update scheduled by that frame's `addChild` / `removeChild` runs a frame later
 found: P107 NSP-016 s56, 2026-10-08

@@ -1,7 +1,9 @@
 ---
 id: P107-C106
 title: A Start Drag X or Y of NaN blanks the page — the Drag's update compares NaN with itself and sets state until React gives up
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: medium
 area: runtime / Drag (noodl-viewer-react/src/components/visual/Drag/Drag.tsx `componentDidUpdate`: `if (prevProps.inputPositionX !== props.inputPositionX) this.setState(…)` — `NaN !== NaN` is true at every update)
 found: P107 NSP-016 s55, 2026-10-07

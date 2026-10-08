@@ -1,7 +1,9 @@
 ---
 id: P107-C111
 title: A Pop whose page below is no longer in the Components list throws: the pusher hears the results and the page below comes back, but the stack never pops
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: low
 area: runtime / Component Stack (noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx `back` :1056-1065 — `addChild(top.from)` and the pusher's back callback run before `_findPage(stack[length - 2].pageId).label` throws)
 found: P107 NSP-016 s56, 2026-10-08

@@ -1,7 +1,9 @@
 ---
 id: P107-C118
 title: A Navigate with no Router name, pressed while no Page Router is on the page, waits for good — a router registering as Main never takes it
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: low
 area: runtime / Page Router (noodl-viewer-react/src/nodes/navigation/router-handler.ts `navigate` :64 queues the name as handed; `registerRouter` :70, :82 compares it with `name || 'Main'`)
 found: P107 NSP-016 s57, 2026-10-08 (the asymmetry was read in NSP-015 s19 for the ROUTE seam, never filed)

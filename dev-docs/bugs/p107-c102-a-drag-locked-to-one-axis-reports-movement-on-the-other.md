@@ -1,7 +1,9 @@
 ---
 id: P107-C102
 title: A Drag locked to one Axis still reports movement on the other — Drag Y moves while the element stays put, then jumps back to 0 at the next drag
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: medium
 area: runtime / Drag (noodl-viewer-react/src/components/visual/Drag/Drag.tsx `setDragValues` and `onStop` — both write `data.x` and `data.y` whatever the Axis; react-draggable 4.5.0 documents that `axis` "only controls flushing to the DOM", the callbacks still carry both)
 found: P107 NSP-016 s55, 2026-10-07

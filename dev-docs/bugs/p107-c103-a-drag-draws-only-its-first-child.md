@@ -1,7 +1,9 @@
 ---
 id: P107-C103
 title: A Drag draws only its first child — every other child vanishes without a word, and the catalog's drag example teaches a readout that never appears
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: medium
 area: runtime / Drag (noodl-viewer-react/src/components/visual/Drag/Drag.tsx `render` — `React.Children.toArray(props.children)[0]`); catalog / docs/node-catalog/examples/vis-drag-snap-back.json
 found: P107 NSP-016 s55, 2026-10-07

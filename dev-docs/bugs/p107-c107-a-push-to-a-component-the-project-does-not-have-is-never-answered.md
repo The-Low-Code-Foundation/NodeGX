@@ -1,7 +1,9 @@
 ---
 id: P107-C107
 title: A push, replace or Reset to a page whose component the project does not have is never answered — the caller's Navigate hangs with no Done and no Failure
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: medium
 area: runtime / Component Stack (noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx `navigateAsync` :974, `replaceAsync` :860, `resetAsync` :550 — `await this.nodeScope.createNode(pageInfo.component)` rejects; nodecontext.ts `getComponentModel` :621-625)
 found: P107 NSP-016 s56, 2026-10-08

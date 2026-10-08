@@ -1,7 +1,9 @@
 ---
 id: P107-C112
 title: A reset that finds no components (or no start page) deletes every page but leaves Top Component Name and Stack Depth naming what was there
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: low
 area: runtime / Component Stack (noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx `resetAsync` :507-546 — the pages are deleted before the two checks, and neither failure calls `setPageOutputs`)
 found: P107 NSP-016 s56, 2026-10-08

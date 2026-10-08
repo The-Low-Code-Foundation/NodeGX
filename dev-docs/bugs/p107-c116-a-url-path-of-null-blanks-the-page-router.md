@@ -1,7 +1,9 @@
 ---
 id: P107-C116
 title: A Page Router whose Url path is null shows nothing and never answers a Reset; a Navigate to it shows the page but never pushes its URL or answers
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: low
 area: runtime / Page Router (noodl-viewer-react/src/nodes/navigation/router.tsx `_trimUrlPart` :42-46 — `url[0]` on null; called wherever `_internal.urlPath !== undefined`: `matchPageFromUrl` :827, `getRelativeURL` :691)
 found: P107 NSP-016 s57, 2026-10-08

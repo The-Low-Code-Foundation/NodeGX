@@ -1,7 +1,9 @@
 ---
 id: P107-C110
 title: A Reset during a back's animation empties the stack: the animation's end takes the new start page off it, and every push after is never answered
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: medium
 area: runtime / Component Stack (noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx `back` :1068-1078 — the transition's end calls `this._internal.stack.pop()`, popping whatever is last by then; `navigateAsync` :994-996 then reads `top.page` of an empty stack)
 found: P107 NSP-016 s56, 2026-10-08

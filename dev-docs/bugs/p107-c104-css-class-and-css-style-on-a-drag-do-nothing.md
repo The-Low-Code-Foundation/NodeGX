@@ -1,7 +1,9 @@
 ---
 id: P107-C104
 title: CSS Class and CSS Style on a Drag do nothing — the Drag has no element and passes neither to the child it moves
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: low
 area: runtime / Drag (noodl-viewer-react/src/components/visual/Drag/Drag.tsx `render` reads neither `props.className` nor `props.style`; react-component-node.ts `cssClassName` / `styleCss` are declared on every visual node)
 found: P107 NSP-016 s55, 2026-10-07

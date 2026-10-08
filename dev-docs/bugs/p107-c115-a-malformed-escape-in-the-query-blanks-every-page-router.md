@@ -1,7 +1,9 @@
 ---
 id: P107-C115
 title: A link whose query has a malformed escape (`?q=%zz`, `?off=50%`) blanks every Page Router — nothing is shown, and its Reset is never answered
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: medium
 area: runtime / Page Router (noodl-viewer-react/src/nodes/navigation/router.tsx `_getSearchParams` :753-768 — `decodeURIComponent` on each name and value; `matchPageFromUrl` :795 calls it before anything else)
 found: P107 NSP-016 s57, 2026-10-08

@@ -1,7 +1,9 @@
 ---
 id: P107-C117
 title: After a Navigate, Back or Forward to the same page with other parameters keeps showing the old ones — the Page Router hands the new parameters to a page it already deleted
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: medium
 area: runtime / Page Router (noodl-viewer-react/src/nodes/navigation/router.tsx `resetAsync` :583 `_updatePageInputs(this._internal.currentPageComponent.nodeScope, …)`; `currentPageComponent` is written only by a reset, :625 — `_buildPage` :951-994 never writes it)
 found: P107 NSP-016 s57, 2026-10-08
