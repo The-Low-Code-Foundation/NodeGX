@@ -1,107 +1,112 @@
-# Next session — P109 session 29
+# Next session — P109 session 30
 
 **Phase:** [README](README.md) · **Audit:** [AUDIT-2026-10-01.md](AUDIT-2026-10-01.md) · scoped at `27d891bf3`.
-**Session 28 (2026-10-07, on `cline-dev`, `fb26f251d` … the handoff commit):** ISL-038 at **7 of 14** (C82 + C84 + C85, C94, C91,
-C92 landed; C88, C90, C91, C92 ruled), **ISL-013 slice 1 landed** (`requires` + `Noodl.getModule` on every loader), and
-`p109-d30` (D30 + COLLECTIONCHURN) **landed** on Richard's go (`32e1856b0`, `624facf73`: rebased, re-graded, fast-forwarded). The board is **22 of 37 closed** (re-derived from the status lines; ISL-031,
-ISL-038 and ISL-013 moved, none closed). Records: ISL-038 §9, ISL-013 §8 "Session 28".
+**Session 29 (2026-10-07 → 08, on `cline-dev`):** **ISL-038 closed, 15 of 15.** Landed: C87 + C89 (`31c78fe6e`), C88 + C90
+(`9e4c79935`), C86 + C95 with the Group spec v3 (`3364b47f6`), C83 (`c335f5d90`), and C81 as ruled "the zone tracks itself"
+(`52fdaf088`), each graded on the runtime target at seeds 13 and 20732 with a control. Docs `5913ef609` and s29's closing commit.
+The board is **23 of 47 closed**. Records: ISL-038 §10 and "§10 continued".
 
-## How s28 worked, and why (read before touching a shared node)
+## How s29 worked (read before touching a shared node)
 
-- P107 was grading the Group while ISL-038's rows sat on the Group too. A runtime fix to a shared known row turns a peer's
-  in-flight run red (`conformance.test.ts` fails a `row` scenario that passes, and the runtime target reads viewer source). So
-  every fix was built in a worktree (`scripts/devtools/make-worktree.sh <name> HEAD /Users/richardosborne/vscode_projects`),
-  rebased onto the peer's commit, graded there, and landed with `git merge --ff-only <branch>` in the primary tree after checking
-  each landing path is clean (`git diff --name-only HEAD <branch>` → `git status --short -- <path>`). Three branches landed so;
-  the hashes survive. The three worktrees were removed after landing; their branches remain.
-- A control whose old code kills the process (C92's out of memory) needs its own run with `NODE_OPTIONS=--max-old-space-size=1536`.
+- P107 grades the specs in the same tree. Every fix was built in a worktree (`scripts/devtools/make-worktree.sh <name> HEAD
+  /Users/richardosborne/vscode_projects`), graded there, rebased onto P107's latest commit, and landed. Where P107 had an
+  **open edit** on a landing path (`conformance.test.ts`, `equivalent-mutants.ts`), the landing was a compare-and-swap of the
+  ref, `git checkout HEAD -- <clean paths>`, and the peer's working copy rebuilt as the new HEAD plus exactly their delta
+  (`git merge-file`, then check: the lines added and removed, as a multiset, equal the peer's). Tell P107 the hash after.
+- P107 asks for CPU windows by message. Pause your loop's shell with `kill -STOP <its zsh pid>` (the run in progress
+  finishes, the next waits), reply "go after PID n", and `kill -CONT` on their "done". Never `pkill` by name.
+- **The spec-package gate list for any visual spec change** (s29 missed the page model once): `cd packages/nodegx-node-spec &&
+  npx jest tests/page-model.test.ts tests/catalog-parity.test.ts tests/schema.test.ts tests/batch-visual.test.ts` (~10 min),
+  then the runtime per node group so no run hits jest's 30-minute `beforeAll`: `NSP_ONLY=Text,Circle,Image`, `Group`, `Video`.
+- A fast probe for a handful of scenarios on the runtime target: a throwaway test calling `runConformance(spec,
+  withViewerNodes(runtimeTarget()), { sequences: 0, mutants: false, scenarios })` with `loadScenarios(type)` filtered by name
+  (s29's `zz-s29-probe.test.ts`, in the scratchpad, never committed). Seconds, not minutes; use it for controls.
 
-## What s28 found that the handoff did not know
+## What s29 found that the handoff did not know
 
-- 🔴 **The state file was stale** (s23, `6128c6b4c`): the folder prompt is the handoff, not `~/.claude/next-session-state`.
-- **ISL-013's docs edit flipped two tripwires on purpose:** ISL-015's trap T6 was "pending ISL-013" and fails once a surface
-  carries the route (now live on the docs page and the scaffold's README), and the docs-sample gate counts uncompiled blocks (a
-  sample with `Noodl.defineModule(` compiles as complete).
-- `P109-S1-CN004` (`noodl-mcp/tests/cn004.test.ts` "still errors under strict", 2 for 1) is red at HEAD before and after s28;
-  filed, scheduled under ISL-034. Not a regression.
-- The primary `noodl-mcp/dist/kit-extract.cjs` is older than `module-inject` and `kitExtract/entry.js` now; the server rebuilds
-  it on the next bind (ISL-014 (b)), and running MCP servers keep the old reader until then.
-- A peer has an untracked `library/modules/nightbook-kit/` in the primary tree; if it gains a `types/node-kit.d.ts` copy,
-  `nodegx-kit-scaffold/tests/types-copy.test.js` grades it.
+- 🔴 **A runtime fix for C90 was wrong and the runtime grade caught it.** `bindToWrapper` brought Click back but fired it
+  before Pointer Up. Block Pointer Events also stopped the scroller's moves, so a scroll Group with it on never followed a drag.
+- 🔴 **C81's proposed fix could not be graded** (browsers do not reliably report a drag leaving the window, and the target fires
+  a replaced element's leave at a detached element), so it was asked and ruled.
+- **Fixing a modelled row strands mutants** (C86: two `person.click` survivors until a scenario reached the lost branch; C81:
+  ~20 per node until write-always). Memory: `fixing-a-modelled-row-can-strand-a-mutant`.
+- **P107's open helper code can read what you delete** (`heldAt`, used by P107's Video rows, stays in `conformance.test.ts`).
+- The P109 s27 probe `zz-p109s27-slider-scenarios.test.ts` was left in the primary tree; s29 deleted it.
 
 ## The board (re-derive it from each task file's status line; never copy this table)
 
 | state | tasks |
 |---|---|
-| ✅ closed (22) | ISL-001, 002, 003, 004, 005, 006, 011, 014, 015, 016, 017, 019, 020, 021, 023, 026, 027, 028, 029, 030, 032, 033 |
-| 🟡 Track F, building | ISL-031 (20 of 23: left the Text's drag rows C77, C78, C79), ISL-038 (7 of 15: left the Group's C86–C90 and C95, the shared C81, C83) |
+| ✅ closed (23) | ISL-001, 002, 003, 004, 005, 006, 011, 014, 015, 016, 017, 019, 020, 021, 023, 026, 027, 028, 029, 030, 032, 033, 038 |
+| 🟡 Track F, building | ISL-031 (20 of 23: the Text's drag rows C77, C78, C79) |
 | 🟡 building | ISL-013 (slice 1 landed; left AC1's deployed drive, AC3's Settings → Kits, AC4 garden kits, AC5 job table, AC6 census) |
 | 🟡 ruled, one reading owed | ISL-012 (AC3's full server render with hydration) · ISL-018 (AC5: the agent round) |
 | 🟢 ruled, not built | ISL-024 ("Own package + a note", quiet gap only) |
 | 🟡 built here, one half elsewhere | ISL-008 (AC7 → P18) · ISL-010 (AC4, Richard) · ISL-009 (export → P18) · ISL-007 (AC4 → P108) |
 | 🟡 one case open | ISL-022 (AC6 inconclusive) · ISL-025 (the closing task) |
 | ⬜ Track F, no rulings | ISL-034 … ISL-037 |
-| ⬜ Track G, not started (added s28) | ISL-039 … ISL-047: 51 bugs no phase owned. Blockers in ISL-039, security rows in ISL-040 |
+| ⬜ Track G, not started | ISL-039 … ISL-047: 51 bugs no phase owned. Blockers in ISL-039, security rows in ISL-040 |
+| ⬜ not scoped | P107's rows handed over under R16 after ISL-038 was scoped: the Drag (C101–C106), the Component Stack (C107–C114), the Page Router (C115–C118) |
 
 ## Do, in this order
 
-1. **ISL-038's Group rows**, now that P107's Group v2 is committed (`99d0d2353`): C95 (as ruled: a Focus off the page is
-   Unchanged), C87 (empty Tag: `as || 'div'`), C89 (Native platform scroll read as a boolean), C88 (ruled: count the cards — a node names the element its children sit in, `slots` /
-   `homeIndex` / `indexAt` / `openGap` use it), C90 (ruled: let the list's taps through the blocker), C86. Check `git status` and
-   mtimes on `group.ts`, `Group.json`, `conformance.test.ts` first; P107 said it is done with shared files.
-2. **C81 and C83** (shared drag / file drop, change the spec on Text, Shape, Image, Group: specs bump, `changes` entries).
-3. **ISL-031's Text drag rows C77, C78, C79** (C79 is a known row on all four nodes).
-4. **ISL-013 slice 2:** AC4 (garden-3d-kit `requires` garden-kit, drops its copy and the `__noodl_modules` walk; retire the pin
+1. **ISL-031's Text drag rows C77, C78, C79** (C79 is a known row on the Text, Shape, Image, Group and Video). drag-drop.ts is
+   free: P107's Drag spec reads react-draggable, not drag-drop.ts. Known rows live in `conformance.test.ts`, which P107 edits:
+   check `git status` and land by compare-and-swap if it is dirty.
+2. **Scope a task for P107-C101 … C118** (README §4 format, from the ledger files): the Drag's C101 (high: on touch nothing
+   inside a Drag can be tapped — react-draggable cancels touchstart; it hits the Site Builder SectionRow's buttons and fields;
+   proposed fix a `cancel` selector in Drag.tsx), C102 (Axis X still reports Drag Y and Delta Y), C103 (Drag draws only its
+   first child), C104 (CSS Class and Style do nothing), C105 (a Snap Do that waited for the mount runs from 0), C106 (a Start
+   Drag X/Y of NaN blanks the page: a setState loop); the Component Stack's C107 … C114 (C107 and C110 medium: requests never
+   answered; record in P107 NSP-016 §7.17); the Page Router's C115 … C118 (C115 and C117 medium; §7.18). None has a `task:`
+   line yet. Then build, worst first.
+3. **ISL-013 slice 2:** AC4 (garden-3d-kit `requires` garden-kit, drops its copy and the `__noodl_modules` walk; retire the pin
    gates by name; regenerate the kit copies and the template, byte-compare), AC5 (the job table's one home), AC6 (every shipped
-   module's injection byte-identical: none declares `requires` today, so only the adopters move), AC3's Settings → Kits, AC1's
-   deployed drive. The exporter's two bootstraps (`nodegx-export/src/parse/kitSource.ts`, `emit/kits.ts`) are P18's: hand over.
-5. Then ISL-018 AC5, ISL-012 AC3.
-6. **Track G (ISL-039 … ISL-047, README §4):** written from the ledger, not re-measured. Its blockers (ISL-039: a restore that
-   loses data, a migrate that overwrites it) and security rows (ISL-040) outrank items 3–5 by severity: ask Richard which comes
-   first. Most of it sits in packages P104 (backend) and P18 (export) are working in; each task's §6 says whom to ask.
-   P107-C96, C97, C98 (the Video) were left out while a P107 session filed them; take them when P107 hands them over.
+   module's injection byte-identical), AC3's Settings → Kits, AC1's deployed drive. The exporter's two bootstraps are P18's.
+4. Then ISL-018 AC5, ISL-012 AC3.
+5. **Track G (ISL-039 … ISL-047, README §4)**: its blockers and security rows outrank items 3–4 by severity; Richard picks the
+   order (asked s29, not yet answered). `packages/nodegx-backend` was quiet on 2026-10-07 (no open edits, last commit 10-05).
 
 ## Decisions for Richard (not yours)
 
-- **Layout of an unlabelled control (s26, measured in jsdom only)** — a real-browser check on a form template before a release.
+- **Track G's order**: the data-loss blockers (ISL-039: a restored backup loses workflows, sign-in, files and settings; migrate
+  overwrites a PostgreSQL database that already holds rows), the security holes (ISL-040: a cloud function can set any account
+  field, adminAccess included; a function deployed with no rule runs for any signed-in user), or the kits (ISL-013 slice 2).
+- **Layout of an unlabelled control (s26, measured in jsdom only)**: a real-browser check on a form template before a release.
 - `P109-S24-SIGNINWITHERRORKEPT`, `P109-S22-BUILTINBOUNDARY` (recommendation: yes), `P109-S20-LISTDEFAULTTYPE`,
   `P109-S18-REFRESHROWSTATE`, ISL-010 AC4 and the Effort port, pushing `cline-dev`, publishing the Garden kits at the origin.
 
 ## Handed over (owed by another phase; say so where you meet it)
 
-- **P18 (export):** ISL-013's `getModule` is not on the exporter's two kit bootstraps; C82/C84/C85/C91/C92/C94 were not checked
-  on the exported app. Plus s26's and earlier lists (STATESRUN, FEEDZONE, BADBODY, …).
-- **P107:** C95 (a Focus on a Group off the page) stays P107's unless R16's reading puts it here.
-- **Release notes, add (s28):** a wired number in Accepted file types, Accept Kind, Drag Kind or Zone Name no longer stops a drop
-  or a drag; an Image placed with Source Set true fetches nothing; a card dropped on a Custom SVG Shape lands at 0; a Shape's
-  Points stops at 500 (Infinity or a non-number draws 5); a kit can `require` another kit and read it with `Noodl.getModule`.
-  A control leaving the page (Mounted off) fires Blurred and Hover End for what was on. A Record holding a list no longer
-  fires Changed when a Fetch reads the same list again.
+- **P18 (export):** ISL-013's `getModule` is not on the exporter's two kit bootstraps; ISL-038's fixes were not checked on the
+  exported app. Plus s26's and earlier lists (STATESRUN, FEEDZONE, BADBODY, …).
+- **P107:** C100 (a `<video>` takes no pointer or file drop) stays open, so C81 cannot show on the Video's runtime yet.
+- **Release notes, add (s29):** a Group with an empty Tag draws a div instead of stopping the page; a wired 1 in Native platform
+  scroll is native scroll; a snapping scroll Group counts its cards for Drop Index; a scroll Group with Block Pointer Events on
+  fires Click and follows a drag; a Group off the page reports Unchanged to Focus (new Unchanged output); a click after a Group's
+  Tag changes counts as a click on it; a keyboard-carried card never drops into a column that left the page (Space cancels); a
+  file drop zone goes dark when Accept File Drops is switched off or it leaves the page, and a redrawn zone counts afresh.
 
-## Gate readings taken s28 (2026-10-07)
+## Gate readings taken s29 (2026-10-07 → 08)
 
-- **ISL-038** (graded on `90b39eaa2`, landed rebased as `f2d9d349b`…`4a48f6eb7` over a docs-only commit): runtime target,
-  `NSP_ONLY=Text,Circle,Image,Group`, seeds 13 and 20732: all four conform (0 divergences, every unkilled mutant declared),
-  "known rows still open" green. Interpreter visual batch 13 / 13. Spec catalog-parity + schema 329 / 329. Viewer 1802 / 1802.
-  Control A red on exactly the row scenarios; control B (base Circle.tsx) out of memory, exit 134.
-- **ISL-013** (`9fd1b12a7`): module-inject 40 / 40, viewer 1807 / 1807, viewer-cloud 264 / 264, kit types 116 / 116, scaffold
-  76 / 76, editor `tests-unit/cn-001` 6 / 6, editor tsc 0, the MCP kit suites 86 / 87 (the one red is `P109-S1-CN004`, red at
-  the base too). Control: the base loader files red on all 9 reader and SSR arms.
-- **p109-d30** (rebased onto `088579843`): catalog / merge / docs:nodes / cloud-library clean; spec and viewer tsc 0; stranger rounds 1–4, catalog
-  parity, schema, pilot, page model, plants and world 483 passed (18 skipped); interpreter visual batch 13 / 13; viewer 1807 / 1807;
-  the churn test with the backends and record suites 422 / 422; the six controls conform on the runtime at seed 13 (0 divergences).
-- `bugs.js check`: 5 problems, none from s28's rows.
+- **Group six** (graded on `c9106c613` + the three commits, landed as `31c78fe6e`…`3364b47f6`): runtime, Group v3 at seeds 13
+  and 20732 (1390 / 1395, the 5 the open C79 row; 0 divergences); Circle and Image at 13, Text at both (earlier run); interpreter
+  Group conforms; viewer 1807 / 1807; catalog, merge, docs:nodes, cloud-library, port-groups checks clean. Control: HEAD's three
+  viewer files red on exactly 15 row scenarios, 9 twins green on both. 🔴 `page-model.test.ts` was **not** run and went red
+  (G4 `stampOn`); P107 fixed the helper in `3236d5f03`.
+- **C83** (`c335f5d90`): runtime, the five at 13 and 20732; spec package 361 / 361; viewer 1807 / 1807; control red on all five.
+- **C81** (`52fdaf088`): runtime, the five at 13 and 20732; after rebasing onto `b28354feb`, the five at 13 again and the spec
+  package 371 / 371; after rebasing onto `afb4bffe6` (P107's Router: its own rows only), page model + catalog parity + schema
+  359 / 359; viewer 1807 / 1807; control red on 11 / 48 / 48 / 13.
+- `bugs.js check`: 5 problems, none from s29's rows (the same five as s28).
 
 ## Recipes
 
-- **A CAS commit:** `GIT_INDEX_FILE=<tmp>`, `git read-tree HEAD`, `git add` the paths (or `update-index --cacheinfo` a
-  blob built from `git show HEAD:<path>` + your edit, for a file with a peer's open edit), check the staged count,
-  `commit-tree`, `update-ref HEAD NEW BASE`, then **reset each committed path in the real index**
-  (`git diff --name-only BASE NEW | while read f; do git reset -q -- "$f"; done`).
-- **Dropping a known row:** run the spec with the row still listed first (its scenarios should read "passed" and the
-  attribution 0), then remove the row and its predicate from BOTH the working `conformance.test.ts` and a copy of HEAD's, diff
-  the two (the peer's lines must be all that differs), commit the HEAD copy. Unmark the row scenarios in the same commit.
-- **A control:** back up each file by name (`cp $f $S/${f:t}`), `git show HEAD:$f > $f`, run, restore in the same command
-  and `cmp`. With zsh, put paths in an array.
-- **Splitting one file's hunks across commits:** replay `git diff -U0` hunks from HEAD by stage (s26's `stages.py` idea:
-  assign each hunk by a keyword, assert the full replay equals the working file).
+- **A CAS commit:** `GIT_INDEX_FILE=<tmp>`, `git read-tree HEAD`, `git add` the paths, check the staged count, `commit-tree`,
+  `update-ref HEAD NEW BASE`, then reset each committed path in the real index.
+- **Landing a branch over a peer's open edit:** `git update-ref refs/heads/cline-dev <branch> <old>`; `git checkout HEAD -- p`
+  for each clean landing path; for the dirty one, `git reset -q -- p` and write `git merge-file -p peer base mine` (or replay
+  your edit onto the peer's copy if it conflicts); prove the multiset of changed lines equals the peer's delta.
+- **A control:** back up each file by name, `git show HEAD:$f > $f`, run the probe, restore in the same command and `cmp`.
+- **Why a mutant lives:** log the twin's `example` once from `runner/mutants.ts` (the `for (const b of branches.values())`
+  loop), run one node, restore the file and `cmp`.

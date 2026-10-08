@@ -1,7 +1,8 @@
 ---
 id: P107-C83
 title: A card carried from the keyboard is dropped into a drop zone that has left the page (Mounted off), and the zone stays lit while it is gone
-status: open
+status: fixed
+commit: c335f5d90
 phase: P109
 task: ISL-038
 severity: low
@@ -9,7 +10,7 @@ area: runtime / drag and drop on every visual node that has it (noodl-viewer-rea
 found: P107 NSP-016 s51, 2026-10-06
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.12; the Text's zone-side scenarios in packages/nodegx-node-spec/scenarios/Text.json, identical on the interpreter and the runtime target
 kit: node-spec
-regression: packages/nodegx-node-spec/scenarios/Text.json "the zone side: from the keyboard, the Text taken off the page under the carried card — Space on the card still drops it there: Dropped on a Text not on the page"
+regression: packages/nodegx-node-spec/scenarios/Text.json "the zone side: from the keyboard, the Text taken off the page under the carried card — Space on the card leaves it first (Drag Over false) and cancels: nothing is Dropped on a Text not on the page (C83)" (and its twin on the Shape, Image, Group and Video)
 ---
 
 **What a person sees.** Someone picks a card up with the keyboard (Space). It starts in a drop zone, and the zone lights
@@ -33,3 +34,5 @@ Will Unmount.
 (`liveElement(g.zone)`). If it has none, leave it first, so the drop becomes a cancel and Drag Over goes false. The arrow
 keys already read `orderedZones`, which leaves out a zone with no live element. Once it is fixed, the spec takes the same
 rule and this scenario changes with it.
+
+**Fixed c335f5d90 (P109 ISL-038, 2026-10-07), as proposed.** drag-drop.ts `onKeyDown` leaves a zone with no live element first (`liveElement`) at any key of a keyboard carry: Drag Over goes false, Enter or Space cancels, and an arrow key moves among the zones still on the page. The five specs that share the drag module say it (`keyDuringGesture`): Text v6, Shape v2, Image v2, Group v4, Video v2; their five "taken off the page under the carried card" scenarios renamed. Graded: on the runtime target all five conform at seeds 13 and 20732 (0 divergences; every unkilled mutant a declared equivalent); the spec package's page model, catalog parity, schema and visual batch 361 / 361; viewer 1807 / 1807. Control: HEAD's drag-drop.ts under the five scenarios is red on all five, at the drop.

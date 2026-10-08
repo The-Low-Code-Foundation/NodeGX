@@ -1,6 +1,6 @@
 # ISL-038 — A visual node draws what it was given, every time
 
-**Status: 🟡 s29 (2026-10-07): 13 of 15 fixed — the Group's six landed: C87 + C89 (`31c78fe6e`), C88 + C90 (`9e4c79935`), C86 + C95 with the Group spec v3 (`3364b47f6`), each graded on the runtime at two seeds with a control (§10). Left: the shared C81 and C83 (both change the spec on all four nodes). s28: C82 + C84 + C85 (`f2d9d349b`), C94 (`2dc8fd90d`), C91 (`dd71d0d83`), C92 (`4a48f6eb7`); AC2 ✅. s27: C93 (`fe5ebfab5`). Scoped 2026-10-07 from P107 R16 ("Hand all to P109, C93 first").** **Source:** 14 bugs from the ledger: 1 high · 8 medium · 5 low. **Side:** noodl-viewer-react (Image,
+**Status: ✅ CLOSED s29 (2026-10-08): 15 of 15 fixed.** s29 landed the Group's six — C87 + C89 (`31c78fe6e`), C88 + C90 (`9e4c79935`), C86 + C95 with the Group spec v3 (`3364b47f6`) — then C83 (`c335f5d90`) and C81 as ruled "the zone tracks itself" (`52fdaf088`), each graded on the runtime at two seeds with a control (§10). s28: C82 + C84 + C85 (`f2d9d349b`), C94 (`2dc8fd90d`), C91 (`dd71d0d83`), C92 (`4a48f6eb7`). s27: C93 (`fe5ebfab5`). Scoped 2026-10-07 from P107 R16 ("Hand all to P109, C93 first"). P107's later rows on the Drag (C101–C106) and the Component Stack (C107–C114) were handed over after this task was scoped: a new task, not this one. **Source:** 14 bugs from the ledger: 1 high · 8 medium · 5 low. **Side:** noodl-viewer-react (Image,
 Shape (`Circle`), Group, drag and drop, file drop)
 
 ## 1. The person sentence
@@ -27,7 +27,7 @@ one reasonable answer: ask it in plain words (§5) before building.
 | bug | severity | status | build | what a person sees |
 |---|---|---|---|---|
 | [P107-C93](../../bugs/p107-c93-an-image-adds-the-base-url-again-at-every-render.md) | high | fixed `fe5ebfab5` | as proposed | An Image in an app served from a sub-path adds the Base URL to its source again at every render — /x/a.png becomes /x/x/x/a.png in the first frame, and the picture breaks |
-| [P107-C81](../../bugs/p107-c81-a-file-drop-zone-stays-lit-after-the-drag-leaves.md) | medium | open | as proposed | A file drop zone stays lit (Is Dragging Over true) after the drag has left, when its element was replaced under the drag or Accept File Drops was switched off during it |
+| [P107-C81](../../bugs/p107-c81-a-file-drop-zone-stays-lit-after-the-drag-leaves.md) | medium | fixed `52fdaf088` | ruled: the zone tracks itself | A file drop zone stays lit (Is Dragging Over true) after the drag has left, when its element was replaced under the drag or Accept File Drops was switched off during it |
 | [P107-C82](../../bugs/p107-c82-a-file-drop-is-lost-when-accepted-file-types-is-not-text.md) | medium | fixed `f2d9d349b` | as proposed | A file drop is lost with nothing said when Accepted file types holds a value that is not text (a wired number, an object) — the drop handler throws before File, Files Dropped or Files Rejected |
 | [P107-C84](../../bugs/p107-c84-a-drag-dies-at-a-zone-whose-accept-kind-is-not-text.md) | medium | fixed `f2d9d349b` | as proposed | A drag dies at a drop zone whose Accept Kind holds a value that is not text (a wired number, a list) — a pointer drag never ends and blocks every later drag; a keyboard pick-up starts in no zone |
 | [P107-C85](../../bugs/p107-c85-a-drop-never-ends-on-a-zone-whose-zone-name-is-not-text.md) | medium | fixed `f2d9d349b` | as proposed | A drop on a zone whose Zone Name holds a value that is not text fires Dropped and then never ends — the zone stays lit, the card stays lifted, and no other drag can start |
@@ -35,7 +35,7 @@ one reasonable answer: ask it in plain words (§5) before building.
 | [P107-C88](../../bugs/p107-c88-a-scrolling-group-counts-its-scroller-as-its-only-child-for-drop-index.md) | medium | fixed `9e4c79935` | ruled: count the cards | A Group with Enable Scroll on and Native platform scroll off reports Drop Index as if it had one child — a card dropped from the keyboard lands at 0 or 1, whatever the Group holds |
 | [P107-C90](../../bugs/p107-c90-a-scrolling-group-with-block-pointer-events-fires-no-click.md) | medium | fixed `9e4c79935` | ruled: let the list's taps through | A Group with the JavaScript scroller (Enable Scroll on, Native platform scroll off) and Block Pointer Events on never fires Click — on itself or from a child |
 | [P107-C92](../../bugs/p107-c92-a-polygon-or-star-with-a-huge-points-value-runs-the-page-out-of-memory.md) | medium | fixed `4a48f6eb7` | ruled: cap at 500 | A Shape set to Polygon or Star with a huge or infinite Points builds that many vertices, and the page runs out of memory |
-| [P107-C83](../../bugs/p107-c83-a-card-carried-from-the-keyboard-drops-into-a-zone-that-has-left-the-page.md) | low | open | as proposed | A card carried from the keyboard is dropped into a drop zone that has left the page (Mounted off), and the zone stays lit while it is gone |
+| [P107-C83](../../bugs/p107-c83-a-card-carried-from-the-keyboard-drops-into-a-zone-that-has-left-the-page.md) | low | fixed `c335f5d90` | as proposed | A card carried from the keyboard is dropped into a drop zone that has left the page (Mounted off), and the zone stays lit while it is gone |
 | [P107-C86](../../bugs/p107-c86-a-click-on-a-group-after-a-tag-change-counts-as-a-click-elsewhere.md) | low | fixed `3364b47f6` | as proposed | After a Group's Tag changes, a click on it counts as a click somewhere else — it fires Focus Lost instead of Focused, until the Group leaves the page and comes back |
 | [P107-C89](../../bugs/p107-c89-native-platform-scroll-wired-a-value-that-is-not-true-starts-the-scroller-on-unwrapped-children.md) | low | fixed `31c78fe6e` | as proposed | Native platform scroll wired a truthy value that is not true (1, "false") starts the JavaScript scroller on children it never wrapped — Scroll To Index fails for every child, and clicks can be lost |
 | [P107-C91](../../bugs/p107-c91-a-custom-svg-shape-counts-its-own-drawing-as-a-child-for-drop-index.md) | low | fixed `dd71d0d83` | ruled: don't count the drawing | A Shape set to Custom SVG counts its own drawing as a child for Drop Index — a card dropped on it from the keyboard lands at 1, where every other shape says 0 |
@@ -135,3 +135,35 @@ twins are red on exactly the fifteen row scenarios (C86's five, C95's six, C87, 
   compare-and-swap, with the peer's working copy rebuilt as the new HEAD plus exactly their delta.
 - Jest's 30-minute `beforeAll` cut the first seed-13 run of all four nodes under a peer's load (the Group alone took 44 minutes);
   grade the Group on its own.
+
+### §10 continued — C83, then C81 (2026-10-07/08)
+
+Built in a worktree (`p109-c83`, then branch `p109-c81`) after P107 committed the Video (`3236d5f03`); P107 cleared the shared
+files. C81 was asked first: its proposed fix could not be graded (below).
+
+| Row | Commit | What changed |
+|---|---|---|
+| C83 | `c335f5d90` | drag-drop.ts `onKeyDown` leaves a zone with no live element at any key of a keyboard carry, so Space cancels. Text v6, Shape v2, Image v2, Group v4, Video v2 (`keyDuringGesture`) |
+| C81 | `52fdaf088` | Ruled "the zone tracks itself": the count belongs to one element (`dragElement`), Accept File Drops off and leaving the page clear it (`fileDropDark`, `_fileDropLeftPage`). Text v7, Shape v3, Image v3, Group v5, Video v3; write-always in `dragTo`; the page model's `FILE_DROP_LEAVES` |
+
+**Grade.** C83: the five conform on the runtime at seeds 13 and 20732; spec package (page model, catalog parity, schema, visual
+batch) 361 / 361; viewer 1807 / 1807; control (HEAD's drag-drop.ts) red on all five C83 scenarios. C81: the five conform on the
+runtime at both seeds and on the interpreter, re-checked after rebasing onto P107's `b28354feb` (the five at seed 13, spec package 371 / 371) and again onto `afb4bffe6` (page model, catalog parity, schema 359 / 359); viewer 1807 / 1807; control
+(HEAD's two runtime files) red on 11 / 48 / 48 / 13 file-drop scenarios (Text, Shape, Image, Group). The Video conforms either
+way: on the runtime a `<video>` takes no file drop at all (P107-C100, open).
+
+**What C81 taught.**
+- **The ledger's proposed fix could not be graded.** "Reset every zone when the drag ends anywhere" needs the browser to say a
+  drag left the window (unreliable), and the runtime target fires the leave of a replaced element at the detached element,
+  where no listener hears it. So it was asked as a question, and the ruled fix is deterministic and graded.
+- **A clear splits every branch by "0 over 0".** The first C81 build left ~20 interpreter survivors per node. Write-always
+  (every file act writes the target, the count, its element and Is Dragging Over, sending only on a change) took the Text from
+  21 to 4. Two were genuine equivalents (an unmount clears the count, so its element is never read), one pair is equivalent
+  only on nodes with no Tag (the Shape, the Image), and one needed a scenario.
+- **A swapped value with no send is invisible until the original sends the opposite.** The surviving mutant wrote Is Dragging
+  Over false without a send, and the next enter's `true` matched the last recorded value. The killing step is Accept File
+  Drops off, where the original sends false and the mutant has nothing to send. The twin's example was read by logging it once
+  from `runner/mutants.ts`.
+- **Still true:** in the runtime target a zone whose element is replaced under the drag, and left before the drag moves again,
+  stays lit until the next drag. The target moves the drag's target only at an act; a browser's next `dragover` would enter the
+  new element first.
