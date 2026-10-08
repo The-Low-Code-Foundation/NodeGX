@@ -40,8 +40,11 @@ scenarios side by side with the interpreter, identical; `NSP_ONLY="Page Stack"` 
 
 ## What s59 does
 
-1. **Tell P109 the new rows** if s58's message did not land (peer `opennoodl-1e`; one short line: C119–C127 are filed, P107's, open).
-   When one of C96–C127 is fixed, its scenario's behaviour moves with it (a spec version) in the same commit — P109 does that for its own.
+1. **P109 took C119–C127 into ISL-048** (its reply, 2026-10-08) and said it would land within hours: C77 / C78 / C79 (the Text,
+   Shape, Image, Group and Video specs and scenarios; conformance.test.ts's C79 known rows dropped), the Router v2–v5 (C115–C118) and
+   Drag.tsx (C101); the Page Stack untouched. **Re-run the visual batch (`-w 2`) and the runtime conformance for those specs once
+   before building on them.** When one of C96–C127 is fixed, its scenario's behaviour moves with it (a spec version) in the same commit
+   — P109 does that for its own.
 2. **The next visual node: the Repeater** (`For Each` — DEFINITIONS + collections + per-item ports + its own async creation). It is
    the last of the three that place children with ports (Component Children has none; Columns waits for geometry). Read
    `noodl-viewer-react/src/nodes/std-library/data/foreach.tsx` and s15's DEFINITIONS first; the Component Stack's queue machinery is the
