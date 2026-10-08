@@ -726,7 +726,7 @@
     ]
   },
   {
-    "name": "a push to a page whose component the project does not have is never answered; the next push is Done (row C107)",
+    "name": "row C107 — a push to a page whose component the project does not have is Failure (not found); the next push is Done",
     "because": "createNode → getComponentModel throws (nodecontext.ts :616-636)",
     "params": {
       "pages": [
@@ -7473,5 +7473,90 @@
         "navigationPathType": "path"
       }
     }
+  },
+  {
+    "name": "row C107 — a replace to a page whose component the project does not have is Failure (not found) — the page it replaced is already gone (Children Count 0); a push after it is Done",
+    "because": "replaceAsync — createNode → getComponentModel throws (nodecontext.ts :616-636), answered as not found",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Missing",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "replace",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C107 — a Start Page whose component the project does not have: the stack is empty (Top Component Name '', Stack Depth 0) and a Reset is Failure; with the page's component back, a Reset is Done",
+    "because": "resetAsync — createNode → getComponentModel throws (nodecontext.ts :616-636), answered as not found",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Missing",
+      "pageComp-p3": "Settings",
+      "startPage": "p2"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle",
+      {
+        "set": "pageComp-p2",
+        "value": "Detail"
+      },
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
   }
 ]

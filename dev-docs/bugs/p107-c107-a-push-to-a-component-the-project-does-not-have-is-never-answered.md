@@ -1,7 +1,7 @@
 ---
 id: P107-C107
 title: A push, replace or Reset to a page whose component the project does not have is never answered — the caller's Navigate hangs with no Done and no Failure
-status: scheduled
+status: fixed
 phase: P109
 task: ISL-048
 severity: medium
@@ -9,7 +9,7 @@ area: runtime / Component Stack (noodl-viewer-react/src/nodes/navigation/navigat
 found: P107 NSP-016 s56, 2026-10-08
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.17; recorded on the runtime target (the probe traces in §7.17), and the spec copies it (R3)
 kit: node-spec
-regression: packages/nodegx-node-spec/scenarios/Page Stack.json "a push to a page whose component the project does not have is never answered; the next push is Done (row C107)"
+regression: packages/nodegx-node-spec/scenarios/Page Stack.json "row C107 — a push to a page whose component the project does not have is Failure (not found); the next push is Done" (and its replace and Start Page twins)
 ---
 
 **What a person sees.** A Component Stack's page points at a component that was renamed or deleted. Pressing the button wired to
@@ -23,3 +23,9 @@ the rejection goes nowhere: the queue moves on and the caller is never told.
 
 **Proposed fix.** Catch the build in `navigateAsync` / `replaceAsync` / `resetAsync` and report `component-stack/component-not-found`
 (the caller's `hasFailed`, the Reset's Failure) — the same code the not-found check already uses.
+
+**Fixed (P109 ISL-048, s31, 2026-10-08), as proposed.** The build is caught in `navigateAsync`, `replaceAsync` and `resetAsync` and answered
+with the not-found code the earlier check uses: a push or replace Failure `push-component-stack/component-not-found` (the page
+container made for it is deleted), a Reset Failure `component-stack/component-not-found` that leaves the stack empty (C112's
+`_resetLeftEmpty`). Page Stack spec v4; two scenarios added (a replace, a Start Page). Runtime 147 / 147 at seeds 13 and 20732;
+control red on exactly the 3 C107 scenarios. Found while writing the replace's: P109-S31-REPLACEDROPSPAGE.

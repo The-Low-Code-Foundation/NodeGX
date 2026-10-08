@@ -28,8 +28,9 @@
  * (`await createNode`), which lands at the next yield to the event loop: a settle, after the frame's end, or an advance, before the
  * clock moves (spec.ts `resume`). Whatever waits behind it runs then, all of it. A request whose checks ended without a build frees
  * the queue a microtask later (a throw: two) — at a yield, or at the next act boundary for what started outside a frame (`hops`). A
- * build that throws (a component the project does not have, a transition there is no such thing as, a stack with nothing on it)
- * answers nothing, and the next one runs (rows C107, C108, C110). A back is not queued.
+ * build of a component the project does not have is answered as not found (row C107, fixed in P109 ISL-048); one that throws (a
+ * transition there is no such thing as, a stack with nothing on it) answers nothing, and the next one runs (rows C108, C110). A
+ * back is not queued.
  *
  * A RESET (`resetAsync` :503-578) — at the mount (registering), at a Reset (Done or Failure, every Reset of the frame alike), when
  * Components change while the stack is on the page, and when the Name changes while it is — deletes every page, then (no components:
@@ -186,7 +187,8 @@ const pagePathPort = (): ValueInputDecl => ({ type: 'string', coerce: 'none', di
 export const ComponentStack = defineNode({
   type: 'Page Stack',
   // v3 (P109 ISL-048, s31): a reset that fails leaves the stack empty and says so — Top Component Name '' and Stack Depth 0 (row C112)
-  version: 3,
+  // v4 (P109 ISL-048, s31): a page whose component the project does not have is answered — a push or replace Failure, a reset Failure that leaves the stack empty (row C107)
+  version: 4,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx',
   needs: ['person', 'clock', 'location', 'project'],
   worldPool: {
@@ -902,14 +904,19 @@ function failReset(w: Work, tokens: number, error: string): null {
   return null;
 }
 
-/** The page lands (after `await createNode`): the rest of the request. A build that throws answers nothing. */
+/** The page lands (after `await createNode`): the rest of the request. A build that throws is answered as not found (row C107,
+ * fixed in P109 ISL-048) — a reset as its other not-found, leaving the stack empty. */
 function finishBusy(w: Work): void {
   const b = w.st.busy;
   if (!b) return;
   w.st.busy = null;
-  if (!canBuild(b.found.component)) return; // row C107
   const s = w.st;
   const item = b.item;
+  if (!canBuild(b.found.component)) {
+    if (item.kind === 'reset') failReset(w, item.tokens, 'component-stack/component-not-found');
+    else answer(w, item.kind, 'failure', 'push-component-stack/component-not-found');
+    return;
+  }
   if (item.kind === 'reset') {
     // :550-577
     const page = newPage(w);

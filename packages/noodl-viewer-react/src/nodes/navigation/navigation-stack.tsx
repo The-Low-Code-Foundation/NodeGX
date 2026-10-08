@@ -551,7 +551,18 @@ const PageStack = {
 
       // In the React viewer a component instance is always a ReactNodeInstance; the
       // published createNode signature only promises the runtime-level NodeInstance.
-      const content = (await this.nodeScope.createNode(pageInfo.component, guid())) as ReactNodeInstance;
+      // P107-C107 — a component the project does not have throws here, inside the request: answer it as not found
+      let content: ReactNodeInstance;
+      try {
+        content = (await this.nodeScope.createNode(pageInfo.component, guid())) as ReactNodeInstance;
+      } catch (e) {
+        this._resetLeftEmpty();
+        this._reportReset(outcomes, 'failure', {
+          code: 'component-stack/component-not-found',
+          message: `The Component Stack "${this._internal.name || 'Main'}" cannot show "${startPageId}" — its component "${pageInfo.component}" is not in the project`
+        });
+        return;
+      }
 
       for (const key in params) {
         content.setInputValue(key, params[key]);
@@ -868,8 +879,19 @@ const PageStack = {
       const group = this.createPageContainer();
       if (willAnimate) group.setInputValue('position', 'absolute');
 
-      // Create the page content
-      const content = (await this.nodeScope.createNode(pageInfo.component, guid())) as ReactNodeInstance;
+      // Create the page content. P107-C107 — a component the project does not have throws here, inside the request: answer it
+      // as not found, and drop the container made for it
+      let content: ReactNodeInstance;
+      try {
+        content = (await this.nodeScope.createNode(pageInfo.component, guid())) as ReactNodeInstance;
+      } catch (e) {
+        this.nodeScope.deleteNode(group);
+        return this._reportNavigationFailure(
+          args,
+          'push-component-stack/component-not-found',
+          `The Component Stack "${this._internal.name || 'Main'}" cannot show "${pageId}" — its component "${pageInfo.component}" is not in the project`
+        );
+      }
       for (const key in args.params) {
         content.setInputValue(key, args.params[key]);
       }
@@ -982,8 +1004,19 @@ const PageStack = {
       const group = this.createPageContainer();
       group.setInputValue('position', 'absolute');
 
-      // Create the page content
-      const content = (await this.nodeScope.createNode(pageInfo.component, guid())) as ReactNodeInstance;
+      // Create the page content. P107-C107 — a component the project does not have throws here, inside the request: answer it
+      // as not found, and drop the container made for it
+      let content: ReactNodeInstance;
+      try {
+        content = (await this.nodeScope.createNode(pageInfo.component, guid())) as ReactNodeInstance;
+      } catch (e) {
+        this.nodeScope.deleteNode(group);
+        return this._reportNavigationFailure(
+          args,
+          'push-component-stack/component-not-found',
+          `The Component Stack "${this._internal.name || 'Main'}" cannot show "${pageId}" — its component "${pageInfo.component}" is not in the project`
+        );
+      }
       for (const key in args.params) {
         content.setInputValue(key, args.params[key]);
       }
