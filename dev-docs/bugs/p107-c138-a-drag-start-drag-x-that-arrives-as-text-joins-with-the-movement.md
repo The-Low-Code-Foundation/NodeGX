@@ -1,7 +1,9 @@
 ---
 id: P107-C138
 title: A Drag's Start Drag X (or Y) that arrives over a wire as text joins with the movement as text — a 10 px drag from "50" puts the element at "5010"
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: low
 area: runtime / Drag (noodl-viewer-react/src/components/visual/Drag/Drag.tsx — the start position is added to the movement without a conversion)
 found: P107 NSP-016 s55, 2026-10-07 (ruled 2026-10-08, filed then)

@@ -1,7 +1,9 @@
 ---
 id: P107-C140
 title: A Repeater input mapping (Script under Input Mapping) that throws for a record stops the Repeater for good — that row and every later one is never drawn, and no Refresh is answered
-status: open
+status: scheduled
+phase: P109
+task: ISL-049
 severity: medium
 area: runtime / Repeater (noodl-viewer-react/src/nodes/std-library/data/foreach.tsx `addItem` :625-629 calls `_mapInputs` :538-555 after `await createNode`, with no try; the throw rejects `addItem`, and `_runQueueOperations` :815-860 catches nothing — C128's mechanism, reached by another line)
 found: P107 NSP-016 s62, 2026-10-08

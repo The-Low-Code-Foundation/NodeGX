@@ -1,7 +1,9 @@
 ---
 id: P107-C136
 title: With Template Type Explicit and no Template, a Refresh reports Done (and draws nothing) once any Script has compiled — without one it fails `repeater/no-template`
-status: open
+status: scheduled
+phase: P109
+task: ISL-049
 severity: low
 area: runtime / Repeater (noodl-viewer-react/src/nodes/std-library/data/foreach.tsx `refresh` :745 checks `internal.template || internal.templateFunction`, whichever Template Type is; `getTemplateForModel` :501-503 reads only Template on Explicit)
 found: P107 NSP-016 s61, 2026-10-08

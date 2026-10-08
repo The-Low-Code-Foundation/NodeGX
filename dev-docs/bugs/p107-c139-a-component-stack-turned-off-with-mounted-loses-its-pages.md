@@ -1,7 +1,9 @@
 ---
 id: P107-C139
 title: A Component Stack turned off with Mounted and back on comes back at its start page — the pages pushed, and anything typed on them, are gone; ruled: keep them when an option is ticked
-status: open
+status: scheduled
+phase: P109
+task: ISL-048
 severity: low
 area: runtime / Component Stack (packages/noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx — a remount resets the stack)
 found: P107 NSP-016 s56, 2026-10-08 (ruled and filed 2026-10-08)

@@ -1,7 +1,9 @@
 ---
 id: P107-C137
 title: A Repeater Refresh pulsed while a rebuild is running is never answered — no Done, no Failure — although a rebuild runs for it
-status: open
+status: scheduled
+phase: P109
+task: ISL-049
 severity: medium
 area: runtime / Repeater (noodl-viewer-react/src/nodes/std-library/data/foreach.tsx `refresh` :729-734 — `const answered = internal.pendingRefreshOutcomes; internal.pendingRefreshOutcomes = [];` at the start, and `settle` does `internal.pendingRefreshOutcomes = answered` before `settleRefresh`, overwriting every invocation pushed by the `refresh` input :384-390 while the rebuild was in flight)
 found: P107 NSP-016 s61, 2026-10-08 — the runtime's generated sequences at seed 13 (seed 658503198: two Refreshes around a click that starts the first rebuild)

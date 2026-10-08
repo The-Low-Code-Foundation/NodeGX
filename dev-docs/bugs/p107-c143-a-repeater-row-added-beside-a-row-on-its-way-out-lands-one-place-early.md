@@ -1,7 +1,9 @@
 ---
 id: P107-C143
 title: A row a Repeater adds while another row is on its way out (its Try Remove waiting, or its removal not yet run) lands one place early and stays there; a Refresh moves the leaving row to the end
-status: open
+status: scheduled
+phase: P109
+task: ISL-049
 severity: medium
 area: runtime / Repeater (noodl-viewer-react/src/nodes/std-library/data/foreach.tsx — the `add` handler :240-246 places a row at `getChildren().indexOf(this) + 1 + args.index`, and `refresh` :783-801 at `baseIndex + i`, counting the parent's children; `removeItem` :658-685 takes a row with a Repeater Item out of `itemNodes` at once but leaves it a child of the parent until its Remove Completed, or until the Repeater Item's frame end when Try Remove is not wired)
 found: P107 NSP-016 s63, 2026-10-08

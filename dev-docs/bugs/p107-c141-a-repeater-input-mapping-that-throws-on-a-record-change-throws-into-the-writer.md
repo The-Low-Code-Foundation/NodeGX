@@ -1,7 +1,9 @@
 ---
 id: P107-C141
 title: A Repeater input mapping that throws when a record changes throws into whatever wrote the record — another node's Set, a backend's save, a Query — which fails there, though the fault is the Repeater's
-status: open
+status: scheduled
+phase: P109
+task: ISL-049
 severity: medium
 area: runtime / Repeater (noodl-viewer-react/src/nodes/std-library/data/foreach.tsx `addItem` :626-628 subscribes `_forEachModelChangeListener = () => this._mapInputs(itemNode, model)` to the record's `change`; `_mapInputs` :538-555 has no try, and a record notifies synchronously inside `set` (model.ts :329-337))
 found: P107 NSP-016 s62, 2026-10-08

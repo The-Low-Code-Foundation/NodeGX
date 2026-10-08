@@ -2,6 +2,7 @@
 id: P107-C103
 title: A Drag draws only its first child — every other child vanishes without a word, and the catalog's drag example teaches a readout that never appears
 status: fixed
+commit: 3506fc6e9
 phase: P109
 task: ISL-048
 severity: medium

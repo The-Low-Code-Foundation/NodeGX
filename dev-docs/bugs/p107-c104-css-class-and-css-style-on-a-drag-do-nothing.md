@@ -2,6 +2,7 @@
 id: P107-C104
 title: CSS Class and CSS Style on a Drag do nothing — the Drag has no element and passes neither to the child it moves
 status: fixed
+commit: 9e19b3841
 phase: P109
 task: ISL-048
 severity: low

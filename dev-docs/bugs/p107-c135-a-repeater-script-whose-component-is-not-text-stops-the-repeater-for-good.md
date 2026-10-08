@@ -1,7 +1,9 @@
 ---
 id: P107-C135
 title: A Repeater Script that sets `component` to something that is not text (a number, an object, `true`) stops the Repeater for good — no later Items, Template or Refresh is drawn or answered
-status: open
+status: scheduled
+phase: P109
+task: ISL-049
 severity: medium
 area: runtime / Repeater (noodl-viewer-react/src/nodes/std-library/data/foreach.tsx `getTemplateForModel` :524 `template.startsWith('./')` runs OUTSIDE the try around the Script (:507-521); the TypeError rejects `addItem`, and `_runQueueOperations` :815-860 catches nothing — C128's mechanism, reached by another line)
 found: P107 NSP-016 s61, 2026-10-08
