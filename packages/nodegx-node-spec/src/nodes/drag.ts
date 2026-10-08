@@ -9,9 +9,10 @@
  * where the runtime does otherwise only because of how it is built, that is a known row on the runtime target (C102, C105 and C106
  * were, until P109 ISL-048 fixed them).
  *
- * THE CHILD. A Drag has no element of its own (drag.ts `noDataAttributes`); it moves its FIRST child's element with a CSS
- * `translate`, and draws no other child (Drag.tsx `render`, row C103). Its page holds one child, a Group, which is the element a
- * person presses. With no child on the page there is nothing to press.
+ * THE CHILD. A Drag has no element of its own (drag.ts `noDataAttributes`); it moves its child's element with a CSS `translate`.
+ * With more than one child it wraps them in one element and moves that (Drag.tsx `render`, row C103, fixed in P109 ISL-048: it drew
+ * only the first; graded in the viewer's tests). Its page holds one child, a Group, which is the element a person presses. With no
+ * child on the page there is nothing to press.
  *
  * THE GESTURE (the acts `pressAt`, `moveTo`, `releaseAt`: a pointer at a point, in pixels from the page's corner). Pure arithmetic —
  * the face lays nothing out, so the pointer is read against the page (DraggableCore `getControlPosition`: the offset parent is the

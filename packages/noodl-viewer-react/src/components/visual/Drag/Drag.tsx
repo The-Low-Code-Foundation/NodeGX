@@ -58,6 +58,9 @@ export class Drag extends React.Component<DragProps, State> {
    */
   draggableNodeRef: React.RefObject<HTMLElement>;
 
+  /** P107-C103 — the element a Drag with more than one child wraps them in, and moves. */
+  wrapperRef = React.createRef<HTMLDivElement>();
+
   /**
    * P107-C105 — where `componentDidMount` put the element, until that `setState` lands. A Snap Do that waited for the component
    * runs at the child's ref, after the mount queued its position and before React commits it: read from `this.state`, it started
@@ -72,6 +75,8 @@ export class Drag extends React.Component<DragProps, State> {
     const self = this;
     this.draggableNodeRef = {
       get current() {
+        // P107-C103 — with more than one child, the library moves the wrapper
+        if (self.wrapperRef.current) return self.wrapperRef.current;
         const noodlNode = self.props.noodlNode;
         const child = noodlNode && noodlNode.children && noodlNode.children[0];
         return child && child.getDOMElement ? child.getDOMElement() : null;
@@ -210,12 +215,44 @@ export class Drag extends React.Component<DragProps, State> {
     const props = this.props;
     const bounds = props.useParentBounds ? 'parent' : undefined;
 
-    let child;
-    if (React.Children.count(props.children) > 0) {
-      child = React.Children.toArray(props.children)[0];
-    } else {
-      return null;
-    }
+    const children = React.Children.toArray(props.children) as React.ReactElement<any>[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+    if (children.length === 0) return null;
+
+    /**
+     * P107-C104 — the Drag has no element of its own, so its CSS Class and CSS Style go on the element it moves (Richard,
+     * 2026-10-08: "Apply to what it moves"). react-draggable adds `react-draggable` to this class and its transform to this
+     * style; a child's wrapper adds both to the node's own (DEF-027 for the class; on a style property both set, the Drag's
+     * wins, as a React parent's always does). Unset, nothing is passed and the child is exactly as before.
+     */
+    const look = {
+      ...(props.className ? { className: props.className } : {}),
+      ...(props.style && Object.keys(props.style).length > 0 ? { style: props.style } : {})
+    };
+
+    /**
+     * P107-C103 — a Drag drew only its first child; the rest vanished without a word (Richard, 2026-10-08: "Draw them all").
+     * One child is moved as it always was. More are wrapped in one element the library moves, so they move together: it lays
+     * them out as a column, as a Group does by default (each child is told so), and sits where a Noodl element sits in the
+     * Drag's parent — in its flow, or at the top left of a parent that lays nothing out.
+     */
+    const moved =
+      children.length === 1 ? (
+        React.cloneElement(children[0], { parentLayout: props.parentLayout, ...look })
+      ) : (
+        <div
+          ref={this.wrapperRef}
+          className={look.className}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            flexShrink: 0,
+            ...(props.parentLayout === 'none' ? { position: 'absolute', left: 0, top: 0 } : { position: 'relative' }),
+            ...look.style
+          }}
+        >
+          {children.map((c) => React.cloneElement(c, { parentLayout: 'column' }))}
+        </div>
+      );
 
     return (
       <Draggable
@@ -261,17 +298,7 @@ export class Drag extends React.Component<DragProps, State> {
           props.onDrag && props.onDrag();
         }}
       >
-        {React.cloneElement(child, {
-          parentLayout: props.parentLayout,
-          /**
-           * P107-C104 — the Drag has no element of its own, so its CSS Class and CSS Style go on the element it moves (Richard,
-           * 2026-10-08: "Apply to what it moves"). react-draggable adds `react-draggable` to this class and its transform to this
-           * style; the child's wrapper adds both to the node's own (DEF-027 for the class; on a style property both set, the Drag's
-           * wins, as a React parent's always does). Unset, nothing is passed and the child is exactly as before.
-           */
-          ...(props.className ? { className: props.className } : {}),
-          ...(props.style && Object.keys(props.style).length > 0 ? { style: props.style } : {})
-        })}
+        {moved}
       </Draggable>
     );
   }
