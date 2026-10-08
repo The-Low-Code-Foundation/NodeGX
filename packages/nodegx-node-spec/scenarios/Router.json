@@ -1292,7 +1292,7 @@
   }
  },
  {
-  "name": "navigate Product 7 twice: the second Unchanged; a Reset reads '7' from the URL, a change — Done, handed to no page (row C117); a third navigate with 7 rebuilds",
+  "name": "navigate Product 7 twice: the second Unchanged; a Reset reads '7' from the URL, a change — Done, handed to the page the navigate built (row C117, fixed in P109 ISL-048); a third navigate with 7 rebuilds",
   "because": "shallowObjectsEqual ===",
   "params": {
    "name": "Main",
@@ -1937,7 +1937,7 @@
   }
  },
  {
-  "name": "after a navigate built Product 1, Back to #/product/2: the reset takes it as the page it shows with new parameters, but its Page Inputs are never handed id 2 — the router hands them to the page the last reset built, deleted (row C117)",
+  "name": "after a navigate built Product 1, Back to #/product/2: the reset takes it as the page it shows with new parameters, and its Page Inputs are handed id 2 (row C117, fixed in P109 ISL-048)",
   "because": "the same page, the parameters moved :548-577",
   "params": {
    "name": "Main",
@@ -6597,6 +6597,64 @@
    "settle",
    {
     "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   }
+  }
+ },
+ {
+  "name": "C117's twin: navigate About with ?x=1 (no Page Inputs), then a Reset reads '1' — a change, Done; a second Reset is Unchanged, and a navigate after it still runs",
+  "because": "resetAsync :571-589 (the parameters move: Done, Page Inputs handed to the page on screen, here none); a reset that changed nothing is Unchanged",
+  "params": {
+   "name": "Main",
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "About",
+     "params": {
+      "x": 1
+     }
+    }
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "act": "navigate",
+    "value": {
+     "target": "Home"
+    }
+   },
+   "settle",
+   {
+    "advance": 1
    },
    "settle"
   ],

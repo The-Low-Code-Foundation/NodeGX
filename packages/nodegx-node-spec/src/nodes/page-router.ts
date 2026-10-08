@@ -118,10 +118,10 @@ type State = {
   current: PageInfo | undefined;
   currentParams: Rec | undefined;
   /**
-   * `_internal.currentPageComponent` — the content the last RESET built (:625): a navigate never writes it (`_buildPage`), so after a
-   * navigate it is a page already deleted, and a reset onto the same page hands its parameters to that one (row C117)
+   * `_internal.currentPageComponent` — the content of the page it shows, as a reset or a navigate built it (row C117, fixed in P109
+   * ISL-048: a navigate never wrote it, so a later reset onto the same page handed its parameters to a page already deleted)
    */
-  resetBuilt: { page: number; info: PageInfo } | undefined;
+  built: { page: number; info: PageInfo } | undefined;
   /** the page containers deleted (left, or refused) */
   deleted: number[];
   children: number[];
@@ -152,10 +152,11 @@ const LOOK = (displayName: string, group: string, description: string, extra: Re
 
 export const PageRouter = defineNode({
   type: 'Router',
+  // v5 (P109 ISL-048, s30): a Reset onto the page a Navigate built hands that page its new parameters — Back to the same page with other ones shows them (row C117)
   // v4 (P109 ISL-048, s30): a blank-named Navigate queued before the router is on the page waits as Main, so a router registering as Main takes it (row C118)
   // v3 (P109 ISL-048, s30): a Url path of null is none — the router matches and pushes its URLs as with no Url path (row C116)
   // v2 (P109 ISL-048, s30): a malformed escape in the query is kept as written, as a path segment's is — the router shows its page and answers (row C115)
-  version: 4,
+  version: 5,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/router.tsx',
   needs: ['person', 'clock', 'location', 'project'],
   worldPool: {
@@ -194,7 +195,7 @@ export const PageRouter = defineNode({
     indexName: undefined,
     current: undefined,
     currentParams: undefined,
-    resetBuilt: undefined,
+    built: undefined,
     deleted: [],
     children: [],
     nextPage: 1,
@@ -720,10 +721,8 @@ function checks(w: Work, item: Item): Busy | number | typeof THROWS {
       // :571-589 — the page it shows: Done when the parameters moved (the Page Inputs handed them), else Unchanged
       if (!shallowEqual(s.currentParams, params)) {
         s.currentParams = params;
-        // `_updatePageInputs(currentPageComponent.nodeScope, …)` :583 — the content the last RESET built: deleted after a navigate (its
-        // scope holds nothing), none at all when no reset ever built one (a throw: never answered) — row C117
-        if (!s.resetBuilt) return THROWS;
-        if (!s.deleted.includes(s.resetBuilt.page)) handPageInputs(w, s.resetBuilt.info, params);
+        // `_updatePageInputs(currentPageComponent.nodeScope, …)` :583 — the page it shows, whoever built it (row C117, fixed in P109 ISL-048)
+        if (s.built) handPageInputs(w, s.built.info, params);
         reportReset(w, item.tokens, 'done');
       } else reportReset(w, item.tokens, 'unchanged');
       return 1;
@@ -790,7 +789,7 @@ function finishBusy(w: Work): void {
     // :600-621 — exactly one Page, or the content is deleted and the page it showed forgotten
     if (b.page.pageNodes !== 1) {
       s.current = undefined;
-      s.resetBuilt = undefined;
+      s.built = undefined;
       s.deleted = [...s.deleted, id];
       s.component = undefined;
       flag(w, 'currentPageComponent');
@@ -800,7 +799,7 @@ function finishBusy(w: Work): void {
     s.currentParams = b.params;
     showOutputs(w, b.page);
     handPageInputs(w, b.page, b.params);
-    s.resetBuilt = { page: id, info: b.page };
+    s.built = { page: id, info: b.page };
     s.children = [...s.children, id];
     return void reportReset(w, b.item.tokens, 'done');
   }
@@ -809,8 +808,9 @@ function finishBusy(w: Work): void {
   s.currentParams = b.params;
   showOutputs(w, b.page);
   handPageInputs(w, b.page, b.params);
+  s.built = { page: id, info: b.page };
   s.children = [...s.children, id];
-  // `_updateUrlWithTopPage` (:874-884): the URL pushed — a later reset in this work reads the location where it moved. A Url path
+  // `_updateUrlWithTopPage` (:874-884): the URL pushed — a later reset in this work reads the location where it moved
   const url = attempt(() => completeUrl(s, b.page, b.params, w.view.projectSettings()));
   if (url === THROWS) return;
   w.answers.push({ op: 'history', url });

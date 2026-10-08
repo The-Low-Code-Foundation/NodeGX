@@ -969,6 +969,9 @@ const RouterNode = {
       // Create the page content, unless it was kept
       const content = kept ? kept._isl004Page.content : await this.nodeScope.createNode(args.target, guid());
 
+      // P107-C117: the page a Navigate builds is the one a later Reset onto it hands new parameters to (`resetAsync` reads
+      // this) — only a reset wrote it, so after a Navigate, Back to the same page with other parameters fed a deleted page
+      this._internal.currentPageComponent = content;
       this._internal.currentPage = newPage;
       this._internal.currentPageSnapshot = _snapshotPageInfo(newPage);
       this._internal.currentParams = args.params;
