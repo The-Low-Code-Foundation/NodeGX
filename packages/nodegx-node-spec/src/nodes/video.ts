@@ -99,6 +99,8 @@ type State = {
   acceptFileDrops: boolean;
   acceptedFileTypes: unknown;
   dragDepth: number;
+  /** the element the count belongs to: an enter on another starts it again (C81, fixed in P109); -1: none */
+  depthOn: number;
   isDragOver: boolean;
   droppedFiles: unknown;
   droppedFile: unknown;
@@ -214,7 +216,8 @@ export const Video = defineNode({
   // v1 (NSP-016 s54): the Image's machinery (image.ts) with the element a Source draws (a `<video>` or an embed), the browser's media
   // element, the four actions and what waits for the component
   // v2 (P109 ISL-038, s29): a key during a keyboard carry leaves a zone taken off the page first, so Space cancels (row C83)
-  version: 2,
+  // v3 (P109 ISL-038, s29): a file drop zone tracks itself — an enter on a new element starts the count again, and Accept File Drops off or leaving the page turns Is Dragging Over off (row C81)
+  version: 3,
   source: 'packages/noodl-viewer-react/src/nodes/visual/video.ts',
   needs: ['person', 'clock'],
   worldPool: { advances: [0, 1, 499, 500, 1000] },
@@ -256,6 +259,7 @@ export const Video = defineNode({
     acceptFileDrops: false,
     acceptedFileTypes: undefined,
     dragDepth: 0,
+    depthOn: -1,
     isDragOver: false,
     droppedFiles: undefined,
     droppedFile: undefined,
@@ -487,7 +491,8 @@ export const Video = defineNode({
       return { set: { acceptDrops: false }, send: [] };
     },
     acceptKind: (_s, v) => ({ set: { acceptKind: v }, send: [] }),
-    acceptFileDrops: (_s, v) => ({ set: { acceptFileDrops: !!v }, send: [] }),
+    // C81 (fixed in P109 ISL-038): switched off, the zone forgets the count and goes dark — it could not hear the leave
+    acceptFileDrops: (s, v) => (v ? { set: { acceptFileDrops: true }, send: [] } : { set: { acceptFileDrops: false, dragDepth: 0, isDragOver: false }, send: s.isDragOver ? ['isDragOver'] : [] }),
     acceptedFileTypes: (_s, v) => ({ set: { acceptedFileTypes: v }, send: [] }),
     // video.ts :130-133 — `resolveMediaSource`; the frame's end draws it
     src: (_s, v) => ({ set: { source: mediaSource(v) }, send: [] }),
@@ -717,7 +722,8 @@ function paintedElement(s: Readonly<State>): Act {
   }
   if (!s.mounted && s.onPage) {
     const gone: Act = s.kind === 'video' ? { ...NONE, set: { domElement: null }, send: ['onVideoElementCreated'] } : NONE;
-    return { ...gone, set: { onPage: false, elementFocused: false, ...gone.set }, emit: ['willUnmount'] };
+    const dark = fileDark(s);
+    return { ...gone, set: { onPage: false, elementFocused: false, ...gone.set, ...dark.set }, send: [...gone.send, ...dark.send], emit: ['willUnmount'] };
   }
   if (!s.onPage) return NONE;
   const kind = kindOf(s.source);
@@ -1042,20 +1048,34 @@ function armed(s: Readonly<State>): boolean {
   return s.acceptFileDrops && (s.fileCarry?.length ?? 0) > 0;
 }
 
+/** C81 (P109): what a file act always does it always writes — the count, its element and Is Dragging Over as they end up, sent only
+ * when they change. A write made only when one changes split each act's branch by whether it did (0 over 0 after a clear). */
+function heldDrag(s: Readonly<State>): Partial<State> {
+  return { dragDepth: s.dragDepth, depthOn: s.depthOn, isDragOver: s.isDragOver };
+}
+
 /** The browser moves the drag's target to `here`: a leave at the element it was over, if that is this node's element on the page, then an enter at `here`. */
 function dragTo(s: Readonly<State>, here: number, extra: Partial<State> = {}): Act {
-  if (s.fileOn === here) return { ...NONE, set: extra };
+  if (s.fileOn === here) return { ...NONE, set: { ...extra, fileOn: here, ...heldDrag(s) } };
   const left = s.onPage && s.fileOn === s.elem ? fileLeft(s) : NONE;
   const mid = { ...s, ...left.set };
-  const entered = here === -1 ? NONE : fileEntered(mid);
-  return join(join(left, entered), { ...NONE, set: { ...extra, fileOn: here } });
+  const entered = here === -1 ? NONE : fileEntered(mid, here);
+  const after = { ...mid, ...entered.set };
+  return join(join(left, entered), { ...NONE, set: { ...extra, fileOn: here, ...heldDrag(after) } });
 }
 
 /** `onDragEnter` (:1009-1019) */
-function fileEntered(s: Readonly<State>): Act {
+function fileEntered(s: Readonly<State>, here: number): Act {
   if (!armed(s)) return NONE;
   const over = dragOver(s, true);
-  return { ...over, set: { ...over.set, dragDepth: s.dragDepth + 1 } };
+  // C81 (fixed in P109 ISL-038): the count belongs to the element it counted; an enter on a new one starts it again
+  return { ...over, set: { ...over.set, dragDepth: (s.depthOn === here ? s.dragDepth : 0) + 1, depthOn: here } };
+}
+
+/** C81 (fixed in P109 ISL-038): the element leaving the page takes the drag with it — the count forgotten, Is Dragging Over false
+ * (node-shared-port-definitions.ts `fileDropDark`, from `_fileDropLeftPage`). Written at every leave; sent only when it changes. */
+function fileDark(s: Readonly<State>): { set: Partial<State>; send: Val[] } {
+  return { set: { dragDepth: 0, isDragOver: false }, send: s.isDragOver ? ['isDragOver'] : [] };
 }
 
 /** `onDragLeave` (:1030-1035) */

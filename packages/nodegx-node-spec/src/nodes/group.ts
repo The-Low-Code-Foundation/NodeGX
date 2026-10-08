@@ -122,6 +122,8 @@ type State = {
   acceptFileDrops: boolean;
   acceptedFileTypes: unknown;
   dragDepth: number;
+  /** the element the count belongs to: an enter on another starts it again (C81, fixed in P109); -1: none */
+  depthOn: number;
   isDragOver: boolean;
   droppedFiles: unknown;
   droppedFile: unknown;
@@ -193,7 +195,8 @@ export const Group = defineNode({
   // v2 (s53, R16): a Focus off the page reports Unchanged and lists nothing, as a field's does (the runtime's Done is row C95)
   // v3 (P109 ISL-038, s29): the Unchanged outcome port (C95: group.ts reports it now), and a new Tag's element carries the node (C86)
   // v4 (P109 ISL-038, s29): a key during a keyboard carry leaves a zone taken off the page first, so Space cancels (row C83)
-  version: 4,
+  // v5 (P109 ISL-038, s29): a file drop zone tracks itself — an enter on a new element starts the count again, and Accept File Drops off or leaving the page turns Is Dragging Over off (row C81)
+  version: 5,
   source: 'packages/noodl-viewer-react/src/nodes/visual/group.ts',
   needs: ['person', 'clock'],
   worldPool: { advances: [0, 1, 499, 500, 1000] },
@@ -241,6 +244,7 @@ export const Group = defineNode({
     acceptFileDrops: false,
     acceptedFileTypes: undefined,
     dragDepth: 0,
+    depthOn: -1,
     isDragOver: false,
     droppedFiles: undefined,
     droppedFile: undefined,
@@ -466,7 +470,8 @@ export const Group = defineNode({
       return { set: { acceptDrops: false }, send: [] };
     },
     acceptKind: (_s, v) => ({ set: { acceptKind: v }, send: [] }),
-    acceptFileDrops: (_s, v) => ({ set: { acceptFileDrops: !!v }, send: [] }),
+    // C81 (fixed in P109 ISL-038): switched off, the zone forgets the count and goes dark — it could not hear the leave
+    acceptFileDrops: (s, v) => (v ? { set: { acceptFileDrops: true }, send: [] } : { set: { acceptFileDrops: false, dragDepth: 0, isDragOver: false }, send: s.isDragOver ? ['isDragOver'] : [] }),
     acceptedFileTypes: (_s, v) => ({ set: { acceptedFileTypes: v }, send: [] }),
     // focus-tracker.ts :56-75 — listed, Focused only when it was not listed; off the page, Unchanged and nothing listed (R16)
     // a Focus behind outcomes the frame has resolved and not yet reported waits its turn (`ran`), as the runtime reports it after them
@@ -491,7 +496,7 @@ export const Group = defineNode({
       // placed on the page with its params set — the first render: Did Mount, and Children Count from the children added before it
       place: (s) => {
         const p = painted(s);
-        return { set: p.set, send: ['childrenCount'], emit: p.emit };
+        return { set: p.set, send: ['childrenCount', ...p.send], emit: p.emit };
       },
       timer: (s, _i, tag) => {
         if (tag === 'unswallow') return { set: { swallow: false }, send: [] };
@@ -506,7 +511,7 @@ export const Group = defineNode({
       const a = chainCheck(s1);
       const b = chainCheck({ ...s1, ...a });
       const p = painted({ ...s1, ...a, ...b });
-      return toPatch({ set: { ...w.set, ...a, ...b, ...p.set, ran: [] }, send: [], emit: p.emit, outcomes: [...s.ran, ...(w.outcomes ?? []), ...(p.outcomes ?? [])] });
+      return toPatch({ set: { ...w.set, ...a, ...b, ...p.set, ran: [] }, send: p.send, emit: p.emit, outcomes: [...s.ran, ...(w.outcomes ?? []), ...(p.outcomes ?? [])] });
     },
     person: {
       hover: (s) => toPatch(pointerAct(s, (p) => (hits(p) ? reach({ ...NONE, emit: ['hoverStart', 'pointerEnter'] }) : NONE))),
@@ -721,14 +726,14 @@ function pointerAct(s: Readonly<State>, then: (painted: Readonly<State>) => Act)
  * the focus tracker) and runs the scrolls that waited; leaving the page drops the Group from the focus list (`nodeUnmounted`); a new Tag
  * makes a new element, which carries the node too (Group.tsx `rootRef`; row C86 before P109).
  */
-function painted(s: Readonly<State>): { set: Partial<State>; emit: Pulse[]; outcomes?: Resolved[] } {
+function painted(s: Readonly<State>): { set: Partial<State>; send: Val[]; emit: Pulse[]; outcomes?: Resolved[] } {
   if (s.mounted && !s.onPage) {
     const f = flushed(s);
-    return { set: { onPage: true, elem: s.elem + 1, stampOn: s.elem + 1, shownTag: s.tag, elementFocused: false, ...f.set }, emit: ['didMount'], outcomes: f.outcomes };
+    return { set: { onPage: true, elem: s.elem + 1, stampOn: s.elem + 1, shownTag: s.tag, elementFocused: false, ...f.set }, send: [], emit: ['didMount'], outcomes: f.outcomes };
   }
-  if (!s.mounted && s.onPage) return { set: { onPage: false, elementFocused: false, listed: false }, emit: ['willUnmount'] };
-  if (s.onPage && s.tag !== s.shownTag) return { set: { elem: s.elem + 1, stampOn: s.elem + 1, shownTag: s.tag, elementFocused: false }, emit: [] };
-  return { set: {}, emit: [] };
+  if (!s.mounted && s.onPage) return { set: { ...fileDark(s).set, onPage: false, elementFocused: false, listed: false }, send: fileDark(s).send, emit: ['willUnmount'] };
+  if (s.onPage && s.tag !== s.shownTag) return { set: { elem: s.elem + 1, stampOn: s.elem + 1, shownTag: s.tag, elementFocused: false }, send: [], emit: [] };
+  return { set: {}, send: [], emit: [] };
 }
 
 /** The act on the painted page: nothing to act on when the element is not there. The act's drain (docblock) after its own work. */
@@ -736,7 +741,7 @@ function onPainted(s: Readonly<State>, then: (painted: Readonly<State>) => Act):
   const p = painted(s);
   const after: State = { ...s, ...p.set };
   const a = after.onPage ? withDrain(after, then(after), false) : { ...NONE, set: { scheduled: after.scheduled, waiting: after.waiting } };
-  return heldOver(s, { ...a, set: { ...p.set, ...a.set }, emit: [...p.emit, ...a.emit], outcomes: [...(p.outcomes ?? []), ...(a.outcomes ?? [])] });
+  return heldOver(s, { ...a, set: { ...p.set, ...a.set }, send: [...p.send, ...a.send], emit: [...p.emit, ...a.emit], outcomes: [...(p.outcomes ?? []), ...(a.outcomes ?? [])] });
 }
 
 /** What an act or a timer resolved, held for the frame's end in the order resolved (`ran`, docblock); written every time. */
@@ -750,7 +755,7 @@ function paintedThen(s: Readonly<State>, then: (painted: Readonly<State>) => Act
   const p = painted(s);
   const after: State = { ...s, ...p.set };
   const a = withDrain(after, then(after), false);
-  return heldOver(s, { ...a, set: { ...p.set, ...a.set }, emit: [...p.emit, ...a.emit], outcomes: [...(p.outcomes ?? []), ...(a.outcomes ?? [])] });
+  return heldOver(s, { ...a, set: { ...p.set, ...a.set }, send: [...p.send, ...a.send], emit: [...p.emit, ...a.emit], outcomes: [...(p.outcomes ?? []), ...(a.outcomes ?? [])] });
 }
 
 function under(s: Readonly<State>): number {
@@ -837,20 +842,34 @@ function armed(s: Readonly<State>): boolean {
   return s.acceptFileDrops && (s.fileCarry?.length ?? 0) > 0;
 }
 
+/** C81 (P109): what a file act always does it always writes — the count, its element and Is Dragging Over as they end up, sent only
+ * when they change. A write made only when one changes split each act's branch by whether it did (0 over 0 after a clear). */
+function heldDrag(s: Readonly<State>): Partial<State> {
+  return { dragDepth: s.dragDepth, depthOn: s.depthOn, isDragOver: s.isDragOver };
+}
+
 /** The browser moves the drag's target to `here`; a drag event that reaches the element drains (its handler is wrapped). */
 function dragTo(s: Readonly<State>, here: number, extra: Partial<State> = {}): Act {
-  if (s.fileOn === here) return here === -1 ? { ...NONE, set: extra } : reach({ ...NONE, set: extra });
+  if (s.fileOn === here) return here === -1 ? { ...NONE, set: { ...extra, fileOn: here, ...heldDrag(s) } } : reach({ ...NONE, set: { ...extra, fileOn: here, ...heldDrag(s) } });
   const leaving = s.onPage && s.fileOn === s.elem;
   const left = leaving ? reach(fileLeft(s)) : NONE;
   const mid = { ...s, ...left.set };
-  const entered = here === -1 ? NONE : reach(fileEntered(mid));
-  return join(join(left, entered), { ...NONE, set: { ...extra, fileOn: here } });
+  const entered = here === -1 ? NONE : reach(fileEntered(mid, here));
+  const after = { ...mid, ...entered.set };
+  return join(join(left, entered), { ...NONE, set: { ...extra, fileOn: here, ...heldDrag(after) } });
 }
 
-function fileEntered(s: Readonly<State>): Act {
+function fileEntered(s: Readonly<State>, here: number): Act {
   if (!armed(s)) return NONE;
   const over = dragOver(s, true);
-  return { ...over, set: { ...over.set, dragDepth: s.dragDepth + 1 } };
+  // C81 (fixed in P109 ISL-038): the count belongs to the element it counted; an enter on a new one starts it again
+  return { ...over, set: { ...over.set, dragDepth: (s.depthOn === here ? s.dragDepth : 0) + 1, depthOn: here } };
+}
+
+/** C81 (fixed in P109 ISL-038): the element leaving the page takes the drag with it — the count forgotten, Is Dragging Over false
+ * (node-shared-port-definitions.ts `fileDropDark`, from `_fileDropLeftPage`). Written at every leave; sent only when it changes. */
+function fileDark(s: Readonly<State>): { set: Partial<State>; send: Val[] } {
+  return { set: { dragDepth: 0, isDragOver: false }, send: s.isDragOver ? ['isDragOver'] : [] };
 }
 
 function fileLeft(s: Readonly<State>): Act {

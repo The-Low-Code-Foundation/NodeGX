@@ -5997,7 +5997,7 @@
     ]
   },
   {
-    "name": "Accept File Drops switched off while a drag is over it: the leave is not heard, so Is Dragging Over stays true; on again, the next drag counts 2, a leave leaves it true, a drop clears it",
+    "name": "Accept File Drops switched off while a drag is over it: Is Dragging Over goes false at once and the count is forgotten (C81); on again, the next drag counts 1, so its leave turns it off, and a drop clears it",
     "because": "node-shared-port-definitions.ts :253-254, :1030-1035 — armed is asked at each event",
     "params": {
       "acceptFileDrops": true
@@ -6068,7 +6068,7 @@
     ]
   },
   {
-    "name": "Accept File Drops switched off before the let go: the element does not take the drop (a leave instead, not heard) — nothing fires and Is Dragging Over stays true",
+    "name": "Accept File Drops switched off before the let go: Is Dragging Over goes false at once (C81), and the element does not take the drop — nothing fires",
     "because": "node-shared-port-definitions.ts :1021-1028 — the dragover is not cancelled",
     "params": {
       "acceptFileDrops": true
@@ -6314,7 +6314,7 @@
     "row": "NSP-016 §6 C79"
   },
   {
-    "name": "Mounted off and on under a drag: the old element's leave reaches nothing and the new one is entered — the count is 2; a let go clears it and drops",
+    "name": "Mounted off and on under a drag: leaving the page turns Is Dragging Over off (C81); the let go enters the new element, the count 1, and drops",
     "because": "react-component-node.ts :2283-2294 — a new element; dragDepth is the node's",
     "params": {
       "acceptFileDrops": true
@@ -6351,7 +6351,7 @@
     ]
   },
   {
-    "name": "Mounted off and on under a drag, then the drag leaves: the count is still 1, so Is Dragging Over stays true with no drag over it",
+    "name": "Mounted off and on under a drag, then the drag leaves: leaving the page turns Is Dragging Over off (C81), the new element's enter counts 1, and the leave turns it off",
     "because": "react-component-node.ts :2283-2294; node-shared-port-definitions.ts :1030-1035",
     "params": {
       "acceptFileDrops": true
@@ -6401,7 +6401,7 @@
     ]
   },
   {
-    "name": "a new Tag under a drag makes a new element: entered again, so a leave leaves Is Dragging Over true",
+    "name": "a new Tag under a drag makes a new element: its enter starts the count again (C81), so a leave turns Is Dragging Over off",
     "because": "Text.tsx :50 — a new element type",
     "params": {
       "acceptFileDrops": true
@@ -6457,6 +6457,73 @@
       },
       {
         "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a new Tag under a drag, then the drag leaves before it moves again: the leave goes to the old element, so Is Dragging Over stays true with no drag; a leave and a let go with no drag change nothing, Accept File Drops off then turns it off (C81), and on again the next drag over the new element lights it and its leave turns it off",
+    "because": "the runtime target moves the drag's target only at an act (a browser's next dragover would enter the new element first); node-shared-port-definitions.ts `onDragEnter` — the count belongs to one element",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "h1"
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "set": "acceptFileDrops",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "acceptFileDrops",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileLeave"
       },
       "settle"
     ]
@@ -6981,7 +7048,7 @@
     ]
   },
   {
-    "name": "Is Dragging Over left true with no drag (an unheard leave): a leave or a let go with no drag changes nothing; the next drag's enter and leave keep it true (the count went 1 → 2 → 1)",
+    "name": "Accept File Drops off and on under a drag turns Is Dragging Over off (C81): a leave or a let go with no drag changes nothing; the next drag's enter and leave turn it on and off",
     "because": "node-shared-port-definitions.ts :1009-1035",
     "params": {
       "acceptFileDrops": true
@@ -7042,7 +7109,7 @@
     ]
   },
   {
-    "name": "a drag that enters while switched off and leaves after it is switched on is counted at the leave: from 1, the count falls to 0 and Is Dragging Over goes false; from 2 it would stay true",
+    "name": "a drag that enters while switched off and leaves after it is switched on is counted at the leave: the count never goes below 0, so Is Dragging Over stays false (C81: switching off forgot the count)",
     "because": "node-shared-port-definitions.ts :1030-1035",
     "params": {
       "acceptFileDrops": true
@@ -8743,7 +8810,7 @@
     ]
   },
   {
-    "name": "Is Dragging Over left true (an unheard leave), then a drag over the hidden text leaves: nothing is counted — visible, the next drag's let go clears it",
+    "name": "Accept File Drops off and on under a drag turns Is Dragging Over off (C81), then a drag over the hidden text leaves: nothing is counted — visible, the next drag lights it and its let go clears it",
     "because": "node-shared-port-definitions.ts :1030-1035 — a leave reaches only the element the drag was over",
     "params": {
       "acceptFileDrops": true

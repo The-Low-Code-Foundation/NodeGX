@@ -97,6 +97,12 @@ const CONTROL_NODE = ['enabled', 'hover', 'pressed', 'focused', 'mounted', 'visi
  * node's own work at the leaving (utils.ts `_leftPage`, from `componentWillUnmount`), not a person's, and it reads only node keys.
  */
 const LEAVES = { frameEnd: ['focused', 'hover', 'pressed'], framePulses: ['onBlur', 'hoverEnd'] };
+/**
+ * P109 ISL-038 (P107-C81, ruled "the zone tracks itself") — a file drop zone's element leaving the page takes the drag with it: the
+ * paint that unmounts it writes the count 0 and Is Dragging Over false (node-shared-port-definitions.ts `fileDropDark`, from
+ * `_fileDropLeftPage` in `componentWillUnmount`). The node's own work at the leaving, reading only node keys.
+ */
+const FILE_DROP_LEAVES = ['dragDepth', 'isDragOver'];
 
 export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
   'net.noodl.controls.button': {
@@ -119,7 +125,7 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
     held: {}
   },
   Text: {
-    node: ['mounted', 'tag', 'chain', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'dragValue', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'dragKind', 'phase', 'input', 'inZone', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'isDragOver', 'droppedFiles', 'droppedFile'],
+    node: ['mounted', 'tag', 'chain', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'dragValue', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'dragKind', 'phase', 'input', 'inZone', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile'],
     attr: {
       onPage,
       // an element's type cannot change: presetting it would claim an element the page does not have
@@ -134,12 +140,12 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
       sourceElem: { keeps: 'what a module put on the element' }
     },
     // drag-drop.ts :136-145 `whenMounted` counts frame starts until the node has an element
-    frameEnd: ['chain'],
+    frameEnd: ['chain', ...FILE_DROP_LEAVES],
     elementCalls: { 'on.draggable': ['onPage', 'elem', 'attrsOn'], 'on.acceptDrops': [], 'world.timer': ['onPage', 'elem', 'pointerAt', 'sourceElem'] }
   },
   // s53 — the Text's model with no Tag: the element is always a `<div>`, so only a mount makes a new one
   Circle: {
-    node: ['mounted', 'chain', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'dragValue', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'dragKind', 'phase', 'input', 'inZone', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'isDragOver', 'droppedFiles', 'droppedFile'],
+    node: ['mounted', 'chain', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'dragValue', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'dragKind', 'phase', 'input', 'inZone', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile'],
     attr: { onPage },
     element: { elem: { changesWith: ['onPage'] } },
     held: { elementFocused: keyboard, attrsOn: { keeps: 'what a module put on the element' }, fileCarry: { keeps: 'a drag from outside the page' }, fileOn: { keeps: 'a drag from outside the page' },
@@ -147,12 +153,12 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
       pointerAt: { keeps: 'where the pointer is' },
       sourceElem: { keeps: 'what a module put on the element' }
     },
-    frameEnd: ['chain'],
+    frameEnd: ['chain', ...FILE_DROP_LEAVES],
     elementCalls: { 'on.draggable': ['onPage', 'elem', 'attrsOn'], 'on.acceptDrops': [], 'world.timer': ['onPage', 'elem', 'pointerAt', 'sourceElem'] }
   },
   // s53 — the Shape's model, and the picture: the element's source and Source Set as written (node), the last failure's reason
   Image: {
-    node: ['mounted', 'chain', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'dragValue', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'dragKind', 'phase', 'input', 'inZone', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'isDragOver', 'droppedFiles', 'droppedFile', 'src', 'srcSet', 'imageError'],
+    node: ['mounted', 'chain', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'dragValue', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'dragKind', 'phase', 'input', 'inZone', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile', 'src', 'srcSet', 'imageError'],
     attr: { onPage },
     element: { elem: { changesWith: ['onPage'] } },
     held: { elementFocused: keyboard, attrsOn: { keeps: 'what a module put on the element' }, fileCarry: { keeps: 'a drag from outside the page' }, fileOn: { keeps: 'a drag from outside the page' },
@@ -160,13 +166,13 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
       pointerAt: { keeps: 'where the pointer is' },
       sourceElem: { keeps: 'what a module put on the element' }
     },
-    frameEnd: ['chain'],
+    frameEnd: ['chain', ...FILE_DROP_LEAVES],
     elementCalls: { 'on.draggable': ['onPage', 'elem', 'attrsOn'], 'on.acceptDrops': [], 'world.timer': ['onPage', 'elem', 'pointerAt', 'sourceElem'] }
   },
   // s54 — the Image's model, and the Video's: the element a Source draws (an embed or a `<video>`: a new element without a mount, as the
   // Text's Tag) with its `src` and flags, the media element the browser holds, and the component the node calls
   Video: {
-    node: ['mounted', 'chain', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'dragValue', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'dragKind', 'phase', 'input', 'inZone', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'isDragOver', 'droppedFiles', 'droppedFile',
+    node: ['mounted', 'chain', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'dragValue', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'dragKind', 'phase', 'input', 'inZone', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile',
       'source', 'startTime', 'endTime', 'muted', 'autoplay', 'loop', 'wantToPlay', 'canPlay', 'timeOut', 'videoWidth', 'videoHeight', 'playbackError', 'domElement', 'waiting', 'ran'],
     attr: {
       onPage,
@@ -189,7 +195,7 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
     // `whenMounted`'s chain; at a mount a new component (Video.tsx :115-127: it wants nothing and has seen no load) runs what waited
     // (`_flushPendingInnerActions`) and reports it in order; a new `<video>` is DOM Element (its ref), one that goes is nothing; a load
     // puts the media at 0, which a `timeupdate` sends
-    frameEnd: ['chain', 'wantToPlay', 'canPlay', 'waiting', 'ran', 'domElement', 'timeOut'],
+    frameEnd: ['chain', 'wantToPlay', 'canPlay', 'waiting', 'ran', 'domElement', 'timeOut', ...FILE_DROP_LEAVES],
     // the actions and Source Object call the component, which calls its element: what it is, whether it may play, where it is
     elementCalls: {
       'on.draggable': ['onPage', 'elem', 'attrsOn'],
@@ -205,7 +211,7 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
   // s52 — the Text's model with the Group's additions: the focus tracker's list (the viewer's, moved by Focus and by clicks), the
   // element the component mounted with (the tracker finds the node on it, C86), the gesture's index, Block Pointer Events, the scrolls
   Group: {
-    node: ['mounted', 'tag', 'chain', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'blocks', 'draggable', 'dragValue', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'dragKind', 'phase', 'input', 'inZone', 'index', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'isDragOver', 'droppedFiles', 'droppedFile', 'scrollIndex', 'scrollElement', 'scheduled', 'waiting', 'ran'],
+    node: ['mounted', 'tag', 'chain', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'blocks', 'draggable', 'dragValue', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'dragKind', 'phase', 'input', 'inZone', 'index', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile', 'scrollIndex', 'scrollElement', 'scheduled', 'waiting', 'ran'],
     attr: {
       onPage,
       shownTag: { follows: (s) => (s.onPage ? s.tag : KEEP), preset: false }
@@ -221,7 +227,7 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
     },
     // `whenMounted`'s chain; the frame's scrolls (`scheduleAfterInputsHaveUpdated`), the ones waiting for the component, and the
     // outcomes the frame resolved before its end (reported there, in order)
-    frameEnd: ['chain', 'scheduled', 'waiting', 'ran'],
+    frameEnd: ['chain', 'scheduled', 'waiting', 'ran', ...FILE_DROP_LEAVES],
     // the Focus action asks the tracker's list, and (v2, R16) whether the Group is on the page; the hold timer's lift meets the page
     // and drains the frame's scrolls
     elementCalls: { 'on.draggable': ['onPage', 'elem', 'attrsOn'], 'on.acceptDrops': [], 'on.focus': ['listed', 'onPage'], 'world.timer': ['onPage', 'elem', 'pointerAt', 'sourceElem'] }

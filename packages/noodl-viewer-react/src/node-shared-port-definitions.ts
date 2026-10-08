@@ -215,6 +215,8 @@ interface FileDropInstance {
     acceptedFileTypes?: string;
     /** Enters minus leaves — see the note on `onDragEnter`. */
     dragDepth?: number;
+    /** The element the count belongs to (P107-C81). */
+    dragElement?: EventTarget | null;
     isDragOver?: boolean;
     droppedFile?: File;
     droppedFiles?: File[];
@@ -258,6 +260,15 @@ function fileDropArmed(node: FileDropInstance, e: DragEvent): boolean {
 
   // A `DOMStringList` in older browsers, an array in current ones; `indexOf` is on both.
   return Array.prototype.indexOf.call(types, 'Files') !== -1;
+}
+
+/**
+ * P107-C81 — the zone forgets the drag: the count to 0 and `Is Dragging Over` false. Accept File Drops switched off, and the
+ * element leaving the page (`_fileDropLeftPage`, from react-component-node.ts `componentWillUnmount`): neither hears a leave.
+ */
+function fileDropDark(node: FileDropInstance): void {
+  node._internal.dragDepth = 0;
+  setDragOver(node, false);
 }
 
 /** Publishes `Is Dragging Over`, and only when it actually changed. */
@@ -955,6 +966,12 @@ export default {
    * on shows one extra row and gains no output clutter at all.
    */
   addFileDropPorts(definition: ReactNodeDefinition) {
+    // P107-C81 — a zone leaving the page under a drag goes dark (the browser sends no leave for an element it removes)
+    if (!definition.methods) definition.methods = {};
+    definition.methods._fileDropLeftPage = function (this: FileDropInstance) {
+      fileDropDark(this);
+    };
+
     addInputs(definition, {
       acceptFileDrops: {
         index: 350,
@@ -966,6 +983,8 @@ export default {
           'Lets a file dragged from the desktop be dropped onto this element, which reveals the File Drop outputs below',
         set(this: FileDropInstance, value: boolean) {
           this._internal.acceptFileDrops = !!value;
+          // P107-C81: switched off, the zone can no longer hear the drag's leave, so it forgets the count and goes dark now.
+          if (!value) fileDropDark(this);
         }
       },
       acceptedFileTypes: {
@@ -1016,6 +1035,12 @@ export default {
             // edge. Counting enters and leaves is the standard answer and the only one that
             // survives a drop zone with content in it — which is every real drop zone, since
             // the "Drop files here" label is itself a child.
+            // P107-C81 (ruled "the zone tracks itself"): the count belongs to one element. A zone redrawn under the drag (a new
+            // Tag, Mounted off and on) never hears the old element's leave, so an enter on a new element starts it again.
+            if (this._internal.dragElement !== e.currentTarget) {
+              this._internal.dragElement = e.currentTarget;
+              this._internal.dragDepth = 0;
+            }
             this._internal.dragDepth = (this._internal.dragDepth || 0) + 1;
             setDragOver(this, true);
           },

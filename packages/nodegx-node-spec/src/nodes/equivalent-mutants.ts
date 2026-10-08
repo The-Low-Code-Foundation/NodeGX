@@ -73,20 +73,14 @@ const TEXT: EquivalentMutant[] = [
     // element 1 with the chain at 0: a plain unmount's chain is already 0 (an element on the page with a chain waiting takes it at
     // the frame start), and element 1 — the first made — is at any unmount the one leaving or one already gone; every element after
     // it is a later one. The five-remount scenario kills the swap for any later element's number.
-    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["elementFocused","onPage"],"emit":["willUnmount"]', swappedWith: '"set":["attrsOn","chain","elementFocused","onPage"],"emit":["willUnmount"]', why: 'a plain unmount handed the twin that put the attributes on element 1 with the chain at 0: the chain is 0 already, and element 1 is leaving or gone — no later element is element 1' },
-    // s50: a leave or a let go with no drag from the desktop under way, handed the twin that ends one over nothing of this node's.
-    // With no drag the files are none and the target is none (every act that ends a drag writes both; the start has both), so the
-    // twin writes what the state holds
-    ...['fileLeave', 'fileDrop'].map((act) => ({ reducer: `person.${act}`, kind: 'swap-branch' as const, branch: '"set":[],"emit":[]', swappedWith: '"set":["fileCarry","fileOn"],"emit":[]', why: ALREADY_HELD(`a ${act === 'fileDrop' ? 'let go' : 'leave'} with no drag from the desktop under way (no files, no target)`) })),
-    // s50: a drop taken with Is Dragging Over already false (the enter came while it was off), handed the drop that also turns it
-    // false: false over false, and a value sent unchanged is not recorded (adapter.ts :26-48)
-    { reducer: 'person.fileDrop', kind: 'swap-branch', branch: '"set":["dragDepth","droppedFile","droppedFiles","fileCarry","fileOn"],"emit":["filesDropped"]', swappedWith: '"set":["dragDepth","droppedFile","droppedFiles","fileCarry","fileOn","isDragOver"],"emit":["filesDropped"]', why: ALREADY_HELD('a drop taken with Is Dragging Over already false (Is Dragging Over false, and sent false)') },
-    // s50, from the 10,000 run (seed 20731). A leave with no drag handed the one that ends a drag over nothing of this node's (no
-    // files over none); a leave of a drag over nothing handed the one that also clears the target (none over none); a leave or a let
-    // go with no drag whose paint takes the element away, handed the one that also ends a drag (no files and no target over the same)
-    { reducer: 'person.fileLeave', kind: 'swap-branch', branch: '"set":[],"emit":[]', swappedWith: '"set":["fileCarry"],"emit":[]', why: ALREADY_HELD('a leave with no drag from the desktop under way (no files)') },
-    { reducer: 'person.fileLeave', kind: 'swap-branch', branch: '"set":["fileCarry"],"emit":[]', swappedWith: '"set":["fileCarry","fileOn"],"emit":[]', why: ALREADY_HELD('a leave of a drag over nothing of this node\'s (no target)') },
-    ...['fileLeave', 'fileDrop'].map((act) => ({ reducer: `person.${act}`, kind: 'swap-branch' as const, branch: '"set":["elementFocused","onPage"],"emit":["willUnmount"]', swappedWith: '"set":["elementFocused","fileCarry","fileOn","onPage"],"emit":["willUnmount"]', why: ALREADY_HELD(`a ${act === 'fileDrop' ? 'let go' : 'leave'} with no drag whose paint takes the element away (no files, no target)`) })),
+    // (P109 s29, C81: every unmount also clears the file drag — the count and Is Dragging Over — on both twins alike)
+    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["dragDepth","elementFocused","isDragOver","onPage"],"emit":["willUnmount"]', swappedWith: '"set":["attrsOn","chain","dragDepth","elementFocused","isDragOver","onPage"],"emit":["willUnmount"]', why: 'a plain unmount handed the twin that put the attributes on element 1 with the chain at 0: the chain is 0 already, and element 1 is leaving or gone — no later element is element 1' },
+    // s50, from the 10,000 run (seed 20731): a leave or a let go with no drag whose paint takes the element away, handed the one that
+    // also ends a drag over nothing of this node's. P109 s29 (C81): the paint clears the count on both, so the count's element the twin
+    // writes is never read (an enter reads it only beside a count above 0), and the files and the target are none already. (s50's
+    // other rows here — a drop with Is Dragging Over already false, a leave writing the files or the target alone — went with
+    // write-always: every file act through `dragTo` now writes the target, the count, its element and Is Dragging Over.)
+    ...['fileLeave', 'fileDrop'].map((act) => ({ reducer: `person.${act}`, kind: 'swap-branch' as const, branch: '"set":["dragDepth","elementFocused","isDragOver","onPage"],"emit":["willUnmount"]', swappedWith: '"set":["depthOn","dragDepth","elementFocused","fileCarry","fileOn","isDragOver","onPage"],"emit":["willUnmount"]', why: ALREADY_HELD(`a ${act === 'fileDrop' ? 'let go' : 'leave'} with no drag whose paint takes the element away (no files, no target)`) })),
     // a click on an element its paint makes: a press that starts a pending gesture and a release that ends it, or neither — the
     // gesture is idle before and after (the s43 pair above, with the mount paint)
     { reducer: 'person.click', kind: 'swap-branch', branch: '"set":["elem","elementFocused","onPage","shownTag"],"emit":["didMount","pointerDown","pointerUp","onClick"]', swappedWith: '"set":["elem","elementFocused","inZone","input","onPage","phase","shownTag","sourceElem"],"emit":["didMount","pointerDown","pointerUp","onClick"]', why: 'a click on the element its paint makes, handed the twin whose press starts a pending gesture and whose release ends it: the gesture is idle before and after' },
@@ -197,6 +191,21 @@ function leftUnpressed(acts: readonly string[]): EquivalentMutant[] {
   );
 }
 
+/**
+ * P109 s29 (C81) — a node with no Tag (the Shape, the Image) makes a new element only by a remount, whose unmount clears the file drag.
+ * So with no drag under way the count is 0 and Is Dragging Over false, always. A leave or a let go with no drag, handed the twin that
+ * ends a drag over nothing of this node's: the twin writes no files, no target, the count 0 and Is Dragging Over false as they stand,
+ * and an element for the count that is never read (an enter reads it only beside a count above 0). Not on the Text, the Group or the
+ * Video: a new Tag or a new kind of element under a drag leaves the old element's leave unheard, so a zone can stay lit with no drag.
+ */
+const NO_DRAG_WITHOUT_A_TAG: EquivalentMutant[] = ['fileLeave', 'fileDrop'].map((act) => ({
+  reducer: `person.${act}`,
+  kind: 'swap-branch' as const,
+  branch: '"set":[],"emit":[]',
+  swappedWith: '"set":["depthOn","dragDepth","fileCarry","fileOn","isDragOver"],"emit":[]',
+  why: ALREADY_HELD(`a ${act === 'fileDrop' ? 'let go' : 'leave'} with no drag from the desktop on a node with no Tag (no files, no target, nothing counted)`)
+}));
+
 export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = Object.freeze({
   // NSP-016 s55 — the Drag writes its whole held state on every path (drag.ts `toPatch`); placed off the page, its paint records the
   // props with no component to read them, and the next paint (an act's, or the frame's end) records them again before anything does
@@ -215,9 +224,9 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
   ],
   Text: TEXT,
   // NSP-016 s53 — the Shape runs the Text's machinery with no Tag
-  Circle: TEXT.map(onCircle),
+  Circle: [...TEXT.map(onCircle), ...NO_DRAG_WITHOUT_A_TAG],
   // NSP-016 s53 — the Image runs the Shape's machinery (no Tag), and its fetch
-  Image: TEXT.map(onCircle),
+  Image: [...TEXT.map(onCircle), ...NO_DRAG_WITHOUT_A_TAG],
   // NSP-016 s54 — the Video runs the Image's machinery, on its own shapes (`onVideo`)
   Video: [
     ...TEXT.flatMap(onVideo),
@@ -242,7 +251,7 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     // twin that makes none: the frame's end mounts it instead and runs what waited there, reporting at the same frame end; the element it
     // makes is numbered one more, so the file bookkeeping the twin wrote names an element no longer there, and the next drag over the
     // new one enters it as it would have (element numbers are only ever compared with each other)
-    { reducer: 'person.fileEnter', kind: 'swap-branch', branch: `"set":${JSON.stringify([...VIDEO_PAINT, 'canPlay', 'elementFocused', 'fileCarry', 'onPage', 'ran', 'timeOut', 'waiting', 'wantToPlay'].sort())},"emit":["didMount"]`, swappedWith: '"emit":[],"outcome":null,"outcomes":[]', why: 'a drag entering in the frame the Video mounts, handed a twin that does not mount: the frame end mounts it, and the twin names an element no longer there' },
+    { reducer: 'person.fileEnter', kind: 'swap-branch', branch: `"set":${JSON.stringify([...VIDEO_PAINT, 'canPlay', 'depthOn', 'dragDepth', 'elementFocused', 'fileCarry', 'fileOn', 'isDragOver', 'onPage', 'ran', 'timeOut', 'waiting', 'wantToPlay'].sort())},"emit":["didMount"]`, swappedWith: '"emit":[],"outcome":null,"outcomes":[]', why: 'a drag entering in the frame the Video mounts, handed a twin that does not mount: the frame end mounts it, and the twin names an element no longer there' },
     // … and a card grabbed in that frame, handed a twin that grabs the SAME card without mounting (a twin that carries another card is
     // killed: the card let go over the Video is the one dropped)
     { reducer: 'person.grab', kind: 'swap-branch', branch: `"set":${JSON.stringify([...VIDEO_PAINT, 'activated', 'canPlay', 'cardFocused', 'carry', 'carryBy', 'elementFocused', 'onPage', 'ran', 'timeOut', 'waiting', 'wantToPlay'].sort())},"emit":["didMount"]`, swappedWith: `"set":${JSON.stringify([...VIDEO_PAINT, 'activated', 'cardFocused', 'carry', 'carryBy', 'elementFocused', 'ran'].sort())},"emit":[]`, why: 'a card grabbed in the frame the Video mounts, handed a twin that grabs the same card without mounting: the frame end mounts it' },

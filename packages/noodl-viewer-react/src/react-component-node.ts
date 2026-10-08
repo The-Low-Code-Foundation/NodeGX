@@ -1010,6 +1010,8 @@ export class NoodlReactComponent extends React.Component<NoodlReactComponentProp
     const noodlNode = this.props.noodlNode;
     // P107-D30 (P109 ISL-031) — a control's states go with its element (controls/utils.ts `_leftPage`)
     noodlNode._leftPage?.();
+    // P107-C81 (P109 ISL-038) — a file drop zone's drag goes with its element (node-shared-port-definitions.ts `fileDropDark`)
+    noodlNode._fileDropLeftPage?.();
     // GAM-012 fault 3 — leaving the page is not a Blur. Every node is dropped from the focus list
     // here; `Group.tsx` used to send a Blur instead, and the tracker could not tell the two apart.
     noodlNode.context.setNodeUnmounted?.(noodlNode);
