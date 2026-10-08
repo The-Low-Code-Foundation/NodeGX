@@ -28,9 +28,9 @@
  * (`await createNode`), which lands at the next yield to the event loop: a settle, after the frame's end, or an advance, before the
  * clock moves (spec.ts `resume`). Whatever waits behind it runs then, all of it. A request whose checks ended without a build frees
  * the queue a microtask later (a throw: two) — at a yield, or at the next act boundary for what started outside a frame (`hops`). A
- * build of a component the project does not have is answered as not found (row C107, fixed in P109 ISL-048); one that throws (a
- * transition there is no such thing as, a stack with nothing on it) answers nothing, and the next one runs (rows C108, C110). A
- * back is not queued.
+ * build of a component the project does not have is answered as not found (row C107, fixed in P109 ISL-048), and a transition
+ * there is no such thing as plays none (row C108, fixed); one that throws (a stack with nothing on it) answers nothing, and the
+ * next one runs (row C110). A back is not queued.
  *
  * A RESET (`resetAsync` :503-578) — at the mount (registering), at a Reset (Done or Failure, every Reset of the frame alike), when
  * Components change while the stack is on the page, and when the Name changes while it is — deletes every page, then (no components:
@@ -189,7 +189,8 @@ export const ComponentStack = defineNode({
   // v3 (P109 ISL-048, s31): a reset that fails leaves the stack empty and says so — Top Component Name '' and Stack Depth 0 (row C112)
   // v4 (P109 ISL-048, s31): a page whose component the project does not have is answered — a push or replace Failure, a reset Failure that leaves the stack empty (row C107)
   // v5 (P109 ISL-048, s31): a Components value that is not a list is none (Failure, no components), and a page found by its label with no component is not found (row C109)
-  version: 5,
+  // v6 (P109 ISL-048, s31): a push with a transition there is no such thing as plays none and is Done (row C108)
+  version: 6,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx',
   needs: ['person', 'clock', 'location', 'project'],
   worldPool: {
@@ -932,11 +933,12 @@ function finishBusy(w: Work): void {
   const v = item.v;
   const params: Rec = { ...(v.params ?? {}) };
   if (item.kind === 'push') {
-    // :993-1027 — the entry below (none: `top.page` throws, row C110), the transition (one there is no such thing as throws, row C108)
+    // :993-1027 — the entry below (none: `top.page` throws, row C110), the transition
     const top = s.stack[s.stack.length - 1];
     if (!top) return;
-    const type = ((v.transition ?? {}).type as string) || 'Push';
-    if (!TRANSITIONS.includes(type)) return;
+    // a type there is no such thing as plays no animation, as a replace's (row C108, fixed in P109 ISL-048)
+    const asked = ((v.transition ?? {}).type as string) || 'Push';
+    const type = TRANSITIONS.includes(asked) ? asked : 'None';
     const tr = timingOf(type, v.transition);
     if (tr === THROWS) return;
     const page = newPage(w);

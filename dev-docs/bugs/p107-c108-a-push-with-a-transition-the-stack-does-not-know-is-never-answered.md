@@ -1,7 +1,7 @@
 ---
 id: P107-C108
 title: A push with a transition the stack does not know (a wired Transition such as "Fade") is never answered, and the page it built is dropped
-status: scheduled
+status: fixed
 phase: P109
 task: ISL-048
 severity: low
@@ -9,7 +9,7 @@ area: runtime / Component Stack (noodl-viewer-react/src/nodes/navigation/navigat
 found: P107 NSP-016 s56, 2026-10-08
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.17; recorded on the runtime target (the probe traces in §7.17), and the spec copies it (R3)
 kit: node-spec
-regression: packages/nodegx-node-spec/scenarios/Page Stack.json "a push with a transition there is no such thing as (Fade) is never answered; the next push is Done (row C108)"
+regression: packages/nodegx-node-spec/scenarios/Page Stack.json "row C108 — a push with a transition there is no such thing as (Fade) plays none and is Done; the next push is Done"
 ---
 
 **What a person sees.** Push Component To Stack's Transition is an enum, but a wire can hand it any text. With a value the stack
@@ -21,3 +21,7 @@ checks the registry first (`!!Transitions[transitionType]`, :843) and falls back
 **How to reproduce.** Play the `regression:` scenario on the runtime target.
 
 **Proposed fix.** Do what a replace does: an unknown type plays no animation (or Push), and the push is Done.
+
+**Fixed (P109 ISL-048, s31, 2026-10-08), as proposed.** A push whose transition the registry has not plays the None transition, as a
+replace with one does, and is Done. Page Stack spec v6. Runtime 147 / 147 at seeds 13 and 20732; control red on exactly the C108
+scenario.

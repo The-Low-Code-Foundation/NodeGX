@@ -1046,7 +1046,9 @@ const PageStack = {
         pageInfo: pageInfo,
         pageId: pageId,
         params: args.params,
-        transition: new Transitions[args.transition.type || 'Push'](top.page, group, args.transition),
+        // P107-C108 — a type there is no such thing as (a wired "Fade") plays no animation, as a replace's does; it threw here,
+        // after the page was built, and the push was never answered
+        transition: new (Transitions[args.transition.type || 'Push'] || Transitions.None)(top.page, group, args.transition),
         backCallback: args.backCallback,
         componentName: args.target
       };

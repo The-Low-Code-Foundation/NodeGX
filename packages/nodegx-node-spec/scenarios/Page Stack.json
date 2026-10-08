@@ -609,7 +609,7 @@
     ]
   },
   {
-    "name": "a push with a transition there is no such thing as (Fade) is never answered; the next push is Done (row C108)",
+    "name": "row C108 — a push with a transition there is no such thing as (Fade) plays none and is Done; the next push is Done",
     "because": "navigateAsync :1001 `new Transitions[type]` throws after the checks; the queue runs on",
     "params": {
       "pages": [
