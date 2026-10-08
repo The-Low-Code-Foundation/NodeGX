@@ -1,7 +1,9 @@
 ---
 id: P107-C134
 title: A Columns on Auto Fit whose Min Column Width plus Horizontal Gap is 0 (Min 16, Gap −16) blanks the page — the column count divides by zero
-status: open
+status: scheduled
+phase: P109
+task: ISL-050
 severity: medium
 area: viewer / Columns (packages/noodl-viewer-react/src/components/visual/Columns/Columns.tsx `calcAutoFit` :302-311 — `Math.floor((width + gap) / (min + gap))` is Infinity at `min + gap = 0`, and `new Array(Infinity)` throws inside the render; no error boundary holds a built-in node)
 found: P107 NSP-016 s60, 2026-10-08 — the runtime deep run (10,000 at seed 20734; sequence seed 3455271128, shrunk to one step)

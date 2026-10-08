@@ -5,7 +5,7 @@
 ISL-031's **C79** (`7496d93f0`) and **C78** (`23d91e383`), ISL-048's **C101** (`534203afc`, high: a tap inside a Drag on a touch
 screen) and the Page Router's **C115** (`6096fadae`), **C116** (`34218468a`), **C118** (`d85e4e6d9`), **C117** (`47f987ef6`), and
 the page-model helper (`ddf76bce5`). Scoped **ISL-048** (`34c76830f`; C101–C118, then C119–C127 from P107 s58) and **ISL-049**
-(the Repeater, C128–C131 from P107 s59). **C77 is built and NOT landed** (branch `p109-c77-wip`, `a133d19b6`). Board: **23 of 49
+(the Repeater, C128–C131 from P107 s59) and **ISL-050** (the Columns, C132–C134 from P107 s60). **C77 is built and NOT landed** (branch `p109-c77-wip`, `a133d19b6`). Board: **23 of 50
 closed**. Records: ISL-031 §11, ISL-048 §8.
 
 ## Do, in this order
@@ -27,7 +27,9 @@ closed**. Records: ISL-031 §11, ISL-048 §8.
    Drag: draw every child or warn; pass CSS Class / Style through or drop the ports), C120 (which history a Pop leaves) and C126
    (a Reset with Use Routes: start page or the address). P107 rewrote the Page Stack spec (v2, `841f0dfe3`) — read it first.
 3. **ISL-049** (the Repeater): C128 first (high, as proposed); ask C129, C130, C131 in the same batch as item 2's asks.
-4. ISL-013 slice 2, ISL-018 AC5, ISL-012 AC3 (unchanged from s29's list). **Track G** (ISL-039 … ISL-047) waits on Richard's order.
+4. **ISL-050** (the Columns, P107 s60 `caee8df0b`): C133 first (high: a non-text Medium / Small Layout blanks the page), then C134;
+   ask C132 with the batch above. C133 and C134 are known rows (C133 also WITHHELD): drop them with the scenario's `row` mark.
+5. ISL-013 slice 2, ISL-018 AC5, ISL-012 AC3 (unchanged from s29's list). **Track G** (ISL-039 … ISL-047) waits on Richard's order.
 
 ## How to work beside P107 (s29's rules, still true)
 
@@ -79,7 +81,7 @@ closed**. Records: ISL-031 §11, ISL-048 §8.
 ## Decisions for Richard (not yours)
 
 - **Track G's order** (asked s29, not answered): ISL-039 data-loss blockers, ISL-040 security holes, or ISL-013 slice 2 first.
-- **The asks in items 2 and 3** (C103, C104, C120, C126, C129, C130, C131) — one batch when those tasks are next.
+- **The asks in items 2–4** (C103, C104, C120, C126, C129, C130, C131, C132) — one batch when those tasks are next.
 - Carried from s29: the layout of an unlabelled control in a real browser; `P109-S24-SIGNINWITHERRORKEPT`,
   `P109-S22-BUILTINBOUNDARY`, `P109-S20-LISTDEFAULTTYPE`, `P109-S18-REFRESHROWSTATE`, ISL-010 AC4 and the Effort port, pushing
   `cline-dev`, publishing the Garden kits at the origin.

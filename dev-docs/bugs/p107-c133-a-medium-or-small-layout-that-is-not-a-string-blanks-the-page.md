@@ -1,7 +1,9 @@
 ---
 id: P107-C133
 title: A Columns whose Medium Layout or Small Layout holds a number (or any value that is not a string) blanks the page when the container narrows into that band
-status: open
+status: scheduled
+phase: P109
+task: ISL-050
 severity: high
 area: viewer / Columns (packages/noodl-viewer-react/src/components/visual/Columns/Columns.tsx `pickBreakpointLayout` :277-293 picks the layout by truthiness and `parseLayout` :147-154 calls `.split` on it, inside the render; no error boundary holds a built-in node, kit-node-boundary.ts)
 found: P107 NSP-016 s60, 2026-10-08

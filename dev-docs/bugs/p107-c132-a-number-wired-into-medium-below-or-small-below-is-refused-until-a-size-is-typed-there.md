@@ -1,7 +1,9 @@
 ---
 id: P107-C132
 title: A number wired into a Columns' Medium Below or Small Below is refused unless a size was typed into that port first, and a number after a var(--token) is refused on any size port
-status: open
+status: scheduled
+phase: P109
+task: ISL-050
 severity: medium
 area: runtime / size ports (packages/noodl-runtime/src/node.ts `setInputValue` :430-437 merges a number only into a `{ value, unit }` the port already holds; nodedefinition.ts `initializeDefaultValues` :180-199 seeds one only for a port with a default; noodl-viewer-react/src/react-component-node.ts `defineRegularInputProp` :698-745 refuses a bare number)
 found: P107 NSP-016 s60, 2026-10-08
