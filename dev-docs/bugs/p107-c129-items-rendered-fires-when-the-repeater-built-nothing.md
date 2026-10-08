@@ -26,3 +26,5 @@ and Items Rendered fires (row C129)"). The spec copies the behaviour (R3).
 **Proposed fix.** Count as work only an operation that added or removed a row (or a rebuild that got past its checks), so Items
 Rendered follows a list that changed. A ruling first: whether a list cleared to empty should still fire it (it does today, and that
 case is arguably right).
+
+**Ruled 2026-10-08 (P107 "Phase 107 Rulings" page), as recommended: "Fire it only when rows were added or removed".** A list cleared to empty still fires it, because rows were removed. A load before any Items, and a Refresh that failed, do not.

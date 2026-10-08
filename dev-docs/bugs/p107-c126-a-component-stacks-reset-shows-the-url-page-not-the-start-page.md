@@ -23,3 +23,5 @@ same happens on a Components edit. Without Use Routes, Reset rebuilds Home.
 
 **Proposed fix (ruling needed).** Either Reset ignores the URL and pushes the start page's URL, as its description says, or the
 description changes to say a Reset with Use Routes re-reads the address, as the Page Router's does.
+
+**Ruled 2026-10-08 (P107 "Phase 107 Rulings" page), as leaned: "Reset goes to the start page and writes its address".** As the Reset input's description says. Loading the page and the browser's Back still read the address.

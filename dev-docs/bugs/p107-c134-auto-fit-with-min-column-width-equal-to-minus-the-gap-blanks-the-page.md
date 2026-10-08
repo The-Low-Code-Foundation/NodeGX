@@ -27,3 +27,5 @@ reports Default, nothing else on the wire); the runtime target counts the diverg
 **Proposed fix.** Clamp the count: treat a `min + gap` at or below 0 as one column (as a negative one already is, through
 `Math.max(1, …)`), and cap it at the number of children — more columns than items draws nothing more. Fixing it drops the
 scenario's `row` and the known row in the same commit.
+
+**Ruled 2026-10-08 (P107 "Phase 107 Rulings" page), as recommended: "Treat it as one column, and never draw more columns than there are children".**

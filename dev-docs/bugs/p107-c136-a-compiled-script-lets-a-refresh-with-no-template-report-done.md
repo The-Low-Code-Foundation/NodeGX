@@ -20,3 +20,5 @@ Explicit the Script is never run, so a compiled one should not count.
 **How to reproduce.** Play the `regression:` scenario on the runtime target. The spec copies the behaviour (R3).
 
 **Proposed fix.** Check the one Template Type uses: on Explicit (or unset) `internal.template`, otherwise `internal.templateFunction`.
+
+**Ruled 2026-10-08 (P107 "Phase 107 Rulings" page), as recommended: "Fail with "no template" whenever Explicit has no Template".** The check reads only what Template Type uses.

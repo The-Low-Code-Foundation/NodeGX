@@ -29,3 +29,5 @@ entry (row C120)" shows the replace. The spec copies the behaviour (R3).
 **Proposed fix.** A pop steps the history back (`history.back()`), and the `popstate` that follows is the stack's own, so it must not
 reset. Or the pop uses `replaceState` with the page below's URL. A replace uses `replaceState`. Ruling needed on which history a pop
 should leave.
+
+**Ruled 2026-10-08 (P107 "Phase 107 Rulings" page), as leaned: "A Pop steps the browser's history back".** The app's Back and the browser's Back then agree. The page change that follows must not reset the stack (see C119); a Replace overwrites the current entry.

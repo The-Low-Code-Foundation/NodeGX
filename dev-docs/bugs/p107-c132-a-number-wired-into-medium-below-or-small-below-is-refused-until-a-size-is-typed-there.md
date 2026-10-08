@@ -29,3 +29,5 @@ and reads as 0: inert; a number after it is refused"). The spec copies the behav
 **Proposed fix.** Give Medium Below and Small Below a size to merge into — a `defaultUnit` seed of `{ value: undefined, unit: 'px' }`
 without a value (or merge a bare number into the port's `defaultUnit` when the port holds no size at all, in `setInputValue`). A
 ruling first: should a number on a size port that holds nothing (or holds a token) be read in the port's default unit?
+
+**Ruled 2026-10-08 (P107 "Phase 107 Rulings" page), as recommended: "Read the number as pixels".** A bare number on a size input that holds no size, or last held a token, is read in the input's default unit.

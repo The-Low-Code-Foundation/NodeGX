@@ -24,3 +24,5 @@ that THROWS is handled (that item has no row, and an error is raised); a Script 
 **Proposed fix.** Treat a component that is not a string like a throw from the Script: raise `repeater/template-script-threw` (or a
 new `repeater/template-not-a-name`) and give that item no row. C128's fix (catching in the operation) would also keep the queue alive,
 but only if its catch spans `getTemplateForModel`, not just the build.
+
+**Ruled 2026-10-08 (P107 "Phase 107 Rulings" page), as recommended: "Skip that item and report an error".** The same as a Script that throws.

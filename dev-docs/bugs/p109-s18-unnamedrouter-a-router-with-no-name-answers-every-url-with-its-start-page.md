@@ -17,3 +17,5 @@ registered in that Router (`pages.routes` lists both, `startPage` the first). `n
 `/robot` as the Robot page (`scripts/devtools/isl005-two-pages.ts`, 13/13). Nothing refused the unnamed Router or warned at
 the write, the deploy or the page. Not measured: whether the editor names a Router when a person adds one, and which side
 owns the fix (the write gate naming the gap, or the router index taking an unnamed Router).
+
+**Ruled 2026-10-08 (P107 "Phase 107 Rulings" page), as recommended: "The deployed app treats an unnamed Router as Main".** The index takes an unnamed Router as `Main`, as the runtime already does (P107 s57's question, asked with this row).

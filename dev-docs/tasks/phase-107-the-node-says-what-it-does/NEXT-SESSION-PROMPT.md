@@ -56,24 +56,18 @@
    Probe the runtime before every rule; the matrix first; mutants at ten seeds and 10,000 on both targets.
 2. **Or, when the box is quiet,** NSP-013's deep run for s11–s14 (`NSP_DEEP=10000 NSP_ONLY=…`, one spec at a time).
 
-**Human decisions outstanding — all seventeen are on one page for Richard: "Phase 107 Rulings",
-https://claude.ai/artifact/6XW6QYo9cdgMvZmp16SAbr (made 2026-10-08, after s61).** He records a ruling per question there. **Read them
-first:** `ArtifactData` `list`, collection `rulings`, on that URL (one document per question: `choice`, `choiceLabel`, `note`, `at`);
-copy each into README §7 and the row's ledger file, then build. Twelve are filed as "recommendation probably right", five as "worth
-weighing". **R7, R8 and G1 are NOT open** — ruled 2026-10-05 on P109's Track F page ("Only on size inputs"; "Yes, correct the docs
-sentence") and fixed in `ebeefb060` / `8a177580d`; s61's handoff carried them by mistake. The questions, for reference:
-- **New (s61), C137:** a Refresh pulsed while the Repeater is still rebuilding from an earlier one — answer it when its own rebuild
-  finishes (what the code's comment says it meant), or answer it together with the rebuild already running?
-- **New (s61), C135:** a Script that names its component with something that is not text (a number): skip that item with an error, as
-  a Script that throws does — yes?
-- **New (s61), C136:** on Explicit with no Template, should a Refresh fail with "no template" even when a Script is written? (Proposed:
-  yes — the Script is not used on Explicit.)
-- **From s60:** Component Children (count it as done with a written reason, or build a special test?); C132 (a number on a size input
-  that holds no size yet: pixels, or refused?); C134 (Auto Fit with a gap that cancels the minimum width: one column, or one per
-  item?); C133 (a breakpoint layout that arrives as a number: read as text, or ignored?).
-- **From s59:** C130, C131, C129. **From s58:** C120, C126.
-- **Older:** a Drag's Start Drag X as text (s55); a Component Stack's Mounted off and on keeping its pages (s56); an unnamed Page Router
-  in the index (s57, with P109's S18); R4's confirmation; NSP-017's question about the templates' CSS sheets.
+**Human decisions: none outstanding.** Richard ruled all seventeen on 2026-10-08 on the "Phase 107 Rulings" page
+(https://claude.ai/artifact/6XW6QYo9cdgMvZmp16SAbr; `ArtifactData` `list`, collection `rulings`). The answers are in README §7 (the
+2026-10-08 table) and in each row's ledger file; two had no row and are filed: **C138** (a Drag's Start Drag X as text: read it as a
+number) and **C139** (a Component Stack's Mounted off and on: keep the pages when a new option is ticked). R16 hands the row fixes to
+P109. What the rulings give P107 itself:
+- **Component Children: exempt with the reason written down.** NSP-009 says an exemption is a reason string in `exemptions.json`, and
+  no such file is tracked — build that (the census and the ledger read it), count Component Children as exempt (19 of 19 handled).
+- **When P109 lands a ruled fix** (C120, C126, C129–C139, S18), the scenario's behaviour moves with it in the same commit — a spec
+  version (Repeater v3 for C129–C131 and C135–C137, the Columns v2 for C132–C134, the Component Stack v3 for C120, C126, C139, the Drag v2
+  for C138, the Router for S18).
+- **NSP-017's stylesheets:** ruled "turn the common patterns into node settings" — product work with no owner yet; NSP-017 grades a
+  CSS Definition as web-only meanwhile.
 
 ## Before you start
 

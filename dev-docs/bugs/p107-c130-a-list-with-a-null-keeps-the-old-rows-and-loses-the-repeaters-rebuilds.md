@@ -26,3 +26,5 @@ runs a node's callbacks in a single loop, so a rebuild scheduled after the copy 
 **Proposed fix.** Two small ones: skip a `null` / `undefined` item in the copy (or report it once, `repeater/items-not-a-collection`
 already exists) instead of throwing; and clear `hasScheduledRefresh` in the scheduled callback rather than in `refresh()`, so a lost
 callback cannot leave the flag set. A ruling on the first: skip the empty entry, or refuse the whole list and say so.
+
+**Ruled 2026-10-08 (P107 "Phase 107 Rulings" page), as leaned: "Skip the empty entry and report it once".** Every other row is drawn. The Repeater must also stop getting stuck after it (the second fix above), which needed no ruling.

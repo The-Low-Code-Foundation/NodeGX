@@ -25,3 +25,5 @@ where `a` is expected, removes `a` and re-inserts it at 1 — after `b`.
 
 **Proposed fix.** In `set`, drop repeated records from the new list before the diff (the first place wins), so the order is the
 items' order and a second copy of the same list moves nothing. A ruling first: should a repeated id be one row (today) or two?
+
+**Ruled 2026-10-08 (P107 "Phase 107 Rulings" page), as recommended: "One row per id, at the first item's place, kept across a Refresh".**

@@ -25,3 +25,5 @@ flight schedules another pass and is settled by that one"); the assignment defea
 
 **Proposed fix.** Don't route through the shared field: have `settle` report `answered` directly (loop over it and `reportOutcome`),
 leaving `pendingRefreshOutcomes` — and whatever arrived during the rebuild — for the next pass.
+
+**Ruled 2026-10-08 (P107 "Phase 107 Rulings" page), as recommended: "Answer it when its own rebuild finishes".** What the code's comment says it meant: every Refresh gets exactly one answer, from the rebuild it asked for.

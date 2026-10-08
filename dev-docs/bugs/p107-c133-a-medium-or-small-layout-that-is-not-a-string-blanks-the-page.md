@@ -28,3 +28,5 @@ the throwing values (conformance.test.ts `WITHHELD`).
 **Proposed fix.** Read Medium Layout and Small Layout through `readColumnLayoutString` before they are used, as Layout String is: a
 number is its text, anything else no layout (the band then picks the base layout). Fixing it moves the row's scenario (drop `row`)
 and the known row and the withheld values in the same commit.
+
+**Ruled 2026-10-08 (P107 "Phase 107 Rulings" page), as recommended: "Read a number as its text, and anything else as no layout".** As Layout String already does.

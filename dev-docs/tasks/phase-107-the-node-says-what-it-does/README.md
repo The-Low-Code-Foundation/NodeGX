@@ -566,6 +566,30 @@ narrow to T1 only, or stop and keep the infrastructure as a test tool.
   box quiet.
 - **(b) 1,000 per node in CI.** More coverage, about five times the time.
 
+**Ruled by Richard, 2026-10-08 (after s61), on one page — "Phase 107 Rulings", https://claude.ai/artifact/6XW6QYo9cdgMvZmp16SAbr —
+seventeen questions in plain words, each with a recommendation; the page's store holds every answer (`rulings`).** The row rulings
+are copied into each ledger file; R16 hands their fixes to P109.
+
+| question | answer | |
+|---|---|---|
+| C137 — a Refresh pressed while a rebuild runs | **Answer it when its own rebuild finishes** | as recommended |
+| C135 — a Script whose component is not text | **Skip that item and report an error** | as recommended |
+| C136 — Explicit, no Template, a Script written | **Fail with "no template"** | as recommended |
+| C129 — when Items Rendered fires | **Only when rows were added or removed** (a list cleared to empty still fires it) | as recommended |
+| C131 — two items with one id | **One row per id, at the first item's place, kept across a Refresh** | as recommended |
+| C132 — a number on Medium / Small Below | **Read it as pixels** | as recommended |
+| C133 — a breakpoint layout arriving as a number | **Read a number as its text, anything else as no layout** | as recommended |
+| C134 — Auto Fit with min + gap at or below 0 | **One column, never more columns than children** | as recommended |
+| Component Children | **Count it as done, with the reason written down** (its placement graded with the graph tests later) | as recommended |
+| A Drag's Start Drag X as text (s55) | **Read it as a number** — filed as row C138 | as recommended |
+| An unnamed Page Router (s57, P109's S18) | **The deployed app treats it as Main** | as recommended |
+| R4 — carry on through every node | **Yes, carry on to the end** — R4 confirmed | as recommended |
+| C120 — a Pop and the browser's Back | **A Pop steps the browser's history back** | as leaned |
+| C126 — Reset with Use Routes | **The start page, and its address written** | as leaned |
+| C130 — a list with an empty entry | **Skip it and report it once** | as leaned |
+| A Component Stack's Mounted off and on (s56) | **Keep the pages only when an option is ticked** — filed as row C139 (a new input) | **against the lean** (keep today's) |
+| NSP-017 — the templates' stylesheets | **Turn the common patterns into node settings** (grids, hover and press states, phone-only rules) | **against the lean** (keep sheets) — a roadmap item with no owner yet |
+
 ## 8. Not this phase
 
 - **Building new targets.** No framework-free web output, no SwiftUI, no Compose, no Rust. This
