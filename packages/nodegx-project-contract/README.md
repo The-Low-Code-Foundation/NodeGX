@@ -9,6 +9,7 @@ another package could not depend on, and the exporter needs both.
 |---|---|---|
 | `tokens.ts` | `noodl-editor` `StyleTokensModel/DefaultTokens.ts` | `@nodegx/export` resolves a project's stored tokens against the shipped defaults. Reaching into the editor's source tree by relative path made the exporter unpublishable and coupled it to the editor's file layout (HLS-001 AC2). |
 | `logic-builder-io.ts` | `@noodl/runtime` `nodes/std-library/logic-builder-io.ts` | Same reason, from the runtime side. |
+| `world.ts` (+ `world/`, `schemas/world.schema.json`) | new — P116 ONT-001 | What a person said about their world: the three files under a project's `docs/world/`, the fourteen relation kinds ONT-000 read off real apps (`defineKind`, `describe`), the validator and the write rule (refuse when the files changed since read). The editor, the MCP, the backend manager and a home-made page must all read it the same way, which is this package's reason to exist; NSP-021 and OWN-001 name it the home of the project format, so the ninth schema starts here and the eight join it. Zero dependencies, so it runs in a page; `npm test` grades it, with ajv proving the schema and the validator agree. |
 
 ## 🔴 The invariant that made the Logic Builder move delicate, and how it survives
 

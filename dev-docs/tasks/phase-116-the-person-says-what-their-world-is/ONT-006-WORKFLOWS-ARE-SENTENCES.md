@@ -21,7 +21,7 @@ enrol them in the learning platform; if they have no account there yet, skip the
 
 ## 3. What to build
 
-1. **The verb.** `verbs.json` in `ontology/`: a sentence, the nouns and relations it touches, its steps as sentences,
+1. **The verb.** `verbs.json` in `docs/world/`: a sentence, the nouns and relations it touches, its steps as sentences,
    and its failure arms, each with what the person sees. A verb's steps bind to step kinds and to specced nodes by
    name; the binding is checked by the validator.
 2. **The projection.** A verb projects to a workflow definition (`WorkflowDefinition`, `steps`, success and error

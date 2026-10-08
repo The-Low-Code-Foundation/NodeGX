@@ -24,7 +24,7 @@ how. This is NSP-006's move: the thesis graded by someone who could not cheat.
    elsewhere, people who leave. No name, email, row or note from Acme; the shape is theirs, the people are synthetic
    (R6).
 2. **The conversation.** With the brief and the one tool, an agent that has never seen Acme's notes takes
-   the description in sentences, asks what the runner returns, and writes `ontology/` and `verbs.json`. The transcript
+   the description in sentences, asks what the runner returns, and writes `docs/world/` and `verbs.json`. The transcript
    is kept.
 3. **The record.** From the transcript and the files: every question asked, in order, with its mutant and incident;
    the first time the *ends* question and the *exists elsewhere* question appear; whether either appeared before the

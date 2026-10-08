@@ -22,7 +22,7 @@ the next question. Nothing else is asked.
 1. **The brief.** One document an agent reads before the first sentence: what an ontology is in NodeGX terms (README
    §3), how to write a noun and a relation into the files, the one tool, and the rule that a question is asked only when
    the tool names it. Served where P112 R3 serves the kit's brief.
-2. **The runner.** `validate` over a project's `ontology/`: project (ONT-003), generate each relation's mutants (ONT-005),
+2. **The runner.** `validate` over a project's `docs/world/`: project (ONT-003), generate each relation's mutants (ONT-005),
    grade the mutants against the claims the answers so far make, and return the survivors as a list of questions in
    the person's words, each with the kind, the relation and the incident it stands for. Empty list means the world is
    described enough to build.
@@ -44,6 +44,12 @@ the next question. Nothing else is asked.
 4. The tool surface after this task is inside the MCP budget gate.
 
 ## 5. Watch for
+
+- **The MCP cannot write `docs/world/` today (found by ONT-001, 2026-10-08).** `write_project_doc` refuses every path under
+  `docs/` that is not `.md` (the editor's `assertInsideDocs`, `docsText.ts:438`). Claude Code can write the files with its
+  own tools; an agent on the MCP alone cannot. The writer exists and is pure (`planWorldWrite` in
+  `@nodegx/project-contract/world`, the `if_revision` rule) — whether R5's one tool writes through it, or the docs
+  containment widens to `docs/world/*.json`, is this task's call, after the budget gate is measured.
 
 - **The agent asks anyway.** The brief says the rule; the honesty number for the ontology (README §12) counts answers
   with no question behind them.

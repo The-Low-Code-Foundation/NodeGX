@@ -35,7 +35,7 @@ sentences give two databases.
 
 ## 4. Acceptance criteria
 
-1. The same `ontology/` projects to byte-identical schema on two runs and two machines.
+1. The same `docs/world/` projects to byte-identical schema on two runs and two machines.
 2. On a fixture of every kind, every claim passes on SQLite and Postgres through the conformance suite; each claim is
    shown to fail on its mutant.
 3. The backend manager's Schema page shows the projected collections with the tiles the kinds named, and the person's

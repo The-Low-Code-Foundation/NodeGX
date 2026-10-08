@@ -46,6 +46,12 @@ reach, which is NSP-005's word.
 
 ## 5. Watch for
 
+- **ONT-001 AC4 lands here (moved 2026-10-08).** The backend manager's `KindPicker` renders its tiles inline from its own
+  `KINDS` constant, with three text slots and no long text, so no relation kind shows there without an edit. `describe()`
+  (`@nodegx/project-contract/world`) returns the tile's fields under the same names (`label`, `line`, `icon`) plus the long
+  text (sentence, ranked questions with what each prevents, `projectsTo`, evidence in words). This task's surface is
+  where "`describe()` of every kind renders as a tile's long text" is shown.
+
 - **A working wireframe is not the mockup** (memory). The suite grades reach and correctness; Richard grades whether he
   could put it in front of the ops team, in ONT-009.
 - **The project token paints nothing on an editor surface** (memory). A home-made page draws with the canvas look's

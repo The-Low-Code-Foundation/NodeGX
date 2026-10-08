@@ -1,0 +1,858 @@
+/**
+ * P116 ONT-001 — the fourteen relation kinds ONT-000 read off eight apps.
+ *
+ * `sentence`, `distinguishes` and `projectsTo` are the census's words, verbatim; `evidence` is
+ * its count. A test pins both against `kinds.hand.json` and `kinds.json`, so this file cannot
+ * drift from what was measured. The questions split the census's question line into things a
+ * person can answer one at a time, and add the three notes and Richard's seven rows where they
+ * name the kind — each says which.
+ *
+ * Every relation NodeGX itself has produced so far is a string id (ONT-000 §6): no template and
+ * no lessons-backend field uses a Link. That is the first mutant of `belongs-to` below.
+ */
+import { defineKind, type Kind, type ProjectedField } from './kind';
+
+const SOURCE = 'dev-docs/tasks/phase-116-the-person-says-what-their-world-is/kinds.json';
+const GOES = ['goes-too', 'stays-unlinked', 'blocks'] as const;
+
+const one = (to: string | readonly string[] | undefined): string => (Array.isArray(to) ? to[0] : (to as string)) || '';
+
+export const belongsTo = defineKind({
+  id: 'belongs-to',
+  version: 1,
+  source: SOURCE,
+  sentence: 'each {from} is attached to one {to}',
+  distinguishes: "one target, no details on the link itself; read the other way it is 'has many' (the same edge)",
+  projectsTo: 'Link (Pointer) with required/optional and an on-delete rule; the reverse read is a query, not a column',
+  target: 'noun',
+  carriesDetails: false,
+  tile: { label: 'Belongs to one', line: 'each one is attached to exactly one of another', icon: '→' },
+  questions: [
+    {
+      id: 'several',
+      ask: 'Could a {from} ever be attached to several {to}s at once, now or later?',
+      prevents:
+        'a person modelled as belonging to one company, who turned out to belong to several once the field existed and real data was in it',
+      answer: { type: 'yes-no' },
+      changesKind: { when: true, to: 'is-on' },
+      from: 'oral'
+    },
+    {
+      id: 'required',
+      ask: 'Must every {from} have a {to}, or can one stand alone?',
+      prevents: 'records that exist without the thing they belong to, on screens that assume they never do',
+      answer: { type: 'yes-no' },
+      from: 'census'
+    },
+    {
+      id: 'whenTargetGoes',
+      ask: 'When a {to} goes, do its {from}s go with it, stay without one, or stop it going?',
+      prevents: 'a removal that silently deletes, or silently orphans, what was attached to it',
+      answer: { type: 'one-of', values: GOES },
+      from: 'census'
+    },
+    {
+      id: 'moves',
+      ask: 'Can a {from} move to another {to} later?',
+      prevents: 'a move that can only be done by deleting and re-creating, which loses the history',
+      answer: { type: 'yes-no' },
+      from: 'census'
+    }
+  ],
+  projection: ({ from, to, answers }) => {
+    const field: ProjectedField = { on: 'from', name: one(to), kind: 'link', points: one(to), required: answers.required === true };
+    if (typeof answers.whenTargetGoes === 'string') field.whenTargetGoes = answers.whenTargetGoes as ProjectedField['whenTargetGoes'];
+    return { fields: [field], rules: answers.moves === false ? [`a ${from}'s ${one(to)} is set once`] : [] };
+  },
+  mutants: [
+    {
+      id: 'id-as-text',
+      mistake: 'the link stored as a text field holding the other record\'s id',
+      why: 'nothing checks the id names a record, and nothing follows it when the record goes; every relation the templates and the lessons backend have is this',
+      from: 'census'
+    },
+    {
+      id: 'one-that-was-several',
+      mistake: "a one-to-many made on 'this user only belongs to one company', then they belong to several, with real data in the field",
+      why: "a 'belongs-to' that was an 'is-on'; 'could it ever be several' was not asked before data existed",
+      from: 'oral'
+    }
+  ],
+  evidence: { rows: 78, sources: ['template:members-area', 'template:planning', 'template:todo-list', 'lessons', 'acme', 'tirion', 'sentinel'] }
+});
+
+export const isOn = defineKind({
+  id: 'is-on',
+  version: 1,
+  source: SOURCE,
+  sentence: 'a {from} is on a {to} for a while, with details of its own',
+  distinguishes: "a junction record that carries details; a plain pairing with none is 'together'",
+  projectsTo: 'a collection of its own with two Links and the details as fields; never a Links (Relation) column, which cannot hold a date',
+  target: 'noun',
+  carriesDetails: true,
+  tile: { label: 'Is on, for a while', line: 'one is on another, with details of its own', icon: '⇄' },
+  questions: [
+    {
+      id: 'counts',
+      ask: 'What must be linked for a {from} to count as one — is a {from} on no {to} still a {from}?',
+      prevents:
+        'a paying member invisible for an unknown period, and a repair that made people without the links they needed to count',
+      answer: { type: 'words' },
+      from: 'note'
+    },
+    {
+      id: 'several',
+      ask: 'Can a {from} be on two {to}s at once?',
+      prevents: 'a second account that overwrites the first, because the link was made to hold one',
+      answer: { type: 'yes-no' },
+      from: 'census'
+    },
+    {
+      id: 'sameTime',
+      ask: 'Can two {from}s be on the same {to} at the same time?',
+      prevents: 'two people booked into one appointment slot, because the slots shown as free had no rule that one slot takes one booking',
+      answer: { type: 'yes-no' },
+      from: 'oral'
+    },
+    {
+      id: 'startsEnds',
+      ask: 'Does being on a {to} start and end — a date, an active switch?',
+      prevents: "a link that cannot hold a date, so 'since when' and 'until when' are lost",
+      answer: { type: 'yes-no' },
+      from: 'census'
+    },
+    {
+      id: 'whenEnds',
+      ask: 'When it ends, what stays and what goes?',
+      prevents: 'an ending decided case by case, after the fact',
+      answer: { type: 'words' },
+      from: 'census'
+    },
+    {
+      id: 'details',
+      ask: 'Which details belong to being on it, and not to the {from} or the {to} — a role, a type, a position?',
+      prevents: 'a role kept on the person, so they can hold only one role across every account they are on',
+      answer: { type: 'words' },
+      from: 'census'
+    }
+  ],
+  projection: ({ id, from, to, answers }) => {
+    const fields: ProjectedField[] = [
+      { on: 'own', name: from, kind: 'link', points: from, required: true, whenTargetGoes: 'goes-too' },
+      { on: 'own', name: one(to), kind: 'link', points: one(to), required: true, whenTargetGoes: 'goes-too' }
+    ];
+    if (answers.startsEnds === true) fields.push({ on: 'own', name: 'since', kind: 'date' }, { on: 'own', name: 'until', kind: 'date' });
+    const rules = [`'${id}' is a record of its own, never a Links field: a Links field cannot hold a date or a role`];
+    if (answers.several === false) rules.push(`a ${from} is on one ${one(to)} at a time`);
+    if (answers.sameTime === false) rules.push(`one ${from} on a ${one(to)} at a time`);
+    return { ownRecord: true, fields, rules };
+  },
+  mutants: [
+    {
+      id: 'links-column',
+      mistake: 'a Links field between the two, with nowhere to put since when, until when or in what role',
+      why: 'a pairing with details made as one without',
+      from: 'census'
+    },
+    {
+      id: 'no-slot-rule',
+      mistake: 'appointment slots shown as free, with no rule that one slot takes one booking, so two people land on one slot',
+      why: "a booking is a person on a slot at a time; 'can two be on it at the same time' was not asked",
+      from: 'oral'
+    }
+  ],
+  evidence: { rows: 20, sources: ['template:members-area', 'lessons', 'acme', 'tirion'] }
+});
+
+export const together = defineKind({
+  id: 'together',
+  version: 1,
+  source: SOURCE,
+  sentence: 'a {from} and a {to} go together',
+  distinguishes: 'a junction with no details',
+  projectsTo: 'Links (Relation) or a junction collection; the unique pair rule',
+  target: 'noun',
+  carriesDetails: false,
+  tile: { label: 'Go together', line: 'a pairing, with nothing said about it', icon: '⇉' },
+  questions: [
+    {
+      id: 'needsDetails',
+      ask: 'Does the pairing ever need a date, a reason, a role or an order?',
+      prevents: 'a pairing that later needed a date, with nowhere to put it',
+      answer: { type: 'yes-no' },
+      changesKind: { when: true, to: 'is-on' },
+      from: 'census'
+    },
+    {
+      id: 'twice',
+      ask: 'Can the same {from} and {to} be paired twice?',
+      prevents: 'a pair listed twice and counted twice in every total',
+      answer: { type: 'yes-no' },
+      from: 'census'
+    }
+  ],
+  projection: ({ from, to, answers }) => ({
+    fields: [{ on: 'from', name: one(to), kind: 'links', points: one(to) }],
+    rules: answers.twice === false ? [`a ${from} and a ${one(to)} are paired once`] : []
+  }),
+  mutants: [
+    {
+      id: 'pair-twice',
+      mistake: 'a pairing with no rule that a pair is listed once',
+      why: "'can the same pair be listed twice' was not asked",
+      from: 'census'
+    }
+  ],
+  evidence: { rows: 4, sources: ['sentinel'], thin: 'one source: every row is from one prototype' }
+});
+
+export const oneOf = defineKind({
+  id: 'one-of',
+  version: 1,
+  source: SOURCE,
+  sentence: "a {from}'s {field} is one of a fixed list",
+  distinguishes: 'a value from a declared list on the record itself, not a link to a record',
+  projectsTo: 'Choice (String + oneOf rule); the mutant is free text where a list belongs',
+  target: 'property',
+  carriesDetails: false,
+  tile: { label: 'One of a list', line: 'a value picked from a list you keep', icon: '☰' },
+  questions: [
+    {
+      id: 'needsDetails',
+      ask: 'Will you ever need details about a {field} itself — a description, an order, a picture?',
+      prevents: 'product categories made as a text field; when they needed details they had to become records, after every product already held the text',
+      answer: { type: 'yes-no' },
+      changesKind: { when: true, to: 'belongs-to' },
+      from: 'oral'
+    },
+    {
+      id: 'whoAdds',
+      ask: 'Who adds to the list of {field}s?',
+      prevents: 'a list kept in the code, so every new value is a call to the developer',
+      answer: { type: 'one-of', values: ['the people using it', 'a developer'] },
+      from: 'census'
+    },
+    {
+      id: 'sameForEveryone',
+      ask: 'Is the list the same for everyone?',
+      prevents: 'one list for every team, when each team had its own',
+      answer: { type: 'yes-no' },
+      from: 'census'
+    },
+    {
+      id: 'retires',
+      ask: 'Does a {field} ever retire?',
+      prevents: 'a retired value removed from the list, leaving records that hold a value no screen can show',
+      answer: { type: 'yes-no' },
+      from: 'census'
+    }
+  ],
+  projection: ({ property, answers }) => ({
+    fields: [{ on: 'from', name: property || '', kind: 'choice' }],
+    rules: answers.retires === true ? ['a retired value stays on the records that hold it, and is no longer offered'] : []
+  }),
+  mutants: [
+    {
+      id: 'free-text',
+      mistake: 'a text field where a list belongs',
+      why: 'every misspelling becomes a new value, and no screen can offer the list',
+      from: 'census'
+    },
+    {
+      id: 'category-as-text',
+      mistake: 'a string field made for product categories, when it should have been a link to a category',
+      why: "a fixed list typed as free text; when categories need details or ordering it is a 'belongs-to' to a category record",
+      from: 'oral'
+    }
+  ],
+  evidence: { rows: 24, sources: ['acme'], thin: 'one source: every row is from one business' }
+});
+
+export const manyByList = defineKind({
+  id: 'many-by-list',
+  version: 1,
+  source: SOURCE,
+  sentence: 'a {from} carries a list of {to} on itself',
+  distinguishes: 'ids or values stored as an array column, no record per entry',
+  projectsTo: 'List (Array); the mutant is a list of ids that nobody can query from the other side',
+  target: 'noun',
+  carriesDetails: false,
+  tile: { label: 'Carries a list', line: 'a short list kept on the thing itself', icon: '≡' },
+  questions: [
+    {
+      id: 'otherWay',
+      ask: 'Will you ever ask it the other way round: which {from}s name this {to}?',
+      prevents: 'a parent carrying dozens of related records as a list; finding the right parent needed a nested query through the list, and it fell apart',
+      answer: { type: 'yes-no' },
+      changesKind: { when: true, to: 'together' },
+      from: 'oral'
+    },
+    {
+      id: 'grows',
+      ask: 'Will the list grow to dozens?',
+      prevents: 'a list that was three entries on day one and sixty in a year, read whole on every screen',
+      answer: { type: 'yes-no' },
+      from: 'census'
+    },
+    {
+      id: 'entryDetails',
+      ask: 'Will an entry in the list ever need details of its own?',
+      prevents: 'a detail about one entry with nowhere to go',
+      answer: { type: 'yes-no' },
+      changesKind: { when: true, to: 'is-on' },
+      from: 'census'
+    }
+  ],
+  projection: ({ to }) => ({
+    fields: [{ on: 'from', name: one(to), kind: 'list' }],
+    rules: ['nobody can ask the list the other way round']
+  }),
+  mutants: [
+    {
+      id: 'dozens-on-the-parent',
+      mistake: 'relation fields where the parent record has dozens of relations, and later a nested query to find the right parent',
+      why: 'a list on the parent that nobody can query from the other side',
+      from: 'oral'
+    }
+  ],
+  evidence: { rows: 8, sources: ['tirion'], thin: 'one source: every row is from one prototype' }
+});
+
+export const partOfTree = defineKind({
+  id: 'part-of-tree',
+  version: 1,
+  source: SOURCE,
+  sentence: 'a {from} can sit under another {from}',
+  distinguishes: 'a link from a collection to itself',
+  projectsTo: 'a Link to the same collection; the path operation walks it (ONT-004)',
+  target: 'self',
+  carriesDetails: false,
+  tile: { label: 'Sits under another', line: 'a tree of one kind of thing', icon: '⊢' },
+  questions: [
+    {
+      id: 'depth',
+      ask: 'How deep can it go?',
+      prevents: 'a screen that shows two levels, and a tree that grew a third',
+      answer: { type: 'words' },
+      from: 'census'
+    },
+    {
+      id: 'ownAncestor',
+      ask: 'Can a {from} end up under itself?',
+      prevents: 'a loop that hangs every screen that walks the tree',
+      answer: { type: 'yes-no' },
+      from: 'census'
+    },
+    {
+      id: 'moves',
+      ask: 'Can a {from} be moved under another?',
+      prevents: 'a move done by re-creating the branch, which loses its history',
+      answer: { type: 'yes-no' },
+      from: 'census'
+    },
+    {
+      id: 'inherits',
+      ask: 'Does a {from} take anything from the one it sits under?',
+      prevents: 'a setting copied down by hand that drifts from its parent',
+      answer: { type: 'words' },
+      from: 'census'
+    }
+  ],
+  projection: ({ from, answers }) => ({
+    fields: [{ on: 'from', name: 'parent', kind: 'link', points: from, whenTargetGoes: 'blocks' }],
+    rules: answers.ownAncestor === false ? [`no ${from} sits under itself`] : []
+  }),
+  mutants: [
+    {
+      id: 'loop',
+      mistake: 'a tree with no rule against a thing sitting under itself',
+      why: "'can it be its own ancestor' was not asked",
+      from: 'census'
+    }
+  ],
+  evidence: { rows: 1, sources: ['sentinel'], thin: 'one row: a single field in one prototype' }
+});
+
+export const existsElsewhere = defineKind({
+  id: 'exists-elsewhere',
+  version: 1,
+  source: SOURCE,
+  sentence: 'a {from} also exists in another system, known there by its own id',
+  distinguishes: 'an id or a provenance record naming another system, not a record in this one',
+  projectsTo: "a Text field per system, unique, plus a sync log; the enrolment note is this kind's unasked question",
+  target: 'system',
+  carriesDetails: false,
+  tile: { label: 'Also exists elsewhere', line: 'the same thing kept in another system too', icon: '⇆' },
+  questions: [
+    {
+      id: 'hereFirst',
+      ask: 'Can a {from} be added here before it exists in {to} — and if it can, what is silently skipped, and how would anyone notice?',
+      prevents: 'an enrolment in the other system silently skipped for people added here first, and nobody noticed',
+      answer: { type: 'words' },
+      from: 'note'
+    },
+    {
+      id: 'thereFirst',
+      ask: 'Can a {from} exist in {to} before it exists here?',
+      prevents: 'records arriving from the other system with nothing here to attach them to',
+      answer: { type: 'yes-no' },
+      from: 'census'
+    },
+    {
+      id: 'wins',
+      ask: 'When the two disagree, which side wins?',
+      prevents: 'two systems overwriting each other in turn',
+      answer: { type: 'one-of', values: ['here', 'there', 'a person decides'] },
+      from: 'census'
+    },
+    {
+      id: 'nameThere',
+      ask: 'What is a {from} called in {to}?',
+      prevents: 'a sync that matches the wrong things because they are named differently there',
+      answer: { type: 'words' },
+      from: 'census'
+    },
+    {
+      id: 'endsThere',
+      ask: 'What happens in {to} when a {from} ends here?',
+      prevents: 'a person who left here still active there',
+      answer: { type: 'words' },
+      from: 'census'
+    }
+  ],
+  projection: ({ to }) => ({
+    fields: [{ on: 'from', name: 'idElsewhere', kind: 'text', unique: true }],
+    rules: [`every exchange with ${one(to)} is logged, and a skipped one says why`]
+  }),
+  mutants: [
+    {
+      id: 'silent-skip',
+      mistake: 'an id from the other system with no log of what was sent and what was skipped',
+      why: "the enrolment note: 'can it exist here before there' was not asked, so the skip was silent",
+      from: 'note'
+    }
+  ],
+  evidence: { rows: 16, sources: ['acme', 'tirion', 'sentinel'] }
+});
+
+export const sameAs = defineKind({
+  id: 'same-as',
+  version: 1,
+  source: SOURCE,
+  sentence: 'two {from}s turned out to be one thing',
+  distinguishes: 'a link between records of the same collection that means identity, not hierarchy',
+  projectsTo: "a 'superseded by' Link on the same collection plus a match record; never a delete",
+  target: 'self',
+  carriesDetails: false,
+  tile: { label: 'Turned out the same', line: 'two records that are one thing', icon: '=' },
+  questions: [
+    {
+      id: 'howTell',
+      ask: 'How do you tell that two {from}s are one?',
+      prevents: 'duplicates merged on a guess',
+      answer: { type: 'words' },
+      from: 'census'
+    },
+    {
+      id: 'whoDecides',
+      ask: 'Who decides when it is not certain?',
+      prevents: 'a merge nobody chose',
+      answer: { type: 'words' },
+      from: 'census'
+    },
+    {
+      id: 'survivor',
+      ask: 'Which one survives, and whose details win?',
+      prevents: 'the newer email lost to the older record',
+      answer: { type: 'words' },
+      from: 'census'
+    },
+    {
+      id: 'undo',
+      ask: 'Can a merge be undone?',
+      prevents: 'a wrong merge that cannot be undone because the other record was deleted',
+      answer: { type: 'yes-no' },
+      from: 'census'
+    }
+  ],
+  projection: ({ from }) => ({
+    fields: [{ on: 'from', name: 'supersededBy', kind: 'link', points: from, whenTargetGoes: 'blocks' }],
+    rules: [`a merged ${from} is kept, never deleted`]
+  }),
+  mutants: [
+    {
+      id: 'merge-by-delete',
+      mistake: 'a duplicate merged by deleting it',
+      why: 'nothing is left to undo a wrong merge with',
+      from: 'census'
+    }
+  ],
+  evidence: { rows: 5, sources: ['acme', 'tirion', 'sentinel'] }
+});
+
+export const ends = defineKind({
+  id: 'ends',
+  version: 1,
+  source: SOURCE,
+  sentence: 'a {from} can end without being deleted',
+  distinguishes: 'a status, an active flag, an end date, an archive or erasure record — the record is kept',
+  projectsTo: "a status Choice or a Date, a rule for each linked thing, and a 'delete: nobody' permission; the archive note is this kind's unasked question",
+  target: 'none',
+  carriesDetails: false,
+  tile: { label: 'Can end', line: 'stops, without being deleted', icon: '◼' },
+  questions: [
+    {
+      id: 'whatStays',
+      ask: 'When a {from} ends, what stays and what goes — its record and its history, the things it is on, its access elsewhere, the lists it is on?',
+      prevents: 'archiving a person with no written answer for what stays and what ends, so it was decided case by case after the fact',
+      answer: { type: 'words' },
+      from: 'note'
+    },
+    {
+      id: 'comesBack',
+      ask: 'Can a {from} come back?',
+      prevents: 'a returning person who cannot be brought back',
+      answer: { type: 'yes-no' },
+      from: 'note'
+    },
+    {
+      id: 'backAs',
+      ask: 'When a {from} comes back, is it the old one revived or a new one?',
+      prevents: 'a returning person made new, with their history left on the old record',
+      answer: { type: 'one-of', values: ['the old one', 'a new one'] },
+      from: 'note'
+    },
+    {
+      id: 'whoEnds',
+      ask: 'Who may end a {from}?',
+      prevents: 'anyone able to end anything',
+      answer: { type: 'words' },
+      from: 'census'
+    }
+  ],
+  projection: ({ from }) => ({
+    fields: [{ on: 'from', name: 'endedAt', kind: 'date' }],
+    rules: [`nobody deletes a ${from}; it ends`]
+  }),
+  mutants: [
+    {
+      id: 'end-by-delete',
+      mistake: 'ending a thing by deleting it',
+      why: 'its history and everything linked to it goes too',
+      from: 'note'
+    }
+  ],
+  evidence: { rows: 13, sources: ['lessons', 'acme', 'tirion'] }
+});
+
+export const happenedTo = defineKind({
+  id: 'happened-to',
+  version: 1,
+  source: SOURCE,
+  sentence: 'something happened to a {from} at a time, and the record of it is kept',
+  distinguishes: 'a record that is an event about another record (a log, an action, an attendance, a submission, a read receipt)',
+  projectsTo: "a collection with a Link, a Date and a 'who' Link; update and delete: nobody",
+  target: 'noun-or-none',
+  carriesDetails: true,
+  tile: { label: 'Happened to', line: 'something that happened, kept as a record', icon: '◷' },
+  questions: [
+    {
+      id: 'forever',
+      ask: 'Is the record kept forever?',
+      prevents: 'a history cleared to save space that was the only proof of what happened',
+      answer: { type: 'yes-no' },
+      from: 'census'
+    },
+    {
+      id: 'undo',
+      ask: 'Can it be undone — and is undoing a new record, or removing this one?',
+      prevents: 'an undo that deleted the history the next question needed',
+      answer: { type: 'one-of', values: ['it cannot', 'a new record', 'removing this one'] },
+      from: 'census'
+    },
+    {
+      id: 'who',
+      ask: 'Is who did it kept?',
+      prevents: 'an action nobody can be asked about',
+      answer: { type: 'yes-no' },
+      from: 'census'
+    },
+    {
+      id: 'seeHistory',
+      ask: 'Who may see the history?',
+      prevents: 'a history everyone can read',
+      answer: { type: 'words' },
+      from: 'census'
+    },
+    {
+      id: 'outlives',
+      ask: 'Can the record outlive the {from} it happened to?',
+      prevents: 'a removal that takes the history with it, or a history that stops a removal nobody expected to be stopped',
+      answer: { type: 'yes-no' },
+      from: 'census'
+    }
+  ],
+  projection: ({ from, to, answers }) => {
+    const fields: ProjectedField[] = [
+      { on: 'own', name: from, kind: 'link', points: from, required: true, whenTargetGoes: answers.outlives === true ? 'stays-unlinked' : 'blocks' },
+      { on: 'own', name: 'at', kind: 'date', required: true }
+    ];
+    if (one(to)) fields.push({ on: 'own', name: one(to), kind: 'link', points: one(to) });
+    if (answers.who === true) fields.push({ on: 'own', name: 'by', kind: 'link' });
+    return { ownRecord: true, fields, rules: answers.undo === 'removing this one' ? ['nobody edits it'] : ['nobody edits or deletes it'] };
+  },
+  mutants: [
+    {
+      id: 'editable-history',
+      mistake: 'a log that anyone may edit or delete',
+      why: 'a record of what happened that can be changed is not one',
+      from: 'census'
+    }
+  ],
+  evidence: { rows: 44, sources: ['template:planning', 'template:todo-list', 'lessons', 'acme', 'tirion', 'sentinel'] }
+});
+
+export const ownedBy = defineKind({
+  id: 'owned-by',
+  version: 1,
+  source: SOURCE,
+  sentence: 'a {from} is seen and changed by whoever it belongs to, and by nobody else unless said',
+  distinguishes: 'a rule about visibility, not a fact about the world: creator-owns, an access list, a tenant, an admin link',
+  projectsTo: "the security file's permissions and creatorOwns; a path-shaped rule needs ONT-004",
+  target: 'noun',
+  carriesDetails: false,
+  tile: { label: 'Owned by', line: 'who may see it and change it', icon: '⚿' },
+  questions: [
+    {
+      id: 'whoElse',
+      ask: 'Who else may see a {from} — a role, an admin of what it sits on, everyone?',
+      prevents: 'a record everyone could read because nobody said who may',
+      answer: { type: 'words' },
+      from: 'census'
+    },
+    {
+      id: 'path',
+      ask: 'Does it belong to someone through a chain — the holder of the account the person is on?',
+      prevents: 'a permission rule four links deep, used eight times, that only a developer could write',
+      answer: { type: 'yes-no' },
+      from: 'census'
+    },
+    {
+      id: 'whenOwnerEnds',
+      ask: 'What happens to a {from} when its {to} ends?',
+      prevents: 'records nobody can reach once the person who made them left',
+      answer: { type: 'one-of', values: ['goes too', 'passes to someone', 'stays, unowned'] },
+      from: 'census'
+    }
+  ],
+  projection: ({ from, to, answers }) => ({
+    fields: [{ on: 'from', name: 'owner', kind: 'link', points: one(to), required: true }],
+    rules: [`only its ${one(to)} sees and changes a ${from}`].concat(answers.path === true ? ['the rule follows a path (ONT-004)'] : [])
+  }),
+  mutants: [
+    {
+      id: 'visible-to-all',
+      mistake: 'records with no owner rule, readable by everyone signed in',
+      why: "'who else may see it' was not asked",
+      from: 'census'
+    }
+  ],
+  evidence: { rows: 71, sources: ['template:members-area', 'template:planning', 'template:todo-list', 'acme', 'tirion'] }
+});
+
+export const extendsKind = defineKind({
+  id: 'extends',
+  version: 1,
+  source: SOURCE,
+  sentence: 'a {from} is extra detail about one {to}, at most one each',
+  distinguishes: 'a one-to-one link, usually unique or the record\'s own key',
+  projectsTo: 'a Link with a unique rule; or fields on the thing itself when it is small',
+  target: 'noun',
+  carriesDetails: false,
+  tile: { label: 'Extra detail about', line: 'more about one thing, one each', icon: '⊕' },
+  questions: [
+    {
+      id: 'filterBy',
+      ask: 'Which of its details will you filter or sort {to}s by?',
+      prevents: "a field split off into the profile that was later used to filter users all the time, and a profile's date copied onto the user by hand to sort by it — repeated until the database was patchwork",
+      answer: { type: 'words' },
+      from: 'oral'
+    },
+    {
+      id: 'grows',
+      ask: 'Is it a few details, or could it grow to a dozen that only some {to}s use?',
+      prevents: 'profile fields piled into the user record; later a dozen of them, half unused by most users',
+      answer: { type: 'one-of', values: ['a few', 'could grow'] },
+      from: 'oral'
+    },
+    {
+      id: 'moreThanOne',
+      ask: 'Is there ever more than one {from} for a {to}?',
+      prevents: 'a second one with nowhere to go',
+      answer: { type: 'yes-no' },
+      changesKind: { when: true, to: 'belongs-to' },
+      from: 'census'
+    },
+    {
+      id: 'standsAlone',
+      ask: 'Does a {from} exist without its {to}?',
+      prevents: 'extra detail left behind about something that is gone',
+      answer: { type: 'yes-no' },
+      from: 'census'
+    },
+    {
+      id: 'computed',
+      ask: 'Is it worked out from other things, or written by a person?',
+      prevents: 'a computed value someone edited by hand',
+      answer: { type: 'one-of', values: ['worked out', 'written by a person'] },
+      from: 'census'
+    }
+  ],
+  projection: ({ from, to, answers }) => ({
+    fields: [
+      { on: 'from', name: one(to), kind: 'link', points: one(to), required: true, unique: true, whenTargetGoes: answers.standsAlone === true ? 'stays-unlinked' : 'goes-too' }
+    ],
+    rules: [`what a ${one(to)} is filtered or sorted by stays on the ${one(to)}, not on its ${from}`].concat(
+      answers.computed === 'worked out' ? ['nobody edits it by hand'] : []
+    )
+  }),
+  mutants: [
+    {
+      id: 'piled-in',
+      mistake: "piling all the profile fields into the user table thinking there's only a few; later a dozen, some users using half",
+      why: 'extra detail folded into the thing it extends',
+      from: 'oral'
+    },
+    {
+      id: 'filter-field-split-off',
+      mistake: 'a field in the profile table later used very often to filter users; too late to move once users have profiles',
+      why: 'the field you filter or sort the main thing by was split off into the extension',
+      from: 'oral'
+    },
+    {
+      id: 'sort-key-copied',
+      mistake: "a 'profile updated' field copied onto the user and kept in sync by hand, to sort users by it",
+      why: 'a derived field copied onto the parent and maintained by hand',
+      from: 'oral'
+    }
+  ],
+  evidence: { rows: 11, sources: ['lessons', 'acme', 'tirion', 'sentinel'] }
+});
+
+export const byName = defineKind({
+  id: 'by-name',
+  version: 1,
+  source: SOURCE,
+  sentence: 'a {from} names its {to} by something a person could retype (an email, a code)',
+  distinguishes: 'a natural key stored as text where a Link would be',
+  projectsTo: 'a Link; the mutant is the text itself',
+  target: 'noun',
+  carriesDetails: false,
+  tile: { label: 'Names by email or code', line: 'points at another by something typed', icon: '@' },
+  questions: [
+    {
+      id: 'changes',
+      ask: "Can a {to}'s email or code change, or be mistyped?",
+      prevents: 'a record pointing at a person by email that stopped pointing at anyone when the email changed',
+      answer: { type: 'yes-no' },
+      from: 'census'
+    },
+    {
+      id: 'shared',
+      ask: 'Can two {to}s share it?',
+      prevents: 'a note that names two people at once',
+      answer: { type: 'yes-no' },
+      from: 'census'
+    },
+    {
+      id: 'shouldLink',
+      ask: 'Should it be a link to the {to} instead?',
+      prevents: 'a text kept where a link belongs',
+      answer: { type: 'yes-no' },
+      changesKind: { when: true, to: 'belongs-to' },
+      from: 'census'
+    }
+  ],
+  projection: ({ from, to }) => ({
+    fields: [{ on: 'from', name: one(to), kind: 'link', points: one(to) }],
+    rules: [`a ${from} keeps the link; the email or code is read from the ${one(to)}`]
+  }),
+  mutants: [
+    {
+      id: 'the-text-itself',
+      mistake: 'the email or code stored as text where a link would be',
+      why: 'a change to the email breaks every record that named it',
+      from: 'census'
+    }
+  ],
+  evidence: { rows: 6, sources: ['lessons'], thin: 'one source: every row is from one backend' }
+});
+
+export const pointsAtOneOf = defineKind({
+  id: 'points-at-one-of',
+  version: 1,
+  source: SOURCE,
+  sentence: 'a {from} points at one thing that may be any of several kinds, and says which',
+  distinguishes: 'an id beside a kind field; no single target collection',
+  projectsTo: 'a kind Choice plus a Text id; the mutant is an id with no kind beside it',
+  target: 'nouns',
+  carriesDetails: false,
+  tile: { label: 'Points at one of several', line: 'one thing, which may be any of a few kinds', icon: '⋔' },
+  questions: [
+    {
+      id: 'more',
+      ask: 'Could it ever point at a kind of thing not on the list?',
+      prevents: 'a new kind of target that every screen reading it does not know',
+      answer: { type: 'yes-no' },
+      from: 'census'
+    },
+    {
+      id: 'whenTargetGoes',
+      ask: 'What happens when the thing it points at goes?',
+      prevents: 'a pointer at nothing, which no rule can catch because no single collection holds the target',
+      answer: { type: 'one-of', values: GOES },
+      from: 'census'
+    },
+    {
+      id: 'repoint',
+      ask: 'Can it be pointed at something else later?',
+      prevents: 'a note moved to another lesson by hand, leaving the kind behind',
+      answer: { type: 'yes-no' },
+      from: 'census'
+    }
+  ],
+  projection: () => ({
+    fields: [
+      { on: 'from', name: 'pointsAtKind', kind: 'choice', required: true },
+      { on: 'from', name: 'pointsAtId', kind: 'text', required: true }
+    ],
+    rules: ['the kind is always set beside the id']
+  }),
+  mutants: [
+    {
+      id: 'id-without-kind',
+      mistake: 'an id with no kind beside it',
+      why: 'nothing can tell which collection to look in',
+      from: 'census'
+    }
+  ],
+  evidence: { rows: 2, sources: ['lessons'], thin: 'one source: two fields of one backend' }
+});
+
+/** In the census's order. */
+export const WORLD_KINDS: readonly Kind[] = Object.freeze([
+  belongsTo,
+  isOn,
+  together,
+  oneOf,
+  manyByList,
+  partOfTree,
+  existsElsewhere,
+  sameAs,
+  ends,
+  happenedTo,
+  ownedBy,
+  extendsKind,
+  byName,
+  pointsAtOneOf
+]);

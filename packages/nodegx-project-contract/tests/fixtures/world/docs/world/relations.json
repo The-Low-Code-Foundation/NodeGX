@@ -1,0 +1,114 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/world-v1.json#/definitions/relationsFile",
+  "relations": [
+    {
+      "id": "membership",
+      "from": "person",
+      "to": "account",
+      "kind": "is-on",
+      "sentence": "A person is on an account as a member, from the day they join until they leave.",
+      "answers": {
+        "counts": "A person counts as a member only while they are on an account that pays.",
+        "several": true,
+        "startsEnds": true,
+        "details": "their role on the account: holder or member"
+      },
+      "properties": [
+        {
+          "name": "role",
+          "kind": "choice",
+          "values": [
+            "holder",
+            "member"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "account-company",
+      "from": "account",
+      "to": "company",
+      "kind": "belongs-to",
+      "sentence": "Every account is one company's.",
+      "answers": {
+        "several": false,
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "plan-size",
+      "from": "account",
+      "property": "plan",
+      "kind": "one-of",
+      "sentence": "An account's plan is small, medium or large.",
+      "answers": {
+        "whoAdds": "a developer",
+        "needsDetails": false
+      }
+    },
+    {
+      "id": "on-the-course-platform",
+      "from": "person",
+      "to": "the course platform",
+      "kind": "exists-elsewhere",
+      "sentence": "A member also has a login on the course platform.",
+      "answers": {
+        "hereFirst": "Yes: they join here first. Until the platform knows them, they cannot start a course, and we want a list of who is waiting.",
+        "wins": "here"
+      }
+    },
+    {
+      "id": "leaves",
+      "from": "person",
+      "kind": "ends",
+      "sentence": "A person can leave, and we keep what they did.",
+      "answers": {
+        "comesBack": true,
+        "backAs": "the old one"
+      }
+    },
+    {
+      "id": "attended",
+      "from": "person",
+      "to": "session",
+      "kind": "happened-to",
+      "sentence": "A person came to a session.",
+      "answers": {
+        "forever": true,
+        "who": true,
+        "outlives": true
+      },
+      "properties": [
+        {
+          "name": "late",
+          "kind": "yesno"
+        }
+      ]
+    },
+    {
+      "id": "note-about",
+      "from": "note",
+      "to": [
+        "person",
+        "account"
+      ],
+      "kind": "points-at-one-of",
+      "sentence": "A note is about a person or about an account.",
+      "answers": {
+        "repoint": false
+      }
+    },
+    {
+      "id": "note-author",
+      "from": "note",
+      "to": "person",
+      "kind": "owned-by",
+      "sentence": "Only whoever wrote a note may change it; the two of us can read every note.",
+      "answers": {
+        "whoElse": "the two of us who run things"
+      }
+    }
+  ]
+}

@@ -19,7 +19,7 @@ derived; with claims, the migration is graded on data. NSP-005's REACH is the wo
 
 ## 3. What to build
 
-1. **The diff.** Two `ontology/` trees compared at the sentence level: nouns added, removed, renamed; relations whose
+1. **The diff.** Two `docs/world/` trees compared at the sentence level: nouns added, removed, renamed; relations whose
    kind or answers changed; verbs touched. A rename is a diff, never a silent re-projection (README §12).
 2. **The reach.** For each changed sentence: the collections and fields it projects to, the verbs that touch them, the
    components whose record nodes name those collections (the v2 files, through the format package), and the

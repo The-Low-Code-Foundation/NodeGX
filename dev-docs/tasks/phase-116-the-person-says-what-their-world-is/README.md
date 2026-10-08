@@ -1,7 +1,7 @@
 # Phase 116 — The person says what their world is
 
 **Scoped:** 2026-10-08, at HEAD `34c76830f`, from a conversation with Richard that started as a report of a chat with a
-colleague about the backend problem and ended as a phase. **Status: 🟡 s1 — ONT-000 ✅ (14 kinds, 303 rows, 8 sources, Richard's Bubble list taken); R1–R7 RULED (§9, ruled table); next ONT-001.** §13 says what the census measured.
+colleague about the backend problem and ended as a phase. **Status: 🟡 s2 — ONT-000 ✅ (14 kinds, 303 rows, 8 sources, Richard's Bubble list taken); R1–R7 RULED (§9, ruled table); ONT-001 🟡 built s2 (`@nodegx/project-contract/world`, files under `docs/world/`; AC1–AC3 ✅ (in `test:ci`), AC4 moved to ONT-008); next ONT-003 and ONT-004.** §13 says what the census measured.
 **Prefix: `ONT`.** Task files: [ONT-000](ONT-000-THE-CORPUS-MEASURED.md) … [ONT-010](ONT-010-THE-CLAIM-AND-ITS-GATE.md).
 The board is §7. Hand-off: [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).
 
@@ -165,7 +165,7 @@ graded against it. Three things make the difference measurable rather than rheto
 | id | task | side | needs |
 |---|---|---|---|
 | [ONT-000](ONT-000-THE-CORPUS-MEASURED.md) ✅ | **The corpus, measured.** Every relation in Acme, four templates, the lessons backend and the two prototypes classified; 14 kinds with a count and evidence per kind (`KINDS.md`, `npm run ontology-census:check`); the two Acme notes and the incident attributed to kinds. Richard's Bubble list taken down (seven mutants, `kinds.hand.json` → `oral`). | research | — |
-| [ONT-001](ONT-001-THE-VOCABULARY-AS-A-PACKAGE.md) | **The vocabulary as a package.** The property graph in the project files; the kinds with `questions`, `projection`, `mutants`; a schema, a validator, a writer. | format | ONT-000, R1, R2 |
+| [ONT-001](ONT-001-THE-VOCABULARY-AS-A-PACKAGE.md) 🟡 | **The vocabulary as a package.** The property graph in the project files; the kinds with `questions`, `projection`, `mutants`; a schema, a validator, a writer. **s2:** an entry of `@nodegx/project-contract` (`world`), the files in `docs/world/`, 14 kinds pinned to the census by test, 55 questions, 19 mutant seeds, a validator with 14 refusals, the `if_revision` write rule, the ninth schema; the editor's save leaves the files byte-identical (in `test:ci`). AC4 → ONT-008. | format | ONT-000, R1, R2 |
 | [ONT-002](ONT-002-THE-CONVERSATION-IS-A-RUNNER.md) | **The conversation is a runner.** The brief; the runner that reports surviving mutants as the next question; the question budget ranked by prevented incidents. | spec + MCP | ONT-001, ONT-005, R5 |
 | [ONT-003](ONT-003-THE-PROJECTION-IS-A-FUNCTION.md) | **The projection is a function.** Ontology → schema against the contract, deterministic; answers as claims; graded on two adapters through the conformance suite. | contract + backend | ONT-001 |
 | [ONT-004](ONT-004-PATHS-JOIN-THE-CONTRACT.md) | **Paths join the contract.** One traversal operation, a capability cell per backend, relational adapters first; Acme's four-hop rule as the fixture. | contract + adapters | R3 |
