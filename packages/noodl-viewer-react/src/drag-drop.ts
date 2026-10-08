@@ -440,6 +440,17 @@ function finish(g: Gesture, { settleGap }: { settleGap: boolean }): void {
 // ── Where the pointer is ────────────────────────────────────────────────────
 
 /**
+ * A zone the gesture's source can never be dropped into: the source node itself, or a zone inside
+ * it (P107-C78). Asked of the node as well as of the element the press started on: a remount or a
+ * new Tag replaces the element under a gesture, and the new one is not inside the old.
+ */
+function insideSource(g: Gesture, node: DragDropNode, el: Element): boolean {
+  if (node === g.source || g.sourceEl.contains(el)) return true;
+  const now = liveElement(g.source);
+  return !!now && now.contains(el);
+}
+
+/**
  * The innermost armed zone that takes this source, walking out from the element under the
  * pointer. A zone that refuses the kind is passed over, so an outer zone that takes it still can
  * (AC3's nesting rule is about the innermost TAKER). A zone inside the source is never a target:
@@ -459,7 +470,7 @@ function zoneAt(g: Gesture, x: number, y: number): { node: DragDropNode; el: HTM
   for (let el: Element | null = hit; el; el = el.parentElement) {
     const node = byElement.get(el);
     if (!node) continue;
-    if (g.sourceEl.contains(el)) continue;
+    if (insideSource(g, node, el)) continue;
     if (accepts(node, g.source)) return { node, el: el as HTMLElement };
   }
   return null;
@@ -809,7 +820,8 @@ function onKeyDown(e: KeyboardEvent): void {
   // Enter or Space cancels instead of dropping into a zone nobody can see, and an arrow key moves among the zones still there.
   if (g.zone && !liveElement(g.zone)) leaveZone(g);
 
-  const list = orderedZones(g.source);
+  // the zones the card can go to — never itself (P107-C78, as `zoneAt` for the pointer)
+  const list = orderedZones(g.source).filter((z) => !insideSource(g, z.node, z.el));
   const at = list.findIndex((z) => z.node === g.zone);
   const count = (z: HTMLElement) => slots(g, z).length;
 
@@ -877,9 +889,10 @@ function keyboardLift(source: DragDropNode, el: HTMLElement): void {
   listenForGesture();
   lift(g);
 
-  // Start where it already is: the innermost zone it sits in, at its own place in that zone.
-  const list = orderedZones(source);
-  const around = list.filter((z) => z.el !== el && z.el.contains(el));
+  // Start where it already is: the innermost zone it sits in, at its own place in that zone. Never
+  // in itself (P107-C78): a Draggable that is also a zone starts in the zone around it, or the first.
+  const list = orderedZones(source).filter((z) => !insideSource(g, z.node, z.el));
+  const around = list.filter((z) => z.el.contains(el));
   const home = around.find((z) => !around.some((o) => o !== z && z.el.contains(o.el))) || list[0];
   if (home) {
     enterZone(g, home.node, home.el);

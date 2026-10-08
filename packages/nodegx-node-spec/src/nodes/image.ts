@@ -58,26 +58,20 @@ type State = {
   peEnabled: boolean | undefined;
   /** the drag inputs (`_internal`) */
   draggable: boolean;
-  dragValue: unknown;
   holdToDrag: unknown;
   holdTime: unknown;
   acceptDrops: boolean;
   acceptKind: unknown;
-  dragKind: unknown;
   /** the gesture (drag-drop.ts :199-225) — this node is its source when it is not idle */
   phase: Phase;
   input: 'mouse' | 'touch' | 'keyboard' | undefined;
-  /** the zone the gesture is over: this node itself (C78, or a card's), or none */
+  /** a card's gesture is over this node as its zone; never the node's own gesture (C78, fixed in P109 ISL-031) */
   inZone: boolean;
   /** THE ZONE SIDE — the card whose gesture it is (its index in `CARDS`; -1: none), and what lifted it. A card's gesture is always lifted */
   carry: number;
   carryBy: 'mouse' | 'keyboard' | undefined;
   /** the card that holds the keyboard (`document.activeElement`), its index in `CARDS`; -1: none (a card takes it at its press, or at a pick-up) */
   cardFocused: number;
-  /** the element the last pointer act on the page landed on, when it is this node's (`elem`); -1: something else — what `elementFromPoint` answers */
-  pointerAt: number;
-  /** the element the Image's own pointer gesture started on (`g.sourceEl`): a zone inside it never takes the drag, a NEW element of the Image's own is not inside it */
-  sourceElem: number;
   /** :920-927 — a click is swallowed until the event loop turns */
   swallow: boolean;
   /** the outputs */
@@ -132,13 +126,12 @@ export const Image = defineNode({
   // v1 (NSP-016 s53): the Text v5's machinery (text.ts), with no Tag (as the Image), and the picture's fetch
   // v2 (P109 ISL-038, s29): a key during a keyboard carry leaves a zone taken off the page first, so Space cancels (row C83)
   // v3 (P109 ISL-038, s29): a file drop zone tracks itself — an enter on a new element starts the count again, and Accept File Drops off or leaving the page turns Is Dragging Over off (row C81)
-  version: 3,
+  // v4 (P109 ISL-031, s30): a drag never takes its own node as its zone — a keyboard lift does not start in itself, Enter or Space then cancels, and a pointer drag over a new element of its own finds no zone (row C78)
+  version: 4,
   source: 'packages/noodl-viewer-react/src/nodes/visual/image.ts',
   needs: ['person', 'clock'],
   // the hold timer: the default half second, either side of it, a second (Hold Time 1), and the turn that unswallows a click
   worldPool: { advances: [0, 1, 499, 500, 1000] },
-  // s51 — where the pointer is follows every pointer act on the page (the element it landed on): the page's sync, not a branch's work
-  synced: ['pointerAt'],
 
   state: {
     mounted: true,
@@ -152,20 +145,16 @@ export const Image = defineNode({
     peStyle: undefined,
     peEnabled: undefined,
     draggable: false,
-    dragValue: undefined,
     holdToDrag: undefined,
     holdTime: undefined,
     acceptDrops: false,
     acceptKind: undefined,
-    dragKind: undefined,
     phase: 'idle',
     input: undefined,
     inZone: false,
     carry: -1,
     carryBy: undefined,
     cardFocused: -1,
-    pointerAt: -1,
-    sourceElem: -1,
     swallow: false,
     isLifted: false,
     isDropTarget: false,
@@ -360,8 +349,9 @@ export const Image = defineNode({
       if (v) return { set: { draggable: true, ...(s.onPage ? { attrsOn: s.elem } : { chain: Math.max(s.chain, FRAMES) }) }, send: [] };
       return { set: { draggable: false, ...(s.onPage && s.attrsOn === s.elem ? { attrsOn: -1 } : {}) }, send: [] };
     },
-    dragValue: (_s, v) => ({ set: { dragValue: v }, send: [] }),
-    dragKind: (_s, v) => ({ set: { dragKind: v }, send: [] }),
+    // read by the zone it is dropped on: this page's only zone is itself, and a drag never takes its own node (C78, fixed in P109 ISL-031)
+    dragValue: () => NOTHING,
+    dragKind: () => NOTHING,
     holdToDrag: (_s, v) => ({ set: { holdToDrag: v }, send: [] }),
     holdTime: (_s, v) => ({ set: { holdTime: v }, send: [] }),
     // drag-drop.ts :112-120 — off while the gesture is over this zone: it leaves it (`leaveZone` :489-512)
@@ -387,7 +377,7 @@ export const Image = defineNode({
       timer: (s, _i, tag) => {
         if (tag === 'unswallow') return { set: { swallow: false }, send: [] };
         // the lift tracks where the pointer is: the element the last pointer act landed on, while it is on the page (`lift` :372-375)
-        if (tag === 'hold' && s.phase === 'holding') return liftedAndTracked(s, s.onPage && s.pointerAt === s.elem);
+        if (tag === 'hold' && s.phase === 'holding') return lifted(s) as Act;
         return NOTHING;
       }
     },
@@ -445,17 +435,13 @@ export const Image = defineNode({
       // drag-drop.ts :285-306 — a window listener: the pointer's move is heard wherever it lands
       move: (s, _i, value) => pointerAct(s, (p) => pointerMove(p, value === 'touch' ? 'touch' : 'mouse', hits(p))),
       // THE ZONE SIDE — the pointer moves onto nothing: heard by the window wherever the Image is
-      away: (s, _i, value) => paintedThen(s, (p) => {
-        const off: Partial<State> = p.pointerAt !== -1 ? { pointerAt: -1 } : {};
-        const a = pointerMove({ ...p, ...off }, value === 'touch' ? 'touch' : 'mouse', false);
-        return { ...a, set: { ...off, ...a.set } };
-      }),
+      away: (s, _i, value) => paintedThen(s, (p) => pointerMove(p, value === 'touch' ? 'touch' : 'mouse', false)),
       // a press on the card (the keyboard goes onto it), then its move: the card lifts when no gesture is under way; else the move is
       // the gesture's pointer moving off the Image
       grab: (s, _i, value) => paintedThen(s, (p) => {
         const i = cardIndex(value);
         if (i < 0) return NONE;
-        const off: Partial<State> = { ...cardTakesKeyboard(p, i), ...(p.pointerAt !== -1 ? { pointerAt: -1 } : {}) };
+        const off: Partial<State> = cardTakesKeyboard(p, i);
         const at = { ...p, ...off };
         const a = busy(at) ? pointerMove(at, 'mouse', false) : { ...NONE, set: { carry: i, carryBy: 'mouse' as const } };
         return { ...a, set: { ...off, ...a.set } };
@@ -546,14 +532,9 @@ function cardTakesKeyboard(s: Readonly<State>, i: number): Partial<State> {
   return { elementFocused: false, cardFocused: i };
 }
 
-/** A pointer act on the painted page: the pointer is then over the element it landed on — this node's, under the hit test, or something else. */
+/** A pointer act on the painted page. */
 function pointerAct(s: Readonly<State>, then: (painted: Readonly<State>) => Act): Act {
-  return onPainted(s, (p) => {
-    const at = hits(p) ? p.elem : -1;
-    const moved: Partial<State> = p.pointerAt !== at ? { pointerAt: at } : {};
-    const a = then({ ...p, ...moved });
-    return { ...a, set: { ...moved, ...a.set } };
-  });
+  return onPainted(s, then);
 }
 
 /**
@@ -594,14 +575,9 @@ function pointerMove(s: Readonly<State>, input: 'mouse' | 'touch', over: boolean
   if (s.carry >= 0) return s.carryBy === input ? track(s, over) : NONE;
   if (s.phase === 'idle' || s.input !== input) return NONE;
   if (s.phase === 'holding') return cancelled(s);
-  if (s.phase === 'pending') return liftedAndTracked(s, over);
-  return track(s, over);
-}
-
-/** `lift` (:355-376) of the Image's own pointer gesture, then `track` where the pointer is (`over`: on the Image's element now). */
-function liftedAndTracked(s: Readonly<State>, over: boolean): Act {
-  const l = lifted(s) as Act;
-  return join(l, track({ ...s, ...l.set }, over));
+  // the node's own lifted drag finds no zone wherever the pointer is (C78, fixed in P109 ISL-031)
+  if (s.phase === 'pending') return lifted(s) as Act;
+  return NONE;
 }
 
 /** One gesture at a time (drag-drop.ts :199-225): the Image's own, or a card's. */
@@ -617,8 +593,7 @@ function cardIndex(value: unknown): number {
 
 /** `track` (:472-484) for a card's gesture: the Image is the zone under the pointer when the pointer lands on it and it is the card's zone. */
 function track(s: Readonly<State>, over: boolean): Act {
-  // the Image's own drag: never into a zone inside its source — the element it started on; a new element of its own is not inside that one
-  const here = over && zoneFor(s) && (s.carry >= 0 || s.elem !== s.sourceElem);
+  const here = over && zoneFor(s);
   if (here === s.inZone) return NONE;
   return { ...NONE, set: { inZone: here, isDropTarget: here }, send: ['isDropTarget'] };
 }
@@ -726,9 +701,8 @@ function holdMs(s: Readonly<State>): number {
 /** `onPointerDown` (drag-drop.ts :232-271): a gesture starts on this element when none is under way and it is Draggable. */
 function pointerDown(s: Readonly<State>, input: 'mouse' | 'touch'): Act {
   if (busy(s) || !s.draggable || !hits(s)) return NONE;
-  const source: Partial<State> = { sourceElem: s.elem };
-  if (holds(s, input)) return { set: { phase: 'holding', input, ...source }, send: [], emit: [], after: [{ tag: 'hold', ms: holdMs(s) }] };
-  return { set: { phase: 'pending', input, ...source }, send: [], emit: [] };
+  if (holds(s, input)) return { set: { phase: 'holding', input }, send: [], emit: [], after: [{ tag: 'hold', ms: holdMs(s) }] };
+  return { set: { phase: 'pending', input }, send: [], emit: [] };
 }
 
 /** `onPointerUp` (:308-323) — the same pointer only; the window hears it wherever it lands. */
@@ -742,10 +716,9 @@ function pointerUp(s: Readonly<State>, input: 'mouse' | 'touch'): Act {
   }
   if (s.phase === 'idle' || s.input !== input) return NONE;
   if (s.phase !== 'lifted') return { set: ended(), send: [], emit: [], cancel: ['hold'] };
-  // tracked where the mouse came up, then dropped there (:308-323)
-  const t = track(s, hits(s));
-  const d = drop({ ...s, ...t.set });
-  return join(t, { ...d, set: { ...d.set, swallow: true }, after: [{ tag: 'unswallow', ms: 0 }] });
+  // let go of its own lifted drag: never over a zone that takes it — its own node is not one (C78, fixed in P109 ISL-031) — so a cancel
+  const c = cancelled(s);
+  return { ...c, set: { ...c.set, swallow: true }, after: [{ tag: 'unswallow', ms: 0 }] };
 }
 
 /** `drop` (:379-399) of a card: on the Image, its Drag Value and Drop Index 0, then Dropped, and the zone left; over none, the card's cancel. */
@@ -765,7 +738,7 @@ function cardCancelled(s: Readonly<State>): Act {
 
 /** What `finish` (:418-436) leaves of the gesture. */
 function ended(): Partial<State> {
-  return { phase: 'idle', input: undefined, inZone: false };
+  return { phase: 'idle', input: undefined };
 }
 
 /** `lift` (:355-376): Is Lifted, then Picked Up. */
@@ -775,22 +748,9 @@ function lifted(_s: Readonly<State>): Send {
 
 /** `cancel` (:401-409): the gesture ends; a lifted one says Cancelled. */
 function cancelled(s: Readonly<State>): Act {
-  const zone: Partial<State> = s.inZone ? { isDropTarget: false } : {};
-  if (s.phase !== 'lifted') return { set: { ...ended(), ...zone }, send: s.inZone ? ['isDropTarget'] : [], emit: [], cancel: ['hold'] };
-  return { set: { ...ended(), ...zone, isLifted: false }, send: [...(s.inZone ? (['isDropTarget'] as Val[]) : []), 'isLifted'], emit: ['dragCancelled'], cancel: ['hold'] };
-}
-
-/**
- * `drop` (:379-399): over a zone — this node itself, row C78 — Dropped Value (the Drag Value now), Drop Index, Dropped, Landed,
- * then the gesture ends (the zone left, Is Lifted false); over none, a cancel.
- */
-function drop(s: Readonly<State>): Act {
-  if (!s.inZone) return cancelled(s);
-  return {
-    set: { ...ended(), droppedValue: s.dragValue, dropIndex: 0, isDropTarget: false, isLifted: false },
-    send: ['droppedValue', 'dropIndex', 'isDropTarget', 'isLifted'],
-    emit: ['dropped', 'landed']
-  };
+  // its own drag is never in a zone (C78, fixed in P109 ISL-031)
+  if (s.phase !== 'lifted') return { set: ended(), send: [], emit: [], cancel: ['hold'] };
+  return { set: { ...ended(), isLifted: false }, send: ['isLifted'], emit: ['dragCancelled'], cancel: ['hold'] };
 }
 
 /** `accepts` (:166-171): no Accept Kind takes anything; else the source's Drag Kind — the card's, or its own — trimmed, among the kinds. */
@@ -800,13 +760,14 @@ function acceptsSource(s: Readonly<State>): boolean {
     .map((k) => k.trim())
     .filter(Boolean);
   if (wanted.length === 0) return true;
-  const kind = s.carry >= 0 ? CARDS[s.carry].dragKind : s.dragKind;
+  const kind = CARDS[s.carry].dragKind;
   return wanted.includes(String(kind || '').trim());
 }
 
 /** This node is an armed zone on the page that takes the gesture's source — itself, or the card (`orderedZones` :753-766, `zoneAt` :446-464). */
 function zoneFor(s: Readonly<State>): boolean {
-  return s.acceptDrops && s.onPage && acceptsSource(s);
+  // a card's: never its own gesture — a drag never takes its own node as its zone (C78, fixed in P109 ISL-031)
+  return s.carry >= 0 && s.acceptDrops && s.onPage && acceptsSource(s);
 }
 
 /** `onKeyDown` (:768-839) — a key reaches the document wherever the keyboard is. */
@@ -814,14 +775,11 @@ function keyDown(s: Readonly<State>, key: string): Act {
   if (!busy(s)) {
     // Space on a card that holds the keyboard (the Image did not take it): the card's `keyboardLift`
     if (key === ' ' && !s.elementFocused && s.cardFocused >= 0) return cardLifted(s, s.cardFocused);
-    // Space on the live, Draggable element that holds the keyboard: `keyboardLift` — into the first zone, itself (C78)
     if (key !== ' ' || !s.elementFocused || !s.draggable || !s.onPage) return NONE;
-    const zone = zoneFor(s);
-    return {
-      set: { phase: 'lifted', input: 'keyboard', isLifted: true, inZone: zone, ...(zone ? { isDropTarget: true } : {}) },
-      send: zone ? ['isLifted', 'isDropTarget'] : ['isLifted'],
-      emit: ['pickedUp']
-    };
+    // Space on the live, Draggable element that holds the keyboard: `keyboardLift` — never into itself (C78, fixed in P109 ISL-031),
+    // and no other zone on this page takes it
+    // it holds the keyboard: written whether the key act just put it there or it was there (one branch either way)
+    return { set: { phase: 'lifted', input: 'keyboard', isLifted: true, elementFocused: true, cardFocused: -1 }, send: ['isLifted'], emit: ['pickedUp'] };
   }
   return keyDuringGesture(s, key);
 }
@@ -841,7 +799,7 @@ function keyDuringGesture(s: Readonly<State>, key: string): Act {
   switch (key) {
     case 'Enter':
     case ' ':
-      return card ? cardDrop(s) : drop(s);
+      return card ? cardDrop(s) : cancelled(s);
     case 'Escape':
     case 'Tab':
       return card ? cardCancelled(s) : cancelled(s);

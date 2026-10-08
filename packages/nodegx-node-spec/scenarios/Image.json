@@ -638,8 +638,8 @@
     ]
   },
   {
-    "name": "row C78 — Draggable and Accept Drops: a keyboard lift starts IN ITSELF (Drag Over true); Enter drops it on itself — its own Drag Value, Drop Index 0, Dropped, Landed",
-    "because": "drag-drop.ts :862-866 — `around` leaves the element out, `list[0]` does not; :386-391",
+    "name": "row C78 — Draggable and Accept Drops: a keyboard lift never starts in itself (no Drag Over); Enter cancels — nothing Dropped, no Landed",
+    "because": "drag-drop.ts `keyboardLift` — the zones it can start in leave its own node out (`insideSource`): row C78, fixed in P109 ISL-031",
     "params": {
       "draggable": true,
       "acceptDrops": true,
@@ -665,7 +665,7 @@
     ]
   },
   {
-    "name": "row C78 — Accept Kind takes the Drag Kind, trimmed, from a comma list: in; another kind: not in — Enter cancels",
+    "name": "row C78 — whatever Accept Kind and Drag Kind say, a keyboard lift never starts in itself — Enter cancels each time",
     "because": "drag-drop.ts :155-171",
     "params": {
       "draggable": true,
@@ -706,7 +706,7 @@
     ]
   },
   {
-    "name": "row C78 — Accept Drops off mid-drag leaves the zone (Drag Over false) and Enter cancels; on again, an arrow enters it and Space drops",
+    "name": "row C78 — Accept Drops off and on mid-drag: an arrow never enters itself, and Enter and Space cancel",
     "because": "drag-drop.ts :117-118, :804-815",
     "params": {
       "draggable": true,
@@ -759,7 +759,7 @@
     ]
   },
   {
-    "name": "row C78 — the drop reports the Drag Value at the DROP, not at the lift; Escape from inside the zone leaves it (Drag Over false, Cancelled)",
+    "name": "row C78 — a Drag Value written mid-drag: Enter cancels, nothing Dropped on itself; Escape cancels the next one",
     "because": "drag-drop.ts :386 reads `_internal.dragValue` at the drop; :401-409",
     "params": {
       "draggable": true,
@@ -3090,7 +3090,7 @@
     ]
   },
   {
-    "name": "row C78 — the same over its own zone: Escape after a blur takes the keyboard back, leaves the zone (Drag Over false) and cancels; hidden, Space lifts into the zone again",
+    "name": "row C78 — the same with Accept Drops on (never its own zone): Escape after a blur takes the keyboard back and cancels; hidden, Space lifts again",
     "because": "drag-drop.ts :768-839, :862-866",
     "params": {
       "draggable": true,
@@ -3165,7 +3165,7 @@
     ]
   },
   {
-    "name": "row C78 — the same over its own zone: Tab after a blur takes the keyboard back, leaves the zone (Drag Over false) and cancels; hidden, Space lifts into the zone again",
+    "name": "row C78 — the same with Accept Drops on (never its own zone): Tab after a blur takes the keyboard back and cancels; hidden, Space lifts again",
     "because": "drag-drop.ts :768-839, :862-866",
     "params": {
       "draggable": true,
@@ -3203,7 +3203,7 @@
     ]
   },
   {
-    "name": "row C78 — Space after a blur takes the keyboard back and lifts into its own zone; hidden, Escape cancels and Space lifts again",
+    "name": "row C78 — Space after a blur takes the keyboard back and lifts, never into its own zone; hidden, Escape cancels and Space lifts again",
     "because": "drag-drop.ts :841-878",
     "params": {
       "draggable": true,
@@ -3666,7 +3666,7 @@
     ]
   },
   {
-    "name": "row C78 — a keyboard drag over its own zone, the keyboard taken away and the element hidden: Escape cancels without taking the keyboard back, so Space raises nothing",
+    "name": "row C78 — a keyboard drag with Accept Drops on (never its own zone), the keyboard taken away and the element hidden: Escape cancels without taking the keyboard back, so Space raises nothing",
     "because": "drag-drop.ts :768-839 — the key reaches the document; a hidden element takes no keyboard",
     "params": {
       "draggable": true,
@@ -5883,7 +5883,7 @@
     ]
   },
   {
-    "name": "a pointer drag never drops on itself: Accept Drops on, press, move, release — Cancelled and no Drag Over (Space from the keyboard does drop on itself, C78)",
+    "name": "a pointer drag never drops on itself: Accept Drops on, press, move, release — Cancelled and no Drag Over (nor does Space from the keyboard, C78)",
     "because": "drag-drop.ts :460 — a zone inside the source never takes it",
     "params": {
       "draggable": true,
@@ -8568,7 +8568,7 @@
     ]
   },
   {
-    "name": "the zone side: its own keyboard lift into itself (C78), then Space on a card: the key is its own gesture's — dropped on itself, Landed",
+    "name": "the zone side: its own keyboard lift (never into itself, C78), then Space on a card: the key is its own gesture's — a cancel, nothing Dropped",
     "because": "drag-drop.ts :446-512 (zoneAt, track, enterZone, leaveZone), :379-399 (drop); :768-822",
     "params": {
       "acceptDrops": true,
@@ -37894,7 +37894,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, then a grab of the same card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, then a grab of the same card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -37997,7 +37997,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, then a grab of another card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, then a grab of another card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -38100,7 +38100,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, then a pick-up of the same card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, then a pick-up of the same card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -38203,7 +38203,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, then a pick-up of another card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, then a pick-up of another card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -38306,7 +38306,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, then the mouse away — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, then the mouse away — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -38406,7 +38406,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, then a finger away — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, then a finger away — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -38506,7 +38506,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, then Enter — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, then Enter — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -38606,7 +38606,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, then Escape — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, then Escape — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -38706,7 +38706,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, then Tab — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, then Tab — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -38806,7 +38806,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, then an arrow — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, then an arrow — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -38906,7 +38906,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, then a key that means nothing — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, then a key that means nothing — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -39006,7 +39006,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, then Space — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, then Space — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -39106,7 +39106,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, then a click — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, then a click — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -39205,7 +39205,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, then a press — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, then a press — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -39304,7 +39304,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, then a release — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, then a release — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -39403,7 +39403,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, then a finger down — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, then a finger down — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -39502,7 +39502,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, then a finger up — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, then a finger up — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -39601,7 +39601,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, then a hover — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, then a hover — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -39700,7 +39700,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, then a leave — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, then a leave — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -39799,7 +39799,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, then the keyboard put on it — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, then the keyboard put on it — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -39898,7 +39898,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, then the keyboard taken off it — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, then the keyboard taken off it — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -39997,7 +39997,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, then a mouse move — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, then a mouse move — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -40097,7 +40097,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, then a finger move — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, then a finger move — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -40197,7 +40197,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, Mounted off in the act's frame, then a grab of the same card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, Mounted off in the act's frame, then a grab of the same card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -40304,7 +40304,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, Mounted off in the act's frame, then a grab of another card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, Mounted off in the act's frame, then a grab of another card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -40411,7 +40411,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, Mounted off in the act's frame, then a pick-up of the same card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, Mounted off in the act's frame, then a pick-up of the same card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -40518,7 +40518,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, Mounted off in the act's frame, then a pick-up of another card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, Mounted off in the act's frame, then a pick-up of another card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -40625,7 +40625,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, Mounted off in the act's frame, then the mouse away — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, Mounted off in the act's frame, then the mouse away — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -40729,7 +40729,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, Mounted off in the act's frame, then a finger away — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, Mounted off in the act's frame, then a finger away — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -40751,672 +40751,6 @@
       {
         "set": "mounted",
         "value": false
-      },
-      {
-        "act": "away",
-        "value": "touch"
-      },
-      "settle",
-      {
-        "set": "acceptDrops",
-        "value": true
-      },
-      {
-        "set": "acceptKind",
-        "value": ""
-      },
-      {
-        "set": "visible",
-        "value": false
-      },
-      "settle",
-      {
-        "act": "key",
-        "value": " "
-      },
-      "settle",
-      {
-        "act": "key",
-        "value": "Escape"
-      },
-      "settle",
-      {
-        "set": "visible",
-        "value": true
-      },
-      {
-        "set": "mounted",
-        "value": true
-      },
-      "settle",
-      {
-        "act": "move",
-        "value": "mouse"
-      },
-      "settle",
-      {
-        "act": "release"
-      },
-      "settle",
-      {
-        "advance": 500
-      },
-      "settle",
-      {
-        "act": "lift"
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": false
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": true
-      },
-      "settle",
-      {
-        "act": "key",
-        "value": " "
-      },
-      "settle",
-      {
-        "act": "key",
-        "value": "Enter"
-      },
-      "settle",
-      {
-        "advance": 1
-      },
-      "settle"
-    ]
-  },
-  {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, mounted again in the act's frame, then a grab of the same card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
-    "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
-    "params": {
-      "draggable": true,
-      "dragValue": "me",
-      "acceptDrops": true
-    },
-    "steps": [
-      "settle",
-      "settle",
-      {
-        "act": "key",
-        "value": " "
-      },
-      "settle",
-      {
-        "act": "focus"
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": false
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": true
-      },
-      {
-        "act": "grab",
-        "value": {
-          "dragValue": "card-1",
-          "dragKind": "card"
-        }
-      },
-      "settle",
-      {
-        "set": "acceptDrops",
-        "value": true
-      },
-      {
-        "set": "acceptKind",
-        "value": ""
-      },
-      {
-        "set": "visible",
-        "value": false
-      },
-      "settle",
-      {
-        "act": "key",
-        "value": " "
-      },
-      "settle",
-      {
-        "act": "key",
-        "value": "Escape"
-      },
-      "settle",
-      {
-        "set": "visible",
-        "value": true
-      },
-      {
-        "set": "mounted",
-        "value": true
-      },
-      "settle",
-      {
-        "act": "move",
-        "value": "mouse"
-      },
-      "settle",
-      {
-        "act": "release"
-      },
-      "settle",
-      {
-        "advance": 500
-      },
-      "settle",
-      {
-        "act": "lift"
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": false
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": true
-      },
-      "settle",
-      {
-        "act": "key",
-        "value": " "
-      },
-      "settle",
-      {
-        "act": "key",
-        "value": "Enter"
-      },
-      "settle",
-      {
-        "advance": 1
-      },
-      "settle"
-    ]
-  },
-  {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, mounted again in the act's frame, then a grab of another card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
-    "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
-    "params": {
-      "draggable": true,
-      "dragValue": "me",
-      "acceptDrops": true
-    },
-    "steps": [
-      "settle",
-      "settle",
-      {
-        "act": "key",
-        "value": " "
-      },
-      "settle",
-      {
-        "act": "focus"
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": false
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": true
-      },
-      {
-        "act": "grab",
-        "value": {
-          "dragValue": 7,
-          "dragKind": " task "
-        }
-      },
-      "settle",
-      {
-        "set": "acceptDrops",
-        "value": true
-      },
-      {
-        "set": "acceptKind",
-        "value": ""
-      },
-      {
-        "set": "visible",
-        "value": false
-      },
-      "settle",
-      {
-        "act": "key",
-        "value": " "
-      },
-      "settle",
-      {
-        "act": "key",
-        "value": "Escape"
-      },
-      "settle",
-      {
-        "set": "visible",
-        "value": true
-      },
-      {
-        "set": "mounted",
-        "value": true
-      },
-      "settle",
-      {
-        "act": "move",
-        "value": "mouse"
-      },
-      "settle",
-      {
-        "act": "release"
-      },
-      "settle",
-      {
-        "advance": 500
-      },
-      "settle",
-      {
-        "act": "lift"
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": false
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": true
-      },
-      "settle",
-      {
-        "act": "key",
-        "value": " "
-      },
-      "settle",
-      {
-        "act": "key",
-        "value": "Enter"
-      },
-      "settle",
-      {
-        "advance": 1
-      },
-      "settle"
-    ]
-  },
-  {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, mounted again in the act's frame, then a pick-up of the same card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
-    "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
-    "params": {
-      "draggable": true,
-      "dragValue": "me",
-      "acceptDrops": true
-    },
-    "steps": [
-      "settle",
-      "settle",
-      {
-        "act": "key",
-        "value": " "
-      },
-      "settle",
-      {
-        "act": "focus"
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": false
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": true
-      },
-      {
-        "act": "pickUp",
-        "value": {
-          "dragValue": "card-1",
-          "dragKind": "card"
-        }
-      },
-      "settle",
-      {
-        "set": "acceptDrops",
-        "value": true
-      },
-      {
-        "set": "acceptKind",
-        "value": ""
-      },
-      {
-        "set": "visible",
-        "value": false
-      },
-      "settle",
-      {
-        "act": "key",
-        "value": " "
-      },
-      "settle",
-      {
-        "act": "key",
-        "value": "Escape"
-      },
-      "settle",
-      {
-        "set": "visible",
-        "value": true
-      },
-      {
-        "set": "mounted",
-        "value": true
-      },
-      "settle",
-      {
-        "act": "move",
-        "value": "mouse"
-      },
-      "settle",
-      {
-        "act": "release"
-      },
-      "settle",
-      {
-        "advance": 500
-      },
-      "settle",
-      {
-        "act": "lift"
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": false
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": true
-      },
-      "settle",
-      {
-        "act": "key",
-        "value": " "
-      },
-      "settle",
-      {
-        "act": "key",
-        "value": "Enter"
-      },
-      "settle",
-      {
-        "advance": 1
-      },
-      "settle"
-    ]
-  },
-  {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, mounted again in the act's frame, then a pick-up of another card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
-    "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
-    "params": {
-      "draggable": true,
-      "dragValue": "me",
-      "acceptDrops": true
-    },
-    "steps": [
-      "settle",
-      "settle",
-      {
-        "act": "key",
-        "value": " "
-      },
-      "settle",
-      {
-        "act": "focus"
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": false
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": true
-      },
-      {
-        "act": "pickUp",
-        "value": {
-          "dragValue": 7,
-          "dragKind": " task "
-        }
-      },
-      "settle",
-      {
-        "set": "acceptDrops",
-        "value": true
-      },
-      {
-        "set": "acceptKind",
-        "value": ""
-      },
-      {
-        "set": "visible",
-        "value": false
-      },
-      "settle",
-      {
-        "act": "key",
-        "value": " "
-      },
-      "settle",
-      {
-        "act": "key",
-        "value": "Escape"
-      },
-      "settle",
-      {
-        "set": "visible",
-        "value": true
-      },
-      {
-        "set": "mounted",
-        "value": true
-      },
-      "settle",
-      {
-        "act": "move",
-        "value": "mouse"
-      },
-      "settle",
-      {
-        "act": "release"
-      },
-      "settle",
-      {
-        "advance": 500
-      },
-      "settle",
-      {
-        "act": "lift"
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": false
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": true
-      },
-      "settle",
-      {
-        "act": "key",
-        "value": " "
-      },
-      "settle",
-      {
-        "act": "key",
-        "value": "Enter"
-      },
-      "settle",
-      {
-        "advance": 1
-      },
-      "settle"
-    ]
-  },
-  {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, mounted again in the act's frame, then the mouse away — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
-    "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
-    "params": {
-      "draggable": true,
-      "dragValue": "me",
-      "acceptDrops": true
-    },
-    "steps": [
-      "settle",
-      "settle",
-      {
-        "act": "key",
-        "value": " "
-      },
-      "settle",
-      {
-        "act": "focus"
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": false
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": true
-      },
-      {
-        "act": "away",
-        "value": "mouse"
-      },
-      "settle",
-      {
-        "set": "acceptDrops",
-        "value": true
-      },
-      {
-        "set": "acceptKind",
-        "value": ""
-      },
-      {
-        "set": "visible",
-        "value": false
-      },
-      "settle",
-      {
-        "act": "key",
-        "value": " "
-      },
-      "settle",
-      {
-        "act": "key",
-        "value": "Escape"
-      },
-      "settle",
-      {
-        "set": "visible",
-        "value": true
-      },
-      {
-        "set": "mounted",
-        "value": true
-      },
-      "settle",
-      {
-        "act": "move",
-        "value": "mouse"
-      },
-      "settle",
-      {
-        "act": "release"
-      },
-      "settle",
-      {
-        "advance": 500
-      },
-      "settle",
-      {
-        "act": "lift"
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": false
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": true
-      },
-      "settle",
-      {
-        "act": "key",
-        "value": " "
-      },
-      "settle",
-      {
-        "act": "key",
-        "value": "Enter"
-      },
-      "settle",
-      {
-        "advance": 1
-      },
-      "settle"
-    ]
-  },
-  {
-    "name": "the zone side, matrix: its own keyboard lift in itself, holding the keyboard, mounted again in the act's frame, then a finger away — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
-    "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
-    "params": {
-      "draggable": true,
-      "dragValue": "me",
-      "acceptDrops": true
-    },
-    "steps": [
-      "settle",
-      "settle",
-      {
-        "act": "key",
-        "value": " "
-      },
-      "settle",
-      {
-        "act": "focus"
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": false
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": true
       },
       {
         "act": "away",
@@ -41499,7 +40833,673 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, then a grab of the same card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, mounted again in the act's frame, then a grab of the same card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
+    "params": {
+      "draggable": true,
+      "dragValue": "me",
+      "acceptDrops": true
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "grab",
+        "value": {
+          "dragValue": "card-1",
+          "dragKind": "card"
+        }
+      },
+      "settle",
+      {
+        "set": "acceptDrops",
+        "value": true
+      },
+      {
+        "set": "acceptKind",
+        "value": ""
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Enter"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, mounted again in the act's frame, then a grab of another card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
+    "params": {
+      "draggable": true,
+      "dragValue": "me",
+      "acceptDrops": true
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "grab",
+        "value": {
+          "dragValue": 7,
+          "dragKind": " task "
+        }
+      },
+      "settle",
+      {
+        "set": "acceptDrops",
+        "value": true
+      },
+      {
+        "set": "acceptKind",
+        "value": ""
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Enter"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, mounted again in the act's frame, then a pick-up of the same card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
+    "params": {
+      "draggable": true,
+      "dragValue": "me",
+      "acceptDrops": true
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pickUp",
+        "value": {
+          "dragValue": "card-1",
+          "dragKind": "card"
+        }
+      },
+      "settle",
+      {
+        "set": "acceptDrops",
+        "value": true
+      },
+      {
+        "set": "acceptKind",
+        "value": ""
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Enter"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, mounted again in the act's frame, then a pick-up of another card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
+    "params": {
+      "draggable": true,
+      "dragValue": "me",
+      "acceptDrops": true
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pickUp",
+        "value": {
+          "dragValue": 7,
+          "dragKind": " task "
+        }
+      },
+      "settle",
+      {
+        "set": "acceptDrops",
+        "value": true
+      },
+      {
+        "set": "acceptKind",
+        "value": ""
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Enter"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, mounted again in the act's frame, then the mouse away — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
+    "params": {
+      "draggable": true,
+      "dragValue": "me",
+      "acceptDrops": true
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "away",
+        "value": "mouse"
+      },
+      "settle",
+      {
+        "set": "acceptDrops",
+        "value": true
+      },
+      {
+        "set": "acceptKind",
+        "value": ""
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Enter"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the zone side, matrix: its own keyboard lift, holding the keyboard, mounted again in the act's frame, then a finger away — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
+    "params": {
+      "draggable": true,
+      "dragValue": "me",
+      "acceptDrops": true
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "away",
+        "value": "touch"
+      },
+      "settle",
+      {
+        "set": "acceptDrops",
+        "value": true
+      },
+      {
+        "set": "acceptKind",
+        "value": ""
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Enter"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, then a grab of the same card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -41602,7 +41602,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, then a grab of another card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, then a grab of another card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -41705,7 +41705,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, then a pick-up of the same card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, then a pick-up of the same card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -41808,7 +41808,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, then a pick-up of another card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, then a pick-up of another card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -41911,7 +41911,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, then the mouse away — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, then the mouse away — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -42011,7 +42011,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, then a finger away — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, then a finger away — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -42111,7 +42111,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, then Enter — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, then Enter — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -42211,7 +42211,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, then Escape — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, then Escape — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -42311,7 +42311,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, then Tab — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, then Tab — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -42411,7 +42411,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, then an arrow — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, then an arrow — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -42511,7 +42511,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, then a key that means nothing — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, then a key that means nothing — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -42611,7 +42611,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, then Space — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, then Space — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -42711,7 +42711,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, then a click — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, then a click — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -42810,7 +42810,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, then a press — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, then a press — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -42909,7 +42909,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, then a release — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, then a release — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -43008,7 +43008,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, then a finger down — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, then a finger down — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -43107,7 +43107,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, then a finger up — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, then a finger up — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -43206,7 +43206,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, then a hover — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, then a hover — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -43305,7 +43305,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, then a leave — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, then a leave — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -43404,7 +43404,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, then the keyboard put on it — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, then the keyboard put on it — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -43503,7 +43503,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, then the keyboard taken off it — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, then the keyboard taken off it — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -43602,7 +43602,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, then a mouse move — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, then a mouse move — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -43702,7 +43702,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, then a finger move — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, then a finger move — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -43802,7 +43802,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, Mounted off in the act's frame, then a grab of the same card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, Mounted off in the act's frame, then a grab of the same card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -43909,7 +43909,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, Mounted off in the act's frame, then a grab of another card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, Mounted off in the act's frame, then a grab of another card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -44016,7 +44016,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, Mounted off in the act's frame, then a pick-up of the same card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, Mounted off in the act's frame, then a pick-up of the same card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -44123,7 +44123,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, Mounted off in the act's frame, then a pick-up of another card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, Mounted off in the act's frame, then a pick-up of another card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -44230,7 +44230,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, Mounted off in the act's frame, then the mouse away — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, Mounted off in the act's frame, then the mouse away — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -44334,7 +44334,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, Mounted off in the act's frame, then a finger away — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, Mounted off in the act's frame, then a finger away — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -44438,7 +44438,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, mounted again in the act's frame, then a grab of the same card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, mounted again in the act's frame, then a grab of the same card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -44550,7 +44550,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, mounted again in the act's frame, then a grab of another card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, mounted again in the act's frame, then a grab of another card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -44662,7 +44662,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, mounted again in the act's frame, then a pick-up of the same card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, mounted again in the act's frame, then a pick-up of the same card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -44774,7 +44774,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, mounted again in the act's frame, then a pick-up of another card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, mounted again in the act's frame, then a pick-up of another card — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -44886,7 +44886,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, mounted again in the act's frame, then the mouse away — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, mounted again in the act's frame, then the mouse away — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -44995,7 +44995,7 @@
     ]
   },
   {
-    "name": "the zone side, matrix: its own keyboard lift in itself, not holding the keyboard, mounted again in the act's frame, then a finger away — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
+    "name": "the zone side, matrix: its own keyboard lift, not holding the keyboard, mounted again in the act's frame, then a finger away — read by Space on it hidden, Escape, a move and a let go, the hold, then Space after a remount",
     "because": "drag-drop.ts :232-323 (one gesture, the same pointer), :768-839 (the keys), :446-512 (the zone); s51's 10,000 survivors",
     "params": {
       "draggable": true,
@@ -75344,7 +75344,7 @@
     ]
   },
   {
-    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a hover on the new one — the hold's lift tracks there: over its new element, which is not inside the source: Drag Over, and the finger coming up drops it on itself",
+    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a hover on the new one — the hold's lift tracks there: over its new element, no zone for its own drag (C78): no Drag Over, and the finger coming up cancels",
     "because": "drag-drop.ts :267-269 (the hold timer lifts), :355-376 (lift tracks), :446-464 (a zone inside the source never takes it — the source is the OLD element)",
     "params": {
       "draggable": true,
@@ -75382,7 +75382,7 @@
     ]
   },
   {
-    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a hover while it is hidden, after a hover on the new one (it lands on what is behind) — the hold's lift tracks there: not over it, no zone; the finger then comes up over it: tracked there, dropped on itself",
+    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a hover while it is hidden, after a hover on the new one (it lands on what is behind) — the hold's lift tracks there: not over it, no zone; the finger then comes up over it: still no zone for its own drag (C78), a cancel",
     "because": "drag-drop.ts :267-269 (the hold timer lifts), :355-376 (lift tracks), :446-464 (a zone inside the source never takes it — the source is the OLD element)",
     "params": {
       "draggable": true,
@@ -75434,7 +75434,7 @@
     ]
   },
   {
-    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a leave on the new one — the hold's lift tracks there: over its new element, which is not inside the source: Drag Over, and the finger coming up drops it on itself",
+    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a leave on the new one — the hold's lift tracks there: over its new element, no zone for its own drag (C78): no Drag Over, and the finger coming up cancels",
     "because": "drag-drop.ts :267-269 (the hold timer lifts), :355-376 (lift tracks), :446-464 (a zone inside the source never takes it — the source is the OLD element)",
     "params": {
       "draggable": true,
@@ -75472,7 +75472,7 @@
     ]
   },
   {
-    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a leave while it is hidden, after a hover on the new one (it lands on what is behind) — the hold's lift tracks there: not over it, no zone; the finger then comes up over it: tracked there, dropped on itself",
+    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a leave while it is hidden, after a hover on the new one (it lands on what is behind) — the hold's lift tracks there: not over it, no zone; the finger then comes up over it: still no zone for its own drag (C78), a cancel",
     "because": "drag-drop.ts :267-269 (the hold timer lifts), :355-376 (lift tracks), :446-464 (a zone inside the source never takes it — the source is the OLD element)",
     "params": {
       "draggable": true,
@@ -75524,7 +75524,7 @@
     ]
   },
   {
-    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a mouse press on the new one — the hold's lift tracks there: over its new element, which is not inside the source: Drag Over, and the finger coming up drops it on itself",
+    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a mouse press on the new one — the hold's lift tracks there: over its new element, no zone for its own drag (C78): no Drag Over, and the finger coming up cancels",
     "because": "drag-drop.ts :267-269 (the hold timer lifts), :355-376 (lift tracks), :446-464 (a zone inside the source never takes it — the source is the OLD element)",
     "params": {
       "draggable": true,
@@ -75562,7 +75562,7 @@
     ]
   },
   {
-    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a mouse press while it is hidden, after a hover on the new one (it lands on what is behind) — the hold's lift tracks there: not over it, no zone; the finger then comes up over it: tracked there, dropped on itself",
+    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a mouse press while it is hidden, after a hover on the new one (it lands on what is behind) — the hold's lift tracks there: not over it, no zone; the finger then comes up over it: still no zone for its own drag (C78), a cancel",
     "because": "drag-drop.ts :267-269 (the hold timer lifts), :355-376 (lift tracks), :446-464 (a zone inside the source never takes it — the source is the OLD element)",
     "params": {
       "draggable": true,
@@ -75614,7 +75614,7 @@
     ]
   },
   {
-    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a mouse release on the new one — the hold's lift tracks there: over its new element, which is not inside the source: Drag Over, and the finger coming up drops it on itself",
+    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a mouse release on the new one — the hold's lift tracks there: over its new element, no zone for its own drag (C78): no Drag Over, and the finger coming up cancels",
     "because": "drag-drop.ts :267-269 (the hold timer lifts), :355-376 (lift tracks), :446-464 (a zone inside the source never takes it — the source is the OLD element)",
     "params": {
       "draggable": true,
@@ -75652,7 +75652,7 @@
     ]
   },
   {
-    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a mouse release while it is hidden, after a hover on the new one (it lands on what is behind) — the hold's lift tracks there: not over it, no zone; the finger then comes up over it: tracked there, dropped on itself",
+    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a mouse release while it is hidden, after a hover on the new one (it lands on what is behind) — the hold's lift tracks there: not over it, no zone; the finger then comes up over it: still no zone for its own drag (C78), a cancel",
     "because": "drag-drop.ts :267-269 (the hold timer lifts), :355-376 (lift tracks), :446-464 (a zone inside the source never takes it — the source is the OLD element)",
     "params": {
       "draggable": true,
@@ -75704,7 +75704,7 @@
     ]
   },
   {
-    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a click on the new one — the hold's lift tracks there: over its new element, which is not inside the source: Drag Over, and the finger coming up drops it on itself",
+    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a click on the new one — the hold's lift tracks there: over its new element, no zone for its own drag (C78): no Drag Over, and the finger coming up cancels",
     "because": "drag-drop.ts :267-269 (the hold timer lifts), :355-376 (lift tracks), :446-464 (a zone inside the source never takes it — the source is the OLD element)",
     "params": {
       "draggable": true,
@@ -75742,7 +75742,7 @@
     ]
   },
   {
-    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a click while it is hidden, after a hover on the new one (it lands on what is behind) — the hold's lift tracks there: not over it, no zone; the finger then comes up over it: tracked there, dropped on itself",
+    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a click while it is hidden, after a hover on the new one (it lands on what is behind) — the hold's lift tracks there: not over it, no zone; the finger then comes up over it: still no zone for its own drag (C78), a cancel",
     "because": "drag-drop.ts :267-269 (the hold timer lifts), :355-376 (lift tracks), :446-464 (a zone inside the source never takes it — the source is the OLD element)",
     "params": {
       "draggable": true,
@@ -75794,7 +75794,7 @@
     ]
   },
   {
-    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a finger down on the new one — the hold's lift tracks there: over its new element, which is not inside the source: Drag Over, and the finger coming up drops it on itself",
+    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a finger down on the new one — the hold's lift tracks there: over its new element, no zone for its own drag (C78): no Drag Over, and the finger coming up cancels",
     "because": "drag-drop.ts :267-269 (the hold timer lifts), :355-376 (lift tracks), :446-464 (a zone inside the source never takes it — the source is the OLD element)",
     "params": {
       "draggable": true,
@@ -75832,7 +75832,7 @@
     ]
   },
   {
-    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a finger down while it is hidden, after a hover on the new one (it lands on what is behind) — the hold's lift tracks there: not over it, no zone; the finger then comes up over it: tracked there, dropped on itself",
+    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a finger down while it is hidden, after a hover on the new one (it lands on what is behind) — the hold's lift tracks there: not over it, no zone; the finger then comes up over it: still no zone for its own drag (C78), a cancel",
     "because": "drag-drop.ts :267-269 (the hold timer lifts), :355-376 (lift tracks), :446-464 (a zone inside the source never takes it — the source is the OLD element)",
     "params": {
       "draggable": true,
@@ -75884,7 +75884,7 @@
     ]
   },
   {
-    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a mouse move on the new one — the hold's lift tracks there: over its new element, which is not inside the source: Drag Over, and the finger coming up drops it on itself",
+    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a mouse move on the new one — the hold's lift tracks there: over its new element, no zone for its own drag (C78): no Drag Over, and the finger coming up cancels",
     "because": "drag-drop.ts :267-269 (the hold timer lifts), :355-376 (lift tracks), :446-464 (a zone inside the source never takes it — the source is the OLD element)",
     "params": {
       "draggable": true,
@@ -75923,7 +75923,7 @@
     ]
   },
   {
-    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a mouse move while it is hidden, after a hover on the new one (it lands on what is behind) — the hold's lift tracks there: not over it, no zone; the finger then comes up over it: tracked there, dropped on itself",
+    "name": "the zone side, where the pointer is: its own finger held, the element replaced, then a mouse move while it is hidden, after a hover on the new one (it lands on what is behind) — the hold's lift tracks there: not over it, no zone; the finger then comes up over it: still no zone for its own drag (C78), a cancel",
     "because": "drag-drop.ts :267-269 (the hold timer lifts), :355-376 (lift tracks), :446-464 (a zone inside the source never takes it — the source is the OLD element)",
     "params": {
       "draggable": true,
@@ -76162,7 +76162,7 @@
     ]
   },
   {
-    "name": "the zone side, where the pointer is: its own finger held, the element replaced, the pointer on the new one, then a grab of a card — the pointer is off it: the hold's lift finds no zone; the finger then comes up over it: tracked there, dropped on itself",
+    "name": "the zone side, where the pointer is: its own finger held, the element replaced, the pointer on the new one, then a grab of a card — the pointer is off it: the hold's lift finds no zone; the finger then comes up over it: still no zone for its own drag (C78), a cancel",
     "because": "drag-drop.ts :267-269 (the hold timer lifts), :355-376 (lift tracks), :446-464 (a zone inside the source never takes it — the source is the OLD element)",
     "params": {
       "draggable": true,
@@ -76208,7 +76208,7 @@
     ]
   },
   {
-    "name": "the zone side, where the pointer is: its own finger held, the element replaced, the pointer on the new one, then the mouse away — the pointer is off it: the hold's lift finds no zone; the finger then comes up over it: tracked there, dropped on itself",
+    "name": "the zone side, where the pointer is: its own finger held, the element replaced, the pointer on the new one, then the mouse away — the pointer is off it: the hold's lift finds no zone; the finger then comes up over it: still no zone for its own drag (C78), a cancel",
     "because": "drag-drop.ts :267-269 (the hold timer lifts), :355-376 (lift tracks), :446-464 (a zone inside the source never takes it — the source is the OLD element)",
     "params": {
       "draggable": true,
@@ -76509,7 +76509,7 @@
     ]
   },
   {
-    "name": "the zone side: its own keyboard lift, with a click swallow waiting: the click is eaten and the keyboard drag goes on — Enter drops it on itself",
+    "name": "the zone side: its own keyboard lift, with a click swallow waiting: the click is eaten and the keyboard drag goes on — Enter cancels it, never on itself (C78)",
     "because": "drag-drop.ts :308-323 (a mouse let go ends only a mouse gesture), :920-927",
     "params": {
       "draggable": true,
@@ -77520,7 +77520,7 @@
     ]
   },
   {
-    "name": "the zone side, an away whose paint changes the element: its own keyboard lift in itself, Mounted off in the act's frame, then the mouse away and Draggable written in the same frame — read by the keyboard on it and Space, a move, a let go and the hold",
+    "name": "the zone side, an away whose paint changes the element: its own keyboard lift, Mounted off in the act's frame, then the mouse away and Draggable written in the same frame — read by the keyboard on it and Space, a move, a let go and the hold",
     "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds), :285-306; s44's paint-branch recipe",
     "params": {
       "draggable": true,
@@ -77600,7 +77600,7 @@
     ]
   },
   {
-    "name": "the zone side, an away whose paint changes the element: its own keyboard lift in itself, Mounted off in the act's frame, then the finger away and Draggable written in the same frame — read by the keyboard on it and Space, a move, a let go and the hold",
+    "name": "the zone side, an away whose paint changes the element: its own keyboard lift, Mounted off in the act's frame, then the finger away and Draggable written in the same frame — read by the keyboard on it and Space, a move, a let go and the hold",
     "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds), :285-306; s44's paint-branch recipe",
     "params": {
       "draggable": true,
@@ -77680,7 +77680,7 @@
     ]
   },
   {
-    "name": "the zone side, an away whose paint changes the element: its own keyboard lift in itself, mounted again in the act's frame, then the mouse away and Draggable written in the same frame — read by the keyboard on it and Space, a move, a let go and the hold",
+    "name": "the zone side, an away whose paint changes the element: its own keyboard lift, mounted again in the act's frame, then the mouse away and Draggable written in the same frame — read by the keyboard on it and Space, a move, a let go and the hold",
     "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds), :285-306; s44's paint-branch recipe",
     "params": {
       "draggable": true,
@@ -77765,7 +77765,7 @@
     ]
   },
   {
-    "name": "the zone side, an away whose paint changes the element: its own keyboard lift in itself, mounted again in the act's frame, then the finger away and Draggable written in the same frame — read by the keyboard on it and Space, a move, a let go and the hold",
+    "name": "the zone side, an away whose paint changes the element: its own keyboard lift, mounted again in the act's frame, then the finger away and Draggable written in the same frame — read by the keyboard on it and Space, a move, a let go and the hold",
     "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds), :285-306; s44's paint-branch recipe",
     "params": {
       "draggable": true,
@@ -81778,7 +81778,7 @@
     ]
   },
   {
-    "name": "the zone side, an away and the element: its own keyboard lift in itself, no paint in the act's frame, then the mouse away; Draggable written in the same frame, every gesture ended there and after it is back on the page — read by Space on it hidden",
+    "name": "the zone side, an away and the element: its own keyboard lift, no paint in the act's frame, then the mouse away; Draggable written in the same frame, every gesture ended there and after it is back on the page — read by Space on it hidden",
     "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds), :285-306, :768-780; s44's paint-branch recipe, with the gesture ended before the keyboard is read",
     "params": {
       "draggable": true,
@@ -81876,7 +81876,7 @@
     ]
   },
   {
-    "name": "the zone side, an away and the element: its own keyboard lift in itself, no paint in the act's frame, then the mouse away; every gesture ended once it is back on the page — read by Space on it hidden",
+    "name": "the zone side, an away and the element: its own keyboard lift, no paint in the act's frame, then the mouse away; every gesture ended once it is back on the page — read by Space on it hidden",
     "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds), :285-306, :768-780; s44's paint-branch recipe, with the gesture ended before the keyboard is read",
     "params": {
       "draggable": true,
@@ -81960,7 +81960,7 @@
     ]
   },
   {
-    "name": "the zone side, an away and the element: its own keyboard lift in itself, no paint in the act's frame, then the finger away; Draggable written in the same frame, every gesture ended there and after it is back on the page — read by Space on it hidden",
+    "name": "the zone side, an away and the element: its own keyboard lift, no paint in the act's frame, then the finger away; Draggable written in the same frame, every gesture ended there and after it is back on the page — read by Space on it hidden",
     "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds), :285-306, :768-780; s44's paint-branch recipe, with the gesture ended before the keyboard is read",
     "params": {
       "draggable": true,
@@ -82058,7 +82058,7 @@
     ]
   },
   {
-    "name": "the zone side, an away and the element: its own keyboard lift in itself, no paint in the act's frame, then the finger away; every gesture ended once it is back on the page — read by Space on it hidden",
+    "name": "the zone side, an away and the element: its own keyboard lift, no paint in the act's frame, then the finger away; every gesture ended once it is back on the page — read by Space on it hidden",
     "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds), :285-306, :768-780; s44's paint-branch recipe, with the gesture ended before the keyboard is read",
     "params": {
       "draggable": true,
@@ -82142,7 +82142,7 @@
     ]
   },
   {
-    "name": "the zone side, an away and the element: its own keyboard lift in itself, Mounted off in the act's frame, then the mouse away; Draggable written in the same frame, every gesture ended there and after it is back on the page — read by Space on it hidden",
+    "name": "the zone side, an away and the element: its own keyboard lift, Mounted off in the act's frame, then the mouse away; Draggable written in the same frame, every gesture ended there and after it is back on the page — read by Space on it hidden",
     "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds), :285-306, :768-780; s44's paint-branch recipe, with the gesture ended before the keyboard is read",
     "params": {
       "draggable": true,
@@ -82244,7 +82244,7 @@
     ]
   },
   {
-    "name": "the zone side, an away and the element: its own keyboard lift in itself, Mounted off in the act's frame, then the mouse away; every gesture ended once it is back on the page — read by Space on it hidden",
+    "name": "the zone side, an away and the element: its own keyboard lift, Mounted off in the act's frame, then the mouse away; every gesture ended once it is back on the page — read by Space on it hidden",
     "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds), :285-306, :768-780; s44's paint-branch recipe, with the gesture ended before the keyboard is read",
     "params": {
       "draggable": true,
@@ -82332,7 +82332,7 @@
     ]
   },
   {
-    "name": "the zone side, an away and the element: its own keyboard lift in itself, Mounted off in the act's frame, then the finger away; Draggable written in the same frame, every gesture ended there and after it is back on the page — read by Space on it hidden",
+    "name": "the zone side, an away and the element: its own keyboard lift, Mounted off in the act's frame, then the finger away; Draggable written in the same frame, every gesture ended there and after it is back on the page — read by Space on it hidden",
     "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds), :285-306, :768-780; s44's paint-branch recipe, with the gesture ended before the keyboard is read",
     "params": {
       "draggable": true,
@@ -82434,7 +82434,7 @@
     ]
   },
   {
-    "name": "the zone side, an away and the element: its own keyboard lift in itself, Mounted off in the act's frame, then the finger away; every gesture ended once it is back on the page — read by Space on it hidden",
+    "name": "the zone side, an away and the element: its own keyboard lift, Mounted off in the act's frame, then the finger away; every gesture ended once it is back on the page — read by Space on it hidden",
     "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds), :285-306, :768-780; s44's paint-branch recipe, with the gesture ended before the keyboard is read",
     "params": {
       "draggable": true,
@@ -82522,7 +82522,7 @@
     ]
   },
   {
-    "name": "the zone side, an away and the element: its own keyboard lift in itself, mounted again in the act's frame, then the mouse away; Draggable written in the same frame, every gesture ended there and after it is back on the page — read by Space on it hidden",
+    "name": "the zone side, an away and the element: its own keyboard lift, mounted again in the act's frame, then the mouse away; Draggable written in the same frame, every gesture ended there and after it is back on the page — read by Space on it hidden",
     "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds), :285-306, :768-780; s44's paint-branch recipe, with the gesture ended before the keyboard is read",
     "params": {
       "draggable": true,
@@ -82629,7 +82629,7 @@
     ]
   },
   {
-    "name": "the zone side, an away and the element: its own keyboard lift in itself, mounted again in the act's frame, then the mouse away; every gesture ended once it is back on the page — read by Space on it hidden",
+    "name": "the zone side, an away and the element: its own keyboard lift, mounted again in the act's frame, then the mouse away; every gesture ended once it is back on the page — read by Space on it hidden",
     "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds), :285-306, :768-780; s44's paint-branch recipe, with the gesture ended before the keyboard is read",
     "params": {
       "draggable": true,
@@ -82722,7 +82722,7 @@
     ]
   },
   {
-    "name": "the zone side, an away and the element: its own keyboard lift in itself, mounted again in the act's frame, then the finger away; Draggable written in the same frame, every gesture ended there and after it is back on the page — read by Space on it hidden",
+    "name": "the zone side, an away and the element: its own keyboard lift, mounted again in the act's frame, then the finger away; Draggable written in the same frame, every gesture ended there and after it is back on the page — read by Space on it hidden",
     "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds), :285-306, :768-780; s44's paint-branch recipe, with the gesture ended before the keyboard is read",
     "params": {
       "draggable": true,
@@ -82829,7 +82829,7 @@
     ]
   },
   {
-    "name": "the zone side, an away and the element: its own keyboard lift in itself, mounted again in the act's frame, then the finger away; every gesture ended once it is back on the page — read by Space on it hidden",
+    "name": "the zone side, an away and the element: its own keyboard lift, mounted again in the act's frame, then the finger away; every gesture ended once it is back on the page — read by Space on it hidden",
     "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds), :285-306, :768-780; s44's paint-branch recipe, with the gesture ended before the keyboard is read",
     "params": {
       "draggable": true,
@@ -85600,7 +85600,7 @@
     ]
   },
   {
-    "name": "the zone side, an away that mounts the element: its own keyboard lift in itself, mounted again in the act's frame, then the mouse away and Draggable written — in the same frame every gesture ended, then Space: the attributes are on the element the away mounted, so it lifts",
+    "name": "the zone side, an away that mounts the element: its own keyboard lift, mounted again in the act's frame, then the mouse away and Draggable written — in the same frame every gesture ended, then Space: the attributes are on the element the away mounted, so it lifts",
     "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds, else at the next 60 frame starts), :768-780; s44's paint-branch recipe, read before the next frame",
     "params": {
       "draggable": true,
@@ -85662,7 +85662,7 @@
     ]
   },
   {
-    "name": "the zone side, an away that mounts the element: its own keyboard lift in itself, mounted again in the act's frame, then the finger away and Draggable written — in the same frame every gesture ended, then Space: the attributes are on the element the away mounted, so it lifts",
+    "name": "the zone side, an away that mounts the element: its own keyboard lift, mounted again in the act's frame, then the finger away and Draggable written — in the same frame every gesture ended, then Space: the attributes are on the element the away mounted, so it lifts",
     "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds, else at the next 60 frame starts), :768-780; s44's paint-branch recipe, read before the next frame",
     "params": {
       "draggable": true,
@@ -106308,6 +106308,296 @@
       {
         "act": "fetched",
         "value": "load"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "C78's twin: its own drag let go (a click swallow waits), a new press, then a click: the swallow eats the click and the let go ends the press — a move after it lifts nothing",
+    "because": "drag-drop.ts :308-323 (the pending press ends at the let go), :920-927 (the swallow); s30: with the self-drop fixed (C78) nothing else read the ended gesture",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "press"
+      },
+      {
+        "act": "click"
+      },
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "C78's twin: its own drag let go (a click swallow waits), a new press, the keyboard taken away, then a click: eaten, it takes the keyboard back and ends the press — a move after it lifts nothing",
+    "because": "drag-drop.ts :308-323, :920-927; :232-271 (the click's press starts nothing, one gesture is under way, and takes the keyboard)",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "press"
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "act": "click"
+      },
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "C78's twin: the second card picked up from the keyboard while the Image takes no drops, then Accept Drops on — an arrow takes the keyboard and enters it, Enter drops 7, and Space then lifts the Image itself",
+    "because": "drag-drop.ts `onKeyDown` :808-819 (an arrow walks the zones on the page now), `drop` :379-399; the key act puts the keyboard on the Image",
+    "params": {
+      "draggable": true,
+      "acceptDrops": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pickUp",
+        "value": {
+          "dragValue": 7,
+          "dragKind": " task "
+        }
+      },
+      "settle",
+      {
+        "set": "acceptDrops",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "ArrowRight"
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Enter"
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "C78's twin: the second card picked up from the keyboard while the Image takes no drops, the keyboard put on the Image, then Accept Drops on — an arrow enters it, Enter drops 7, and Space then lifts the Image itself",
+    "because": "drag-drop.ts `onKeyDown` :808-819, `drop` :379-399",
+    "params": {
+      "draggable": true,
+      "acceptDrops": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pickUp",
+        "value": {
+          "dragValue": 7,
+          "dragKind": " task "
+        }
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "acceptDrops",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "ArrowRight"
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Enter"
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "C78's twin: the second card picked up while the Image takes no drops, Accept Drops on, an arrow that puts the keyboard on the Image and enters it, then the Image hidden — Enter drops 7, and Space lifts the Image: it still holds the keyboard",
+    "because": "drag-drop.ts `onKeyDown`; a hidden element keeps the keyboard it holds (the face's written choice)",
+    "params": {
+      "draggable": true,
+      "acceptDrops": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pickUp",
+        "value": {
+          "dragValue": 7,
+          "dragKind": " task "
+        }
+      },
+      "settle",
+      {
+        "set": "acceptDrops",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "ArrowRight"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Enter"
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "C78's twin: its own press pending, the element replaced (Mounted off and on), then a click on the new one: the click ends the press — a move after it lifts nothing",
+    "because": "drag-drop.ts :308-323 — the press ends at the let go wherever it lands; a remount does not end it",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "C78's twin: a finger held on it, then a mouse click: the click takes the keyboard and leaves the held finger alone — the hold lifts it",
+    "because": "drag-drop.ts :232-271 (one gesture; the click's press starts nothing), :308-323 (the same pointer only), :267-269 (the hold timer)",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "touch"
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "advance": 500
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "C78's twin: a finger held on it, the element replaced (Mounted off and on), then a mouse click on the new one: the click leaves the held finger alone — the hold lifts it",
+    "because": "drag-drop.ts :232-271, :308-323 (the same pointer only), :267-269 (the hold timer: a held finger whose element was replaced still lifts)",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "touch"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "advance": 500
       },
       "settle"
     ]

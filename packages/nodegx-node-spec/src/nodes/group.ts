@@ -89,16 +89,14 @@ type State = {
   blocks: boolean;
   /** the drag inputs (`_internal`) */
   draggable: boolean;
-  dragValue: unknown;
   holdToDrag: unknown;
   holdTime: unknown;
   acceptDrops: boolean;
   acceptKind: unknown;
-  dragKind: unknown;
   /** the gesture (drag-drop.ts :199-225) — this node is its source when it is not idle */
   phase: Phase;
   input: 'mouse' | 'touch' | 'keyboard' | undefined;
-  /** the zone the gesture is over: this node itself (C78, or a card's), or none */
+  /** a card's gesture is over this node as its zone; never the node's own gesture (C78, fixed in P109 ISL-031) */
   inZone: boolean;
   /** the gesture's index in this zone (`g.index`): -1 while it is in none */
   index: number;
@@ -107,10 +105,6 @@ type State = {
   carryBy: 'mouse' | 'keyboard' | undefined;
   /** the card that holds the keyboard, its index in `CARDS`; -1: none */
   cardFocused: number;
-  /** the element the last pointer act on the page landed on, when it is this node's (`elem`, or a child inside it); -1: something else */
-  pointerAt: number;
-  /** the element the Group's own pointer gesture started on (`g.sourceEl`) */
-  sourceElem: number;
   /** :920-927 — a click is swallowed until the event loop turns */
   swallow: boolean;
   /** the outputs */
@@ -196,11 +190,11 @@ export const Group = defineNode({
   // v3 (P109 ISL-038, s29): the Unchanged outcome port (C95: group.ts reports it now), and a new Tag's element carries the node (C86)
   // v4 (P109 ISL-038, s29): a key during a keyboard carry leaves a zone taken off the page first, so Space cancels (row C83)
   // v5 (P109 ISL-038, s29): a file drop zone tracks itself — an enter on a new element starts the count again, and Accept File Drops off or leaving the page turns Is Dragging Over off (row C81)
-  version: 5,
+  // v6 (P109 ISL-031, s30): a drag never takes its own node as its zone — a keyboard lift does not start in itself, Enter or Space then cancels, and a pointer drag over a new element of its own finds no zone (row C78)
+  version: 6,
   source: 'packages/noodl-viewer-react/src/nodes/visual/group.ts',
   needs: ['person', 'clock'],
   worldPool: { advances: [0, 1, 499, 500, 1000] },
-  synced: ['pointerAt'],
   // group.ts `outcomeOutputs({ done, failure, unchanged })` — Focus, Scroll To Element and Scroll To Index share them; only Focus is Unchanged
   outcomes: ['done', 'failure', 'unchanged'],
 
@@ -221,12 +215,10 @@ export const Group = defineNode({
     peEnabled: undefined,
     blocks: false,
     draggable: false,
-    dragValue: undefined,
     holdToDrag: undefined,
     holdTime: undefined,
     acceptDrops: false,
     acceptKind: undefined,
-    dragKind: undefined,
     phase: 'idle',
     input: undefined,
     inZone: false,
@@ -234,8 +226,6 @@ export const Group = defineNode({
     carry: -1,
     carryBy: undefined,
     cardFocused: -1,
-    pointerAt: -1,
-    sourceElem: -1,
     swallow: false,
     isLifted: false,
     isDropTarget: false,
@@ -460,8 +450,9 @@ export const Group = defineNode({
       if (v) return { set: { draggable: true, ...(s.onPage ? { attrsOn: s.elem } : { chain: Math.max(s.chain, FRAMES) }) }, send: [] };
       return { set: { draggable: false, ...(s.onPage && s.attrsOn === s.elem ? { attrsOn: -1 } : {}) }, send: [] };
     },
-    dragValue: (_s, v) => ({ set: { dragValue: v }, send: [] }),
-    dragKind: (_s, v) => ({ set: { dragKind: v }, send: [] }),
+    // read by the zone it is dropped on: this page's only zone is itself, and a drag never takes its own node (C78, fixed in P109 ISL-031)
+    dragValue: () => NOTHING,
+    dragKind: () => NOTHING,
     holdToDrag: (_s, v) => ({ set: { holdToDrag: v }, send: [] }),
     holdTime: (_s, v) => ({ set: { holdTime: v }, send: [] }),
     acceptDrops: (s, v) => {
@@ -500,7 +491,7 @@ export const Group = defineNode({
       },
       timer: (s, _i, tag) => {
         if (tag === 'unswallow') return { set: { swallow: false }, send: [] };
-        if (tag === 'hold' && s.phase === 'holding') return toPatch(heldOver(s, withDrain(s, liftedAndTracked(s, s.onPage && s.pointerAt === s.elem), false)));
+        if (tag === 'hold' && s.phase === 'holding') return toPatch(heldOver(s, withDrain(s, lifted(s) as Act, false)));
         return NOTHING;
       }
     },
@@ -547,16 +538,12 @@ export const Group = defineNode({
         const m = pointerMove(p, value === 'touch' ? 'touch' : 'mouse', hits(p));
         return hits(p) && p.blocks ? reach(m) : m;
       })),
-      away: (s, _i, value) => toPatch(paintedThen(s, (p) => {
-        const off: Partial<State> = p.pointerAt !== -1 ? { pointerAt: -1 } : {};
-        const a = pointerMove({ ...p, ...off }, value === 'touch' ? 'touch' : 'mouse', false);
-        return { ...a, set: { ...off, ...a.set } };
-      })),
+      away: (s, _i, value) => toPatch(paintedThen(s, (p) => pointerMove(p, value === 'touch' ? 'touch' : 'mouse', false))),
       // a card's press reaches the card's own handler, which drains the page (docblock)
       grab: (s, _i, value) => toPatch(paintedThen(s, (p) => {
         const i = cardIndex(value);
         if (i < 0) return NONE;
-        const off: Partial<State> = { ...cardTakesKeyboard(p, i), ...(p.pointerAt !== -1 ? { pointerAt: -1 } : {}) };
+        const off: Partial<State> = cardTakesKeyboard(p, i);
         const at = { ...p, ...off };
         const a = busy(at) ? pointerMove(at, 'mouse', false) : { ...NONE, set: { carry: i, carryBy: 'mouse' as const } };
         return reach({ ...a, set: { ...off, ...a.set } });
@@ -586,11 +573,7 @@ export const Group = defineNode({
       // a click on a child: the Group's own click, from inside it; the press focuses the nearest focusable ancestor, or nothing
       tap: (s, _i, value) => toPatch(pointerAct(s, (p) => (childIndexOf(value) < 0 ? NONE : clicked(p, hits(p), true)))),
       // a click on the page beside it: the pointer is off the Group; the press takes the keyboard off whatever held it
-      clickAway: (s) => toPatch(paintedThen(s, (p) => {
-        const off: Partial<State> = p.pointerAt !== -1 ? { pointerAt: -1 } : {};
-        const a = clicked({ ...p, ...off }, false, true);
-        return { ...a, set: { ...off, ...a.set } };
-      }))
+      clickAway: (s) => toPatch(paintedThen(s, (p) => clicked(p, false, true)))
     }
   }
 );
@@ -711,14 +694,9 @@ function withDrain(p: Readonly<State>, a: Act, reached: boolean): Act {
   return join(a, { ...NONE, set: w.set, outcomes: w.outcomes });
 }
 
-/** A pointer act on the painted page: the pointer is then over the element it landed on — this node's (or a child inside it), or something else. */
+/** A pointer act on the painted page. */
 function pointerAct(s: Readonly<State>, then: (painted: Readonly<State>) => Act): Act {
-  return onPainted(s, (p) => {
-    const at = hits(p) ? p.elem : -1;
-    const moved: Partial<State> = p.pointerAt !== at ? { pointerAt: at } : {};
-    const a = then({ ...p, ...moved });
-    return { ...a, set: { ...moved, ...a.set } };
-  });
+  return onPainted(s, then);
 }
 
 /**
@@ -799,13 +777,9 @@ function pointerMove(s: Readonly<State>, input: 'mouse' | 'touch', over: boolean
   if (s.carry >= 0) return s.carryBy === input ? track(s, over) : NONE;
   if (s.phase === 'idle' || s.input !== input) return NONE;
   if (s.phase === 'holding') return cancelled(s);
-  if (s.phase === 'pending') return liftedAndTracked(s, over);
-  return track(s, over);
-}
-
-function liftedAndTracked(s: Readonly<State>, over: boolean): Act {
-  const l = lifted(s) as Act;
-  return join(l, track({ ...s, ...l.set }, over));
+  // the node's own lifted drag finds no zone wherever the pointer is (C78, fixed in P109 ISL-031)
+  if (s.phase === 'pending') return lifted(s) as Act;
+  return NONE;
 }
 
 function busy(s: Readonly<State>): boolean {
@@ -827,7 +801,7 @@ function childIndexOf(value: unknown): number {
  * starts at the index the pointer is at — 0 (docblock: no geometry).
  */
 function track(s: Readonly<State>, over: boolean): Act {
-  const here = over && zoneFor(s) && (s.carry >= 0 || s.elem !== s.sourceElem);
+  const here = over && zoneFor(s);
   if (here === s.inZone) return NONE;
   return { ...NONE, set: { inZone: here, isDropTarget: here, index: here ? 0 : -1 }, send: ['isDropTarget'] };
 }
@@ -927,9 +901,8 @@ function holdMs(s: Readonly<State>): number {
 /** `onPointerDown` (drag-drop.ts :232-271): a press on the Group or a child inside it starts the Group's gesture (`innermostDraggable`). */
 function pointerDown(s: Readonly<State>, input: 'mouse' | 'touch', on: boolean): Act {
   if (busy(s) || !s.draggable || !on) return NONE;
-  const source: Partial<State> = { sourceElem: s.elem };
-  if (holds(s, input)) return { set: { phase: 'holding', input, ...source }, send: [], emit: [], after: [{ tag: 'hold', ms: holdMs(s) }] };
-  return { set: { phase: 'pending', input, ...source }, send: [], emit: [] };
+  if (holds(s, input)) return { set: { phase: 'holding', input }, send: [], emit: [], after: [{ tag: 'hold', ms: holdMs(s) }] };
+  return { set: { phase: 'pending', input }, send: [], emit: [] };
 }
 
 /** `onPointerUp` (:308-323) — the same pointer only; `over`: it comes up on the Group (or a child inside it). */
@@ -942,9 +915,9 @@ function pointerUp(s: Readonly<State>, input: 'mouse' | 'touch', over: boolean):
   }
   if (s.phase === 'idle' || s.input !== input) return NONE;
   if (s.phase !== 'lifted') return { set: ended(), send: [], emit: [], cancel: ['hold'] };
-  const t = track(s, over);
-  const d = drop({ ...s, ...t.set });
-  return join(t, { ...d, set: { ...d.set, swallow: true }, after: [{ tag: 'unswallow', ms: 0 }] });
+  // let go of its own lifted drag: never over a zone that takes it — its own node is not one (C78, fixed in P109 ISL-031) — so a cancel
+  const c = cancelled(s);
+  return { ...c, set: { ...c.set, swallow: true }, after: [{ tag: 'unswallow', ms: 0 }] };
 }
 
 /** `drop` (:379-399) of a card: on the Group, its Drag Value and the gesture's index, then Dropped, and the zone left; over none, the card's cancel. */
@@ -962,7 +935,7 @@ function cardCancelled(s: Readonly<State>): Act {
 }
 
 function ended(): Partial<State> {
-  return { phase: 'idle', input: undefined, inZone: false, index: -1 };
+  return { phase: 'idle', input: undefined };
 }
 
 function lifted(_s: Readonly<State>): Send {
@@ -970,19 +943,9 @@ function lifted(_s: Readonly<State>): Send {
 }
 
 function cancelled(s: Readonly<State>): Act {
-  const zone: Partial<State> = s.inZone ? { isDropTarget: false } : {};
-  if (s.phase !== 'lifted') return { set: { ...ended(), ...zone }, send: s.inZone ? ['isDropTarget'] : [], emit: [], cancel: ['hold'] };
-  return { set: { ...ended(), ...zone, isLifted: false }, send: [...(s.inZone ? (['isDropTarget'] as Val[]) : []), 'isLifted'], emit: ['dragCancelled'], cancel: ['hold'] };
-}
-
-/** `drop` (:379-399): over a zone — the Group itself, row C78 — Dropped Value, Drop Index (the gesture's), Dropped, Landed; over none, a cancel. */
-function drop(s: Readonly<State>): Act {
-  if (!s.inZone) return cancelled(s);
-  return {
-    set: { ...ended(), droppedValue: s.dragValue, dropIndex: s.index, isDropTarget: false, isLifted: false },
-    send: ['droppedValue', 'dropIndex', 'isDropTarget', 'isLifted'],
-    emit: ['dropped', 'landed']
-  };
+  // its own drag is never in a zone (C78, fixed in P109 ISL-031)
+  if (s.phase !== 'lifted') return { set: ended(), send: [], emit: [], cancel: ['hold'] };
+  return { set: { ...ended(), isLifted: false }, send: ['isLifted'], emit: ['dragCancelled'], cancel: ['hold'] };
 }
 
 function acceptsSource(s: Readonly<State>): boolean {
@@ -991,12 +954,13 @@ function acceptsSource(s: Readonly<State>): boolean {
     .map((k) => k.trim())
     .filter(Boolean);
   if (wanted.length === 0) return true;
-  const kind = s.carry >= 0 ? CARDS[s.carry].dragKind : s.dragKind;
+  const kind = CARDS[s.carry].dragKind;
   return wanted.includes(String(kind || '').trim());
 }
 
 function zoneFor(s: Readonly<State>): boolean {
-  return s.acceptDrops && s.onPage && acceptsSource(s);
+  // a card's: never its own gesture — a drag never takes its own node as its zone (C78, fixed in P109 ISL-031)
+  return s.carry >= 0 && s.acceptDrops && s.onPage && acceptsSource(s);
 }
 
 /** `onKeyDown` (:768-839) */
@@ -1004,13 +968,10 @@ function keyDown(s: Readonly<State>, key: string): Act {
   if (!busy(s)) {
     if (key === ' ' && !s.elementFocused && s.cardFocused >= 0) return cardLifted(s, s.cardFocused);
     if (key !== ' ' || !s.elementFocused || !s.draggable || !s.onPage) return NONE;
-    // `keyboardLift` — into the first zone, itself (C78), at 0: its children are inside it, not before it
-    const zone = zoneFor(s);
-    return {
-      set: { phase: 'lifted', input: 'keyboard', isLifted: true, inZone: zone, index: zone ? 0 : -1, ...(zone ? { isDropTarget: true } : {}) },
-      send: zone ? ['isLifted', 'isDropTarget'] : ['isLifted'],
-      emit: ['pickedUp']
-    };
+    // Space on the live, Draggable element that holds the keyboard: `keyboardLift` — never into itself (C78, fixed in P109 ISL-031),
+    // and no other zone on this page takes it
+    // it holds the keyboard: written whether the key act just put it there or it was there (one branch either way)
+    return { set: { phase: 'lifted', input: 'keyboard', isLifted: true, elementFocused: true, cardFocused: -1 }, send: ['isLifted'], emit: ['pickedUp'] };
   }
   return keyDuringGesture(s, key);
 }
@@ -1029,7 +990,7 @@ function keyDuringGesture(s: Readonly<State>, key: string): Act {
   switch (key) {
     case 'Enter':
     case ' ':
-      return card ? cardDrop(s) : drop(s);
+      return card ? cardDrop(s) : cancelled(s);
     case 'Escape':
     case 'Tab':
       return card ? cardCancelled(s) : cancelled(s);
