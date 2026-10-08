@@ -6827,7 +6827,7 @@
     }
   },
   {
-    "name": "ROUTES: Use Routes OFF — a push, then the person's Back: the stack still resets to Home (row C119)",
+    "name": "row C119 — ROUTES: Use Routes OFF — a push, then the person's Back: the stack does not hear it — Detail stays on top, Stack Depth 2",
     "because": "the popstate listener is added whatever Use Routes says (:182-198)",
     "params": {
       "pages": [

@@ -187,6 +187,9 @@ const PageStack = {
     this._internal.asyncQueue = new ASyncQueue();
 
     this.onScheduleReset = () => {
+      // P107-C119 — the address is the stack's only with Use Routes on: the browser's Back or Forward sent every stack on the page
+      // back to its start page, Use Routes or not. Read at the event, so Use Routes turned on or off while mounted holds
+      if (!this._internal.useRoutes) return;
       this.scheduleReset();
     };
 

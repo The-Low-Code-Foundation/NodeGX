@@ -64,8 +64,8 @@
  * its `{name}` parts are decoded with `decodeURIComponent`, and so is the whole query — a malformed escape is kept as written (row
  * C124, fixed in P109 ISL-048: it threw, and the reset ended there with the stack empty). The page found is the start page, with the query and the path's parameters; none
  * found, the Start Page. So a Reset, or a Components edit, shows the page in the URL, not the start page (row C126). THE BROWSER'S
- * BACK AND FORWARD (the act `traverse`): the stack listens for `popstate` from its mount to its unmount WHATEVER Use Routes says
- * (:182-214), and resets at the frame's end — a stack with Use Routes off goes back to its start page too (row C119).
+ * BACK AND FORWARD (the act `traverse`): the stack listens for `popstate` from its mount to its unmount (:182-214) and, with Use
+ * Routes on, resets at the frame's end (row C119, fixed in P109 ISL-048: a stack with Use Routes off went back to its start page too).
  */
 
 import { defineNode, type AnswerCall, type InputDecl, type ValueInputDecl } from '../spec';
@@ -198,7 +198,8 @@ export const ComponentStack = defineNode({
   // v11 (P109 ISL-048, s31): a page's Path that is not text is unset — the label's path (row C125)
   // v12 (P109 ISL-048, s31): a page pushed or started by its label has its URL (row C123)
   // v13 (P109 ISL-048, s31): in hash mode a page with no parameters clears the query in the address (row C121)
-  version: 13,
+  // v14 (P109 ISL-048, s31): the browser's Back or Forward resets only a stack with Use Routes on (row C119)
+  version: 14,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx',
   needs: ['person', 'clock', 'location', 'project'],
   worldPool: {
@@ -418,15 +419,15 @@ export const ComponentStack = defineNode({
           view,
           'act'
         ),
-      // Back or Forward (USE ROUTES): the location moves; a stack on the page hears popstate (:182-214) — whatever Use Routes says
-      // (row C119) — and resets at the frame's end
+      // Back or Forward (USE ROUTES): the location moves; a stack on the page with Use Routes on hears popstate (:182-214) and
+      // resets at the frame's end (row C119, fixed in P109 ISL-048: one with Use Routes off reset too)
       traverse: (s, _i, v, view) =>
         run(
           s,
           (w) => {
             paint(w);
             w.traverse = v;
-            if (w.st.isMounted) scheduleReset(w);
+            if (w.st.isMounted && w.st.useRoutes) scheduleReset(w);
           },
           view,
           'act'
