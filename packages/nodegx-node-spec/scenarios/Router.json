@@ -292,8 +292,8 @@
   }
  },
  {
-  "name": "Url path null: every match throws — the router shows nothing and its Reset is never answered (row C116)",
-  "because": "_trimUrlPart(null) :43-47",
+  "name": "Url path null is no Url path: the router shows its page and answers its Reset (row C116, fixed in P109 ISL-048)",
+  "because": "the Url path setter — null is none (row C116, fixed in P109 ISL-048)",
   "params": {
    "name": "Main",
    "pages": {
@@ -1009,7 +1009,7 @@
   }
  },
  {
-  "name": "navigate with Url path null: the page is built and shown, then the URL throws — nothing pushed, never answered (row C116)",
+  "name": "navigate with Url path null: the page is built and shown, its URL pushed, Done (row C116, fixed in P109 ISL-048)",
   "because": "_updateUrlWithTopPage",
   "params": {
    "name": "Main",

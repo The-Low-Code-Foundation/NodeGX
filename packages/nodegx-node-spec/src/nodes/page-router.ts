@@ -152,8 +152,9 @@ const LOOK = (displayName: string, group: string, description: string, extra: Re
 
 export const PageRouter = defineNode({
   type: 'Router',
+  // v3 (P109 ISL-048, s30): a Url path of null is none — the router matches and pushes its URLs as with no Url path (row C116)
   // v2 (P109 ISL-048, s30): a malformed escape in the query is kept as written, as a path segment's is — the router shows its page and answers (row C115)
-  version: 2,
+  version: 3,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/router.tsx',
   needs: ['person', 'clock', 'location', 'project'],
   worldPool: {
@@ -176,7 +177,7 @@ export const PageRouter = defineNode({
   // :280-291 `outcomeOutputs({ done, unchanged, failure })` — Reset's
   outcomes: ['done', 'unchanged', 'failure'],
 
-  init: (_w, params) => ({ indexName: params.name, name: params.name, pages: params.pages, urlPath: params.urlPath }),
+  init: (_w, params) => ({ indexName: params.name, name: params.name, pages: params.pages, urlPath: params.urlPath === null ? undefined : params.urlPath }),
 
   state: {
     mounted: true,
@@ -290,7 +291,8 @@ export const PageRouter = defineNode({
         view
       ),
     // :223-230 — stored; read by the next match and the next URL
-    urlPath: (s, v, _i, view) => run(s, (w) => void (w.st.urlPath = v), view),
+    // a null Url path is none (row C116, fixed in P109 ISL-048: `_trimUrlPart(null)` threw at every match and every URL)
+    urlPath: (s, v, _i, view) => run(s, (w) => void (w.st.urlPath = v === null ? undefined : v), view),
     // :259-268, :340-357 — every Reset of the frame is answered by the one reset at the frame's end
     reset: (s, _i, view) => ({ ...run(s, (w) => (scheduleReset(w), void (w.st.resetTokens += 1)), view), outcome: 'pending' }),
     // react-component-node.ts :2310-2320
@@ -736,7 +738,7 @@ function checks(w: Work, item: Item): Busy | number | typeof THROWS {
   if (!page) return answer(w, 'failure', 'navigate/page-not-found');
   const params: Rec = v.params ?? {};
   if (v.openInNewTab) {
-    // :914-920 — `window.open(url, '_blank')`, then Done; a Url path the URL cannot be made with throws first (row C116)
+    // :914-920 — `window.open(url, '_blank')`, then Done
     const url = attempt(() => completeUrl(s, page, params, w.view.projectSettings()));
     if (url === THROWS) return THROWS;
     w.answers.push({ op: 'open', url, target: '_blank' });
@@ -808,7 +810,6 @@ function finishBusy(w: Work): void {
   handPageInputs(w, b.page, b.params);
   s.children = [...s.children, id];
   // `_updateUrlWithTopPage` (:874-884): the URL pushed — a later reset in this work reads the location where it moved. A Url path
-  // the URL cannot be made with (`_trimUrlPart(null)`) throws here: the page is on, nothing pushed, nothing answered (row C116)
   const url = attempt(() => completeUrl(s, b.page, b.params, w.view.projectSettings()));
   if (url === THROWS) return;
   w.answers.push({ op: 'history', url });

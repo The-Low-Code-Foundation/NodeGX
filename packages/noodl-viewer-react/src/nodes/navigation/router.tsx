@@ -226,7 +226,9 @@ const RouterNode = {
       description: 'Path segment prefixed to every page of this router, for nesting one router inside another',
       group: 'General',
       set: function (value) {
-        this._internal.urlPath = value;
+        // P107-C116: a null Url path is none — `_trimUrlPart(null)` threw at every match and every URL, so the router showed
+        // nothing and answered nothing. Any other value already reads as text where it is joined to a page's path.
+        this._internal.urlPath = value === null ? undefined : value;
       }
     },
     clip: {
