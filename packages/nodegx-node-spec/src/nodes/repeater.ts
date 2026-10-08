@@ -31,7 +31,7 @@
  * array is LISTENED to (the one Items held before is not, whatever it was); its own `change` — the app adding, removing or
  * replacing its members elsewhere (world.ts REGISTRY `writes`) — QUEUES a copy: an operation like any other, which copies Items as
  * it is when the operation runs, its additions and removals queued behind whatever waits (it costs one act boundary, as a removal
- * does). A `set` that moves nothing tells nothing. A record's own change needs nothing here: a row reads its record live (below).
+ * does). A `set` that moves nothing tells nothing. A record's own change reaches the rows (THE ROW'S INPUTS below).
  * `repeaterDisabledWhenUnmounted` would hold the copies back while the Repeater is off the page; a play's Repeater is on it from
  * its placing, so the setting defers nothing (measured, NSP-016 §7.23).
  *
@@ -53,15 +53,29 @@
  *
  * THE QUEUE (`_runQueueOperations` :815-860): one operation at a time, in order.
  *   - **an addition**: the item's component (none: no row); then the row's node id (eight draws, guid.ts) and the build (`await
- *     createNode`). A component the project has lands as a row at its place: its `id` input the record's id, every input the record
- *     has a field for set from it, and kept in step with the record's changes (:592-630). One it does not have THROWS (`getComponentModel`
- *     nodecontext.ts :616-636) — and the queue never runs again (row C128).
+ *     createNode`). A component the project has lands as a row at its place, its inputs given (THE ROW'S INPUTS below). One it does
+ *     not have THROWS (`getComponentModel` nodecontext.ts :616-636) — and the queue never runs again (row C128).
  *   - **a removal**: the record's row goes (:658-685).
  *   - **a rebuild** (`refresh` :723-810): no Template (falsy) — every Refresh it answers fails `repeater/no-template`; no Items (falsy)
  *     — `repeater/no-items`. Otherwise the Items are copied again (what that copy queues is dropped), EVERY row goes, and a row is built
  *     for each record in the list, in order, as an addition builds one; then every Refresh it answers is Done. A throw in the copy or a
  *     build is the queue's for good (C128): its Refreshes are never answered.
  *   When the queue empties, **Items Rendered** — after every run of the queue, including one that built nothing (row C129).
+ *
+ * THE ROW'S INPUTS (v2, `addItem` :592-629, `_mapInputs` :538-555). At its landing a row is given its inputs by the input mapping AS IT
+ * IS THEN (`inputMappingScript` :968-1000 — compiled as it arrives when it is text that is not empty; what does not compile leaves none;
+ * either way a rebuild is asked for):
+ *   - **no mapping** — DIRECT: `id` the record's id, every other input the record's field of that name; then each field the record
+ *     changes that is one of its inputs.
+ *   - **a mapping** — MAPPED: `map({ input: 'field' | function (record) })`, each key the row HAS as an input; any other value passed
+ *     over; `id` only if mapped. Each change of the record maps the row again by the mapping AS IT IS THEN (none: nothing is set) — so
+ *     rows whose rebuild failed keep what the old mapping gave them until their record changes. A mapping that throws at the landing
+ *     leaves `addItem` before the row is added: the queue stops for good (row C140). One that throws at a record's change throws into
+ *     whoever wrote the record (row C141) — not drawn: in a lone play that is the world's own write.
+ *   A value given that is `undefined` is never sent on (the graph's rule, C3): an input keeps the last value it was given, so a field
+ *   cleared elsewhere leaves the row as it was. So each row HOLDS its inputs (v1 read the record live; the two differ only once a field
+ *   is cleared). A row hears its record's changes whoever writes them: the app elsewhere (world.ts REGISTRY, `watch`), or the
+ *   Repeater's own copy writing a record by its id (heard in the order told, `hearingRecords`).
  *
  * WHEN THE WORK LANDS. A build lands at the next yield to the event loop (a settle, after the frame's end): eleven microtasks the play
  * does not give it otherwise. What does not build ends sooner, and the queue runs on that many act boundaries later (measured: a
@@ -121,11 +135,46 @@ export const REPEATER_TEMPLATES: Readonly<Record<string, RowTemplate>> = {
   }
 };
 
-/** What each output of a row reads: the input wired to it, which the Repeater keeps in step with the record (:592-630). */
-const ROW_OUTPUT: Readonly<Record<string, Readonly<Record<string, (rec: RecordRef) => unknown>>>> = {
-  Row: { Id: (rec) => rec.getId(), Label: (rec) => rec.data.label },
-  Card: { Label: (rec) => rec.data.title }
+/** What each output of a row reads: the component input wired to it (the templates' `wires`). */
+const ROW_OUTPUT: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+  Row: { Id: 'id', Label: 'label' },
+  Card: { Label: 'title' }
 };
+
+/**
+ * v2 — a row's inputs at its landing. DIRECT (no mapping then, :592-605): `id` the record's id, every other input the record's field of
+ * that name when it has one. A value the row is given that is `undefined` is never sent on (the graph's rule, C3): what the row shows
+ * stays the last value it was given — so a row holds its inputs, where v1 read the record live (measured, NSP-016 §7.23).
+ */
+function directInputs(rec: RecordRef, template: string): Record<string, unknown> {
+  const inputs: Record<string, unknown> = {};
+  for (const key of Object.keys(REPEATER_TEMPLATES[template].inputs)) {
+    const v = key === 'id' ? rec.getId() : rec.data[key];
+    if (v !== undefined) inputs[key] = v;
+  }
+  return inputs;
+}
+
+/**
+ * v2 (:606-629) — the row's record told it a field changed: a DIRECT row takes the field when it is one of its inputs; a MAPPED row is
+ * mapped again by the CURRENT mapping (none now, :539: nothing is set). Either way `undefined` is not taken.
+ */
+function heardField(w: Work, row: Row, name: string, value: unknown): Row {
+  if (!row.mapped) {
+    if (!Object.prototype.hasOwnProperty.call(REPEATER_TEMPLATES[row.template].inputs, name) || value === undefined) return row;
+    return { ...row, inputs: { ...row.inputs, [name]: value } };
+  }
+  const fn = w.st.mapCompiles ? compileMapping(w.st.mapping) : undefined;
+  if (!fn) return row;
+  const inputs = mapInputs(fn, row.rec, row.template, row.inputs);
+  // a throw here leaves the listener into the writer (row C141): never drawn in a play (MAPPINGS)
+  return inputs === THROWS ? row : { ...row, inputs };
+}
+
+/** v2 — each change a row's record told, in the order told: the row as it stands then hears it */
+function hearFields(w: Work, told: ReadonlyArray<{ id: string; name: string; value: unknown }>): void {
+  for (const t of told) w.st.rows = w.st.rows.map((r) => (r.rec.getId() === t.id ? heardField(w, r, t.name, t.value) : r));
+}
 
 const ITEMS: readonly unknown[] = [
   [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }],
@@ -157,7 +206,9 @@ const REGISTRIES = [
     writes: [
       { at: 1, array: 'list', add: 'c' },
       { at: 10, array: 'list', remove: 'a' },
-      { at: 100, record: 'b', key: 'label', value: 'B2' },
+      { at: 99, record: 'b', key: 'label' },
+      { at: 100, record: 'b', key: 'title', value: 'T2' },
+      { at: 1000, record: 'b', key: 'label', value: 'B2' },
       { at: 1000, array: 'list', set: ['c', 'b', 'a'] },
       { at: 30000, array: 'list', set: ['a', 'b'] }
     ]
@@ -193,6 +244,36 @@ const SCRIPTS: readonly unknown[] = [
 ];
 
 /** :1028 `templateScript`'s default (`defaultDynamicScript`) — the editor's; it never runs the setter */
+/**
+ * v2 — input mappings (`inputMappingScript`, :968-1000): a key the row has, mapped from a field by name or by a function of the record;
+ * a key the row does not have, or a value that is neither, is passed over; a mapping that calls `map` with nothing, or never calls it;
+ * one that does not compile; none. A mapping that THROWS is not drawn: at a row's landing it stops the queue (row C140, a hand
+ * scenario), and on a record's change it throws into whoever wrote the record (row C141) — in a lone play, the world's own write.
+ */
+const MAPPINGS: readonly unknown[] = [
+  "map({ label: 'title' })",
+  "map({ label: function (o) { return o.getId() + ':' + o.label } })",
+  "map({ id: 'label', label: 'label' })",
+  "map({ title: 'label', label: 'title' })",
+  "map({ label: 7, nope: 'label' })",
+  'map(null)',
+  '/* maps nothing */',
+  'map(',
+  ''
+];
+
+/** The port the runtime registers on its first write (`registerInputIfNeeded` :1003-1009); the editor draws it with a Template (:1077) */
+const MAPPING_PORT = {
+  type: 'string',
+  editOnly: true,
+  coerce: 'none',
+  displayName: 'Script',
+  group: 'Input Mapping',
+  description: "JavaScript that maps each item's fields to the template's inputs: call `map({ input: 'field' })`, or a function of the item, as `object`",
+  portability: 'logic',
+  examples: MAPPINGS
+} as const;
+
 const DEFAULT_SCRIPT =
   "// Set the 'component' variable to the name of the desired component for this item.\n" +
   "// Component name must start with a '/'.\n" +
@@ -202,8 +283,8 @@ const DEFAULT_SCRIPT =
 
 /** One operation on the queue (:240-254, :465) */
 type Op = { kind: 'add'; rec: RecordRef; index: number } | { kind: 'remove'; rec: RecordRef } | { kind: 'refresh' } | { kind: 'copy' };
-/** A row: its record and the component it was built from */
-type Row = { rec: RecordRef; template: string };
+/** A row: its record, the component it was built from, and — v2 — whether a mapping set its inputs, and its inputs as last given */
+type Row = { rec: RecordRef; template: string; mapped: boolean; inputs: Readonly<Record<string, unknown>> };
 /** The operation waiting on a build (`await createNode`): it lands at the next yield */
 type Building = { kind: 'add'; row: Row; index: number } | { kind: 'refresh'; row: Row; index: number; rest: RecordRef[]; tokens: number };
 
@@ -218,6 +299,9 @@ type State = {
   /** v2 — Script as last written (`undefined` until then: the declared default is never compiled), and whether it compiled (`templateFunction`) */
   script: unknown;
   compiles: boolean;
+  /** v2 — the input mapping as last written (`undefined` until then), and whether it compiled (`inputMapFunc`) */
+  mapping: unknown;
+  mapCompiles: boolean;
   /** the outputs the editor drew for the PLACED Template: the value outputs' names, and whether `Tapped` is one (`itemOutputSignals`) */
   registered: { values: string[]; tapped: boolean };
   /** `hasScheduledCopyItems`, `hasScheduledRefresh` */
@@ -258,7 +342,7 @@ type Work = { st: State; view: View; pulses: string[]; send: Set<'itemActionItem
 type View = {
   random(): number;
   registry: { create(data?: unknown): RecordRef; collection(name?: unknown): CollectionRef; isRecord(v: unknown): v is RecordRef; isCollection(v: unknown): v is CollectionRef };
-  watch(t: { collection: string }): void;
+  watch(t: { collection: string } | { model: string }): void;
   unwatch(t: { collection: string }): void;
 };
 
@@ -297,6 +381,8 @@ export const Repeater = defineNode({
     templateType: undefined,
     script: undefined,
     compiles: false,
+    mapping: undefined,
+    mapCompiles: false,
     registered: { values: [], tapped: false },
     copyScheduled: false,
     refreshScheduled: false,
@@ -369,8 +455,10 @@ export const Repeater = defineNode({
   },
   {
     derived: {
-      // `inputMappingScript` (:968-1010) is the editor's, drawn with a Template: JavaScript, v2
+      // v2 — `inputMappingScript` (:968-1010): the editor draws it with a Template, and the runtime registers it on any write
       inputs: () => ({}),
+      discover: (port) => (port === 'inputMappingScript' ? MAPPING_PORT : undefined),
+      candidates: ['inputMappingScript'],
       outputs: (params) => {
         const r = outputsOf(params.template);
         const out: Record<string, unknown> = {};
@@ -378,7 +466,15 @@ export const Repeater = defineNode({
         if (r.tapped) out['itemOutputSignal-Tapped'] = { type: 'signal', displayName: 'Tapped', group: 'Item Signals' };
         return out as never;
       },
-      on: () => ({ send: [] })
+      // :970-1000 — compiled as it arrives when it is text that is not empty (what does not compile leaves none); a rebuild either way
+      on: (s, port, v, _d, view) =>
+        port === 'inputMappingScript'
+          ? run(s, view as View, (w) => {
+              w.st.mapping = v;
+              w.st.mapCompiles = compileMapping(v) !== undefined;
+              scheduleRefresh(w);
+            })
+          : { send: [] }
     },
     // the frame's end: the callbacks asked for, in order; what they queue starts at once
     afterInputs: (s, _i, view) => run(s, view, (w) => frameWork(w), 'frame'),
@@ -386,8 +482,12 @@ export const Repeater = defineNode({
       // the yield: the build lands, and the queue runs to its end
       resume: (s, _i, _tag, view) => run(s, view, (w) => atYield(w), 'yield'),
       // v2 — the bound array changed (`onItemsCollectionChanged` :257-269): the copy is QUEUED, an operation like any other
-      change: (s, _i, e, view) =>
-        e.kind === 'collection' && view.registry.isCollection(s.items) && e.id === s.items.getId() ? run(s, view, (w) => enqueue(w, { kind: 'copy' }), 'world') : { send: [] }
+      change: (s, _i, e, view) => {
+        if (e.kind === 'collection') return view.registry.isCollection(s.items) && e.id === s.items.getId() ? run(s, view, (w) => enqueue(w, { kind: 'copy' }), 'world') : { send: [] };
+        // v2 (:606-629) — a row's record changed elsewhere: the row hears the field
+        const id = String(e.id);
+        return s.rows.some((r) => r.rec.getId() === id) ? run(s, view, (w) => hearFields(w, [{ id, name: e.name, value: e.value }]), 'world') : { send: [] };
+      }
     },
     person: {
       tapRow: (s, _i, v, view) =>
@@ -400,9 +500,10 @@ export const Repeater = defineNode({
             if (!row) return;
             // the click's handler drains the graph: the Repeater's waiting frame-end work first (it was dirty first)
             frameWork(w);
-            // a row that work deleted delivers nothing
-            if (!w.st.rows.includes(row)) return;
-            tapped(w, row);
+            // a row that work deleted delivers nothing (the row as that work left it: a mapping may have run again)
+            const now = w.st.rows.find((r) => r.rec === row.rec);
+            if (!now) return;
+            tapped(w, now);
           },
           'act'
         )
@@ -474,6 +575,10 @@ const THROWS = Symbol('throws');
  * `Model.instanceOf(item)` reads `item.target` — a `null` or `undefined` item throws there, after the items before it were converted.
  */
 function copy(w: Work, src: unknown): void | typeof THROWS {
+  return hearingRecords(w, () => copyInto(w, src));
+}
+
+function copyInto(w: Work, src: unknown): void | typeof THROWS {
   const own = w.st.own as CollectionRef;
   const source = (src || []) as ArrayLike<unknown>;
   const n = source.length;
@@ -497,6 +602,28 @@ function copy(w: Work, src: unknown): void | typeof THROWS {
     list.off('remove', remove);
   }
   for (const op of ops) enqueue(w, op);
+}
+
+/**
+ * v2 (:606-629) — a row listens to its record: while the Repeater's own copy writes the records (a plain item with an id writes that
+ * record's fields), what each row's record tells is heard by the row, field by field in the order told, once the copy is done (nothing
+ * between reads a row).
+ */
+function hearingRecords<T>(w: Work, f: () => T): T {
+  const told: Array<{ id: string; name: string; value: unknown }> = [];
+  const offs: Array<() => void> = [];
+  for (const r of w.st.rows) {
+    const rec = r.rec as unknown as { on(e: string, f: (c: { name: string; value: unknown }) => void): void; off(e: string, f: (c: { name: string; value: unknown }) => void): void };
+    const heard = (c: { name: string; value: unknown }) => void told.push({ id: r.rec.getId(), name: c.name, value: c.value });
+    rec.on('change', heard);
+    offs.push(() => rec.off('change', heard));
+  }
+  try {
+    return f();
+  } finally {
+    for (const off of offs) off();
+    hearFields(w, told);
+  }
 }
 
 /** The conversion loop of `set` (:584-631) up to item `upTo`: what becomes a record before the throw (the same cache the diff keeps) */
@@ -611,6 +738,40 @@ function start(w: Work, op: Op): void {
   } else refresh(w);
 }
 
+/** v2 :977-998 — the function an input mapping compiles to: none for a mapping that is empty or does not compile */
+function compileMapping(code: unknown): ((map: (m: unknown) => void, object: unknown) => void) | undefined {
+  if (!code) return undefined;
+  try {
+    return new Function('map', 'object', code as string) as (map: (m: unknown) => void, object: unknown) => void;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * `_mapInputs` (:538-555): the mapping run on the record — each key the row HAS as an input set from the record's field of that name
+ * (a string) or from a function of the record; any other value passed over. What it does not set keeps its value (`prev`). A throw
+ * is the caller's (C140, C141).
+ */
+function mapInputs(fn: (map: (m: unknown) => void, object: unknown) => void, rec: RecordRef, template: string, prev: Readonly<Record<string, unknown>>): Record<string, unknown> | typeof THROWS {
+  const inputs: Record<string, unknown> = { ...prev };
+  const has = REPEATER_TEMPLATES[template].inputs;
+  try {
+    fn((mappings) => {
+      for (const key in mappings as object) {
+        if (!Object.prototype.hasOwnProperty.call(has, key)) continue;
+        const m = (mappings as Record<string, unknown>)[key];
+        const v = typeof m === 'function' ? m(rec) : typeof m === 'string' ? rec.get(m) : undefined;
+        // `undefined` is never sent on (C3): the input keeps what it had
+        if (v !== undefined) inputs[key] = v;
+      }
+    }, rec);
+  } catch {
+    return THROWS;
+  }
+  return inputs;
+}
+
 /** :357-360 — the function Script compiles to, or `undefined` when it does not compile */
 function compileScript(code: unknown): ((item: unknown) => unknown) | undefined {
   try {
@@ -649,12 +810,26 @@ function addItem(w: Work, rec: RecordRef, _index: number): Row | null | typeof T
   for (let i = 0; i < 8; i++) w.view.random();
   const name = String(template);
   if (!Object.prototype.hasOwnProperty.call(REPEATER_TEMPLATES, name)) return THROWS;
-  return { rec, template: name };
+  return { rec, template: name, mapped: false, inputs: {} };
 }
 
 /** The row lands (:592-656): added at its place among the parent's children (after the Repeater, so its place in the list) */
 function land(w: Work, b: Building): void {
-  w.st.rows.splice(b.index, 0, b.row);
+  // v2 (:592-629) — the mapping as it is at the landing decides the row's inputs: none, direct (live); one, mapped now and again at
+  // each change of the record (heard: `watch`); a mapping that throws leaves `addItem` before the row is added — the queue stops (C140)
+  let row = b.row;
+  const fn = w.st.mapCompiles ? compileMapping(w.st.mapping) : undefined;
+  if (fn) {
+    const inputs = mapInputs(fn, row.rec, row.template, {});
+    if (inputs === THROWS) {
+      w.st.stuck = true;
+      return;
+    }
+    row = { ...row, mapped: true, inputs };
+  } else row = { ...row, inputs: directInputs(row.rec, row.template) };
+  // the row listens to its record (:610, :628): what is written elsewhere reaches it (`world.change`)
+  w.view.watch({ model: row.rec.getId() });
+  w.st.rows.splice(b.index, 0, row);
   if (b.kind === 'add') return;
   // a rebuild goes on: the next record's row
   rebuildFrom(w, b.rest, b.index + 1, b.tokens);
@@ -733,7 +908,7 @@ function tapped(w: Work, row: Row): void {
   const outs = { ...w.st.outs };
   for (const name of Object.keys(REPEATER_TEMPLATES[row.template].outputs)) {
     if (!w.st.registered.values.includes(name)) continue;
-    outs[name] = reads[name](row.rec);
+    outs[name] = row.inputs[reads[name]];
     w.sendDerived.add(`itemOutput-${name}`);
   }
   w.st.outs = outs;

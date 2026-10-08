@@ -12466,5 +12466,3914 @@
    },
    "settle"
   ]
+ },
+ {
+  "name": "the mapping matrix — a field by another name; placed with it, then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   },
+   "inputMappingScript": "map({ label: 'title' })"
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — a field by another name; written after the rows landed (a rebuild), then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "inputMappingScript",
+    "value": "map({ label: 'title' })"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — a field by another name; written with the Template cleared (the rebuild fails, the rows keep what they had), then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   },
+   "inputMappingScript": "map({ label: function (o) { return 'm' + o.label } })"
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "template",
+    "value": ""
+   },
+   {
+    "set": "inputMappingScript",
+    "value": "map({ label: 'title' })"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — a field by another name; the Repeater's own copy writes a mapped record's fields",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "p",
+     "label": "P",
+     "title": "t"
+    },
+    {
+     "id": "q",
+     "label": "Q"
+    }
+   ],
+   "inputMappingScript": "map({ label: 'title' })"
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "p",
+      "label": "P2",
+      "title": "t2"
+     },
+     {
+      "id": "q",
+      "label": "Q"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — a function of the record; placed with it, then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   },
+   "inputMappingScript": "map({ label: function (o) { return o.getId() + ':' + o.label } })"
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — a function of the record; written after the rows landed (a rebuild), then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "inputMappingScript",
+    "value": "map({ label: function (o) { return o.getId() + ':' + o.label } })"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — a function of the record; written with the Template cleared (the rebuild fails, the rows keep what they had), then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   },
+   "inputMappingScript": "map({ label: function (o) { return 'm' + o.label } })"
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "template",
+    "value": ""
+   },
+   {
+    "set": "inputMappingScript",
+    "value": "map({ label: function (o) { return o.getId() + ':' + o.label } })"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — a function of the record; the Repeater's own copy writes a mapped record's fields",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "p",
+     "label": "P",
+     "title": "t"
+    },
+    {
+     "id": "q",
+     "label": "Q"
+    }
+   ],
+   "inputMappingScript": "map({ label: function (o) { return o.getId() + ':' + o.label } })"
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "p",
+      "label": "P2",
+      "title": "t2"
+     },
+     {
+      "id": "q",
+      "label": "Q"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — two inputs, `id` among them; placed with it, then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   },
+   "inputMappingScript": "map({ id: 'label', label: 'label' })"
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — two inputs, `id` among them; written after the rows landed (a rebuild), then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "inputMappingScript",
+    "value": "map({ id: 'label', label: 'label' })"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — two inputs, `id` among them; written with the Template cleared (the rebuild fails, the rows keep what they had), then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   },
+   "inputMappingScript": "map({ label: function (o) { return 'm' + o.label } })"
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "template",
+    "value": ""
+   },
+   {
+    "set": "inputMappingScript",
+    "value": "map({ id: 'label', label: 'label' })"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — two inputs, `id` among them; the Repeater's own copy writes a mapped record's fields",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "p",
+     "label": "P",
+     "title": "t"
+    },
+    {
+     "id": "q",
+     "label": "Q"
+    }
+   ],
+   "inputMappingScript": "map({ id: 'label', label: 'label' })"
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "p",
+      "label": "P2",
+      "title": "t2"
+     },
+     {
+      "id": "q",
+      "label": "Q"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — an input the row does not have beside one it has; placed with it, then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   },
+   "inputMappingScript": "map({ title: 'label', label: 'title' })"
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — an input the row does not have beside one it has; written after the rows landed (a rebuild), then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "inputMappingScript",
+    "value": "map({ title: 'label', label: 'title' })"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — an input the row does not have beside one it has; written with the Template cleared (the rebuild fails, the rows keep what they had), then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   },
+   "inputMappingScript": "map({ label: function (o) { return 'm' + o.label } })"
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "template",
+    "value": ""
+   },
+   {
+    "set": "inputMappingScript",
+    "value": "map({ title: 'label', label: 'title' })"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — an input the row does not have beside one it has; the Repeater's own copy writes a mapped record's fields",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "p",
+     "label": "P",
+     "title": "t"
+    },
+    {
+     "id": "q",
+     "label": "Q"
+    }
+   ],
+   "inputMappingScript": "map({ title: 'label', label: 'title' })"
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "p",
+      "label": "P2",
+      "title": "t2"
+     },
+     {
+      "id": "q",
+      "label": "Q"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — values that are neither a name nor a function; placed with it, then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   },
+   "inputMappingScript": "map({ label: 7, nope: 'label' })"
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — values that are neither a name nor a function; written after the rows landed (a rebuild), then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "inputMappingScript",
+    "value": "map({ label: 7, nope: 'label' })"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — values that are neither a name nor a function; written with the Template cleared (the rebuild fails, the rows keep what they had), then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   },
+   "inputMappingScript": "map({ label: function (o) { return 'm' + o.label } })"
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "template",
+    "value": ""
+   },
+   {
+    "set": "inputMappingScript",
+    "value": "map({ label: 7, nope: 'label' })"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — values that are neither a name nor a function; the Repeater's own copy writes a mapped record's fields",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "p",
+     "label": "P",
+     "title": "t"
+    },
+    {
+     "id": "q",
+     "label": "Q"
+    }
+   ],
+   "inputMappingScript": "map({ label: 7, nope: 'label' })"
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "p",
+      "label": "P2",
+      "title": "t2"
+     },
+     {
+      "id": "q",
+      "label": "Q"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — `map` handed nothing; placed with it, then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   },
+   "inputMappingScript": "map(null)"
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — `map` handed nothing; written after the rows landed (a rebuild), then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "inputMappingScript",
+    "value": "map(null)"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — `map` handed nothing; written with the Template cleared (the rebuild fails, the rows keep what they had), then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   },
+   "inputMappingScript": "map({ label: function (o) { return 'm' + o.label } })"
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "template",
+    "value": ""
+   },
+   {
+    "set": "inputMappingScript",
+    "value": "map(null)"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — `map` handed nothing; the Repeater's own copy writes a mapped record's fields",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "p",
+     "label": "P",
+     "title": "t"
+    },
+    {
+     "id": "q",
+     "label": "Q"
+    }
+   ],
+   "inputMappingScript": "map(null)"
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "p",
+      "label": "P2",
+      "title": "t2"
+     },
+     {
+      "id": "q",
+      "label": "Q"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — `map` never called; placed with it, then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   },
+   "inputMappingScript": "/* maps nothing */"
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — `map` never called; written after the rows landed (a rebuild), then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "inputMappingScript",
+    "value": "/* maps nothing */"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — `map` never called; written with the Template cleared (the rebuild fails, the rows keep what they had), then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   },
+   "inputMappingScript": "map({ label: function (o) { return 'm' + o.label } })"
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "template",
+    "value": ""
+   },
+   {
+    "set": "inputMappingScript",
+    "value": "/* maps nothing */"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — `map` never called; the Repeater's own copy writes a mapped record's fields",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "p",
+     "label": "P",
+     "title": "t"
+    },
+    {
+     "id": "q",
+     "label": "Q"
+    }
+   ],
+   "inputMappingScript": "/* maps nothing */"
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "p",
+      "label": "P2",
+      "title": "t2"
+     },
+     {
+      "id": "q",
+      "label": "Q"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — one that does not compile; placed with it, then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   },
+   "inputMappingScript": "map("
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — one that does not compile; written after the rows landed (a rebuild), then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "inputMappingScript",
+    "value": "map("
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — one that does not compile; written with the Template cleared (the rebuild fails, the rows keep what they had), then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   },
+   "inputMappingScript": "map({ label: function (o) { return 'm' + o.label } })"
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "template",
+    "value": ""
+   },
+   {
+    "set": "inputMappingScript",
+    "value": "map("
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — one that does not compile; the Repeater's own copy writes a mapped record's fields",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "p",
+     "label": "P",
+     "title": "t"
+    },
+    {
+     "id": "q",
+     "label": "Q"
+    }
+   ],
+   "inputMappingScript": "map("
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "p",
+      "label": "P2",
+      "title": "t2"
+     },
+     {
+      "id": "q",
+      "label": "Q"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — an empty one; placed with it, then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   },
+   "inputMappingScript": ""
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — an empty one; written after the rows landed (a rebuild), then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "inputMappingScript",
+    "value": ""
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — an empty one; written with the Template cleared (the rebuild fails, the rows keep what they had), then records written elsewhere",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   },
+   "inputMappingScript": "map({ label: function (o) { return 'm' + o.label } })"
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "template",
+    "value": ""
+   },
+   {
+    "set": "inputMappingScript",
+    "value": ""
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "the mapping matrix — an empty one; the Repeater's own copy writes a mapped record's fields",
+  "because": "NSP-016 §7.23 THE MAPPING MATRIX: every input mapping × when it meets the rows (placed with it, written later, written while the rebuild fails, the Repeater's own copy writing a mapped record), with records written elsewhere, followed by an observer — clicks on each row and a Refresh",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "p",
+     "label": "P",
+     "title": "t"
+    },
+    {
+     "id": "q",
+     "label": "Q"
+    }
+   ],
+   "inputMappingScript": ""
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "p",
+      "label": "P2",
+      "title": "t2"
+     },
+     {
+      "id": "q",
+      "label": "Q"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "an input mapping that throws for a record: no row lands, and the Repeater never draws again (row C140)",
+  "because": "NSP-016 §7.23 — the input mapping, beside the matrix",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "set": "inputMappingScript",
+    "value": "map({ label: function (o) { if (o.getId() === 'b') throw new Error('no'); return o.label } })"
+   },
+   "settle",
+   {
+    "set": "inputMappingScript",
+    "value": "map({ label: function (o) { return 'm' + o.label } })"
+   },
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a Card mapped: its title from the record's label",
+  "because": "NSP-016 §7.23 — the input mapping, beside the matrix",
+  "params": {
+   "template": "Card",
+   "items": {
+    "$array": "list"
+   },
+   "inputMappingScript": "map({ title: 'label' })"
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  }
+ },
+ {
+  "name": "rows that landed with no mapping stay direct when one arrives and its rebuild fails: they read their record live",
+  "because": "NSP-016 §7.23 — the input mapping, beside the matrix",
+  "params": {
+   "items": {
+    "$array": "list"
+   },
+   "template": "Row"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "template",
+    "value": ""
+   },
+   {
+    "set": "inputMappingScript",
+    "value": "map({ label: function (o) { return 'm' + o.label } })"
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  }
+ },
+ {
+  "name": "the mapping cleared while its rebuild fails: a record written elsewhere is not mapped again, the rows keep what they had",
+  "because": "NSP-016 §7.23 — the input mapping, beside the matrix",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   },
+   "inputMappingScript": "map({ label: function (o) { return 'm' + o.label } })"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "template",
+    "value": ""
+   },
+   {
+    "set": "inputMappingScript",
+    "value": ""
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   }
+  }
+ },
+ {
+  "name": "an addition waiting on a click's yield lands with the mapping written before it lands",
+  "because": "NSP-016 §7.23 — the input mapping, beside the matrix",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "set": "inputMappingScript",
+    "value": "map({ label: function (o) { return 'm' + o.label } })"
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "add": "c"
+     }
+    ]
+   }
+  }
+ },
+ {
+  "name": "chunked creation: mapped rows built in one run, then a record written elsewhere",
+  "because": "NSP-016 §7.23 — the input mapping, beside the matrix",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   },
+   "inputMappingScript": "map({ label: function (o) { return 'm' + o.label } })"
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ],
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 1,
+      "record": "b",
+      "key": "title",
+      "value": "T2"
+     }
+    ]
+   },
+   "projectSettings": {
+    "repeaterCreateComponentsAsync": true
+   }
+  }
+ },
+ {
+  "name": "a click whose drain rebuilds an empty bound array (Done at once, the row clicked gone), then that array written elsewhere before the queue's next act boundary: the heard copy queues behind it and lands at the yield",
+  "because": "NSP-016 §7.23 — the interpreter's 10,000 at seed 20733 left `person.tapRow` drop-resume on this shape (outcomes [refresh: done], no emit): only a heard change, handed over with no act boundary, queues work behind the rebuild before the queue runs on",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "none": []
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "none",
+      "add": "c"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   {
+    "set": "items",
+    "value": {
+     "$array": "none"
+    }
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a record's field cleared elsewhere: the row (no mapping) keeps the value it had",
+  "because": "NSP-016 §7.23 — a row keeps the last value it was given: `undefined` is never sent on (the graph's rule, C3), so a field cleared elsewhere leaves the row as it was; a click on another row between makes the kept value visible again",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a record's field cleared elsewhere: the mapped row, mapped again to nothing, keeps the value it had",
+  "because": "NSP-016 §7.23 — a row keeps the last value it was given: `undefined` is never sent on (the graph's rule, C3), so a field cleared elsewhere leaves the row as it was; a click on another row between makes the kept value visible again",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   },
+   "inputMappingScript": "map({ label: 'label' })"
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a record's field cleared, then written again: the row takes the new value",
+  "because": "NSP-016 §7.23 — a row keeps the last value it was given: `undefined` is never sent on (the graph's rule, C3), so a field cleared elsewhere leaves the row as it was; a click on another row between makes the kept value visible again",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label"
+     },
+     {
+      "at": 2,
+      "record": "a",
+      "key": "label",
+      "value": "A3"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a record written elsewhere that is no longer in the list: its old row is gone, and nothing hears it",
+  "because": "NSP-016 §7.23 — a row keeps the last value it was given: `undefined` is never sent on (the graph's rule, C3), so a field cleared elsewhere leaves the row as it was; a click on another row between makes the kept value visible again",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   }
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C",
+      "title": "T"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ],
+     "other": [
+      "c"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "array": "list",
+      "remove": "a"
+     },
+     {
+      "at": 2,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "advance": 2
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
  }
 ]
