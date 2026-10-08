@@ -19,7 +19,8 @@
  * THE URL (world.ts LOCATION). The router reads the location — its hash (`navigationPathType` unset or `hash`) or its path (`path`) —
  * and its query, matching the path against each page's path (with Url path in front): the page whose pattern has the fewest parts
  * more or fewer than the URL wins, the first on a tie; `{name}` parts are parameters, each segment decoded once (`_decodePathSegment`).
- * The query is decoded with `decodeURIComponent`, which THROWS on a malformed escape (`?q=%zz`): the reset ends there, unanswered. No
+ * The query is decoded the same way, once, a malformed escape (`?q=%zz`) kept as written — row C115, fixed in P109 ISL-048 (it threw and
+ * blanked the router, a Reset unanswered). No
  * match: the start page, with the query's parameters only when the router had pages to match against.
  *
  * THE CALLERS (spec.ts; the acts `navigate`, `traverse`). A Navigate hands the router a navigate at ITS frame's end (`scheduleNavigate`
@@ -151,7 +152,8 @@ const LOOK = (displayName: string, group: string, description: string, extra: Re
 
 export const PageRouter = defineNode({
   type: 'Router',
-  version: 1,
+  // v2 (P109 ISL-048, s30): a malformed escape in the query is kept as written, as a path segment's is — the router shows its page and answers (row C115)
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/router.tsx',
   needs: ['person', 'clock', 'location', 'project'],
   worldPool: {
@@ -490,11 +492,11 @@ function locationPath(href: string, settings: Readonly<Record<string, unknown>>)
   if (path && path[0] === '/') path = path.substring(1);
   return path;
 }
-/** `_getSearchParams` (:753-768) — decodes with `decodeURIComponent`, which throws on a malformed escape */
+/** `_getSearchParams` (:753-768) — each name and value decoded once; a malformed escape is kept as written (row C115, fixed in P109 ISL-048) */
 function searchParams(href: string): Record<string, string> {
   const pl = /\+/g;
   const search = /([^&=]+)=?([^&]*)/g;
-  const decode = (x: string) => decodeURIComponent(x.replace(pl, ' '));
+  const decode = (x: string) => decodePathSegment(x.replace(pl, ' '));
   const query = new URL(href).search.substring(1);
   let match: RegExpExecArray | null;
   const out: Record<string, string> = {};

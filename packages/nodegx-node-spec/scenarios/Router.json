@@ -503,8 +503,8 @@
   }
  },
  {
-  "name": "a malformed query: the reset throws — nothing shown, a Reset never answered (row C115)",
-  "because": "_getSearchParams decodeURIComponent :749-764",
+  "name": "a malformed query is kept as written: the router shows its start page (row C115, fixed in P109 ISL-048)",
+  "because": "_getSearchParams :749-764 — a malformed escape kept as written (row C115, fixed in P109 ISL-048)",
   "params": {
    "name": "Main",
    "pages": {
@@ -1986,7 +1986,7 @@
   }
  },
  {
-  "name": "Back to a malformed query: the reset throws; a later Back recovers",
+  "name": "Back to a malformed query: the reset keeps it as written and answers (row C115, fixed in P109 ISL-048); a later Back moves on",
   "because": "",
   "params": {
    "name": "Main",

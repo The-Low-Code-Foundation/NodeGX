@@ -754,8 +754,15 @@ const RouterNode = {
       // Regex for replacing addition symbol with a space
       const pl = /\+/g;
       const search = /([^&=]+)=?([^&]*)/g;
+      // P107-C115: a malformed escape (`?q=%zz`, `?off=50%`) is kept as written, as `_decodePathSegment` keeps a segment —
+      // decodeURIComponent threw, and the throw blanked every Page Router on the page
       const decode = function (s) {
-        return decodeURIComponent(s.replace(pl, ' '));
+        const text = s.replace(pl, ' ');
+        try {
+          return decodeURIComponent(text);
+        } catch {
+          return text;
+        }
       };
       const query = location.search.substring(1);
 
