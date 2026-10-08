@@ -2,6 +2,7 @@
 id: P107-C127
 title: The node catalog does not know a Component Stack page has a Path — `pagePath-<pageId>` is missing, so the MCP cannot set one
 status: fixed
+commit: df238bd79
 phase: P109
 task: ISL-048
 severity: low

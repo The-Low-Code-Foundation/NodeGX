@@ -153,7 +153,7 @@ Every row: runtime at seeds 13 and 20732, interpreter mutants 0 survivors at bot
 **Left (16):** C119, C122, C124 (C115's twin), C120 (ruled), C121, C123, C125, C126 (ruled), C127, C113, C114; the Drag's C102,
 C105, C106, and C103, C104 (ruled). **The export:** not checked (P18's).
 
-## 10. Session 31, second batch (2026-10-08) — the Component Stack's address
+## 10. Session 31, second batch (2026-10-08) — the Component Stack's address, its Name, and the catalog
 
 Built in worktree `p109-isl048` on `5f8fe659f`, each with the interpreter's trace of every scenario diffed before and after its
 spec version and the changed scenarios renamed where their names claimed the old outcome; cherry-picked onto `d5876f6b4` (P107
@@ -167,6 +167,8 @@ s62, which changed `page-model.helper.ts`) and re-gated there.
 | C123 | `52367365b` | `getRelativeURL` finds the page's row by the id `_findPage` found, so a page pushed or started by its label has its URL; spec v12 | 150 / 150; control red on exactly 2 |
 | C121 | `437a1bfaa` | in hash mode, a page with no parameters writes the address's path in front WHILE the address holds a query, so the query goes; spec v13 | 150 / 150; control red on exactly 2 |
 | C119 | `b5b06bcb6` | the `popstate` / `hashchange` listener returns at once with Use Routes off, read at the event; spec v14 | 150 / 150; control red on exactly 1 |
+| C113 | `2cc6d1dd7` | a Name written that keeps the handler's key (`String(name \|\| 'Main')`) is stored and nothing more: no register, no reset; spec v15; one ROUTES scenario now writes Other so it still plays the register's reset | 150 / 150; control red on exactly 2 |
+| C127 | `df238bd79` | the catalog probe drives the stack with Use Routes on, and a new pass marks a pattern that needs a switch with `when` (`pagePath-<pageId>`: `{ "useRoutes": true }`); the description says what the stack draws; parity probes a `when` pattern with and without its switch | catalog checks, parity 312 / 312, nine MCP suites 132 / 132; control red on exactly the stack's parity test |
 
 Every row: runtime at seeds 13 and 20732, interpreter mutants 0 survivors at both. Batch (worktree): viewer 1,815 / 1,815, spec
 gates 505 / 523 (18 skipped), Push and Pop Component Stack conform on the runtime at 20732. Landing tree (`d5876f6b4` + the six):
@@ -179,5 +181,9 @@ spec gates 505 / 523 (18 skipped), spec tsc 0.
 - **C120 and C126 (both ruled) wait on P107.** Building either needs the test world to model the browser's history stepping back
   and an entry being replaced; that is P107's world file.
 
-**Left (10):** C120 and C126 (ruled; wait on the world), C113, C114, C127; the Drag's C102, C105, C106, and C103, C104 (ruled).
+C113 and C127 landed after the six (`2cc6d1dd7`, `df238bd79`; landing tree viewer 1,815 / 1,815, page model and parity 332 / 332, spec
+tsc 0, Page Stack 150 / 150 on the runtime at 20732). **C127 records the switch, not only the port:** the probe alone would have
+told an author every page always has a Path; `when` is the generic answer, and only Page Stack carries one today.
+
+**Left (8):** C120 and C126 (ruled; wait on the world), C114; the Drag's C102, C105, C106, and C103, C104 (ruled).
 **The export:** not checked (P18's).

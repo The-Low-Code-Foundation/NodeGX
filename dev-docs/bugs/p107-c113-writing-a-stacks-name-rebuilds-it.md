@@ -2,6 +2,7 @@
 id: P107-C113
 title: Writing a Component Stack's Name — even the name it already has — rebuilds it at its start page, losing every page pushed
 status: fixed
+commit: 2cc6d1dd7
 phase: P109
 task: ISL-048
 severity: low
