@@ -22,3 +22,5 @@ Drag's second child and is never drawn. An agent learning from the catalog learn
 **Proposed fix.** Either draw every child (wrap them in one element the library moves) or make the one-child rule visible: a
 validation warning on a Drag with more than one child, and the example fixed to put the Circle and the Text inside one Group under
 the Drag. The example needs the fix either way. Small.
+
+**Ruled 2026-10-08 (P109 s31, asked in session), as recommended: "Draw them all".** Everything inside a Drag appears and moves together as one piece: with more than one child they are wrapped in one element the library moves; a Drag with one child stays exactly as today. The catalog example then works as written.

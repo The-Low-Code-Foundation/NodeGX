@@ -17,3 +17,5 @@ own class survive the Drag).
 **Proposed fix.** Pass `className` and `style` from the Drag through to the child it clones (merging with the child's own, as
 DEF-027 does for the class), or stop declaring the two ports on a node with no element (`noDataAttributes` already marks Drag as
 one). Small.
+
+**Ruled 2026-10-08 (P109 s31, asked in session), as recommended: "Apply to what it moves".** CSS Class and CSS Style go onto the element the Drag moves, added to that element's own class and style (as DEF-027 does for the class).
