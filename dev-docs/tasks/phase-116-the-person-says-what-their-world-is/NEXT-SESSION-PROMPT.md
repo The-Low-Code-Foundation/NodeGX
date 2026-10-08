@@ -6,6 +6,7 @@ the ruled table, in Richard's words). The README's board is §7; what the census
 
 ## Before anything
 
+0. **Model check.** Every task file names the model it wants under its status line (README §7, the model paragraph). Read your system prompt's model line; if it is not the one named, stop and say so before any work. ONT-001 wants Opus 5.5.
 1. `npm run ontology-census:check` — must be green. Regenerating with the private corpora needs their paths on the
    command line (`--acme`, `--tirion`, `--sentinel`, `--private`; the private folder is a sibling of the checkouts and
    its README has the full command). Never write a private path or row into the repo.

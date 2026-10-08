@@ -2,6 +2,9 @@
 
 **Opened 2026-10-08.** **Depends on ONT-001, ONT-003 and P112 OWN-007** (the brief). **Status: 📋 not started.**
 
+> **Model check, before anything (Richard, 2026-10-08):** this task wants **Opus 5.5 is sufficient** — it runs P112's stranger method, which exists. Your system prompt says which model you are. If it is not the one named here, stop before any work and say so in one line ("this task is marked for Opus 5.5; you are on <model> — switch with /model, or say go"), and wait for Richard's word. Do not start on the wrong model because the check felt like a formality.
+
+
 ## 1. The person sentence
 
 > **My agent built me a page for my data in my own words, from a kit, and a suite told it when it was right. Richard

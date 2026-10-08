@@ -2,6 +2,9 @@
 
 **Opened 2026-10-08.** **Depends on ONT-001.** **Status: 📋 not started.**
 
+> **Model check, before anything (Richard, 2026-10-08):** this task wants **Opus 5.5 is sufficient** — a deterministic projection graded by the existing conformance suite. Your system prompt says which model you are. If it is not the one named here, stop before any work and say so in one line ("this task is marked for Opus 5.5; you are on <model> — switch with /model, or say go"), and wait for Richard's word. Do not start on the wrong model because the check felt like a formality.
+
+
 ## 1. The person sentence
 
 > **The database is made from what I said, the same way every time, and a test proves on two different engines that

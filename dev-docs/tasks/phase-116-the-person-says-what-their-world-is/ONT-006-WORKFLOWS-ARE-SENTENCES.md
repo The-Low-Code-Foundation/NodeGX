@@ -2,6 +2,9 @@
 
 **Opened 2026-10-08.** **Depends on ONT-001 and NSP-014** (✅). **Status: 📋 not started.**
 
+> **Model check, before anything (Richard, 2026-10-08):** this task wants **Fable 5.1** — it invents a small language (a verb over the graph with named failure arms); the sentence shape wrong is a phase-level mistake, not a bug. Your system prompt says which model you are. If it is not the one named here, stop before any work and say so in one line ("this task is marked for Fable 5.1; you are on <model> — switch with /model, or say go"), and wait for Richard's word. Do not start on the wrong model because the check felt like a formality.
+
+
 ## 1. The person sentence
 
 > **The thing I do every week is a sentence over my world with its failures named, and when a step cannot be done the

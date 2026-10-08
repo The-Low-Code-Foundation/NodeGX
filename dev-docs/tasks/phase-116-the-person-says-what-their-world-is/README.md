@@ -176,6 +176,8 @@ graded against it. Three things make the difference measurable rather than rheto
 | [ONT-009](ONT-009-ACME-FROM-THE-SENTENCES.md) | **Acme from the sentences.** The thesis test: the ops persona's world described in sentences, with synthetic people; the two notes' answers must surface as questions before any collection exists. | proof | ONT-002…008, R6 |
 | [ONT-010](ONT-010-THE-CLAIM-AND-ITS-GATE.md) | **The claim and its gate.** Each word of "framework independent, open source, full stack" bound to a check, and the sentence said on nodegx.io only when every check passes. | docs + site | ONT-003, ONT-008, R7 |
 
+**Model (Richard, 2026-10-08; every task file carries the check under its status line):** Fable 5.1 where a wrong frame costs the phase and no suite can catch it — ONT-005, ONT-006, ONT-002's brief, ONT-004's operation semantics, ONT-007's reach review. Opus 5.5 where a pattern and a grading suite already exist — ONT-001, ONT-003, ONT-008, ONT-010, ONT-004's adapters, ONT-007's build, ONT-002's runner. **ONT-009's conversation runs on Opus or Sonnet on purpose** (users run the agent on what they have); Fable grades the record. A session reads its model from its system prompt; on the wrong one it stops and says so before any work.
+
 **Order:** ONT-000 → R1, R2 → ONT-001 → ONT-003 and ONT-004 in parallel → ONT-005 → ONT-002 → ONT-006 and ONT-007
 → ONT-008 → ONT-009 → ONT-010.
 

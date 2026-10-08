@@ -2,6 +2,9 @@
 
 **Opened 2026-10-08.** **Depends on ONT-001, ONT-005 and R5.** **Status: 📋 not started.**
 
+> **Model check, before anything (Richard, 2026-10-08):** this task wants **Fable 5.1 for the brief; Opus 5.5 for the runner** — the brief decides whether the questions arrive before the schema — the thesis itself; the runner is mechanical. Your system prompt says which model you are. If it is not the one named here, stop before any work and say so in one line ("this task is marked for Fable 5.1; you are on <model> — switch with /model, or say go"), and wait for Richard's word. Do not start on the wrong model because the check felt like a formality.
+
+
 ## 1. The person sentence
 
 > **Every question I am asked about my world has a reason, and the reason is written down: a mistake that would have

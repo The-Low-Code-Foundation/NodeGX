@@ -2,6 +2,9 @@
 
 **Opened 2026-10-08.** **Depends on ONT-003, ONT-008 and R7.** **Status: 📋 not started.**
 
+> **Model check, before anything (Richard, 2026-10-08):** this task wants **Opus 5.5 is sufficient** — words bound to checks and a site gate. Your system prompt says which model you are. If it is not the one named here, stop before any work and say so in one line ("this task is marked for Opus 5.5; you are on <model> — switch with /model, or say go"), and wait for Richard's word. Do not start on the wrong model because the check felt like a formality.
+
+
 ## 1. The person sentence
 
 > **When nodegx.io says NodeGX is a framework-independent, open-source, full-stack app system, every word of that

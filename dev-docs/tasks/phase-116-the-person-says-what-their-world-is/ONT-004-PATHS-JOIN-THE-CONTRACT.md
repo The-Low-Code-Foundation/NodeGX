@@ -2,6 +2,9 @@
 
 **Opened 2026-10-08.** **Depends on R3.** Can start beside ONT-001. **Status: 📋 not started.**
 
+> **Model check, before anything (Richard, 2026-10-08):** this task wants **Fable 5.1 for the operation's semantics and the capability cells; Opus 5.5 for the per-adapter build** — a cell marked supported without proof is the gate hole memory keeps finding; the adapter work is graded by the suite. Your system prompt says which model you are. If it is not the one named here, stop before any work and say so in one line ("this task is marked for Fable 5.1; you are on <model> — switch with /model, or say go"), and wait for Richard's word. Do not start on the wrong model because the check felt like a formality.
+
+
 ## 1. The person sentence
 
 > **I can ask for "the members on my account's companies" and get them, and if a backend cannot answer that, it says

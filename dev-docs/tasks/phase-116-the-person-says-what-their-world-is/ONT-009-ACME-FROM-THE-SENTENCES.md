@@ -2,6 +2,9 @@
 
 **Opened 2026-10-08.** **Depends on ONT-002 … ONT-008 and R6.** **Status: 📋 not started. The phase's thesis test.**
 
+> **Model check, before anything (Richard, 2026-10-08):** this task wants **Opus 5.5 (or Sonnet 5.5) for the conversation, ON PURPOSE; Fable 5.1 reads the record and grades it** — users run the product's agent on whatever model they have — a pass on Fable would measure the wrong thing. Your system prompt says which model you are. If it is not the one named here, stop before any work and say so in one line ("this task is marked for Opus 5.5; you are on <model> — switch with /model, or say go"), and wait for Richard's word. Do not start on the wrong model because the check felt like a formality.
+
+
 ## 1. The person sentence
 
 > **A two-person ops team describes their membership world in their own words, and the questions they are asked

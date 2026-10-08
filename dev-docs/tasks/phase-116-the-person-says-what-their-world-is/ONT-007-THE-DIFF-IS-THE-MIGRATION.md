@@ -2,6 +2,9 @@
 
 **Opened 2026-10-08.** **Depends on ONT-003.** **Status: 📋 not started.**
 
+> **Model check, before anything (Richard, 2026-10-08):** this task wants **Opus 5.5 to build; Fable 5.1 to review the reach** — 'what survives' is where the error hides, and the suite grades only what someone thought to claim. Your system prompt says which model you are. If it is not the one named here, stop before any work and say so in one line ("this task is marked for Opus 5.5 to build; you are on <model> — switch with /model, or say go"), and wait for Richard's word. Do not start on the wrong model because the check felt like a formality.
+
+
 ## 1. The person sentence
 
 > **Two days after launch I change one sentence about my world, and I am told what it reaches, what will happen to the

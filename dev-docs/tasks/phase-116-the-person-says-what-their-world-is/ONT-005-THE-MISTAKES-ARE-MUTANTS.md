@@ -2,6 +2,9 @@
 
 **Opened 2026-10-08.** **Depends on ONT-003.** **Status: 📋 not started.**
 
+> **Model check, before anything (Richard, 2026-10-08):** this task wants **Fable 5.1** — the judgement task of the phase: a mutant the claims already kill is not a mutant, and the survivors are the vocabulary's honesty number. Your system prompt says which model you are. If it is not the one named here, stop before any work and say so in one line ("this task is marked for Fable 5.1; you are on <model> — switch with /model, or say go"), and wait for Richard's word. Do not start on the wrong model because the check felt like a formality.
+
+
 ## 1. The person sentence
 
 > **The mistakes everyone makes the first time they build a database are written down as things the system tries to
