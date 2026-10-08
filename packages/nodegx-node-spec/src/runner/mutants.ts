@@ -36,7 +36,7 @@
 
 import type { AnyNodeSpec, ErasedReducer, WorldView } from '../spec';
 
-export type MutationKind = 'drop-emit' | 'drop-set' | 'flip-outcome' | 'swap-branch' | 'drop-request' | 'drop-backend' | 'drop-picker' | 'drop-subscribe' | 'drop-unsubscribe' | 'drop-socket' | 'drop-subscribe-first';
+export type MutationKind = 'drop-emit' | 'drop-set' | 'flip-outcome' | 'swap-branch' | 'drop-request' | 'drop-backend' | 'drop-picker' | 'drop-subscribe' | 'drop-unsubscribe' | 'drop-socket' | 'drop-subscribe-first' | 'drop-answers' | 'drop-resume';
 
 export interface Branch {
   reducer: string;
@@ -85,6 +85,9 @@ export interface PatchLike {
   subscribeFirst?: boolean;
   /** NSP-014 s34: calls on WebSockets (spec.ts `Patch.socket`). */
   socket?: ReadonlyArray<{ op: string }>;
+  /** NSP-016 s56: answers to callers, and an awaited promise (spec.ts `Patch.answers`, `Patch.resume`). */
+  answers?: ReadonlyArray<{ op: string; value?: string }>;
+  resume?: string;
 }
 
 /** `synced` (spec.ts `NodeDecl.synced`): state keys a branch key leaves out — the page's syncs, not the reducer's work. */
@@ -116,7 +119,11 @@ export function shapeOf(patch: unknown, synced: ReadonlySet<string> = NO_SYNCED)
     // s35 — likewise only when the branch makes its subscriptions before its backend calls
     ...(p.subscribeFirst ? { subscribeFirst: true } : {}),
     // s34 — likewise only when the branch makes calls on a WebSocket: WHICH calls, not how many
-    ...(p.socket !== undefined && p.socket.length > 0 ? { socket: [...new Set(p.socket.map((o) => o.op))].sort() } : {})
+    ...(p.socket !== undefined && p.socket.length > 0 ? { socket: [...new Set(p.socket.map((o) => o.op))].sort() } : {}),
+    // NSP-016 s56 — likewise only when the branch answers a caller (WHICH answers, not how many). Not whether it awaits (`resume`):
+    // an await is the state's progress, like a write — in the shape it split every branch by whether the queue started working there,
+    // and each split was a branch only a scenario of its own could reach (seeds 13, 20733, 20729, 7 each found another)
+    ...(p.answers !== undefined && p.answers.length > 0 ? { answers: [...new Set(p.answers.map((a) => (a.op === 'returned' ? 'returned' : `${a.op}:${a.value}`)))].sort() } : {})
   });
 }
 
@@ -143,6 +150,7 @@ export function reducerNames(spec: AnyNodeSpec): string[] {
   if (spec.world?.socket) names.push('world.socket');
   if (spec.world?.stream) names.push('world.stream');
   if (spec.world?.group) names.push('world.group');
+  if (spec.world?.resume) names.push('world.resume');
   // NSP-016 s37 — the person's acts (spec.ts THE PERSON), one reducer each
   for (const act of Object.keys(spec.person ?? {})) names.push(`person.${act}`);
   return names;
@@ -193,6 +201,8 @@ export function wrapReducers(spec: AnyNodeSpec, wrap: (name: string, original: E
     if (spec.world.stream) w.stream = wrap('world.stream', spec.world.stream as unknown as ErasedReducer) as unknown as typeof spec.world.stream;
     // NSP-016 s42 — the graph's writes to the group the node sits in (world.ts GROUP): a copy without it never hears one
     if (spec.world.group) w.group = wrap('world.group', spec.world.group as unknown as ErasedReducer) as unknown as typeof spec.world.group;
+    // NSP-016 s56 — an awaited promise landing (spec.ts `resume`): a copy without it never finishes a build
+    if (spec.world.resume) w.resume = wrap('world.resume', spec.world.resume as unknown as ErasedReducer) as unknown as typeof spec.world.resume;
     out.world = w;
   }
   // NSP-016 s37 — the person's acts: a copy without one would refuse the act the original answers
@@ -306,6 +316,15 @@ function mutatePatch(patch: PatchLike, kind: MutationKind, sibling?: PatchLike, 
       const { subscribeFirst: _f, ...rest } = patch;
       return rest;
     }
+    // NSP-016 s56 — the answers to callers, and the await
+    case 'drop-answers': {
+      const { answers: _a, ...rest } = patch;
+      return rest;
+    }
+    case 'drop-resume': {
+      const { resume: _r, ...rest } = patch;
+      return rest;
+    }
     default:
       return patch;
   }
@@ -335,6 +354,8 @@ export function mutantsOf(spec: AnyNodeSpec, branches: Map<string, Branch>): Mut
     if (ex.unsubscribe !== undefined && ex.unsubscribe.length > 0) kinds.push(['drop-unsubscribe', undefined]);
     if (ex.socket !== undefined && ex.socket.length > 0) kinds.push(['drop-socket', undefined]);
     if (ex.subscribeFirst) kinds.push(['drop-subscribe-first', undefined]);
+    if (ex.answers !== undefined && ex.answers.length > 0) kinds.push(['drop-answers', undefined]);
+    if (ex.resume !== undefined) kinds.push(['drop-resume', undefined]);
     for (const sibling of byReducer.get(b.reducer) ?? []) {
       if (sibling.shape !== b.shape) kinds.push(['swap-branch', sibling]);
     }

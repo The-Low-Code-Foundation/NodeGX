@@ -1,0 +1,5159 @@
+[
+  {
+    "name": "placed with three components: the start page is built at once — Top Component Name Home, Stack Depth 1, one child; Did Mount",
+    "because": "the mount registers the stack, which resets (navigation-handler.ts :62-104, navigation-stack.tsx :503-578); the build lands at the frame's yield",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "a push with the default transition (Push, 300 ms): Detail on top, Stack Depth 2, two children while it plays, Done; the page below leaves the children at the first frame past 300 ms",
+    "because": "navigateAsync :993-1027; transition.ts `frame` — the end is the first frame whose clock is past start + Duration + Delay",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2"
+        }
+      },
+      "settle",
+      "settle",
+      {
+        "advance": 100
+      },
+      {
+        "advance": 250
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two pushes with no transition in one frame: both Done, Stack Depth 3, Detail on top, one child",
+    "because": "None ends at once: the page below leaves before the new one is added (:1012-1025)",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two animated pushes in one frame: the first is Done, the second is refused — the stack is still animating",
+    "because": "the queue runs them in order (async-queue.ts); the second's check meets isTransitioning (:936-942)",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2"
+        }
+      },
+      {
+        "act": "push",
+        "value": {
+          "target": "p3"
+        }
+      },
+      "settle",
+      {
+        "advance": 400
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a push, then the pushed page's Pop: the pusher is handed the back's action and results, then the back is Done — Home on top, Stack Depth 1; a Pop in the start page reaches no stack",
+    "because": "back :1041-1083; the stack connects the Pop only in a page it pushed (:984-991)",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "back",
+        "value": {
+          "action": "saved",
+          "results": {
+            "n": 1
+          }
+        }
+      },
+      "settle",
+      {
+        "advance": 400
+      },
+      "settle",
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Reset after a push: the stack goes back to its start page, Done",
+    "because": "scheduleReset :463-479 → resetAsync",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a replace after a push: the replaced page is the only one — Stack Depth 1, Done",
+    "because": "replaceAsync :787-910",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "replace",
+        "value": {
+          "target": "p1",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "no components: the mount's reset reports to no one; a Reset is Failure component-stack/no-components",
+    "because": "_reportReset :480-494 — the mount path raises off the wire",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a push before the first frame: the start page is built first, then the push — Stack Depth 2, Detail, Done",
+    "because": "the request arrives at the frame's end, behind the mount's reset in the queue",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "a push to a stack named Other waits in the handler; naming this stack Other replays it — reset first, then the push",
+    "because": "registerPageStack :62-104: the first waiting push resets before it",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "stack": "Other",
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "name",
+        "value": "Other"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Mounted off, then on: Will Unmount, Did Mount — and the stack is rebuilt at its start page",
+    "because": "the remount registers again, which resets (:182-203)",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a push of a page the stack does not have is Failure component-not-found; a push of the page already on top is Unchanged, whatever its transition",
+    "because": "_findPage :386-410; _isAlreadyShowing :430-455 comes before the transition is made",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "nope"
+        }
+      },
+      {
+        "act": "push",
+        "value": {
+          "target": "p1",
+          "transition": {
+            "type": "Fade"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a push and a replace of the page already showing are Unchanged",
+    "because": ":964-967, :831-834",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p1",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "replace",
+        "value": {
+          "target": "p1",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a push and a Pop in the same frame: the Pop is the start page's — it reaches no stack; the push is Done",
+    "because": "the Pop a person presses is in the page painted at the act",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an animated push and a Pop in the same frame: the push is Done, the Pop reaches nothing",
+    "because": "as the one before, with the transition",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2"
+        }
+      },
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a push with a transition there is no such thing as (Fade) is never answered; the next push is Done (row C108)",
+    "because": "navigateAsync :1001 `new Transitions[type]` throws after the checks; the queue runs on",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "Fade"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Components value that is not a list: the stack draws nothing and a Reset is never answered (row C109)",
+    "because": "resetAsync deletes the pages, then `pages.find` throws",
+    "params": {
+      "pages": "abc",
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a page with no component: by its id it is not found (Failure); by its label the lookup throws and is never answered (row C109); the start page is Unchanged",
+    "because": "_findPage :398-406 reads the label's pageInfo, which was never made",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "Detail",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p1",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a push to a page whose component the project does not have is never answered; the next push is Done (row C107)",
+    "because": "createNode → getComponentModel throws (nodecontext.ts :616-636)",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Missing",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Start Page picks the start page; changing it takes effect at the next Reset",
+    "because": "setStartPage :1098-1100 stores; resetAsync :533 reads it",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "startPage": "p2"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "startPage",
+        "value": "p3"
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Popup with Duration 100 and Delay 50: two children until the first frame past 150 ms",
+    "because": "transition.ts `frame` :63-72",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "Popup",
+            "timing": {
+              "curve": [
+                0,
+                0,
+                0.58,
+                1
+              ],
+              "dur": 100,
+              "delay": 50
+            }
+          }
+        }
+      },
+      "settle",
+      {
+        "advance": 100
+      },
+      "settle",
+      {
+        "advance": 50
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Pop while the push still plays is Failure transition-in-progress; after it, the back puts the page below back (two children), and a second Pop during the back is refused too",
+    "because": "back :1045-1050",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2"
+        }
+      },
+      "settle",
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle",
+      {
+        "advance": 301
+      },
+      "settle",
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle",
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle",
+      {
+        "advance": 301
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "a push while a back plays is refused; after it the stack is one shallower and a push is Done",
+    "because": "the back takes the entry off at its end (:1068-1078)",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2"
+        }
+      },
+      "settle",
+      {
+        "advance": 301
+      },
+      "settle",
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "advance": 301
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Reset during a push's animation rebuilds the start page, but the stack refuses pushes until the old animation ends",
+    "because": "resetAsync does not touch isTransitioning",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2"
+        }
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "advance": 301
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Mounted off during a push's animation: the animation still ends (one child); Mounted on rebuilds the start page",
+    "because": "the frame chain runs whether the stack is on the page or not",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2"
+        }
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "advance": 301
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an animated replace: Stack Depth 1 at once, two children until the animation ends",
+    "because": "replaceAsync :856-909 deletes the outgoing pages at the end",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "replace",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "Push"
+          }
+        }
+      },
+      "settle",
+      {
+        "advance": 301
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two Resets in one frame: one reset, both Done",
+    "because": "scheduleReset coalesces (:470-478)",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "reset"
+      },
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Components changed while on the page: the stack resets at the frame's end",
+    "because": "pages setter :308-313",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "pages",
+        "value": [
+          {
+            "id": "p1",
+            "label": "Home"
+          },
+          {
+            "id": "p2",
+            "label": "Detail"
+          }
+        ]
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "writing Name — even the name it has — rebuilds the stack at its start page (row C113)",
+    "because": "the Name setter deregisters and registers again, and registering resets (:255-269)",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "name",
+        "value": "Main"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a push and a rename in the same frame: the push is Done, then the rename's reset rebuilds the start page — no change seen",
+    "because": "both land in queue order at the frame's yield",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "set": "name",
+        "value": "Other"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Pop in a replaced page reaches no stack",
+    "because": "replaceAsync never connects the page's Pop",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "replace",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two pushes and two Pops in one frame: the Pops are the start page's and reach nothing; a Pop in the next frame pops Settings",
+    "because": "the requests land at the frame's end; a Pop is the one painted at its act",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "a"
+        }
+      },
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle",
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a push with nothing in it is the start page — Unchanged",
+    "because": "pageId = target || pages[0].id (:944)",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {}
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Reset during a back's animation: when the animation ends it takes the NEW start page off the stack, and every push after is never answered (row C110)",
+    "because": "back's end :1075 `stack.pop()` pops whatever is last",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2"
+        }
+      },
+      "settle",
+      {
+        "advance": 301
+      },
+      "settle",
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle",
+      {
+        "advance": 301
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Reset during an animated replace: the start page is built; the replace's end deletes only the pages it was replacing",
+    "because": "dropOutgoing deletes its snapshot",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "replace",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "Push"
+          }
+        }
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle",
+      {
+        "advance": 301
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two pushes and a replace waiting under Other, replayed when the stack is renamed: reset, push, push, replace — all Done",
+    "because": "registerPageStack replays in order",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "stack": "Other",
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "act": "push",
+        "value": {
+          "stack": "Other",
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "act": "replace",
+        "value": {
+          "stack": "Other",
+          "target": "p1",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "name",
+        "value": "Other"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a replace alone waiting under Other replays with no reset",
+    "because": "registerPageStack: `hasNavigated` skips the reset",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "replace",
+        "value": {
+          "stack": "Other",
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "name",
+        "value": "Other"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a push while the stack is off the page waits in the handler and lands when it comes back: Detail on top",
+    "because": "the unmount deregisters (:205-214)",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Components emptied after a push: the pages go, but Top Component Name and Stack Depth still name Detail (row C112); a Reset is Failure",
+    "because": "resetAsync deletes first, then finds nothing; setPageOutputs is never called",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "pages",
+        "value": []
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an animated push lands before an advance moves the clock: the animation starts at 0 and ends at the first frame past 300",
+    "because": "the play yields before the clock moves",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2"
+        }
+      },
+      {
+        "advance": 200
+      },
+      "settle",
+      {
+        "advance": 101
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "an animated push, then an advance past its end before any frame: the first frame ends it — one child throughout",
+    "because": "the frame chain runs at a frame's start",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2"
+        }
+      },
+      {
+        "advance": 400
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "Name blank or null is Main: writing either rebuilds the stack",
+    "because": "navigation-handler.ts `name || 'Main'`",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "stack": "",
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "name",
+        "value": ""
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "name",
+        "value": null
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Mounted off and on in the same frame: nothing",
+    "because": "the paint sees the stack wanted on the page and on it",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Pop and a Reset in the same frame: the Pop pops, the Reset rebuilds the start page; a Pop in the next frame reaches nothing",
+    "because": "the frame's callbacks run in step order",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "back",
+        "value": {}
+      },
+      {
+        "signal": "reset"
+      },
+      "settle",
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a replace and a Pop in the same frame: the replace deletes the pushed page first, so its Pop asks nothing",
+    "because": "unanimated replace deletes before it builds (:852-854)",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "replace",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Components changed to leave out the page below, and a Pop in the same frame: the pusher hears the results, the page below comes back, but the stack never pops (row C111)",
+    "because": "back :1060 `_findPage` of the page below throws",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "pages",
+        "value": [
+          {
+            "id": "p2",
+            "label": "Detail"
+          }
+        ]
+      },
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the same, with two pages left",
+    "because": "as the one before",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "pages",
+        "value": [
+          {
+            "id": "p2",
+            "label": "Detail"
+          },
+          {
+            "id": "p3",
+            "label": "Settings"
+          }
+        ]
+      },
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "a push with no transition key plays Push (300 ms); its Pop plays it back: the popped page goes at the first frame past 600",
+    "because": "`args.transition.type || 'Push'`; back uses the entry's transition",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2"
+        }
+      },
+      "settle",
+      {
+        "advance": 301
+      },
+      "settle",
+      {
+        "act": "back",
+        "value": {
+          "action": "x"
+        }
+      },
+      "settle",
+      {
+        "advance": 299
+      },
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a replace onto a stack with nothing on it builds its page, unanimated",
+    "because": "replaceAsync: `from` is null",
+    "params": {
+      "pages": "abc",
+      "pageComp-p1": "Home"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pages",
+        "value": [
+          {
+            "id": "p1",
+            "label": "Home"
+          }
+        ]
+      },
+      {
+        "act": "replace",
+        "value": {
+          "target": "p1",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a push onto a stack with nothing on it is never answered (row C110); the reset Components schedule then rebuilds the start page",
+    "because": "navigateAsync :996 `top.page` of nothing",
+    "params": {
+      "pages": "abc",
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pages",
+        "value": [
+          {
+            "id": "p1",
+            "label": "Home"
+          },
+          {
+            "id": "p2",
+            "label": "Detail"
+          }
+        ]
+      },
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "two replaces behind a reset that threw: the queue frees two act boundaries later — the first throws too, the second meets Components cleared and is refused",
+    "because": "async-queue.ts: a throw frees the queue after `.then` and `.catch` (two microtask generations)",
+    "params": {
+      "pages": {}
+    },
+    "steps": [
+      {
+        "act": "replace",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "Push",
+            "timing": {
+              "curve": [
+                0,
+                0,
+                0.58,
+                1
+              ],
+              "dur": 0,
+              "delay": 0
+            }
+          }
+        }
+      },
+      {
+        "act": "replace",
+        "value": {
+          "target": "p1",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "set": "pages"
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "the same with two pushes",
+    "because": "as the one before",
+    "params": {
+      "pages": {}
+    },
+    "steps": [
+      {
+        "act": "push",
+        "value": {
+          "target": "p2"
+        }
+      },
+      {
+        "act": "push",
+        "value": {
+          "target": "p1"
+        }
+      },
+      {
+        "set": "pages"
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "one replace behind a reset that threw, Components cleared before the frame's end: refused",
+    "because": "as the one before",
+    "params": {
+      "pages": {}
+    },
+    "steps": [
+      {
+        "act": "replace",
+        "value": {
+          "target": "p1",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "set": "pages"
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "a push and forty Pops in one frame: every Pop is the start page's — nothing; the push is Done",
+    "because": "the requests land at the frame's end",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b0"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b1"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b2"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b3"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b4"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b5"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b6"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b7"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b8"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b9"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b10"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b11"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b12"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b13"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b14"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b15"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b16"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b17"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b18"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b19"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b20"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b21"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b22"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b23"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b24"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b25"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b26"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b27"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b28"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b29"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b30"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b31"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b32"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b33"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b34"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b35"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b36"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b37"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b38"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b39"
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "forty Pops on the start page: nothing",
+    "because": "no page the stack pushed",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      {
+        "act": "back",
+        "value": {
+          "action": "b0"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b1"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b2"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b3"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b4"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b5"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b6"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b7"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b8"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b9"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b10"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b11"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b12"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b13"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b14"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b15"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b16"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b17"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b18"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b19"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b20"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b21"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b22"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b23"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b24"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b25"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b26"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b27"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b28"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b29"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b30"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b31"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b32"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b33"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b34"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b35"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b36"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b37"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b38"
+        }
+      },
+      {
+        "act": "back",
+        "value": {
+          "action": "b39"
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a refused push, a push, and Components emptied in one frame: refused, Done — then the reset finds no components and the outputs keep naming Detail",
+    "because": "queue order at the frame's end",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "nope"
+        }
+      },
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "set": "pages",
+        "value": []
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a replace of the only page is Unchanged once — the next frame says nothing — and a Reset after is Done",
+    "because": "the frame's callbacks run once",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "replace",
+        "value": {
+          "target": "p1",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a replace at the act that remounts the stack: the remount's reset, then the replace",
+    "because": "the act paints first",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "replace",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Reset and a replace behind the mount's refusal: both refused at the yield; Components given and a Reset, Done",
+    "because": "a check that returns frees the queue one microtask later",
+    "params": {
+      "pages": [],
+      "pageComp-p1": "Home"
+    },
+    "steps": [
+      {
+        "signal": "reset"
+      },
+      {
+        "act": "replace",
+        "value": {
+          "target": "p1",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "pages",
+        "value": [
+          {
+            "id": "p1",
+            "label": "Home"
+          }
+        ]
+      },
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a push and a replace behind the mount's refusal: refused; Components given rebuild the stack, a push is Done",
+    "because": "as the one before",
+    "params": {
+      "pages": [],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail"
+    },
+    "steps": [
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "act": "replace",
+        "value": {
+          "target": "p1",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "pages",
+        "value": [
+          {
+            "id": "p1",
+            "label": "Home"
+          },
+          {
+            "id": "p2",
+            "label": "Detail"
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "placed off the page, then Mounted on and a push at once: the act's paint mounts it — Did Mount, the start page, then the push",
+    "because": "the act paints first",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "mounted": false
+    },
+    "steps": [
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "a replace waits while the stack is off the page; an act that remounts it replays it, refused, and the act's own replace is Done",
+    "because": "registerPageStack replays; the act's request lands at the frame's end",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "replace",
+        "value": {
+          "target": "nope",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "replace",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Reset, a push and a replace with no components: all refused; Components given, then a push is Done",
+    "because": "the queue frees at the yield",
+    "params": {
+      "pages": [],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "reset"
+      },
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "act": "replace",
+        "value": {
+          "target": "p1",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "pages",
+        "value": [
+          {
+            "id": "p1",
+            "label": "Home"
+          },
+          {
+            "id": "p2",
+            "label": "Detail"
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Reset and a push behind the mount's refusal: refused at the yield; Components given rebuild the start page",
+    "because": "as 82",
+    "params": {
+      "pages": [],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail"
+    },
+    "steps": [
+      {
+        "signal": "reset"
+      },
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "pages",
+        "value": [
+          {
+            "id": "p1",
+            "label": "Home"
+          },
+          {
+            "id": "p2",
+            "label": "Detail"
+          }
+        ]
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Reset, a push and a replace behind the mount's refusal: refused; Components given rebuild the start page",
+    "because": "as 82",
+    "params": {
+      "pages": [],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail"
+    },
+    "steps": [
+      {
+        "signal": "reset"
+      },
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "act": "replace",
+        "value": {
+          "target": "p1",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "pages",
+        "value": [
+          {
+            "id": "p1",
+            "label": "Home"
+          },
+          {
+            "id": "p2",
+            "label": "Detail"
+          }
+        ]
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a frame that refuses a Reset and mounts the stack: the mount's reset waits behind it; Components given rebuild the start page",
+    "because": "the frame's callbacks run before its paint",
+    "params": {
+      "pages": [],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "mounted": false
+    },
+    "steps": [
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "signal": "reset"
+      },
+      "settle",
+      {
+        "set": "pages",
+        "value": [
+          {
+            "id": "p1",
+            "label": "Home"
+          },
+          {
+            "id": "p2",
+            "label": "Detail"
+          }
+        ]
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a frame that refuses a Reset and unmounts the stack; remounted with components: the start page",
+    "because": "as the one before",
+    "params": {
+      "pages": [],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "reset"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "pages",
+        "value": [
+          {
+            "id": "p1",
+            "label": "Home"
+          },
+          {
+            "id": "p2",
+            "label": "Detail"
+          }
+        ]
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Pop at the act that remounts the stack replays a waiting replace (refused); a Reset after is Done",
+    "because": "the act paints first; the remount replays what waited",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "replace",
+        "value": {
+          "target": "nope",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Reset, a push and a replace behind the mount's build, with Components emptied by the frame's end: the build lands, then all three are refused; Components back and a Reset, Done",
+    "because": "the queue runs in order at the yield",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      {
+        "signal": "reset"
+      },
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "act": "replace",
+        "value": {
+          "target": "p1",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "set": "pages",
+        "value": []
+      },
+      "settle",
+      {
+        "set": "pages",
+        "value": [
+          {
+            "id": "p1",
+            "label": "Home"
+          },
+          {
+            "id": "p2",
+            "label": "Detail"
+          },
+          {
+            "id": "p3",
+            "label": "Settings"
+          }
+        ]
+      },
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Pop at the act that remounts the stack: the remount's reset deletes the pushed page, and the Pop asks nothing — Home on top",
+    "because": "the Pop's page was deleted before the frame's end",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a frame that remounts the stack replays a waiting replace (refused); a Reset after is Done",
+    "because": "as 91, at a frame",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "replace",
+        "value": {
+          "target": "nope",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the matrix — a push of a page it does not have, in a frame with no paint; then a Reset",
+    "because": "NSP-016 §7.17 THE MATRIX: every frame-end shape (a paint × a request) followed by a frame that shows the queue is free — the mutants of each shape are killed here, not by a seed",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "nope",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the matrix — a replace with a page it does not have, in a frame with no paint; then a Reset",
+    "because": "NSP-016 §7.17 THE MATRIX: every frame-end shape (a paint × a request) followed by a frame that shows the queue is free — the mutants of each shape are killed here, not by a seed",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "replace",
+        "value": {
+          "target": "nope",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the matrix — a push, in a frame with no paint; then a Reset",
+    "because": "NSP-016 §7.17 THE MATRIX: every frame-end shape (a paint × a request) followed by a frame that shows the queue is free — the mutants of each shape are killed here, not by a seed",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the matrix — a replace, in a frame with no paint; then a Reset",
+    "because": "NSP-016 §7.17 THE MATRIX: every frame-end shape (a paint × a request) followed by a frame that shows the queue is free — the mutants of each shape are killed here, not by a seed",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "replace",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the matrix — a push of the page on top, in a frame with no paint; then a Reset",
+    "because": "NSP-016 §7.17 THE MATRIX: every frame-end shape (a paint × a request) followed by a frame that shows the queue is free — the mutants of each shape are killed here, not by a seed",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the matrix — a Reset, in a frame with no paint; then a Reset",
+    "because": "NSP-016 §7.17 THE MATRIX: every frame-end shape (a paint × a request) followed by a frame that shows the queue is free — the mutants of each shape are killed here, not by a seed",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the matrix — a push of a page it does not have, in a frame where the stack is unmounted; then a Reset",
+    "because": "NSP-016 §7.17 THE MATRIX: every frame-end shape (a paint × a request) followed by a frame that shows the queue is free — the mutants of each shape are killed here, not by a seed",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "nope",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the matrix — a replace with a page it does not have, in a frame where the stack is unmounted; then a Reset",
+    "because": "NSP-016 §7.17 THE MATRIX: every frame-end shape (a paint × a request) followed by a frame that shows the queue is free — the mutants of each shape are killed here, not by a seed",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "replace",
+        "value": {
+          "target": "nope",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the matrix — a push, in a frame where the stack is unmounted; then a Reset",
+    "because": "NSP-016 §7.17 THE MATRIX: every frame-end shape (a paint × a request) followed by a frame that shows the queue is free — the mutants of each shape are killed here, not by a seed",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the matrix — a replace, in a frame where the stack is unmounted; then a Reset",
+    "because": "NSP-016 §7.17 THE MATRIX: every frame-end shape (a paint × a request) followed by a frame that shows the queue is free — the mutants of each shape are killed here, not by a seed",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "replace",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the matrix — a push of the page on top, in a frame where the stack is unmounted; then a Reset",
+    "because": "NSP-016 §7.17 THE MATRIX: every frame-end shape (a paint × a request) followed by a frame that shows the queue is free — the mutants of each shape are killed here, not by a seed",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the matrix — a Reset, in a frame where the stack is unmounted; then a Reset",
+    "because": "NSP-016 §7.17 THE MATRIX: every frame-end shape (a paint × a request) followed by a frame that shows the queue is free — the mutants of each shape are killed here, not by a seed",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the matrix — a push of a page it does not have, in a frame where the stack is mounted again; then a Reset",
+    "because": "NSP-016 §7.17 THE MATRIX: every frame-end shape (a paint × a request) followed by a frame that shows the queue is free — the mutants of each shape are killed here, not by a seed",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "nope",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the matrix — a replace with a page it does not have, in a frame where the stack is mounted again; then a Reset",
+    "because": "NSP-016 §7.17 THE MATRIX: every frame-end shape (a paint × a request) followed by a frame that shows the queue is free — the mutants of each shape are killed here, not by a seed",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "replace",
+        "value": {
+          "target": "nope",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the matrix — a push, in a frame where the stack is mounted again; then a Reset",
+    "because": "NSP-016 §7.17 THE MATRIX: every frame-end shape (a paint × a request) followed by a frame that shows the queue is free — the mutants of each shape are killed here, not by a seed",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the matrix — a replace, in a frame where the stack is mounted again; then a Reset",
+    "because": "NSP-016 §7.17 THE MATRIX: every frame-end shape (a paint × a request) followed by a frame that shows the queue is free — the mutants of each shape are killed here, not by a seed",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "replace",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the matrix — a push of the page on top, in a frame where the stack is mounted again; then a Reset",
+    "because": "NSP-016 §7.17 THE MATRIX: every frame-end shape (a paint × a request) followed by a frame that shows the queue is free — the mutants of each shape are killed here, not by a seed",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the matrix — a Reset, in a frame where the stack is mounted again; then a Reset",
+    "because": "NSP-016 §7.17 THE MATRIX: every frame-end shape (a paint × a request) followed by a frame that shows the queue is free — the mutants of each shape are killed here, not by a seed",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Reset behind the mount's refusal is refused at the yield; Components given and a Reset, Done",
+    "because": "as 82",
+    "params": {
+      "pages": [],
+      "pageComp-p1": "Home"
+    },
+    "steps": [
+      {
+        "signal": "reset"
+      },
+      "settle",
+      {
+        "set": "pages",
+        "value": [
+          {
+            "id": "p1",
+            "label": "Home"
+          }
+        ]
+      },
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a push waiting under Other, replayed by a Name write behind a refused reset, runs at the second act's boundary after it and is refused; that act's own replace is answered at the frame's end; Components given and a Reset, Done",
+    "because": "a check that returns frees the queue one microtask later: at the next act boundary for what a Name write started (async-queue.ts `.then`)",
+    "params": {
+      "pages": [],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "stack": "Other",
+          "target": "p1",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "name",
+        "value": "Other"
+      },
+      {
+        "act": "back",
+        "value": {}
+      },
+      {
+        "act": "replace",
+        "value": {
+          "stack": "Other",
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "pages",
+        "value": [
+          {
+            "id": "p1",
+            "label": "Home"
+          },
+          {
+            "id": "p2",
+            "label": "Detail"
+          }
+        ]
+      },
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a push waiting under Other, replayed by a Name write behind a refused reset, runs at the second act's boundary after it and is refused; that act's own push, of a page the stack does not have, is refused when Components arrive before the frame's end",
+    "because": "as the one before, with the same request twice: the act's own is told apart by its page",
+    "params": {
+      "pages": [],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "stack": "Other",
+          "target": "p1",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "name",
+        "value": "Other"
+      },
+      {
+        "act": "back",
+        "value": {}
+      },
+      {
+        "act": "push",
+        "value": {
+          "stack": "Other",
+          "target": "nope",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "set": "pages",
+        "value": [
+          {
+            "id": "p1",
+            "label": "Home"
+          },
+          {
+            "id": "p2",
+            "label": "Detail"
+          }
+        ]
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a push and a replace waiting under Other, replayed by a Name write behind a refused reset: each act boundary after it frees one — the push is refused at the second act, the replace at the third (a replace); that act's own replace, of a page the stack does not have, is refused when Components arrive before the frame's end",
+    "because": "a check that returns frees the queue one microtask later; what a Name write started frees one act boundary at a time (async-queue.ts `.then`)",
+    "params": {
+      "pages": [],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "stack": "Other",
+          "target": "p1",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "act": "replace",
+        "value": {
+          "stack": "Other",
+          "target": "p1",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "name",
+        "value": "Other"
+      },
+      {
+        "act": "back",
+        "value": {}
+      },
+      {
+        "act": "back",
+        "value": {}
+      },
+      {
+        "act": "replace",
+        "value": {
+          "stack": "Other",
+          "target": "nope",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "set": "pages",
+        "value": [
+          {
+            "id": "p1",
+            "label": "Home"
+          },
+          {
+            "id": "p2",
+            "label": "Detail"
+          }
+        ]
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a push and a replace waiting under Other, replayed by a Name write behind a refused reset: each act boundary after it frees one — the push is refused at the second act, the replace at the third (a push); that act's own push, of a page the stack does not have, is refused when Components arrive before the frame's end",
+    "because": "a check that returns frees the queue one microtask later; what a Name write started frees one act boundary at a time (async-queue.ts `.then`)",
+    "params": {
+      "pages": [],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "stack": "Other",
+          "target": "p1",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "act": "replace",
+        "value": {
+          "stack": "Other",
+          "target": "p1",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "name",
+        "value": "Other"
+      },
+      {
+        "act": "back",
+        "value": {}
+      },
+      {
+        "act": "back",
+        "value": {}
+      },
+      {
+        "act": "push",
+        "value": {
+          "stack": "Other",
+          "target": "nope",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      {
+        "set": "pages",
+        "value": [
+          {
+            "id": "p1",
+            "label": "Home"
+          },
+          {
+            "id": "p2",
+            "label": "Detail"
+          }
+        ]
+      },
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a replace waiting under Other is refused at the Name write that replays it (a waiting replace replays with no reset); a Reset in that frame lands at the yield — Failure, no components; Components given and a Reset, Done; a push to Other then reaches it",
+    "because": "registerPageStack resets only before a waiting push",
+    "params": {
+      "pages": [],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "replace",
+        "value": {
+          "stack": "Other",
+          "target": "p1",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "name",
+        "value": "Other"
+      },
+      {
+        "signal": "reset"
+      },
+      "settle",
+      {
+        "set": "pages",
+        "value": [
+          {
+            "id": "p1",
+            "label": "Home"
+          },
+          {
+            "id": "p2",
+            "label": "Detail"
+          }
+        ]
+      },
+      {
+        "signal": "reset"
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "stack": "Other",
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Scroll Into View says nothing on the wire; a push after it is Done",
+    "because": "react-component-node.ts :1380-1395 scrolls the element; nothing reaches an output",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "scrollIntoView"
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a stack with no components, remounted with Components in the same frame: its start page lands at that frame's yield and Children Count says 1 a frame later (row C114)",
+    "because": "measured on the runtime (s56): a stack mounted at a frame's paint counts what lands at that frame's yield one frame later",
+    "params": {
+      "pages": [],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "pages",
+        "value": [
+          {
+            "id": "p1",
+            "label": "Home"
+          }
+        ]
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "placed off the page and mounted at a frame: the start page lands at its yield, Children Count a frame later (row C114); a push in that next frame is counted with it",
+    "because": "measured on the runtime (s56): a stack mounted at a frame's paint counts what lands at that frame's yield one frame later",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2"
+        }
+      },
+      "settle",
+      "settle"
+    ]
+  }
+]

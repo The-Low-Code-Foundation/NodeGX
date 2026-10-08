@@ -353,6 +353,11 @@ export interface ValueInputDecl extends PortMeta {
    * handed `{}` by the generator was noise, not a finding.
    */
   editOnly?: boolean;
+  /**
+   * NSP-016 s56 — why the generator does not drive this port yet: the port is declared (the editor draws it), stored, and graded
+   * by no scenario until the spec's next version says what it does. A sentence, read by the reviewer; the generator draws nothing.
+   */
+  undriven?: string;
 }
 
 export interface SignalInputDecl extends PortMeta {
@@ -528,7 +533,22 @@ export interface Patch<S, O> {
   subscribe?: SpecBackendCall;
   subscribeFirst?: boolean;
   socket?: readonly SpecSocketOp[];
+  /**
+   * NSP-016 s56 — THE CALLERS: what the node answers the requests other nodes hand it, in the order made (an `answer` event each, in
+   * the LOCATION group, after this patch's other LOCATION events): `{ op, value, error? }` for a push, replace or back (`error` the
+   * failure's code), `{ op: 'returned', action?, results }` for what a popped page hands the node that pushed it.
+   */
+  answers?: readonly AnswerCall[];
+  /**
+   * NSP-016 s56 — the node awaits a promise its own code makes (a component it builds: navigation-stack.tsx `await createNode`). It
+   * resolves at the next yield to the event loop — a settle's, after the frame-end reducer, or an advance's, before the clock moves —
+   * where `WorldHandlers.resume` runs with this tag. Nothing is recorded.
+   */
+  resume?: string;
 }
+
+/** NSP-016 s56 — one answer to a caller (spec.ts THE CALLERS; trace.ts `answer`). */
+export type AnswerCall = { op: 'push' | 'replace' | 'back'; value: Outcome; error?: string } | { op: 'returned'; action?: unknown; results: unknown };
 
 export interface OutcomePatch<S, O> extends Patch<S, O> {
   /** Required — rule 3. `deferred` hands the decision to `afterInputs` (see `ReducerOutcome`). */
@@ -756,6 +776,8 @@ export interface WorldHandlers<S, I, O> {
    * closed that socket, or after its `close`.
    */
   socket?: (state: Readonly<S>, inputs: Inputs<I>, event: SocketEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
+  /** NSP-016 s56 — a promise the node awaited resolved (`Patch.resume`): at the next yield to the event loop, with the patch's tag. */
+  resume?: (state: Readonly<S>, inputs: Inputs<I>, tag: string, world: WorldView) => AfterInputsPatch<S, I, O>;
   /**
    * NSP-014 s34 — a request's streamed body said something after its head (world.ts NETWORK, A STREAMED BODY): its text, its end,
    * or its failure (an abort while it is read is one, `AbortError`) — landing as a read resolves, like a response. After an end or
@@ -1036,6 +1058,7 @@ export interface AnyNodeSpec {
     picker?: (state: never, inputs: never, event: import('./world').PickerEvent, world: WorldView) => unknown;
     realtime?: (state: never, inputs: never, event: RealtimeEvent, world: WorldView) => unknown;
     socket?: (state: never, inputs: never, event: SocketEvent, world: WorldView) => unknown;
+    resume?: (state: never, inputs: never, tag: string, world: WorldView) => unknown;
     stream?: (state: never, inputs: never, event: StreamEvent, world: WorldView) => unknown;
     group?: (state: never, inputs: never, value: unknown, world: WorldView) => unknown;
   };

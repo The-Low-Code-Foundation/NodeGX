@@ -1,7 +1,7 @@
 # NSP-016 — Visual nodes: research first, then layout semantics that are not CSS
 
 **Opened 2026-09-29.** **Depends on NSP-008.**
-**Status: 🟡 s55 (2026-10-07): the Drag conforms on both targets (14 of 19; v1 — react-draggable, not drag-drop.ts; the face's pointer WITH A POSITION: `pressAt` / `moveTo` / `releaseAt`; the snaps are Animate To Value's timer; only Constrain to parent needs geometry and waits); rows C101 (high: on a touch screen nothing inside a Drag can be tapped — measured in headless Chrome), C102–C106 (§7.16). s54 (2026-10-07): the Video conforms on both targets at 200 and 10,000 (13 of 19; v1 — the Image's machinery, the browser's media element with four new acts, the autoplay rule, the four actions); every paint writes the element and its media as they stand, every action the playback; rows C96–C100 (C98 high: a Volume outside 0 to 1 blanks the page) (§7.15). s53 (2026-10-07): the Shape (`Circle`) and the Image conform on both targets (12 of 19; v1 each — the Text's machinery with no Tag; the Image adds the picture's fetch, a new act `fetched`); the runner can withhold a value a target cannot survive; rows C91 (Custom SVG's span is a drop slot), C92 (a huge Points runs the page out of memory), C93 (an Image adds a sub-path Base URL again at every render — high), C94 (Source Set true at placing fetches "true"); the Group v2 (R16: a Focus off the page reports Unchanged; row C95) (§7.14). s52 (2026-10-07): the Group conforms on both targets at 200 and 10,000 (10 of 19; v1, 1,387 scenarios) — its children as drop slots, the focus tracker, the scroll actions and when a frame's work runs; rows C86–C90 (§7.13). s44 (2026-10-05): the Text v3 — C79 is a known row (R11: the spec says the intent, not React's redraw rules); 162 scenarios; s43's 47 deep-run survivors killed (§7.9). s43 (2026-10-05): drag and drop researched ([RESEARCH-DRAG-DROP.md](RESEARCH-DRAG-DROP.md)) and the Text conforms (9 of 19; rows C77, C78, §7.8) — its drag SOURCE graded on a lone node; the zone side and the file drop are step (b). The face learned the browser's hit test, and the 7 conforming specs it moved say what a browser lets a person do. s42 (2026-10-04): the Radio Button Group and the Radio Button conform on both targets at 200 and 10,000 (8 of 19; rows C76, D37, §7.7) — the visual tree, per node: a node's children are on its PAGE (the spec declares them; the face builds them with the node's own `addChild`; a person `pick`s one) and a node's parent is its WORLD (the GROUP seam). s41 (2026-10-04): Slider and Icon conform on both targets at 200 and 10,000 (6 of 19; rows D36, C73, C74, C75; C63 takes null, §7.6) — the face grew `slide` (jsdom's range sanitization, which it applies to every write, plus the browser's step rule, which jsdom lacks; a reversed range is not played); the 13 left each need infrastructure first (a visual tree with context, drag and drop, geometry, media — §7.6). s39 (2026-10-04): Dropdown conforms on both targets (4 of 19; rows C70, C71, D34 and instances of C65, C66, D30, §7.4) — the face grew `choose` (a keyboard pick: an enabled option the list offers, no `change` for the one already selected); the spec keeps the node's value, the author's Value, the shown value and the browser's selection apart because the component does. s38: Text Input conforms on both targets (3 of 19; rows C68, C69, D31–D33, §7.3) — the face grew `type` and `key`, the format a person patch that resolves deferred outcomes (the viewer's pointer drain). s37: AC3 begun — THE PERSON face (the real React component in a jsdom page; an act is the browser's events) and the format's `act` / `acts` / `person` / `place` / `portability`; Button and Checkbox conform on the runtime (rows C61–C66, D30, §7.2). s36: research done, R10 ruled — build the logic for all 19 with each input's portability class in the spec; geometry grading after NSP-017.**
+**Status: 🟡 s56 (2026-10-08): the Component Stack conforms on both targets (15 of 19; v1 — the callers' requests as three acts and one new trace event, `answer`; one request at a time, landing at the yield (`resume`); the transition is the only clock; Use Routes is v2); rows C107–C114 (§7.17). s55 (2026-10-07): the Drag conforms on both targets (14 of 19; v1 — react-draggable, not drag-drop.ts; the face's pointer WITH A POSITION: `pressAt` / `moveTo` / `releaseAt`; the snaps are Animate To Value's timer; only Constrain to parent needs geometry and waits); rows C101 (high: on a touch screen nothing inside a Drag can be tapped — measured in headless Chrome), C102–C106 (§7.16). s54 (2026-10-07): the Video conforms on both targets at 200 and 10,000 (13 of 19; v1 — the Image's machinery, the browser's media element with four new acts, the autoplay rule, the four actions); every paint writes the element and its media as they stand, every action the playback; rows C96–C100 (C98 high: a Volume outside 0 to 1 blanks the page) (§7.15). s53 (2026-10-07): the Shape (`Circle`) and the Image conform on both targets (12 of 19; v1 each — the Text's machinery with no Tag; the Image adds the picture's fetch, a new act `fetched`); the runner can withhold a value a target cannot survive; rows C91 (Custom SVG's span is a drop slot), C92 (a huge Points runs the page out of memory), C93 (an Image adds a sub-path Base URL again at every render — high), C94 (Source Set true at placing fetches "true"); the Group v2 (R16: a Focus off the page reports Unchanged; row C95) (§7.14). s52 (2026-10-07): the Group conforms on both targets at 200 and 10,000 (10 of 19; v1, 1,387 scenarios) — its children as drop slots, the focus tracker, the scroll actions and when a frame's work runs; rows C86–C90 (§7.13). s44 (2026-10-05): the Text v3 — C79 is a known row (R11: the spec says the intent, not React's redraw rules); 162 scenarios; s43's 47 deep-run survivors killed (§7.9). s43 (2026-10-05): drag and drop researched ([RESEARCH-DRAG-DROP.md](RESEARCH-DRAG-DROP.md)) and the Text conforms (9 of 19; rows C77, C78, §7.8) — its drag SOURCE graded on a lone node; the zone side and the file drop are step (b). The face learned the browser's hit test, and the 7 conforming specs it moved say what a browser lets a person do. s42 (2026-10-04): the Radio Button Group and the Radio Button conform on both targets at 200 and 10,000 (8 of 19; rows C76, D37, §7.7) — the visual tree, per node: a node's children are on its PAGE (the spec declares them; the face builds them with the node's own `addChild`; a person `pick`s one) and a node's parent is its WORLD (the GROUP seam). s41 (2026-10-04): Slider and Icon conform on both targets at 200 and 10,000 (6 of 19; rows D36, C73, C74, C75; C63 takes null, §7.6) — the face grew `slide` (jsdom's range sanitization, which it applies to every write, plus the browser's step rule, which jsdom lacks; a reversed range is not played); the 13 left each need infrastructure first (a visual tree with context, drag and drop, geometry, media — §7.6). s39 (2026-10-04): Dropdown conforms on both targets (4 of 19; rows C70, C71, D34 and instances of C65, C66, D30, §7.4) — the face grew `choose` (a keyboard pick: an enabled option the list offers, no `change` for the one already selected); the spec keeps the node's value, the author's Value, the shown value and the browser's selection apart because the component does. s38: Text Input conforms on both targets (3 of 19; rows C68, C69, D31–D33, §7.3) — the face grew `type` and `key`, the format a person patch that resolves deferred outcomes (the viewer's pointer drain). s37: AC3 begun — THE PERSON face (the real React component in a jsdom page; an act is the browser's events) and the format's `act` / `acts` / `person` / `place` / `portability`; Button and Checkbox conform on the runtime (rows C61–C66, D30, §7.2). s36: research done, R10 ruled — build the logic for all 19 with each input's portability class in the spec; geometry grading after NSP-017.**
 
 ## 1. The person sentence
 
@@ -1485,3 +1485,97 @@ suites 106 / 106; at 200 on seed 20733 the Button, Icon, Text, Group, Circle, Im
 agrees on every scenario and sequence but leaves one mutant at that seed (`person.press` swap-branch on its willUnmount + onBlur
 branch) — the same survivor on the INTERPRETER, which never touches the face, so not this session's change: the branch is P109's D30
 fix (32e1856b0), and the day's seed rotation found its gap. Told P109.
+
+### 7.17 s56, 2026-10-08 — the Component Stack conforms (15 of 19): the callers, one request at a time, seven rows
+
+**Why this one.** Of the four left that place children (Component Children, Repeater, Component Stack, Page Router), the Component
+Stack is the one the existing seams reach: NSP-015 s18's STACK already spells its protocol from the caller's side (a push or a replace
+`{ target, params, transition }`, answered done, unchanged or a failure; a Pop's back callback), and s15's DEFINITIONS build a component
+by name. Component Children has no ports at all; the Repeater needs collections, per-item ports and its own async creation; the
+Page Router reads the URL.
+
+**The reading** (navigation-stack.tsx, navigation-handler.ts, transitions/*.ts, async-queue.ts, navigate.ts, navigate-back.ts), then
+fifty probe cases recorded on the runtime before a rule was written:
+- **A request arrives by name** (`NavigationHandler`): a blank name is `Main`; a name no stack holds waits in the handler and is
+  replayed when a stack registers under it (a waiting push resets the stack first). A stack registers at its mount, and again at every
+  Name write — even the same name — and **registering resets it** (row C113). Mounted off deregisters; on again rebuilds the start page.
+- **One request at a time** (`ASyncQueue`). A reset, a push and a replace each run their checks at once — a refusal is answered there
+  (no components; still animating; no such page; already showing) — then build the page (`await createNode`), which lands at the next
+  yield to the event loop. A back is not queued.
+- **The transition** is the only clock: None (or a Push / Popup with no time) ends at once; a timed one ends at the first frame past
+  start + Duration + Delay (a `requestAnimationFrame` chain), and while it runs the stack refuses pushes, replaces and backs. A
+  reset does not stop it, and a back's end pops the LAST entry, whatever it is by then (row C110).
+- **Children Count** is the page containers: two while a push plays (the page below leaves at the end), and while a back plays.
+
+**THE CALLERS — the format's one addition** (trace.ts, schema.ts, schema/trace.schema.json; additive; stranger hashes refreshed): an
+`answer` observation event, in the LOCATION group in the order made — `{ op: push | replace | back, value: done | unchanged | failure,
+error?: <code> }`, or `{ op: 'returned', action?, results }` (what a popped page hands the node that pushed it). A spec says it with a
+patch's `answers`. The requests are three acts — `push`, `replace`, `back` — with what a Push Component To Stack and a Pop hand.
+
+**Two more format pieces, both additive.** `resume` (spec.ts `Patch.resume`, `WorldHandlers.resume`; the interpreter's inbox): a node
+awaits a promise its own code makes; it lands at the next yield — a settle's, after the frame's end, or an advance's, before the clock
+moves. A transition that starts there starts at that clock (measured: a push, then an advance of 200, then 101 — the push's animation
+ends at 301, so it started at 0). `undriven` (spec.ts `ValueInputDecl`): a declared port the generator does not drive yet, with why —
+Use Routes, v2. The mutant runner knows both (`drop-answers`, `drop-resume`); an await is not part of a branch's shape (it split every
+branch by whether the queue started there, and each split needed its own scenario — four seeds, four new survivors).
+
+**When a request reaches the stack — measured, then made the face's rule.** A Push Component To Stack and a Pop both hand their request
+at THEIR frame's end (`scheduleNavigate` → `scheduleAfterInputsHaveUpdated`), synchronously with the frame's other callbacks. The face's
+first version called the handler at the act, and the play's `await` between steps let microtasks run between two requests: a request
+behind a refused one ran one act later, behind a throw two acts later, and a page build landed about seven acts later (a push and forty
+Pops in one frame: the seventh Pop popped it). That is the runner's `await`, not the app. Now the face schedules every caller's request
+on the stack's own frame-end list, in step order with the stack's scheduled Reset — as in the app. What still starts outside a frame (a
+register at a Name write, or at an act's paint) counts act boundaries in the spec (`hops`): a check that returns frees the queue one
+boundary later, a throw two (async-queue.ts `.then`, then `.catch`); a build waits for the yield.
+
+**Face choices, written down:** the play's project has three components — `Home`, `Detail`, `Settings` — each holding one Pop
+Component Stack and nothing else; any other name is one the project does not have. A request goes through the play's real
+`NavigationHandler`, past its own recording (that is the caller's `stack` event). A Pop is the one in the top page as the person sees it
+at the act; a page deleted by the frame's end asks nothing. A request that throws while it builds rejects a promise nothing awaits — in a
+browser a console line; the face takes it. The stack gets a real `NodeScope` (a lone node's stand-in had no `createNode`), real Groups
+for its pages (the popup stand-in now replaces only the popup root's), and the world's clock in `window.performance.now` (jsdom's runs
+on the wall clock). **And one the generator found at once:** the face's React is the DEVELOPMENT build, which freezes the style object a
+component hands a DOM element; the stack hands its div the node's own, so its next Background Color or Clip Content write threw — in the
+face only (the app ships `react.production.min.js`). Before a write the face gives a frozen style back as a copy.
+
+**Use Routes is v2.** The URL is the world's LOCATION, and a page in a play does not have it: the world's `window` is replaced by the
+page's jsdom one, whose URL is `about:blank`, and a Component Stack reads the bare `location` (undefined there: the reset throws). v2 puts
+the world's location and history on the page's window.
+
+**Rows** (all open, all ledger; the spec copies each, R3):
+- **P107-C107** (medium, [ledger](../../bugs/p107-c107-a-push-to-a-component-the-project-does-not-have-is-never-answered.md)): a
+  push, replace or Reset to a page whose component the project does not have is never answered.
+- **P107-C108** (low, [ledger](../../bugs/p107-c108-a-push-with-a-transition-the-stack-does-not-know-is-never-answered.md)): a push
+  with a transition the stack does not know is never answered (a replace falls back to no animation).
+- **P107-C109** (low, [ledger](../../bugs/p107-c109-a-components-value-that-is-not-a-list-blanks-the-stack.md)): Components that is not
+  a list blanks the stack and its Reset is never answered; a page found by its label with no component throws the same way.
+- **P107-C110** (medium, [ledger](../../bugs/p107-c110-a-reset-during-a-backs-animation-empties-the-stack.md)): a Reset during a back's
+  animation empties the stack, and every push after is never answered.
+- **P107-C111** (low, [ledger](../../bugs/p107-c111-a-back-whose-page-below-left-components-never-pops.md)): a Pop whose page below left
+  the Components list hands the results back but never pops.
+- **P107-C112** (low, [ledger](../../bugs/p107-c112-a-reset-that-finds-no-components-keeps-naming-the-old-page.md)): a reset that finds
+  no components leaves Top Component Name and Stack Depth naming the page that went.
+- **P107-C113** (low, [ledger](../../bugs/p107-c113-writing-a-stacks-name-rebuilds-it.md)): writing Name, even the same one, rebuilds
+  the stack at its start page.
+- **P107-C114** (low, [ledger](../../bugs/p107-c114-children-count-lags-a-frame-after-a-remount.md)): a stack mounted again at a
+  frame sends no Children Count in that frame — the page it builds is counted a frame late (measured, not read to the line; found by
+  the runtime on a scenario the interpreter had written from the reading).
+
+**The build** ([component-stack.ts](../../../packages/nodegx-node-spec/src/nodes/component-stack.ts), `Page Stack`, v1, 98 scenarios,
+three acts). Every reducer works on a draft of the whole state and returns it whole (s54, s55), and the runtime's lookups that throw on
+a value they do not expect (`_findPage`, `pages[0].id`, the handler's names) run as the same expressions on the same values. **THE
+MATRIX** (s51's lesson): every frame-end shape — no paint, an unmount, a remount × a refused push, a refused replace, a push, a replace,
+an Unchanged push, a Reset — each followed by a frame that shows the queue is free; plus one scenario per queue state a yield can leave
+(a refusal, a throw, a build behind it).
+
+**The mutants, and what they taught.** Each new seed found one more frame-end combination (a paint × a refused request) with a mutant
+nothing killed; the matrix ended that. Three runner lessons: an await (`resume`) is not part of a branch's shape; a `resume` asked for
+by a request the act boundary frees is always redundant (one is already waiting since the queue started working — so only a queue
+going from idle to working asks); and a killer for "a request replayed at the second act after a Name write" needs the act's own
+request told apart from the replayed one (another op, or a page the stack does not have) — under `drop-set` the replayed one re-runs
+at the yield and answers exactly what the lost one would have. A waiting REPLACE replays with no reset, so it runs at the Name write.
+
+**Readings (2026-10-08, 98 scenarios, three acts).** Interpreter, every mutant killed or declared (one: a placing with Mounted off):
+at 200 on seeds 13, 20733, 20729, 7 and 20734–20746, and at 10,000 on 20733 (796 mutants). Runtime: CONFORMS at 200 on 13 and 20733
+and at 10,000 on 20733 — 0 divergences; the runtime conformance test (`NSP_ONLY="Page Stack"`) CONFORMS, 643 / 644 mutants (the
+declared one). Cost: 200 sequences in ~3.5 s on the runtime, 10,000 in ~90 s; the interpreter with mutants at 10,000 in ~30 s.

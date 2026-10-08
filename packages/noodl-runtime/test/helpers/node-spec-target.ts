@@ -623,7 +623,17 @@ interface Page {
    * is how a `grab` or a `pickUp` finds it. Deleted with the page.
    */
   cards?: Array<{ node: RuntimeNode; value: unknown; root: { unmount(): void }; container: any }>;
+  /** NSP-016 s56 — the components a Component Stack's page registered (`STACK_PAGES`), removed with the page. */
+  models?: string[];
+  /** NSP-016 s56 — puts jsdom's `performance.now` back: a Component Stack's page runs on the world's clock. */
+  restoreClock?: () => void;
 }
+
+/** NSP-016 s56 — the components a Component Stack can build in a play (navigation-stack.ts THE PAGES), each holding one Pop Component Stack. */
+const STACK_PAGES = ['Home', 'Detail', 'Settings'] as const;
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const NodeModel = require('../../src/models/nodemodel') as { createFromExportData(data: unknown): unknown };
 
 /**
  * The element a person acts on: the control itself when the node's root IS one, else the control inside it, else the
@@ -1158,7 +1168,7 @@ export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 't
 export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back', 'router-navigate', 'page-inputs', 'showpopup', 'closepopup'] as const;
 
 /** NSP-016 s37 — the viewer's VISUAL nodes this phase has specced, from `src/nodes/` (their React components come with them; PERSON above). */
-export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox', 'controls/text-input', 'controls/options', 'controls/slider', 'visual/icon', 'controls/radiobuttongroup', 'controls/radiobutton', 'visual/text', 'visual/group', 'visual/circle', 'visual/image', 'visual/video', 'visual/drag'] as const;
+export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox', 'controls/text-input', 'controls/options', 'controls/slider', 'visual/icon', 'controls/radiobuttongroup', 'controls/radiobutton', 'visual/text', 'visual/group', 'visual/circle', 'visual/image', 'visual/video', 'visual/drag', 'navigation/navigation-stack'] as const;
 
 /**
  * Picker nodes whose SOURCE is in this package but which only the viewer's `register-nodes.js`
@@ -1605,8 +1615,11 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     context.nodeRegister.register(GROUP_STAND_IN);
     const scopeProto = NodeScope.prototype as unknown as { createPrimitiveNode(name: string, ...rest: unknown[]): unknown };
     const realPrimitive = scopeProto.createPrimitiveNode;
+    // only the popup container: a Group made in the ROOT's scope (nodecontext.ts :1277). NSP-016 s56 — a Component Stack makes its
+    // page containers and its transitions' overlays as real Groups in its own scope (navigation-stack.tsx `createPageContainer`)
     scopeProto.createPrimitiveNode = function (this: unknown, name: string, ...rest: unknown[]) {
-      return realPrimitive.call(this, name === 'Group' ? POPUP_GROUP : name, ...rest);
+      const inRoot = this === (ctx.rootComponent as { nodeScope?: unknown } | undefined)?.nodeScope;
+      return realPrimitive.call(this, name === 'Group' && inRoot ? POPUP_GROUP : name, ...rest);
     };
     const g = globalThis as unknown as { requestAnimationFrame?: unknown };
     const savedRaf = g.requestAnimationFrame;
@@ -1705,7 +1718,9 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     if (graphId !== undefined && states.has(graphId)) throw new Error(`runtime: a node "${graphId}" is still mounted — a previous play leaked it`);
     const id = graphId ?? `${type}#${next++}`;
     const logs: LogLine[] = [];
-    const nodeScope = scope ?? loneScope(id, logs);
+    // NSP-016 s56 — a lone Component Stack builds its pages in its own scope (`createNode`, `createPrimitiveNode`, `deleteNode`):
+    // a REAL scope, as the popup root has (`scopeFor`)
+    const nodeScope = scope ?? (type === 'Page Stack' ? scopeFor({ name: `node-spec/${id}`, getInstanceId: () => id, getRoots: () => [] as never[] }, logs) : loneScope(id, logs));
     // POPUP (world.ts, NSP-015 s20) — a lone Close Popup inside the script's popups
     if (!scope && type === 'NavigationClosePopup' && world && world.popup.inside.length > 0) insidePopups(nodeScope.componentOwner as { parentNodeScope?: unknown }, world.popup.inside);
     const metadata = context.nodeRegister.getNodeMetadata(type);
@@ -1838,6 +1853,42 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       const child = context.nodeRegister.createNode('Group', `${s.h.id}/child0`, scope) as unknown as RuntimeNode;
       root.addChild(child);
       page.children = [{ node: child, value: 'child' }];
+    } else if (s.h.type === 'Page Stack') {
+      // NSP-016 s56 — the components a Component Stack can build (navigation-stack.ts THE PAGES): each a component the project has,
+      // holding one Pop Component Stack and nothing else, registered as the app's project registers one (the context's table, as
+      // `installPopups` does) before the first render; gone with the page. And the page's clock: a transition reads
+      // `window.performance.now()` (transitions/transition.ts) — jsdom's runs on the wall clock, so for the play it is the world's
+      const models = (context as unknown as { componentModels: Record<string, unknown> }).componentModels;
+      page.models = [];
+      for (const name of STACK_PAGES) {
+        if (Object.prototype.hasOwnProperty.call(models, name)) continue;
+        const model = new ComponentModel(name) as unknown as { nodes: Record<string, unknown> };
+        const pop = NodeModel.createFromExportData({ id: `${name}/back`, type: 'PageStackNavigateBack', parameters: {} } as never) as unknown as { component?: unknown; id: string };
+        pop.component = model;
+        model.nodes[pop.id] = pop;
+        models[name] = model;
+        page.models.push(name);
+      }
+      // a request that throws while it builds (navigation-stack.tsx `navigateAsync`, `resetAsync` — rows C107, C108, C110) rejects the
+      // promise its `navigate` / `reset` never awaits: in a browser an "Uncaught (in promise)" line in the console, and the queue runs on
+      // (async-queue.ts :62-76). The face takes the line; nothing reaches the trace
+      const queue = (node as unknown as { _internal: { asyncQueue: { enqueue(t: unknown): Promise<unknown> } } })._internal.asyncQueue;
+      const enqueue = queue.enqueue.bind(queue);
+      queue.enqueue = (t: unknown) => {
+        const p = enqueue(t);
+        p.catch(() => undefined);
+        return p;
+      };
+      const perf = d.window.performance as { now(): number };
+      if (world) {
+        const w = world;
+        const own = Object.getOwnPropertyDescriptor(perf, 'now');
+        perf.now = () => w.clock.now();
+        page.restoreClock = () => {
+          if (own) Object.defineProperty(perf, 'now', own);
+          else delete (perf as { now?: unknown }).now;
+        };
+      }
     } else if (spec?.needs?.includes('group') && world?.group.present) {
       const group = context.nodeRegister.createNode('Radio Button Group', `${s.h.id}/group`, scope) as unknown as RuntimeNode & Holder;
       // the group's Value parameter at load, then the node, then its siblings — the order a loaded project builds them
@@ -1946,6 +1997,10 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       }
     }
     if (page.group) (page.group as unknown as { parent?: unknown }).parent = undefined;
+    // NSP-016 s56 — a Component Stack's components and the page's clock go with the page
+    const models = (context as unknown as { componentModels: Record<string, unknown> }).componentModels;
+    for (const name of page.models ?? []) delete models[name];
+    page.restoreClock?.();
     (s.h.node as unknown as { parent?: unknown }).parent = undefined;
     s.page = undefined;
     onPage.delete(s);
@@ -1997,6 +2052,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
   function personActs(s: State, act: string, value: unknown): void {
     const d = ensureDom();
     const w = d.window;
+    // NSP-016 s56 — THE CALLERS: another node's request to a Component Stack, not a person's gesture
+    if (act === 'push' || act === 'replace' || act === 'back') return stackActs(s, act, value);
     // NSP-016 s42 — a `pick` acts on the CHILD whose Value is the act's (a Radio Button Group's button): the control a person sees
     // inside it; a Value no child carries, or a child off the page, is nothing to act on
     // NSP-016 s52 — a `tap` acts on the CHILD it names (a Group's, group.ts THE CHILDREN); a `clickAway` on the page beside the node
@@ -2291,6 +2348,71 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     if (act !== 'fileDrop') return;
     fire(taken ? 'drop' : 'dragleave', at);
     fileDrag = undefined;
+  }
+
+  /**
+   * NSP-016 s56 — THE CALLERS (navigation-stack.ts): a request another node hands the Component Stack, and the stack's answer, each
+   * an `answer` event in the LOCATION group when the stack makes it. A caller hands its request at ITS frame's end (navigate.ts and
+   * navigate-back.ts `scheduleNavigate` → `scheduleAfterInputsHaveUpdated`), so the face schedules it on the stack's own frame-end list —
+   * in the order of the frame's steps with the stack's own frame-end work (a Reset), and with no microtask between two requests, as
+   * in an app. A `push` or a `replace` (`{ stack?, target?, params?, transition? }`) then goes through the play's REAL
+   * `NavigationHandler` (`installStacks`) under the name it carries (navigate.ts :176-231) — past the handler's own recording, which is
+   * the CALLER's `stack` event, not the stack's — with `params` and `transition` copies (a transition clamps its timing curve in place);
+   * a push hands a back callback, which records what the stack hands it at a pop (`returned`). A `back` (`{ action?, results? }`) is the
+   * Pop Component Stack in the top page as the person sees it at the act: the callback the stack installed on it when it pushed the page
+   * (navigation-stack.tsx :981-991), called at the frame's end with the action and the results a Pop hands (navigate-back.ts :154-157) —
+   * a page the stack did not push has none, and one deleted by then asks nothing.
+   */
+  function stackActs(s: State, act: 'push' | 'replace' | 'back', value: unknown): void {
+    type Args = { stack?: unknown; target?: unknown; params?: Record<string, unknown>; transition?: Record<string, unknown>; action?: unknown; results?: unknown };
+    const v = (value ?? {}) as Args;
+    const node = s.h.node as unknown as { scheduleAfterInputsHaveUpdated(cb: () => void): void; _internal: { stack?: Array<{ page: Page }> } };
+    type Page = { _deleted?: boolean; getChildren(): Content[] };
+    type Pop = { _internal: { backCallback?: (a: { backAction: unknown; results: unknown }) => { ok: boolean; unchanged?: true; code?: string } | undefined } };
+    type Content = { nodeScope?: { getNodesWithType(type: string): Pop[] } };
+    const answer = (op: 'push' | 'replace' | 'back', outcome: 'done' | 'unchanged' | 'failure', code?: string) =>
+      s.frame.location.push(outcome === 'failure' ? { t: 'answer', op, value: outcome, error: code || OUTCOME_UNSPECIFIED } : { t: 'answer', op, value: outcome });
+    if (act === 'back') {
+      const stack = node._internal.stack ?? [];
+      const page = stack[stack.length - 1]?.page;
+      const callback = page?.getChildren()[0]?.nodeScope?.getNodesWithType('PageStackNavigateBack')[0]?._internal.backCallback;
+      if (!page || !callback) return;
+      node.scheduleAfterInputsHaveUpdated(() => {
+        if (page._deleted) return;
+        // a throw inside the stack's back (navigation-stack.tsx :1060 `_findPage` on a page the Components list no longer has) is the
+        // Pop's frame-end callback throwing: the runtime's update loop logs it (nodecontext.ts `updateDirtyNodes`), nothing is answered
+        let r: ReturnType<typeof callback>;
+        try {
+          r = callback({ backAction: v.action, results: v.results ?? {} });
+        } catch {
+          return;
+        }
+        if (!r || r.ok) answer('back', 'done');
+        else if (r.unchanged) answer('back', 'unchanged');
+        else answer('back', 'failure', r.code);
+      });
+      return;
+    }
+    const proto = (NavigationHandler as unknown as { prototype: Record<'navigate' | 'replace', (name: unknown, args: unknown) => void> }).prototype;
+    const op = act;
+    const args = {
+      target: v.target,
+      params: { ...(v.params ?? {}) },
+      transition: JSON.parse(JSON.stringify(v.transition ?? {})),
+      ...(act === 'push'
+        ? {
+            backCallback: (action: unknown, results: unknown) => {
+              const e: TraceEvent = { t: 'answer', op: 'returned', results: canonicalise(results) };
+              if (action !== undefined) e.action = canonicalise(action);
+              s.frame.location.push(e);
+            }
+          }
+        : {}),
+      hasNavigated: () => answer(op, 'done'),
+      hasUnchanged: () => answer(op, 'unchanged'),
+      hasFailed: (code: string) => answer(op, 'failure', code)
+    };
+    node.scheduleAfterInputsHaveUpdated(() => proto[act === 'push' ? 'navigate' : 'replace'].call(NavigationHandler.instance, v.stack, args));
   }
 
   /**
@@ -2650,6 +2772,12 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       if (isSignalInput(s, port)) throw new Error(`${h.type}: "${port}" is a signal input — use signal()`);
       const c = canonicalise(value);
       s.trace.push(c === undefined ? { t: 'set', port } : { t: 'set', port, value: c });
+      // NSP-016 s56 — the app ships React's PRODUCTION build (noodl-viewer-react/static/shared-react19), which leaves a style object
+      // alone; the face's React is the development build, which freezes the style object a component hands a DOM element. The
+      // Component Stack hands its div the node's own (navigation-stack.tsx :44), so its next `setStyle` threw here and never in an app:
+      // a frozen style is given back as a copy (its symbols too — the default-style layer) before the write
+      const styled = node as unknown as { style?: object };
+      if (styled.style && Object.isFrozen(styled.style)) styled.style = Object.assign({}, styled.style);
       node.setInputValue(port, value);
     },
 

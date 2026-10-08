@@ -114,8 +114,15 @@ describe('catalog parity — every spec draws the same ports the editor draws', 
           }
           const inputs = Object.keys(spec.derived!.inputs(probe));
           const outputs = Object.keys(spec.derived!.outputs?.(probe) ?? {});
+          // NSP-016 s56 — each pattern with ITS seed's token: the Component Stack is seeded by a list (`pageComp-<pageId>`, a row of
+          // `pages`, probed with the id `probe`) and by a filtered name list (`<name>`, Data Attributes' `data-testid`) at once
+          const tokenFor = (p: { variables?: Record<string, string> }) => {
+            const vars = Object.values(p.variables ?? {});
+            const fromList = node.parameterEncoding!.seededBy!.some((seed) => isList(seed) && vars.some((v) => v.includes('`' + seed + '`')));
+            return fromList ? 'probe' : token;
+          };
           for (const p of patterns) {
-            const name = p.pattern.replace(/<[^>]+>/g, token);
+            const name = p.pattern.replace(/<[^>]+>/g, tokenFor(p as { variables?: Record<string, string> }));
             if ((node.parameterEncoding as { seededByProjectMetadata?: string[] }).seededByProjectMetadata && !fromParameter(p as { variables?: Record<string, string> })) {
               if (p.plug === 'input') expect(spec.derived!.discover?.(name)).toBeDefined();
               continue;

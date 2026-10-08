@@ -224,6 +224,20 @@
           "properties": { "t": { "const": "act" }, "act": { "type": "string", "minLength": 1 }, "value": { "$ref": "#/definitions/canonical" }, "subject": { "$ref": "#/definitions/subject" } },
           "required": ["t", "act"],
           "additionalProperties": false
+        },
+        {
+          "description": "observation (NSP-016 s56): the node answered a request another node handed it (src/spec.ts THE CALLERS) — a Component Stack's answer to a `push`, a `replace` or a `back` (`value` done, unchanged or failure; `error` the failure's code, only with a failure), or `returned`: the page a back popped hands the node that pushed it the back's `action` (absent when none) and `results`, canonical at the call. In the LOCATION group.",
+          "properties": {
+            "t": { "const": "answer" },
+            "op": { "enum": ["push", "replace", "back", "returned"] },
+            "value": { "enum": ["done", "unchanged", "failure"] },
+            "error": { "type": "string", "minLength": 1 },
+            "action": { "$ref": "#/definitions/canonical" },
+            "results": { "$ref": "#/definitions/canonical" },
+            "subject": { "$ref": "#/definitions/subject" }
+          },
+          "required": ["t", "op"],
+          "additionalProperties": false
         }
       ]
     }

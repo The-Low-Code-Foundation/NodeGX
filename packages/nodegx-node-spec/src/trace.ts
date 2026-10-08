@@ -6,7 +6,7 @@
  * (changed since the last settle only), then `signal` events in emission order, then `outcome`
  * events in the order they were REPORTED, then `request` events, (s21) `backend` events and (s34) `socket` events, one group, in the order they
  * were issued, then
- * the LOCATION events — `open`, `history`, `dispatch`, (s18) `stack`, (s19) `route`, (s20) `popup` and (NSP-014 s31) `picker`, one group — in the order they were made
+ * the LOCATION events — `open`, `history`, `dispatch`, (s18) `stack`, (s19) `route`, (s20) `popup`, (NSP-014 s31) `picker` and (NSP-016 s56) `answer`, one group — in the order they were made
  * (NSP-015).
  * "Changed" is canonical inequality with the last value RECORDED for
  * the port (nothing before the first settle, so the first settle records every defined output),
@@ -110,7 +110,14 @@ export type TraceEvent =
    * protocols)`: `url` as handed, `protocols` absent when not handed), a `send` (`data` as handed: text as itself, bytes as
    * `$bytes`) or a `close` (`code`, `reason`, each absent when not handed); each canonical. In the request group.
    */
-  | (Base & { t: 'socket'; op: 'connect' | 'send' | 'close'; url?: unknown; protocols?: unknown; data?: unknown; code?: unknown; reason?: unknown });
+  | (Base & { t: 'socket'; op: 'connect' | 'send' | 'close'; url?: unknown; protocols?: unknown; data?: unknown; code?: unknown; reason?: unknown })
+  /**
+   * observation (NSP-016 s56): the node answered a request another node handed it (spec.ts THE CALLERS) — a Component Stack's
+   * answer to a `push`, a `replace` or a `back`: `value` done, unchanged or failure, `error` the failure's CODE (as an outcome's);
+   * or `returned` — the page a back popped hands the node that pushed it the back's `action` (absent when none) and `results`
+   * (canonical at the call). In the LOCATION group, in the order made.
+   */
+  | (Base & { t: 'answer'; op: 'push' | 'replace' | 'back' | 'returned'; value?: Outcome; error?: string; action?: unknown; results?: unknown });
 
 /**
  * NSP-016 s37 — the canonical form of a node's reference to ITSELF (a visual node's `This` output,

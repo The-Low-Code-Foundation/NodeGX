@@ -138,6 +138,8 @@ const POOLS: Readonly<Record<string, readonly unknown[]>> = Object.freeze({
 
 export function poolFor(decl: InputDecl): readonly unknown[] {
   if (isSignalInput(decl)) return [];
+  // NSP-016 s56 — a port the spec does not grade yet (spec.ts `undriven`) is never driven
+  if (decl.undriven !== undefined) return [];
   const own = decl.examples ?? [];
   if (decl.editOnly) {
     // NSP-012: a panel-only port — what the panel can produce, and nothing a wire could

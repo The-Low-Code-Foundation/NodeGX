@@ -98,7 +98,7 @@ import type { Step } from './adapter';
 import { canonicalise, canonicalKey } from './canonical';
 import { coerce } from './coerce';
 import { isRegistryEntry } from './registry';
-import type { AnyNodeSpec, BackendAnswerEvent, ChangeEvent, Outcome, InputDecl, RealtimeEvent, ReducerOutcome, SignalOutputDecl, SocketEvent, SpecBackendCall, StreamEvent, SpecRequest, SpecSocketOp, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
+import type { AnswerCall, AnyNodeSpec, BackendAnswerEvent, ChangeEvent, Outcome, InputDecl, RealtimeEvent, ReducerOutcome, SignalOutputDecl, SocketEvent, SpecBackendCall, StreamEvent, SpecRequest, SpecSocketOp, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
 import { isSignalInput } from './spec';
 import type { TraceEvent } from './trace';
 import { backendEvent, installTimeZone, isAuthOp, locationEvent, openReturnsWindow, pushTarget, userRecordEvent, World, writeStoreEvent, type AuthNotice, type AuthReturnState, type AuthStep, type BackendDelivery, type Delivery, type LocationCall, type PickerClick, type PickerEvent, type PopupCall, type PopupEvent, type StoreEvent, type StreamDelivery, type WorldSocket, type WorldSubscription } from './world';
@@ -106,6 +106,8 @@ import { backendEvent, installTimeZone, isAuthOp, locationEvent, openReturnsWind
 /** One thing the world handed back, waiting to be delivered to the spec. */
 type Inbound =
   | { kind: 'timer'; tag: string }
+  // NSP-016 s56: a promise the node awaited resolved (spec.ts `Patch.resume`) — at the next yield
+  | { kind: 'resume'; tag: string }
   | { kind: 'response'; response: WorldResponse }
   // s26: an AUTH call's answer carries the call and the session at the call — its landing runs the adapter's steps (world.ts AUTH)
   | { kind: 'backend'; answer: BackendAnswerEvent; auth?: { op: string; backend: string; args: Readonly<Record<string, unknown>>; atCall: Readonly<Record<string, unknown>> | undefined; delivery: BackendDelivery } }
@@ -675,6 +677,8 @@ interface PatchLike {
   subscribe?: SpecBackendCall;
   subscribeFirst?: boolean;
   socket?: readonly SpecSocketOp[];
+  answers?: readonly AnswerCall[];
+  resume?: string;
 }
 
 /** Applies a reducer's patch; returns the value outputs the write sends (`send` + `sendDerived`), or undefined for all. */
@@ -766,6 +770,11 @@ function apply(inst: Instance, port: string, patchUnknown: unknown, outcomeRequi
 /** The world effects of a patch (spec.ts `Patch`): timers, requests, aborts, an open — in the order the patch names them. */
 function effects(inst: Instance, port: string, patch: PatchLike): void {
   const { world, spec } = inst;
+  // NSP-016 s56 — the await resolves at the next yield: the inbox, delivered after the frame-end reducer or before an advance moves the clock
+  if (patch.resume !== undefined) {
+    if (!spec.world?.resume) throw new SpecError(`${spec.type}.${port}: awaited a promise but the spec has no world.resume handler`);
+    inst.inbox.push({ kind: 'resume', tag: patch.resume });
+  }
   for (const a of patch.after ?? []) {
     if (!spec.world?.timer) throw new SpecError(`${spec.type}.${port}: asked for a timer but the spec has no world.timer handler`);
     const tag = a.tag;
@@ -928,6 +937,17 @@ function stackEffects(inst: Instance, port: string, patch: PatchLike): void {
     world.popup.record(patch.popup);
     inst.pending.location.push(world.popup.calls[world.popup.calls.length - 1]);
   }
+  // THE CALLERS (spec.ts, NSP-016 s56): the node's answers to the requests handed it — an `answer` event each, in the order made
+  for (const a of patch.answers ?? []) {
+    if (a.op === 'returned') {
+      const e: TraceEvent = { t: 'answer', op: 'returned', results: canonicalise(a.results) };
+      if (a.action !== undefined) e.action = canonicalise(a.action);
+      inst.pending.location.push(e);
+    } else if (a.op === 'push' || a.op === 'replace' || a.op === 'back') {
+      if (a.value === 'failure' && (typeof a.error !== 'string' || a.error.length === 0)) throw new SpecError(`${spec.type}.${port}: a failure answer carries its code`);
+      inst.pending.location.push(a.value === 'failure' ? { t: 'answer', op: a.op, value: a.value, error: a.error } : { t: 'answer', op: a.op, value: a.value });
+    } else throw new SpecError(`${spec.type}.${port}: an answer's op is push, replace, back or returned, not ${String((a as { op?: unknown }).op)}`);
+  }
   // PICKER (world.ts, NSP-014 s31): a click recorded as the element holds it — a `picker` event in the same group; the
   // answer fires at its moment, as a DOM event's handler runs at its dispatch (inside the `advance` that reaches it)
   if (patch.picker) {
@@ -958,7 +978,11 @@ function handleInbound(inst: Instance, item: Inbound): void {
   const { spec, view } = inst;
   let patch: unknown;
   let name: string;
-  if (item.kind === 'timer') {
+  if (item.kind === 'resume') {
+    name = 'world.resume';
+    if (!spec.world?.resume) throw new SpecError(`${spec.type}: awaited a promise and the spec has no world.resume handler`);
+    patch = asWriter(inst, () => spec.world!.resume!(inst.state as never, inst.inputs as never, item.tag, view));
+  } else if (item.kind === 'timer') {
     name = 'world.timer';
     if (!spec.world?.timer) throw new SpecError(`${spec.type}: a timer fired and the spec has no world.timer handler`);
     patch = asWriter(inst, () => spec.world!.timer!(inst.state as never, inst.inputs as never, item.tag, view));

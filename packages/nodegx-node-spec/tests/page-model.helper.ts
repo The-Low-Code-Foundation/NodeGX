@@ -275,6 +275,27 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
     node: ['value', 'mounted', 'visible'],
     attr: { onPage, pageVisible },
     held: {}
+  },
+  // s55 — the Drag (drag.ts): react-draggable's position and pointer are the component's (node), the finger is where the pointer is
+  Drag: {
+    node: ['mounted', 'axis', 'enabled', 'useParentBounds', 'scale', 'startX', 'startY', 'x', 'y', 'dragging', 'libX', 'libY', 'prevX', 'prevY', 'slackX', 'slackY', 'lastX', 'lastY', 'kind', 'heardMouse', 'heardTouch', 'touchStart', 'snapX', 'snapY', 'durationX', 'durationY', 'timerX', 'timerY', 'scheduled', 'waiting', 'ran', 'posX', 'posY', 'dX', 'dY'],
+    attr: {
+      onPage,
+      // Drag.tsx `componentDidUpdate` moves the element by a Start Drag X / Y that CHANGED since the one drawn: what was drawn is read at the paint
+      shown: { follows: (s) => ({ axis: s.axis, enabled: s.enabled, useParentBounds: s.useParentBounds, scale: s.scale, startX: s.startX, startY: s.startY }), preset: false, why: 'Start Drag X / Y move the element by the change since the last one drawn (Drag.tsx `componentDidUpdate`), so what was drawn is part of the page' }
+    },
+    held: { finger: { keeps: 'where the pointer is' } },
+    // the frame's end: the Dos' callbacks, the timer pass, then the paint — a mount is a new component (its position, the library's,
+    // what waited), an unmount ends the drag and both snaps (drag.ts THE FRAME)
+    frameEnd: ['x', 'y', 'dragging', 'libX', 'libY', 'prevX', 'prevY', 'slackX', 'slackY', 'lastX', 'lastY', 'heardMouse', 'heardTouch', 'touchStart', 'timerX', 'timerY', 'scheduled', 'waiting', 'ran', 'posX', 'posY', 'dX', 'dY']
+  },
+  // s56 — the Component Stack (component-stack.ts): everything is the node's own — its pages, its queue, the handler's names; the frame's
+  // end runs its callbacks (a reset, the callers' requests), the transition's tick, and the paint, which registers and so resets
+  'Page Stack': {
+    node: ['mounted', 'isMounted', 'name', 'regKey', 'waiting', 'pages', 'pageInfo', 'startPageId', 'stack', 'children', 'deleted', 'nextPage', 'running', 'queue', 'busy', 'hops', 'owed', 'callbacks', 'resetScheduled', 'resetTokens', 'countLate', 'top', 'depth', 'count'],
+    attr: { onPage },
+    held: {},
+    frameEnd: ['isMounted', 'regKey', 'waiting', 'stack', 'children', 'deleted', 'nextPage', 'running', 'queue', 'busy', 'hops', 'owed', 'callbacks', 'resetScheduled', 'resetTokens', 'countLate', 'top', 'depth', 'count']
   }
 };
 
@@ -293,7 +314,7 @@ function offers(items: unknown, value: unknown): boolean {
 export const isVisual = (spec: AnyNodeSpec) => !!spec.acts || !!spec.world?.place;
 
 /** The format's world kinds (spec.ts `WorldHandlers`), pinned: a new one is sorted (NSP-023 §3) before it lands. */
-export const WORLD_KINDS = ['timer', 'response', 'change', 'resize', 'page', 'popup', 'backend', 'store', 'auth', 'authReturn', 'mount', 'place', 'picker', 'realtime', 'socket', 'stream', 'group'] as const;
+export const WORLD_KINDS = ['timer', 'response', 'change', 'resize', 'page', 'popup', 'backend', 'store', 'auth', 'authReturn', 'mount', 'place', 'picker', 'realtime', 'socket', 'resume', 'stream', 'group'] as const;
 
 const LIFECYCLE = new Set(['didMount', 'willUnmount']);
 
@@ -302,6 +323,9 @@ type S = Record<string, unknown>;
 
 const canon = (v: unknown) =>
   JSON.stringify(v, (_k, x) => (x === undefined ? '$undefined' : typeof x === 'number' && !Number.isFinite(x) ? `$${x}` : Object.is(x, -0) ? '$-0' : typeof x === 'symbol' ? String(x) : x));
+
+/** s56 — an attribute equals its projection: by identity, or — an attribute that is an object (the Drag's `shown`, the props last drawn) — by value */
+const same = (a: unknown, b: unknown) => Object.is(a, b) || (a !== null && b !== null && typeof a === 'object' && typeof b === 'object' && canon(a) === canon(b));
 
 function perturb(v: unknown): unknown {
   if (typeof v === 'boolean') return !v;
@@ -346,12 +370,12 @@ export function guarded(spec: AnyNodeSpec, model: PageModel, findings: Map<strin
       // G4
       for (const [k, a] of Object.entries(model.attr)) {
         const v = a.follows(next);
-        if (v !== KEEP && !Object.is(next[k], v)) find('G4', k, where, () => `${canon(next[k])}, follows ${canon(v)}`);
+        if (v !== KEEP && !same(next[k], v)) find('G4', k, where, () => `${canon(next[k])}, follows ${canon(v)}`);
       }
       for (const [k, h] of Object.entries(model.held)) {
         if (!('shows' in h)) continue;
         const v = h.shows(next);
-        if (v !== KEEP && !Object.is(next[k], v)) find('G4', k, where, () => `${canon(next[k])}, shows ${canon(v)}`);
+        if (v !== KEEP && !same(next[k], v)) find('G4', k, where, () => `${canon(next[k])}, shows ${canon(v)}`);
       }
       for (const [k, e] of Object.entries(model.element ?? {})) if (!Object.is(next[k], s[k]) && !e.changesWith.some((c) => !Object.is(next[c], s[c]))) find('G4', k, where, () => 'changed alone');
       // G5
