@@ -27,6 +27,7 @@ import type {
 
 import { iconSourceProblem } from './components/visual/Icon/iconSourceProblem';
 import DOMBoundingBoxObserver from './dom-boundingbox-oberver';
+import { elementChanged as dragElementChanged } from './drag-drop';
 import {
   cssPropertyName,
   DEFAULT_LAYER,
@@ -2006,6 +2007,8 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
           runScrollIntoView(this);
         }
         if (element) syncDataAttributesOnElement(this);
+        // P107-C77 — a Draggable node's new element (a remount, a new Tag) takes the keyboard too.
+        if (element) dragElementChanged(this, element as HTMLElement);
       },
       /**
        * NDA-012 (Visual) check A3 — run an imperative action on the inner React component,

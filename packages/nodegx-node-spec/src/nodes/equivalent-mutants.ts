@@ -50,41 +50,40 @@ const TEXT: EquivalentMutant[] = [
     { reducer: 'person.key', kind: 'swap-branch', branch: '"set":["carry","carryBy"],"emit":[]', swappedWith: '"set":["carry","carryBy","inZone","isDropTarget"],"emit":[]', why: ALREADY_HELD("a card's carry ended outside a zone (Drag Over is false, and was sent false)") },
     // a click the swallow ate, and the twin that also started and ended a pending press of its own: the gesture is idle before and after
     { reducer: 'person.release', kind: 'swap-branch', branch: '"set":["carry","carryBy","swallow"],"emit":[]', swappedWith: '"set":["carry","carryBy","inZone","isDropTarget","swallow"],"emit":[]', why: ALREADY_HELD("a card let go outside a zone (Drag Over is false, and was sent false)") },
-    // a Space that lifts an element that ALREADY holds the keyboard, handed the twin that also took it: `elementFocused` true over true
-    { reducer: 'person.key', kind: 'swap-branch', branch: '"set":["inZone","input","isLifted","phase"],"emit":["pickedUp"]', swappedWith: '"set":["cardFocused","elementFocused","inZone","input","isLifted","phase"],"emit":["pickedUp"]', why: ALREADY_HELD('a Space lift of an element that holds the keyboard') },
+    // a Space that lifts an element that ALREADY holds the keyboard, handed the twin that also took it: `focusedElem` the element's over the element's
+    { reducer: 'person.key', kind: 'swap-branch', branch: '"set":["inZone","input","isLifted","phase"],"emit":["pickedUp"]', swappedWith: '"set":["cardFocused","focusedElem","inZone","input","isLifted","phase"],"emit":["pickedUp"]', why: ALREADY_HELD('a Space lift of an element that holds the keyboard') },
     // a keyboard cancel outside any zone, handed the in-zone twin: Drag Over false over false, and its send meets a wire already false
     { reducer: 'person.key', kind: 'swap-branch', branch: '"set":["inZone","input","isLifted","phase"],"emit":["dragCancelled"]', swappedWith: '"set":["inZone","input","isDropTarget","isLifted","phase"],"emit":["dragCancelled"]', why: ALREADY_HELD('a cancel outside a zone (Drag Over is false, and was sent false)') },
     // a click that meets nothing (hidden, no swallow waiting), handed the click a waiting swallow ate: `swallow` false over false
     { reducer: 'person.click', kind: 'swap-branch', branch: '"set":[],"emit":[]', swappedWith: '"set":["swallow"],"emit":[]', why: ALREADY_HELD('a click that meets nothing and finds no swallow waiting') },
-    // a blur on an element that does not hold the keyboard, handed the blur that gave it up: `elementFocused` false over false
-    { reducer: 'person.blur', kind: 'swap-branch', branch: '"set":[],"emit":[]', swappedWith: '"set":["elementFocused"],"emit":[]', why: ALREADY_HELD('a blur of an element that does not hold the keyboard') },
+    // a blur on an element that does not hold the keyboard, handed the blur that gave it up: `focusedElem` none over none
+    { reducer: 'person.blur', kind: 'swap-branch', branch: '"set":[],"emit":[]', swappedWith: '"set":["focusedElem"],"emit":[]', why: ALREADY_HELD('a blur of an element that does not hold the keyboard') },
     // a click on a Draggable element starts a pending mouse gesture and its release ends it: phase idle → pending → idle. Dropped,
     // or handed a twin that moves no gesture, the state after the click is the same
     // s44: the same two twins over its own zone — a Space lift into the zone of an element that already holds the keyboard; a keyboard
     // cancel outside any zone handed the twin that also took the keyboard back and left a zone (Drag Over false over false)
-    { reducer: 'person.key', kind: 'swap-branch', branch: '"set":["inZone","input","isDropTarget","isLifted","phase"],"emit":["pickedUp"]', swappedWith: '"set":["cardFocused","elementFocused","inZone","input","isDropTarget","isLifted","phase"],"emit":["pickedUp"]', why: ALREADY_HELD('a Space lift into its own zone of an element that holds the keyboard') },
-    { reducer: 'person.key', kind: 'swap-branch', branch: '"set":["cardFocused","elementFocused","inZone","input","isLifted","phase"],"emit":["dragCancelled"]', swappedWith: '"set":["cardFocused","elementFocused","inZone","input","isDropTarget","isLifted","phase"],"emit":["dragCancelled"]', why: ALREADY_HELD('a cancel outside a zone that takes the keyboard back (Drag Over is false, and was sent false)') },
-    // s44: a plain unmount, handed the unmount whose frame start also found the chain's element. Its example puts the attributes on
-    // element 1 with the chain at 0: a plain unmount's chain is already 0 (an element on the page with a chain waiting takes it at
-    // the frame start), and element 1 — the first made — is at any unmount the one leaving or one already gone; every element after
-    // it is a later one. The five-remount scenario kills the swap for any later element's number.
-    // (P109 s29, C81: every unmount also clears the file drag — the count and Is Dragging Over — on both twins alike)
-    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["dragDepth","elementFocused","isDragOver","onPage"],"emit":["willUnmount"]', swappedWith: '"set":["attrsOn","chain","dragDepth","elementFocused","isDragOver","onPage"],"emit":["willUnmount"]', why: 'a plain unmount handed the twin that put the attributes on element 1 with the chain at 0: the chain is 0 already, and element 1 is leaving or gone — no later element is element 1' },
+    { reducer: 'person.key', kind: 'swap-branch', branch: '"set":["inZone","input","isDropTarget","isLifted","phase"],"emit":["pickedUp"]', swappedWith: '"set":["cardFocused","focusedElem","inZone","input","isDropTarget","isLifted","phase"],"emit":["pickedUp"]', why: ALREADY_HELD('a Space lift into its own zone of an element that holds the keyboard') },
+    { reducer: 'person.key', kind: 'swap-branch', branch: '"set":["cardFocused","focusedElem","inZone","input","isLifted","phase"],"emit":["dragCancelled"]', swappedWith: '"set":["cardFocused","focusedElem","inZone","input","isDropTarget","isLifted","phase"],"emit":["dragCancelled"]', why: ALREADY_HELD('a cancel outside a zone that takes the keyboard back (Drag Over is false, and was sent false)') },
     // s50, from the 10,000 run (seed 20731): a leave or a let go with no drag whose paint takes the element away, handed the one that
     // also ends a drag over nothing of this node's. P109 s29 (C81): the paint clears the count on both, so the count's element the twin
     // writes is never read (an enter reads it only beside a count above 0), and the files and the target are none already. (s50's
     // other rows here — a drop with Is Dragging Over already false, a leave writing the files or the target alone — went with
     // write-always: every file act through `dragTo` now writes the target, the count, its element and Is Dragging Over.)
-    ...['fileLeave', 'fileDrop'].map((act) => ({ reducer: `person.${act}`, kind: 'swap-branch' as const, branch: '"set":["dragDepth","elementFocused","isDragOver","onPage"],"emit":["willUnmount"]', swappedWith: '"set":["depthOn","dragDepth","elementFocused","fileCarry","fileOn","isDragOver","onPage"],"emit":["willUnmount"]', why: ALREADY_HELD(`a ${act === 'fileDrop' ? 'let go' : 'leave'} with no drag whose paint takes the element away (no files, no target)`) })),
+    ...['fileLeave', 'fileDrop'].map((act) => ({ reducer: `person.${act}`, kind: 'swap-branch' as const, branch: '"set":["dragDepth","isDragOver"],"emit":["willUnmount"]', swappedWith: '"set":["depthOn","dragDepth","fileCarry","fileOn","isDragOver"],"emit":["willUnmount"]', why: ALREADY_HELD(`a ${act === 'fileDrop' ? 'let go' : 'leave'} with no drag whose paint takes the element away (no files, no target)`) })),
     // a click on an element its paint makes: a press that starts a pending gesture and a release that ends it, or neither — the
     // gesture is idle before and after (the s43 pair above, with the mount paint)
     // NSP-016 s51 — the zone side's clicks: the twins differ only in what a click leaves as it found (the gesture's start and end)
     // and a source element no reader reaches before the next press writes it
     // a key that ends a card's carry outside a zone and takes the keyboard, handed the twin that also left the zone: false over false
-    { reducer: 'person.key', kind: 'swap-branch', branch: '"set":["cardFocused","carry","carryBy","elementFocused"],"emit":[]', swappedWith: '"set":["cardFocused","carry","carryBy","elementFocused","inZone","isDropTarget"],"emit":[]', why: ALREADY_HELD("a card's carry ended outside a zone by a key that takes the keyboard (Drag Over is false, and was sent false)") },
+    { reducer: 'person.key', kind: 'swap-branch', branch: '"set":["cardFocused","carry","carryBy","focusedElem"],"emit":[]', swappedWith: '"set":["cardFocused","carry","carryBy","focusedElem","inZone","isDropTarget"],"emit":[]', why: ALREADY_HELD("a card's carry ended outside a zone by a key that takes the keyboard (Drag Over is false, and was sent false)") },
     // s30 (P109 ISL-031, C78): an arrow that walks a carried card into the Text while the Text already holds the keyboard, handed
-    // the twin whose key act also put the keyboard on it — `elementFocused` true over true, `cardFocused` -1 over -1
-    { reducer: 'person.key', kind: 'swap-branch', branch: '"set":["inZone","isDropTarget"],"emit":[]', swappedWith: '"set":["cardFocused","elementFocused","inZone","isDropTarget"],"emit":[]', why: ALREADY_HELD('an arrow that walks a carried card into it while it already holds the keyboard') },
+    // the twin whose key act also put the keyboard on it — `focusedElem` the element's over the element's, `cardFocused` -1 over -1
+    { reducer: 'person.key', kind: 'swap-branch', branch: '"set":["inZone","isDropTarget"],"emit":[]', swappedWith: '"set":["cardFocused","focusedElem","inZone","isDropTarget"],"emit":[]', why: ALREADY_HELD('an arrow that walks a carried card into it while it already holds the keyboard') },
+    // P109 s31 (C77): a leave or a let go with no drag from the desktop whose paint MOUNTS the element, handed the twin that also ends
+    // a drag over nothing of this node's. The element was off the page, and the unmount that took it there (or a placing with
+    // Mounted off) left the count 0 and Is Dragging Over false (`fileDark`); with no drag there are no files and no target. The twin
+    // writes those as they stand, and a count's element that is never read (an enter reads it only beside a count above 0)
+    ...['fileLeave', 'fileDrop'].map((act) => ({ reducer: `person.${act}`, kind: 'swap-branch' as const, branch: '"set":[],"emit":["didMount"]', swappedWith: '"set":["depthOn","dragDepth","fileCarry","fileOn","isDragOver"],"emit":["didMount"]', why: ALREADY_HELD(`a ${act === 'fileDrop' ? 'let go' : 'leave'} with no drag from the desktop whose paint mounts the element (the unmount left nothing counted)`) })),
 ];
 
 /**
@@ -100,8 +99,8 @@ function onGroupShape(shape: string | undefined, frameEnd: boolean, actRow = fal
   const keys = new Set<string>(m[1] ? (JSON.parse(`[${m[1]}]`) as string[]) : []);
   if (frameEnd) for (const k of ['ran', 'scheduled', 'waiting']) keys.add(k);
   if (keys.has('inZone')) keys.add('index');
-  if (keys.has('onPage') && m[2].includes('"willUnmount"')) keys.add('listed');
-  if (keys.has('onPage') && m[2].includes('"didMount"')) keys.add('stampOn');
+  // P109 s31 (C77): `onPage`, `elem`, `shownTag` and `stampOn` are the page's syncs (group.ts `synced`), never in a shape
+  if (m[2].includes('"willUnmount"')) keys.add('listed');
   // an act's row is exact (no outcomes); a frame end's holds whatever the frame reports, its scrolls' outcomes being read from the
   // state before its paint and its chain, and touching neither
   return `"set":${JSON.stringify([...keys].sort())},"emit":[${m[2]}]${frameEnd && !actRow ? '' : ',"outcome":null,"outcomes":[]'}`;
@@ -166,7 +165,7 @@ function onVideo(row: EquivalentMutant): EquivalentMutant[] {
 }
 
 /** What every paint of the Video writes (video.ts `painted`): the `<video>`'s three flags, and the element and its media as they stand. */
-const VIDEO_PAINT = ['atEnd', 'canAutoplay', 'domElement', 'elAutoplay', 'elLoop', 'elMuted', 'elem', 'failed', 'height', 'kind', 'loading', 'paused', 'pending', 'position', 'ready', 'srcAttr', 'width'];
+const VIDEO_PAINT = ['atEnd', 'canAutoplay', 'domElement', 'elAutoplay', 'elLoop', 'elMuted', 'failed', 'height', 'kind', 'loading', 'paused', 'pending', 'position', 'ready', 'srcAttr', 'width'];
 
 // P109 ISL-031 (P107-D30) — the paint that takes a control's element off the page resets Focused, Hover and Pressed. A leave
 // that was not pressed, handed its twin's example that was: the twin fires the same pulses (Blurred with Focused, Hover End with
@@ -233,18 +232,14 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     // where a reload changes nothing, and are the oldest in the list, so the cap pushes them out first, without a word
     // a placing off the page draws the flags with no element to draw them on; the mount draws them again (PLACED_OFF_PAGE)
     { reducer: 'world.place', kind: 'drop-set', branch: `"set":${JSON.stringify(VIDEO_PAINT)},"emit":[]`, why: 'a placing on a node placed off the page: its set holds the flags, which nothing reads before the frame end repaints them, and the element and media as they already stand' },
-    // a frame end that mounts the Video and runs a Reset that waited, with no chain under way, handed the twin whose chain check spent
-    // the last frame start: the twin writes chain 0 where it is 0 already, and a fresh element's flags and media, which nothing reads
-    // before the next paint draws them again (an action reads Muted only once the component has seen a load, and a new one has not)
-    { reducer: 'afterInputs', kind: 'swap-branch', branch: `"set":${JSON.stringify([...VIDEO_PAINT, 'canPlay', 'elementFocused', 'onPage', 'ran', 'timeOut', 'waiting', 'wantToPlay'].sort())},"emit":["didMount"],"outcome":null,"outcomes":["reset:done"]`, swappedWith: `"set":${JSON.stringify([...VIDEO_PAINT, 'canPlay', 'chain', 'elementFocused', 'onPage', 'ran', 'timeOut', 'waiting', 'wantToPlay'].sort())},"emit":["didMount"],"outcome":null,"outcomes":["reset:done"]`, why: 'a mount that runs a waiting Reset with no chain, handed the twin that spent the chain: chain 0 where it is 0, and a fresh element nothing reads before the next paint' },
     // a drag from the desktop entering in the frame Mounted comes back, its paint making the element (and running what waited), handed a
     // twin that makes none: the frame's end mounts it instead and runs what waited there, reporting at the same frame end; the element it
     // makes is numbered one more, so the file bookkeeping the twin wrote names an element no longer there, and the next drag over the
     // new one enters it as it would have (element numbers are only ever compared with each other)
-    { reducer: 'person.fileEnter', kind: 'swap-branch', branch: `"set":${JSON.stringify([...VIDEO_PAINT, 'canPlay', 'depthOn', 'dragDepth', 'elementFocused', 'fileCarry', 'fileOn', 'isDragOver', 'onPage', 'ran', 'timeOut', 'waiting', 'wantToPlay'].sort())},"emit":["didMount"]`, swappedWith: '"emit":[],"outcome":null,"outcomes":[]', why: 'a drag entering in the frame the Video mounts, handed a twin that does not mount: the frame end mounts it, and the twin names an element no longer there' },
+    { reducer: 'person.fileEnter', kind: 'swap-branch', branch: `"set":${JSON.stringify([...VIDEO_PAINT, 'canPlay', 'depthOn', 'dragDepth', 'fileCarry', 'fileOn', 'isDragOver', 'ran', 'timeOut', 'waiting', 'wantToPlay'].sort())},"emit":["didMount"]`, swappedWith: '"emit":[],"outcome":null,"outcomes":[]', why: 'a drag entering in the frame the Video mounts, handed a twin that does not mount: the frame end mounts it, and the twin names an element no longer there' },
     // … and a card grabbed in that frame, handed a twin that grabs the SAME card without mounting (a twin that carries another card is
     // killed: the card let go over the Video is the one dropped)
-    { reducer: 'person.grab', kind: 'swap-branch', branch: `"set":${JSON.stringify([...VIDEO_PAINT, 'activated', 'canPlay', 'cardFocused', 'carry', 'carryBy', 'elementFocused', 'onPage', 'ran', 'timeOut', 'waiting', 'wantToPlay'].sort())},"emit":["didMount"]`, swappedWith: `"set":${JSON.stringify([...VIDEO_PAINT, 'activated', 'cardFocused', 'carry', 'carryBy', 'elementFocused', 'ran'].sort())},"emit":[]`, why: 'a card grabbed in the frame the Video mounts, handed a twin that grabs the same card without mounting: the frame end mounts it' },
+    { reducer: 'person.grab', kind: 'swap-branch', branch: `"set":${JSON.stringify([...VIDEO_PAINT, 'activated', 'canPlay', 'cardFocused', 'carry', 'carryBy', 'focusedElem', 'ran', 'timeOut', 'waiting', 'wantToPlay'].sort())},"emit":["didMount"]`, swappedWith: `"set":${JSON.stringify([...VIDEO_PAINT, 'activated', 'cardFocused', 'carry', 'carryBy', 'focusedElem', 'ran'].sort())},"emit":[]`, why: 'a card grabbed in the frame the Video mounts, handed a twin that grabs the same card without mounting: the frame end mounts it' },
     { reducer: 'srcObject', kind: 'swap-branch', branch: '"set":[],"emit":[]', swappedWith: '"set":["waiting"],"emit":[]', why: 'an on-page Source Object write handed a twin that left Source Object writes waiting: they run on a fresh element and are pushed out first, silently' }
   ],
   // NSP-016 s52 — the Group runs the Text's machinery (group.ts docblock): the Text's rows, on the Group's shapes
@@ -272,8 +267,8 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
       ['', '"pointerDown","pointerUp"'].map((emit) => ({
         reducer: `person.${act}`,
         kind: 'swap-branch' as const,
-        branch: `"set":["cardFocused","carry","carryBy","elementFocused","ran","scheduled","swallow","waiting"],"emit":[${emit}],`,
-        swappedWith: '"set":["cardFocused","carry","carryBy","elementFocused","inZone","index","isDropTarget","ran","scheduled","swallow","waiting"],',
+        branch: `"set":["cardFocused","carry","carryBy","focusedElem","ran","scheduled","swallow","waiting"],"emit":[${emit}],`,
+        swappedWith: '"set":["cardFocused","carry","carryBy","focusedElem","inZone","index","isDropTarget","ran","scheduled","swallow","waiting"],',
         why: ALREADY_HELD(`a ${act === 'tap' ? 'tap' : 'click beside it'} ending a card's carry outside a zone (Drag Over is false, and was sent false)`)
       }))
     ),
@@ -281,16 +276,13 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     // and only ends it — the Text's click row: the gesture is idle before and after, and the source the first records is written
     // again by the next press before anything reads it
     ...[
-      ['"set":["cardFocused","elementFocused","inZone","index","input","listed","phase","ran","scheduled","sourceElem","waiting"],', '"set":["cardFocused","elementFocused","inZone","index","input","listed","phase","ran","scheduled","waiting"],'],
-      ['"set":["cardFocused","elementFocused","inZone","index","input","listed","phase","ran","scheduled","waiting"],', '"set":["cardFocused","elementFocused","inZone","index","input","listed","phase","ran","scheduled","sourceElem","waiting"],'],
-      ['"set":["cardFocused","elementFocused","inZone","index","input","phase","ran","scheduled","sourceElem","waiting"],', '"set":["cardFocused","elementFocused","inZone","index","input","phase","ran","scheduled","waiting"],'],
-      ['"set":["cardFocused","elementFocused","inZone","index","input","phase","ran","scheduled","waiting"],', '"set":["cardFocused","elementFocused","inZone","index","input","phase","ran","scheduled","sourceElem","waiting"],']
+      ['"set":["cardFocused","focusedElem","inZone","index","input","listed","phase","ran","scheduled","sourceElem","waiting"],', '"set":["cardFocused","focusedElem","inZone","index","input","listed","phase","ran","scheduled","waiting"],'],
+      ['"set":["cardFocused","focusedElem","inZone","index","input","listed","phase","ran","scheduled","waiting"],', '"set":["cardFocused","focusedElem","inZone","index","input","listed","phase","ran","scheduled","sourceElem","waiting"],'],
+      ['"set":["cardFocused","focusedElem","inZone","index","input","phase","ran","scheduled","sourceElem","waiting"],', '"set":["cardFocused","focusedElem","inZone","index","input","phase","ran","scheduled","waiting"],'],
+      ['"set":["cardFocused","focusedElem","inZone","index","input","phase","ran","scheduled","waiting"],', '"set":["cardFocused","focusedElem","inZone","index","input","phase","ran","scheduled","sourceElem","waiting"],']
     ].map(([branch, swappedWith]) => ({ reducer: 'person.tap', kind: 'swap-branch' as const, branch, swappedWith, why: "a tap whose press starts its own pending gesture and whose release ends it, beside a twin that differs only there: the gesture is idle before and after" })),
     // a click beside it nothing eats, handed the twin a waiting swallow ate: that twin writes the swallow false, where it already is
-    { reducer: 'person.clickAway', kind: 'swap-branch', branch: '"set":["cardFocused","elementFocused","ran","scheduled","waiting"],"emit":[],', swappedWith: '"set":["cardFocused","elementFocused","ran","scheduled","swallow","waiting"],"emit":[],', why: ALREADY_HELD('a click beside it that nothing ate, handed the click a waiting swallow ate (the swallow false over false)') },
-    // a mount with no chain waiting, handed the twin whose mount spent the chain's last two frame starts: that twin's example writes the
-    // chain 0, which it is (a twin recorded with frames left would put the tabindex on, and every reader of the keyboard kills it)
-    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["elem","elementFocused","onPage","ran","scheduled","shownTag","stampOn","waiting"],"emit":["didMount"]', swappedWith: '"set":["chain","elem","elementFocused","onPage","ran","scheduled","shownTag","stampOn","waiting"],"emit":["didMount"]', why: ALREADY_HELD('a mount with no chain waiting, handed the mount that spent the chain (the chain 0 over 0)') },
+    { reducer: 'person.clickAway', kind: 'swap-branch', branch: '"set":["cardFocused","focusedElem","ran","scheduled","waiting"],"emit":[],', swappedWith: '"set":["cardFocused","focusedElem","ran","scheduled","swallow","waiting"],"emit":[],', why: ALREADY_HELD('a click beside it that nothing ate, handed the click a waiting swallow ate (the swallow false over false)') },
     // the frame end that reports outcomes — States' and Pop Component Stack's frame end exactly: its outcomes stand without its
     // `set`, and only the NEXT settle shows what it failed to keep (the held outcomes and the scrolls reported again, which the
     // interpreter refuses, or a paint not kept). The branch keys are combinations of outcome ports and answers, so which of them end a

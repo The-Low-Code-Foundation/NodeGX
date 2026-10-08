@@ -84,20 +84,8 @@ export function setDraggable(node: DragDropNode, on: boolean): void {
   if (on) {
     draggables.add(node);
     install();
-    whenMounted(node, (el) => {
-      // Something a keyboard can reach and a screen reader can name. Only added where the author
-      // has not already decided — an element with its own tabindex keeps it.
-      const added: string[] = [];
-      if (!el.hasAttribute('tabindex')) {
-        el.setAttribute('tabindex', '0');
-        added.push('tabindex');
-      }
-      if (!el.hasAttribute('aria-roledescription')) {
-        el.setAttribute('aria-roledescription', 'draggable');
-        added.push('aria-roledescription');
-      }
-      if (added.length) addedAttributes.set(el, added);
-    });
+    const el = node.getDOMElement();
+    if (el) markDraggable(el);
   } else {
     draggables.delete(node);
     const el = node.getDOMElement();
@@ -107,6 +95,34 @@ export function setDraggable(node: DragDropNode, on: boolean): void {
       addedAttributes.delete(el);
     }
   }
+}
+
+/**
+ * P107-C77: the node has a new element — a mount, a remount, a new Tag. A Draggable one gets the
+ * attributes at once, so the keyboard can still pick it up. Called from `setDOMElement`, where
+ * every built-in node reports its element; the attributes used to go on whatever element existed
+ * when Draggable was written (or turned up within 60 frames), and a later element had none.
+ */
+export function elementChanged(node: DragDropNode, el: HTMLElement): void {
+  if (draggables.has(node)) markDraggable(el);
+}
+
+/**
+ * Something a keyboard can reach and a screen reader can name. Only added where the author has
+ * not already decided — an element with its own tabindex keeps it.
+ */
+function markDraggable(el: HTMLElement): void {
+  if (addedAttributes.has(el)) return;
+  const added: string[] = [];
+  if (!el.hasAttribute('tabindex')) {
+    el.setAttribute('tabindex', '0');
+    added.push('tabindex');
+  }
+  if (!el.hasAttribute('aria-roledescription')) {
+    el.setAttribute('aria-roledescription', 'draggable');
+    added.push('aria-roledescription');
+  }
+  if (added.length) addedAttributes.set(el, added);
 }
 
 export function setAcceptsDrops(node: DragDropNode, on: boolean): void {
@@ -125,23 +141,6 @@ export function forget(node: DragDropNode): void {
   zones.delete(node);
   if (gesture && gesture.source === node) cancel(gesture);
   else if (gesture && gesture.zone === node) leaveZone(gesture);
-}
-
-/**
- * Run `fn` with the node's element once it has one. A port's `set` runs before the first render,
- * when there is no element yet; a few frames is always enough for a mounted node, and a node that
- * never mounts (in a hidden branch) is simply not reachable by keyboard until it does — pointer
- * pickup does not depend on this at all.
- */
-function whenMounted(node: DragDropNode, fn: (el: HTMLElement) => void, framesLeft = 60): void {
-  if (typeof window === 'undefined') return;
-  const el = node.getDOMElement();
-  if (el) {
-    fn(el);
-    return;
-  }
-  if (framesLeft <= 0 || node._deleted) return;
-  window.requestAnimationFrame(() => whenMounted(node, fn, framesLeft - 1));
 }
 
 function liveElement(node: DragDropNode): HTMLElement | null {

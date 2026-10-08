@@ -1,7 +1,8 @@
 ---
 id: P107-C77
 title: A Draggable element can no longer be picked up from the keyboard once its element is replaced — after Mounted goes off and on, after its Tag changes, or when it mounts more than about a second after Draggable was set
-status: scheduled
+status: fixed
+commit: (this commit)
 phase: P109
 task: ISL-031
 severity: medium
@@ -9,7 +10,7 @@ area: runtime / drag and drop (noodl-viewer-react/src/drag-drop.ts `setDraggable
 found: P107 NSP-016 s43, 2026-10-05
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/RESEARCH-DRAG-DROP.md §4 (the probe's six cases, on the real Text node in the runtime target's page)
 kit: node-spec
-regression: packages/nodegx-node-spec/scenarios/Text.json "row C77 — Mounted off and on: the new element has no tabindex, so Space raises nothing; Draggable off and on puts it back"
+regression: packages/nodegx-node-spec/scenarios/Text.json "row C77 — Mounted off and on: the new element takes the keyboard too, so Space lifts it; after Draggable off and on, the next Space lets it go" (and the other "row C77" scenarios, a new Tag and a late mount among them, on the Text, Shape, Image, Group and Video)
 ---
 
 **What a person sees.** A card that could be picked up with Tab and Space stops responding to the keyboard. Tab
@@ -38,3 +39,14 @@ target is two frame starts, both before its paint commits).
 **Proposed fix (small).** Add the attributes where the node learns its element, in `setDOMElement`
 (react-component-node.ts :1934): when `_internal.draggable` is on, add the two attributes the author has not set.
 That covers every new element, with no polling and no frame budget. `whenMounted` can then go.
+
+**Fixed (P109 ISL-031, s31, 2026-10-08), as proposed.** The node reports each new element to the drag module from
+`setDOMElement` (`elementChanged`), and a Draggable node's element takes the two attributes there; `whenMounted` is gone.
+The five specs that copy drag-drop.ts (Text v9, Shape v5, Image v5, Group v7, Video v5) say the same. With every element
+taking the keyboard, nothing outside could tell whether an act's paint or the frame end made a new element, and ~630
+interpreter mutants were stranded on exactly that. As P107 ruled (s30), the state that became unobservable was removed
+rather than declared: which element is on the page (`onPage`, `elem`, `shownTag`, the Group's `stampOn`) is the paint's
+sync (`synced`), and the keyboard is the element that holds it (`focusedElem`, replacing the `elementFocused` flag), so
+a paint writes nothing about the keyboard. 118 scenarios read what is left (a focused element given a new Tag and its old
+one back in one frame; Draggable off and on around an act; a card picked up during the node's own drag; …). Interpreter
+mutants: 0 survivors on all five at seeds 13 and 20732. Runtime: see ISL-031 §12.

@@ -1284,7 +1284,7 @@
   },
   {
     "name": "Draggable at the placing: focus and Space pick it up (Is Lifted, Picked Up); Escape puts it back (Is Lifted false, Cancelled)",
-    "because": "drag-drop.ts :83-110 (the tabindex at the first frame start), :768-783 keyboardLift, :823-826 Escape",
+    "because": "drag-drop.ts :83-110 (the tabindex on the element there), :768-783 keyboardLift, :823-826 Escape",
     "params": {
       "draggable": true,
       "dragValue": "v"
@@ -1396,7 +1396,7 @@
   },
   {
     "name": "Draggable written after the first frame: the element has one now — Space lifts at once",
-    "because": "drag-drop.ts :87 `whenMounted` finds the element",
+    "because": "drag-drop.ts `elementChanged` — the element takes the attributes when it arrives",
     "steps": [
       "settle",
       {
@@ -1414,8 +1414,8 @@
     ]
   },
   {
-    "name": "row C77 — Mounted off and on: the new element has no tabindex, so Space raises nothing; Draggable off and on puts it back",
-    "because": "drag-drop.ts :87-100 — the attributes go on the element that exists when Draggable is written, once",
+    "name": "row C77 — Mounted off and on: the new element takes the keyboard too, so Space lifts it; after Draggable off and on, the next Space lets it go",
+    "because": "drag-drop.ts `setDraggable`, `elementChanged` — the attributes go on every element while Draggable is on (row C77, fixed in P109 ISL-031)",
     "params": {
       "draggable": true
     },
@@ -1461,7 +1461,7 @@
     ]
   },
   {
-    "name": "row C77 — a new Tag makes a new element: Space raises nothing; the same Tag again changes nothing",
+    "name": "row C77 — a new Tag makes a new element, which takes the keyboard too: Space lifts it; the same Tag again changes nothing",
     "because": "Group.tsx :50 — React makes a new element for a new type",
     "params": {
       "draggable": true
@@ -1512,8 +1512,8 @@
     ]
   },
   {
-    "name": "row C77 — placed unmounted with Draggable: mounted after 28 settles it is still reached (the 59th frame start, the first of the settle after the mount) — Space lifts",
-    "because": "drag-drop.ts :136-145 — 60 frame starts; a settle is two here (its frame and its drain), both before its paint commits",
+    "name": "row C77 — placed unmounted with Draggable: mounted after 28 settles it takes the keyboard — Space lifts",
+    "because": "drag-drop.ts `elementChanged` — a mount however late takes the attributes (row C77, fixed in P109 ISL-031)",
     "params": {
       "draggable": true,
       "mounted": false
@@ -1564,7 +1564,7 @@
     ]
   },
   {
-    "name": "row C77 — placed unmounted with Draggable: mounted after 29 settles the 60 frame starts are spent before the element is committed — Space raises nothing for good",
+    "name": "row C77 — placed unmounted with Draggable: mounted after 29 settles (past the old 60-frame budget) it still takes the keyboard — Space lifts",
     "because": "drag-drop.ts :143 `framesLeft <= 0` gives up",
     "params": {
       "draggable": true,
@@ -1618,7 +1618,7 @@
     ]
   },
   {
-    "name": "placed unmounted with Draggable and mounted by a person's act before the next settle: the frame start finds the element",
+    "name": "placed unmounted with Draggable and mounted by a person's act before the next settle: the element takes the keyboard",
     "because": "an act paints the page first (adapter.ts `act`); the next frame start sees what it painted",
     "params": {
       "draggable": true,
@@ -2576,8 +2576,8 @@
     ]
   },
   {
-    "name": "row C77 — a click after a remount meets an element with no tabindex: it takes no keyboard, so hidden, Space raises nothing",
-    "because": "drag-drop.ts :87-100 — the remounted element has no tabindex",
+    "name": "row C77 — a click after a remount takes the keyboard (the new element is Draggable's too): hidden, Space lifts",
+    "because": "drag-drop.ts `setDraggable`, `elementChanged` — the attributes go on every element while Draggable is on (row C77, fixed in P109 ISL-031)",
     "params": {
       "draggable": true
     },
@@ -3067,8 +3067,8 @@
     ]
   },
   {
-    "name": "row C77 — Draggable on its element, then off the page: a frame end with a render asked while it is off spends no frame start of the chain (there is none) — remounted, Space raises nothing",
-    "because": "drag-drop.ts :87-100 — the attributes stayed on the element that left; no chain was started",
+    "name": "row C77 — Draggable on its element, then off the page with a render asked while it is off: remounted, the new element takes the keyboard — Space lifts",
+    "because": "drag-drop.ts `setDraggable`, `elementChanged` — the attributes go on every element while Draggable is on (row C77, fixed in P109 ISL-031)",
     "params": {
       "draggable": true
     },
@@ -3101,8 +3101,8 @@
     ]
   },
   {
-    "name": "row C77 — placed unmounted with Draggable, mounted, and unmounted at the next frame: the chain's frame start finds the element before it leaves, so the remounted one has no tabindex — Space raises nothing",
-    "because": "drag-drop.ts :136-145 — the frame start comes before the frame end's unmount",
+    "name": "row C77 — placed unmounted with Draggable, mounted, unmounted at the next frame and mounted again: the last element takes the keyboard too — Space lifts",
+    "because": "drag-drop.ts `elementChanged` — a mount however late takes the attributes (row C77, fixed in P109 ISL-031)",
     "params": {
       "draggable": true,
       "mounted": false
@@ -3136,8 +3136,8 @@
     ]
   },
   {
-    "name": "row C77 — Draggable written while off the page starts the chain: the SECOND element, mounted later, takes the tabindex at the next frame start — Space lifts it",
-    "because": "drag-drop.ts :136-145 `whenMounted`",
+    "name": "row C77 — Draggable written while off the page: the SECOND element, mounted later, takes the keyboard — Space lifts it",
+    "because": "drag-drop.ts `elementChanged`",
     "steps": [
       "settle",
       {
@@ -3167,8 +3167,8 @@
     ]
   },
   {
-    "name": "row C77 — five remounts in a row: none of the new elements has a tabindex — Space raises nothing each time",
-    "because": "drag-drop.ts :87-100 — the attributes were put on the first element only",
+    "name": "row C77 — five remounts in a row: every new element takes the keyboard — each Space lifts it or lets it go",
+    "because": "drag-drop.ts `setDraggable`, `elementChanged` — the attributes go on every element while Draggable is on (row C77, fixed in P109 ISL-031)",
     "params": {
       "draggable": true
     },
@@ -3300,8 +3300,8 @@
     ]
   },
   {
-    "name": "row C77 — a hover right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts before the next frame start",
-    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain)",
+    "name": "row C77 — a hover right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts at once",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there)",
     "steps": [
       "settle",
       {
@@ -3407,8 +3407,8 @@
     ]
   },
   {
-    "name": "row C77 — a leave right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts before the next frame start",
-    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain)",
+    "name": "row C77 — a leave right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts at once",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there)",
     "steps": [
       "settle",
       {
@@ -3514,8 +3514,8 @@
     ]
   },
   {
-    "name": "row C77 — a press right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts before the next frame start",
-    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain)",
+    "name": "row C77 — a press right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts at once",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there)",
     "steps": [
       "settle",
       {
@@ -3621,8 +3621,8 @@
     ]
   },
   {
-    "name": "row C77 — a release right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts before the next frame start",
-    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain)",
+    "name": "row C77 — a release right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts at once",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there)",
     "steps": [
       "settle",
       {
@@ -3728,8 +3728,8 @@
     ]
   },
   {
-    "name": "row C77 — a click right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts before the next frame start",
-    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain)",
+    "name": "row C77 — a click right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts at once",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there)",
     "steps": [
       "settle",
       {
@@ -3835,8 +3835,8 @@
     ]
   },
   {
-    "name": "row C77 — a touch right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts before the next frame start",
-    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain)",
+    "name": "row C77 — a touch right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts at once",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there)",
     "steps": [
       "settle",
       {
@@ -3942,8 +3942,8 @@
     ]
   },
   {
-    "name": "row C77 — a lift right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts before the next frame start",
-    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain)",
+    "name": "row C77 — a lift right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts at once",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there)",
     "steps": [
       "settle",
       {
@@ -4049,8 +4049,8 @@
     ]
   },
   {
-    "name": "row C77 — a focus right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts before the next frame start",
-    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain)",
+    "name": "row C77 — a focus right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts at once",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there)",
     "steps": [
       "settle",
       {
@@ -4156,8 +4156,8 @@
     ]
   },
   {
-    "name": "row C77 — a blur right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts before the next frame start",
-    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain)",
+    "name": "row C77 — a blur right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts at once",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there)",
     "steps": [
       "settle",
       {
@@ -4264,8 +4264,8 @@
     ]
   },
   {
-    "name": "row C77 — a key right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts before the next frame start",
-    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain)",
+    "name": "row C77 — a key right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts at once",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there)",
     "steps": [
       "settle",
       {
@@ -5102,8 +5102,8 @@
     ]
   },
   {
-    "name": "row C77 — placed unmounted with Draggable: the frame that finds the element ALSO replaces it (a new Tag) — the attributes go on the one leaving, Space raises nothing even settles later",
-    "because": "drag-drop.ts :136-145 at the frame start, then the paint makes a new element",
+    "name": "row C77 — placed unmounted with Draggable: the frame that mounts the element ALSO replaces it (a new Tag) — the new one takes the keyboard too, Space lifts",
+    "because": "drag-drop.ts `elementChanged` — the new element takes the attributes when it arrives",
     "params": {
       "draggable": true,
       "mounted": false
@@ -5712,7 +5712,7 @@
   },
   {
     "name": "row C77 — Pointer Events off: a hover right after Mounted on meets nothing but makes the element; Draggable written after it in the same frame puts the tabindex on it at once — Space lifts",
-    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain); the keyboard is not a pointer",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there); the keyboard is not a pointer",
     "params": {
       "pointerEventsEnabled": false
     },
@@ -5747,7 +5747,7 @@
   },
   {
     "name": "row C77 — Pointer Events off: a leave right after Mounted on meets nothing but makes the element; Draggable written after it in the same frame puts the tabindex on it at once — Space lifts",
-    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain); the keyboard is not a pointer",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there); the keyboard is not a pointer",
     "params": {
       "pointerEventsEnabled": false
     },
@@ -5782,7 +5782,7 @@
   },
   {
     "name": "row C77 — Pointer Events off: a press right after Mounted on meets nothing but makes the element; Draggable written after it in the same frame puts the tabindex on it at once — Space lifts",
-    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain); the keyboard is not a pointer",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there); the keyboard is not a pointer",
     "params": {
       "pointerEventsEnabled": false
     },
@@ -5817,7 +5817,7 @@
   },
   {
     "name": "row C77 — Pointer Events off: a release right after Mounted on meets nothing but makes the element; Draggable written after it in the same frame puts the tabindex on it at once — Space lifts",
-    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain); the keyboard is not a pointer",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there); the keyboard is not a pointer",
     "params": {
       "pointerEventsEnabled": false
     },
@@ -5852,7 +5852,7 @@
   },
   {
     "name": "row C77 — Pointer Events off: a click right after Mounted on meets nothing but makes the element; Draggable written after it in the same frame puts the tabindex on it at once — Space lifts",
-    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain); the keyboard is not a pointer",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there); the keyboard is not a pointer",
     "params": {
       "pointerEventsEnabled": false
     },
@@ -5887,7 +5887,7 @@
   },
   {
     "name": "row C77 — Pointer Events off: a touch right after Mounted on meets nothing but makes the element; Draggable written after it in the same frame puts the tabindex on it at once — Space lifts",
-    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain); the keyboard is not a pointer",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there); the keyboard is not a pointer",
     "params": {
       "pointerEventsEnabled": false
     },
@@ -5922,7 +5922,7 @@
   },
   {
     "name": "row C77 — Pointer Events off: a lift right after Mounted on meets nothing but makes the element; Draggable written after it in the same frame puts the tabindex on it at once — Space lifts",
-    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain); the keyboard is not a pointer",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there); the keyboard is not a pointer",
     "params": {
       "pointerEventsEnabled": false
     },
@@ -8332,7 +8332,7 @@
   },
   {
     "name": "move in the frame Mounted goes off: its paint takes the element away first — a Draggable write in that frame waits for the next element, which Space then lifts",
-    "because": "adapter.ts `act` — an act paints first; drag-drop.ts :83-110, :136-145",
+    "because": "adapter.ts `act` — an act paints first; drag-drop.ts `setDraggable`, `elementChanged`",
     "params": {
       "acceptFileDrops": true
     },
@@ -8464,7 +8464,7 @@
   },
   {
     "name": "move in the frame Mounted goes off during a drag from the desktop: its paint takes the element away first — a Draggable write in that frame waits for the next element, which Space then lifts — then a let go reads whether the drag went on",
-    "because": "adapter.ts `act` — an act paints first; drag-drop.ts :83-110, :136-145",
+    "because": "adapter.ts `act` — an act paints first; drag-drop.ts `setDraggable`, `elementChanged`",
     "params": {
       "acceptFileDrops": true
     },
@@ -8664,7 +8664,7 @@
   },
   {
     "name": "fileEnter in the frame Mounted goes off: its paint takes the element away first — a Draggable write in that frame waits for the next element, which Space then lifts",
-    "because": "adapter.ts `act` — an act paints first; drag-drop.ts :83-110, :136-145",
+    "because": "adapter.ts `act` — an act paints first; drag-drop.ts `setDraggable`, `elementChanged`",
     "params": {
       "acceptFileDrops": true
     },
@@ -8828,7 +8828,7 @@
   },
   {
     "name": "fileEnter in the frame Mounted goes off: its paint takes the element away first — a Draggable write in that frame waits for the next element, which Space then lifts",
-    "because": "adapter.ts `act` — an act paints first; drag-drop.ts :83-110, :136-145",
+    "because": "adapter.ts `act` — an act paints first; drag-drop.ts `setDraggable`, `elementChanged`",
     "params": {
       "acceptFileDrops": true
     },
@@ -8992,7 +8992,7 @@
   },
   {
     "name": "fileLeave in the frame Mounted goes off: its paint takes the element away first — a Draggable write in that frame waits for the next element, which Space then lifts",
-    "because": "adapter.ts `act` — an act paints first; drag-drop.ts :83-110, :136-145",
+    "because": "adapter.ts `act` — an act paints first; drag-drop.ts `setDraggable`, `elementChanged`",
     "params": {
       "acceptFileDrops": true
     },
@@ -9120,7 +9120,7 @@
   },
   {
     "name": "fileLeave in the frame Mounted goes off during a drag from the desktop: its paint takes the element away first — a Draggable write in that frame waits for the next element, which Space then lifts — then a let go reads whether the drag went on",
-    "because": "adapter.ts `act` — an act paints first; drag-drop.ts :83-110, :136-145",
+    "because": "adapter.ts `act` — an act paints first; drag-drop.ts `setDraggable`, `elementChanged`",
     "params": {
       "acceptFileDrops": true
     },
@@ -9316,7 +9316,7 @@
   },
   {
     "name": "fileDrop in the frame Mounted goes off: its paint takes the element away first — a Draggable write in that frame waits for the next element, which Space then lifts",
-    "because": "adapter.ts `act` — an act paints first; drag-drop.ts :83-110, :136-145",
+    "because": "adapter.ts `act` — an act paints first; drag-drop.ts `setDraggable`, `elementChanged`",
     "params": {
       "acceptFileDrops": true
     },
@@ -9444,7 +9444,7 @@
   },
   {
     "name": "fileDrop in the frame Mounted goes off during a drag from the desktop: its paint takes the element away first — a Draggable write in that frame waits for the next element, which Space then lifts — then a let go reads whether the drag went on",
-    "because": "adapter.ts `act` — an act paints first; drag-drop.ts :83-110, :136-145",
+    "because": "adapter.ts `act` — an act paints first; drag-drop.ts `setDraggable`, `elementChanged`",
     "params": {
       "acceptFileDrops": true
     },
@@ -9947,7 +9947,7 @@
     ]
   },
   {
-    "name": "a leave (no drag) in the frame a remount makes element 2, with the attributes still on element 1 (C77): element 2 takes no keyboard, Space lifts nothing",
+    "name": "a leave (no drag) in the frame a remount makes element 2: element 2 takes the keyboard too (C77, fixed in P109 ISL-031), Space lifts it",
     "because": "drag-drop.ts :83-110 (C77); adapter.ts `act`",
     "params": {
       "draggable": true
@@ -9978,7 +9978,7 @@
     ]
   },
   {
-    "name": "a let go (no drag) in the frame a remount makes element 2, with the attributes still on element 1 (C77): element 2 takes no keyboard, Space lifts nothing",
+    "name": "a let go (no drag) in the frame a remount makes element 2: element 2 takes the keyboard too (C77, fixed in P109 ISL-031), Space lifts it",
     "because": "drag-drop.ts :83-110 (C77); adapter.ts `act`",
     "params": {
       "draggable": true
@@ -86712,7 +86712,7 @@
     ]
   },
   {
-    "name": "the zone side: on a new element with no tabindex (C77), an eaten click that starts and ends its own press cannot take the keyboard: the card keeps it — hidden, Space lifts the card, Enter drops it",
+    "name": "the zone side: on a new element (Draggable's too, C77), an eaten click that starts and ends its own press takes the keyboard from the card — hidden, Space lifts it, Enter lets it go",
     "because": "drag-drop.ts :83-110 (the tabindex goes on the element it found; a new element has none — row C77), :768-780 (Space goes to the element holding the keyboard)",
     "params": {
       "draggable": true,
@@ -86764,7 +86764,7 @@
     ]
   },
   {
-    "name": "the zone side: on a new element with no tabindex (C77), a click that ends its own pending press cannot take the keyboard: hidden, Space lifts nothing",
+    "name": "the zone side: on a new element (Draggable's too, C77), a click that ends its own pending press takes the keyboard: hidden, Space lifts it, Enter lets it go",
     "because": "drag-drop.ts :83-110 (the tabindex goes on the element it found; a new element has none — row C77), :768-780 (Space goes to the element holding the keyboard)",
     "params": {
       "draggable": true,
@@ -86805,7 +86805,7 @@
     ]
   },
   {
-    "name": "the zone side: on a new element with no tabindex (C77), a click that drops a card carried over it cannot take the keyboard: the card keeps it — hidden, Space lifts the card again",
+    "name": "the zone side: on a new element (Draggable's too, C77), a click that drops a card carried over it takes the keyboard from the card — hidden, Space lifts it, Enter lets it go",
     "because": "drag-drop.ts :83-110 (the tabindex goes on the element it found; a new element has none — row C77), :768-780 (Space goes to the element holding the keyboard)",
     "params": {
       "draggable": true,
@@ -86854,7 +86854,7 @@
     ]
   },
   {
-    "name": "the zone side: on a new element with no tabindex (C77), a click that lets a refused card go cannot take the keyboard: the card keeps it — Accept Drops on, hidden, Space lifts the card into it",
+    "name": "the zone side: on a new element (Draggable's too, C77), a click that lets a refused card go takes the keyboard from the card — Accept Drops on, hidden, Space lifts it, Enter lets it go",
     "because": "drag-drop.ts :83-110 (the tabindex goes on the element it found; a new element has none — row C77), :768-780 (Space goes to the element holding the keyboard)",
     "params": {
       "draggable": true,
@@ -98874,7 +98874,7 @@
   },
   {
     "name": "the zone side, an away that mounts the element: nothing under way, mounted again in the act's frame, then the mouse away and Draggable written — in the same frame every gesture ended, then Space: the attributes are on the element the away mounted, so it lifts",
-    "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds, else at the next 60 frame starts), :768-780; s44's paint-branch recipe, read before the next frame",
+    "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element there, and on every later one), :768-780; s44's paint-branch recipe, read before the next frame",
     "params": {
       "draggable": true,
       "dragValue": "me",
@@ -98929,7 +98929,7 @@
   },
   {
     "name": "the zone side, an away that mounts the element: nothing under way, mounted again in the act's frame, then the finger away and Draggable written — in the same frame every gesture ended, then Space: the attributes are on the element the away mounted, so it lifts",
-    "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds, else at the next 60 frame starts), :768-780; s44's paint-branch recipe, read before the next frame",
+    "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element there, and on every later one), :768-780; s44's paint-branch recipe, read before the next frame",
     "params": {
       "draggable": true,
       "dragValue": "me",
@@ -98984,7 +98984,7 @@
   },
   {
     "name": "the zone side, an away that mounts the element: its own mouse press pending, mounted again in the act's frame, then the mouse away and Draggable written — in the same frame every gesture ended, then Space: the attributes are on the element the away mounted, so it lifts",
-    "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds, else at the next 60 frame starts), :768-780; s44's paint-branch recipe, read before the next frame",
+    "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element there, and on every later one), :768-780; s44's paint-branch recipe, read before the next frame",
     "params": {
       "draggable": true,
       "dragValue": "me",
@@ -99042,7 +99042,7 @@
   },
   {
     "name": "the zone side, an away that mounts the element: its own mouse press pending, mounted again in the act's frame, then the finger away and Draggable written — in the same frame every gesture ended, then Space: the attributes are on the element the away mounted, so it lifts",
-    "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds, else at the next 60 frame starts), :768-780; s44's paint-branch recipe, read before the next frame",
+    "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element there, and on every later one), :768-780; s44's paint-branch recipe, read before the next frame",
     "params": {
       "draggable": true,
       "dragValue": "me",
@@ -99100,7 +99100,7 @@
   },
   {
     "name": "the zone side, an away that mounts the element: its own finger held, mounted again in the act's frame, then the mouse away and Draggable written — in the same frame every gesture ended, then Space: the attributes are on the element the away mounted, so it lifts",
-    "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds, else at the next 60 frame starts), :768-780; s44's paint-branch recipe, read before the next frame",
+    "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element there, and on every later one), :768-780; s44's paint-branch recipe, read before the next frame",
     "params": {
       "draggable": true,
       "dragValue": "me",
@@ -99158,7 +99158,7 @@
   },
   {
     "name": "the zone side, an away that mounts the element: its own finger held, mounted again in the act's frame, then the finger away and Draggable written — in the same frame every gesture ended, then Space: the attributes are on the element the away mounted, so it lifts",
-    "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds, else at the next 60 frame starts), :768-780; s44's paint-branch recipe, read before the next frame",
+    "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element there, and on every later one), :768-780; s44's paint-branch recipe, read before the next frame",
     "params": {
       "draggable": true,
       "dragValue": "me",
@@ -99216,7 +99216,7 @@
   },
   {
     "name": "the zone side, an away that mounts the element: its own keyboard lift, mounted again in the act's frame, then the mouse away and Draggable written — in the same frame every gesture ended, then Space: the attributes are on the element the away mounted, so it lifts",
-    "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds, else at the next 60 frame starts), :768-780; s44's paint-branch recipe, read before the next frame",
+    "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element there, and on every later one), :768-780; s44's paint-branch recipe, read before the next frame",
     "params": {
       "draggable": true,
       "dragValue": "me",
@@ -99278,7 +99278,7 @@
   },
   {
     "name": "the zone side, an away that mounts the element: its own keyboard lift, mounted again in the act's frame, then the finger away and Draggable written — in the same frame every gesture ended, then Space: the attributes are on the element the away mounted, so it lifts",
-    "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds, else at the next 60 frame starts), :768-780; s44's paint-branch recipe, read before the next frame",
+    "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element there, and on every later one), :768-780; s44's paint-branch recipe, read before the next frame",
     "params": {
       "draggable": true,
       "dragValue": "me",
@@ -99340,7 +99340,7 @@
   },
   {
     "name": "the zone side, an away that mounts the element: a card carried over it with the mouse, mounted again in the act's frame, then the mouse away and Draggable written — in the same frame every gesture ended, then Space: the attributes are on the element the away mounted, so it lifts",
-    "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds, else at the next 60 frame starts), :768-780; s44's paint-branch recipe, read before the next frame",
+    "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element there, and on every later one), :768-780; s44's paint-branch recipe, read before the next frame",
     "params": {
       "draggable": true,
       "dragValue": "me",
@@ -99406,7 +99406,7 @@
   },
   {
     "name": "the zone side, an away that mounts the element: a card carried over it with the mouse, mounted again in the act's frame, then the finger away and Draggable written — in the same frame every gesture ended, then Space: the attributes are on the element the away mounted, so it lifts",
-    "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds, else at the next 60 frame starts), :768-780; s44's paint-branch recipe, read before the next frame",
+    "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element there, and on every later one), :768-780; s44's paint-branch recipe, read before the next frame",
     "params": {
       "draggable": true,
       "dragValue": "me",
@@ -99472,7 +99472,7 @@
   },
   {
     "name": "the zone side, an away that mounts the element: a card carried from the keyboard into it, mounted again in the act's frame, then the mouse away and Draggable written — in the same frame every gesture ended, then Space: the attributes are on the element the away mounted, so it lifts",
-    "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds, else at the next 60 frame starts), :768-780; s44's paint-branch recipe, read before the next frame",
+    "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element there, and on every later one), :768-780; s44's paint-branch recipe, read before the next frame",
     "params": {
       "draggable": true,
       "dragValue": "me",
@@ -99534,7 +99534,7 @@
   },
   {
     "name": "the zone side, an away that mounts the element: a card carried from the keyboard into it, mounted again in the act's frame, then the finger away and Draggable written — in the same frame every gesture ended, then Space: the attributes are on the element the away mounted, so it lifts",
-    "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element it finds, else at the next 60 frame starts), :768-780; s44's paint-branch recipe, read before the next frame",
+    "because": "drag-drop.ts :83-110 (a Draggable write puts the attributes on the element there, and on every later one), :768-780; s44's paint-branch recipe, read before the next frame",
     "params": {
       "draggable": true,
       "dragValue": "me",
@@ -141385,7 +141385,7 @@
     ]
   },
   {
-    "name": "who holds the keyboard, and the list: listed already, a new Tag (its element has no tabindex, C77), then a click: its press starts and ends but cannot take the keyboard — hidden, Space lifts nothing",
+    "name": "who holds the keyboard, and the list: listed already, a new Tag (Draggable's too, C77), then a click: its press starts and ends and takes the keyboard — hidden, Space lifts it",
     "because": "drag-drop.ts :83-110 — the tabindex is on the old element",
     "params": {
       "draggable": true,
@@ -141425,7 +141425,7 @@
     ]
   },
   {
-    "name": "who holds the keyboard, and the list: a new Tag (its element has no tabindex, C77), then a first click: Focused (C86 fixed), its press starts and ends but takes no keyboard — hidden, Space lifts nothing",
+    "name": "who holds the keyboard, and the list: a new Tag (Draggable's too, C77), then a first click: Focused (C86 fixed), its press starts and ends and takes the keyboard — hidden, Space lifts it",
     "because": "drag-drop.ts :83-110; Group.tsx componentDidMount",
     "params": {
       "draggable": true,
@@ -141495,7 +141495,7 @@
     ]
   },
   {
-    "name": "who holds the keyboard, and the list: C86 fixed, a click ending a press already pending: listed, a new Tag (no tabindex on it, C77), a press, then a click — still listed, no Focused again, the press ends and the keyboard stays off it, so Space lifts nothing",
+    "name": "who holds the keyboard, and the list: C86 fixed, a click ending a press already pending: listed, a new Tag (Draggable's too, C77), a press, then a click — still listed, no Focused again, the press ends and takes the keyboard, so Space lifts it",
     "because": "focus-tracker.ts :127 (a listed Group found again: nothing fires); drag-drop.ts :232-323 (the press already pending: the click's own press starts nothing); C77 (the new element has no tabindex, so it cannot take the keyboard)",
     "params": {
       "draggable": true,
@@ -141664,7 +141664,7 @@
   },
   {
     "name": "who holds the keyboard, and the list: Scroll To Index at a child in a frame with no Draggable waiting: the card keeps the keyboard, and Space lifts it into the Group",
-    "because": "drag-drop.ts :136-145 — no chain, no tabindex",
+    "because": "drag-drop.ts `setDraggable`, `elementChanged` — the attributes go on every element while Draggable is on (row C77, fixed in P109 ISL-031)",
     "params": {},
     "steps": [
       "settle",
@@ -141708,8 +141708,8 @@
     ]
   },
   {
-    "name": "who holds the keyboard, and the list: Scroll To Index at a child in the frame Draggable's chain finds the element: the Group then takes the keyboard, and Space lifts it",
-    "because": "drag-drop.ts :136-145 — the chain finds the element at the frame after the mount",
+    "name": "who holds the keyboard, and the list: Scroll To Index at a child in the frame it mounts with Draggable written while it was off: the Group then takes the keyboard, and Space lifts it",
+    "because": "drag-drop.ts `elementChanged` — a mount however late takes the attributes (row C77, fixed in P109 ISL-031)",
     "params": {
       "mounted": false,
       "draggable": true,
@@ -141747,7 +141747,7 @@
   },
   {
     "name": "who holds the keyboard, and the list: Scroll To Index past the children in a frame with no Draggable waiting: the card keeps the keyboard, and Space lifts it into the Group",
-    "because": "drag-drop.ts :136-145 — no chain, no tabindex",
+    "because": "drag-drop.ts `setDraggable`, `elementChanged` — the attributes go on every element while Draggable is on (row C77, fixed in P109 ISL-031)",
     "params": {},
     "steps": [
       "settle",
@@ -141791,8 +141791,8 @@
     ]
   },
   {
-    "name": "who holds the keyboard, and the list: Scroll To Index past the children in the frame Draggable's chain finds the element: the Group then takes the keyboard, and Space lifts it",
-    "because": "drag-drop.ts :136-145 — the chain finds the element at the frame after the mount",
+    "name": "who holds the keyboard, and the list: Scroll To Index past the children in the frame it mounts with Draggable written while it was off: the Group then takes the keyboard, and Space lifts it",
+    "because": "drag-drop.ts `elementChanged` — a mount however late takes the attributes (row C77, fixed in P109 ISL-031)",
     "params": {
       "mounted": false,
       "draggable": true,
@@ -141830,7 +141830,7 @@
   },
   {
     "name": "who holds the keyboard, and the list: Scroll To Element with nothing in a frame with no Draggable waiting: the card keeps the keyboard, and Space lifts it into the Group",
-    "because": "drag-drop.ts :136-145 — no chain, no tabindex",
+    "because": "drag-drop.ts `setDraggable`, `elementChanged` — the attributes go on every element while Draggable is on (row C77, fixed in P109 ISL-031)",
     "params": {},
     "steps": [
       "settle",
@@ -141870,8 +141870,8 @@
     ]
   },
   {
-    "name": "who holds the keyboard, and the list: Scroll To Element with nothing in the frame Draggable's chain finds the element: the Group then takes the keyboard, and Space lifts it",
-    "because": "drag-drop.ts :136-145 — the chain finds the element at the frame after the mount",
+    "name": "who holds the keyboard, and the list: Scroll To Element with nothing in the frame it mounts with Draggable written while it was off: the Group then takes the keyboard, and Space lifts it",
+    "because": "drag-drop.ts `elementChanged` — a mount however late takes the attributes (row C77, fixed in P109 ISL-031)",
     "params": {
       "mounted": false,
       "draggable": true,
@@ -141905,7 +141905,7 @@
   },
   {
     "name": "who holds the keyboard, and the list: Scroll To Element with a value in a frame with no Draggable waiting: the card keeps the keyboard, and Space lifts it into the Group",
-    "because": "drag-drop.ts :136-145 — no chain, no tabindex",
+    "because": "drag-drop.ts `setDraggable`, `elementChanged` — the attributes go on every element while Draggable is on (row C77, fixed in P109 ISL-031)",
     "params": {},
     "steps": [
       "settle",
@@ -141949,8 +141949,8 @@
     ]
   },
   {
-    "name": "who holds the keyboard, and the list: Scroll To Element with a value in the frame Draggable's chain finds the element: the Group then takes the keyboard, and Space lifts it",
-    "because": "drag-drop.ts :136-145 — the chain finds the element at the frame after the mount",
+    "name": "who holds the keyboard, and the list: Scroll To Element with a value in the frame it mounts with Draggable written while it was off: the Group then takes the keyboard, and Space lifts it",
+    "because": "drag-drop.ts `elementChanged` — a mount however late takes the attributes (row C77, fixed in P109 ISL-031)",
     "params": {
       "mounted": false,
       "draggable": true,
@@ -141988,7 +141988,7 @@
   },
   {
     "name": "the frame end's outcomes together, matrix: a plain frame, with one, two or three of Focus, Scroll To Index and Scroll To Element in it — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame",
-    "because": "the trace prints a frame's outcomes together, in order (group.ts docblock); drag-drop.ts :136-145; focus-tracker.ts; Group.tsx componentDidMount",
+    "because": "the trace prints a frame's outcomes together, in order (group.ts docblock); drag-drop.ts `elementChanged`; focus-tracker.ts; Group.tsx componentDidMount",
     "params": {
       "draggable": true,
       "dragValue": "me"
@@ -145732,7 +145732,7 @@
   },
   {
     "name": "the frame end's outcomes together, matrix: a frame with a new Tag, with one, two or three of Focus, Scroll To Index and Scroll To Element in it — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame",
-    "because": "the trace prints a frame's outcomes together, in order (group.ts docblock); drag-drop.ts :136-145; focus-tracker.ts; Group.tsx componentDidMount",
+    "because": "the trace prints a frame's outcomes together, in order (group.ts docblock); drag-drop.ts `elementChanged`; focus-tracker.ts; Group.tsx componentDidMount",
     "params": {
       "draggable": true,
       "dragValue": "me"
@@ -149652,7 +149652,7 @@
   },
   {
     "name": "the frame end's outcomes together, matrix: the frame Mounted goes off, with one, two or three of Focus, Scroll To Index and Scroll To Element in it — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame",
-    "because": "the trace prints a frame's outcomes together, in order (group.ts docblock); drag-drop.ts :136-145; focus-tracker.ts; Group.tsx componentDidMount",
+    "because": "the trace prints a frame's outcomes together, in order (group.ts docblock); drag-drop.ts `elementChanged`; focus-tracker.ts; Group.tsx componentDidMount",
     "params": {
       "draggable": true,
       "dragValue": "me"
@@ -153836,7 +153836,7 @@
   },
   {
     "name": "C95 — the frame end's outcomes together, matrix: the frame Mounted comes back, with one, two or three of Focus, Scroll To Index and Scroll To Element in it — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame",
-    "because": "the trace prints a frame's outcomes together, in order (group.ts docblock); drag-drop.ts :136-145; focus-tracker.ts; Group.tsx componentDidMount",
+    "because": "the trace prints a frame's outcomes together, in order (group.ts docblock); drag-drop.ts `elementChanged`; focus-tracker.ts; Group.tsx componentDidMount",
     "params": {
       "draggable": true,
       "dragValue": "me"
@@ -157975,8 +157975,8 @@
     ]
   },
   {
-    "name": "the frame end's outcomes together, matrix: the frame Draggable's chain finds the element, with one, two or three of Focus, Scroll To Index and Scroll To Element in it — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame",
-    "because": "the trace prints a frame's outcomes together, in order (group.ts docblock); drag-drop.ts :136-145; focus-tracker.ts; Group.tsx componentDidMount",
+    "name": "the frame end's outcomes together, matrix: the frame it mounts with Draggable written while it was off, with one, two or three of Focus, Scroll To Index and Scroll To Element in it — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame",
+    "because": "the trace prints a frame's outcomes together, in order (group.ts docblock); drag-drop.ts `elementChanged`; focus-tracker.ts; Group.tsx componentDidMount",
     "params": {
       "draggable": true,
       "dragValue": "me"
@@ -162599,8 +162599,8 @@
     ]
   },
   {
-    "name": "C95 — the frame end's outcomes together, matrix: the frame Mounted comes back while Draggable's chain waits, with one, two or three of Focus, Scroll To Index and Scroll To Element in it — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame",
-    "because": "the trace prints a frame's outcomes together, in order (group.ts docblock); drag-drop.ts :136-145; focus-tracker.ts; Group.tsx componentDidMount",
+    "name": "C95 — the frame end's outcomes together, matrix: the frame Mounted comes back with Draggable written while it was off, with one, two or three of Focus, Scroll To Index and Scroll To Element in it — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame",
+    "because": "the trace prints a frame's outcomes together, in order (group.ts docblock); drag-drop.ts `elementChanged`; focus-tracker.ts; Group.tsx componentDidMount",
     "params": {
       "draggable": true,
       "dragValue": "me"
@@ -167179,8 +167179,8 @@
     ]
   },
   {
-    "name": "the frame end's outcomes together, matrix: the frame Draggable's chain finds the element and Mounted goes off, with one, two or three of Focus, Scroll To Index and Scroll To Element in it — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame",
-    "because": "the trace prints a frame's outcomes together, in order (group.ts docblock); drag-drop.ts :136-145; focus-tracker.ts; Group.tsx componentDidMount",
+    "name": "the frame end's outcomes together, matrix: the frame after it mounts with Draggable on, Mounted goes off, with one, two or three of Focus, Scroll To Index and Scroll To Element in it — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame",
+    "because": "the trace prints a frame's outcomes together, in order (group.ts docblock); drag-drop.ts `elementChanged`; focus-tracker.ts; Group.tsx componentDidMount",
     "params": {
       "draggable": true,
       "dragValue": "me"
@@ -172805,8 +172805,8 @@
     ]
   },
   {
-    "name": "the deep run's acts: Draggable written off the page, then 29 frames, then the frame it mounts with Scroll To Index (a child): the chain is spent, so the keyboard cannot be put on it",
-    "because": "drag-drop.ts :136-145 — 60 frame starts, two per frame here",
+    "name": "the deep run's acts: Draggable written off the page, then 29 frames, then the frame it mounts with Scroll To Index (a child): it takes the keyboard however late (C77)",
+    "because": "drag-drop.ts `elementChanged` — a mount however late takes the attributes (row C77, fixed in P109 ISL-031)",
     "params": {
       "mounted": false,
       "draggable": true,
@@ -172876,8 +172876,8 @@
     ]
   },
   {
-    "name": "the deep run's acts: Draggable written off the page, then 29 frames, then the frame it mounts with Scroll To Index (past the children): the chain is spent, so the keyboard cannot be put on it",
-    "because": "drag-drop.ts :136-145 — 60 frame starts, two per frame here",
+    "name": "the deep run's acts: Draggable written off the page, then 29 frames, then the frame it mounts with Scroll To Index (past the children): it takes the keyboard however late (C77)",
+    "because": "drag-drop.ts `elementChanged` — a mount however late takes the attributes (row C77, fixed in P109 ISL-031)",
     "params": {
       "mounted": false,
       "draggable": true,
@@ -172947,8 +172947,8 @@
     ]
   },
   {
-    "name": "the deep run's acts: Draggable written off the page, then 29 frames, then the frame it mounts with Scroll To Element (nothing on Element): the chain is spent, so the keyboard cannot be put on it",
-    "because": "drag-drop.ts :136-145 — 60 frame starts, two per frame here",
+    "name": "the deep run's acts: Draggable written off the page, then 29 frames, then the frame it mounts with Scroll To Element (nothing on Element): it takes the keyboard however late (C77)",
+    "because": "drag-drop.ts `elementChanged` — a mount however late takes the attributes (row C77, fixed in P109 ISL-031)",
     "params": {
       "mounted": false,
       "draggable": true,
@@ -173014,8 +173014,8 @@
     ]
   },
   {
-    "name": "the deep run's acts: Draggable written off the page, then 29 frames, then the frame it mounts with Scroll To Element (a value on Element): the chain is spent, so the keyboard cannot be put on it",
-    "because": "drag-drop.ts :136-145 — 60 frame starts, two per frame here",
+    "name": "the deep run's acts: Draggable written off the page, then 29 frames, then the frame it mounts with Scroll To Element (a value on Element): it takes the keyboard however late (C77)",
+    "because": "drag-drop.ts `elementChanged` — a mount however late takes the attributes (row C77, fixed in P109 ISL-031)",
     "params": {
       "mounted": false,
       "draggable": true,
@@ -173136,8 +173136,8 @@
     ]
   },
   {
-    "name": "the deep run's acts: Scroll To Index, a hover that runs it, and a Focus behind it, in the frame Draggable's chain finds the element — read by the keyboard",
-    "because": "group.ts docblock (the held outcomes); drag-drop.ts :136-145",
+    "name": "the deep run's acts: Scroll To Index, a hover that runs it, and a Focus behind it, in the frame it mounts with Draggable written while it was off — read by the keyboard",
+    "because": "group.ts docblock (the held outcomes); drag-drop.ts `elementChanged`",
     "params": {
       "draggable": true,
       "dragValue": "me"
@@ -173246,8 +173246,8 @@
     ]
   },
   {
-    "name": "the deep run's acts: Scroll To Element, a hover that runs it, and a Focus behind it, in the frame Draggable's chain finds the element — read by the keyboard",
-    "because": "group.ts docblock (the held outcomes); drag-drop.ts :136-145",
+    "name": "the deep run's acts: Scroll To Element, a hover that runs it, and a Focus behind it, in the frame it mounts with Draggable written while it was off — read by the keyboard",
+    "because": "group.ts docblock (the held outcomes); drag-drop.ts `elementChanged`",
     "params": {
       "draggable": true,
       "dragValue": "me"
@@ -173370,7 +173370,7 @@
     ]
   },
   {
-    "name": "the deep run's acts: Scroll To Index, a hover that runs it, and a Focus behind it, in a plain frame, after a remount (a new element the chain put the tabindex on) — read by the keyboard, then a Draggable write before any act",
+    "name": "the deep run's acts: Scroll To Index, a hover that runs it, and a Focus behind it, in a plain frame, after a remount (a new element, Draggable's too) — read by the keyboard, then a Draggable write before any act",
     "because": "group.ts docblock (the held outcomes)",
     "params": {
       "draggable": true,
@@ -173674,8 +173674,8 @@
     ]
   },
   {
-    "name": "the deep run's acts: Scroll To Index at 1, a hover that runs it, and a Focus behind it, in the frame Draggable's chain finds the element — read by the keyboard",
-    "because": "group.ts docblock (the held outcomes); drag-drop.ts :136-145",
+    "name": "the deep run's acts: Scroll To Index at 1, a hover that runs it, and a Focus behind it, in the frame it mounts with Draggable written while it was off — read by the keyboard",
+    "because": "group.ts docblock (the held outcomes); drag-drop.ts `elementChanged`",
     "params": {
       "draggable": true,
       "dragValue": "me"
@@ -173759,8 +173759,8 @@
     ]
   },
   {
-    "name": "the deep run's acts: Scroll To Index at 9, a hover that runs it, and a Focus behind it, in the frame Draggable's chain finds the element — read by the keyboard",
-    "because": "group.ts docblock (the held outcomes); drag-drop.ts :136-145",
+    "name": "the deep run's acts: Scroll To Index at 9, a hover that runs it, and a Focus behind it, in the frame it mounts with Draggable written while it was off — read by the keyboard",
+    "because": "group.ts docblock (the held outcomes); drag-drop.ts `elementChanged`",
     "params": {
       "draggable": true,
       "dragValue": "me"
@@ -173844,7 +173844,7 @@
     ]
   },
   {
-    "name": "the deep run's acts: after a new Tag (its element has no tabindex), Scroll To Index at 1, a hover that runs it, and a Focus behind it — read by the keyboard",
+    "name": "the deep run's acts: after a new Tag (Draggable's too, C77), Scroll To Index at 1, a hover that runs it, and a Focus behind it — read by the keyboard",
     "because": "group.ts docblock (the held outcomes); drag-drop.ts :83-110 (C77)",
     "params": {
       "draggable": true,
@@ -173915,7 +173915,7 @@
     ]
   },
   {
-    "name": "the deep run's acts: after a new Tag (its element has no tabindex), Scroll To Index at 9, a hover that runs it, and a Focus behind it — read by the keyboard",
+    "name": "the deep run's acts: after a new Tag (Draggable's too, C77), Scroll To Index at 9, a hover that runs it, and a Focus behind it — read by the keyboard",
     "because": "group.ts docblock (the held outcomes); drag-drop.ts :83-110 (C77)",
     "params": {
       "draggable": true,
@@ -174160,7 +174160,7 @@
   },
   {
     "name": "the frame end's outcomes together, matrix: the frame Mounted comes back, with Scroll To Index, Scroll To Element or both in it (no Focus) — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame — the twin of row C95's matrix, graded on both targets",
-    "because": "the trace prints a frame's outcomes together, in order (group.ts docblock); drag-drop.ts :136-145; focus-tracker.ts; Group.tsx componentDidMount",
+    "because": "the trace prints a frame's outcomes together, in order (group.ts docblock); drag-drop.ts `elementChanged`; focus-tracker.ts; Group.tsx componentDidMount",
     "params": {
       "draggable": true,
       "dragValue": "me"
@@ -178203,8 +178203,8 @@
     ]
   },
   {
-    "name": "the frame end's outcomes together, matrix: the frame Mounted comes back while Draggable's chain waits, with Scroll To Index, Scroll To Element or both in it (no Focus) — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame — the twin of row C95's matrix, graded on both targets",
-    "because": "the trace prints a frame's outcomes together, in order (group.ts docblock); drag-drop.ts :136-145; focus-tracker.ts; Group.tsx componentDidMount",
+    "name": "the frame end's outcomes together, matrix: the frame Mounted comes back with Draggable written while it was off, with Scroll To Index, Scroll To Element or both in it (no Focus) — each read by who can take the keyboard, a Draggable write before any act, the Group back on the page, a click and the next frame — the twin of row C95's matrix, graded on both targets",
+    "because": "the trace prints a frame's outcomes together, in order (group.ts docblock); drag-drop.ts `elementChanged`; focus-tracker.ts; Group.tsx componentDidMount",
     "params": {
       "draggable": true,
       "dragValue": "me"
@@ -183072,6 +183072,1088 @@
       "settle",
       {
         "advance": 500
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — the Group at Opacity 0 holding the keyboard is given a new Tag, then the pointer moving onto it, then its old Tag back in the same frame: two new elements, the keyboard on neither — hidden, Space lifts nothing",
+    "because": "Text.tsx :50 — a new Tag is a new element; drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": true,
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "set": "as",
+        "value": "div"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — the Group at Opacity 0 holding the keyboard is given a new Tag, then the pointer moving off it, then its old Tag back in the same frame: two new elements, the keyboard on neither — hidden, Space lifts nothing",
+    "because": "Text.tsx :50 — a new Tag is a new element; drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": true,
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "set": "as",
+        "value": "div"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — the Group at Opacity 0 holding the keyboard is given a new Tag, then a mouse press on it, then its old Tag back in the same frame: two new elements, the keyboard on neither — hidden, Space lifts nothing",
+    "because": "Text.tsx :50 — a new Tag is a new element; drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": true,
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "press"
+      },
+      {
+        "set": "as",
+        "value": "div"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — the Group at Opacity 0 holding the keyboard is given a new Tag, then a mouse release, then its old Tag back in the same frame: two new elements, the keyboard on neither — hidden, Space lifts nothing",
+    "because": "Text.tsx :50 — a new Tag is a new element; drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": true,
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "set": "as",
+        "value": "div"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — the Group at Opacity 0 holding the keyboard is given a new Tag, then a click on it, then its old Tag back in the same frame: two new elements, the keyboard on neither — hidden, Space lifts nothing",
+    "because": "Text.tsx :50 — a new Tag is a new element; drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": true,
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "click"
+      },
+      {
+        "set": "as",
+        "value": "div"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — the Group at Opacity 0 holding the keyboard is given a new Tag, then a finger going down on it, then its old Tag back in the same frame: two new elements, the keyboard on neither — hidden, Space lifts nothing",
+    "because": "Text.tsx :50 — a new Tag is a new element; drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": true,
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "set": "as",
+        "value": "div"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — the Group at Opacity 0 holding the keyboard is given a new Tag, then the finger coming up, then its old Tag back in the same frame: two new elements, the keyboard on neither — hidden, Space lifts nothing",
+    "because": "Text.tsx :50 — a new Tag is a new element; drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": true,
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "set": "as",
+        "value": "div"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — the Group holding the keyboard is hidden, given a new Tag, then the keyboard put on it, then its old Tag back in the same frame: two new elements, the keyboard on neither (hidden, neither takes it) — Space lifts nothing",
+    "because": "Text.tsx :50 — a new Tag is a new element; drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "as",
+        "value": "div"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — the Group holding the keyboard is given a new Tag, then the keyboard taken off it, then its old Tag back in the same frame: two new elements, the keyboard on neither — hidden, Space lifts nothing",
+    "because": "Text.tsx :50 — a new Tag is a new element; drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "set": "as",
+        "value": "div"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — the Group holding the keyboard is hidden, given a new Tag, then Space, then its old Tag back in the same frame: two new elements, the keyboard on neither (hidden, neither takes it) — Space lifts nothing",
+    "because": "Text.tsx :50 — a new Tag is a new element; drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      {
+        "set": "as",
+        "value": "div"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — the Group holding the keyboard is given a new Tag, then the mouse moving off it onto nothing, then its old Tag back in the same frame: two new elements, the keyboard on neither — hidden, Space lifts nothing",
+    "because": "Text.tsx :50 — a new Tag is a new element; drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "away",
+        "value": "mouse"
+      },
+      {
+        "set": "as",
+        "value": "div"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — the Group holding the keyboard is given a new Tag, then a drag from the desktop leaving, then its old Tag back in the same frame: two new elements, the keyboard on neither — hidden, Space lifts nothing",
+    "because": "Text.tsx :50 — a new Tag is a new element; drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "fileLeave"
+      },
+      {
+        "set": "as",
+        "value": "div"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — the Group holding the keyboard is given a new Tag, then a drag from the desktop let go, then its old Tag back in the same frame: two new elements, the keyboard on neither — hidden, Space lifts nothing",
+    "because": "Text.tsx :50 — a new Tag is a new element; drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "fileDrop"
+      },
+      {
+        "set": "as",
+        "value": "div"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the Group holding the keyboard is pressed (a drag pending), then the card beside it is picked up from the keyboard: the keyboard goes to the card — released and hidden, Space lifts the card, not the Group",
+    "because": "drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "press"
+      },
+      {
+        "act": "pickUp",
+        "value": {
+          "dragValue": "card-1",
+          "dragKind": "card"
+        }
+      },
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the Group not Draggable, a card beside it grabbed and moved over it, then a click on it drops the card: the Group takes no keyboard and the card keeps it — Draggable on and hidden, Space lifts the card into it (Drag Over)",
+    "because": "drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": false,
+      "acceptDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "grab",
+        "value": {
+          "dragValue": "card-1",
+          "dragKind": "card"
+        }
+      },
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the Group not Draggable, taken off the page and put back, is pressed as it mounts: it takes no keyboard — Draggable on and hidden, Space lifts nothing",
+    "because": "drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the Group not Draggable, taken off the page and put back, is clicked as it mounts: it takes no keyboard — Draggable on and hidden, Space lifts nothing",
+    "because": "drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a Draggable Group taken off the page and put back is given the keyboard as it mounts: its new element takes it — hidden, Space lifts it",
+    "because": "drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the Group not Draggable, taken off the page and put back, is given the keyboard as it mounts: it cannot take it — Draggable on and hidden, Space lifts nothing",
+    "because": "drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a Draggable Group taken off the page and put back: Space as it mounts lifts its new element, and Space again, hidden, cancels the lift",
+    "because": "drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the Group not Draggable, taken off the page and put back: Space as it mounts lifts nothing and takes no keyboard — Draggable on and hidden, Space lifts nothing",
+    "because": "drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a Draggable Group taken off the page and put back: a key as it mounts puts the keyboard on its new element — hidden, Space lifts it",
+    "because": "drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "key",
+        "value": "x"
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the Group not Draggable: a card beside it picked up from the keyboard, then Escape — the keyboard stays on the card; Draggable on and hidden, Space lifts the card again, not the Group",
+    "because": "drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pickUp",
+        "value": {
+          "dragValue": "card-1",
+          "dragKind": "card"
+        }
+      },
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the Group not Draggable: a card beside it grabbed, then a click on the Group ends the carry — the Group takes no keyboard and the card keeps it; Draggable on and hidden, Space lifts the card, not the Group",
+    "because": "drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "grab",
+        "value": {
+          "dragValue": "card-1",
+          "dragKind": "card"
+        }
+      },
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a card beside the Group carried from the keyboard while the Group is off the page; it comes back and is clicked as it mounts: its new element takes the keyboard — hidden, Escape cancels the card and Space lifts the Group",
+    "because": "drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "pickUp",
+        "value": {
+          "dragValue": "card-1",
+          "dragKind": "card"
+        }
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — the Group's second element (a new Tag) holding the keyboard: its own mouse drag let go over nothing, then a click the swallow eats (its press starting and ending a pending drag) — it keeps the keyboard; hidden, Space lifts it",
+    "because": "drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "press"
+      },
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a card beside the Group carried from the keyboard while the Group is off the page; it comes back and is pressed as it mounts: its new element takes the keyboard — hidden, Escape cancels the card and Space lifts the Group",
+    "because": "drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "pickUp",
+        "value": {
+          "dragValue": "card-1",
+          "dragKind": "card"
+        }
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a Group's second element (a new Tag) given the keyboard by a key, then clicked twice (each press starting and ending a pending drag): it keeps the keyboard — hidden, Space lifts it",
+    "because": "drag-drop.ts `elementChanged` (row C77, fixed in P109 ISL-031): every element of a Draggable takes the keyboard; a new element holds it only once something puts it there",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "x"
+      },
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
       },
       "settle"
     ]

@@ -69,9 +69,8 @@ type State = {
   onPage: boolean;
   /** which element is on the page — a new one each time one is made (a mount, or a Source that moves between file and embed) */
   elem: number;
-  attrsOn: number;
-  chain: number;
-  elementFocused: boolean;
+  /** the element that holds the keyboard, or -1 — a new element never does (row C77, P109 s31: so a paint writes nothing about it) */
+  focusedElem: number;
   visible: boolean;
   opacityZero: boolean;
   peStyle: 'auto' | 'none' | undefined;
@@ -187,7 +186,6 @@ type Act = { set: Partial<State>; send: Val[]; emit: Pulse[]; after?: Array<{ ms
 
 const NOTHING: Send = { send: [] };
 const NONE: Act = { set: {}, send: [], emit: [] };
-const FRAMES = 60;
 /** react-component-node.ts :2028 — the most that wait for the component */
 const WAIT_CAP = 16;
 /** where the video ends, in seconds (the face's MEDIA_END): `ended` puts Playback Position there */
@@ -214,9 +212,13 @@ export const Video = defineNode({
   // v2 (P109 ISL-038, s29): a key during a keyboard carry leaves a zone taken off the page first, so Space cancels (row C83)
   // v3 (P109 ISL-038, s29): a file drop zone tracks itself — an enter on a new element starts the count again, and Accept File Drops off or leaving the page turns Is Dragging Over off (row C81)
   // v4 (P109 ISL-031, s30): a drag never takes its own node as its zone — a keyboard lift does not start in itself, Enter or Space then cancels, and a pointer drag over a new element of its own finds no zone (row C78)
-  version: 4,
+  // v5 (P109 ISL-031, s30–31): every element of a Draggable node takes the keyboard — a remount, a new Tag or a mount however late gets the attributes (row C77); which element is on the page is the paint's sync (`synced`), and the keyboard is held by an element (`focusedElem`), so a paint writes nothing about it
+  version: 5,
   source: 'packages/noodl-viewer-react/src/nodes/visual/video.ts',
   needs: ['person', 'clock'],
+  // the page's syncs (spec.ts `synced`): which element is on the page, written only by a paint. Not branches (row C77, P109 s31):
+  // with every element of a Draggable taking the keyboard, whether an act's paint or the frame end made the element is not a branch
+  synced: ['onPage', 'elem'],
   worldPool: { advances: [0, 1, 499, 500, 1000] },
   // video.ts :341-344 `outcomeOutputs({ done, failure })` — the four actions share them
   outcomes: ['done', 'failure'],
@@ -225,9 +227,7 @@ export const Video = defineNode({
     mounted: true,
     onPage: false,
     elem: 0,
-    attrsOn: -1,
-    chain: 0,
-    elementFocused: false,
+    focusedElem: -1,
     visible: true,
     opacityZero: false,
     peStyle: undefined,
@@ -469,10 +469,9 @@ export const Video = defineNode({
     opacity: (_s, v) => ({ set: { opacityZero: v === 0 }, send: [] }),
     pointerEventsMode: (s, v) => ({ set: { peStyle: v === 'inherit' ? undefined : s.peEnabled === false ? 'none' : 'auto' }, send: [] }),
     pointerEventsEnabled: (_s, v) => ({ set: { peEnabled: !!v, peStyle: v ? 'auto' : 'none' }, send: [] }),
-    draggable: (s, v) => {
-      if (v) return { set: { draggable: true, ...(s.onPage ? { attrsOn: s.elem } : { chain: Math.max(s.chain, FRAMES) }) }, send: [] };
-      return { set: { draggable: false, ...(s.onPage && s.attrsOn === s.elem ? { attrsOn: -1 } : {}) }, send: [] };
-    },
+    // drag-drop.ts `setDraggable`, `elementChanged` — the attributes go on every element the node has while Draggable is on (a
+    // remount, a new Tag, a mount however late), and come off the one on the page with it (row C77, fixed in P109 ISL-031)
+    draggable: (_s, v) => ({ set: { draggable: !!v }, send: [] }),
     // read by the zone it is dropped on: this page's only zone is itself, and a drag never takes its own node (C78, fixed in P109 ISL-031)
     dragValue: () => NOTHING,
     dragKind: () => NOTHING,
@@ -518,13 +517,10 @@ export const Video = defineNode({
         return NOTHING;
       }
     },
-    // the frame's end: `whenMounted`'s two frame starts, then the paint (which runs what waited, at a mount); the frame's outcomes in
-    // the order they were resolved (`ran` first)
+    // the frame's end: the paint (which runs what waited, at a mount); the frame's outcomes in the order they were resolved (`ran` first)
     afterInputs: (s) => {
-      const a = chainCheck(s);
-      const b = chainCheck({ ...s, ...a });
-      const p = painted({ ...s, ...a, ...b });
-      return toPatch({ set: { ...a, ...b, ...p.set, ran: [] }, send: p.send, emit: p.emit, outcomes: [...s.ran, ...(p.outcomes ?? [])] });
+      const p = painted(s);
+      return toPatch({ set: { ...p.set, ran: [] }, send: p.send, emit: p.emit, outcomes: [...s.ran, ...(p.outcomes ?? [])] });
     },
     person: {
       hover: (s) => pointerAct(s, (p) => (inEmbed(p) ? NONE : hits(p) ? { ...NONE, emit: ['hoverStart', 'pointerEnter'] } : NONE)),
@@ -564,13 +560,13 @@ export const Video = defineNode({
         return join(activation(p), hits(p) ? { ...up, emit: [...up.emit, 'pointerUp'] } : up);
       })),
       focus: (s) => onPainted(s, (p) => ({ ...NONE, set: takesKeyboard(p) })),
-      blur: (s) => onPainted(s, (p) => (p.elementFocused ? { ...NONE, set: { elementFocused: false } } : NONE)),
+      blur: (s) => onPainted(s, (p) => (holdsKeyboard(p) ? { ...NONE, set: { focusedElem: -1 } } : NONE)),
       // a key other than Escape is an activation
       key: (s, _i, value) => keepsActivation(s, onPainted(s, (p) => {
         const f = takesKeyboard(p);
         // the keyboard on an embed: the key goes into the embedded page
         const act = activation(p, value !== 'Escape');
-        if (p.kind === 'embed' && { ...p, ...f }.elementFocused) return join(act, { ...NONE, set: f });
+        if (p.kind === 'embed' && holdsKeyboard({ ...p, ...f })) return join(act, { ...NONE, set: f });
         const k = keyDown({ ...p, ...f }, String(value));
         return join(act, { ...k, set: { ...f, ...k.set } });
       })),
@@ -704,7 +700,7 @@ function heldElement(s: Readonly<State>): Partial<State> {
 
 function paintedElement(s: Readonly<State>): Act {
   if (s.mounted && !s.onPage) {
-    const made = madeElement(s, { onPage: true, elem: s.elem + 1, elementFocused: false, wantToPlay: false, canPlay: false });
+    const made = madeElement(s, { onPage: true, elem: s.elem + 1, wantToPlay: false, canPlay: false });
     const at = { ...s, ...made.set };
     const f = flushed(at);
     return { set: { ...made.set, ...f.set }, send: [...made.send, ...f.send], emit: ['didMount', ...f.emit], outcomes: f.outcomes };
@@ -712,14 +708,14 @@ function paintedElement(s: Readonly<State>): Act {
   if (!s.mounted && s.onPage) {
     const gone: Act = s.kind === 'video' ? { ...NONE, set: { domElement: null }, send: ['onVideoElementCreated'] } : NONE;
     const dark = fileDark(s);
-    return { ...gone, set: { onPage: false, elementFocused: false, ...gone.set, ...dark.set }, send: [...gone.send, ...dark.send], emit: ['willUnmount'] };
+    return { ...gone, set: { onPage: false, ...gone.set, ...dark.set }, send: [...gone.send, ...dark.send], emit: ['willUnmount'] };
   }
   if (!s.onPage) return NONE;
   const kind = kindOf(s.source);
   if (kind !== s.kind) {
     // the component stays; the old element goes (a `<video>`'s ref is called with null) and a new one is made
     const gone: Act = s.kind === 'video' ? { ...NONE, set: { domElement: null }, send: ['onVideoElementCreated'] } : NONE;
-    return join(gone, madeElement(s, { elem: s.elem + 1, elementFocused: false }));
+    return join(gone, madeElement(s, { elem: s.elem + 1 }));
   }
   if (kind === 'embed') return NONE;
   const srcAttr = srcAttrOf(s);
@@ -963,15 +959,20 @@ function hits(s: Readonly<State>): boolean {
   return s.onPage && s.visible && !s.opacityZero && s.peStyle !== 'none';
 }
 
+/** The element on the page holds the keyboard: the one that took it is still there. */
+function holdsKeyboard(s: Readonly<State>): boolean {
+  return s.onPage && s.focusedElem === s.elem;
+}
+
 /** `el.focus()` — the element takes the keyboard when it has the module's tabindex and can be seen; it keeps it once it has it. */
 function takesKeyboard(s: Readonly<State>): Partial<State> {
-  if (s.elementFocused) return {};
-  return s.onPage && s.visible && (s.kind === 'embed' || s.attrsOn === s.elem) ? { elementFocused: true, cardFocused: -1 } : {};
+  if (holdsKeyboard(s)) return {};
+  return s.onPage && s.visible && (s.kind === 'embed' || s.draggable) ? { focusedElem: s.elem, cardFocused: -1 } : {};
 }
 
 /** The card's element takes the keyboard (it has drag-drop.ts's tabindex): off the Video, onto card `i`. */
 function cardTakesKeyboard(s: Readonly<State>, i: number): Partial<State> {
-  return { elementFocused: false, cardFocused: i };
+  return { focusedElem: -1, cardFocused: i };
 }
 
 /** A pointer act on the painted page. */
@@ -1097,12 +1098,6 @@ function firstFile(s: Readonly<State>, key: 'name' | 'type' | 'size'): unknown {
   return f && f[key];
 }
 
-/** `whenMounted` at a frame's start (drag-drop.ts :136-145): the element on the page takes the attributes; none, one frame fewer. */
-function chainCheck(s: Readonly<State>): Partial<State> {
-  if (s.chain <= 0) return {};
-  return s.onPage ? { attrsOn: s.elem, chain: 0 } : { chain: s.chain - 1 };
-}
-
 /** drag-drop.ts :173-183 */
 function holds(s: Readonly<State>, input: 'mouse' | 'touch'): boolean {
   const mode = s.holdToDrag || 'touch';
@@ -1191,12 +1186,12 @@ function zoneFor(s: Readonly<State>): boolean {
 function keyDown(s: Readonly<State>, key: string): Act {
   if (!busy(s)) {
     // Space on a card that holds the keyboard (the Video did not take it): the card's `keyboardLift`
-    if (key === ' ' && !s.elementFocused && s.cardFocused >= 0) return cardLifted(s, s.cardFocused);
-    if (key !== ' ' || !s.elementFocused || !s.draggable || !s.onPage) return NONE;
+    if (key === ' ' && !holdsKeyboard(s) && s.cardFocused >= 0) return cardLifted(s, s.cardFocused);
+    if (key !== ' ' || !holdsKeyboard(s) || !s.draggable) return NONE;
     // Space on the live, Draggable element that holds the keyboard: `keyboardLift` — never into itself (C78, fixed in P109 ISL-031),
     // and no other zone on this page takes it
     // it holds the keyboard: written whether the key act just put it there or it was there (one branch either way)
-    return { set: { phase: 'lifted', input: 'keyboard', isLifted: true, elementFocused: true, cardFocused: -1 }, send: ['isLifted'], emit: ['pickedUp'] };
+    return { set: { phase: 'lifted', input: 'keyboard', isLifted: true, focusedElem: s.elem, cardFocused: -1 }, send: ['isLifted'], emit: ['pickedUp'] };
   }
   return keyDuringGesture(s, key);
 }

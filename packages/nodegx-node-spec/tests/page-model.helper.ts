@@ -127,7 +127,7 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
     held: {}
   },
   Text: {
-    node: ['mounted', 'tag', 'chain', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'phase', 'input', 'inZone', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile'],
+    node: ['mounted', 'tag', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'phase', 'input', 'inZone', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile'],
     attr: {
       onPage,
       // an element's type cannot change: presetting it would claim an element the page does not have
@@ -135,40 +135,39 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
     },
     element: { elem: { changesWith: ['onPage', 'shownTag'] } },
     // s50 — a file dragged from the desktop: the files it carries and the element it is over are the browser's drag, moved by a person
-    held: { elementFocused: keyboard, attrsOn: { keeps: 'what a module put on the element' }, fileCarry: { keeps: 'a drag from outside the page' }, fileOn: { keeps: 'a drag from outside the page' },
+    held: { focusedElem: keyboard, fileCarry: { keeps: 'a drag from outside the page' }, fileOn: { keeps: 'a drag from outside the page' },
       // s51 — the zone side: a card beside it holds the keyboard (where the pointer is, and where its own drag started, went with C78)
       cardFocused: keyboard
     },
-    // drag-drop.ts :136-145 `whenMounted` counts frame starts until the node has an element
-    frameEnd: ['chain', ...FILE_DROP_LEAVES],
-    elementCalls: { 'on.draggable': ['onPage', 'elem', 'attrsOn'], 'on.acceptDrops': [], 'world.timer': ['onPage', 'elem'] }
+    frameEnd: [...FILE_DROP_LEAVES],
+    elementCalls: { 'on.acceptDrops': [], 'world.timer': ['onPage', 'elem'] }
   },
   // s53 — the Text's model with no Tag: the element is always a `<div>`, so only a mount makes a new one
   Circle: {
-    node: ['mounted', 'chain', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'phase', 'input', 'inZone', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile'],
+    node: ['mounted', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'phase', 'input', 'inZone', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile'],
     attr: { onPage },
     element: { elem: { changesWith: ['onPage'] } },
-    held: { elementFocused: keyboard, attrsOn: { keeps: 'what a module put on the element' }, fileCarry: { keeps: 'a drag from outside the page' }, fileOn: { keeps: 'a drag from outside the page' },
+    held: { focusedElem: keyboard, fileCarry: { keeps: 'a drag from outside the page' }, fileOn: { keeps: 'a drag from outside the page' },
       cardFocused: keyboard
     },
-    frameEnd: ['chain', ...FILE_DROP_LEAVES],
-    elementCalls: { 'on.draggable': ['onPage', 'elem', 'attrsOn'], 'on.acceptDrops': [], 'world.timer': ['onPage', 'elem'] }
+    frameEnd: [...FILE_DROP_LEAVES],
+    elementCalls: { 'on.acceptDrops': [], 'world.timer': ['onPage', 'elem'] }
   },
   // s53 — the Shape's model, and the picture: the element's source and Source Set as written (node), the last failure's reason
   Image: {
-    node: ['mounted', 'chain', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'phase', 'input', 'inZone', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile', 'src', 'srcSet', 'imageError'],
+    node: ['mounted', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'phase', 'input', 'inZone', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile', 'src', 'srcSet', 'imageError'],
     attr: { onPage },
     element: { elem: { changesWith: ['onPage'] } },
-    held: { elementFocused: keyboard, attrsOn: { keeps: 'what a module put on the element' }, fileCarry: { keeps: 'a drag from outside the page' }, fileOn: { keeps: 'a drag from outside the page' },
+    held: { focusedElem: keyboard, fileCarry: { keeps: 'a drag from outside the page' }, fileOn: { keeps: 'a drag from outside the page' },
       cardFocused: keyboard
     },
-    frameEnd: ['chain', ...FILE_DROP_LEAVES],
-    elementCalls: { 'on.draggable': ['onPage', 'elem', 'attrsOn'], 'on.acceptDrops': [], 'world.timer': ['onPage', 'elem'] }
+    frameEnd: [...FILE_DROP_LEAVES],
+    elementCalls: { 'on.acceptDrops': [], 'world.timer': ['onPage', 'elem'] }
   },
   // s54 — the Image's model, and the Video's: the element a Source draws (an embed or a `<video>`: a new element without a mount, as the
   // Text's Tag) with its `src` and flags, the media element the browser holds, and the component the node calls
   Video: {
-    node: ['mounted', 'chain', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'phase', 'input', 'inZone', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile',
+    node: ['mounted', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'phase', 'input', 'inZone', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile',
       'source', 'startTime', 'endTime', 'muted', 'autoplay', 'loop', 'wantToPlay', 'canPlay', 'timeOut', 'videoWidth', 'videoHeight', 'playbackError', 'domElement', 'waiting', 'ran'],
     attr: {
       onPage,
@@ -181,18 +180,17 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
       elLoop: { follows: (s) => (s.onPage && videoKind(s.source) === 'video' ? !!s.loop : KEEP) }
     },
     element: { elem: { changesWith: ['onPage', 'kind'] } },
-    held: { elementFocused: keyboard, attrsOn: { keeps: 'what a module put on the element' }, fileCarry: { keeps: 'a drag from outside the page' }, fileOn: { keeps: 'a drag from outside the page' },
+    held: { focusedElem: keyboard, fileCarry: { keeps: 'a drag from outside the page' }, fileOn: { keeps: 'a drag from outside the page' },
       cardFocused: keyboard,
       paused: media, position: media, ready: media, loading: media, failed: media, pending: media, canAutoplay: media, atEnd: media, width: media, height: media,
       activated: { keeps: "a person's activation" }
     },
-    // `whenMounted`'s chain; at a mount a new component (Video.tsx :115-127: it wants nothing and has seen no load) runs what waited
+    // at a mount a new component (Video.tsx :115-127: it wants nothing and has seen no load) runs what waited
     // (`_flushPendingInnerActions`) and reports it in order; a new `<video>` is DOM Element (its ref), one that goes is nothing; a load
     // puts the media at 0, which a `timeupdate` sends
-    frameEnd: ['chain', 'wantToPlay', 'canPlay', 'waiting', 'ran', 'domElement', 'timeOut', ...FILE_DROP_LEAVES],
+    frameEnd: ['wantToPlay', 'canPlay', 'waiting', 'ran', 'domElement', 'timeOut', ...FILE_DROP_LEAVES],
     // the actions and Source Object call the component, which calls its element: what it is, whether it may play, where it is
     elementCalls: {
-      'on.draggable': ['onPage', 'elem', 'attrsOn'],
       'on.acceptDrops': [],
       'world.timer': ['onPage', 'elem'],
       'on.play': VIDEO_CALL,
@@ -205,24 +203,24 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
   // s52 — the Text's model with the Group's additions: the focus tracker's list (the viewer's, moved by Focus and by clicks), the
   // element the component mounted with (the tracker finds the node on it, C86), the gesture's index, Block Pointer Events, the scrolls
   Group: {
-    node: ['mounted', 'tag', 'chain', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'blocks', 'draggable', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'phase', 'input', 'inZone', 'index', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile', 'scrollIndex', 'scrollElement', 'scheduled', 'waiting', 'ran'],
+    node: ['mounted', 'tag', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'blocks', 'draggable', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'phase', 'input', 'inZone', 'index', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile', 'scrollIndex', 'scrollElement', 'scheduled', 'waiting', 'ran'],
     attr: {
       onPage,
       shownTag: { follows: (s) => (s.onPage ? s.tag : KEEP), preset: false }
     },
     // Group.tsx's root ref puts the node on every element it meets: a mount, and since C86's fix (P109, the Group v3) a new Tag too
     element: { elem: { changesWith: ['onPage', 'shownTag'] }, stampOn: { changesWith: ['onPage', 'shownTag'] } },
-    held: { elementFocused: keyboard, attrsOn: { keeps: 'what a module put on the element' }, fileCarry: { keeps: 'a drag from outside the page' }, fileOn: { keeps: 'a drag from outside the page' },
+    held: { focusedElem: keyboard, fileCarry: { keeps: 'a drag from outside the page' }, fileOn: { keeps: 'a drag from outside the page' },
       cardFocused: keyboard,
       // focus-tracker.ts — the viewer's list of focused nodes: a Group is not focusable, so this is its keyboard focus
       listed: keyboard
     },
-    // `whenMounted`'s chain; the frame's scrolls (`scheduleAfterInputsHaveUpdated`), the ones waiting for the component, and the
+    // the frame's scrolls (`scheduleAfterInputsHaveUpdated`), the ones waiting for the component, and the
     // outcomes the frame resolved before its end (reported there, in order)
-    frameEnd: ['chain', 'scheduled', 'waiting', 'ran', ...FILE_DROP_LEAVES],
+    frameEnd: ['scheduled', 'waiting', 'ran', ...FILE_DROP_LEAVES],
     // the Focus action asks the tracker's list, and (v2, R16) whether the Group is on the page; the hold timer's lift meets the page
     // and drains the frame's scrolls
-    elementCalls: { 'on.draggable': ['onPage', 'elem', 'attrsOn'], 'on.acceptDrops': [], 'on.focus': ['listed', 'onPage'], 'world.timer': ['onPage', 'elem'] }
+    elementCalls: { 'on.acceptDrops': [], 'on.focus': ['listed', 'onPage'], 'world.timer': ['onPage', 'elem'] }
   },
   'net.noodl.controls.textinput': {
     node: ['fieldType', 'runOnChange', 'maxLength', 'textToInsert', 'text', 'startValue', 'out', 'wire', 'announced', 'hasAnnounced', 'queue', 'blocksPointer', 'opacityZero', ...CONTROL_NODE],

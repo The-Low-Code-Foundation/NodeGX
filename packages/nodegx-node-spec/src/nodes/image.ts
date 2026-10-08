@@ -43,12 +43,9 @@ type State = {
   onPage: boolean;
   /** which element is on the page — a new one each time one is made (a mount) */
   elem: number;
-  /** the element the module's `tabindex` and `aria-roledescription` are on (drag-drop.ts :87-100), or none */
-  attrsOn: number;
-  /** `whenMounted`'s frame starts left (:136-145): 60 at a Draggable written with no element; 0 when none is waiting */
-  chain: number;
-  /** the element holds the keyboard (`document.activeElement`) */
-  elementFocused: boolean;
+  /** the element that holds the keyboard (`document.activeElement`), or -1 — a new element never does (row C77, P109 s31: so a paint
+   * writes nothing about the keyboard) */
+  focusedElem: number;
   /** the hit test (Image.tsx :53-55, :366-375, :772-793) */
   visible: boolean;
   opacityZero: boolean;
@@ -110,8 +107,6 @@ type Act = { set: Partial<State>; send: Val[]; emit: Pulse[]; after?: Array<{ ms
 
 const NOTHING: Send = { send: [] };
 const NONE: Act = { set: {}, send: [], emit: [] };
-/** drag-drop.ts :136 — `whenMounted`'s budget */
-const FRAMES = 60;
 const KEYS = [' ', 'Enter', 'Escape', 'Tab', 'ArrowRight', 'ArrowDown', 'x'] as const;
 /** what a drag from the desktop carries: an image (its extension upper-case), a PDF, both, a file of no known type, or no file (text) */
 const PNG = { $file: { name: 'photo.PNG', type: 'image/png', size: 3 } };
@@ -127,9 +122,13 @@ export const Image = defineNode({
   // v2 (P109 ISL-038, s29): a key during a keyboard carry leaves a zone taken off the page first, so Space cancels (row C83)
   // v3 (P109 ISL-038, s29): a file drop zone tracks itself — an enter on a new element starts the count again, and Accept File Drops off or leaving the page turns Is Dragging Over off (row C81)
   // v4 (P109 ISL-031, s30): a drag never takes its own node as its zone — a keyboard lift does not start in itself, Enter or Space then cancels, and a pointer drag over a new element of its own finds no zone (row C78)
-  version: 4,
+  // v5 (P109 ISL-031, s30–31): every element of a Draggable node takes the keyboard — a remount, a new Tag or a mount however late gets the attributes (row C77); which element is on the page is the paint's sync (`synced`), and the keyboard is held by an element (`focusedElem`), so a paint writes nothing about it
+  version: 5,
   source: 'packages/noodl-viewer-react/src/nodes/visual/image.ts',
   needs: ['person', 'clock'],
+  // the page's syncs (spec.ts `synced`): which element is on the page, written only by a paint. Not branches (row C77, P109 s31):
+  // with every element of a Draggable taking the keyboard, whether an act's paint or the frame end made the element is not a branch
+  synced: ['onPage', 'elem'],
   // the hold timer: the default half second, either side of it, a second (Hold Time 1), and the turn that unswallows a click
   worldPool: { advances: [0, 1, 499, 500, 1000] },
 
@@ -137,9 +136,7 @@ export const Image = defineNode({
     mounted: true,
     onPage: false,
     elem: 0,
-    attrsOn: -1,
-    chain: 0,
-    elementFocused: false,
+    focusedElem: -1,
     visible: true,
     opacityZero: false,
     peStyle: undefined,
@@ -343,12 +340,9 @@ export const Image = defineNode({
     pointerEventsMode: (s, v) => ({ set: { peStyle: v === 'inherit' ? undefined : s.peEnabled === false ? 'none' : 'auto' }, send: [] }),
     // :787-793 — written whatever the mode
     pointerEventsEnabled: (_s, v) => ({ set: { peEnabled: !!v, peStyle: v ? 'auto' : 'none' }, send: [] }),
-    // drag-drop.ts :83-110 — on: the attributes on the element now, or at the start of each of the next 60 frames; off: taken
-    // off the element they were added to, when it is the one on the page
-    draggable: (s, v) => {
-      if (v) return { set: { draggable: true, ...(s.onPage ? { attrsOn: s.elem } : { chain: Math.max(s.chain, FRAMES) }) }, send: [] };
-      return { set: { draggable: false, ...(s.onPage && s.attrsOn === s.elem ? { attrsOn: -1 } : {}) }, send: [] };
-    },
+    // drag-drop.ts `setDraggable`, `elementChanged` — the attributes go on every element the node has while Draggable is on (a
+    // remount, a new Tag, a mount however late), and come off the one on the page with it (row C77, fixed in P109 ISL-031)
+    draggable: (_s, v) => ({ set: { draggable: !!v }, send: [] }),
     // read by the zone it is dropped on: this page's only zone is itself, and a drag never takes its own node (C78, fixed in P109 ISL-031)
     dragValue: () => NOTHING,
     dragKind: () => NOTHING,
@@ -381,16 +375,8 @@ export const Image = defineNode({
         return NOTHING;
       }
     },
-    // every frame's end is a paint (react-component-node.ts :1675-1689). `whenMounted` checks at each frame START — two in a
-    // settle of the runtime target (its frame and its drain), and both before the paint: the frame end's paint lands when
-    // the runtime target's settle closes (React's `act` there), after the drain (measured: an element mounted by a Mounted write is found at the NEXT
-    // settle's first frame start)
-    afterInputs: (s) => {
-      const a = chainCheck(s);
-      const b = chainCheck({ ...s, ...a });
-      const p = painted({ ...s, ...a, ...b });
-      return { set: { ...a, ...b, ...p.set }, send: p.send, emit: p.emit };
-    },
+    // every frame's end is a paint (react-component-node.ts :1675-1689)
+    afterInputs: (s) => painted(s),
     // a person acts on a PAINTED page (adapter.ts `act`): the page follows first, then the act meets what is there
     person: {
       // node-shared-port-definitions.ts :826-848 — Hover Start and Pointer Enter
@@ -426,7 +412,7 @@ export const Image = defineNode({
         return hits(p) ? { ...up, emit: [...up.emit, 'pointerUp'] } : up;
       }),
       focus: (s) => onPainted(s, (p) => ({ ...NONE, set: takesKeyboard(p) })),
-      blur: (s) => onPainted(s, (p) => (p.elementFocused ? { ...NONE, set: { elementFocused: false } } : NONE)),
+      blur: (s) => onPainted(s, (p) => (holdsKeyboard(p) ? { ...NONE, set: { focusedElem: -1 } } : NONE)),
       key: (s, _i, value) => onPainted(s, (p) => {
         const f = takesKeyboard(p);
         const k = keyDown({ ...p, ...f }, String(value));
@@ -521,15 +507,20 @@ function hits(s: Readonly<State>): boolean {
   return s.onPage && s.visible && !s.opacityZero && s.peStyle !== 'none';
 }
 
+/** The element on the page holds the keyboard: the one that took it is still there. */
+function holdsKeyboard(s: Readonly<State>): boolean {
+  return s.onPage && s.focusedElem === s.elem;
+}
+
 /** `el.focus()` — the element takes the keyboard when it has the module's tabindex and can be seen; it keeps it once it has it. */
 function takesKeyboard(s: Readonly<State>): Partial<State> {
-  if (s.elementFocused) return {};
-  return s.onPage && s.visible && s.attrsOn === s.elem ? { elementFocused: true, cardFocused: -1 } : {};
+  if (holdsKeyboard(s)) return {};
+  return s.onPage && s.visible && s.draggable ? { focusedElem: s.elem, cardFocused: -1 } : {};
 }
 
 /** The card's element takes the keyboard (it has drag-drop.ts's tabindex): off the Image, onto card `i`. */
 function cardTakesKeyboard(s: Readonly<State>, i: number): Partial<State> {
-  return { elementFocused: false, cardFocused: i };
+  return { focusedElem: -1, cardFocused: i };
 }
 
 /** A pointer act on the painted page. */
@@ -539,11 +530,11 @@ function pointerAct(s: Readonly<State>, then: (painted: Readonly<State>) => Act)
 
 /**
  * A paint: the page follows what the node wants (button.ts `painted`). A new element whenever one is made — at a mount (no Tag:
- * the element is always a `<div>`) — with no attributes on it and not holding the keyboard.
+ * the element is always a `<div>`) — which does not hold the keyboard (`focusedElem` names the element that does).
  */
 function painted(s: Readonly<State>): { set: Partial<State>; send: Val[]; emit: Pulse[] } {
-  if (s.mounted && !s.onPage) return { set: { onPage: true, elem: s.elem + 1, elementFocused: false }, send: [], emit: ['didMount'] };
-  if (!s.mounted && s.onPage) return { set: { ...fileDark(s).set, onPage: false, elementFocused: false }, send: fileDark(s).send, emit: ['willUnmount'] };
+  if (s.mounted && !s.onPage) return { set: { onPage: true, elem: s.elem + 1 }, send: [], emit: ['didMount'] };
+  if (!s.mounted && s.onPage) return { set: { ...fileDark(s).set, onPage: false }, send: fileDark(s).send, emit: ['willUnmount'] };
   return { set: {}, send: [], emit: [] };
 }
 
@@ -680,12 +671,6 @@ function firstFile(s: Readonly<State>, key: 'name' | 'type' | 'size'): unknown {
   return f && f[key];
 }
 
-/** `whenMounted` at a frame's start (drag-drop.ts :136-145): the element on the page takes the attributes; none, one frame fewer. */
-function chainCheck(s: Readonly<State>): Partial<State> {
-  if (s.chain <= 0) return {};
-  return s.onPage ? { attrsOn: s.elem, chain: 0 } : { chain: s.chain - 1 };
-}
-
 /** drag-drop.ts :173-183 */
 function holds(s: Readonly<State>, input: 'mouse' | 'touch'): boolean {
   const mode = s.holdToDrag || 'touch';
@@ -774,12 +759,12 @@ function zoneFor(s: Readonly<State>): boolean {
 function keyDown(s: Readonly<State>, key: string): Act {
   if (!busy(s)) {
     // Space on a card that holds the keyboard (the Image did not take it): the card's `keyboardLift`
-    if (key === ' ' && !s.elementFocused && s.cardFocused >= 0) return cardLifted(s, s.cardFocused);
-    if (key !== ' ' || !s.elementFocused || !s.draggable || !s.onPage) return NONE;
+    if (key === ' ' && !holdsKeyboard(s) && s.cardFocused >= 0) return cardLifted(s, s.cardFocused);
+    if (key !== ' ' || !holdsKeyboard(s) || !s.draggable) return NONE;
     // Space on the live, Draggable element that holds the keyboard: `keyboardLift` — never into itself (C78, fixed in P109 ISL-031),
     // and no other zone on this page takes it
     // it holds the keyboard: written whether the key act just put it there or it was there (one branch either way)
-    return { set: { phase: 'lifted', input: 'keyboard', isLifted: true, elementFocused: true, cardFocused: -1 }, send: ['isLifted'], emit: ['pickedUp'] };
+    return { set: { phase: 'lifted', input: 'keyboard', isLifted: true, focusedElem: s.elem, cardFocused: -1 }, send: ['isLifted'], emit: ['pickedUp'] };
   }
   return keyDuringGesture(s, key);
 }
