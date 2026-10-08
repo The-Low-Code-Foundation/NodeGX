@@ -2,6 +2,7 @@
 id: P107-C112
 title: A reset that finds no components (or no start page) deletes every page but leaves Top Component Name and Stack Depth naming what was there
 status: fixed
+commit: cd5f66a1a
 phase: P109
 task: ISL-048
 severity: low

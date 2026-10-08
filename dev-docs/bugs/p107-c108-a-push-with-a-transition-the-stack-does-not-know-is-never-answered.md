@@ -2,6 +2,7 @@
 id: P107-C108
 title: A push with a transition the stack does not know (a wired Transition such as "Fade") is never answered, and the page it built is dropped
 status: fixed
+commit: 9f3a5ad49
 phase: P109
 task: ISL-048
 severity: low

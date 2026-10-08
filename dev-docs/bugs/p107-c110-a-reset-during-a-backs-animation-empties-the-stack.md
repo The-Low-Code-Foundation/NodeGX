@@ -2,6 +2,7 @@
 id: P107-C110
 title: A Reset during a back's animation empties the stack: the animation's end takes the new start page off it, and every push after is never answered
 status: fixed
+commit: e9a35da48
 phase: P109
 task: ISL-048
 severity: medium

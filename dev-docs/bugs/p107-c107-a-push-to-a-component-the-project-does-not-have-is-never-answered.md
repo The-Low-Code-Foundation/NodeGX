@@ -2,6 +2,7 @@
 id: P107-C107
 title: A push, replace or Reset to a page whose component the project does not have is never answered — the caller's Navigate hangs with no Done and no Failure
 status: fixed
+commit: 4b29cb7f0
 phase: P109
 task: ISL-048
 severity: medium

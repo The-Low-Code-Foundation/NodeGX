@@ -2,6 +2,7 @@
 id: P107-C109
 title: A Components value that is not a list blanks the stack and its Reset is never answered; a page looked up by its label whose component was never set throws the same way
 status: fixed
+commit: ed3a693cf
 phase: P109
 task: ISL-048
 severity: low
