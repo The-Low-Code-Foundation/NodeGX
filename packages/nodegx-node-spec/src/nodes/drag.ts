@@ -6,7 +6,8 @@
  * `addChild`, `outcomeOnInnerComponent` :2014-2056) on 2026-10-07 (NSP-016 s55; the reading is NSP-016 §7.16).
  *
  * R3 (a): the runtime wins by default. Every rule below cites the line it was read from. R11: the spec says what a person gets;
- * where the runtime does otherwise only because of how it is built, that is a known row on the runtime target (C102).
+ * where the runtime does otherwise only because of how it is built, that is a known row on the runtime target (C105; C102 and C106
+ * were, until P109 ISL-048 fixed them).
  *
  * THE CHILD. A Drag has no element of its own (drag.ts `noDataAttributes`); it moves its FIRST child's element with a CSS
  * `translate`, and draws no other child (Drag.tsx `render`, row C103). Its page holds one child, a Group, which is the element a
@@ -24,8 +25,8 @@
  *   - **a let go**: the element takes the position the pointer's last movement gives, on the axes Axis allows (Drag.tsx `onStop`).
  *     Drag X / Y are sent as where the element is, then **Drag Ended**.
  *   - **Axis** says which axes the element moves on: X, Y or Both (any other value: neither). On an axis it does not allow, Drag X / Y
- *     report where the element is and Delta X / Y is 0 (row C102: the runtime reports the pointer's movement there, and sends the
- *     element's position again at the next press — a known row on the runtime target, R11).
+ *     report where the element is and Delta X / Y is 0 (row C102, fixed in P109 ISL-048: the runtime reported the pointer's movement
+ *     there, and sent the element's position again at the next press).
  *   - **Constrain to parent** keeps the element inside its parent's box. That is geometry (NSP-016 §7.16): the face lays nothing out,
  *     so the parent has no box and nothing is constrained. What the runtime does with it in a world with no layout (the slack it keeps
  *     past an edge, with every bound unreadable) is copied, since it reaches the outputs when a position is not a number.
@@ -560,7 +561,7 @@ function move(s: Readonly<State>, v: unknown): Act {
     uy = ny;
   }
   // the element moves only on the axes Axis allows (Draggable `render`): on a locked axis the outputs report where the element is, and
-  // a Delta of 0 (row C102: the runtime reports the pointer's movement there)
+  // a Delta of 0 (row C102, fixed in P109 ISL-048: the runtime reported the pointer's movement there)
   const canX = canDrag(s, 'x');
   const canY = canDrag(s, 'y');
   return {
@@ -606,8 +607,8 @@ function stop(s: Readonly<State>, kind: Kind, p: { x: number; y: number }): Act 
   const sc = scaleOf(s);
   const dataX = (s.libX as any) + (isNum(s.lastX) ? at.x - s.lastX : 0) / sc; // eslint-disable-line @typescript-eslint/no-explicit-any
   const dataY = (s.libY as any) + (isNum(s.lastY) ? at.y - s.lastY : 0) / sc; // eslint-disable-line @typescript-eslint/no-explicit-any
-  // Drag.tsx `onStop`: the element takes the position on the axes Axis allows, and Drag X / Y report where it is (row C102: the runtime
-  // sends the pointer's position on a locked axis)
+  // Drag.tsx `onStop`: the element takes the position on the axes Axis allows, and Drag X / Y report where it is (row C102, fixed in
+  // P109 ISL-048: the runtime sent the pointer's position on a locked axis)
   const x = canDrag(s, 'x') ? dataX : s.x;
   const y = canDrag(s, 'y') ? dataY : s.y;
   // Draggable `onDragStop` (controlled): its position goes back to the prop it was last handed; the re-render then follows the new state.

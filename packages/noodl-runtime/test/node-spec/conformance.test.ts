@@ -97,21 +97,6 @@ const videoFileTakesNoPointer = (d: Divergence) => {
   const src = lastAct >= 0 ? (written ? written.value : d.params.src) : heldAt(d, 'src');
   return !(typeof src === 'string' && EMBED.some((p) => p.test(src)));
 };
-/**
- * NSP-016 §6 C102 (s55) — a Drag reports the pointer's movement on an axis Axis locks: Drag X / Y or Delta X / Y differ on that axis.
- * The Axis is the one held at the person's last act before the difference (written before it in its frame is painted before it).
- * Either side's event may be the locked axis's: a frame's values are sorted, so the reference's next one can be the other axis.
- */
-const DRAG_AXIS_PORTS: Record<string, 'x' | 'y'> = { positionX: 'x', deltaX: 'x', positionY: 'y', deltaY: 'y' };
-const dragLockedAxisReported = (d: Divergence) => {
-  if (d.difference.threw !== undefined) return false;
-  const lastAct = d.reference.slice(0, d.difference.index).map((e) => e.t).lastIndexOf('act');
-  if (lastAct < 0) return false;
-  const written = d.reference.slice(0, lastAct).filter((e) => e.t === 'set' && e.port === 'axis').pop() as { value?: unknown } | undefined;
-  const axis = written ? written.value : 'axis' in d.params ? d.params.axis : 'x';
-  const locked = (e: { t: string; port?: string } | undefined) => !!e && e.t === 'value' && !!DRAG_AXIS_PORTS[e.port!] && axis !== DRAG_AXIS_PORTS[e.port!] && axis !== 'both';
-  return locked(d.reference[d.difference.index]) || locked(d.actual[d.difference.index]);
-};
 /** NSP-016 §6 C105 (s55) — a Snap Do that waited for the Drag to mount runs from 0: Drag X / Y differ after a Do sent while it was off the page. */
 const dragWaitedSnapFromZero = (d: Divergence) => {
   if (d.difference.threw !== undefined) return false;
@@ -161,9 +146,8 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
     { row: 'NSP-016 §6 C99 — a Source Object that is not a stream: the browser refuses it and the node throws', matches: sourceObjectNotAStream },
     { row: 'NSP-016 §6 C100 — a Video playing a file fires no pointer output and takes no file drop', matches: videoFileTakesNoPointer }
   ],
-  // s55 — the Drag's own rows: C102 (a locked axis reports the pointer's movement), C105 (a snap that waited runs from 0); C106 fixed in P109 ISL-048
+  // s55 — the Drag's own row: C105 (a snap that waited runs from 0); C102 and C106 fixed in P109 ISL-048
   Drag: [
-    { row: 'NSP-016 §6 C102 — a Drag locked to one Axis reports the pointer\'s movement on the other', matches: dragLockedAxisReported },
     { row: 'NSP-016 §6 C105 — a Snap Do that waited for the Drag to mount runs from 0', matches: dragWaitedSnapFromZero }
   ],
 };

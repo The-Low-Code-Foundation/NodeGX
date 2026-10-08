@@ -82,9 +82,8 @@
     ]
   },
   {
-    "name": "Axis X: the element moves on X only — Drag Y stays where the element is and Delta Y is 0 (row C102 on the runtime)",
-    "because": "Draggable `canDragX` / `canDragY`; R11 — the runtime reports the pointer's movement on the locked axis",
-    "row": "NSP-016 §6 C102",
+    "name": "row C102 — Axis X: the element moves on X only — Drag Y stays where the element is and Delta Y is 0",
+    "because": "Draggable `canDragX` / `canDragY`; Drag.tsx `reportDrag` (row C102, fixed in P109 ISL-048: the runtime reported the pointer's movement on the locked axis)",
     "steps": [
       "settle",
       {

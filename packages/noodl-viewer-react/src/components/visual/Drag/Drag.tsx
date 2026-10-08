@@ -33,6 +33,11 @@ function setDragValues(event, props) {
   props.deltaY && props.deltaY(event.deltaY);
 }
 
+/** react-draggable's `canDragX` / `canDragY`: the axes Axis lets the element move on (any other value: neither). */
+function canDrag(axis: DragProps['axis'], on: 'x' | 'y') {
+  return axis === on || axis === 'both';
+}
+
 /** P107-C101 — what a press inside a Drag operates instead of dragging. */
 const DRAG_CANCEL = 'input, textarea, select, button, a, [contenteditable]';
 
@@ -65,6 +70,25 @@ export class Drag extends React.Component<DragProps, State> {
         return child && child.getDOMElement ? child.getDOMElement() : null;
       }
     } as React.RefObject<HTMLElement>;
+  }
+
+  /**
+   * P107-C102 — what a press, a move or a let go reports. react-draggable's callbacks carry the pointer's movement on both axes
+   * whatever `axis` is (it "only controls flushing to the DOM"), so on an axis Axis locks Drag X / Y said the element moved while it
+   * stayed put, and jumped back at the next press. There they report where the element is, and a Delta of 0.
+   */
+  reportDrag(data: { x: number; y: number; deltaX: number; deltaY: number }, axis: DragProps['axis']) {
+    const canX = canDrag(axis, 'x');
+    const canY = canDrag(axis, 'y');
+    setDragValues(
+      {
+        x: canX ? data.x : this.state.x,
+        y: canY ? data.y : this.state.y,
+        deltaX: canX ? data.deltaX : 0,
+        deltaY: canY ? data.deltaY : 0
+      },
+      this.props
+    );
   }
 
   snapToPosition({ timerScheduler, propCallback, duration, axis, endValue }) {
@@ -203,24 +227,22 @@ export class Drag extends React.Component<DragProps, State> {
         scale={props.scale || 1}
         position={{ x: this.state.x, y: this.state.y }}
         onStart={(e, data) => {
-          setDragValues(data, props);
+          this.reportDrag(data, props.axis);
           props.onStart && props.onStart();
           this.snapToPositionXTimer && this.snapToPositionXTimer.stop();
           this.snapToPositionYTimer && this.snapToPositionYTimer.stop();
         }}
         onStop={(e, data) => {
-          if (props.axis === 'x' || props.axis === 'both') {
-            this.setState({ x: data.x });
-          }
-          if (props.axis === 'y' || props.axis === 'both') {
-            this.setState({ y: data.y });
-          }
-          props.positionX && props.positionX(data.x);
-          props.positionY && props.positionY(data.y);
+          // P107-C102 — on an axis Axis locks the element stays, and Drag X / Y say so
+          const x = canDrag(props.axis, 'x') ? data.x : this.state.x;
+          const y = canDrag(props.axis, 'y') ? data.y : this.state.y;
+          this.setState({ x, y });
+          props.positionX && props.positionX(x);
+          props.positionY && props.positionY(y);
           props.onStop && props.onStop();
         }}
         onDrag={(e, data) => {
-          setDragValues(data, props);
+          this.reportDrag(data, props.axis);
           props.onDrag && props.onDrag();
         }}
       >
