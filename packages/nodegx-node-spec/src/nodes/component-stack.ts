@@ -188,7 +188,8 @@ export const ComponentStack = defineNode({
   type: 'Page Stack',
   // v3 (P109 ISL-048, s31): a reset that fails leaves the stack empty and says so — Top Component Name '' and Stack Depth 0 (row C112)
   // v4 (P109 ISL-048, s31): a page whose component the project does not have is answered — a push or replace Failure, a reset Failure that leaves the stack empty (row C107)
-  version: 4,
+  // v5 (P109 ISL-048, s31): a Components value that is not a list is none (Failure, no components), and a page found by its label with no component is not found (row C109)
+  version: 5,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx',
   needs: ['person', 'clock', 'location', 'project'],
   worldPool: {
@@ -298,7 +299,8 @@ export const ComponentStack = defineNode({
       run(
         s,
         (w) => {
-          w.st.pages = v;
+          // a value that is not a list is none (row C109, fixed in P109 ISL-048)
+          w.st.pages = Array.isArray(v) ? v : undefined;
           if (w.st.isMounted) scheduleReset(w);
         },
         view
@@ -538,7 +540,8 @@ function findPage(s: State, key: unknown): Found | undefined | typeof THROWS {
       return { component: String(pageInfo.component), label: String(pageRef.label), id: String(key), path: pageInfo.path !== undefined ? String(pageInfo.path) : undefined };
     }
     const pageRef = pages.find((x: any) => x.label === key); // eslint-disable-line @typescript-eslint/no-explicit-any
-    if (pageRef) {
+    // a page found by its label with no entry (its component never set) is not found, as by its id (row C109, fixed in P109 ISL-048)
+    if (pageRef && info[pageRef.id]) {
       const pageInfo = info[pageRef.id];
       return { component: String(pageInfo.component), label: String(pageRef.label), id: String(pageRef.id), path: pageInfo.path !== undefined ? String(pageInfo.path) : undefined };
     }

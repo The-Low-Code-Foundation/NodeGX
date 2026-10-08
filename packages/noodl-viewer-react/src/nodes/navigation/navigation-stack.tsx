@@ -308,7 +308,9 @@ const PageStack = {
       description: 'The components this stack can show, and which of them it starts on',
       group: 'Components',
       set: function (this: PageStackInstance, value: PageListItem[]) {
-        this._internal.pages = value;
+        // P107-C109 — a value that is not a list (a wired string, an object) is no list: every reader below calls `.find`,
+        // `.length` or `[0]` on it, and a reset that threw on it blanked the stack and never answered
+        this._internal.pages = Array.isArray(value) ? value : undefined;
         if (this._internal.isMounted) {
           this.scheduleReset();
         }
@@ -398,7 +400,8 @@ const PageStack = {
       }
 
       const pageRef = this._internal.pages.find((x) => x.label === pageIdOrLabel);
-      if (pageRef) {
+      // P107-C109 — a page found by its label whose component was never set has no entry here: not found, as by its id
+      if (pageRef && this._internal.pageInfo[pageRef.id]) {
         const pageInfo = this._internal.pageInfo[pageRef.id];
         return {
           component: String(pageInfo.component),

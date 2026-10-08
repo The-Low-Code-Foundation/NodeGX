@@ -655,7 +655,7 @@
     ]
   },
   {
-    "name": "a Components value that is not a list: the stack draws nothing and a Reset is never answered (row C109)",
+    "name": "row C109 — a Components value that is not a list is no components: the stack draws nothing, and a Reset is Failure (no components)",
     "because": "resetAsync deletes the pages, then `pages.find` throws",
     "params": {
       "pages": "abc",
@@ -672,7 +672,7 @@
     ]
   },
   {
-    "name": "a page with no component: by its id it is not found (Failure); by its label the lookup throws and is never answered (row C109); the start page is Unchanged",
+    "name": "row C109 — a page with no component is not found, by its id and by its label (Failure each); the start page is Unchanged",
     "because": "_findPage :398-406 reads the label's pageInfo, which was never made",
     "params": {
       "pages": [
