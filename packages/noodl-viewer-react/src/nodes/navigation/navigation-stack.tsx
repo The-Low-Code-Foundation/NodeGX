@@ -606,6 +606,9 @@ const PageStack = {
         }
       ];
 
+      // P109 ISL-048 (P107-C114): counted with the outputs below — a reset that ends after the frame's last update (the stack
+      // mounted at a frame's paint) said Stack Depth in that frame and Children Count in the next
+      this.updateChildCountAndIndiciesNow();
       this.setPageOutputs({
         topPageName: pageInfo.label,
         stackDepth: this._internal.stack.length
@@ -620,6 +623,8 @@ const PageStack = {
      */
     _resetLeftEmpty(this: PageStackInstance) {
       this._internal.stack = [];
+      // P107-C114 — with Stack Depth, as the reset that works does
+      this.updateChildCountAndIndiciesNow();
       this.setPageOutputs({ topPageName: '', stackDepth: 0 });
     },
     getRelativeURL(this: PageStackInstance) {

@@ -3496,8 +3496,8 @@
     ]
   },
   {
-    "name": "a frame that refuses a Reset and unmounts the stack; remounted with components: the start page",
-    "because": "as the one before",
+    "name": "a frame that refuses a Reset and unmounts the stack; remounted with components: the start page, counted with it (v16, row C114)",
+    "because": "as the one before — v16: the reset counts its pages with Stack Depth (P107-C114, fixed in P109 ISL-048)",
     "params": {
       "pages": [],
       "pageComp-p1": "Home",
@@ -5140,8 +5140,8 @@
     ]
   },
   {
-    "name": "a stack with no components, remounted with Components in the same frame: its start page lands at that frame's yield and Children Count says 1 a frame later (row C114)",
-    "because": "measured on the runtime (s56): a stack mounted at a frame's paint counts what lands at that frame's yield one frame later",
+    "name": "a stack with no components, remounted with Components in the same frame: its start page lands at that frame's yield, Children Count 1 with it (v16, row C114)",
+    "because": "measured on the runtime (s56): a stack mounted at a frame's paint counts what lands at that frame's yield one frame later — v16: the reset counts its pages with Stack Depth (P107-C114, fixed in P109 ISL-048)",
     "params": {
       "pages": [],
       "pageComp-p1": "Home",
@@ -5172,8 +5172,39 @@
     ]
   },
   {
-    "name": "placed off the page and mounted at a frame: the start page lands at its yield, Children Count a frame later (row C114); a push in that next frame is counted with it",
-    "because": "measured on the runtime (s56): a stack mounted at a frame's paint counts what lands at that frame's yield one frame later",
+    "name": "a stack showing a page, remounted with no Components: the reset fails and Children Count 0 goes with Stack Depth 0 (v16, row C114)",
+    "because": "navigation-stack.tsx `_resetLeftEmpty` — the failing reset counts its (removed) pages with Stack Depth, in the frame whose paint mounted the stack (P107-C114, fixed in P109 ISL-048)",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        }
+      ],
+      "pageComp-p1": "Home"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "pages",
+        "value": []
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "placed off the page and mounted at a frame: the start page lands at its yield with Children Count (v16, row C114); a push in the next frame is counted at once",
+    "because": "measured on the runtime (s56): a stack mounted at a frame's paint counts what lands at that frame's yield one frame later — v16: the reset counts its pages with Stack Depth (P107-C114, fixed in P109 ISL-048)",
     "params": {
       "pages": [
         {

@@ -253,6 +253,10 @@ export interface ReactNodeInstance extends NodeInstance {
   updateChildIndices(): void;
   updateChildrenCount(): void;
   scheduleUpdateChildCountAndIndicies(): void;
+  /** P107-C114 — count the children now; the queued count then finds nothing new and sends nothing. */
+  updateChildCountAndIndiciesNow(): void;
+  /** P107-C114 — a child was added or removed since the children were last counted. */
+  childrenChangedSinceCount?: boolean;
 
   // --- mounting and rendering ---------------------------------------------
   /** Mirrors the `mounted` input. A false value keeps the node out of the tree. */
@@ -1671,15 +1675,25 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
         return this.children.some((child) => child.contains && child.contains(node));
       },
       scheduleUpdateChildCountAndIndicies() {
+        this.childrenChangedSinceCount = true;
         if (this.updateChildIndiciesScheduled) return;
         this.updateChildIndiciesScheduled = true;
         this.scheduleAfterInputsHaveUpdated(() => {
-          this.updateChildIndices();
-          if (hasChildCountOutput) {
-            this.updateChildrenCount();
-          }
+          if (this.childrenChangedSinceCount) this.updateChildCountAndIndiciesNow();
           this.updateChildIndiciesScheduled = false;
         });
+      },
+      /**
+       * P109 ISL-048 (P107-C114). The queued count runs at the node's next update — a frame later for a change made after the
+       * frame's last update (a Component Stack building its page when it mounts at a frame's paint). A node that publishes what the
+       * change means at once (the stack's Stack Depth) counts here beside it; the queued count then sends nothing twice.
+       */
+      updateChildCountAndIndiciesNow() {
+        this.childrenChangedSinceCount = false;
+        this.updateChildIndices();
+        if (hasChildCountOutput) {
+          this.updateChildrenCount();
+        }
       },
       getChildren() {
         return this.children;

@@ -49,8 +49,9 @@
  * frame's start); while it runs the stack refuses a push, a replace and a back. A reset does not stop it.
  *
  * **Children Count** is the stack's page containers, counted at the frame's end — except in a frame whose paint mounted the stack,
- * which sends none: the next frame counts (row C114, measured; a mount at the placing or at an act counts at once). The look reaches the
- * element only.
+ * which sends none: the next frame counts (a mount at the placing or at an act counts at once). A reset counts its pages when it lands,
+ * with Stack Depth (v16, row C114, fixed in P109 ISL-048: v15 left a stack mounted at a frame's paint saying Stack Depth in that frame
+ * and Children Count in the next). The look reaches the element only.
  *
  * USE ROUTES (v2, s58; world.ts LOCATION — the page's window is the world's browser). With Use Routes on, the stack puts its top page
  * in the URL and reads its start page from it. THE URL a page has: its Path (`pagePath-<id>`, an input the editor draws only with Use
@@ -201,7 +202,8 @@ export const ComponentStack = defineNode({
   // v13 (P109 ISL-048, s31): in hash mode a page with no parameters clears the query in the address (row C121)
   // v14 (P109 ISL-048, s31): the browser's Back or Forward resets only a stack with Use Routes on (row C119)
   // v15 (P109 ISL-048, s31): a Name written that keeps the stack's key does not reset it (row C113)
-  version: 15,
+  // v16 (P109 ISL-048, s33): a reset counts its pages with Stack Depth — a stack mounted at a frame's paint says Children Count in that frame (row C114)
+  version: 16,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx',
   needs: ['person', 'clock', 'location', 'project'],
   worldPool: {
@@ -938,6 +940,8 @@ function answer(w: Work, op: 'push' | 'replace', value: 'done' | 'unchanged' | '
  * so the stack is empty and says so — Top Component Name '' and Stack Depth 0 (row C112, fixed in P109 ISL-048) */
 function failReset(w: Work, tokens: number, error: string): null {
   w.st.stack = [];
+  // v16, row C114: counted with Stack Depth (`_resetLeftEmpty` → `updateChildCountAndIndiciesNow`)
+  countChildren(w);
   outputs(w, '', 0);
   for (let i = 0; i < tokens; i++) w.outcomes.push({ port: 'reset', outcome: 'failure', error });
   return null;
@@ -961,6 +965,9 @@ function finishBusy(w: Work): void {
     const page = newPage(w);
     addChild(w, page);
     s.stack = [{ page, from: null, pageId: b.pageId, id: b.found.id, label: b.found.label, path: b.found.path, params: b.params, tr: undefined, pushed: false }];
+    // v16, row C114: the reset counts its pages with Stack Depth (`updateChildCountAndIndiciesNow`) — in the frame whose paint mounted
+    // the stack too, which counted nothing until the next frame
+    countChildren(w);
     outputs(w, b.found.label, 1);
     for (let i = 0; i < item.tokens; i++) w.outcomes.push({ port: 'reset', outcome: 'done' });
     return;
