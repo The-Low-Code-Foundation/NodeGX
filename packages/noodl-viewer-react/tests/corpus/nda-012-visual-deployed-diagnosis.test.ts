@@ -65,6 +65,9 @@ interface DrivableNode extends NodeInstance {
   getTemplateForModel(model: unknown): string | undefined;
   reportTemplateProblem(code: string, message: string): void;
   registerInputIfNeeded(name: string): void;
+  addItem(model: unknown, index: number): Promise<void>;
+  _mapInputs(itemNode: unknown, model: unknown): void;
+  _queueOperation(op: () => unknown): void;
 }
 
 async function build(module: { node: { name: string } }, parameters: Record<string, unknown> = {}) {
@@ -353,5 +356,97 @@ describe('B2-d — the report is raised once per rebuild, not once per item', ()
     node.reportTemplateProblem('repeater/no-template-for-item', 'a one-off add');
 
     expect(codes(graph)).toEqual(['repeater/no-template-for-item', 'repeater/no-template-for-item']);
+  });
+});
+
+/**
+ * P109 ISL-049 — what used to stop a Repeater for good is caught where it happens and said on the bus (rows C128, C135, C140,
+ * C141). Whether the queue then runs on, and when, is graded by the For Each scenarios on the runtime target; the trace there
+ * carries no runtime errors, so the codes are graded here. Each catch has a control beside it that raises nothing.
+ */
+describe('ISL-049 — a Repeater names what it cannot build and goes on', () => {
+  const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+  // C135: `startsWith` on a number threw outside the Script's try
+  it('reports a Script whose component is not text, and gives that item no row', async () => {
+    const { graph, node } = await build(ForEachModule, { templateType: 'dynamic' });
+
+    node.setInputValue('templateScript', 'component = 7;');
+    graph.update();
+
+    expect(node.getTemplateForModel(Model.create({ id: 'a' }))).toBeUndefined();
+    expect(codes(graph)).toEqual(['repeater/template-script-threw']);
+    expect(graph.errors[0].message).toContain('7');
+  });
+
+  // C128: `createNode` throws for a component the project does not have; the `!itemNode` branch never ran
+  it('reports a Template the project does not have, and the build resolves', async () => {
+    const { graph, node } = await build(ForEachModule, { template: '/Missing' });
+
+    await expect(node.addItem(Model.create({ id: 'a' }), 0)).resolves.toBeUndefined();
+
+    expect(codes(graph)).toEqual(['repeater/template-component-not-found']);
+    expect(graph.errors[0].message).toContain('"/Missing"');
+  });
+
+  // C140 / C141: the same catch serves the landing and a record's change
+  it('reports a mapping that throws for an item, keeps what it set before, and does not throw into the caller', async () => {
+    const { graph, node } = await build(ForEachModule);
+    const set: Record<string, unknown> = {};
+    const row = { hasInput: () => true, setInputValue: (k: string, v: unknown) => (set[k] = v) };
+
+    node.registerInputIfNeeded('inputMappingScript');
+    node.setInputValue('inputMappingScript', "map({ id: function (o) { return o.getId() }, label: function () { throw new Error('no label'); } })");
+    graph.update();
+
+    expect(() => node._mapInputs(row, Model.create({ id: 'b' }))).not.toThrow();
+    expect(set).toEqual({ id: 'b' });
+    expect(codes(graph)).toEqual(['repeater/input-mapping-threw']);
+    expect(graph.errors[0].message).toContain('"b"');
+    expect(graph.errors[0].message).toContain('no label');
+  });
+
+  it('says nothing about a mapping that does not throw', async () => {
+    const { graph, node } = await build(ForEachModule);
+    const set: Record<string, unknown> = {};
+    const row = { hasInput: () => true, setInputValue: (k: string, v: unknown) => (set[k] = v) };
+
+    node.registerInputIfNeeded('inputMappingScript');
+    node.setInputValue('inputMappingScript', 'map({ id: function (o) { return o.getId() } })');
+    graph.update();
+
+    node._mapInputs(row, Model.create({ id: 'b' }));
+    expect(set).toEqual({ id: 'b' });
+    expect(codes(graph)).toEqual([]);
+  });
+
+  // C128's backstop: anything an operation does not catch itself
+  it('reports an operation that throws, and runs the next one', async () => {
+    const { graph, node } = await build(ForEachModule);
+    let ran = false;
+
+    node._queueOperation(() => {
+      throw new Error('broken op');
+    });
+    node._queueOperation(() => {
+      ran = true;
+    });
+    await flush();
+
+    expect(ran).toBe(true);
+    expect(codes(graph)).toEqual(['repeater/operation-threw']);
+    expect(graph.errors[0].message).toContain('broken op');
+  });
+
+  it('says nothing when every operation completes', async () => {
+    const { graph, node } = await build(ForEachModule);
+    let ran = 0;
+
+    node._queueOperation(() => void ran++);
+    node._queueOperation(() => void ran++);
+    await flush();
+
+    expect(ran).toBe(2);
+    expect(codes(graph)).toEqual([]);
   });
 });

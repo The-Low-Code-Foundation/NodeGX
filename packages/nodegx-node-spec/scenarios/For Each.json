@@ -4045,8 +4045,8 @@
   ]
  },
  {
-  "name": "a Template the project does not have: the row goes, and after it nothing is ever drawn — Template Row and a Refresh change nothing (row C128)",
-  "because": "addItem → createNode → getComponentModel throws (nodecontext.ts :616-636); the queue's runner rejects with runningOperations still true (:815-860)",
+  "name": "a Template the project does not have: the row goes and the Repeater goes on — Template Row draws it again, and a Refresh and a new list are answered (row C128)",
+  "because": "addItem → createNode → getComponentModel throws (nodecontext.ts :616-636); the queue's runner rejects with runningOperations still true (:815-860) — renamed in P109 s32 (v3: the queue goes on)",
   "params": {
    "template": "Row",
    "items": [
@@ -4109,8 +4109,8 @@
   ]
  },
  {
-  "name": "a list with a null in it, rebuilt: the rebuild throws and the Repeater never draws again (row C128)",
-  "because": "refresh :771 copies again — Model.instanceOf(null) throws (model.ts :265)",
+  "name": "a list with a null in it, rebuilt: the Refresh fails (repeater/items-copy-threw), the rows stay, and the next list is drawn (row C128)",
+  "because": "refresh :771 copies again — Model.instanceOf(null) throws (model.ts :265) — renamed in P109 s32 (v3: the queue goes on)",
   "params": {
    "template": "Row",
    "items": [
@@ -4574,8 +4574,8 @@
   }
  },
  {
-  "name": "a click starts the rebuild; a Template the project does not have arrives before the yield: the rebuild lands one row, then throws (row C128)",
-  "because": "the click's drain starts the queue (pointerlisteners.ts :173-186); the build lands at the yield, the next one throws",
+  "name": "a click starts the rebuild; a Template the project does not have arrives before the yield: the rebuild finishes and Refresh is Done, the rebuild that Template asks for leaves no row, and a later Refresh is answered (row C128)",
+  "because": "the click's drain starts the queue (pointerlisteners.ts :173-186); the build lands at the yield, the next one throws — renamed in P109 s32 (v3: the queue goes on)",
   "params": {
    "template": "Row",
    "items": [
@@ -5002,8 +5002,8 @@
   ]
  },
  {
-  "name": "a Script whose component is not text stops the Repeater for good: its rows go, and a fixed Script and a Refresh change nothing (row C135)",
-  "because": "foreach.tsx :524 `template.startsWith` runs outside the Script's try; the queue catches nothing (:815-860)",
+  "name": "a Script whose component is not text: its items have no row and the Repeater goes on — a fixed Script and a Refresh draw them again (row C135)",
+  "because": "foreach.tsx :524 `template.startsWith` runs outside the Script's try; the queue catches nothing (:815-860) — renamed in P109 s32 (v3: the queue goes on)",
   "params": {
    "template": "Row",
    "items": [
@@ -12054,8 +12054,8 @@
   ]
  },
  {
-  "name": "drawn, then a Template the project does not have: the rebuild stops the queue, a heard change queues behind it, and nothing is drawn again (row C128)",
-  "because": "NSP-016 §7.23 — the bound array's own changes, beside the matrix",
+  "name": "drawn, then a Template the project does not have: the rows go, a heard change is copied behind the rebuild, and Template Row with a Refresh draws them again (row C128)",
+  "because": "NSP-016 §7.23 — the bound array's own changes, beside the matrix — renamed in P109 s32 (v3: the queue goes on)",
   "params": {
    "template": "Row",
    "items": {
@@ -15582,12 +15582,35 @@
   ]
  },
  {
-  "name": "an input mapping that throws for a record: no row lands, and the Repeater never draws again (row C140)",
-  "because": "NSP-016 §7.23 — the input mapping, beside the matrix",
+  "name": "an input mapping that throws for a record: its row lands with what the mapping set before it, every other row is drawn, and a fixed mapping and a Refresh draw it again (row C140)",
+  "because": "NSP-016 §7.23 — the input mapping, beside the matrix; P109 s32: the records it maps (the v2 scenario's list was empty, so its mapping never ran)",
   "params": {
    "template": "Row",
    "items": {
     "$array": "list"
+   },
+   "inputMappingScript": "map({ id: function (o) { return o.getId() }, label: function (o) { if (o.getId() === 'b') throw new Error('no'); return o.label } })"
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     },
+     "c": {
+      "label": "C"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b",
+      "c"
+     ]
+    }
    }
   },
   "steps": [
@@ -15598,18 +15621,413 @@
    },
    "settle",
    {
-    "set": "inputMappingScript",
-    "value": "map({ label: function (o) { if (o.getId() === 'b') throw new Error('no'); return o.label } })"
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 2
    },
    "settle",
    {
     "set": "inputMappingScript",
-    "value": "map({ label: function (o) { return 'm' + o.label } })"
+    "value": "map({ id: function (o) { return o.getId() }, label: function (o) { return 'm' + o.label } })"
    },
    {
     "signal": "refresh"
    },
    "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "an input mapping that throws when a record is written elsewhere: the write goes through, the row keeps what it had, and a Refresh draws it with what the mapping sets (row C141)",
+  "because": "P109 s32 — C141 had no regression (a lone node cannot grade it without a writer): the world's REGISTRY write is the writer",
+  "params": {
+   "template": "Row",
+   "items": {
+    "$array": "list"
+   },
+   "inputMappingScript": "map({ id: function (o) { return o.getId() }, label: function (o) { if (o.label === 'A2') throw new Error('no'); return o.label } })"
+  },
+  "world": {
+   "registry": {
+    "models": {
+     "a": {
+      "label": "A"
+     },
+     "b": {
+      "label": "B"
+     }
+    },
+    "collections": {
+     "list": [
+      "a",
+      "b"
+     ]
+    },
+    "writes": [
+     {
+      "at": 1,
+      "record": "a",
+      "key": "label",
+      "value": "A2"
+     },
+     {
+      "at": 2,
+      "record": "b",
+      "key": "label",
+      "value": "B2"
+     }
+    ]
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "advance": 1
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 1
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "an addition whose component the project does not have: no row, and the queue runs on five act boundaries later — Items Rendered after the fifth click (row C128)",
+  "because": "P109 s32 (ISL-049, row C128) — the act boundaries the queue runs on after the caught failure, counted by clicks with no settle between (a count one off is red here)",
+  "params": {
+   "template": "Row",
+   "templateType": "dynamic",
+   "templateScript": "component = item.kind",
+   "items": [
+    {
+     "id": "a",
+     "kind": "Row",
+     "label": "A"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "a",
+      "kind": "Row",
+      "label": "A"
+     },
+     {
+      "id": "x",
+      "kind": "Missing",
+      "label": "X"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a rebuild of a record whose component the project does not have, beside rows on their way out: Refresh is Done and Items Rendered fires after the clicks its record costs (row C128)",
+  "because": "P109 s32 (ISL-049, row C128) — the act boundaries the queue runs on after the caught failure, counted by clicks with no settle between (a count one off is red here)",
+  "params": {
+   "template": "Leaving",
+   "items": [
+    {
+     "id": "p",
+     "label": "P"
+    },
+    {
+     "id": "q",
+     "label": "Q"
+    },
+    {
+     "id": "r",
+     "label": "R"
+    },
+    {
+     "id": "s",
+     "label": "S"
+    },
+    {
+     "id": "t",
+     "label": "T"
+    },
+    {
+     "id": "u",
+     "label": "U"
+    },
+    {
+     "id": "v",
+     "label": "V"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "a",
+      "label": "A"
+     }
+    ]
+   },
+   "settle",
+   {
+    "set": "template",
+    "value": "Missing"
+   },
+   {
+    "signal": "refresh"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a rebuild of two records whose component the project does not have: each costs its act boundaries before Refresh is Done (row C128)",
+  "because": "P109 s32 (ISL-049, row C128) — the act boundaries the queue runs on after the caught failure, counted by clicks with no settle between (a count one off is red here)",
+  "params": {
+   "template": "Leaving",
+   "items": [
+    {
+     "id": "p",
+     "label": "P"
+    },
+    {
+     "id": "q",
+     "label": "Q"
+    },
+    {
+     "id": "r",
+     "label": "R"
+    },
+    {
+     "id": "s",
+     "label": "S"
+    },
+    {
+     "id": "t",
+     "label": "T"
+    },
+    {
+     "id": "u",
+     "label": "U"
+    },
+    {
+     "id": "v",
+     "label": "V"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "a",
+      "label": "A"
+     },
+     {
+      "id": "b",
+      "label": "B"
+     }
+    ]
+   },
+   "settle",
+   {
+    "set": "template",
+    "value": "Missing"
+   },
+   {
+    "signal": "refresh"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a Refresh whose copy of Items throws (a null): Refresh fails, the rows stay, and Items Rendered fires at the next click (row C128)",
+  "because": "P109 s32 (ISL-049, row C128) — the act boundaries the queue runs on after the caught failure, counted by clicks with no settle between (a count one off is red here)",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "a",
+      "label": "A"
+     },
+     null
+    ]
+   },
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
    {
     "act": "tapRow",
     "value": 0

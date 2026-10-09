@@ -1872,13 +1872,9 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
    * its wires and its roots — and the Group it sits in, made in its scope and named its parent (`setNodeModel` → `updateTarget`)
    * before its parameters are set, as a loaded project does.
    *
-   * What throws inside the Repeater's queue — building a component the project does not have (`getComponentModel` throws), or a rebuild
-   * whose Items hold a `null` (`Model.instanceOf(null)`) — rejects a promise nothing hears: in a browser a console line, and the queue's
-   * runner stops with `runningOperations` still true (repeater.ts, row C128). With chunked creation that promise is `runOps`'s, which
-   * the face cannot reach, and jest fails the suite on it. So the face takes the line at its source: the build of a component the
-   * project does not have, and such a rebuild, each hand back a promise that never settles — the runner stops at the same `await`, as
-   * the rejection stops it. Every other build and rebuild is the runtime's own promise, untouched (its microtasks are the spec's act
-   * boundaries).
+   * What used to throw inside the Repeater's queue — building a component the project does not have, a Script whose component is not
+   * text, a rebuild whose Items hold a `null` — is caught by the Repeater since P109 ISL-049 (row C128): the face once handed back a
+   * promise that never settled there, standing in for the rejection that stopped the queue. Every build and rebuild is the runtime's own.
    */
   function repeaterParent(node: RuntimeNode, scope: InstanceType<typeof NodeScope>, id: string): void {
     const models = (context as unknown as { componentModels: Record<string, unknown> }).componentModels;
@@ -1906,47 +1902,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     }
     const group = context.nodeRegister.createNode('Group', `${id}/parent`, scope as never) as unknown as RuntimeNode & { cachedChildren?: unknown };
     scope.nodes[group.id] = group as never;
-    type Internal = { template?: unknown; templateFunction?: unknown; items?: unknown };
-    const n = node as unknown as { updateTarget(id: string): void; _runQueueOperations(): Promise<void>; refresh(): Promise<void>; _internal: Internal };
-    const run = n._runQueueOperations.bind(node);
-    n._runQueueOperations = () => {
-      const p = run();
-      p.catch(() => undefined);
-      return p;
-    };
-    const never = () => new Promise<never>(() => undefined);
-    const build = scope.createNode.bind(scope);
-    (scope as unknown as { createNode(name: unknown, id?: unknown, extra?: unknown): Promise<unknown> }).createNode = (name, id, extra) => {
-      // nodescope.ts `createNode` → nodecontext.ts `getComponentModel` (:616-636): a node type, or a component the project has
-      const known = !context.nodeRegister.hasNode(name as string) && Object.prototype.hasOwnProperty.call(models, name as string);
-      return known ? build(name as string, id as string, extra as Record<string, unknown>) : never();
-    };
-    // s61 — the same at the third source (row C135): a Script whose component is not text throws at `startsWith` in
-    // `getTemplateForModel` (:524), before `addItem`'s first await. The face asks it first — the same synchronous call `addItem` makes
-    // next, on the same record — and hands back a promise that never settles when it throws; otherwise `addItem` runs untouched.
-    const n2 = node as unknown as { addItem(model: unknown, index: number): Promise<void>; getTemplateForModel(model: unknown): unknown };
-    const addItem = n2.addItem.bind(node);
-    const templateFor = n2.getTemplateForModel.bind(node);
-    n2.addItem = (model, index) => {
-      try {
-        templateFor(model);
-      } catch {
-        return never();
-      }
-      return addItem(model, index);
-    };
-    const refresh = n.refresh.bind(node);
-    n.refresh = () => {
-      // foreach.tsx `refresh` :745-772 — past its two checks it copies Items again, and an item that is `null` throws there
-      const i = n._internal;
-      const src = (i.items || []) as ArrayLike<unknown>;
-      let hole = false;
-      for (let k = 0; k < src.length; k++) if (src[k] === null || src[k] === undefined) hole = true;
-      const p = refresh();
-      if (!((i.template || i.templateFunction) && i.items && hole)) return p;
-      p.catch(() => undefined);
-      return never();
-    };
+    const n = node as unknown as { updateTarget(id: string): void };
     n.updateTarget(group.id);
     repeaters.set(id, { group, models: made });
   }

@@ -197,6 +197,7 @@ interface ForEachInstance extends NodeInstance {
   settleRefresh(outcome: NodeOutcome, code?: string, message?: string): void;
   _queueOperation(op: QueuedOperation): void;
   _runQueueOperations(): Promise<void>;
+  _operationThrew(e: unknown): void;
   /** Fires `Items Rendered` once the operation queue has drained. See NDA-004 §3. */
   _signalItemsRendered(didWork: boolean): void;
   didMount(): void;
@@ -520,6 +521,17 @@ const ForEachDefinition: NodeDefinitionOptions = {
         );
       }
 
+      // ISL-049 (P107-C135). A component that is not text (`component = item.kind` on a record whose kind is a number)
+      // reached `startsWith` below, outside the try, and the TypeError stopped the Repeater for good. Ruled: skip that item
+      // and report it, as a Script that throws is.
+      if (template && typeof template !== 'string') {
+        this.raiseRuntimeError(
+          'repeater/template-script-threw',
+          `The Repeater's Script set component to ${JSON.stringify(template) ?? String(template)}, which is not a component path, so that item has no row`
+        );
+        return undefined;
+      }
+
       //simple (and limited) way to support ./ and ../ at the start of component template names
       if (template) {
         if (template.startsWith('./')) {
@@ -537,20 +549,33 @@ const ForEachDefinition: NodeDefinitionOptions = {
     },
     _mapInputs: function (this: ForEachInstance, itemNode: ForEachItemNode, model: ModelLike) {
       if (this._internal.inputMapFunc !== undefined) {
-        // We have a mapping function, run the function and use the mapped values
-        // as inputs
-        this._internal.inputMapFunc(function (mappings) {
-          for (const key in mappings) {
-            if (itemNode.hasInput(key)) {
-              const mapping = mappings[key];
-              if (typeof mapping === 'function') {
-                itemNode.setInputValue(key, mapping(model));
-              } else if (typeof mapping === 'string') {
-                itemNode.setInputValue(key, model.get(mapping));
+        // ISL-049 (P107-C140, C141). Caught here, where both callers meet: at a row's landing the throw used to leave
+        // `addItem` and stop the queue for good; on a record's `change` it unwound through `set` into whoever wrote the
+        // record. The row keeps the inputs the mapping set before it threw.
+        try {
+          // We have a mapping function, run the function and use the mapped values
+          // as inputs
+          this._internal.inputMapFunc(function (mappings) {
+            for (const key in mappings) {
+              if (itemNode.hasInput(key)) {
+                const mapping = mappings[key];
+                if (typeof mapping === 'function') {
+                  itemNode.setInputValue(key, mapping(model));
+                } else if (typeof mapping === 'string') {
+                  itemNode.setInputValue(key, model.get(mapping));
+                }
               }
             }
-          }
-        }, model);
+          }, model);
+        } catch (e) {
+          this.raiseRuntimeError(
+            'repeater/input-mapping-threw',
+            `The Repeater's input mapping threw for the item ${JSON.stringify(model.getId())}, so its row keeps the inputs it had: ${
+              (e as Error)?.message ?? String(e)
+            }`,
+            e
+          );
+        }
       }
     },
     addItem: async function (this: ForEachInstance, model: ModelLike, index: number) {
@@ -573,19 +598,31 @@ const ForEachDefinition: NodeDefinitionOptions = {
         return;
       }
 
-      const itemNode = (await this.nodeScope.createNode(template, guid(), {
-        _forEachModel: model,
-        _forEachNode: this
-      })) as ForEachItemNode;
-
-      // D1, second half: `createNode` on a component path that does not exist yields nothing,
-      // and every line below assumes it did. A renamed or deleted template component is the
-      // ordinary way into this, and it was silent.
-      if (!itemNode) {
-        this.reportTemplateProblem(
-          'repeater/template-component-not-found',
-          `The Repeater cannot find the component ${JSON.stringify(template)}, so its items have no rows — it may have been renamed or deleted`
-        );
+      // D1, second half — a renamed or deleted template component is the ordinary way into this. ISL-049 (P107-C128):
+      // `createNode` never yields nothing for a component the project does not have, it THROWS (`getComponentModel`), so
+      // the `!itemNode` branch written for it never ran and the throw stopped the queue for good. Caught: that item has
+      // no row, and the queue runs on.
+      let itemNode: ForEachItemNode;
+      try {
+        itemNode = (await this.nodeScope.createNode(template, guid(), {
+          _forEachModel: model,
+          _forEachNode: this
+        })) as ForEachItemNode;
+      } catch (e) {
+        // found and still not built (a node in it threw while it was made): not "cannot find"
+        if ((this.context as unknown as { hasComponentModelWithName(name: string): boolean }).hasComponentModelWithName(template)) {
+          this.reportTemplateProblem(
+            'repeater/row-build-failed',
+            `The Repeater could not build a row from ${JSON.stringify(template)}, so its items have no rows: ${
+              (e as Error)?.message ?? String(e)
+            }`
+          );
+        } else {
+          this.reportTemplateProblem(
+            'repeater/template-component-not-found',
+            `The Repeater cannot find the component ${JSON.stringify(template)}, so its items have no rows — it may have been renamed or deleted`
+          );
+        }
         return;
       }
 
@@ -768,7 +805,15 @@ const ForEachDefinition: NodeDefinitionOptions = {
       // just appended — and only those, so anything already queued before Refresh started
       // (and thus meant to run after it) is left alone.
       const queueLengthBeforeResync = internal.queuedOperations.length;
-      internal.collection.set(internal.items);
+      try {
+        internal.collection.set(internal.items);
+      } catch (e) {
+        // ISL-049 (P107-C128). A copy that throws (Items holding a null) used to stop the queue for good, its Refreshes
+        // never answered. Now it fails them, and the rows stay as they were.
+        internal.queuedOperations.length = queueLengthBeforeResync;
+        settle('failure', 'repeater/items-copy-threw', `The Repeater could not copy its Items, so it did not rebuild: ${(e as Error)?.message ?? String(e)}`);
+        return;
+      }
       internal.queuedOperations.length = queueLengthBeforeResync;
 
       // Full teardown-and-rebuild, deliberately kept rather than turned into a diff: `set`
@@ -835,7 +880,11 @@ const ForEachDefinition: NodeDefinitionOptions = {
           while (this._internal.queuedOperations.length && performance.now() - start < 25) {
             const op = this._internal.queuedOperations.shift();
             didWork = true;
-            await op();
+            try {
+              await op();
+            } catch (e) {
+              this._operationThrew(e);
+            }
           }
 
           if (this._internal.queuedOperations.length) {
@@ -851,12 +900,25 @@ const ForEachDefinition: NodeDefinitionOptions = {
         while (this._internal.queuedOperations.length) {
           const op = this._internal.queuedOperations.shift();
           didWork = true;
-          await op();
+          try {
+            await op();
+          } catch (e) {
+            this._operationThrew(e);
+          }
         }
 
         this.runningOperations = false;
         this._signalItemsRendered(didWork);
       }
+    },
+    /**
+     * ISL-049 (P107-C128). The loop used to catch nothing: one operation that threw left `runningOperations` true, and
+     * every later operation waited behind it for good — no Items, Template or Refresh was drawn or answered again. Each
+     * operation catches what it knows how to name (a component not found, a Script's or a mapping's throw, a copy); this
+     * is for anything else, so the queue always runs on.
+     */
+    _operationThrew(this: ForEachInstance, e: unknown) {
+      this.raiseRuntimeError('repeater/operation-threw', `The Repeater could not change its rows: ${(e as Error)?.message ?? String(e)}`, e);
     },
     /**
      * Announce that the queue has drained — every item node for this pass now exists.

@@ -42,11 +42,18 @@
  * first: `setNodeModel` → `updateTarget` :436-452). Template Type Explicit (or never set) builds every row from Template; any other
  * value runs Script per item (`getTemplateForModel` :501-537).
  *
+ * v3 (P109 ISL-049): NOTHING STOPS THE QUEUE. v2 recorded four throws inside it that left `runningOperations` true for good (rows C128,
+ * C135, C140); each is caught now where it happens — the build of a component the project does not have (`repeater/template-component-
+ * not-found`, no row), a Script's component that is not text (`repeater/template-script-threw`, no row), a mapping's throw (`repeater/
+ * input-mapping-threw`, the row keeps what it set), a rebuild's copy (its Refreshes fail `repeater/items-copy-threw`, the rows stay) — and
+ * the runner catches anything else (`repeater/operation-threw`). The errors are the bus's, outside the trace (graded in viewer-react's
+ * nda-012 corpus test).
+ *
  * SCRIPT (v2, :348-378). Compiled as it arrives — `new Function('item', 'var component;' + code + ';return component;')` — and the
  * spec compiles and runs the same code on the same record. Code that does not compile leaves no function (the one before is dropped,
  * NDA-012 D1); the declared default is never compiled (a default never runs its setter). Either way a rebuild is asked for. Per record,
- * Template Type Dynamic runs the function: no function, a throw (raised, :507-520) or nothing set is no component — no row; a component
- * that is not text throws at `startsWith` (:524), OUTSIDE the catch, and the queue stops for good as C128's does. A rebuild needs a
+ * Template Type Dynamic runs the function: no function, a throw (raised, :507-520), nothing set or (v3, row C135) a component that is not
+ * text is no component — no row. A rebuild needs a
  * Template or a compiled Script (:745) — whichever Template Type picks, so a Script that compiled lets a rebuild with no Template pass.
  *
  * THE FRAME'S END (node.ts :759-763). The Repeater's frame-end callbacks run in the order they were asked for — the copy and the
@@ -56,12 +63,14 @@
  * THE QUEUE (`_runQueueOperations` :815-860): one operation at a time, in order.
  *   - **an addition**: the item's component (none: no row); then the row's node id (eight draws, guid.ts) and the build (`await
  *     createNode`). A component the project has lands as a row at its place, its inputs given (THE ROW'S INPUTS below). One it does
- *     not have THROWS (`getComponentModel` nodecontext.ts :616-636) — and the queue never runs again (row C128).
+ *     not have throws (`getComponentModel` nodecontext.ts :616-636), caught in `addItem` (v3, row C128): no row, and the queue runs on
+ *     five act boundaries later.
  *   - **a removal**: the record's row goes (:658-685).
  *   - **a rebuild** (`refresh` :723-810): no Template (falsy) — every Refresh it answers fails `repeater/no-template`; no Items (falsy)
  *     — `repeater/no-items`. Otherwise the Items are copied again (what that copy queues is dropped), EVERY row goes, and a row is built
- *     for each record in the list, in order, as an addition builds one; then every Refresh it answers is Done. A throw in the copy or a
- *     build is the queue's for good (C128): its Refreshes are never answered.
+ *     for each record in the list, in order, as an addition builds one (a component the project does not have: no row, four act
+ *     boundaries); then every Refresh it answers is Done. A copy that throws (a `null`) fails every Refresh it answers
+ *     (`repeater/items-copy-threw`), and the rows stay (v3, row C128).
  *   When the queue empties, **Items Rendered** — after every run of the queue, including one that built nothing (row C129).
  *
  * THE ROW'S INPUTS (v2, `addItem` :592-629, `_mapInputs` :538-555). At its landing a row is given its inputs by the input mapping AS IT
@@ -71,9 +80,9 @@
  *     changes that is one of its inputs.
  *   - **a mapping** — MAPPED: `map({ input: 'field' | function (record) })`, each key the row HAS as an input; any other value passed
  *     over; `id` only if mapped. Each change of the record maps the row again by the mapping AS IT IS THEN (none: nothing is set) — so
- *     rows whose rebuild failed keep what the old mapping gave them until their record changes. A mapping that throws at the landing
- *     leaves `addItem` before the row is added: the queue stops for good (row C140). One that throws at a record's change throws into
- *     whoever wrote the record (row C141) — not drawn: in a lone play that is the world's own write.
+ *     rows whose rebuild failed keep what the old mapping gave them until their record changes. v3 — a mapping that throws is caught
+ *     (`repeater/input-mapping-threw`): the row keeps the inputs it set before the throw, at its landing (row C140) and at a record's
+ *     change, which no longer throws into whoever wrote the record (row C141).
  *   A value given that is `undefined` is never sent on (the graph's rule, C3): an input keeps the last value it was given, so a field
  *   cleared elsewhere leaves the row as it was. So each row HOLDS its inputs (v1 read the record live; the two differ only once a field
  *   is cleared). A row hears its record's changes whoever writes them: the app elsewhere (world.ts REGISTRY, `watch`), or the
@@ -214,9 +223,8 @@ function heardField(w: Work, row: Row, name: string, value: unknown): Row {
   }
   const fn = w.st.mapCompiles ? compileMapping(w.st.mapping) : undefined;
   if (!fn) return row;
-  const inputs = mapInputs(fn, row.rec, row.template, row.inputs);
-  // a throw here leaves the listener into the writer (row C141): never drawn in a play (MAPPINGS)
-  return inputs === THROWS ? row : { ...row, inputs };
+  // v3 — a throw is the Repeater's (raised), never the writer's: the row keeps what the mapping set before it (row C141)
+  return { ...row, inputs: mapInputs(fn, row.rec, row.template, row.inputs) };
 }
 
 /** v2 — each change a row's record told, in the order told: the row as it stands then hears it */
@@ -297,8 +305,8 @@ const SCRIPTS: readonly unknown[] = [
 /**
  * v2 — input mappings (`inputMappingScript`, :968-1000): a key the row has, mapped from a field by name or by a function of the record;
  * a key the row does not have, or a value that is neither, is passed over; a mapping that calls `map` with nothing, or never calls it;
- * one that does not compile; none. A mapping that THROWS is not drawn: at a row's landing it stops the queue (row C140, a hand
- * scenario), and on a record's change it throws into whoever wrote the record (row C141) — in a lone play, the world's own write.
+ * one that does not compile; none. v3 — and one that THROWS for some records after it set `id` (rows C140, C141: caught, the row keeps
+ * what it set); v2 could not draw it, since it stopped the queue for good.
  */
 const MAPPINGS: readonly unknown[] = [
   "map({ label: 'title' })",
@@ -306,6 +314,7 @@ const MAPPINGS: readonly unknown[] = [
   "map({ id: 'label', label: 'label' })",
   "map({ title: 'label', label: 'title' })",
   "map({ label: 7, nope: 'label' })",
+  "map({ id: function (o) { return o.getId() }, label: function (o) { if (o.label === 'B' || o.label === 'A2') throw new Error('no'); return o.label } })",
   'map(null)',
   '/* maps nothing */',
   'map(',
@@ -381,9 +390,8 @@ type State = {
   tokens: number;
   /** `queuedOperations` */
   queue: Op[];
-  /** `runningOperations` — the queue is working (for good, once something threw) */
+  /** `runningOperations` — the queue is working */
   running: boolean;
-  stuck: boolean;
   /** the act boundaries before the queue runs on, after an operation that did not build */
   hops: number;
   /**
@@ -451,7 +459,9 @@ function outputsOf(template: unknown): { values: string[]; tapped: boolean; sign
 export const Repeater = defineNode({
   type: 'For Each',
   // v2 (NSP-016 s61): Script is graded — Template Type Dynamic runs it per record, as v1 left undriven
-  version: 2,
+  // v3 (P109 ISL-049, s32): nothing the Repeater meets stops its queue — a component the project does not have, a Script's component
+  // that is not text, a mapping that throws, a copy that throws are each caught where they happen (rows C128, C135, C140, C141)
+  version: 3,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/data/foreach.tsx',
   needs: ['person', 'registry', 'project'],
   worldPool: {
@@ -480,7 +490,6 @@ export const Repeater = defineNode({
     tokens: 0,
     queue: [],
     running: false,
-    stuck: false,
     hops: 0,
     settling: null,
     owed: false,
@@ -682,6 +691,18 @@ function frameWork(w: Work): void {
 // ---------------------------------------------------------------------------------------------
 
 const THROWS = Symbol('throws');
+/** v3 — a build of a component the project does not have, caught (row C128): no row, the queue runs on */
+const MISSING = Symbol('missing');
+/**
+ * v3 — the act boundaries the queue runs on after, measured on the runtime (P109 s32): an addition whose build was not found (its
+ * rejection reaches `addItem`'s catch through `getComponentModel`, `createComponentInstanceNode` and `createNode`); a record a rebuild
+ * looked at whose build was not found; a copy that threw — the queue's own (the runner's catch) and a rebuild's (its Refreshes fail)
+ */
+const HOPS_ADD_MISSING = 5;
+const LOOK_MISSING = 4;
+// never reached in a play — a registry array holds records, never a null: 1, as a copy that does not throw (unmeasured)
+const HOPS_COPY_THREW = 1;
+const HOPS_REFRESH_COPY_THREW = 1;
 
 /**
  * `collection.set(src)` (collection.ts :569-700) on the Repeater's own list: each addition and removal one queued operation (:240-254).
@@ -808,7 +829,7 @@ function settleRebuild(w: Work): void {
 
 /** The yield: the build lands, and the queue runs to its end */
 function atYield(w: Work): void {
-  if (!w.st.running || w.st.stuck) return;
+  if (!w.st.running) return;
   settleRebuild(w);
   w.st.hops = 0;
   for (;;) {
@@ -816,10 +837,7 @@ function atYield(w: Work): void {
     if (b) {
       w.st.building = null;
       land(w, b);
-      if (w.st.building || w.st.stuck) {
-        if (w.st.stuck) return;
-        continue;
-      }
+      if (w.st.building) continue;
     }
     settleRebuild(w);
     if (w.st.hops > 0) w.st.hops = 0;
@@ -830,22 +848,21 @@ function atYield(w: Work): void {
       return;
     }
     start(w, op);
-    if (w.st.stuck) return;
   }
 }
 
-/** An operation's synchronous part: it ends (the queue runs on `hops` act boundaries later), waits on a build, or throws (C128) */
+/** An operation's synchronous part: it ends (the queue runs on `hops` act boundaries later) or waits on a build */
 function start(w: Work, op: Op): void {
   if (op.kind === 'remove') {
     removeItem(w, op.rec);
     w.st.hops = 1;
   } else if (op.kind === 'copy') {
     // v2 (:261-268) — Items as it is NOW copied into the list; what the diff adds and removes is queued behind what waits
-    if (copy(w, w.st.items) === THROWS) w.st.stuck = true;
-    else w.st.hops = 1;
+    // v3 — a copy that throws is the runner's to catch (`_operationThrew`, row C128): the queue runs on
+    w.st.hops = copy(w, w.st.items) === THROWS ? HOPS_COPY_THREW : 1;
   } else if (op.kind === 'add') {
     const b = addItem(w, op.rec, op.index);
-    if (b === THROWS) w.st.stuck = true;
+    if (b === MISSING) w.st.hops = HOPS_ADD_MISSING;
     else if (b === null) w.st.hops = 2;
     else w.st.building = { kind: 'add', row: b, index: op.index };
   } else refresh(w);
@@ -863,10 +880,10 @@ function compileMapping(code: unknown): ((map: (m: unknown) => void, object: unk
 
 /**
  * `_mapInputs` (:538-555): the mapping run on the record — each key the row HAS as an input set from the record's field of that name
- * (a string) or from a function of the record; any other value passed over. What it does not set keeps its value (`prev`). A throw
- * is the caller's (C140, C141).
+ * (a string) or from a function of the record; any other value passed over. What it does not set keeps its value (`prev`). v3 — a
+ * throw is caught there and raised (`repeater/input-mapping-threw`): what it set before it stays (rows C140, C141).
  */
-function mapInputs(fn: (map: (m: unknown) => void, object: unknown) => void, rec: RecordRef, template: string, prev: Readonly<Record<string, unknown>>): Record<string, unknown> | typeof THROWS {
+function mapInputs(fn: (map: (m: unknown) => void, object: unknown) => void, rec: RecordRef, template: string, prev: Readonly<Record<string, unknown>>): Record<string, unknown> {
   const inputs: Record<string, unknown> = { ...prev };
   const has = REPEATER_TEMPLATES[template].inputs;
   try {
@@ -880,7 +897,7 @@ function mapInputs(fn: (map: (m: unknown) => void, object: unknown) => void, rec
       }
     }, rec);
   } catch {
-    return THROWS;
+    return inputs;
   }
   return inputs;
 }
@@ -896,7 +913,7 @@ function compileScript(code: unknown): ((item: unknown) => unknown) | undefined 
 
 /**
  * `getTemplateForModel` (:501-537): Explicit (or never set) reads Template; anything else runs Script on the record — no function, or
- * a throw (raised, :507-520), is no component. A component that is not text throws at `startsWith` (:524), outside the catch.
+ * a throw (raised, :507-520), is no component. v3 — so is a component that is not text, raised the same way (row C135).
  */
 function templateFor(st: State, rec: RecordRef): unknown {
   if (st.templateType === undefined || st.templateType === 'explicit') return st.template;
@@ -908,38 +925,32 @@ function templateFor(st: State, rec: RecordRef): unknown {
   } catch {
     return undefined;
   }
-  if (template && typeof template !== 'string') return THROWS;
+  if (template && typeof template !== 'string') return undefined;
   return template;
 }
 
 /**
  * `addItem` (:556-657) up to its build: no component — no row (null); else the row's node id (eight draws, guid.ts) and the build —
- * a component the project does not have throws (`getComponentModel`), one it has is the row to land.
+ * a component the project does not have throws (`getComponentModel`): v3, caught there and raised (`repeater/template-component-not-
+ * found`), no row (MISSING, row C128); one it has is the row to land.
  */
-function addItem(w: Work, rec: RecordRef, _index: number): Row | null | typeof THROWS {
+function addItem(w: Work, rec: RecordRef, _index: number): Row | null | typeof MISSING {
   const template = templateFor(w.st, rec);
-  if (template === THROWS) return THROWS;
   if (!template) return null;
   for (let i = 0; i < 8; i++) w.view.random();
   const name = String(template);
-  if (!Object.prototype.hasOwnProperty.call(REPEATER_TEMPLATES, name)) return THROWS;
+  if (!Object.prototype.hasOwnProperty.call(REPEATER_TEMPLATES, name)) return MISSING;
   return { rec, template: name, mapped: false, inputs: {}, born: -1 };
 }
 
 /** The row lands (:592-656): added at its place among the parent's children (after the Repeater, so its place in the list) */
 function land(w: Work, b: Building): void {
   // v2 (:592-629) — the mapping as it is at the landing decides the row's inputs: none, direct (live); one, mapped now and again at
-  // each change of the record (heard: `watch`); a mapping that throws leaves `addItem` before the row is added — the queue stops (C140)
+  // each change of the record (heard: `watch`). v3 — a mapping that throws lands the row with what it set before it (row C140)
   let row = b.row;
   const fn = w.st.mapCompiles ? compileMapping(w.st.mapping) : undefined;
-  if (fn) {
-    const inputs = mapInputs(fn, row.rec, row.template, {});
-    if (inputs === THROWS) {
-      w.st.stuck = true;
-      return;
-    }
-    row = { ...row, mapped: true, inputs };
-  } else row = { ...row, inputs: directInputs(row.rec, row.template) };
+  if (fn) row = { ...row, mapped: true, inputs: mapInputs(fn, row.rec, row.template, {}) };
+  else row = { ...row, inputs: directInputs(row.rec, row.template) };
   // the row listens to its record (:610, :628): what is written elsewhere reaches it (`world.change`)
   w.view.watch({ model: row.rec.getId() });
   row = { ...row, born: w.st.made };
@@ -1091,8 +1102,11 @@ function refresh(w: Work): void {
   }
   // :770-772 — the copy again; what it queued is dropped
   const before = st.queue.length;
+  // v3 — a copy that throws fails every Refresh it answers, and the rows stay (row C128)
   if (copy(w, st.items) === THROWS) {
-    st.stuck = true;
+    settle('failure', 'repeater/items-copy-threw');
+    st.queue.length = before;
+    st.hops = HOPS_REFRESH_COPY_THREW;
     return;
   }
   st.queue.length = before;
@@ -1107,9 +1121,10 @@ function rebuildFrom(w: Work, records: RecordRef[], k: number, tokens: number): 
   let looked = 0;
   for (let i = k; i < records.length; i++) {
     const b = addItem(w, records[i], i);
-    if (b === THROWS) {
-      w.st.stuck = true;
-      return;
+    // v3 — a component the project does not have: that record has no row (row C128)
+    if (b === MISSING) {
+      looked += LOOK_MISSING;
+      continue;
     }
     if (b === null) {
       looked += 1;

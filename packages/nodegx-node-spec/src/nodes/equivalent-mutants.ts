@@ -212,6 +212,12 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     }))
   ],
   Text: TEXT,
+  // P109 ISL-049 (s32) — the Repeater v3: with no queue that stops for good (row C128), a yield that pulses nothing and answers
+  // nothing finds the queue idle. Its set clears `afterFrame` and `owed` (every later step sets both before reading them) and, after a
+  // settle's frame, empties `pending` of signals the drain did not hear — a row the Repeater deleted, or an output the PLACED Template
+  // lacks, so never heard later either. A row let go at a drain was let go by the frame's drain before it. v2's stuck yield was the one
+  // this branch could show (the C128 scenarios killed it there)
+  'For Each': [{ reducer: 'world.resume', kind: 'drop-set', branch: '"emit":[],"outcome":null,"outcomes":[],"request":false}', why: 'a yield that finds the queue idle: its set clears two flags every later step sets before reading, and signals no drain can hear' }],
   // NSP-016 s53 — the Shape runs the Text's machinery with no Tag
   Circle: [...TEXT.map(onCircle), ...NO_DRAG_WITHOUT_A_TAG],
   // NSP-016 s53 — the Image runs the Shape's machinery (no Tag), and its fetch
