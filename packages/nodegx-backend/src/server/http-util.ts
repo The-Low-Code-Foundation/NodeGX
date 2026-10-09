@@ -7,7 +7,7 @@
 
 import type * as http from 'http';
 
-import type { StorageQueryResult } from '@noodl/backend-contract';
+import { StillLinked, type StorageQueryResult } from '@noodl/backend-contract';
 
 import { requestIdOf } from '../ops/request-id';
 
@@ -259,6 +259,17 @@ export function checkViolationToHttp(message: string, schema?: CheckReader): Htt
     142,
     { reason: 'check-failed', check: problem.check, collection: problem.collection, ...(found ? { rule: found.rule } : {}) }
   );
+}
+
+/**
+ * P116 R10: a delete a link's `blocks` rule refused (`StillLinked`, `@noodl/backend-contract`
+ * `targetGoes.ts`). 409 — the record is there and something still depends on it — with what links
+ * to it, per collection and field, so a graph can branch on it and a person knows what to unlink.
+ * `null` for any other error: the door's own answer (a 404) stands for those.
+ */
+export function stillLinkedToHttp(e: unknown): HttpError | null {
+  if (!(e instanceof StillLinked)) return null;
+  return new HttpError(409, e.message, 142, { reason: 'still-linked', collection: e.collection, objectId: e.objectId, linked: e.linked });
 }
 
 /**

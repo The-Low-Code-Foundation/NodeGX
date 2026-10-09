@@ -39,6 +39,7 @@ import {
   sendJSON,
   preconditionToHttp,
   splitCapped,
+  stillLinkedToHttp,
   uniqueViolationToHttp
 } from './http-util';
 
@@ -583,8 +584,9 @@ export class ParseWireRoutes {
   async classDelete(ctx: RequestContext): Promise<void> {
     try {
       await this.facade.rawDelete(ctx.params.collection, ctx.params.id, ctx.acl('write'));
-    } catch {
-      throw new HttpError(404, 'Object not found.', 101);
+    } catch (e) {
+      // P116 R10: a link's `blocks` rule refusing is a 409 that says what links to it, not a 404.
+      throw stillLinkedToHttp(e) || new HttpError(404, 'Object not found.', 101);
     }
     sendJSON(ctx.res, 200, {});
   }

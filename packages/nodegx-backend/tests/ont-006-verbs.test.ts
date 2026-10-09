@@ -31,6 +31,7 @@ import { makeContext, runClaim, saysTheRule } from '@noodl/backend-contract/conf
 
 import { ExecutionHistory } from '../src/execution/ExecutionStore';
 import { createAdapter, type PersistenceHandle } from '../src/persistence/createAdapter';
+import { deletesThroughTheFacade } from './helpers/facade-deletes';
 import type { StepExecContext, StepExecutor } from '../src/workflow/StepExecutor';
 import { CompositeStepExecutor } from '../src/workflow/steps/CompositeStepExecutor';
 import { WorkflowEngine, validateWorkflowDefinition } from '../src/workflow/WorkflowEngine';
@@ -342,7 +343,7 @@ for (const engine of [sqlite(), postgres()]) {
 
     it('every held row passes on records, and the row the store does not keep fails at the step that says it', async () => {
       const h = await engine.make();
-      const ctx = makeContext(h.adapter, 'ont006');
+      const ctx = makeContext(deletesThroughTheFacade(h.adapter), 'ont006');
       const wrong: string[] = [];
       for (const claim of claims) {
         const run = await runClaim(ctx, schema, claim);
@@ -354,7 +355,7 @@ for (const engine of [sqlite(), postgres()]) {
 
     it('the grade grades something: an end whose date is never written fails at the read-back', async () => {
       const h = await engine.make();
-      const ctx = makeContext(h.adapter, 'ont006m');
+      const ctx = makeContext(deletesThroughTheFacade(h.adapter), 'ont006m');
       const ends = claims.find((c) => c.id === 'archive/memberships-end')!;
       const mutant = { ...ends, steps: ends.steps.filter((s) => !('change' in s)) };
       const run = await runClaim(ctx, schema, mutant);
@@ -364,7 +365,7 @@ for (const engine of [sqlite(), postgres()]) {
 
     it('the enrolment verb’s one row — the person made here — passes too', async () => {
       const h = await engine.make();
-      const ctx = makeContext(h.adapter, 'ont006e');
+      const ctx = makeContext(deletesThroughTheFacade(h.adapter), 'ont006e');
       const c = verbClaims(ENROL, WORLD);
       if (!c.ok) throw new Error(c.problems.join('\n'));
       expect(c.claims.map((x) => x.id)).toEqual(['enrol/person-here']);

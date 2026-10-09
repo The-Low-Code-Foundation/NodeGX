@@ -48,6 +48,7 @@ import { planMigration, schemaPushes, type MigrationPlan, type WorldFiles, type 
 import { snapshotDatabase } from '../src/backup/snapshot';
 import { AdapterFacade } from '../src/persistence/AdapterFacade';
 import { createAdapter, type PersistenceHandle } from '../src/persistence/createAdapter';
+import { deletesThroughTheFacade } from './helpers/facade-deletes';
 
 jest.setTimeout(300000);
 
@@ -202,7 +203,8 @@ function postgres(): Engine {
 
 /** The context on the real table names: a migration and its grade read the tables the person has. */
 function onTheRealTables(adapter: IStorageAdapter): ConformanceContext {
-  const ctx = makeContext(adapter, 'ont007');
+  // R10: the backend's own delete, which keeps every link's "when it goes" rule.
+  const ctx = makeContext(deletesThroughTheFacade(adapter), 'ont007');
   return { ...ctx, collection: (base: string) => base };
 }
 
@@ -700,22 +702,51 @@ for (const engine of [sqlite(), postgres()]) {
     });
 
     describe('s9 — a changed answer that changes only the words on a collection', () => {
-      // `whenTargetGoes`, `setOnce`, `whatStays`… project into the collection's description (ONT-003: the rules
-      // the store does not keep, in words). The schema route writes a description once, at `createTable`, and has
-      // no action that changes it (byob-admin.ts: "a changed description is ONT-007's migration"). So the plan
-      // had no step for it, the reach no row, and the Schema card kept the old words. Pinned as failing in s9;
-      // green since s11: `describeTable` on the surface and both engines, and the plan's step for it.
+      // A noun's sentence, a field's words, and the rules the store does not keep project into the collection's
+      // description (ONT-003). The schema route writes a description once, at `createTable`, and has no action
+      // that changes it (byob-admin.ts: "a changed description is ONT-007's migration"). So the plan had no step
+      // for it, the reach no row, and the Schema card kept the old words. Pinned as failing in s9; green since
+      // s11: `describeTable` on the surface and both engines, and the plan's step for it. (Until R10 this rode on
+      // the bombshell, whose link rule was said in Person's words; a kept rule is no longer words, so it rides on
+      // a sentence said again.)
       it('is carried to the collection the backend holds, and a restart reads it', async () => {
+        const worded: WorldFiles = JSON.parse(JSON.stringify(ONE));
+        worded.nouns.nouns[0].sentence = 'A person is someone we serve, on the account that pays for them.';
+        const said = plan(ONE, worded);
         const h = await engine.make();
         const ctx = onTheRealTables(h.adapter);
-        applyWorld(ctx, bombshell.before);
+        applyWorld(ctx, said.before);
         await seedOne(ctx);
-        const run = await runMigration(ctx, asPlanData(bombshell), { backup: async () => 'taken' });
-        expect(run).toMatchObject({ ran: true });
-        const want = bombshell.after.collections.find((c) => c.name === 'Person')!.description;
-        expect(want).not.toBe(bombshell.before.collections.find((c) => c.name === 'Person')!.description);
+        const run = await runMigration(ctx, asPlanData(said), { backup: async () => 'taken' });
+        expect(run).toMatchObject({ ran: true, steps: 2 });
+        const want = said.after.collections.find((c) => c.name === 'Person')!.description;
+        expect(want).not.toBe(said.before.collections.find((c) => c.name === 'Person')!.description);
         expect(ctx.schema.getTableSchema('Person')!.description).toBe(want);
         expect(onTheRealTables((await engine.reopen(h)).adapter).schema.getTableSchema('Person')!.description).toBe(want);
+      });
+    });
+
+    describe('R10 — a changed answer to "when what it points at goes" is carried to the link the backend keeps', () => {
+      it('blocks → goes-too: refused before, the rule moved, kept after a restart, and the next delete takes the people with it', async () => {
+        const goes: WorldFiles = JSON.parse(JSON.stringify(ONE));
+        goes.relations.relations[0].answers!.whenTargetGoes = 'goes-too';
+        const told = plan(ONE, goes);
+        expect(told.steps.map((s) => ('schema' in s ? s.schema.action : 'backup' in s ? 'backup' : 'move'))).toEqual(['backup', 'setWhenTargetGoes']);
+        const h = await engine.make();
+        const ctx = onTheRealTables(h.adapter);
+        applyWorld(ctx, told.before);
+        const { accounts, people } = await seedOne(ctx);
+        // The control: the world before says an account cannot go while people are on it.
+        await expect(ctx.remove('Account', accounts.Northwind)).rejects.toThrow(/cannot be deleted: 2 Person records link to it by "account"/);
+        const run = await runMigration(ctx, asPlanData(told), { backup: async () => 'taken' });
+        expect(run).toMatchObject({ ran: true, steps: 2 });
+        const linkNow = (c: ConformanceContext) => c.schema.getTableSchema('Person')!.columns!.find((x) => x.name === 'account')!.whenTargetGoes;
+        expect(linkNow(ctx)).toBe('goes-too');
+        const again = onTheRealTables((await engine.reopen(h)).adapter);
+        expect(linkNow(again)).toBe('goes-too');
+        await again.remove('Account', accounts.Northwind);
+        const left = (await rows(again, 'Person')).map((r) => String(r.objectId)).sort();
+        expect(left).toEqual([people.Linus]);
       });
     });
   });

@@ -17,6 +17,7 @@
 
 import { deepEq, eq, ok } from '../assert';
 import type { ConformanceCase, ConformanceContext } from '../index';
+import type { StorageColumn } from '../../src/storage';
 
 /** The optional members are feature-detected, exactly as their call sites do. */
 function hasIndexSupport(ctx: ConformanceContext): boolean {
@@ -314,6 +315,42 @@ export const schemaCases: readonly ConformanceCase[] = Object.freeze([
       ok(!('score' in after) || !hasCheckSupport(ctx), 'a read still carries the second dropped column');
     }
   },
+  {
+    id: 'schema/set-when-target-goes-changes-the-declaration',
+    area: 'schema',
+    pins: 'P116 R10: setWhenTargetGoes changes what a link says happens when its record goes — read back by getTableSchema, taken away by null, refused on a field that is not a link and on a required one told to stay without it; the other columns untouched',
+    async run(ctx) {
+      if (typeof ctx.schema.setWhenTargetGoes !== 'function') {
+        throw new Error('setWhenTargetGoes is absent — declare this case unsupported (§3.4)');
+      }
+      const target = ctx.collection('SchT');
+      const c = ctx.collection('Sch');
+      ctx.createTable(target, [{ name: 'name', type: 'String' }]);
+      ctx.schema.createTable({
+        name: c,
+        columns: [
+          { name: 'title', type: 'String' },
+          { name: 'owner', type: 'Pointer', targetClass: target, whenTargetGoes: 'blocks' },
+          { name: 'must', type: 'Pointer', targetClass: target, required: true } as StorageColumn
+        ]
+      });
+      const rule = (field: string) => (ctx.schema.getTableSchema(c)?.columns || []).find((col) => col.name === field)?.whenTargetGoes;
+      eq(rule('owner'), 'blocks', 'createTable did not keep the rule');
+
+      ok(ctx.schema.setWhenTargetGoes(c, { owner: 'goes-too', must: 'blocks' }) === true, 'setWhenTargetGoes did not report the change');
+      eq(rule('owner'), 'goes-too', 'the changed rule is not read back');
+      eq(rule('must'), 'blocks', 'a rule put on a link that had none is not read back');
+
+      ok(/link|Pointer/i.test(refusalOf(() => ctx.schema.setWhenTargetGoes!(c, { title: 'blocks' }))), 'a rule on a text field was not refused as not a link');
+      ok(/required/i.test(refusalOf(() => ctx.schema.setWhenTargetGoes!(c, { must: 'stays-unlinked' }))), 'stays-unlinked on a required link was not refused');
+      ok(/nope/.test(refusalOf(() => ctx.schema.setWhenTargetGoes!(c, { nope: 'blocks' }))), 'a field the collection does not have was not refused');
+      eq(rule('must'), 'blocks', 'a refused change changed the rule anyway');
+
+      ctx.schema.setWhenTargetGoes(c, { owner: null });
+      eq(rule('owner'), undefined, 'null did not take the rule away');
+      ok(deepEqFields((ctx.schema.getTableSchema(c)?.columns || []).map((col) => col.name), ['title', 'owner', 'must']), 'setWhenTargetGoes disturbed the columns');
+    }
+  },
 
   {
     id: 'schema/index-declaration-survives-a-reread',
@@ -339,6 +376,16 @@ export const schemaCases: readonly ConformanceCase[] = Object.freeze([
 ]);
 
 /** Field lists compare as ordered tuples — `[a,b]` is not `[b,a]` for an index. */
+/** The message of a refusal of any kind; fails the case when the call goes through. */
+function refusalOf(fn: () => unknown): string {
+  try {
+    fn();
+  } catch (err) {
+    return String((err as { message?: string }).message);
+  }
+  throw new Error('expected the call to be refused, and it succeeded');
+}
+
 function deepEqFields(a: string[] | undefined, b: string[]): boolean {
   if (!Array.isArray(a) || a.length !== b.length) return false;
   return a.every((v, i) => v === b[i]);

@@ -10,10 +10,8 @@
         "noun": "product"
       },
       "sentence": "A product is one thing we sell, with a price.",
-      "notHeld": [
-        "a subcategory cannot go while any products are linked to it"
-      ],
-      "description": "A product is one thing we sell, with a price. Not kept by the database yet: a subcategory cannot go while any products are linked to it.",
+      "notHeld": [],
+      "description": "A product is one thing we sell, with a price.",
       "columns": [
         {
           "name": "name",
@@ -32,6 +30,7 @@
           "type": "Pointer",
           "targetClass": "Subcategory",
           "required": true,
+          "whenTargetGoes": "blocks",
           "description": "Every product sits on one shelf: its subcategory.",
           "relation": "product-subcategory"
         }
@@ -151,7 +150,13 @@
       "from": {
         "relation": "product-subcategory"
       },
-      "held": false,
+      "held": true,
+      "mutant": {
+        "dropWhenTargetGoes": {
+          "collection": "Product",
+          "field": "subcategory"
+        }
+      },
       "steps": [
         {
           "make": "Subcategory",
@@ -180,13 +185,6 @@
       "collection": "Subcategory",
       "says": "a retired value stays on the records that hold it, and is no longer offered",
       "why": "what a list offers is the screen’s choice; the store keeps whatever value is written"
-    },
-    {
-      "collection": "Product",
-      "field": "subcategory",
-      "says": "a subcategory cannot go while any products are linked to it",
-      "why": "a link holds the other record’s id, and no engine behind the contract follows it when that record is deleted",
-      "claim": "product-subcategory/subcategory-blocks"
     }
   ]
 }

@@ -69,7 +69,7 @@ describe('the bombshell — one account becomes several', () => {
 
   it('backs up first, makes the records, moves the links, keeps the rules, and drops the old field last', () => {
     // s11: and says again what a person is — the words on Person change with the answer (§6.9 #5).
-    expect(shape(p)).toEqual(['backup', 'createTable:Membership', 'move:linkToRecord', 'setChecks:Membership', 'describeTable:Person', 'dropColumn:Person']);
+    expect(shape(p)).toEqual(['backup', 'createTable:Membership', 'move:linkToRecord', 'setChecks:Membership', 'dropColumn:Person']);
     expect(p.steps[2]).toEqual({
       move: { linkToRecord: { from: 'Person', field: 'account', record: 'Membership', fromField: 'person', toField: 'account' } },
       says: "every person's account becomes their first 'membership' record; its since, until, role left empty, because nobody said what they were"
@@ -92,7 +92,7 @@ describe('the bombshell — one account becomes several', () => {
 
   it('every schema step is a body the schema route takes', () => {
     // `nodegx-backend/src/server/byob-admin.ts` `mutateSchema`: the actions it answers. The backend spec posts them.
-    const ROUTE = ['createTable', 'addColumn', 'renameColumn', 'renameTable', 'describeTable', 'changeColumnType', 'dropColumn', 'deleteTable', 'setIndexes', 'setChecks'];
+    const ROUTE = ['createTable', 'addColumn', 'renameColumn', 'renameTable', 'describeTable', 'setWhenTargetGoes', 'changeColumnType', 'dropColumn', 'deleteTable', 'setIndexes', 'setChecks'];
     for (const s of p.steps) if ('schema' in s) expect(ROUTE).toContain(s.schema.action);
   });
 });
@@ -184,7 +184,7 @@ describe('the mirror — several accounts become one', () => {
   });
 
   it('adds the link, fills it from the records, then lets the records go', () => {
-    expect(shape(p)).toEqual(['backup', 'addColumn:Person', 'move:recordToLink', 'describeTable:Person', 'deleteTable:Membership']);
+    expect(shape(p)).toEqual(['backup', 'addColumn:Person', 'move:recordToLink', 'deleteTable:Membership']);
   });
 
   it('stops on a person on two accounts or on none, and counts the details it would lose', () => {
@@ -398,7 +398,7 @@ describe('AC3 — a noun renamed keeps its records', () => {
 
   it('a rename and the bombshell in one change: renamed first, then the records made under the new names', () => {
     const p = plan(ONE, renamed(readWorld(AFTER), 'account', 'subscription', 'Subscription'));
-    expect(shape(p)).toEqual(['backup', 'renameTable:Account', 'renameColumn:Person', 'createTable:Membership', 'move:linkToRecord', 'setChecks:Membership', 'describeTable:Person', 'dropColumn:Person']);
+    expect(shape(p)).toEqual(['backup', 'renameTable:Account', 'renameColumn:Person', 'createTable:Membership', 'move:linkToRecord', 'setChecks:Membership', 'dropColumn:Person']);
     expect(p.steps[4]).toMatchObject({ move: { linkToRecord: { from: 'Person', field: 'subscription', record: 'Membership', toField: 'subscription' } } });
     expect(p.checks).toEqual([]);
   });
@@ -534,5 +534,34 @@ describe('s11 — a changed answer that changes only the words is a step of its 
       for (const [field, words] of Object.entries(d.schema.columns)) expect(now.columns.find((c) => c.name === field)!.description ?? null).toBe(words);
     }
     expect(described.some((d) => Object.keys(d.schema.columns).length > 0)).toBe(true);
+  });
+});
+
+describe('R10 — a changed answer to "when what it points at goes" is a step of its own', () => {
+  const ONE = readWorld(BEFORE);
+  it('blocks → goes-too: the backup, then the link told — no words step, no check, no reach', () => {
+    const after = clone(ONE);
+    after.relations.relations[0].answers!.whenTargetGoes = 'goes-too';
+    const p = plan(ONE, after);
+    expect(shape(p)).toEqual(['backup', 'setWhenTargetGoes:Person']);
+    expect((p.steps[1] as { schema: unknown }).schema).toEqual({ action: 'setWhenTargetGoes', table: 'Person', columns: { account: 'goes-too' } });
+    expect(p.steps[1].says).toBe("when the Account a person's account points at goes, the person goes too");
+    expect(p.checks).toEqual([]);
+    expect(p.reach).toEqual([]);
+  });
+
+  it('the rule is carried on the column a new collection is made with, so a bombshell needs no step for it', () => {
+    const p = plan(readWorld(BEFORE), readWorld(AFTER));
+    const made = p.steps.find((s) => 'schema' in s && s.schema.action === 'createTable') as { schema: { columns: Array<{ name: string; whenTargetGoes?: string }> } };
+    expect(made.schema.columns.filter((c) => c.whenTargetGoes).map((c) => `${c.name}:${c.whenTargetGoes}`).sort()).toEqual(
+      p.after.collections.find((c) => c.name === 'Membership')!.columns.filter((c) => c.whenTargetGoes).map((c) => `${c.name}:${c.whenTargetGoes}`).sort()
+    );
+    expect(made.schema.columns.some((c) => c.whenTargetGoes)).toBe(true);
+  });
+
+  it('the same answer twice says nothing — the control', () => {
+    const after = clone(ONE);
+    after.relations.relations[0].answers!.whenTargetGoes = 'blocks';
+    expect(shape(plan(ONE, after))).toEqual(['backup']);
   });
 });

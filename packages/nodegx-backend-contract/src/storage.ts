@@ -222,6 +222,11 @@ export interface StorageColumn {
   /** Optional: some import paths carry a column with no declared type yet. */
   type?: string;
   targetClass?: string;
+  /**
+   * P116 R10 — a Pointer only: what happens to the rows holding this link when the record it points
+   * at is deleted. Kept by the backend at delete time, never a foreign key (`targetGoes.ts`).
+   */
+  whenTargetGoes?: 'goes-too' | 'stays-unlinked' | 'blocks';
 }
 
 /**
@@ -410,6 +415,14 @@ export interface IStorageSchema {
    * have. Optional — `byob-admin.ts` answers 501 without it.
    */
   describeTable?(table: string, description: string | null, columns?: Record<string, string | null>): boolean;
+  /**
+   * P116 R10: say again, per link, what happens to a record when the one it points at goes
+   * (`whenTargetGoes`, by field name; `null` takes the rule away). Only a Pointer may carry one, and
+   * `stays-unlinked` not on a required field. The backend keeps it at delete time (`targetGoes.ts`);
+   * this only changes the declaration. Throws on a collection or field the declaration does not
+   * have, or a rule the field cannot carry. Optional — `byob-admin.ts` answers 501 without it.
+   */
+  setWhenTargetGoes?(table: string, columns: Record<string, 'goes-too' | 'stays-unlinked' | 'blocks' | null>): boolean;
   /**
    * BMG-003: drop a column (a Relation's junction table goes with it). Throws
    * `code: 'COLUMN_IN_USE'` naming the declared index, check or search opt-in

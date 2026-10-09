@@ -65,9 +65,16 @@ describe('nothing said is dropped', () => {
         else if ('pairOnce' in h) expect([rule.says, schema.claims.some((x) => x.held && x.says === rule.says)]).toEqual([rule.says, true]);
         else expect([rule.says, said(c.name, rule.says), schema.notHeld.some((n) => n.says === rule.says)]).toEqual([rule.says, true, true]);
       }
+      // R10: a link to a noun HOLDS its "when it goes" rule on the column, with a held claim; a text id
+      // (no single collection) says it. Never both, never neither.
       for (const f of out.fields.filter((x) => x.whenTargetGoes)) {
         const c = home(f.on);
-        expect([r.id, f.name, schema.notHeld.some((n) => n.collection === c && n.field === fieldName(f.name))]).toEqual([r.id, f.name, true]);
+        const col = schema.collections.find((x) => x.name === c)!.columns.find((x) => x.name === fieldName(f.name))!;
+        const id = `${r.id}/${col.name}-${f.whenTargetGoes}`;
+        const held = col.whenTargetGoes === f.whenTargetGoes && schema.claims.some((x) => x.held && x.id === id);
+        // Another rule may be said on the same field (set once): only the link's own counts.
+        const said = schema.notHeld.some((n) => n.collection === c && n.field === col.name && (n.claim === id || (col.type !== 'Pointer' && /\bgo(es)?\b/.test(n.says))));
+        expect([r.id, f.name, col.type, held, said]).toEqual([r.id, f.name, col.type, col.type === 'Pointer', col.type !== 'Pointer']);
       }
     }
     if (files.relations.relations.length) expect(rules).toBeGreaterThan(0);

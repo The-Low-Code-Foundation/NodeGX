@@ -521,6 +521,36 @@ class SchemaManager {
   }
 
   /**
+   * P116 R10: what happens to a record when the one each named link points at goes — `whenTargetGoes`
+   * by field name, `null` to take it away. Only the declaration changes; the backend keeps the rule
+   * at delete time. A fresh object in the cache, as every schema edit (the memo, s11).
+   */
+  setWhenTargetGoes(tableName: string, columns: Record<string, 'goes-too' | 'stays-unlinked' | 'blocks' | null>): boolean {
+    const schema = this.getTableSchema(tableName);
+    if (!schema) throw new Error(`There is no collection called "${tableName}"`);
+    const fresh = freshSchema(schema);
+    const RULES = ['goes-too', 'stays-unlinked', 'blocks'];
+    for (const [name, rule] of Object.entries(columns)) {
+      const col = (fresh.columns || []).find((c) => c.name === name);
+      if (!col) throw new Error(`"${tableName}" has no field "${name}"`);
+      if (rule === null) {
+        delete col.whenTargetGoes;
+        continue;
+      }
+      if (!RULES.includes(rule)) throw new Error(`"${tableName}.${name}": "${String(rule)}" is not one of ${RULES.join(', ')}`);
+      if (col.type !== 'Pointer') throw new Error(`"${tableName}.${name}" is not a link to one record, so it cannot say what happens when that record goes`);
+      if (rule === 'stays-unlinked' && col.required) throw new Error(`"${tableName}.${name}" is required, so it cannot stay without one`);
+      col.whenTargetGoes = rule;
+    }
+    this.ensureSchemaTable();
+    this.db
+      .prepare(`UPDATE "_Schema" SET "schema" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "name" = ?`)
+      .run(JSON.stringify(fresh), tableName);
+    this._schemaCache.set(tableName, fresh);
+    return true;
+  }
+
+  /**
    * Rename a column in a table (SQLite 3.25.0+)
    *
    * @returns Whether column was renamed

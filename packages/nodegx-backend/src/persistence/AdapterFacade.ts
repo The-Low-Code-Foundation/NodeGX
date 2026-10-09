@@ -23,6 +23,7 @@
 
 import * as crypto from 'crypto';
 
+import { deleteKeepingLinks } from '@noodl/backend-contract';
 import type {
   IStorageAdapter,
   IStorageDataPlane,
@@ -280,8 +281,29 @@ export class AdapterFacade implements IStorageFacade {
     return this.call('save', expect ? { collection, objectId, data, acl, expect } : { collection, objectId, data, acl });
   }
 
-  rawDelete(collection: string, objectId: string, acl?: AclOption): Promise<void> {
-    return this.call('delete', { collection, objectId, acl });
+  /**
+   * P116 R10 — a delete keeps what every link to the record says happens when it goes
+   * (`goes-too`, `stays-unlinked`, `blocks`; `@noodl/backend-contract` `targetGoes.ts`). HERE, above
+   * the adapter, for the reason the page cap is here: every door that deletes — `/classes` (and so
+   * a cloud function's Delete Record, which calls it over loopback), BYOB `/api/:table`, its batch,
+   * the account and session sweeps — passes this one method, on every engine. A `blocks` refusal is
+   * thrown as `StillLinked` with nothing changed; a delete no rule reaches is the plain one.
+   */
+  async rawDelete(collection: string, objectId: string, acl?: AclOption): Promise<void> {
+    const sm = this.schemaManager;
+    if (!sm || typeof sm.listTables !== 'function') return this.call('delete', { collection, objectId, acl });
+    await deleteKeepingLinks(
+      {
+        schema: sm,
+        query: (c, options) => this.rawQueryAll(c, options),
+        count: (c, where) => this.call('count', { collection: c, where }),
+        save: (c, id, data) => this.call('save', { collection: c, objectId: id, data }),
+        delete: (c, id, a) => this.call('delete', { collection: c, objectId: id, acl: a })
+      },
+      collection,
+      objectId,
+      acl
+    );
   }
 
   rawCount(collection: string, where?: Record<string, unknown>, acl?: AclOption): Promise<number> {

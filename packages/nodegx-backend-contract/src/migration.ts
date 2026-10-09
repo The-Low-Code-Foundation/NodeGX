@@ -26,6 +26,7 @@
  */
 
 import type { PathHop } from './filter';
+import { whenTargetGoesProblems, type WhenTargetGoes } from './targetGoes';
 import type { IStorageFacade, IStorageSchema, StorageCheckDecl, StorageColumn, StorageIndexDecl, StorageQueryOptions } from './storage';
 
 /** A stored row, as the storage layer hands it back. */
@@ -38,6 +39,8 @@ export type MigrationSchemaBody =
   | { action: 'renameTable'; table: string; newName: string }
   | { action: 'renameColumn'; table: string; oldName: string; newName: string }
   | { action: 'describeTable'; table: string; description: string; columns: Record<string, string | null> }
+  /** P116 R10: a changed answer to "when what it points at goes", per link (null takes the rule away). */
+  | { action: 'setWhenTargetGoes'; table: string; columns: Record<string, WhenTargetGoes | null> }
   | { action: 'setChecks'; table: string; checks: StorageCheckDecl[] }
   | { action: 'setIndexes'; table: string; indexes: StorageIndexDecl[] }
   | { action: 'dropColumn'; table: string; column: string }
@@ -226,6 +229,10 @@ function applySchema(ctx: MigrationContext, body: MigrationSchemaBody): void {
       if (typeof sm.describeTable !== 'function') throw new Error('the schema surface cannot say again what a collection is');
       sm.describeTable(body.table, body.description, body.columns);
       return;
+    case 'setWhenTargetGoes':
+      if (typeof sm.setWhenTargetGoes !== 'function') throw new Error('the schema surface cannot say what happens to a link when its record goes');
+      sm.setWhenTargetGoes(body.table, body.columns);
+      return;
     case 'setChecks':
       if (typeof sm.reconcileChecks !== 'function') throw new Error('the schema surface has no reconcileChecks');
       sm.reconcileChecks(body.table, body.checks);
@@ -330,6 +337,7 @@ const SCHEMA_ACTIONS: ReadonlyArray<MigrationSchemaBody['action']> = [
   'renameTable',
   'renameColumn',
   'describeTable',
+  'setWhenTargetGoes',
   'setChecks',
   'setIndexes',
   'dropColumn',
@@ -364,6 +372,12 @@ export function migrationPlanProblems(plan: unknown): string[] {
       const b = s.schema;
       if (!isObject(b) || !SCHEMA_ACTIONS.includes(b.action as MigrationSchemaBody['action'])) out.push(`${at}: no schema action "${isObject(b) ? String(b.action) : ''}"`);
       else if (!isWords(b.table)) out.push(`${at}: a schema change names its table`);
+      // R10: the executor writes through the schema surface, not the route, so a rule the backend
+      // could never keep is refused here, as the route refuses it.
+      else if (b.action === 'createTable' || b.action === 'addColumn') {
+        const cols = b.action === 'createTable' ? b.columns : [b.column];
+        if (Array.isArray(cols)) for (const p of whenTargetGoesProblems(String(b.table), cols.filter(isObject) as unknown as StorageColumn[])) out.push(`${at}: ${p}`);
+      }
     }
     if ('move' in s) {
       const m = s.move;

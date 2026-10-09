@@ -760,6 +760,39 @@ export class PgSchemaManager {
     return true;
   }
 
+  /** P116 R10 — the SQLite manager's `setWhenTargetGoes`: the declaration only, a fresh object (the memo). */
+  setWhenTargetGoes(tableName: string, columns: Record<string, 'goes-too' | 'stays-unlinked' | 'blocks' | null>): boolean {
+    const st = this.s;
+    const schema = st.schemas.get(tableName);
+    if (!schema) throw new Error(`There is no collection called "${tableName}"`);
+    const fresh = freshSchema(schema);
+    const RULES = ['goes-too', 'stays-unlinked', 'blocks'];
+    for (const [name, rule] of Object.entries(columns)) {
+      const col = (fresh.columns || []).find((c) => c.name === name);
+      if (!col) throw new Error(`"${tableName}" has no field "${name}"`);
+      if (rule === null) {
+        delete col.whenTargetGoes;
+        continue;
+      }
+      if (!RULES.includes(rule)) throw new Error(`"${tableName}.${name}": "${String(rule)}" is not one of ${RULES.join(', ')}`);
+      if (col.type !== 'Pointer') throw new Error(`"${tableName}.${name}" is not a link to one record, so it cannot say what happens when that record goes`);
+      if (rule === 'stays-unlinked' && col.required) throw new Error(`"${tableName}.${name}" is required, so it cannot stay without one`);
+      col.whenTargetGoes = rule;
+    }
+    st.schemas.set(tableName, fresh);
+    const snapshot = JSON.stringify(fresh);
+    this.enqueue(
+      `setWhenTargetGoes("${tableName}")`,
+      async () => {
+        await this.pool.run(UPSERT_SCHEMA, [tableName, snapshot]);
+      },
+      () => {
+        st.schemas.set(tableName, schema);
+      }
+    );
+    return true;
+  }
+
   renameColumn(tableName: string, oldName: string, newName: string): boolean {
     if (!newName || !/^[a-zA-Z][a-zA-Z0-9_]*$/.test(newName)) {
       throw new Error('Invalid column name');

@@ -59,10 +59,9 @@
       },
       "sentence": "An account is what pays us: a company's membership, with the people on it.",
       "notHeld": [
-        "an account's company is set once",
-        "a company cannot go while any accounts are linked to it"
+        "an account's company is set once"
       ],
-      "description": "An account is what pays us: a company's membership, with the people on it. Not kept by the database yet: an account's company is set once; a company cannot go while any accounts are linked to it.",
+      "description": "An account is what pays us: a company's membership, with the people on it. Not kept by the database yet: an account's company is set once.",
       "columns": [
         {
           "name": "plan",
@@ -82,6 +81,7 @@
           "type": "Pointer",
           "targetClass": "Company",
           "required": true,
+          "whenTargetGoes": "blocks",
           "description": "Every account is one company's.",
           "relation": "account-company"
         }
@@ -198,11 +198,8 @@
         "relation": "membership"
       },
       "sentence": "A person is on an account as a member, from the day they join until they leave.",
-      "notHeld": [
-        "when a person goes, the 'membership' records linked to it go too",
-        "when an account goes, the 'membership' records linked to it go too"
-      ],
-      "description": "A person is on an account as a member, from the day they join until they leave. Not kept by the database yet: when a person goes, the 'membership' records linked to it go too; when an account goes, the 'membership' records linked to it go too.",
+      "notHeld": [],
+      "description": "A person is on an account as a member, from the day they join until they leave.",
       "columns": [
         {
           "name": "person",
@@ -210,6 +207,7 @@
           "type": "Pointer",
           "targetClass": "Person",
           "required": true,
+          "whenTargetGoes": "goes-too",
           "description": "A person is on an account as a member, from the day they join until they leave.",
           "relation": "membership"
         },
@@ -219,6 +217,7 @@
           "type": "Pointer",
           "targetClass": "Account",
           "required": true,
+          "whenTargetGoes": "goes-too",
           "description": "A person is on an account as a member, from the day they join until they leave.",
           "relation": "membership"
         },
@@ -261,16 +260,16 @@
       "sentence": "A person came to a session.",
       "notHeld": [
         "nobody edits it",
-        "nobody deletes it",
-        "when a person goes, the 'attended' records linked to it stay, without one"
+        "nobody deletes it"
       ],
-      "description": "A person came to a session. Not kept by the database yet: nobody edits it; nobody deletes it; when a person goes, the 'attended' records linked to it stay, without one.",
+      "description": "A person came to a session. Not kept by the database yet: nobody edits it; nobody deletes it.",
       "columns": [
         {
           "name": "person",
           "kind": "link",
           "type": "Pointer",
           "targetClass": "Person",
+          "whenTargetGoes": "stays-unlinked",
           "description": "A person came to a session.",
           "relation": "attended"
         },
@@ -988,7 +987,13 @@
       "from": {
         "relation": "membership"
       },
-      "held": false,
+      "held": true,
+      "mutant": {
+        "dropWhenTargetGoes": {
+          "collection": "Membership",
+          "field": "person"
+        }
+      },
       "steps": [
         {
           "make": "Person",
@@ -1037,7 +1042,13 @@
       "from": {
         "relation": "membership"
       },
-      "held": false,
+      "held": true,
+      "mutant": {
+        "dropWhenTargetGoes": {
+          "collection": "Membership",
+          "field": "account"
+        }
+      },
       "steps": [
         {
           "make": "Company",
@@ -1086,7 +1097,13 @@
       "from": {
         "relation": "account-company"
       },
-      "held": false,
+      "held": true,
+      "mutant": {
+        "dropWhenTargetGoes": {
+          "collection": "Account",
+          "field": "company"
+        }
+      },
       "steps": [
         {
           "make": "Company",
@@ -1115,7 +1132,13 @@
       "from": {
         "relation": "attended"
       },
-      "held": false,
+      "held": true,
+      "mutant": {
+        "dropWhenTargetGoes": {
+          "collection": "Attended",
+          "field": "person"
+        }
+      },
       "steps": [
         {
           "make": "Person",
@@ -1181,34 +1204,6 @@
       "collection": "Note",
       "says": "only its person sees and changes a note",
       "why": "who may see a record is its collection’s permissions (BMG-006), not the schema; a rule through a chain is ONT-004’s"
-    },
-    {
-      "collection": "Membership",
-      "field": "person",
-      "says": "when a person goes, the 'membership' records linked to it go too",
-      "why": "a link holds the other record’s id, and no engine behind the contract follows it when that record is deleted",
-      "claim": "membership/person-goes-too"
-    },
-    {
-      "collection": "Membership",
-      "field": "account",
-      "says": "when an account goes, the 'membership' records linked to it go too",
-      "why": "a link holds the other record’s id, and no engine behind the contract follows it when that record is deleted",
-      "claim": "membership/account-goes-too"
-    },
-    {
-      "collection": "Account",
-      "field": "company",
-      "says": "a company cannot go while any accounts are linked to it",
-      "why": "a link holds the other record’s id, and no engine behind the contract follows it when that record is deleted",
-      "claim": "account-company/company-blocks"
-    },
-    {
-      "collection": "Attended",
-      "field": "person",
-      "says": "when a person goes, the 'attended' records linked to it stay, without one",
-      "why": "a link holds the other record’s id, and no engine behind the contract follows it when that record is deleted",
-      "claim": "attended/person-stays-unlinked"
     }
   ]
 }

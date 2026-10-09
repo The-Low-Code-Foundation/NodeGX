@@ -37,6 +37,7 @@ import {
 import { applyMutant, projectWorld, STORAGE_TYPE, type WorldFiles, type WorldSchema } from '../../nodegx-project-contract/world';
 import { KINDS } from '../src/admin/app/fieldKinds';
 import { createAdapter, type PersistenceHandle } from '../src/persistence/createAdapter';
+import { deletesThroughTheFacade } from './helpers/facade-deletes';
 
 jest.setTimeout(300000);
 
@@ -99,7 +100,8 @@ function sqlite(): Engine {
       dirs.push(dir);
       const h = await createAdapter({ dataDir: dir });
       handles.push(h);
-      return h.adapter;
+      // R10: the backend's own delete, which keeps every link's "when it goes" rule.
+      return deletesThroughTheFacade(h.adapter);
     },
     async teardown() {
       for (const h of handles) await h.adapter.disconnect();
@@ -140,7 +142,8 @@ function postgres(): Engine {
       dirs.push(dir);
       const h = await createAdapter({ dataDir: dir, storageUrl: u.toString() });
       handles.push(h);
-      return h.adapter;
+      // R10: the backend's own delete, which keeps every link's "when it goes" rule.
+      return deletesThroughTheFacade(h.adapter);
     },
     async teardown() {
       for (const h of handles) {

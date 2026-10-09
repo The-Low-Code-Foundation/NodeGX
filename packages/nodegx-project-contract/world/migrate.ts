@@ -174,6 +174,8 @@ export type SchemaBody =
   | { action: 'renameColumn'; table: string; oldName: string; newName: string }
   /** s11: the words on a kept collection, and on its kept fields whose words changed (`null`: none now). */
   | { action: 'describeTable'; table: string; description: string; columns: Record<string, string | null> }
+  /** R10: a changed answer to "when what it points at goes", per link (null takes the rule away). */
+  | { action: 'setWhenTargetGoes'; table: string; columns: Record<string, NonNullable<WorldColumn['whenTargetGoes']> | null> }
   | { action: 'setChecks'; table: string; checks: WorldCheck[] }
   | { action: 'setIndexes'; table: string; indexes: WorldIndex[] }
   | { action: 'dropColumn'; table: string; column: string }
@@ -257,6 +259,14 @@ const optional = (col: WorldColumn): Omit<WorldColumn, 'kind' | 'relation'> => {
   delete out.required;
   return out;
 };
+/** R10: what a link's rule does now, said in a migration step: "when the Account a person's account points at goes, the person goes too". */
+function goesNow(holder: string, col: WorldColumn): string {
+  const when = `when the ${col.targetClass} ${article(holder)}'s ${col.name} points at goes`;
+  if (col.whenTargetGoes === 'goes-too') return `${when}, the ${holder} goes too`;
+  if (col.whenTargetGoes === 'stays-unlinked') return `${when}, the ${holder} stays, without one`;
+  if (col.whenTargetGoes === 'blocks') return `the ${col.targetClass} cannot go while ${article(holder)}'s ${col.name} points at it`;
+  return `${when}, nothing is said about the ${holder} any more`;
+}
 const columnShape = (c: WorldColumn): string => JSON.stringify([c.type, c.targetClass ?? null, Boolean(c.required)]);
 /** A field as the person picked it: "a required link to Account", "a list". */
 const columnWords = (c: WorldColumn): string => `${c.required ? `a required ${c.kind}` : article(c.kind)}${c.targetClass ? ` to ${c.targetClass}` : ''}`;
@@ -573,6 +583,23 @@ function planBetween(before: WorldFiles, after: WorldFiles, sb: WorldSchema, sa:
         checks.push({ refuse: 'duplicates', collection: c.name, fields: [...i.fields], says: `two ${wordsOf(c)} that share ${i.fields.join(' and ')} cannot both keep it` });
       }
     }
+    // R10: a changed answer to "when what it points at goes" on a link that is otherwise the same. The
+    // backend keeps it at delete time, so it is a step of its own — without one the old rule would
+    // go on deleting (or blocking) as the person no longer says. Nothing a record holds moves: no
+    // check, no reach row.
+    const goes: Record<string, NonNullable<WorldColumn['whenTargetGoes']> | null> = {};
+    for (const col of c.columns) {
+      const old = was.columns.find((x) => x.name === col.name);
+      if (old && columnShape(old) === columnShape(col) && (old.whenTargetGoes ?? null) !== (col.whenTargetGoes ?? null)) goes[col.name] = col.whenTargetGoes ?? null;
+    }
+    if (Object.keys(goes).length)
+      rules.push({
+        schema: { action: 'setWhenTargetGoes', table: c.name, columns: goes },
+        says: c.columns
+          .filter((col) => col.name in goes)
+          .map((col) => goesNow(oneOf(c), col))
+          .join('; ')
+      });
     // s11 (§6.9 #5): a changed answer that changes only what the store does not keep changes only the words
     // — the collection's, or a kept field's. Said again by a step of its own, or the Schema card keeps the old
     // sentence. No reach row: nothing a component, a rule or a verb reads has moved.

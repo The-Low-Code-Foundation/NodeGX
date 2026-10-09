@@ -24,6 +24,8 @@ export interface SchemaColumn {
   targetClass?: string;
   required?: boolean;
   defaultValue?: unknown;
+  /** P116 R10 — a Pointer only: what happens to this record when the one it points at goes. Kept by the backend at delete time, never DDL. */
+  whenTargetGoes?: 'goes-too' | 'stays-unlinked' | 'blocks';
   /**
    * BMG-003 R6: `addColumn` only — the value the rows ALREADY in the table get,
    * once. It is not a default and it is never declared: a required field

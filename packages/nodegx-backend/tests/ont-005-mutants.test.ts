@@ -38,6 +38,7 @@ import {
   type WorldSchema
 } from '../../nodegx-project-contract/world';
 import { createAdapter, type PersistenceHandle } from '../src/persistence/createAdapter';
+import { deletesThroughTheFacade } from './helpers/facade-deletes';
 
 jest.setTimeout(600000);
 
@@ -63,7 +64,8 @@ function sqlite(): Engine {
       dirs.push(dir);
       const h = await createAdapter({ dataDir: dir });
       handles.push(h);
-      return h.adapter;
+      // R10: the backend's own delete, which keeps every link's "when it goes" rule.
+      return deletesThroughTheFacade(h.adapter);
     },
     async teardown() {
       for (const h of handles) await h.adapter.disconnect();
@@ -103,7 +105,8 @@ function postgres(): Engine {
       dirs.push(dir);
       const h = await createAdapter({ dataDir: dir, storageUrl: u.toString() });
       handles.push(h);
-      return h.adapter;
+      // R10: the backend's own delete, which keeps every link's "when it goes" rule.
+      return deletesThroughTheFacade(h.adapter);
     },
     async teardown() {
       for (const h of handles) {
@@ -256,14 +259,17 @@ function honesty(engine: string, fixture: string, verdicts: Verdict[]): string {
  * AC1's pin: the survivors of each world, by class. A mutant killed here that this list says
  * survives, or the other way round, is red — read the honesty number before moving a line.
  * Identical on both engines (the test says so).
+ *
+ * R10 (2026-10-09): a link's "when it goes" rule is kept by the backend at delete time, so in every
+ * world two fell — the link with that question unanswered, and the link stored as text (the held
+ * `…-blocks` claim now fails on it). every-kind 18 → 16 of 38. A text id beside a kind
+ * (`note-about`, points-at-one-of) names no one collection and still survives, as it must.
  */
 const SURVIVORS: Record<(typeof WORLDS)[number], string[]> = {
   world: [
     'membership/sameTime-unanswered (unanswered)',
     'membership/startsEnds-unanswered (unclaimed)',
-    'account-company/whenTargetGoes-unanswered (unkept)',
     'account-company/moves-unanswered (unkept)',
-    'account-company/id-as-text (unclaimed)',
     'plan-size/retires-unanswered (unanswered)',
     'on-the-course-platform/silent-skip (unkept)',
     'leaves/end-by-delete (unclaimed)',
@@ -277,9 +283,7 @@ const SURVIVORS: Record<(typeof WORLDS)[number], string[]> = {
     'session/on-as-text (unclaimed)'
   ],
   'world-every-kind': [
-    'account-company/whenTargetGoes-unanswered (unkept)',
     'account-company/moves-unanswered (unkept)',
-    'account-company/id-as-text (unclaimed)',
     'plan-size/retires-unanswered (unkept)',
     'topic-tree/ownAncestor-unanswered (unkept)',
     'on-the-course-platform/silent-skip (unkept)',
@@ -297,9 +301,7 @@ const SURVIVORS: Record<(typeof WORLDS)[number], string[]> = {
     'slot/open-as-text (unclaimed)'
   ],
   'world-membership': [
-    'account-company/whenTargetGoes-unanswered (unkept)',
     'account-company/moves-unanswered (unkept)',
-    'account-company/id-as-text (unclaimed)',
     'membership/startsEnds-unanswered (unclaimed)',
     'employment/startsEnds-unanswered (unclaimed)',
     'attended/editable-history (unkept)',
@@ -310,8 +312,6 @@ const SURVIVORS: Record<(typeof WORLDS)[number], string[]> = {
   ],
   'world-categories': [
     'subcategory-category/retires-unanswered (unkept)',
-    'product-subcategory/whenTargetGoes-unanswered (unkept)',
-    'product-subcategory/id-as-text (unclaimed)',
     'product/price-as-text (unclaimed)'
   ]
 };

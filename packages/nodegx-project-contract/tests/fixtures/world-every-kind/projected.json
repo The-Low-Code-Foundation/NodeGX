@@ -13,10 +13,9 @@
       "notHeld": [
         "every exchange with the course platform is logged, and a skipped one says why",
         "a merged person is kept, never deleted",
-        "nobody deletes a person; it ends",
-        "a person cannot go while any persons are linked to it"
+        "nobody deletes a person; it ends"
       ],
-      "description": "A person is anyone we know: a member, someone who came to a session, someone we wrote to. Not kept by the database yet: every exchange with the course platform is logged, and a skipped one says why; a merged person is kept, never deleted; nobody deletes a person; it ends; a person cannot go while any persons are linked to it.",
+      "description": "A person is anyone we know: a member, someone who came to a session, someone we wrote to. Not kept by the database yet: every exchange with the course platform is logged, and a skipped one says why; a merged person is kept, never deleted; nobody deletes a person; it ends.",
       "columns": [
         {
           "name": "name",
@@ -41,6 +40,7 @@
           "kind": "link",
           "type": "Pointer",
           "targetClass": "Person",
+          "whenTargetGoes": "blocks",
           "description": "Sometimes two people turn out to be one person, written down twice.",
           "relation": "same-person"
         },
@@ -70,10 +70,9 @@
       "sentence": "An account is what pays us: a company's membership, with the people on it.",
       "notHeld": [
         "an account's company is set once",
-        "a retired value stays on the records that hold it, and is no longer offered",
-        "a company cannot go while any accounts are linked to it"
+        "a retired value stays on the records that hold it, and is no longer offered"
       ],
-      "description": "An account is what pays us: a company's membership, with the people on it. Not kept by the database yet: an account's company is set once; a retired value stays on the records that hold it, and is no longer offered; a company cannot go while any accounts are linked to it.",
+      "description": "An account is what pays us: a company's membership, with the people on it. Not kept by the database yet: an account's company is set once; a retired value stays on the records that hold it, and is no longer offered.",
       "columns": [
         {
           "name": "plan",
@@ -88,6 +87,7 @@
           "type": "Pointer",
           "targetClass": "Company",
           "required": true,
+          "whenTargetGoes": "blocks",
           "description": "Every account is one company's, and stays that company's.",
           "relation": "account-company"
         }
@@ -185,10 +185,9 @@
       },
       "sentence": "A topic is what a session is about; topics sit under broader topics.",
       "notHeld": [
-        "no topic sits under itself",
-        "a topic cannot go while any topics are linked to it"
+        "no topic sits under itself"
       ],
-      "description": "A topic is what a session is about; topics sit under broader topics. Not kept by the database yet: no topic sits under itself; a topic cannot go while any topics are linked to it.",
+      "description": "A topic is what a session is about; topics sit under broader topics. Not kept by the database yet: no topic sits under itself.",
       "columns": [
         {
           "name": "title",
@@ -200,6 +199,7 @@
           "kind": "link",
           "type": "Pointer",
           "targetClass": "Topic",
+          "whenTargetGoes": "blocks",
           "description": "A topic can sit under a broader topic.",
           "relation": "topic-tree"
         }
@@ -213,10 +213,8 @@
         "noun": "profile"
       },
       "sentence": "A profile is the longer story about one person, written by them.",
-      "notHeld": [
-        "when a person goes, the profiles linked to it go too"
-      ],
-      "description": "A profile is the longer story about one person, written by them. Not kept by the database yet: when a person goes, the profiles linked to it go too.",
+      "notHeld": [],
+      "description": "A profile is the longer story about one person, written by them.",
       "columns": [
         {
           "name": "bio",
@@ -229,6 +227,7 @@
           "type": "Pointer",
           "targetClass": "Person",
           "required": true,
+          "whenTargetGoes": "goes-too",
           "description": "A person has one profile, and a profile is one person's.",
           "relation": "person-profile"
         }
@@ -353,11 +352,8 @@
         "relation": "membership"
       },
       "sentence": "A person is on one account at a time, as a member, from the day they join until they leave.",
-      "notHeld": [
-        "when a person goes, the 'membership' records linked to it go too",
-        "when an account goes, the 'membership' records linked to it go too"
-      ],
-      "description": "A person is on one account at a time, as a member, from the day they join until they leave. Not kept by the database yet: when a person goes, the 'membership' records linked to it go too; when an account goes, the 'membership' records linked to it go too.",
+      "notHeld": [],
+      "description": "A person is on one account at a time, as a member, from the day they join until they leave.",
       "columns": [
         {
           "name": "person",
@@ -365,6 +361,7 @@
           "type": "Pointer",
           "targetClass": "Person",
           "required": true,
+          "whenTargetGoes": "goes-too",
           "description": "A person is on one account at a time, as a member, from the day they join until they leave.",
           "relation": "membership"
         },
@@ -374,6 +371,7 @@
           "type": "Pointer",
           "targetClass": "Account",
           "required": true,
+          "whenTargetGoes": "goes-too",
           "description": "A person is on one account at a time, as a member, from the day they join until they leave.",
           "relation": "membership"
         },
@@ -426,11 +424,8 @@
         "relation": "booking"
       },
       "sentence": "A person books a slot; one slot takes one booking, and a person may book several.",
-      "notHeld": [
-        "when a person goes, the 'booking' records linked to it go too",
-        "when a slot goes, the 'booking' records linked to it go too"
-      ],
-      "description": "A person books a slot; one slot takes one booking, and a person may book several. Not kept by the database yet: when a person goes, the 'booking' records linked to it go too; when a slot goes, the 'booking' records linked to it go too.",
+      "notHeld": [],
+      "description": "A person books a slot; one slot takes one booking, and a person may book several.",
       "columns": [
         {
           "name": "person",
@@ -438,6 +433,7 @@
           "type": "Pointer",
           "targetClass": "Person",
           "required": true,
+          "whenTargetGoes": "goes-too",
           "description": "A person books a slot; one slot takes one booking, and a person may book several.",
           "relation": "booking"
         },
@@ -447,6 +443,7 @@
           "type": "Pointer",
           "targetClass": "Slot",
           "required": true,
+          "whenTargetGoes": "goes-too",
           "description": "A person books a slot; one slot takes one booking, and a person may book several.",
           "relation": "booking"
         },
@@ -474,10 +471,9 @@
       "sentence": "A person came to a session.",
       "notHeld": [
         "nobody edits it",
-        "nobody deletes it",
-        "a person cannot go while any 'attended' records are linked to it"
+        "nobody deletes it"
       ],
-      "description": "A person came to a session. Not kept by the database yet: nobody edits it; nobody deletes it; a person cannot go while any 'attended' records are linked to it.",
+      "description": "A person came to a session. Not kept by the database yet: nobody edits it; nobody deletes it.",
       "columns": [
         {
           "name": "person",
@@ -485,6 +481,7 @@
           "type": "Pointer",
           "targetClass": "Person",
           "required": true,
+          "whenTargetGoes": "blocks",
           "description": "A person came to a session.",
           "relation": "attended"
         },
@@ -1787,7 +1784,13 @@
       "from": {
         "relation": "account-company"
       },
-      "held": false,
+      "held": true,
+      "mutant": {
+        "dropWhenTargetGoes": {
+          "collection": "Account",
+          "field": "company"
+        }
+      },
       "steps": [
         {
           "make": "Company",
@@ -1816,7 +1819,13 @@
       "from": {
         "relation": "membership"
       },
-      "held": false,
+      "held": true,
+      "mutant": {
+        "dropWhenTargetGoes": {
+          "collection": "Membership",
+          "field": "person"
+        }
+      },
       "steps": [
         {
           "make": "Person",
@@ -1865,7 +1874,13 @@
       "from": {
         "relation": "membership"
       },
-      "held": false,
+      "held": true,
+      "mutant": {
+        "dropWhenTargetGoes": {
+          "collection": "Membership",
+          "field": "account"
+        }
+      },
       "steps": [
         {
           "make": "Company",
@@ -1914,7 +1929,13 @@
       "from": {
         "relation": "booking"
       },
-      "held": false,
+      "held": true,
+      "mutant": {
+        "dropWhenTargetGoes": {
+          "collection": "Booking",
+          "field": "person"
+        }
+      },
       "steps": [
         {
           "make": "Person",
@@ -1954,7 +1975,13 @@
       "from": {
         "relation": "booking"
       },
-      "held": false,
+      "held": true,
+      "mutant": {
+        "dropWhenTargetGoes": {
+          "collection": "Booking",
+          "field": "slot"
+        }
+      },
       "steps": [
         {
           "make": "Slot",
@@ -1994,7 +2021,13 @@
       "from": {
         "relation": "topic-tree"
       },
-      "held": false,
+      "held": true,
+      "mutant": {
+        "dropWhenTargetGoes": {
+          "collection": "Topic",
+          "field": "parent"
+        }
+      },
       "steps": [
         {
           "make": "Topic",
@@ -2023,7 +2056,13 @@
       "from": {
         "relation": "same-person"
       },
-      "held": false,
+      "held": true,
+      "mutant": {
+        "dropWhenTargetGoes": {
+          "collection": "Person",
+          "field": "supersededBy"
+        }
+      },
       "steps": [
         {
           "make": "Person",
@@ -2052,7 +2091,13 @@
       "from": {
         "relation": "attended"
       },
-      "held": false,
+      "held": true,
+      "mutant": {
+        "dropWhenTargetGoes": {
+          "collection": "Attended",
+          "field": "person"
+        }
+      },
       "steps": [
         {
           "make": "Person",
@@ -2084,7 +2129,13 @@
       "from": {
         "relation": "person-profile"
       },
-      "held": false,
+      "held": true,
+      "mutant": {
+        "dropWhenTargetGoes": {
+          "collection": "Profile",
+          "field": "person"
+        }
+      },
       "steps": [
         {
           "make": "Person",
@@ -2166,73 +2217,10 @@
       "why": "who may see a record is its collection’s permissions (BMG-006), not the schema; a rule through a chain is ONT-004’s"
     },
     {
-      "collection": "Account",
-      "field": "company",
-      "says": "a company cannot go while any accounts are linked to it",
-      "why": "a link holds the other record’s id, and no engine behind the contract follows it when that record is deleted",
-      "claim": "account-company/company-blocks"
-    },
-    {
-      "collection": "Membership",
-      "field": "person",
-      "says": "when a person goes, the 'membership' records linked to it go too",
-      "why": "a link holds the other record’s id, and no engine behind the contract follows it when that record is deleted",
-      "claim": "membership/person-goes-too"
-    },
-    {
-      "collection": "Membership",
-      "field": "account",
-      "says": "when an account goes, the 'membership' records linked to it go too",
-      "why": "a link holds the other record’s id, and no engine behind the contract follows it when that record is deleted",
-      "claim": "membership/account-goes-too"
-    },
-    {
-      "collection": "Booking",
-      "field": "person",
-      "says": "when a person goes, the 'booking' records linked to it go too",
-      "why": "a link holds the other record’s id, and no engine behind the contract follows it when that record is deleted",
-      "claim": "booking/person-goes-too"
-    },
-    {
-      "collection": "Booking",
-      "field": "slot",
-      "says": "when a slot goes, the 'booking' records linked to it go too",
-      "why": "a link holds the other record’s id, and no engine behind the contract follows it when that record is deleted",
-      "claim": "booking/slot-goes-too"
-    },
-    {
-      "collection": "Topic",
-      "field": "parent",
-      "says": "a topic cannot go while any topics are linked to it",
-      "why": "a link holds the other record’s id, and no engine behind the contract follows it when that record is deleted",
-      "claim": "topic-tree/parent-blocks"
-    },
-    {
-      "collection": "Person",
-      "field": "supersededBy",
-      "says": "a person cannot go while any persons are linked to it",
-      "why": "a link holds the other record’s id, and no engine behind the contract follows it when that record is deleted",
-      "claim": "same-person/supersededBy-blocks"
-    },
-    {
-      "collection": "Attended",
-      "field": "person",
-      "says": "a person cannot go while any 'attended' records are linked to it",
-      "why": "a link holds the other record’s id, and no engine behind the contract follows it when that record is deleted",
-      "claim": "attended/person-blocks"
-    },
-    {
-      "collection": "Profile",
-      "field": "person",
-      "says": "when a person goes, the profiles linked to it go too",
-      "why": "a link holds the other record’s id, and no engine behind the contract follows it when that record is deleted",
-      "claim": "person-profile/person-goes-too"
-    },
-    {
       "collection": "Note",
       "field": "pointsAtId",
       "says": "when what they point at goes, the notes pointing at it stay, pointing at nothing",
-      "why": "a link holds the other record’s id, and no engine behind the contract follows it when that record is deleted"
+      "why": "the id is text beside a kind, not a link to one collection, so the backend cannot tell which records point at the one that goes"
     }
   ]
 }

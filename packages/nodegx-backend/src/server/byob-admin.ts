@@ -18,7 +18,7 @@
 
 import type * as http from 'http';
 
-import type { IStorageFacade } from '@noodl/backend-contract';
+import { whenTargetGoesProblems, type IStorageFacade, type WhenTargetGoes } from '@noodl/backend-contract';
 import type { ExecutionHistory } from '../execution/ExecutionStore';
 import type { WorkflowRunner } from '../workflow/WorkflowRunner';
 import type { RequestContext } from './HttpServer';
@@ -74,6 +74,7 @@ import {
   readJSONBody,
   sendJSON,
   splitCapped,
+  stillLinkedToHttp,
   uniqueViolationToHttp
 } from './http-util';
 
@@ -185,7 +186,7 @@ export interface TableSchemaResponse {
 /** `POST /admin/schema` — one of the five mutation actions. */
 export interface SchemaMutationResponse {
   success: boolean;
-  action: 'createTable' | 'addColumn' | 'renameColumn' | 'renameTable' | 'describeTable' | 'changeColumnType' | 'deleteTable' | 'setIndexes' | 'setChecks' | 'dropColumn';
+  action: 'createTable' | 'addColumn' | 'renameColumn' | 'renameTable' | 'describeTable' | 'setWhenTargetGoes' | 'changeColumnType' | 'deleteTable' | 'setIndexes' | 'setChecks' | 'dropColumn';
   table: string;
   /** Present on createTable / deleteTable: whether the DDL actually ran. */
   created?: boolean;
@@ -239,6 +240,12 @@ export interface SchemaExportOptions {
   userIdClaim?: string;
 }
 
+
+/** P116 R10 — 400 in words for a `whenTargetGoes` the backend could never keep (`targetGoes.ts`). */
+function refuseUnkeptLinkRules(table: string, columns: StorageColumn[]): void {
+  const problems = whenTargetGoesProblems(table, columns);
+  if (problems.length) throw new HttpError(400, problems.join(' '));
+}
 export class ByobAdminRoutes {
   private readonly facade: IStorageFacade;
   private readonly executions: ExecutionHistory;
@@ -340,8 +347,9 @@ export class ByobAdminRoutes {
     }
     try {
       await this.facade.rawDelete(ctx.params.table, ctx.params.id, ctx.acl('write'));
-    } catch {
-      throw new HttpError(404, 'Record not found');
+    } catch (e) {
+      // P116 R10: a link's `blocks` rule refusing is a 409 that says what links to it, not a 404.
+      throw stillLinkedToHttp(e) || new HttpError(404, 'Record not found');
     }
     sendJSON(ctx.res, 200, { deleted: true, objectId: ctx.params.id });
   }
@@ -390,7 +398,9 @@ export class ByobAdminRoutes {
             results.push({ error: `Unknown method: ${String(op.method)}` });
         }
       } catch (e) {
-        results.push({ error: e instanceof Error ? e.message : String(e) });
+        // P116 R10: a refused delete says why, in the shape the single-record door answers with.
+        const linked = stillLinkedToHttp(e);
+        results.push(linked ? { error: linked.message, ...linked.extra } : { error: e instanceof Error ? e.message : String(e) });
       }
     }
 
@@ -518,6 +528,8 @@ export class ByobAdminRoutes {
         // kept with the table's declaration on both engines and never interpreted; like the rest
         // of `createTable` it is written once — a changed description is ONT-007's migration (`describeTable`).
         const description = describedAs(body.description).description;
+        // P116 R10: a link's "when it goes" rule that could never be kept is refused, not stored.
+        refuseUnkeptLinkRules(table, (body.columns as StorageColumn[] | undefined) || []);
         const created = sm.createTable({
           name: table,
           columns: (body.columns as StorageColumn[] | undefined) || [],
@@ -559,6 +571,7 @@ export class ByobAdminRoutes {
         // and either refusal is the person's to act on — so it is 400 in words,
         // and the queue is awaited here so it reaches the person who added the
         // field rather than whoever writes the next record.
+        refuseUnkeptLinkRules(table, body.column ? [body.column as StorageColumn] : []);
         try {
           sm.addColumn(table, body.column as StorageColumn);
         } catch (e) {
@@ -614,6 +627,33 @@ export class ByobAdminRoutes {
         await this.awaitSchemaQueue(ctx, table);
         ctx.audit({ describedTable: table, fields: Object.keys(columns) });
         sendJSON(res, 200, { success: true, action: 'describeTable', table } satisfies SchemaMutationResponse);
+        return;
+      }
+      case 'setWhenTargetGoes': {
+        // P116 R10: per link, what happens to a record when the one it points at goes — a changed
+        // answer. Only the declaration changes here; every delete keeps it (`AdapterFacade.rawDelete`).
+        if (typeof sm.setWhenTargetGoes !== 'function') {
+          throw new HttpError(501, 'This adapter cannot say what happens to a link when its record goes.');
+        }
+        const columns = body.columns;
+        if (!columns || typeof columns !== 'object' || Array.isArray(columns) || !Object.values(columns).every((v) => v === null || typeof v === 'string')) {
+          throw new HttpError(400, 'Say each link\'s rule as { "<field>": "goes-too" | "stays-unlinked" | "blocks" } (null takes it away).');
+        }
+        const rules = columns as Record<string, WhenTargetGoes | null>;
+        const now = sm.getTableSchema(table);
+        if (!now) throw new HttpError(404, `No such table: ${table}`);
+        refuseUnkeptLinkRules(
+          table,
+          (now.columns || []).filter((c) => rules[c.name]).map((c) => ({ ...c, whenTargetGoes: rules[c.name] as WhenTargetGoes }))
+        );
+        try {
+          sm.setWhenTargetGoes(table, rules);
+        } catch (e) {
+          throw new HttpError(400, e instanceof Error ? e.message : String(e));
+        }
+        await this.awaitSchemaQueue(ctx, table);
+        ctx.audit({ setWhenTargetGoes: table, fields: Object.keys(rules) });
+        sendJSON(res, 200, { success: true, action: 'setWhenTargetGoes', table } satisfies SchemaMutationResponse);
         return;
       }
       case 'changeColumnType': {
@@ -679,7 +719,7 @@ export class ByobAdminRoutes {
         throw new HttpError(
           400,
           `Unknown schema action: ${String(body.action)}. Expected one of createTable, addColumn, ` +
-            'renameColumn, renameTable, describeTable, changeColumnType, dropColumn, deleteTable, setIndexes, setChecks.'
+            'renameColumn, renameTable, describeTable, setWhenTargetGoes, changeColumnType, dropColumn, deleteTable, setIndexes, setChecks.'
         );
     }
   }

@@ -243,6 +243,7 @@ export const SCHEMA_COVERAGE: { readonly [K in keyof IStorageSchema]-?: Coverage
       'collection). Graded by `nodegx-backend/tests/ont-007-migration.test.ts` on SQLite and PostgreSQL, not by a suite case.',
     owes: 'BRG-004'
   },
+  setWhenTargetGoes: { kind: 'cases', cases: ['schema/set-when-target-goes-changes-the-declaration'] },
   exportSchemas: {
     kind: 'uncovered',
     why: 'The read half of the export path the two generators below sit on. BRG-004 owns that path end to end.',

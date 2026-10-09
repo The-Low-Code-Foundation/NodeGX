@@ -67,6 +67,11 @@ export interface WorldColumn {
   type: string;
   targetClass?: string;
   required?: true;
+  /**
+   * P116 R10: a link to a noun — what happens to this record when the one it points at goes. Kept
+   * by the backend at delete time (`@noodl/backend-contract` `targetGoes.ts`), so it is held.
+   */
+  whenTargetGoes?: 'goes-too' | 'stays-unlinked' | 'blocks';
   description?: string;
   /** The relation that made it, when one did (ONT-004: a path is compiled by reading these back). */
   relation?: string;
@@ -128,7 +133,9 @@ export type ClaimMutant =
   | { dropRequired: { collection: string; field: string } }
   | { dropIndex: { collection: string; fields: string[] } }
   | { dropCheck: { collection: string; field: string } }
-  | { linksAsList: { collection: string; field: string } };
+  | { linksAsList: { collection: string; field: string } }
+  /** R10: the link says nothing about when its record goes. */
+  | { dropWhenTargetGoes: { collection: string; field: string } };
 
 export interface WorldClaim {
   /** `<relation or noun id>/<what>`, unique in the schema. */
@@ -185,7 +192,8 @@ export function fieldName(word: string): string {
 
 /** Why the store does not keep a rule of this shape, in words. */
 const WHY: Record<string, string> = {
-  whenTargetGoes: 'a link holds the other record’s id, and no engine behind the contract follows it when that record is deleted',
+  // R10: a link to a noun keeps it (held). What is left is an id that names no one collection.
+  whenTargetGoes: 'the id is text beside a kind, not a link to one collection, so the backend cannot tell which records point at the one that goes',
   setOnce: 'the schema has no rule against changing a field once the record is made',
   neverEdited: 'the schema cannot say it; who may change a record is its collection’s permissions (BMG-006), which the projection does not write yet',
   neverDeleted: 'the schema cannot say it; who may delete a record is its collection’s permissions (BMG-006), which the projection does not write yet',
@@ -195,6 +203,13 @@ const WHY: Record<string, string> = {
   retiredStays: 'what a list offers is the screen’s choice; the store keeps whatever value is written',
   pairTwice: 'a Links field keeps a pair once; a pair made twice needs a record of its own (an is-on)'
 };
+
+/**
+ * Whether the backend keeps a link's "when it goes" rule on this column (R10): a link to one
+ * noun's collection. A text id (`points-at-one-of`) names no collection; a link to the app's users
+ * is never given one by a kind, and a claim could not make a user to delete.
+ */
+const keepsWhenTargetGoes = (col: WorldColumn): boolean => col.type === 'Pointer' && !!col.targetClass && col.targetClass !== USERS_COLLECTION;
 
 /** `from` is what holds the link, already in words: "accounts", "'membership' records". */
 function goesWords(field: ProjectedField, from: string): string {
@@ -332,6 +347,7 @@ export function projectWorld(files: WorldFiles): WorldProjection {
         col.targetClass = target;
       }
       if (f.required) col.required = true;
+      if (f.whenTargetGoes && keepsWhenTargetGoes(col)) col.whenTargetGoes = f.whenTargetGoes;
       col.description = r.sentence;
       col.relation = r.id;
       d.madeBy.set(col.name, r.id);
@@ -368,6 +384,7 @@ export function projectWorld(files: WorldFiles): WorldProjection {
     }
   }
   for (const { d, field, col } of linked) {
+    if (d.collection.columns.find((c) => c.name === col)?.whenTargetGoes) continue;
     notHeld.push({ collection: d.collection.name, field: col, says: goesWords(field, holders(d.collection.made)), why: WHY.whenTargetGoes });
   }
 
@@ -587,7 +604,15 @@ function claimsFor(
       s.steps.push(field.whenTargetGoes === 'goes-too' ? { gone: c, row } : { empty: c, row, field: col });
     }
     const id = `${r.id}/${col}-${field.whenTargetGoes}`;
-    claims.push({ id, says: goesWords(field, holders(d.collection.made)), from: { relation: r.id }, held: false, steps: s.steps });
+    const held = column.whenTargetGoes !== undefined;
+    claims.push({
+      id,
+      says: goesWords(field, holders(d.collection.made)),
+      from: { relation: r.id },
+      held,
+      ...(held ? { mutant: { dropWhenTargetGoes: { collection: c, field: col } } } : {}),
+      steps: s.steps
+    });
     const n = schema.notHeld.find((x) => x.collection === c && x.field === col && x.why === WHY.whenTargetGoes);
     if (n) n.claim = id;
   }
@@ -632,6 +657,10 @@ export function applyMutant(schema: WorldSchema, mutant: ClaimMutant): WorldSche
     const before = c.checks.length;
     c.checks = c.checks.filter((k) => k.field !== mutant.dropCheck.field);
     takesOut(before, c.checks.length);
+  } else if ('dropWhenTargetGoes' in mutant) {
+    const col = column(coll(mutant.dropWhenTargetGoes.collection), mutant.dropWhenTargetGoes.field);
+    takesOut(col.whenTargetGoes ? 1 : 0, 0);
+    delete col.whenTargetGoes;
   } else {
     const col = column(coll(mutant.linksAsList.collection), mutant.linksAsList.field);
     takesOut(col.type === 'Relation' ? 1 : 0, 0);
