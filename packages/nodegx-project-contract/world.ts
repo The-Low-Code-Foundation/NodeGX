@@ -3,7 +3,7 @@
  *
  * `@nodegx/project-contract/world`: the three files under `docs/world/`, the fourteen relation
  * kinds they are written in (`defineKind`), `describe()` for a picker, the validator and the
- * write rule, and `projectWorld()`, the schema it projects to (ONT-003). The JSON Schema for any other tool is `schemas/world.schema.json`.
+ * write rule, and `projectWorld()`, the schema it projects to (ONT-003), and `planMigration()`, what a changed sentence does to it (ONT-007). The JSON Schema for any other tool is `schemas/world.schema.json`.
  *
  * It is an entry of this package, not a package of its own: NSP-021 and OWN-001 name
  * `@nodegx/project-contract` the home of the project format ("do not grow a second one"),
@@ -20,3 +20,4 @@ export * from './world/paths';
 export * from './world/mutants';
 export * from './world/runner';
 export * from './world/brief';
+export * from './world/migrate';

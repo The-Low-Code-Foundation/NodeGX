@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c-enrol",
+  "version": 1,
+  "nodes": [
+    { "id": "e_req", "type": "noodl.cloud.request", "parameters": { "params": "name,account" } },
+    { "id": "e_make", "type": "NewDbModelProperties", "label": "Make the member", "parameters": { "collectionName": "Person" } },
+    { "id": "e_res", "type": "noodl.cloud.response", "parameters": {} }
+  ]
+}

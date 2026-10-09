@@ -100,15 +100,20 @@ function reached(schema: ClaimSchema, claim: Claim): ClaimCollection[] {
  * Applies the part of `schema` a claim reaches under fresh names, then runs its steps. Never
  * throws for a step: the result says where it stopped. Throws only when the schema surface
  * cannot take the schema at all.
+ *
+ * `{ apply: false }` (P116 ONT-007) runs the steps on the tables as they stand, applying
+ * nothing: the grade of a migration. Applying would declare the very rules the migration was
+ * meant to leave behind, and a migration that forgot one would pass for a reason the claim never
+ * names — measured: a plan without its `setChecks` step passed every claim until this option.
  */
-export async function runClaim(ctx: ConformanceContext, schema: ClaimSchema, claim: Claim): Promise<ClaimRun> {
+export async function runClaim(ctx: ConformanceContext, schema: ClaimSchema, claim: Claim, options: { apply?: boolean } = {}): Promise<ClaimRun> {
   const collections = reached(schema, claim);
   const names = new Map<string, string>();
   for (const c of collections) names.set(c.name, ctx.collection(c.name));
   const real = (name: string): string => names.get(name) ?? name;
   const byName = new Map(collections.map((c) => [c.name, c]));
 
-  for (const c of collections) {
+  for (const c of options.apply === false ? [] : collections) {
     const columns = c.columns.map((col) => (col.targetClass ? { ...col, targetClass: real(col.targetClass) } : { ...col }));
     ctx.schema.createTable({ name: real(c.name), columns });
     if (c.checks.length) {

@@ -1,0 +1,534 @@
+/**
+ * P116 ONT-007 — the diff is the migration.
+ *
+ * Two days after launch the person changes one sentence ("some members are on two accounts").
+ * With the world in files that is a diff; with the projection a function, the schema change is
+ * derived; with claims, the migration is graded on data. This module is the pure half:
+ *
+ * - `diffWorld(before, after)` — what changed, sentence by sentence, in the person's words.
+ *   Nouns and relations are matched by id. A changed word or sentence changes no schema; a
+ *   changed id is a noun removed and another added, never a silent rename (README §12).
+ * - `planMigration(before, after)` — the steps, in order: the backup, the schema route's own
+ *   bodies (`POST /admin/schema`: createTable, addColumn, setChecks, setIndexes, dropColumn,
+ *   deleteTable — never SQL), and the data moves between them, each said in words. With it,
+ *   the checks a dry run makes on the records before anything moves: a move the data cannot
+ *   satisfy, and the values a drop would lose.
+ *
+ * Nothing here runs anything. `@noodl/backend-contract/conformance`'s `runMigration` reads the
+ * plan as data and runs it through the schema surface and the data plane, the way `runClaim`
+ * runs a claim. A change this module cannot migrate yet is refused in words, never guessed at.
+ */
+import type { Noun, Relation, WorldFiles, WorldProperty } from './files';
+import { plural } from './mutants';
+import { fieldName, projectWorld, type WorldCheck, type WorldCollection, type WorldColumn, type WorldIndex, type WorldSchema } from './project';
+
+// ---------------------------------------------------------------------- the diff --
+
+/** What a change is about: a noun, or a relation, by id. */
+export type ChangeAbout = { noun: string } | { relation: string };
+
+export type ChangeWhat =
+  | 'noun-added'
+  | 'noun-removed'
+  /** The word or the sentence changed; the id, and so the schema, did not. */
+  | 'noun-reworded'
+  | 'noun-signs-in'
+  | 'property-added'
+  | 'property-removed'
+  | 'property-changed'
+  | 'relation-added'
+  | 'relation-removed'
+  | 'relation-reworded'
+  /** The relation is another kind now: "a member is on one account" became "on several". */
+  | 'relation-rekinded'
+  /** It joins other things: `from` or `to` changed. */
+  | 'relation-reattached'
+  | 'relation-answered';
+
+export interface WorldChange {
+  what: ChangeWhat;
+  about: ChangeAbout;
+  /** For a property: its name. For an answer: the question id. */
+  detail?: string;
+  /** The change in the person's words. */
+  says: string;
+}
+
+const quoteWords = (s: string): string => `“${s}”`;
+const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
+const byId = <T extends { id: string }>(xs: readonly T[]): Map<string, T> => new Map(xs.map((x) => [x.id, x]));
+const shownAnswer = (v: string | boolean | undefined): string => (v === undefined ? 'unanswered' : v === true ? 'yes' : v === false ? 'no' : quoteWords(v));
+
+function propertyChanges(about: ChangeAbout, owner: string, before: readonly WorldProperty[] = [], after: readonly WorldProperty[] = []): WorldChange[] {
+  const out: WorldChange[] = [];
+  const b = new Map(before.map((p) => [p.name, p]));
+  const a = new Map(after.map((p) => [p.name, p]));
+  for (const p of after)
+    if (!b.has(p.name)) out.push({ what: 'property-added', about, detail: p.name, says: `${owner} now has ${article(p.name)} (${p.kind})` });
+  for (const p of before) if (!a.has(p.name)) out.push({ what: 'property-removed', about, detail: p.name, says: `${owner} no longer has ${article(p.name)}` });
+  for (const p of after) {
+    const was = b.get(p.name);
+    if (!was || same(was, p)) continue;
+    const how = was.kind !== p.kind ? `is ${p.kind} now, not ${was.kind}` : !same(was.values, p.values) ? `is one of ${(p.values || []).join(', ')} now` : 'is said differently';
+    out.push({ what: 'property-changed', about, detail: p.name, says: `${owner}'s ${p.name} ${how}` });
+  }
+  return out;
+}
+
+/**
+ * What changed between two worlds, in the person's words: nouns, then relations, each in the
+ * after world's order with what was removed last. Two worlds that say the same thing give `[]`.
+ */
+export function diffWorld(before: WorldFiles, after: WorldFiles): WorldChange[] {
+  const out: WorldChange[] = [];
+  const bn = byId<Noun>(before.nouns.nouns);
+  const an = byId<Noun>(after.nouns.nouns);
+  for (const n of after.nouns.nouns) {
+    const was = bn.get(n.id);
+    const about = { noun: n.id };
+    if (!was) {
+      out.push({ what: 'noun-added', about, says: `there are ${plural(n.id)} now: ${quoteWords(n.sentence)}` });
+      continue;
+    }
+    if (was.name !== n.name || was.sentence !== n.sentence)
+      out.push({ what: 'noun-reworded', about, says: was.name !== n.name ? `${article(was.name)} is called ${quoteWords(n.name)} now` : `${article(n.id)} is said differently: ${quoteWords(n.sentence)}` });
+    if (Boolean(was.signsIn) !== Boolean(n.signsIn))
+      out.push({ what: 'noun-signs-in', about, says: n.signsIn ? `${plural(n.id)} sign in now` : `${plural(n.id)} no longer sign in` });
+    out.push(...propertyChanges(about, article(n.id), was.properties, n.properties));
+  }
+  for (const n of before.nouns.nouns) if (!an.has(n.id)) out.push({ what: 'noun-removed', about: { noun: n.id }, says: `there are no ${plural(n.id)} any more` });
+
+  const br = byId<Relation>(before.relations.relations);
+  const ar = byId<Relation>(after.relations.relations);
+  for (const r of after.relations.relations) {
+    const was = br.get(r.id);
+    const about = { relation: r.id };
+    if (!was) {
+      out.push({ what: 'relation-added', about, says: `new: ${quoteWords(r.sentence)}` });
+      continue;
+    }
+    if (was.sentence !== r.sentence) out.push({ what: 'relation-reworded', about, says: `${quoteWords(was.sentence)} is now ${quoteWords(r.sentence)}` });
+    if (was.from !== r.from || !same(was.to, r.to) || was.property !== r.property)
+      out.push({ what: 'relation-reattached', about, says: `'${r.id}' joins other things now: ${r.from} to ${JSON.stringify(r.to ?? r.property ?? null)}` });
+    if (was.kind !== r.kind) {
+      out.push({ what: 'relation-rekinded', about, says: `'${r.id}' was ${was.kind} and is ${r.kind} now: ${quoteWords(r.sentence)}` });
+      continue; // the answers belong to the kind; a new kind's answers are new, not changed
+    }
+    const wa = was.answers || {};
+    const na = r.answers || {};
+    for (const q of [...new Set([...Object.keys(wa), ...Object.keys(na)])].sort()) {
+      if (wa[q] === na[q]) continue;
+      out.push({ what: 'relation-answered', about, detail: q, says: `'${r.id}': ${q} was ${shownAnswer(wa[q])}, is ${shownAnswer(na[q])} now` });
+    }
+    out.push(...propertyChanges(about, `being on '${r.id}'`, was.properties, r.properties));
+  }
+  for (const r of before.relations.relations) if (!ar.has(r.id)) out.push({ what: 'relation-removed', about: { relation: r.id }, says: `no longer said: ${quoteWords(r.sentence)}` });
+  return out;
+}
+
+// ---------------------------------------------------------------------- the plan --
+
+/** One `POST /admin/schema` body, as the route takes it. */
+export type SchemaBody =
+  | { action: 'createTable'; table: string; description: string; columns: Array<Omit<WorldColumn, 'kind' | 'relation'>> }
+  | { action: 'addColumn'; table: string; column: Omit<WorldColumn, 'kind' | 'relation'> }
+  | { action: 'setChecks'; table: string; checks: WorldCheck[] }
+  | { action: 'setIndexes'; table: string; indexes: WorldIndex[] }
+  | { action: 'dropColumn'; table: string; column: string }
+  | { action: 'deleteTable'; table: string };
+
+/**
+ * A data move, said as data. Collections and fields are the schema's names; every link is a
+ * Pointer, read and written as one.
+ */
+export type DataMove =
+  /** For every `from` row whose `field` points somewhere, one `record` row: `fromField` → the row, `toField` → where it pointed. */
+  | { linkToRecord: { from: string; field: string; record: string; fromField: string; toField: string } }
+  /** For every `record` row, its `into` row (by `fromField`) gets `field` → the record's `toField`. One record per `into` row at most. */
+  | { recordToLink: { record: string; fromField: string; toField: string; into: string; field: string } }
+  /** Across a one-each link (`extends`): every `from` row's `field` is written onto the row its `link` points at, or (`back`) read from it. */
+  | { fieldAcross: { from: string; link: string; field: string; to: string; back?: true } };
+
+export type MigrationStep =
+  | { backup: true; says: string }
+  | { schema: SchemaBody; says: string }
+  | { move: DataMove; says: string };
+
+/** What a dry run reads off the records before anything moves. A failed `refuse` stops the migration; a `loses` is shown and must be accepted. */
+export type MigrationCheck =
+  /** Refused when any value of `by` occurs on more than one `record` row. */
+  | { refuse: 'more-than-one'; record: string; by: string; says: string }
+  /** Refused when any `collection` row has no `record` row pointing at it through `by` (the link it gets will be required). */
+  | { refuse: 'none'; collection: string; record: string; by: string; says: string }
+  /** Refused when the collection has any rows: a field they would all need, with nothing to fill it. */
+  | { refuse: 'rows'; collection: string; says: string }
+  /** Counts the values a drop would lose; the run asks for them to be accepted. */
+  | { loses: 'values'; collection: string; field: string; says: string }
+  | { loses: 'rows'; collection: string; says: string };
+
+export interface ReachRow {
+  /** The collection, as stored. */
+  collection: string;
+  /** What it is, in the person's words: the noun, or the relation's own records. */
+  words: string;
+  /** Fields added, dropped, or whose rules change. Empty when the whole collection is new or goes. */
+  fields: string[];
+  how: 'made' | 'changed' | 'removed';
+}
+
+export interface MigrationPlan {
+  changes: WorldChange[];
+  /** Where the schema changes, collection by collection — the start of the reach (§3.2). */
+  reach: ReachRow[];
+  steps: MigrationStep[];
+  checks: MigrationCheck[];
+  /**
+   * Claims of the after schema the migrated records will not keep: a rule the schema route
+   * cannot put on a field once rows exist. Measured, not assumed — the grade runs them and
+   * each must fail at the step that says its rule.
+   */
+  notKept: Array<{ claim: string; why: string }>;
+  /** Changes this module cannot migrate yet, in words. A plan with any is refused whole. */
+  refused: string[];
+  before: WorldSchema;
+  after: WorldSchema;
+}
+
+export type MigrationPlanResult = { ok: true; plan: MigrationPlan } | { ok: false; problems: string[] };
+
+const wordsOf = (c: WorldCollection): string => ('noun' in c.made ? plural(c.made.noun) : `'${c.made.relation}' records`);
+const oneOf = (c: WorldCollection): string => ('noun' in c.made ? c.made.noun : `'${c.made.relation}' record`);
+const pushable = ({ kind, relation, ...col }: WorldColumn): Omit<WorldColumn, 'kind' | 'relation'> => (void kind, void relation, { ...col });
+/** "an account", "a user", "an update": a `u` sounds like "you" when a consonant and a vowel follow it. */
+const article = (word: string): string => (/^[aeio]/i.test(word) || (/^u/i.test(word) && !/^u[^aeiou][aeiou]/i.test(word)) ? 'an ' : 'a ') + word;
+/** The column without its required rule: added over rows a move fills one by one. */
+const optional = (col: WorldColumn): Omit<WorldColumn, 'kind' | 'relation'> => {
+  const out = pushable(col);
+  delete out.required;
+  return out;
+};
+const columnShape = (c: WorldColumn): string => JSON.stringify([c.type, c.targetClass ?? null, Boolean(c.required)]);
+/** A field as the person picked it: "a required link to Account", "a list". */
+const columnWords = (c: WorldColumn): string => `${c.required ? `a required ${c.kind}` : article(c.kind)}${c.targetClass ? ` to ${c.targetClass}` : ''}`;
+const sortedText = (xs: readonly unknown[]): string => JSON.stringify(xs.map((x) => JSON.stringify(x)).sort());
+
+/** The Pointer a relation made on a noun's collection, in a schema. */
+function linkOf(schema: WorldSchema, relation: string): { collection: WorldCollection; column: WorldColumn } | undefined {
+  for (const c of schema.collections) {
+    if (!('noun' in c.made)) continue;
+    const column = c.columns.find((x) => x.relation === relation && x.type === 'Pointer');
+    if (column) return { collection: c, column };
+  }
+  return undefined;
+}
+/** The record of its own a relation became, in a schema, with its two links. */
+function recordOf(schema: WorldSchema, relation: string): WorldCollection | undefined {
+  return schema.collections.find((c) => 'relation' in c.made && c.made.relation === relation);
+}
+
+/**
+ * The migration from one world to the next, or the sentences that say why there is none.
+ *
+ * A move is derived for the one change of kind the corpus has lived (the bombshell): a link on
+ * a record becoming a record of its own (`belongs-to` → `is-on`), and back. Any other change of
+ * kind, or a field whose type, target or required-ness changes in place, is refused in words —
+ * the plan is a list of things this module can grade, not a hope.
+ */
+export function planMigration(before: WorldFiles, after: WorldFiles): MigrationPlanResult {
+  const pb = projectWorld(before);
+  if (!pb.ok) return { ok: false, problems: pb.problems.map((p) => `the world before: ${p}`) };
+  const pa = projectWorld(after);
+  if (!pa.ok) return { ok: false, problems: pa.problems.map((p) => `the world after: ${p}`) };
+  const sb = pb.schema;
+  const sa = pa.schema;
+  const changes = diffWorld(before, after);
+
+  const refused: string[] = [];
+  const checks: MigrationCheck[] = [];
+  const notKept: MigrationPlan['notKept'] = [];
+  const moves: Array<{ move: DataMove; says: string }> = [];
+  /** `collection.field` a move reads, so dropping it after loses nothing. */
+  const carried = new Set<string>();
+  /** `collection.field` a move fills, so it is added without `required` and the rule is not kept. */
+  const filled = new Set<string>();
+  /** Collections a move empties into another, so deleting them after loses no rows. */
+  const emptied = new Set<string>();
+  /** Relations already refused: what their fields do is the same refusal, not another. */
+  const refusedRelations = new Set<string>();
+
+  // 1. The changes of kind, as data moves.
+  const rb = byId<Relation>(before.relations.relations);
+  for (const r of after.relations.relations) {
+    const was = rb.get(r.id);
+    if (!was || was.kind === r.kind) continue;
+    const link = linkOf(sb, r.id);
+    const record = recordOf(sa, r.id);
+    const backLink = linkOf(sa, r.id);
+    const backRecord = recordOf(sb, r.id);
+    if (link && record && !backLink) {
+      // A link on the record becomes a record of its own: every link that points somewhere makes one.
+      const fromField = record.columns.find((c) => c.relation === r.id && c.targetClass === link.collection.name);
+      const toField = record.columns.find((c) => c.relation === r.id && c.targetClass === link.column.targetClass && c !== fromField);
+      const needs = record.columns.filter((c) => c.required && c !== fromField && c !== toField);
+      if (!fromField || !toField) {
+        refused.push(`'${r.id}' became ${r.kind}, and its records do not link both ${link.collection.name} and ${link.column.targetClass}: there is nowhere to move the link to.`);
+        continue;
+      }
+      if (needs.length) {
+        refused.push(`a '${r.id}' record must have a ${needs.map((c) => c.name).join(' and ')}, and nothing says what the existing links' ${needs.length === 1 ? 'is' : 'are'}.`);
+        continue;
+      }
+      const from = link.collection;
+      moves.push({
+        move: { linkToRecord: { from: from.name, field: link.column.name, record: record.name, fromField: fromField.name, toField: toField.name } },
+        says: `every ${oneOf(from)}'s ${link.column.name} becomes their first '${r.id}' record` +
+          (record.columns.some((c) => !c.required && c !== fromField && c !== toField)
+            ? `; its ${record.columns.filter((c) => !c.required && c !== fromField && c !== toField).map((c) => c.name).join(', ')} left empty, because nobody said what they were`
+            : '')
+      });
+      carried.add(`${from.name}.${link.column.name}`);
+    } else if (backRecord && backLink && !link) {
+      // A record of its own becomes a link on the record: one record per row at most.
+      const into = backLink.collection;
+      const fromField = backRecord.columns.find((c) => c.relation === r.id && c.targetClass === into.name);
+      const toField = backRecord.columns.find((c) => c.relation === r.id && c.targetClass === backLink.column.targetClass && c !== fromField);
+      if (!fromField || !toField) {
+        refused.push(`'${r.id}' became ${r.kind}, and its records do not link both ${into.name} and ${backLink.column.targetClass}: there is nothing to read the link from.`);
+        continue;
+      }
+      checks.push({
+        refuse: 'more-than-one',
+        record: backRecord.name,
+        by: fromField.name,
+        says: `${article(oneOf(into))} on more than one ${backLink.column.name} cannot keep just one without losing the others`
+      });
+      if (backLink.column.required)
+        checks.push({ refuse: 'none', collection: into.name, record: backRecord.name, by: fromField.name, says: `every ${oneOf(into)} must have ${article(backLink.column.name)}, and some are on none` });
+      moves.push({
+        move: { recordToLink: { record: backRecord.name, fromField: fromField.name, toField: toField.name, into: into.name, field: backLink.column.name } },
+        says: `every ${oneOf(into)}'s one '${r.id}' record becomes their ${backLink.column.name}`
+      });
+      filled.add(`${into.name}.${backLink.column.name}`);
+      emptied.add(backRecord.name);
+      for (const c of backRecord.columns)
+        if (c !== fromField && c !== toField) checks.push({ loses: 'values', collection: backRecord.name, field: c.name, says: `the ${c.name} of each '${r.id}' record` });
+    } else {
+      refused.push(`'${r.id}' changing from ${was.kind} to ${r.kind} is not migrated yet: only a link becoming a record of its own, and back, is.`);
+      refusedRelations.add(r.id);
+    }
+  }
+
+  // 1b. A field moved across an `extends` link, either way: the value goes with it, record by
+  //     record, instead of being lost from one side and empty on the other (`filter-field-split-off`:
+  //     "too late to move once users have profiles"). A field put on the other side while this
+  //     side keeps it is a copy nothing keeps the same (`sort-key-copied`), and is refused.
+  const nb = byId<Noun>(before.nouns.nouns);
+  const na = byId<Noun>(after.nouns.nouns);
+  for (const r of after.relations.relations) {
+    const was = rb.get(r.id);
+    if (!was || was.kind !== 'extends' || r.kind !== 'extends' || typeof r.to !== 'string' || was.from !== r.from || was.to !== r.to) continue;
+    const link = linkOf(sa, r.id);
+    if (!link) continue;
+    const ends: Array<{ side: string; other: string; back: boolean }> = [
+      { side: r.from, other: r.to, back: false },
+      { side: r.to, other: r.from, back: true }
+    ];
+    for (const { side, other, back } of ends) {
+      const had = new Map((nb.get(side)?.properties || []).map((p) => [p.name, p]));
+      const has = new Set((na.get(side)?.properties || []).map((p) => p.name));
+      const otherHad = new Set((nb.get(other)?.properties || []).map((p) => p.name));
+      for (const p of na.get(other)?.properties || []) {
+        const from = had.get(p.name);
+        if (!from || otherHad.has(p.name)) continue;
+        const name = fieldName(p.name);
+        const sideColl = sa.collections.find((c) => 'noun' in c.made && c.made.noun === side)!;
+        if (has.has(p.name)) {
+          refused.push(
+            `${article(other)} would hold a copy of its ${side}'s ${p.name}, and nothing keeps the two the same: move it (take it off the ${side} in the same change), or keep it on the ${side} and sort ${plural(other)} through the link.`
+          );
+          continue;
+        }
+        if (from.kind !== p.kind) continue; // a change of tile as well as of place: the schema step refuses it below
+        moves.push({
+          move: back
+            ? { fieldAcross: { from: link.collection.name, link: link.column.name, field: name, to: link.column.targetClass!, back: true } }
+            : { fieldAcross: { from: link.collection.name, link: link.column.name, field: name, to: link.column.targetClass! } },
+          says: back ? `every ${r.from} takes its ${r.to}'s ${p.name}` : `every ${r.to} takes its ${r.from}'s ${p.name}`
+        });
+        carried.add(`${sideColl.name}.${name}`);
+      }
+    }
+  }
+
+  // 2. The schema, collection by collection.
+  const reach: ReachRow[] = [];
+  const created: MigrationStep[] = [];
+  const added: MigrationStep[] = [];
+  const rules: MigrationStep[] = [];
+  const dropped: MigrationStep[] = [];
+  const deleted: MigrationStep[] = [];
+  const ba = new Map(sb.collections.map((c) => [c.name, c]));
+  const aa = new Map(sa.collections.map((c) => [c.name, c]));
+
+  for (const c of sa.collections) {
+    const was = ba.get(c.name);
+    if (!was) {
+      created.push({ schema: { action: 'createTable', table: c.name, description: c.description, columns: c.columns.map(pushable) }, says: `make a place for ${wordsOf(c)}` });
+      if (c.checks.length) rules.push({ schema: { action: 'setChecks', table: c.name, checks: c.checks }, says: `${wordsOf(c)} keep: ${c.checks.map((k) => `${k.field} is one of its list`).join('; ')}` });
+      if (c.indexes.length) rules.push({ schema: { action: 'setIndexes', table: c.name, indexes: c.indexes }, says: `${wordsOf(c)} keep: no two share ${c.indexes.map((i) => i.fields.join(' and ')).join('; ')}` });
+      reach.push({ collection: c.name, words: wordsOf(c), fields: [], how: 'made' });
+      continue;
+    }
+    const fields = new Set<string>();
+    for (const col of c.columns) {
+      const old = was.columns.find((x) => x.name === col.name);
+      if (!old) {
+        const key = `${c.name}.${col.name}`;
+        if (filled.has(key) && col.required) {
+          added.push({ schema: { action: 'addColumn', table: c.name, column: optional(col) }, says: `give every ${oneOf(c)} ${article(col.name)}, filled by the move below` });
+          const claim = sa.claims.find((x) => x.mutant && 'dropRequired' in x.mutant && x.mutant.dropRequired.collection === c.name && x.mutant.dropRequired.field === col.name);
+          if (claim) notKept.push({ claim: claim.id, why: `the schema route cannot make a field required once records exist, except by filling every one with the same value; the ${col.name} is filled record by record instead, and new ${wordsOf(c)} are not made to have one` });
+        } else {
+          added.push({ schema: { action: 'addColumn', table: c.name, column: pushable(col) }, says: `give every ${oneOf(c)} ${article(col.name)}` });
+          if (col.required && !filled.has(key)) checks.push({ refuse: 'rows', collection: c.name, says: `every ${oneOf(c)} must have ${article(col.name)}, and the ones already there have none` });
+        }
+        fields.add(col.name);
+      } else if (columnShape(old) !== columnShape(col)) {
+        if (!refusedRelations.has(col.relation || '') && !refusedRelations.has(old.relation || ''))
+          refused.push(`${article(oneOf(c))}'s ${col.name} changing from ${columnWords(old)} to ${columnWords(col)} in place is not migrated yet.`);
+        fields.add(col.name);
+      }
+    }
+    for (const old of was.columns) {
+      if (c.columns.some((x) => x.name === old.name)) continue;
+      dropped.push({ schema: { action: 'dropColumn', table: c.name, column: old.name }, says: `take the ${old.name} off ${wordsOf(c)}` });
+      if (!carried.has(`${c.name}.${old.name}`)) checks.push({ loses: 'values', collection: c.name, field: old.name, says: `the ${old.name} of each ${oneOf(c)}` });
+      fields.add(old.name);
+    }
+    if (sortedText(was.checks) !== sortedText(c.checks)) {
+      rules.push({ schema: { action: 'setChecks', table: c.name, checks: c.checks }, says: `${wordsOf(c)} keep the lists said now` });
+      for (const k of [...was.checks, ...c.checks]) fields.add(k.field);
+    }
+    if (sortedText(was.indexes) !== sortedText(c.indexes)) {
+      rules.push({ schema: { action: 'setIndexes', table: c.name, indexes: c.indexes }, says: `${wordsOf(c)} keep the unique rules said now` });
+      for (const i of [...was.indexes, ...c.indexes]) for (const f of i.fields) fields.add(f);
+    }
+    if (fields.size) reach.push({ collection: c.name, words: wordsOf(c), fields: [...fields], how: 'changed' });
+  }
+  for (const c of sb.collections) {
+    if (aa.has(c.name)) continue;
+    // Its rules first: the route refuses to drop what an index or a check still reads.
+    deleted.push({ schema: { action: 'deleteTable', table: c.name }, says: `${wordsOf(c)} are no longer kept` });
+    if (!emptied.has(c.name)) checks.push({ loses: 'rows', collection: c.name, says: `every ${oneOf(c)}` });
+    reach.push({ collection: c.name, words: wordsOf(c), fields: [], how: 'removed' });
+  }
+
+  // A dropped field an index or a check on a surviving collection reads goes after the rule changes.
+  const steps: MigrationStep[] = [
+    { backup: true, says: 'take a backup of everything first, so any of this can be undone' },
+    ...created,
+    ...added,
+    ...moves,
+    ...rules,
+    ...dropped,
+    ...deleted
+  ];
+  return { ok: true, plan: { changes, reach, steps, checks, notKept, refused, before: sb, after: sa } };
+}
+
+/** The plan as a person reads it: what changed, what it reaches, then each step. */
+export function migrationWords(plan: MigrationPlan): string[] {
+  const out = plan.changes.map((c) => `Changed: ${c.says}.`);
+  for (const r of plan.reach) out.push(`Reaches ${r.words} (${r.collection}): ${r.how}${r.fields.length ? ` — ${r.fields.join(', ')}` : ''}.`);
+  for (const r of plan.refused) out.push(`Cannot: ${r}`);
+  plan.steps.forEach((s, i) => out.push(`${i + 1}. ${s.says.charAt(0).toUpperCase()}${s.says.slice(1)}.`));
+  for (const c of plan.checks) out.push(`${'refuse' in c ? 'Stops if' : 'Would lose'}: ${c.says}.`);
+  for (const n of plan.notKept) out.push(`Not kept after: ${n.claim} — ${n.why}.`);
+  return out;
+}
+
+// ------------------------------------------------------------ the components --
+
+/** One component of the project as its v2 files hold it: `component.json`'s path, `nodes.json`, `connections.json`. */
+export interface ComponentGraph {
+  /** `component.json` `path` (or its name): how the person finds it in the editor. */
+  path: string;
+  nodes: ReadonlyArray<{ id: string; type: string; label?: string; parameters?: Record<string, unknown> }>;
+  connections?: ReadonlyArray<{ toId: string; toProperty: string }>;
+}
+
+export interface ComponentReachRow {
+  component: string;
+  /** The record node, by its label when it has one. */
+  node: string;
+  collection: string;
+  /** Changed fields the node reads or writes: a `prop-<field>` port wired, or a filter rule on it. Empty when it only names the collection. */
+  fields: string[];
+}
+
+/**
+ * The components a plan reaches (§3.2): every node whose `collectionName` names a collection the
+ * plan makes, changes or removes — the one parameter that names a table (the Record family's
+ * class, the Query and Collection nodes) — with the changed fields it reads or writes. Pure: the
+ * caller reads the files (`ProjectStructureService` in the editor, `fs` in a test).
+ */
+export function componentReach(plan: Pick<MigrationPlan, 'reach'>, components: readonly ComponentGraph[]): ComponentReachRow[] {
+  const reached = new Map(plan.reach.map((r) => [r.collection.toLowerCase(), r]));
+  const out: ComponentReachRow[] = [];
+  for (const c of components) {
+    for (const n of c.nodes) {
+      const named = n.parameters?.collectionName;
+      if (typeof named !== 'string') continue;
+      const r = reached.get(named.trim().toLowerCase());
+      if (!r) continue;
+      const touched = new Set<string>();
+      for (const w of c.connections || []) if (w.toId === n.id && w.toProperty.startsWith('prop-')) touched.add(w.toProperty.slice(5));
+      const filter = n.parameters?.visualFilter as { rules?: Array<{ property?: string }> } | undefined;
+      for (const rule of filter?.rules || []) if (rule?.property) touched.add(rule.property);
+      out.push({ component: c.path, node: n.label || n.id, collection: r.collection, fields: r.fields.filter((f) => touched.has(f)) });
+    }
+  }
+  return out;
+}
+
+// ------------------------------------------------------------- the workflows --
+
+/** A backend workflow definition (`*.workflow.json`), as much of it as a reach reads. */
+export interface WorkflowGraph {
+  id: string;
+  name?: string;
+  steps: ReadonlyArray<{ id: string; name?: string; kind: string; ref?: string }>;
+}
+
+export interface WorkflowReachRow {
+  workflow: string;
+  step: string;
+  /** The cloud function the step calls, which names a reached collection. */
+  calls: string;
+  collection: string;
+  fields: string[];
+}
+
+/** The cloud function a component is, by its path (`/#__cloud__/enrol` → `enrol`), or undefined. */
+const cloudFunctionOf = (componentPath: string): string | undefined => /__cloud__\/(.+)$/.exec(componentPath)?.[1];
+
+/**
+ * The workflows a plan reaches (§3.2): a workflow step reads or writes records only by calling a
+ * cloud function (`call-function`, `for-each`: `ref` is the function's name), and a cloud
+ * function is a component — so a workflow is reached when a step of it calls a component
+ * `componentReach` found. Until ONT-006's verbs exist, a workflow is what a verb would project to.
+ */
+export function workflowReach(components: readonly ComponentReachRow[], workflows: readonly WorkflowGraph[]): WorkflowReachRow[] {
+  const byFunction = new Map<string, ComponentReachRow[]>();
+  for (const row of components) {
+    const fn = cloudFunctionOf(row.component);
+    if (fn) byFunction.set(fn, [...(byFunction.get(fn) || []), row]);
+  }
+  const out: WorkflowReachRow[] = [];
+  for (const w of workflows)
+    for (const s of w.steps) {
+      if (!s.ref) continue;
+      for (const row of byFunction.get(s.ref) || []) out.push({ workflow: w.name || w.id, step: s.name || s.id, calls: s.ref, collection: row.collection, fields: row.fields });
+    }
+  return out;
+}

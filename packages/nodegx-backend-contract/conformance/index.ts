@@ -40,9 +40,11 @@ import { schemaCases } from './cases/schema';
 import { AdapterRefusal, makeContext, type ConformanceContext } from './context';
 
 export type { ConformanceContext, Row, ReadResult } from './context';
-export { read, write, AdapterRefusal, ConformanceError } from './context';
+export { read, write, makeContext, AdapterRefusal, ConformanceError } from './context';
 export { claimCases, runClaim, saysTheRule } from './claims';
 export type { Claim, ClaimCollection, ClaimColumn, ClaimData, ClaimRun, ClaimSchema, ClaimStep, ClaimValue } from './claims';
+export { dryRunMigration, runMigration } from './migration';
+export type { DryRun, MigrationCheckData, MigrationContext, MigrationMove, MigrationPlanData, MigrationRun, MigrationSchemaBody, MigrationStepData } from './migration';
 
 /**
  * The areas of §3.2, each one in the promise because something real consumes

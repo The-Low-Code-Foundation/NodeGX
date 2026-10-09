@@ -1,0 +1,7 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c-enrol",
+  "name": "enrol",
+  "path": "/#__cloud__/enrol",
+  "type": "cloud"
+}
