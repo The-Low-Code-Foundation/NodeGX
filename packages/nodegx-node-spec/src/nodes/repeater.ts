@@ -467,7 +467,8 @@ export const Repeater = defineNode({
   // that is not text, a mapping that throws, a copy that throws are each caught where they happen (rows C128, C135, C140, C141)
   // v5 (P109 ISL-049, s32): Items Rendered only after a run of the queue that added or removed a row (row C129)
   // v6 (P109 ISL-049, s32): a rebuild checks only what Template Type uses (row C136)
-  version: 6,
+  // v7 (P109 ISL-049, s32): a Refresh pulsed while a rebuild runs is answered by the rebuild it asked for (row C137)
+  version: 7,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/data/foreach.tsx',
   needs: ['person', 'registry', 'project'],
   worldPool: {
@@ -792,14 +793,13 @@ function hop(w: Work): void {
 }
 
 /**
- * `settle` :731-734 — the rebuild's end: every Refresh it took at its start is Done, and it puts back only THOSE, so one pulsed
- * while it ran is dropped, never answered (row C137)
+ * `settle` — the rebuild's end: every Refresh it took at its start is Done. v7 (row C137, ruled): one pulsed while it ran stays
+ * waiting, for the rebuild it asked for (v6 put back only the ones taken, so it was dropped, never answered)
  */
 function settleRebuild(w: Work): void {
   const tokens = w.st.settling;
   if (tokens === null) return;
   w.st.settling = null;
-  w.st.tokens = 0;
   for (let i = 0; i < tokens; i++) w.outcomes.push({ port: 'refresh', outcome: 'done' });
 }
 

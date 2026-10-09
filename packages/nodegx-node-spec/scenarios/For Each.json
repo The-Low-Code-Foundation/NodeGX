@@ -8508,8 +8508,8 @@
   ]
  },
  {
-  "name": "a Refresh pulsed while a rebuild builds is dropped: never answered, though its rebuild runs; the next Refresh answers only itself (row C137)",
-  "because": "foreach.tsx `refresh` :729-734 — it takes the Refreshes waiting at its start and, at its end, `settle` puts back only those (`pendingRefreshOutcomes = answered`) before answering them; one pulsed while it ran is overwritten",
+  "name": "a Refresh pulsed while a rebuild builds is answered by the rebuild it asked for, and the next Refresh answers itself (row C137)",
+  "because": "foreach.tsx `refresh` :729-734 — it takes the Refreshes waiting at its start and, at its end, `settle` puts back only those (`pendingRefreshOutcomes = answered`) before answering them; one pulsed while it ran is overwritten — renamed in P109 s32 (v7: every Refresh is answered by the rebuild it asked for)",
   "params": {
    "template": "Row",
    "items": [
@@ -8558,8 +8558,8 @@
   ]
  },
  {
-  "name": "a rebuild that builds nothing, started by a click, settles when one of its act boundaries is left: a Refresh pulsed one act before that is dropped (row C137)",
-  "because": "foreach.tsx `refresh` :729-734 — it takes the Refreshes waiting at its start and, at its end, `settle` puts back only those (`pendingRefreshOutcomes = answered`) before answering them; one pulsed while it ran is overwritten; measured: N records looked at, N of its N + 1 boundaries — P109 s32: a Script that compiles and names no component (v6, row C136: Dynamic with no Script now fails its check, and builds nothing no more)",
+  "name": "a rebuild that builds nothing, started by a click, settles when one of its act boundaries is left: a Refresh pulsed one act before that is answered by the next rebuild (row C137)",
+  "because": "foreach.tsx `refresh` :729-734 — it takes the Refreshes waiting at its start and, at its end, `settle` puts back only those (`pendingRefreshOutcomes = answered`) before answering them; one pulsed while it ran is overwritten; measured: N records looked at, N of its N + 1 boundaries — P109 s32: a Script that compiles and names no component (v6, row C136: Dynamic with no Script now fails its check, and builds nothing no more) — renamed in P109 s32 (v7: every Refresh is answered by the rebuild it asked for)",
   "params": {
    "template": "Row",
    "items": [
@@ -8684,8 +8684,8 @@
   ]
  },
  {
-  "name": "a Refresh before the click that starts the rebuild is answered by it; a second, after the click, is dropped (row C137)",
-  "because": "foreach.tsx `refresh` :729-734 — it takes the Refreshes waiting at its start and, at its end, `settle` puts back only those (`pendingRefreshOutcomes = answered`) before answering them; one pulsed while it ran is overwritten — P109 s32: a Script that compiles and names no component (v6, row C136: Dynamic with no Script now fails its check, and builds nothing no more)",
+  "name": "a Refresh before the click that starts the rebuild is answered by it; a second, after the click, by the next rebuild (row C137)",
+  "because": "foreach.tsx `refresh` :729-734 — it takes the Refreshes waiting at its start and, at its end, `settle` puts back only those (`pendingRefreshOutcomes = answered`) before answering them; one pulsed while it ran is overwritten — P109 s32: a Script that compiles and names no component (v6, row C136: Dynamic with no Script now fails its check, and builds nothing no more) — renamed in P109 s32 (v7: every Refresh is answered by the rebuild it asked for)",
   "params": {
    "template": "Row",
    "items": [

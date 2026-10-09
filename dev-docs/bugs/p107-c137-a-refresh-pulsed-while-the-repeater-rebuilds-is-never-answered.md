@@ -1,7 +1,7 @@
 ---
 id: P107-C137
 title: A Repeater Refresh pulsed while a rebuild is running is never answered — no Done, no Failure — although a rebuild runs for it
-status: scheduled
+status: fixed
 phase: P109
 task: ISL-049
 severity: medium
@@ -9,7 +9,7 @@ area: runtime / Repeater (noodl-viewer-react/src/nodes/std-library/data/foreach.
 found: P107 NSP-016 s61, 2026-10-08 — the runtime's generated sequences at seed 13 (seed 658503198: two Refreshes around a click that starts the first rebuild)
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.22; recorded on the runtime target (the s61 probes E1–E3, H1–H2 and the N × K table — a rebuild that builds nothing settles after N of its N + 1 act boundaries), and the spec copies it (R3)
 kit: node-spec
-regression: packages/nodegx-node-spec/scenarios/For Each.json "a Refresh pulsed while a rebuild builds is dropped: never answered, though its rebuild runs; the next Refresh answers only itself (row C137)"
+regression: packages/nodegx-node-spec/scenarios/For Each.json "a Refresh pulsed while a rebuild builds is answered by the rebuild it asked for, and the next Refresh answers itself (row C137)"
 ---
 
 **What a person sees.** A graph pulses Refresh and waits for Done (or Failure) before going on — showing a spinner, then hiding it.
@@ -29,3 +29,8 @@ flight schedules another pass and is settled by that one"); the assignment defea
 leaving `pendingRefreshOutcomes` — and whatever arrived during the rebuild — for the next pass.
 
 **Ruled 2026-10-08 (P107 "Phase 107 Rulings" page), as recommended: "Answer it when its own rebuild finishes".** What the code's comment says it meant: every Refresh gets exactly one answer, from the rebuild it asked for.
+
+**Fixed (P109 ISL-049, s32, 2026-10-09), as proposed and ruled.** `refresh`'s `settle` reports the invocations it took at its start
+directly; `pendingRefreshOutcomes` keeps whatever was pulsed meanwhile for the next pass. `settleRefresh` had no other caller and is
+gone. For Each spec v7 (`settleRebuild` no longer clears the waiting count). Runtime 296 / 296 at seeds 13 and 20732; interpreter
+mutants 266 / 266 at both; control (the C136 commit's `foreach.tsx`) red on exactly the 4 scenarios the fix moved (three renamed).

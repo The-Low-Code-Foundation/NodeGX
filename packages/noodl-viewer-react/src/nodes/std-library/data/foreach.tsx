@@ -198,7 +198,6 @@ interface ForEachInstance extends NodeInstance {
   _deleteAllItemNodes(): void;
   refresh(): Promise<void>;
   /** Ends every `Refresh` this rebuild answered. A no-op for a setter-driven rebuild. */
-  settleRefresh(outcome: NodeOutcome, code?: string, message?: string): void;
   _queueOperation(op: QueuedOperation): void;
   _runQueueOperations(): Promise<void>;
   _operationThrew(e: unknown): void;
@@ -748,33 +747,22 @@ const ForEachDefinition: NodeDefinitionOptions = {
 
       this._internal.itemNodes = [];
     },
-    /**
-     * End every `Refresh` this rebuild answered, at most once each.
-     *
-     * ERG-001 §4. The tokens are drained by the caller and passed in, so a `Refresh` pulsed
-     * *during* the async rebuild belongs to the next pass rather than being settled by this
-     * one. A rebuild nobody asked for arrives here with an empty list and reports nothing,
-     * which is what keeps every setter-driven refresh silent.
-     */
-    settleRefresh: function (this: ForEachInstance, outcome: NodeOutcome, code?: string, message?: string) {
-      const tokens = this._internal.pendingRefreshOutcomes;
-      if (tokens.length === 0) return;
-      this._internal.pendingRefreshOutcomes = [];
-      for (const token of tokens) {
-        this.reportOutcome(token, outcome, outcome === 'failure' ? { code, message } : undefined);
-      }
-    },
     refresh: async function (this: ForEachInstance) {
       const internal = this._internal;
       internal.hasScheduledRefresh = false;
 
       // Taken now, before any await: these are the invocations *this* pass answers. One pulsed
       // while the rebuild is in flight schedules another pass and is settled by that one.
+      // ERG-001 §4: a rebuild nobody asked for answers nothing, which keeps every setter-driven
+      // refresh silent. ISL-049 (P107-C137), ruled "Answer it when its own rebuild finishes": `settle`
+      // used to write `answered` back over `pendingRefreshOutcomes` and report from there, which threw
+      // away every Refresh pulsed while the rebuild ran — never answered, though its rebuild ran.
       const answered = internal.pendingRefreshOutcomes;
       internal.pendingRefreshOutcomes = [];
       const settle = (outcome: NodeOutcome, code?: string, message?: string) => {
-        internal.pendingRefreshOutcomes = answered;
-        this.settleRefresh(outcome, code, message);
+        for (const token of answered) {
+          this.reportOutcome(token, outcome, outcome === 'failure' ? { code, message } : undefined);
+        }
       };
 
       // NDA-012 (Visual) D1/B2. Per-item template failures are reported once per rebuild, not
