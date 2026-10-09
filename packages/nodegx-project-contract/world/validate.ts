@@ -86,6 +86,7 @@ export function validateWorld(
   // ── nouns.json ─────────────────────────────────────────────────────────────
   const nounIds = new Map<string, Record<string, unknown>>();
   let signsIn: string | undefined;
+  const wasIds: Array<{ at: string; was: string; id: string }> = [];
   const checkProperties = (name: WorldFileName, at: string, props: unknown) => {
     if (props === undefined) return;
     if (!Array.isArray(props)) return say(name, at, 'a list of properties', props, `${at} must be a list.`);
@@ -125,7 +126,7 @@ export function validateWorld(
     nf.nouns.forEach((n: unknown, i: number) => {
       const at = `nouns[${i}]`;
       if (!isObj(n)) return say('nouns', at, 'a noun', n, `${at} is not a noun.`);
-      strayKeys('nouns', at, n, ['id', 'name', 'sentence', 'properties', 'signsIn']);
+      strayKeys('nouns', at, n, ['id', 'name', 'sentence', 'properties', 'signsIn', 'was']);
       if (typeof n.id !== 'string' || !ID.test(n.id)) say('nouns', `${at}.id`, 'an id: a letter, then letters, digits, - or _', n.id, `${at} has no usable id.`);
       else if (nounIds.has(n.id)) say('nouns', `${at}.id`, 'an id used once', n.id, `${at}: the id "${n.id}" is used twice.`);
       else nounIds.set(n.id, n);
@@ -140,7 +141,18 @@ export function validateWorld(
         if (signsIn) say('nouns', `${at}.signsIn`, `nothing: "${signsIn}" already signs in`, n.id, `${at} ("${String(n.name ?? n.id)}") signs in, and so does "${signsIn}": one noun is who signs in. If both can, they are one noun, or one extends the other.`);
         else signsIn = String(n.id);
       }
+      if (n.was !== undefined) {
+        if (typeof n.was !== 'string' || !ID.test(n.was)) say('nouns', `${at}.was`, 'the id it had: a letter, then letters, digits, - or _', n.was, `${at} ("${String(n.name ?? n.id)}"): was is the id this noun had before it was renamed.`);
+        else if (n.was === n.id) say('nouns', `${at}.was`, 'an id other than its own', n.was, `${at} ("${String(n.name ?? n.id)}") says it was "${n.was}", which is what it is: a noun renamed has a new id.`);
+        else wasIds.push({ at, was: n.was, id: String(n.id) });
+      }
     });
+    const seenWas = new Map<string, string>();
+    for (const w of wasIds) {
+      if (nounIds.has(w.was)) say('nouns', `${w.at}.was`, 'an id no noun has now', w.was, `${w.at} ("${w.id}") says it was "${w.was}", and "${w.was}" is still a noun: a renamed noun is one noun, not two.`);
+      else if (seenWas.has(w.was)) say('nouns', `${w.at}.was`, 'an id only one noun was', w.was, `${w.at} ("${w.id}") and "${seenWas.get(w.was)}" both say they were "${w.was}": one noun becomes one noun.`);
+      else seenWas.set(w.was, w.id);
+    }
   }
 
   // ── relations.json ─────────────────────────────────────────────────────────

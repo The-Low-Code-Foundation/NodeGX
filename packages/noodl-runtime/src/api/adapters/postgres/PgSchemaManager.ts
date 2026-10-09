@@ -78,6 +78,7 @@ import {
   indexName,
   junctionTableName,
   refuseColumnInUse,
+  refuseTableRename,
   normalizeIndexDecls,
   POSTGRES_TYPE_MAP,
   sameIndexSignature,
@@ -629,6 +630,91 @@ export class PgSchemaManager {
           if (rel) st.relations.set(j, rel);
           if (own) st.owners.set(j, own);
         }
+      }
+    );
+    return true;
+  }
+
+  /**
+   * P116 ONT-007 — rename a collection, keeping its records. See
+   * `IStorageSchema.renameTable`. The model moves at once; the DDL is one
+   * queued transaction (the table, its two built-in indexes, the junction
+   * tables its own `Relation` columns name, the `_Schema` rows), and a
+   * failure puts the model back.
+   */
+  renameTable(oldName: string, newName: string): boolean {
+    const st = this.s;
+    const known = st.tables.has(oldName);
+    refuseTableRename(oldName, newName, (n) => st.tables.has(n) || st.schemas.has(n), {
+      indexes: known ? this.indexStatus(oldName) : [],
+      checks: known ? this.checkStatus(oldName) : [],
+      search: known && this.hasSearchIndex(oldName)
+    });
+
+    const schema = st.schemas.get(oldName);
+    const renamed = schema ? { ...schema, name: newName } : undefined;
+    const junctions = (schema?.columns || [])
+      .filter((c) => c.type === 'Relation' && c.targetClass)
+      .map((c) => ({ from: junctionTableName(oldName, c.name), to: junctionTableName(newName, c.name) }))
+      .filter((j) => st.tables.has(j.from));
+    const others = [...st.schemas.values()].filter(
+      (o) => o.name !== oldName && (o.columns || []).some((c) => c.targetClass === oldName)
+    );
+    const retargeted = others.flatMap((o) => (o.columns || []).filter((c) => c.targetClass === oldName));
+
+    const move = <T>(m: Map<string, T>, from: string, to: string): void => {
+      if (!m.has(from)) return;
+      m.set(to, m.get(from)!);
+      m.delete(from);
+    };
+    const apply = (from: string, to: string, js: Array<{ from: string; to: string }>): void => {
+      st.tables.delete(from);
+      st.tables.add(to);
+      move(st.columns, from, to);
+      move(st.built, from, to);
+      move(st.checks, from, to);
+      for (const j of js) {
+        st.tables.delete(j.from);
+        st.tables.add(j.to);
+        move(st.relations, j.from, j.to);
+        move(st.owners, j.from, j.to);
+        move(st.columns, j.from, j.to);
+      }
+    };
+    apply(oldName, newName, junctions);
+    st.schemas.delete(oldName);
+    if (renamed) st.schemas.set(newName, renamed);
+    for (const c of retargeted) c.targetClass = newName;
+    const snapshots = others.map((o) => [o.name, JSON.stringify(o)] as const);
+    const [oldCreated, oldUpdated] = builtInIndexNames(oldName);
+    const [newCreated, newUpdated] = builtInIndexNames(newName);
+
+    this.enqueue(
+      `renameTable("${oldName}" → "${newName}")`,
+      async () => {
+        await this.pool.transaction(async (tx) => {
+          await tx.run(`ALTER TABLE ${escapeTable(oldName)} RENAME TO ${escapeTable(newName)}`);
+          await tx.run(`ALTER INDEX IF EXISTS ${escapeTable(oldCreated)} RENAME TO ${escapeTable(newCreated)}`);
+          await tx.run(`ALTER INDEX IF EXISTS ${escapeTable(oldUpdated)} RENAME TO ${escapeTable(newUpdated)}`);
+          for (const j of junctions) {
+            await tx.run(`ALTER TABLE ${escapeTable(j.from)} RENAME TO ${escapeTable(j.to)}`);
+            for (const end of ['owning', 'related'])
+              await tx.run(`ALTER INDEX IF EXISTS ${escapeTable(`idx_${j.from}_${end}`)} RENAME TO ${escapeTable(`idx_${j.to}_${end}`)}`);
+          }
+          await tx.run('DELETE FROM "_Schema" WHERE "name" = ?', [oldName]);
+          if (renamed) await tx.run(UPSERT_SCHEMA, [newName, JSON.stringify(renamed)]);
+          for (const [name, snapshot] of snapshots) await tx.run(UPSERT_SCHEMA, [name, snapshot]);
+        });
+      },
+      () => {
+        apply(
+          newName,
+          oldName,
+          junctions.map((j) => ({ from: j.to, to: j.from }))
+        );
+        st.schemas.delete(newName);
+        if (schema) st.schemas.set(oldName, schema);
+        for (const c of retargeted) c.targetClass = oldName;
       }
     );
     return true;

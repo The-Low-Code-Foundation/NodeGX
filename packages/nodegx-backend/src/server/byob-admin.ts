@@ -185,13 +185,15 @@ export interface TableSchemaResponse {
 /** `POST /admin/schema` — one of the five mutation actions. */
 export interface SchemaMutationResponse {
   success: boolean;
-  action: 'createTable' | 'addColumn' | 'renameColumn' | 'changeColumnType' | 'deleteTable' | 'setIndexes' | 'setChecks' | 'dropColumn';
+  action: 'createTable' | 'addColumn' | 'renameColumn' | 'renameTable' | 'changeColumnType' | 'deleteTable' | 'setIndexes' | 'setChecks' | 'dropColumn';
   table: string;
   /** Present on createTable / deleteTable: whether the DDL actually ran. */
   created?: boolean;
   deleted?: boolean;
   /** BMG-003 — dropColumn: whether the column was there to drop. */
   dropped?: boolean;
+  /** P116 ONT-007 — renameTable: the collection's name now (`table` is the name it had). */
+  renamedTo?: string;
   column?: string;
   // ── changeColumnType (AAQ-002) ────────────────────────────────────────────
   /** Whether the column's type actually moved (false when it already matched). */
@@ -569,6 +571,29 @@ export class ByobAdminRoutes {
         sm.renameColumn(table, body.oldName as string, body.newName as string);
         sendJSON(res, 200, { success: true, action: 'renameColumn', table } satisfies SchemaMutationResponse);
         return;
+      case 'renameTable': {
+        // P116 ONT-007: a noun the person calls something else now. Optional on the interface,
+        // like `deleteTable`. The adapter refuses while an index, a check or a search index is
+        // built under the old name (`TABLE_IN_USE`, 409) — a world migration takes them off
+        // first and puts them back after. Permission rules kept under the old name are NOT
+        // moved here: the migration's reach names them (ONT-007 §6).
+        if (typeof sm.renameTable !== 'function') {
+          throw new HttpError(501, 'This adapter cannot rename a collection.');
+        }
+        const newName = body.newName as string;
+        if (typeof newName !== 'string' || !newName) throw new HttpError(400, 'Say what the collection is called now (newName).');
+        try {
+          sm.renameTable(table, newName);
+        } catch (e) {
+          const err = e as { code?: string; message?: string };
+          if (err && err.code === 'TABLE_IN_USE') throw new HttpError(409, String(err.message));
+          throw new HttpError(400, e instanceof Error ? e.message : String(e));
+        }
+        await this.awaitSchemaQueue(ctx, table);
+        ctx.audit({ renamedTable: `${table} → ${newName}` });
+        sendJSON(res, 200, { success: true, action: 'renameTable', table, renamedTo: newName } satisfies SchemaMutationResponse);
+        return;
+      }
       case 'changeColumnType': {
         // AAQ-002. Optional on the interface (an older adapter predates it), so
         // its absence is a 501 rather than an `is not a function` at request time.
@@ -632,7 +657,7 @@ export class ByobAdminRoutes {
         throw new HttpError(
           400,
           `Unknown schema action: ${String(body.action)}. Expected one of createTable, addColumn, ` +
-            'renameColumn, changeColumnType, dropColumn, deleteTable, setIndexes, setChecks.'
+            'renameColumn, renameTable, changeColumnType, dropColumn, deleteTable, setIndexes, setChecks.'
         );
     }
   }

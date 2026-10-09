@@ -56,6 +56,13 @@ export interface Noun {
    * (ONT-004 `worldRule`); the runner asks which noun it is when a rule needs it (ONT-002).
    */
   signsIn?: true;
+  /**
+   * The id this noun had before the person called it something else (P116 ONT-007). A rename is
+   * a diff the migration carries the records through, never a noun removed and another added;
+   * without this key the two cannot be told apart. Read only by `diffWorld`/`planMigration`
+   * against the world before; a `was` that world does not have is history, and changes nothing.
+   */
+  was?: string;
 }
 
 export interface Relation {

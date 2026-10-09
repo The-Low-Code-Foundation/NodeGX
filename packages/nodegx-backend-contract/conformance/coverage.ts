@@ -229,6 +229,13 @@ export const SCHEMA_COVERAGE: { readonly [K in keyof IStorageSchema]-?: Coverage
     owes: 'BRG-004'
   },
   deleteTable: { kind: 'uncovered', why: 'Optional; same migration path as renameColumn.', owes: 'BRG-004' },
+  renameTable: {
+    kind: 'uncovered',
+    why:
+      'Optional; P116 ONT-007 calls it from a world migration (a noun the person renamed). Graded by ' +
+      '`nodegx-backend/tests/ont-007-migration.test.ts` (AC3) on SQLite and PostgreSQL, not by a suite case.',
+    owes: 'BRG-004'
+  },
   exportSchemas: {
     kind: 'uncovered',
     why: 'The read half of the export path the two generators below sit on. BRG-004 owns that path end to end.',

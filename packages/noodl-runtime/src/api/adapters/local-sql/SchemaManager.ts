@@ -34,6 +34,7 @@ import {
   junctionTableName,
   quoteLiteral,
   refuseColumnInUse,
+  refuseTableRename,
   sameIndexSignature,
   sanitizeIdent,
   SYSTEM_COLUMNS,
@@ -411,6 +412,78 @@ class SchemaManager {
       this.db.exec(`DROP TABLE IF EXISTS ${escapeTable(jt.name)}`);
     }
 
+    return true;
+  }
+
+  /**
+   * P116 ONT-007 — rename a collection, keeping its records. See
+   * `IStorageSchema.renameTable` for what is carried and what refuses it.
+   *
+   * SQLite's `ALTER TABLE … RENAME TO` keeps the rows and the indexes but not
+   * their names, so the two built-in indexes are made again under the new
+   * name. The junction tables are the ones this table's own `Relation` columns
+   * name — read from its declaration, never by a `LIKE` over table names (in
+   * which `_` matches any character). One transaction: a failure leaves the
+   * old name whole.
+   *
+   * @returns true; it throws rather than answering false.
+   */
+  renameTable(oldName: string, newName: string): boolean {
+    const isTable = (n: string): boolean =>
+      Boolean(this.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = ?").get(n));
+    const known = isTable(oldName);
+    refuseTableRename(oldName, newName, (n) => isTable(n) || this.getTableSchema(n) !== null, {
+      indexes: known ? this.indexStatus(oldName) : [],
+      checks: known ? this.checkStatus(oldName) : [],
+      search: known && this.hasSearchIndex(oldName)
+    });
+
+    const schema = this.getTableSchema(oldName);
+    const relations = (schema?.columns || []).filter((c) => c.type === 'Relation' && c.targetClass);
+    this.ensureSchemaTable();
+    const others = (this.db.prepare('SELECT "name", "schema" FROM "_Schema"').all() as Array<{ name: string; schema: string }>)
+      .filter((r) => r.name !== oldName)
+      .map((r) => ({ name: r.name, schema: JSON.parse(r.schema) as TableSchema }))
+      .filter((r) => (r.schema.columns || []).some((c) => c.targetClass === oldName));
+
+    this.db.exec('BEGIN');
+    try {
+      this.db.exec(`ALTER TABLE ${escapeTable(oldName)} RENAME TO ${escapeTable(newName)}`);
+      for (const [from, to] of sharedBuiltInIndexNames(oldName).map((n, i) => [n, sharedBuiltInIndexNames(newName)[i]])) {
+        this.db.exec(`DROP INDEX IF EXISTS ${escapeTable(from)}`);
+        this.db.exec(`CREATE INDEX IF NOT EXISTS ${escapeTable(to)} ON ${escapeTable(newName)}("${from.endsWith('_createdAt') ? 'createdAt' : 'updatedAt'}")`);
+      }
+      for (const col of relations) {
+        const from = junctionTableName(oldName, col.name);
+        const to = junctionTableName(newName, col.name);
+        if (!isTable(from)) continue;
+        this.db.exec(`ALTER TABLE ${escapeTable(from)} RENAME TO ${escapeTable(to)}`);
+        for (const end of ['owning', 'related']) {
+          this.db.exec(`DROP INDEX IF EXISTS ${escapeTable(`idx_${from}_${end}`)}`);
+          this.db.exec(`CREATE INDEX IF NOT EXISTS ${escapeTable(`idx_${to}_${end}`)} ON ${escapeTable(to)}("${end}Id")`);
+        }
+      }
+      if (schema) {
+        this.db.prepare('DELETE FROM "_Schema" WHERE "name" = ?').run(oldName);
+        this.db
+          .prepare('INSERT OR REPLACE INTO "_Schema" ("name", "schema", "updatedAt") VALUES (?, ?, CURRENT_TIMESTAMP)')
+          .run(newName, JSON.stringify({ ...schema, name: newName }));
+      }
+      for (const o of others) {
+        for (const c of o.schema.columns || []) if (c.targetClass === oldName) c.targetClass = newName;
+        this.db
+          .prepare('UPDATE "_Schema" SET "schema" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "name" = ?')
+          .run(JSON.stringify(o.schema), o.name);
+      }
+      this.db.exec('COMMIT');
+    } catch (e) {
+      this.db.exec('ROLLBACK');
+      throw e;
+    }
+
+    this._schemaCache.delete(oldName);
+    if (schema) this._schemaCache.set(newName, freshSchema({ ...schema, name: newName }));
+    for (const o of others) this._schemaCache.set(o.name, freshSchema(o.schema));
     return true;
   }
 

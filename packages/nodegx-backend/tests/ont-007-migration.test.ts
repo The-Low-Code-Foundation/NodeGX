@@ -17,7 +17,13 @@
  *     refused, the rows that stop it counted, no backup taken, nothing moved;
  *   - **the mirror run** — on data where it fits, only once its losses are accepted;
  *   - **the backup comes first** — on SQLite the backup is the backend's own online snapshot, and
- *     it holds the records as they were before the first step.
+ *     it holds the records as they were before the first step;
+ *   - **AC3, a noun renamed** — "accounts are subscriptions now" (`was`): every record kept under the
+ *     new name, every link to them read back as a link to the new name, the field named after it
+ *     renamed, the rule built under the old name taken off and put back, the new world's claims
+ *     green on the migrated tables, and a backend opened again on the same database sees it all
+ *     (the DDL ran, not only the model); each step's mutant caught; and `renameTable` itself —
+ *     junction tables carried, refused while a rule is built under the name.
  *
  * PostgreSQL is skipped when no server answers, as BRG-005's suites are.
  */
@@ -40,6 +46,7 @@ import {
 // Relative on purpose, as ONT-003's spec: this package declares no dependency on the project contract.
 import { planMigration, schemaPushes, type MigrationPlan, type WorldFiles, type WorldSchema } from '../../nodegx-project-contract/world';
 import { snapshotDatabase } from '../src/backup/snapshot';
+import { AdapterFacade } from '../src/persistence/AdapterFacade';
 import { createAdapter, type PersistenceHandle } from '../src/persistence/createAdapter';
 
 jest.setTimeout(300000);
@@ -66,6 +73,24 @@ function plan(before: WorldFiles, after: WorldFiles): MigrationPlan {
   if (!out.ok) throw new Error(out.problems.join('\n'));
   return out.plan;
 }
+/** The world with one noun called something else: a new id, a new word, and the id it `was`. */
+function renamed(w: WorldFiles, from: string, to: string, name: string): WorldFiles {
+  const out: WorldFiles = JSON.parse(JSON.stringify(w));
+  Object.assign(out.nouns.nouns.find((n) => n.id === from)!, { id: to, name, was: from });
+  for (const r of out.relations.relations) {
+    if (r.from === from) r.from = to;
+    if (r.to === from) r.to = to;
+  }
+  return out;
+}
+/** Accounts with a tier from a fixed list: a rule built under the collection's name. */
+const TIERED: WorldFiles = (() => {
+  const w: WorldFiles = JSON.parse(JSON.stringify(ONE));
+  w.nouns.nouns[1].properties!.push({ name: 'tier', kind: 'choice', values: ['basic', 'gold'] });
+  return w;
+})();
+const SUBSCRIBED = renamed(TIERED, 'account', 'subscription', 'Subscription');
+
 // The compile-time half: the planner's output IS the runner's input, with no cast.
 const asPlanData = (p: MigrationPlan): MigrationPlanData => p;
 
@@ -78,11 +103,19 @@ function without(p: MigrationPlan, pick: (s: MigrationPlan['steps'][number]) => 
 
 // ------------------------------------------------------------------- engines --
 
-type Engine = { name: string; available: boolean; make: () => Promise<PersistenceHandle>; teardown: () => Promise<void> };
+type Engine = {
+  name: string;
+  available: boolean;
+  make: () => Promise<PersistenceHandle>;
+  /** A second backend on the same database, as a restart would open it. */
+  reopen: (h: PersistenceHandle) => Promise<PersistenceHandle>;
+  teardown: () => Promise<void>;
+};
 
 function sqlite(): Engine {
   const dirs: string[] = [];
   const handles: PersistenceHandle[] = [];
+  const opened = new Map<PersistenceHandle, string>();
   return {
     name: 'local-sql (node:sqlite)',
     available: true,
@@ -91,7 +124,13 @@ function sqlite(): Engine {
       dirs.push(dir);
       const h = await createAdapter({ dataDir: dir });
       handles.push(h);
+      opened.set(h, dir);
       return h;
+    },
+    async reopen(h) {
+      const again = await createAdapter({ dataDir: opened.get(h)! });
+      handles.push(again);
+      return again;
     },
     async teardown() {
       for (const h of handles) await h.adapter.disconnect();
@@ -116,6 +155,7 @@ function postgres(): Engine {
   const dirs: string[] = [];
   const handles: PersistenceHandle[] = [];
   const dbs: string[] = [];
+  const opened = new Map<PersistenceHandle, { dataDir: string; storageUrl: string }>();
   return {
     name: 'postgres',
     available: pgReachable(),
@@ -130,7 +170,13 @@ function postgres(): Engine {
       dirs.push(dir);
       const h = await createAdapter({ dataDir: dir, storageUrl: u.toString() });
       handles.push(h);
+      opened.set(h, { dataDir: dir, storageUrl: u.toString() });
       return h;
+    },
+    async reopen(h) {
+      const again = await createAdapter(opened.get(h)!);
+      handles.push(again);
+      return again;
     },
     async teardown() {
       for (const h of handles) {
@@ -337,6 +383,126 @@ for (const engine of [sqlite(), postgres()]) {
         const r = await migrate(without(moved, (s) => 'move' in s));
         expect(r.run).toMatchObject({ ran: true });
         expect(r.days).toEqual({ Ada: null, Grace: null, Linus: null });
+      });
+    });
+
+    describe('AC3 — a noun renamed: accounts are subscriptions now, every record kept', () => {
+      const rename = plan(TIERED, SUBSCRIBED);
+
+      async function migrateTheRename(p: MigrationPlan) {
+        const h = await engine.make();
+        const ctx = onTheRealTables(h.adapter);
+        applyWorld(ctx, rename.before);
+        const accounts: Record<string, string> = {};
+        for (const [name, tier] of [
+          ['Northwind', 'gold'],
+          ['Contoso', 'basic']
+        ])
+          accounts[name] = String((await ctx.create('Account', { name, tier })).objectId);
+        const on: Record<string, string> = { Ada: 'Northwind', Grace: 'Northwind', Linus: 'Contoso' };
+        for (const [name, account] of Object.entries(on)) await ctx.create('Person', { name, account: pointer('Account', accounts[account]) });
+        const run = await runMigration(ctx, asPlanData(p), { backup: async () => 'taken' });
+        return { h, ctx, run, accounts, on };
+      }
+      /** Who holds which subscription, by name, read through the field the new world names. */
+      async function holders(ctx: ConformanceContext, accounts: Record<string, string>): Promise<Record<string, string | undefined>> {
+        const nameOf = Object.fromEntries(Object.entries(accounts).map(([n, id]) => [id, n]));
+        return Object.fromEntries((await rows(ctx, 'Person')).map((p) => [p.name, nameOf[idOf(p.subscription) || '']]));
+      }
+
+      let result: Awaited<ReturnType<typeof migrateTheRename>>;
+      beforeAll(async () => {
+        result = await migrateTheRename(rename);
+      });
+
+      it('runs every step, nothing to refuse and nothing lost', () => {
+        expect(result.run).toMatchObject({ ran: true, steps: rename.steps.length });
+        expect(result.run.dryRun).toEqual({ refusals: [], losses: [], moves: [] });
+      });
+
+      it('keeps every account as a subscription, with the same id, and every person on the one they were on', async () => {
+        const subs = await rows(result.ctx, 'Subscription');
+        expect(Object.fromEntries(subs.map((s) => [s.name, [String(s.objectId), s.tier]]))).toEqual({
+          Northwind: [result.accounts.Northwind, 'gold'],
+          Contoso: [result.accounts.Contoso, 'basic']
+        });
+        expect(result.ctx.schema.listTables()).not.toContain('Account');
+        expect(await holders(result.ctx, result.accounts)).toEqual(result.on);
+      });
+
+      it('every link to them goes with them: on the wire a person’s subscription is a link to Subscription, and include follows it', async () => {
+        const col = result.ctx.schema.getTableSchema('Person')!.columns!.find((c) => c.name === 'subscription');
+        expect(col).toMatchObject({ type: 'Pointer', targetClass: 'Subscription' });
+        // The adapter hands a link back as a bare id; the wire (`AdapterFacade.toWire`) is what reads
+        // the column's target, so it is the reader a stale target would mislead.
+        const wire = new AdapterFacade(result.h.adapter);
+        const { results } = await wire.wireQuery('Person', { where: { name: 'Ada' }, include: ['subscription'] });
+        expect(results[0].subscription).toMatchObject({ __type: 'Object', className: 'Subscription', objectId: result.accounts.Northwind, name: 'Northwind', tier: 'gold' });
+      });
+
+      it('keeps every claim of the new world on the migrated tables — the list put back is enforced', async () => {
+        expect(await claimsOnTheMigratedTables(result.ctx, rename)).toEqual([]);
+      });
+
+      it('a backend opened again on the same database sees the rename: the DDL ran, not only the model', async () => {
+        await rows(result.ctx, 'Person'); // a data call waits for every queued statement
+        const again = onTheRealTables((await engine.reopen(result.h)).adapter);
+        expect(again.schema.listTables()).toEqual(expect.arrayContaining(['Person', 'Subscription']));
+        expect(again.schema.listTables()).not.toContain('Account');
+        expect(again.schema.getTableSchema('Person')!.columns!.find((c) => c.name === 'subscription')).toMatchObject({ targetClass: 'Subscription' });
+        expect((again.schema.checkStatus!('Subscription') || []).map((c) => [c.built, c.declared])).toEqual([[true, true]]);
+        expect(await holders(again, result.accounts)).toEqual(result.on);
+      });
+
+      it('the plan without its field rename leaves every person holding nothing under the new name — and the grade sees it', async () => {
+        const r = await migrateTheRename(without(rename, (s) => 'schema' in s && s.schema.action === 'renameColumn'));
+        expect(r.run).toMatchObject({ ran: true });
+        expect(await holders(r.ctx, r.accounts)).toEqual({ Ada: undefined, Grace: undefined, Linus: undefined });
+      });
+
+      it('the plan without putting the list back renames everything — and a claim sees the list is gone', async () => {
+        const r = await migrateTheRename(without(rename, (s) => 'schema' in s && s.schema.action === 'setChecks' && s.schema.checks.length > 0));
+        expect(r.run).toMatchObject({ ran: true });
+        expect(await claimsOnTheMigratedTables(r.ctx, rename)).toEqual([expect.stringMatching(/^subscription\/tier-is-one-of-its-list is not kept/)]);
+      });
+
+      it('the plan without taking the list off first is refused at the rename, and nothing is renamed', async () => {
+        const r = await migrateTheRename(without(rename, (s) => 'schema' in s && s.schema.action === 'setChecks' && s.schema.checks.length === 0));
+        expect(r.run).toMatchObject({ ran: 'partly', steps: 1, failed: { step: 1, message: expect.stringMatching(/the rule chk_Account_\w+ is built under its name/) } });
+        expect(r.ctx.schema.listTables()).toEqual(expect.arrayContaining(['Account', 'Person']));
+        expect((await rows(r.ctx, 'Account')).length).toBe(2);
+      });
+    });
+
+    describe('renameTable itself — what it carries, and what refuses it', () => {
+      it('carries the junction tables the collection owns, and every other collection’s link to it', async () => {
+        const h = await engine.make();
+        const ctx = onTheRealTables(h.adapter);
+        ctx.schema.createTable({ name: 'Book', columns: [{ name: 'title', type: 'String' }] });
+        ctx.schema.createTable({ name: 'Shelf', columns: [{ name: 'label', type: 'String' }, { name: 'books', type: 'Relation', targetClass: 'Book' }] });
+        ctx.schema.createTable({ name: 'Room', columns: [{ name: 'shelf', type: 'Pointer', targetClass: 'Shelf' }] });
+        const book = String((await ctx.create('Book', { title: 'Dune' })).objectId);
+        const shelf = String((await ctx.create('Shelf', { label: 'top' })).objectId);
+        ctx.schema.addRelation('Shelf', shelf, 'books', book);
+        await rows(ctx, 'Book');
+        expect(ctx.schema.renameTable!('Shelf', 'Bookcase')).toBe(true);
+        expect(ctx.schema.getRelatedIds('Bookcase', shelf, 'books')).toEqual([book]);
+        expect(ctx.schema.getTableSchema('Room')!.columns!.find((c) => c.name === 'shelf')).toMatchObject({ targetClass: 'Bookcase' });
+        expect((await rows(ctx, 'Bookcase')).map((r) => r.label)).toEqual(['top']);
+        const again = onTheRealTables((await engine.reopen(h)).adapter);
+        expect(again.schema.getRelatedIds('Bookcase', shelf, 'books')).toEqual([book]);
+        expect(again.schema.getTableSchema('Room')!.columns!.find((c) => c.name === 'shelf')).toMatchObject({ targetClass: 'Bookcase' });
+      });
+
+      it('refuses a name taken, a name unknown, and the backend’s own collections — in words', async () => {
+        const h = await engine.make();
+        const ctx = onTheRealTables(h.adapter);
+        ctx.schema.createTable({ name: 'A', columns: [] });
+        ctx.schema.createTable({ name: 'B', columns: [] });
+        expect(() => ctx.schema.renameTable!('A', 'B')).toThrow('There is already a collection called "B"');
+        expect(() => ctx.schema.renameTable!('Nope', 'C')).toThrow('There is no collection called "Nope"');
+        expect(() => ctx.schema.renameTable!('_User', 'People')).toThrow('"_User" is one of the backend\'s own collections');
+        expect(() => ctx.schema.renameTable!('A', 'not a name')).toThrow('"not a name" cannot be a collection\'s name');
       });
     });
 

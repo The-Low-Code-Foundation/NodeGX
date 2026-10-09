@@ -12,7 +12,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { componentReach, diffWorld, workflowReach, migrationWords, planMigration, WORLD_FILES, type ComponentGraph, type MigrationPlan, type WorkflowGraph, type WorldFiles } from '../world';
+import { componentReach, diffWorld, nounRenames, permissionReach, validateWorld, workflowReach, migrationWords, planMigration, WORLD_FILES, type ComponentGraph, type MigrationPlan, type WorkflowGraph, type WorldFiles } from '../world';
 
 const FIXTURES = path.join(__dirname, 'fixtures');
 const BEFORE = 'world-bombshell-before';
@@ -255,5 +255,135 @@ describe('the extends mistakes only a diff can read (ONT-005 §6.6)', () => {
     const p = plan(before, after);
     expect(p.steps.filter((s) => 'move' in s)).toEqual([]);
     expect(p.checks).toContainEqual({ loses: 'values', collection: 'Account', field: 'title', says: 'the title of each account' });
+  });
+});
+
+/** The world with one noun called something else: a new id, a new word, and the id it `was`. */
+function renamed(w: WorldFiles, from: string, to: string, name: string): WorldFiles {
+  const out = clone(w);
+  Object.assign(out.nouns.nouns.find((n) => n.id === from)!, { id: to, name, was: from });
+  for (const r of out.relations.relations) {
+    if (r.from === from) r.from = to;
+    if (r.to === from) r.to = to;
+  }
+  return out;
+}
+
+describe('AC3 — a noun renamed keeps its records', () => {
+  const ONE = readWorld(BEFORE);
+  const SUBSCRIBED = renamed(ONE, 'account', 'subscription', 'Subscription');
+  /** Accounts with a tier from a fixed list: a rule built under the collection's name. */
+  const TIERED = clone(ONE);
+  TIERED.nouns.nouns[1].properties!.push({ name: 'tier', kind: 'choice', values: ['basic', 'gold'] });
+
+  it('the diff says it is renamed — not one noun removed and another added, and its relation is not re-attached', () => {
+    expect(diffWorld(ONE, SUBSCRIBED).map((c) => [c.what, c.detail, c.says])).toEqual([
+      ['noun-renamed', 'account', 'accounts are subscriptions now: every one is kept, under its new name'],
+      ['noun-reworded', undefined, 'an Account is called “Subscription” now']
+    ]);
+  });
+
+  it('the plan renames the collection, then the field named after it — nothing to refuse, nothing lost', () => {
+    const p = plan(ONE, SUBSCRIBED);
+    expect(shape(p)).toEqual(['backup', 'renameTable:Account', 'renameColumn:Person']);
+    expect(p.steps[1]).toMatchObject({ schema: { action: 'renameTable', table: 'Account', newName: 'Subscription' } });
+    expect(p.steps[2]).toMatchObject({ schema: { action: 'renameColumn', table: 'Person', oldName: 'account', newName: 'subscription' } });
+    expect({ checks: p.checks, refused: p.refused, notKept: p.notKept }).toEqual({ checks: [], refused: [], notKept: [] });
+  });
+
+  it('the control: the same rename without `was` is still a noun removed and another added, its rows counted as lost', () => {
+    const noWas = clone(SUBSCRIBED);
+    delete noWas.nouns.nouns[1].was;
+    const p = plan(ONE, noWas);
+    expect(shape(p)).not.toContain('renameTable:Account');
+    expect(p.checks).toContainEqual({ loses: 'rows', collection: 'Account', says: 'every account' });
+  });
+
+  it('reaches the renamed collection by its old name: every screen written before still names Account', () => {
+    const p = plan(ONE, SUBSCRIBED);
+    expect(p.reach).toEqual([
+      { collection: 'Person', words: 'people', fields: ['account'], how: 'changed' },
+      { collection: 'Subscription', words: 'subscriptions', fields: [], how: 'renamed', was: 'Account' }
+    ]);
+    expect(componentReach(p, readComponents(BEFORE)).map((r) => [r.component, r.collection, r.fields])).toEqual([
+      ['/Pages/Accounts', 'Subscription', []],
+      ['/#__cloud__/enrol', 'Person', ['account']],
+      ['/Pages/Members', 'Person', []],
+      ['/Pages/Members', 'Person', ['account']]
+    ]);
+    expect(migrationWords(p)).toContain('Reaches subscriptions (Subscription, was Account): renamed.');
+  });
+
+  it('a rename under a rule takes the rule off first and puts it back after — the adapter refuses to rename under it', () => {
+    const p = plan(TIERED, renamed(TIERED, 'account', 'subscription', 'Subscription'));
+    expect(shape(p)).toEqual(['backup', 'setChecks:Account', 'renameTable:Account', 'renameColumn:Person', 'setChecks:Subscription']);
+    expect(p.steps[1]).toMatchObject({ schema: { checks: [] } });
+    expect(p.steps[4]).toMatchObject({ schema: { checks: [{ field: 'tier', oneOf: ['basic', 'gold'] }] } });
+  });
+
+  it('and leaves a rule the rename does not reach where it is: a list on the role, when only the person field is renamed', () => {
+    const MANY = readWorld(AFTER);
+    const p = plan(MANY, renamed(MANY, 'person', 'member', 'Member'));
+    expect(shape(p)).toEqual(['backup', 'renameTable:Person', 'renameColumn:Membership']);
+  });
+
+  it('a rename and the bombshell in one change: renamed first, then the records made under the new names', () => {
+    const p = plan(ONE, renamed(readWorld(AFTER), 'account', 'subscription', 'Subscription'));
+    expect(shape(p)).toEqual(['backup', 'renameTable:Account', 'renameColumn:Person', 'createTable:Membership', 'move:linkToRecord', 'setChecks:Membership', 'dropColumn:Person']);
+    expect(p.steps[4]).toMatchObject({ move: { linkToRecord: { from: 'Person', field: 'subscription', record: 'Membership', toField: 'subscription' } } });
+    expect(p.checks).toEqual([]);
+  });
+
+  it('a `was` the world before does not have is history: it renames nothing', () => {
+    expect(nounRenames(SUBSCRIBED, SUBSCRIBED).size).toBe(0);
+    expect(diffWorld(SUBSCRIBED, SUBSCRIBED)).toEqual([]);
+  });
+
+  it('the validator keeps `was` honest: an id, not its own, not a noun still there, one noun per old id', () => {
+    const at = (w: WorldFiles) => validateWorld(w).problems.filter((x) => x.at.endsWith('.was')).map((x) => x.expected);
+    expect(at(SUBSCRIBED)).toEqual([]);
+    const own = clone(SUBSCRIBED);
+    own.nouns.nouns[1].was = 'subscription';
+    expect(at(own)).toEqual(['an id other than its own']);
+    const still = clone(SUBSCRIBED);
+    still.nouns.nouns[1].was = 'person';
+    expect(at(still)).toEqual(['an id no noun has now']);
+    const twice = clone(SUBSCRIBED);
+    twice.nouns.nouns.push({ id: 'plan', name: 'Plan', sentence: 'A plan is what an account was too.', was: 'account' });
+    expect(at(twice)).toEqual(['an id only one noun was']);
+  });
+});
+
+describe('the permission rules a plan reaches (§3.2)', () => {
+  // An account holder sees the accounts they are on: from their login, through the person, along the link.
+  const SECURITY = {
+    collections: {
+      Account: { permissions: { find: ['role:admin', { path: { hops: [{ from: 'Person', by: 'login' }, { follow: 'account', to: 'Account' }], maxDepth: 2 } }] } },
+      Person: { permissions: { find: 'authenticated', create: 'role:admin' } },
+      Company: { permissions: { find: 'public' } }
+    }
+  };
+
+  it('the bombshell reaches the people’s own rules, and the account rule whose path follows a person’s account', () => {
+    const p = plan(readWorld(BEFORE), readWorld(AFTER));
+    expect(permissionReach(p, SECURITY)).toEqual([
+      { at: 'collections.Account.permissions.find', collection: 'Person', reads: 'a path through it', fields: ['account'] },
+      { at: 'collections.Person', collection: 'Person', reads: 'its rules', fields: [] }
+    ]);
+  });
+
+  it('a rename says the rules kept under the old name must move — until they do, they protect nothing', () => {
+    const p = plan(readWorld(BEFORE), renamed(readWorld(BEFORE), 'account', 'subscription', 'Subscription'));
+    expect(permissionReach(p, SECURITY)).toEqual([
+      { at: 'collections.Account', collection: 'Subscription', reads: 'its rules', fields: [], mustMove: { from: 'Account', to: 'Subscription' } },
+      { at: 'collections.Account.permissions.find', collection: 'Person', reads: 'a path through it', fields: ['account'] },
+      { at: 'collections.Account.permissions.find', collection: 'Subscription', reads: 'a path through it', fields: [] },
+      { at: 'collections.Person', collection: 'Person', reads: 'its rules', fields: [] }
+    ]);
+  });
+
+  it('the control: a plan that reaches only companies reaches only the company rules', () => {
+    const rows = permissionReach({ reach: [{ collection: 'Company', words: 'companies', fields: [], how: 'changed' }], before: plan(readWorld(BEFORE), readWorld(AFTER)).before }, SECURITY);
+    expect(rows).toEqual([{ at: 'collections.Company', collection: 'Company', reads: 'its rules', fields: [] }]);
   });
 });

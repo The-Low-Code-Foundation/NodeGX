@@ -1,6 +1,6 @@
 # ONT-007 — The diff is the migration
 
-**Opened 2026-10-08.** **Depends on ONT-003.** **Status: 🟡 s7 (2026-10-09) — built on Opus 5.5; the reach review (Fable) not yet done. See §6.**
+**Opened 2026-10-08.** **Depends on ONT-003.** **Status: 🟡 s8 (2026-10-09) — AC2 ✅, AC3 ✅ (s8), AC1 🟡 (a workflow stands for a verb until ONT-006); the route and the reach review (Fable) not yet done. See §6.**
 
 > **Model check, before anything (Richard, 2026-10-08):** this task wants **Opus 5.5 to build; Fable 5.1 to review the reach** — 'what survives' is where the error hides, and the suite grades only what someone thought to claim. Your system prompt says which model you are. If it is not the one named here, stop before any work and say so in one line ("this task is marked for Opus 5.5 to build; you are on <model> — switch with /model, or say go"), and wait for Richard's word. Do not start on the wrong model because the check felt like a formality.
 
@@ -126,21 +126,77 @@ Readings taken 2026-10-09 ~17:15 CEST on the working tree over HEAD `84018e920`,
    not a verb:** ONT-006's verbs do not exist yet, so "one verb" is met by what a verb projects to. When verbs land,
    this criterion is re-read against them.
 2. ✅ **Refused with the rows counted, nothing moved** — the mirror on a person on two accounts, on both engines.
-3. ❌ **The rename.** Owed (§6.5): matching is by id, and a changed id is measured as a removal and an addition whose
-   losses stop the plan — nothing is renamed silently, but nothing is renamed at all.
+3. ✅ **The rename (s8, §6.7).** A noun renamed says which id it `was`; nothing changes a collection's name until the
+   migration runs, and then every record is kept under the new name on SQLite and PostgreSQL. Without `was`, the same
+   change is still a removal and an addition whose losses stop the plan (the control). "The manager shows both names
+   until then" is ONT-008's: `plan.reach` carries `{ how: 'renamed', was }` for it to read.
 
 ### 6.5 Owed
 
 - **The route.** `POST /admin/world/migrate` (or the MCP's `write_world` growing a `migrate` arm): dry run → words →
   the person's yes → `POST /admin/backups` → the steps through `mutateSchema`. Today the spec passes the backup
   function (on SQLite the backend's own online snapshot, `snapshotDatabase`; on PostgreSQL a recorder).
-- **AC3, the rename.** A `was` key on a noun (format v1, optional, like s6's two) and a table rename in the contract;
-  the manager showing both names until the run is ONT-008's.
+- ~~AC3, the rename~~ — built s8 (§6.7).
 - **Verbs.** ONT-006's `verbs.json` does not exist; the reach reads the workflow definitions a verb would project to.
   When verbs land, `workflowReach` gains a sibling that reads them by name.
-- **The permission rules** a changed collection is read by (`nodegx.security.json`, ONT-004's `{ path }` atoms) are
-  not in the reach yet.
+- ~~The permission rules in the reach~~ — `permissionReach()` s8 (§6.7). **Moving them is the route's**: the backend
+  keeps rules under `security.json` `collections[<name>]`, and after a rename the rules under the old name protect
+  nothing (the collection falls to `defaults`). `renameTable` deliberately does not touch them; the route must move
+  `mustMove` rows in the same run, and have the running backend take them up (BMG-016), before it answers.
+- **Where the executor lives, for the route.** `runMigration` is in `@noodl/backend-contract/conformance`; nothing in
+  `nodegx-backend/src` imports from `conformance/` today and the esbuild config has no alias for it (measured s8:
+  `grep -rn backend-contract/conformance src` → none). The route needs the executor moved to `src/` (or a build alias)
+  first — a decision, not a detail. Then: the plan as the body (admin-only, same power as `POST /admin/schema`), dry
+  run → words → yes → `POST /admin/backups` → steps → the security moves.
 - **The reach review (Fable)** — the task's model line: "what survives is where the error hides".
+
+### 6.7 s8, 2026-10-09 — the rename (AC3) and the permission reach (Opus 5.5)
+
+| Piece | Where | What it does |
+|---|---|---|
+| `was` | `Noun.was` (`world/files.ts`, `schemas/world.schema.json`, `validate.ts`) | The id this noun had before the person renamed it. Optional, format v1, like s6's two keys. Refused: not an id; its own id; an id another noun still has ("a renamed noun is one noun, not two"); two nouns that were the same one. A `was` the world before does not have is history and renames nothing (so it can stay in the file after the run). |
+| The diff | `diffWorld`, `nounRenames()` | `noun-renamed` ("accounts are subscriptions now: every one is kept, under its new name"); relations compared as they read under the new ids, so a rename is not a re-attachment. |
+| The plan | `planMigration` → `renameSteps` | The world before is re-said under the new ids (`renameNouns`) and both projected; collections paired by what made them (the noun, renamed; the relation), columns by position — **refused unless every pair has the same kind and relation** ("the rename changes more than names"). Steps, right after the backup: rules off → `renameTable` → `renameColumn` (fields named after the noun: `Person.account` → `subscription`, `Membership.person` → `member`) → rules back; then the rest of the plan from the renamed world. A rule comes off **only when the rename reaches it** — the table it is built under, or a field it reads (a list on `role` stays put when only `person` is renamed). |
+| `renameTable` | `IStorageSchema.renameTable?` (optional, the 17th name); `SchemaManager`, `PgSchemaManager`; `refuseTableRename` + `TableInUseError` in `schemaCommon.ts` | Carries the table and rows, the two built-in indexes (renamed), the junction tables its OWN `Relation` columns name (read from its declaration — never a `LIKE` over names, see bug -junctions), the `_Schema` row, and every other collection's `targetClass` pointing at it. Refused in the same words on both engines: a name taken, unknown, `_`-prefixed, not a name; and `TABLE_IN_USE` while a declared index, check or search index is built under the old name. SQLite: one transaction. PostgreSQL: the model at once, one queued transaction, the model put back on failure. |
+| The route action | `POST /admin/schema` `{ action: 'renameTable', table, newName }` | 501 without the member; 409 on `TABLE_IN_USE`; 400 in words otherwise; awaits the queue; audited (`renamedTable`); answers `renamedTo`. **Does not move permission rules** (above). |
+| The executor | `runMigration` `applySchema` | Two more bodies: `renameTable`, `renameColumn`. |
+| The permission reach | `permissionReach(plan, security)` | Rules kept under a reached collection's name (`its rules`; under the OLD name for a renamed one, with `mustMove: { from, to }`), and every `{ path }` rule whose hops land on a reached collection or follow / match by a changed field of it (`a path through it`, the fields). `componentReach` now also matches a renamed collection by its old name — what every node written before still says. |
+
+**Graded** (2026-10-09 ~17:30 CEST, working tree over HEAD `7ee55891e`, single specs in band beside a peer's short runs):
+
+- `nodegx-project-contract` `npx jest`: **151 / 151** (139 → 151; `migrate.test.ts` 22 → 34: AC3 ×9, permissions ×3;
+  `world.test.ts`'s pinned stray-key list now names `was`).
+- `nodegx-backend` `npx jest --runInBand tests/ont-007-migration`: **45 / 45** on SQLite and PostgreSQL (25 → 45). Per
+  engine: the rename runs with nothing to refuse or lose; both accounts are subscriptions **with the same ids** and
+  tiers; every person on the one they were on; **on the wire** (`AdapterFacade.wireQuery … include: ['subscription']`)
+  a person's subscription is `{ __type: 'Object', className: 'Subscription', name, tier }` — the adapter alone hands
+  a bare id back, so the first version of this assertion (`if (typeof link === 'object')`) asserted nothing and was
+  replaced; every claim of the new world kept on the migrated tables; **a backend opened again on the same database**
+  sees `Subscription`, the retargeted link, the check built and declared, and every holder (the DDL ran, not only the
+  model). Mutants: no field rename → every holder empty; no list put back → `subscription/tier-is-one-of-its-list is
+  not kept`; no list taken off → `ran: 'partly'` at step 1 with "the rule chk_Account_… is built under its name",
+  `Account` and its 2 rows still there. `renameTable` itself: a `Relation`'s links and another collection's link carried
+  across, and again after reopening; the four refusals in words.
+- `nodegx-backend` `ont-005-mutants ont-003-claims ont-003-write ont-004-world ont-004-rule service-http fed-002-indexes`
+  with `ont-007-migration`: **166 / 166, exit 0**; `service-http` then 29 / 29 with the route test (409 under a rule,
+  400 on a taken name, the rows read back under the new name, 404 under the old).
+- `nodegx-backend-contract` **199 / 199** (the coverage register's `keyof IStorageSchema` entry for `renameTable`).
+- After the peer's full suite ended (~17:40): `ont-007-migration` again **45 / 45, exit 0**; `noodl-mcp`
+  `ont002WorldTools toolDisclosure` **25 / 25** (surface 8,261, 19 under); `noodl-runtime` `test/adapters/SchemaManager*`
+  **83 / 83** (7 files); `npm run ontology-census:check` fresh.
+
+### 6.8 Found in s8
+
+- **Bug `P116-ONT-007-junctions` (blocker).** `deleteTable` finds junctions by name — SQLite `LIKE '_Join_%_<t>'`
+  (`_` matches any character), PostgreSQL `endsWith('_' + t)`. Measured with a before-reading as the control:
+  deleting `Account` emptied `MyAccount`'s and `My_Account`'s relations on SQLite and `My_Account`'s on PostgreSQL.
+- **Bug `P116-ONT-007-renamecolumn` (medium).** `renameColumn` under a check leaves the declaration on the old field,
+  the status saying it is built, and the same declaration refused when pushed again — both engines. The planner
+  already takes such a rule off first; the route does not refuse.
+- **A conditional assertion asserts nothing.** `if (typeof link === 'object') expect(…)` passed on both engines because
+  the link was a string — the reader that uses `targetClass` is the wire facade, not the adapter.
+- A rename and the bombshell in one change renames `Person.account` and then drops it: correct, one step more than
+  needed.
 
 ### 6.6 Found, for other tasks
 

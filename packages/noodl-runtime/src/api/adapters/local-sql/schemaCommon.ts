@@ -793,6 +793,51 @@ export function refuseColumnInUse(
   }
 }
 
+/**
+ * P116 ONT-007 — thrown by `renameTable` while something is built under the
+ * collection's name: a declared index, a check or a search index. Their names
+ * are derived from the table's, so a rename would leave them describing a
+ * table that is gone. They are taken off first and put back after (a world
+ * migration does exactly that), never renamed silently.
+ */
+export class TableInUseError extends Error {
+  code = 'TABLE_IN_USE';
+  constructor(message: string) {
+    super(message);
+    this.name = 'TableInUseError';
+  }
+}
+
+/**
+ * The checks `renameTable` makes before anything moves, shared by both
+ * managers so the two engines refuse in the same words. `exists` answers for
+ * a collection or any table by that name.
+ */
+export function refuseTableRename(
+  oldName: string,
+  newName: string,
+  exists: (name: string) => boolean,
+  inUse: { indexes: Array<{ name: string }>; checks: Array<{ name: string }>; search: boolean }
+): void {
+  if (!newName || !/^[a-zA-Z][a-zA-Z0-9_]*$/.test(newName)) throw new Error(`"${newName}" cannot be a collection's name`);
+  if (oldName.startsWith('_') || newName.startsWith('_')) {
+    throw new Error(`"${oldName.startsWith('_') ? oldName : newName}" is one of the backend's own collections`);
+  }
+  if (!exists(oldName)) throw new Error(`There is no collection called "${oldName}"`);
+  if (exists(newName)) throw new Error(`There is already a collection called "${newName}"`);
+  const what = [
+    ...inUse.indexes.map((i) => `the index ${i.name}`),
+    ...inUse.checks.map((c) => `the rule ${c.name}`),
+    ...(inUse.search ? ['its search index'] : [])
+  ];
+  if (what.length) {
+    throw new TableInUseError(
+      `Cannot rename "${oldName}": ${what.join(', ')} ${what.length === 1 ? 'is' : 'are'} built under its name. ` +
+        'Take them off first and put them back after the rename.'
+    );
+  }
+}
+
 /** A person's reading of a check. */
 export function describeCheck(check: CheckDecl): string {
   if ('exactlyOne' in check) return `exactly one of ${check.exactlyOne.join(', ')} is set`;

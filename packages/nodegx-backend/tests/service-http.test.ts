@@ -516,6 +516,30 @@ describe('nodegx-backend HTTP surface', () => {
     expect(gone.status).toBe(404);
   });
 
+  it('admin schema mutations: renameTable keeps the rows, refuses under a rule (409) and in words (400)', async () => {
+    // P116 ONT-007 AC3 — a noun the person calls something else now.
+    await req('POST', '/admin/schema', { action: 'createTable', table: 'Kept', columns: [{ name: 'tier', type: 'String' }] });
+    await req('POST', '/admin/schema', { action: 'createTable', table: 'Taken', columns: [] });
+    expect((await req('POST', '/classes/Kept', { tier: 'gold' })).status).toBe(201);
+    await req('POST', '/admin/schema', { action: 'setChecks', table: 'Kept', checks: [{ field: 'tier', oneOf: ['basic', 'gold'] }] });
+
+    const underRule = await req<{ error: string }>('POST', '/admin/schema', { action: 'renameTable', table: 'Kept', newName: 'Held' });
+    expect(underRule.status).toBe(409);
+    expect(underRule.json.error).toMatch(/is built under its name/);
+    const taken = await req<{ error: string }>('POST', '/admin/schema', { action: 'renameTable', table: 'Kept', newName: 'Taken' });
+    expect(taken.status).toBe(400);
+    expect(taken.json.error).toBe('There is already a collection called "Taken"');
+
+    await req('POST', '/admin/schema', { action: 'setChecks', table: 'Kept', checks: [] });
+    const ok = await req<SchemaMutationResponse>('POST', '/admin/schema', { action: 'renameTable', table: 'Kept', newName: 'Held' });
+    expect(ok.json).toMatchObject({ success: true, action: 'renameTable', table: 'Kept', renamedTo: 'Held' });
+    expect((await req('GET', '/admin/schema/Kept')).status).toBe(404);
+    const rows = await req<ParseQueryResult>('POST', '/classes/Held', { _method: 'GET', limit: 10 });
+    expect(rows.json.results.map((r) => r.tier)).toEqual(['gold']);
+    await req('POST', '/admin/schema', { action: 'deleteTable', table: 'Held' });
+    await req('POST', '/admin/schema', { action: 'deleteTable', table: 'Taken' });
+  });
+
   it('admin workflow status reports the loaded function', async () => {
     const status = await req<WorkflowRunnerStatus>('GET', '/admin/workflows');
     expect(status.json.initialized).toBe(true);

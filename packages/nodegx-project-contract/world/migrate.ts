@@ -7,10 +7,12 @@
  *
  * - `diffWorld(before, after)` — what changed, sentence by sentence, in the person's words.
  *   Nouns and relations are matched by id. A changed word or sentence changes no schema; a
- *   changed id is a noun removed and another added, never a silent rename (README §12).
+ *   changed id is a noun removed and another added — unless the new noun says which id it
+ *   `was`: then it is the same noun renamed, and its records go with it (README §12: a rename
+ *   is a diff, never a silent re-projection).
  * - `planMigration(before, after)` — the steps, in order: the backup, the schema route's own
- *   bodies (`POST /admin/schema`: createTable, addColumn, setChecks, setIndexes, dropColumn,
- *   deleteTable — never SQL), and the data moves between them, each said in words. With it,
+ *   bodies (`POST /admin/schema`: createTable, addColumn, renameTable, renameColumn, setChecks,
+ *   setIndexes, dropColumn, deleteTable — never SQL), and the data moves between them, each said in words. With it,
  *   the checks a dry run makes on the records before anything moves: a move the data cannot
  *   satisfy, and the values a drop would lose.
  *
@@ -30,6 +32,8 @@ export type ChangeAbout = { noun: string } | { relation: string };
 export type ChangeWhat =
   | 'noun-added'
   | 'noun-removed'
+  /** The noun has a new id and says which it `was`: the same things, called something else. */
+  | 'noun-renamed'
   /** The word or the sentence changed; the id, and so the schema, did not. */
   | 'noun-reworded'
   | 'noun-signs-in'
@@ -81,24 +85,29 @@ function propertyChanges(about: ChangeAbout, owner: string, before: readonly Wor
  */
 export function diffWorld(before: WorldFiles, after: WorldFiles): WorldChange[] {
   const out: WorldChange[] = [];
+  const renames = nounRenames(before, after);
+  const renamedFrom = new Map([...renames].map(([from, to]) => [to, from]));
   const bn = byId<Noun>(before.nouns.nouns);
   const an = byId<Noun>(after.nouns.nouns);
   for (const n of after.nouns.nouns) {
-    const was = bn.get(n.id);
+    const was = bn.get(renamedFrom.get(n.id) ?? n.id);
     const about = { noun: n.id };
     if (!was) {
       out.push({ what: 'noun-added', about, says: `there are ${plural(n.id)} now: ${quoteWords(n.sentence)}` });
       continue;
     }
+    if (was.id !== n.id)
+      out.push({ what: 'noun-renamed', about, detail: was.id, says: `${plural(was.id)} are ${plural(n.id)} now: every one is kept, under its new name` });
     if (was.name !== n.name || was.sentence !== n.sentence)
       out.push({ what: 'noun-reworded', about, says: was.name !== n.name ? `${article(was.name)} is called ${quoteWords(n.name)} now` : `${article(n.id)} is said differently: ${quoteWords(n.sentence)}` });
     if (Boolean(was.signsIn) !== Boolean(n.signsIn))
       out.push({ what: 'noun-signs-in', about, says: n.signsIn ? `${plural(n.id)} sign in now` : `${plural(n.id)} no longer sign in` });
     out.push(...propertyChanges(about, article(n.id), was.properties, n.properties));
   }
-  for (const n of before.nouns.nouns) if (!an.has(n.id)) out.push({ what: 'noun-removed', about: { noun: n.id }, says: `there are no ${plural(n.id)} any more` });
+  for (const n of before.nouns.nouns) if (!an.has(n.id) && !renames.has(n.id)) out.push({ what: 'noun-removed', about: { noun: n.id }, says: `there are no ${plural(n.id)} any more` });
 
-  const br = byId<Relation>(before.relations.relations);
+  // A relation is compared as it would read with the renamed nouns' new ids: a rename is not a re-attachment.
+  const br = byId<Relation>(renameNouns(before, renames).relations.relations);
   const ar = byId<Relation>(after.relations.relations);
   for (const r of after.relations.relations) {
     const was = br.get(r.id);
@@ -126,12 +135,41 @@ export function diffWorld(before: WorldFiles, after: WorldFiles): WorldChange[] 
   return out;
 }
 
+/**
+ * The nouns renamed between two worlds, old id → new id: a noun of the after world whose id the
+ * world before does not have, and whose `was` it does (and no longer does after). A `was` that
+ * names nothing before is history from an earlier rename and changes nothing.
+ */
+export function nounRenames(before: WorldFiles, after: WorldFiles): Map<string, string> {
+  const had = new Set(before.nouns.nouns.map((n) => n.id));
+  const has = new Set(after.nouns.nouns.map((n) => n.id));
+  const out = new Map<string, string>();
+  for (const n of after.nouns.nouns) if (n.was && !had.has(n.id) && had.has(n.was) && !has.has(n.was) && !out.has(n.was)) out.set(n.was, n.id);
+  return out;
+}
+
+/** The world as it would read with these nouns' ids changed, and nothing else. */
+function renameNouns(world: WorldFiles, renames: ReadonlyMap<string, string>): WorldFiles {
+  if (!renames.size) return world;
+  const to = (id: string): string => renames.get(id) ?? id;
+  const out: WorldFiles = JSON.parse(JSON.stringify(world));
+  for (const n of out.nouns.nouns) n.id = to(n.id);
+  for (const r of out.relations.relations) {
+    r.from = to(r.from);
+    if (typeof r.to === 'string') r.to = to(r.to);
+    else if (Array.isArray(r.to)) r.to = r.to.map(to);
+  }
+  return out;
+}
+
 // ---------------------------------------------------------------------- the plan --
 
 /** One `POST /admin/schema` body, as the route takes it. */
 export type SchemaBody =
   | { action: 'createTable'; table: string; description: string; columns: Array<Omit<WorldColumn, 'kind' | 'relation'>> }
   | { action: 'addColumn'; table: string; column: Omit<WorldColumn, 'kind' | 'relation'> }
+  | { action: 'renameTable'; table: string; newName: string }
+  | { action: 'renameColumn'; table: string; oldName: string; newName: string }
   | { action: 'setChecks'; table: string; checks: WorldCheck[] }
   | { action: 'setIndexes'; table: string; indexes: WorldIndex[] }
   | { action: 'dropColumn'; table: string; column: string }
@@ -171,9 +209,11 @@ export interface ReachRow {
   collection: string;
   /** What it is, in the person's words: the noun, or the relation's own records. */
   words: string;
-  /** Fields added, dropped, or whose rules change. Empty when the whole collection is new or goes. */
+  /** Fields added, dropped, renamed (by the name they had) or whose rules change. Empty when the whole collection is new or goes. */
   fields: string[];
-  how: 'made' | 'changed' | 'removed';
+  how: 'made' | 'changed' | 'renamed' | 'removed';
+  /** For a renamed collection: the name it had, which every component and rule written before still uses. */
+  was?: string;
 }
 
 export interface MigrationPlan {
@@ -239,8 +279,90 @@ export function planMigration(before: WorldFiles, after: WorldFiles): MigrationP
   if (!pb.ok) return { ok: false, problems: pb.problems.map((p) => `the world before: ${p}`) };
   const pa = projectWorld(after);
   if (!pa.ok) return { ok: false, problems: pa.problems.map((p) => `the world after: ${p}`) };
-  const sb = pb.schema;
-  const sa = pa.schema;
+  const renames = nounRenames(before, after);
+  const renamed = renameNouns(before, renames);
+  const pr = renames.size ? projectWorld(renamed) : pb;
+  if (!pr.ok) return { ok: false, problems: pr.problems.map((p) => `the world before, renamed: ${p}`) };
+
+  // The renames first, on the old schema: the rest of the plan reads the world before as if it
+  // had always used the new ids.
+  const r = renameSteps(pb.schema, pr.schema, renames);
+  const rest = planBetween(renamed, after, pr.schema, pa.schema);
+  const [backup, ...steps] = rest.steps;
+  return {
+    ok: true,
+    plan: {
+      ...rest,
+      changes: diffWorld(before, after),
+      reach: mergeReach([...r.reach, ...rest.reach]),
+      steps: [backup, ...r.steps, ...steps],
+      refused: [...r.refused, ...rest.refused],
+      before: pb.schema
+    }
+  };
+}
+
+/**
+ * The steps that carry the records of renamed nouns to their new names: the tables (and with
+ * them every link that points at them), then the fields named after a noun. Whatever is built
+ * under an old name — a check, a unique rule — is taken off before and put back after, because
+ * the adapter refuses to rename under it (`TABLE_IN_USE`) and a field rename would leave the
+ * declaration naming a field that is gone.
+ */
+function renameSteps(old: WorldSchema, renamed: WorldSchema, renames: ReadonlyMap<string, string>): { steps: MigrationStep[]; reach: ReachRow[]; refused: string[] } {
+  const steps: MigrationStep[] = [];
+  const reach: ReachRow[] = [];
+  const refused: string[] = [];
+  if (!renames.size) return { steps, reach, refused };
+  const counterpart = (c: WorldCollection): WorldCollection | undefined =>
+    renamed.collections.find((x) => ('noun' in c.made && 'noun' in x.made ? x.made.noun === (renames.get(c.made.noun) ?? c.made.noun) : 'relation' in c.made && 'relation' in x.made && x.made.relation === c.made.relation));
+  const off: MigrationStep[] = [];
+  const tables: MigrationStep[] = [];
+  const columns: MigrationStep[] = [];
+  const on: MigrationStep[] = [];
+  for (const c of old.collections) {
+    const n = counterpart(c);
+    if (!n) {
+      refused.push(`${wordsOf(c)} have no place in the world renamed: the rename changes more than names.`);
+      continue;
+    }
+    const sameShape = c.columns.length === n.columns.length && c.columns.every((col, i) => col.kind === n.columns[i].kind && col.relation === n.columns[i].relation);
+    if (!sameShape) {
+      refused.push(`${wordsOf(c)}'s fields do not line up with ${wordsOf(n)}'s: the rename changes more than names.`);
+      continue;
+    }
+    const fields = c.columns.map((col, i) => [col.name, n.columns[i].name] as const).filter(([a, b]) => a !== b);
+    if (c.name === n.name && !fields.length) continue;
+    // A rule comes off only when the rename reaches it: the table it is built under, or a field it reads.
+    const moved = new Set(fields.map(([from]) => from));
+    const tableMoves = c.name !== n.name;
+    const checksMove = c.checks.length > 0 && (tableMoves || c.checks.some((k) => moved.has(k.field)));
+    const indexesMove = c.indexes.length > 0 && (tableMoves || c.indexes.some((i) => [...i.fields, ...Object.keys(i.where || {})].some((f) => moved.has(f))));
+    if (checksMove) off.push({ schema: { action: 'setChecks', table: c.name, checks: [] }, says: `take the lists ${wordsOf(c)} keep off while they are renamed` });
+    if (indexesMove) off.push({ schema: { action: 'setIndexes', table: c.name, indexes: [] }, says: `take the unique rules ${wordsOf(c)} keep off while they are renamed` });
+    if (tableMoves)
+      tables.push({ schema: { action: 'renameTable', table: c.name, newName: n.name }, says: `call the ${c.name} records ${n.name} now, every one kept, and every link to them with them` });
+    for (const [from, to] of fields) columns.push({ schema: { action: 'renameColumn', table: n.name, oldName: from, newName: to }, says: `call ${article(oneOf(n))}'s ${from} its ${to} now` });
+    if (checksMove) on.push({ schema: { action: 'setChecks', table: n.name, checks: n.checks }, says: `put the lists ${wordsOf(n)} keep back` });
+    if (indexesMove) on.push({ schema: { action: 'setIndexes', table: n.name, indexes: n.indexes }, says: `put the unique rules ${wordsOf(n)} keep back` });
+    reach.push({ collection: n.name, words: wordsOf(n), fields: fields.map(([from]) => from), how: c.name !== n.name ? 'renamed' : 'changed', ...(c.name !== n.name ? { was: c.name } : {}) });
+  }
+  return { steps: [...off, ...tables, ...columns, ...on], reach, refused };
+}
+
+/** One row per collection: fields together, a rename kept. */
+function mergeReach(rows: ReachRow[]): ReachRow[] {
+  const out = new Map<string, ReachRow>();
+  for (const r of rows) {
+    const had = out.get(r.collection);
+    if (!had) out.set(r.collection, { ...r, fields: [...r.fields] });
+    else out.set(r.collection, { ...had, fields: [...new Set([...had.fields, ...r.fields])], how: had.how === 'renamed' || r.how === 'renamed' ? 'renamed' : had.how, ...(had.was || r.was ? { was: had.was || r.was } : {}) });
+  }
+  return [...out.values()];
+}
+
+/** The plan between two worlds that use the same ids: everything but a rename. */
+function planBetween(before: WorldFiles, after: WorldFiles, sb: WorldSchema, sa: WorldSchema): MigrationPlan {
   const changes = diffWorld(before, after);
 
   const refused: string[] = [];
@@ -433,13 +555,13 @@ export function planMigration(before: WorldFiles, after: WorldFiles): MigrationP
     ...dropped,
     ...deleted
   ];
-  return { ok: true, plan: { changes, reach, steps, checks, notKept, refused, before: sb, after: sa } };
+  return { changes, reach, steps, checks, notKept, refused, before: sb, after: sa };
 }
 
 /** The plan as a person reads it: what changed, what it reaches, then each step. */
 export function migrationWords(plan: MigrationPlan): string[] {
   const out = plan.changes.map((c) => `Changed: ${c.says}.`);
-  for (const r of plan.reach) out.push(`Reaches ${r.words} (${r.collection}): ${r.how}${r.fields.length ? ` — ${r.fields.join(', ')}` : ''}.`);
+  for (const r of plan.reach) out.push(`Reaches ${r.words} (${r.collection}${r.was ? `, was ${r.was}` : ''}): ${r.how}${r.fields.length ? ` — ${r.fields.join(', ')}` : ''}.`);
   for (const r of plan.refused) out.push(`Cannot: ${r}`);
   plan.steps.forEach((s, i) => out.push(`${i + 1}. ${s.says.charAt(0).toUpperCase()}${s.says.slice(1)}.`));
   for (const c of plan.checks) out.push(`${'refuse' in c ? 'Stops if' : 'Would lose'}: ${c.says}.`);
@@ -473,7 +595,8 @@ export interface ComponentReachRow {
  * caller reads the files (`ProjectStructureService` in the editor, `fs` in a test).
  */
 export function componentReach(plan: Pick<MigrationPlan, 'reach'>, components: readonly ComponentGraph[]): ComponentReachRow[] {
-  const reached = new Map(plan.reach.map((r) => [r.collection.toLowerCase(), r]));
+  // A renamed collection is reached by its old name: that is what every node written before names.
+  const reached = new Map(plan.reach.flatMap((r) => [[r.collection.toLowerCase(), r] as const, ...(r.was ? [[r.was.toLowerCase(), r] as const] : [])]));
   const out: ComponentReachRow[] = [];
   for (const c of components) {
     for (const n of c.nodes) {
@@ -486,6 +609,73 @@ export function componentReach(plan: Pick<MigrationPlan, 'reach'>, components: r
       const filter = n.parameters?.visualFilter as { rules?: Array<{ property?: string }> } | undefined;
       for (const rule of filter?.rules || []) if (rule?.property) touched.add(rule.property);
       out.push({ component: c.path, node: n.label || n.id, collection: r.collection, fields: r.fields.filter((f) => touched.has(f)) });
+    }
+  }
+  return out;
+}
+
+// ------------------------------------------------------------ the permissions --
+
+/** As much of the backend's `security.json` as a reach reads: the rules kept per collection. */
+export interface SecurityRules {
+  collections?: Record<string, { permissions?: Record<string, unknown>; creatorOwns?: boolean }>;
+}
+
+export interface PermissionReachRow {
+  /** Where the rule lives in `security.json`. */
+  at: string;
+  /** The reached collection, by the name it will have. */
+  collection: string;
+  /** Its own rules, kept under its name; or a rule whose path goes through it. */
+  reads: 'its rules' | 'a path through it';
+  /** Changed fields the path follows or matches by. */
+  fields: string[];
+  /** Rules kept under a renamed collection's old name: they protect nothing until they move. */
+  mustMove?: { from: string; to: string };
+}
+
+type Hop = { follow?: string; to?: string; from?: string; by?: string };
+
+/**
+ * The permission rules a plan reaches (§3.2): every collection's rules kept under the name of a
+ * collection the plan changes — under its OLD name, for a renamed one, which is where the
+ * backend will no longer look — and every `path` rule (ONT-004) whose hops go through one: a
+ * hop that lands on it, or that follows or matches by a field of it the plan changes. Pure: the
+ * caller reads `security.json`.
+ */
+export function permissionReach(plan: Pick<MigrationPlan, 'reach' | 'before'>, security: SecurityRules): PermissionReachRow[] {
+  const reached = new Map(plan.reach.flatMap((r) => [[r.collection, r] as const, ...(r.was ? [[r.was, r] as const] : [])]));
+  const targetOf = (collection: string, field: string): string | undefined =>
+    plan.before.collections.find((c) => c.name === collection)?.columns.find((c) => c.name === field)?.targetClass;
+  const out: PermissionReachRow[] = [];
+  for (const [name, entry] of Object.entries(security.collections || {})) {
+    const own = reached.get(name);
+    if (own) out.push({ at: `collections.${name}`, collection: own.collection, reads: 'its rules', fields: [], ...(own.was === name ? { mustMove: { from: name, to: own.collection } } : {}) });
+    for (const [op, rule] of Object.entries(entry.permissions || {})) {
+      for (const atom of Array.isArray(rule) ? rule : [rule]) {
+        const hops = (atom as { path?: { hops?: Hop[] } } | null)?.path?.hops;
+        if (!Array.isArray(hops)) continue;
+        const through = new Map<string, Set<string>>();
+        const note = (collection: string | undefined, field?: string) => {
+          const r = collection ? reached.get(collection) : undefined;
+          if (!r) return;
+          const fields = through.get(r.collection) || new Set<string>();
+          if (field && r.fields.includes(field)) fields.add(field);
+          through.set(r.collection, fields);
+        };
+        let at: string | undefined = '_User';
+        for (const hop of hops) {
+          if (hop.follow) {
+            note(at, hop.follow);
+            at = hop.to ?? (at ? targetOf(at, hop.follow) : undefined);
+          } else if (hop.from) {
+            note(hop.from, hop.by);
+            at = hop.from;
+          }
+          note(at);
+        }
+        for (const [collection, fields] of through) out.push({ at: `collections.${name}.permissions.${op}`, collection, reads: 'a path through it', fields: [...fields] });
+      }
     }
   }
   return out;

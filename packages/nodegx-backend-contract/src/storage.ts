@@ -357,7 +357,7 @@ export interface StorageSupabaseExportOptions {
 }
 
 /**
- * The schema surface — 16 names, every one called by `nodegx-backend` today.
+ * The schema surface — 17 names, every one called by `nodegx-backend` today.
  *
  * This replaces `persistence/SchemaManagerLike.ts`, whose own docstring asked
  * to be replaced ("it is a stand-in, and it says so on purpose"). The list is
@@ -365,7 +365,7 @@ export interface StorageSupabaseExportOptions {
  * called, so that a second adapter has something to implement rather than a
  * class to imitate.
  *
- * **On the optional members:** `changeColumnType`, `deleteTable`,
+ * **On the optional members:** `changeColumnType`, `deleteTable`, `renameTable`,
  * `reconcileIndexes` and `indexStatus` are optional and feature-detected at
  * their call sites, because this interface describes whatever adapter the
  * service was handed and an older one predates them. The two that are reachable
@@ -391,6 +391,17 @@ export interface IStorageSchema {
   ): { changed: boolean; from?: string; rebuilt?: boolean; convertedValues?: number };
   /** Optional: `backup/schema-migrate.ts` feature-detects it before calling. */
   deleteTable?(table: string): boolean;
+  /**
+   * P116 ONT-007: rename a collection, keeping its records — a noun the person calls something
+   * else now. Carries what is keyed by the name and nothing more: the `_Schema` declaration,
+   * the two built-in indexes, the junction tables the collection owns, and every other
+   * collection's link (`targetClass`) that points at it. Throws `code: 'TABLE_IN_USE'` while a
+   * declared index, a check or a search index is built under the old name — those are taken
+   * off first and put back after, on purpose, the way `dropColumn` refuses (`COLUMN_IN_USE`).
+   * Throws when the new name is taken, the old one is unknown, or either is the backend's own
+   * (`_`-prefixed). Optional — `byob-admin.ts` answers 501 without it.
+   */
+  renameTable?(oldName: string, newName: string): boolean;
   /**
    * BMG-003: drop a column (a Relation's junction table goes with it). Throws
    * `code: 'COLUMN_IN_USE'` naming the declared index, check or search opt-in
