@@ -1,7 +1,8 @@
 ---
 id: P116-ONT-003-links
 title: A Link keeps pointing at a record after that record is deleted, on both engines — nothing a person says about "when it goes" can be kept
-status: open
+status: fixed
+commit: 1668b99c6
 severity: medium
 area: backend / Link (Pointer) — no on-delete rule in the contract (`@noodl/backend-contract` `IStorageSchema`, `StorageColumn`) or either engine (`noodl-runtime/src/api/adapters/local-sql/SchemaManager.ts` `_columnToSQL`, `postgres/ddl.ts`: a Pointer is a TEXT id, no foreign key)
 found: P116 ONT-003 s3, 2026-10-08
@@ -33,3 +34,14 @@ projection is told.
 **Ruled 2026-10-09 (Richard, P116 s11, README §9 R10): at delete time, in the backend** — not a foreign key. The
 contract grows an on-delete rule on a Pointer (`goes-too` · `stays-unlinked` · `blocks`) and the backend applies it
 inside the delete, the same on every engine, so a project that already holds broken links keeps working.
+
+**Fixed 2026-10-09 (P116 s12, Opus 5.5)** — ONT-003 §6.6. `StorageColumn.whenTargetGoes` on a Pointer (the person's
+three words); `@noodl/backend-contract` `targetGoes.ts` `deleteKeepingLinks()` reads every rule that points at the
+record, plans the whole delete read-only (refusing on any `blocks`, at any depth, before a row is written), deletes the
+caller's own record under their ACL, then empties and cascades as the master key; `AdapterFacade.rawDelete` calls it,
+so every door (`/classes` — and so a cloud function's Delete Record — BYOB `/api/:table`, its batch) keeps it on both
+engines. A `blocks` refusal is a 409 `reason: 'still-linked'` naming what links to it. The schema route refuses a rule
+that could never be kept; `setWhenTargetGoes` changes it over records; the world migration emits it for a changed
+answer. The claims above are now **held** and pass on SQLite and PostgreSQL through the facade's delete, each failing
+on its mutant (`dropWhenTargetGoes`); with the rule skipped in the facade, exactly those 22 fail. A Links field's pairs
+are not covered — bug `P116-ONT-003-pairs`.

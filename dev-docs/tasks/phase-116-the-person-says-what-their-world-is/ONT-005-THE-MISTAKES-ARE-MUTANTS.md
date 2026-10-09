@@ -1,6 +1,6 @@
 # ONT-005 — The mistakes are mutants
 
-**Opened 2026-10-08.** **Depends on ONT-003.** **Status: 🟡 s5 — built 2026-10-09 (Fable 5.1); §6.**
+**Opened 2026-10-08.** **Depends on ONT-003.** **Status: 🟡 s5 — built 2026-10-09 (Fable 5.1); §6. R10 (s12): 16 of 38 survive on the fully answered world (§6.3).**
 
 > **Model check, before anything (Richard, 2026-10-08):** this task wants **Fable 5.1** — the judgement task of the phase: a mutant the claims already kill is not a mutant, and the survivors are the vocabulary's honesty number. Your system prompt says which model you are. If it is not the one named here, stop before any work and say so in one line ("this task is marked for Fable 5.1; you are on <model> — switch with /model, or say go"), and wait for Richard's word. Do not start on the wrong model because the check felt like a formality.
 
@@ -100,6 +100,13 @@ engines, every mutant**:
 | `world-every-kind` (fully answered) | 38 | 18 | 6 (6) | 8 | 4 | **18** | 0 | 9 | 9 | 2 |
 | `world-membership` | 20 | 8 | 2 (2) | 4 | 2 | 10 | 0 | 5 | 5 | 2 |
 | `world-categories` (AC3) | 10 | 6 | 3 (3) | 0 | 3 | 4 | 0 | 2 | 2 | 0 |
+
+> **R10, 2026-10-09 (P116 s12, ONT-003 §6.6): now 16 of 38** (8 unkept, 8 unclaimed), identical on both engines.
+> A link's "when it goes" rule is kept by the backend at delete time, so in every world two fell: the link with that
+> question unanswered (`account-company`/`product-subcategory` `whenTargetGoes-unanswered`, unkept) and the link stored
+> as text (`…/id-as-text`, unclaimed — it loses the rule, and the held `…-blocks` claim kills it). world 16 → 14,
+> membership 10 → 8, categories 4 → 2. The text id beside a kind (`note-about`) still survives, as it must. The table
+> above and the paragraphs below are s5's reading.
 
 **The honesty number on the fully answered world is 18 of 38.** Read by class, because the classes say different things:
 

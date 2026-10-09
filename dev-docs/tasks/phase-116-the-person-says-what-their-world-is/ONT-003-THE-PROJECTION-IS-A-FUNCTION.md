@@ -137,3 +137,80 @@ filed as [`P116-ONT-003-tsc`](../../bugs/p116-ont-003-tsc-the-backend-spec-typec
 - **ONT-008:** each column carries its tile (`kind`); the card already shows the sentence. The relation's own
   sentence is on each field it made (`description`).
 - **ONT-002:** the conversation should ask a field's name when a second relation would make the same one.
+
+### 6.6 R10 — the "when it goes" rule, kept at delete time (s12, 2026-10-09, Opus 5.5)
+
+Ruled R10 (README §9): not a foreign key; the backend keeps it inside the delete, the same on every engine. Bug
+[`P116-ONT-003-links`](../../bugs/p116-ont-003-links-a-link-keeps-pointing-at-a-deleted-record.md) → `fixed`.
+
+**What it is.**
+
+- **The contract.** `StorageColumn.whenTargetGoes?: 'goes-too' | 'stays-unlinked' | 'blocks'` — the person's three
+  words, kept as they are (R8's choice for names). `@noodl/backend-contract` `src/targetGoes.ts` (beside the migration
+  executor, R9's home): `whenTargetGoesProblems()` (only a Pointer with a target; one of the three; `stays-unlinked`
+  never on a required field), `planDelete()` (read-only: every rule pointing at the record, breadth first over what
+  goes, a row reached twice going once so a loop ends; blockers counted, minus rows that go anyway),
+  `deleteKeepingLinks()`, `StillLinked`, and `WHEN_TARGET_GOES_BY_BACKEND` — the capability cell per backend
+  (`nodegx` supported; the other five unsupported, each saying where that backend keeps it itself). It is NOT a
+  `CapabilityKey`: those are what a node can attempt, and no node attempts this.
+- **The backend.** `AdapterFacade.rawDelete` calls it — the one method every door passes: `/classes` (and so a
+  cloud function's Delete Record, which calls it over loopback — `FunctionRuns.ts`), BYOB `/api/:table`, `_batch`, the
+  session and account sweeps. A `blocks` refusal is `409 { reason: 'still-linked', linked: [{ collection, field,
+  target, count }] }` on all three data doors (both single-record doors used to answer every error with 404).
+  `POST /admin/schema` refuses a rule that could never be kept on `createTable`/`addColumn` (400) and has a new action
+  `setWhenTargetGoes` (`{ columns: { field: rule | null } }`) — `IStorageSchema.setWhenTargetGoes?`, 19 names now,
+  both engines (a fresh schema object, the s11 memo rule), **covered** by a new BRG-003 case
+  (`schema/set-when-target-goes-changes-the-declaration`; 79 cases now) — it first went in as `uncovered` and the
+  BRG-003 ratchet (22, a ceiling never raised) went red at 23, so the gap was closed instead of the number moved.
+- **The projection.** A link to a noun carries `whenTargetGoes` on its column and its claim is **held**, with the
+  mutant `dropWhenTargetGoes`. A text id beside a kind (`points-at-one-of`) names no one collection: still not held,
+  with that reason. 22 claims flipped across the four worlds (world 4, every-kind 9, membership 8, categories 1).
+- **The migration.** A changed answer on an otherwise-same link is a `setWhenTargetGoes` step ("when the Account a
+  person's account points at goes, the person goes too"); a new collection carries the rule on its `createTable`. The
+  executor runs it and `migrationPlanProblems` refuses a rule the route would. Because a kept rule is no longer in the
+  collection's words, the bombshell and its mirror lost their `describeTable:Person` step — correctly.
+
+**Decisions (mine; nothing waited).**
+
+1. **Who it runs as.** The caller's own record is deleted FIRST, under their ACL: a refusal there changes nothing
+   anywhere. What follows is the schema's rule, not the caller's act, so it runs as the master key — the cascade, the
+   emptying, and the `blocks` count (which therefore counts rows the caller may not see; the 409 says how many). A rule
+   that held only for callers who could write every linked row would say a different thing for every caller. That is
+   what a database's own on-delete actions do (they are not subject to row security). Measured: a stranger's delete of
+   an account cascades nothing; the owner's takes the person with it.
+2. **Plan, then write.** Every refusal is found before any row is written (a badge that blocks a person two links
+   down leaves the account, the person and the badge). It is not one transaction: a row linked between the read and
+   the writes is not seen, and a write failing part way leaves the rest pointing at nothing — every project's state
+   before R10. The facade has no transaction across an await on every engine (BRG-005's).
+3. **A delete of nothing** reaches for nothing (the plan is `null` when the record is not there), so a master delete of
+   a missing id does not cascade over rows still naming it.
+4. **Graded through the facade, never in the conformance context.** The claim specs (`ont-003-claims`, `ont-005`,
+   `ont-006`, `ont-007-migration`) hand the conformance context an adapter whose `delete` IS `AdapterFacade.rawDelete`
+   (`tests/helpers/facade-deletes.ts`). The rule in the context would have passed every claim while the facade forgot
+   to call it.
+
+**What it measured (2026-10-09, in band).**
+
+- `ont-003-claims` 26/26 both engines: world 15 held / 4 not, every-kind 28 / 6, membership 19 / 7, categories 3 / 0;
+  every held claim fails on its mutant. **Control:** the facade's rule skipped → exactly the 22 flipped claims fail
+  (4 + 9 + 8 + 1), the rest pass.
+- `ont-003-target-goes` (new) **20/20**, SQLite and PostgreSQL: the three doors, two levels of goes-too beside an
+  emptied link and an untouched account, a refusal two links deep, a tree and a loop, **501** people past a page, the
+  route's refusals, `setWhenTargetGoes` over records and `null` (the old behaviour, the control), a restart, the
+  caller's ACL. **Control:** the cascade moved before the caller's own delete → the ACL case red on both engines.
+- `ont-005` re-pinned: in every world two fell — `…/whenTargetGoes-unanswered` and `…/id-as-text` (the link stored as
+  text loses its rule, so the held `…-blocks` claim kills it). **every-kind 18 → 16 of 38** (8 unkept, 8 unclaimed);
+  identical on both engines. `note-about/whenTargetGoes-unanswered` (a text id) still survives, as it must.
+- `ont-007-migration`: s9's words test re-based on a sentence said again (it rode on the rule's words); a new R10 case
+  — blocks refused before, `setWhenTargetGoes` run, kept after a restart, the next delete takes Ada and Grace and
+  leaves Linus.
+
+- The backend specs that delete or gate anything (53 files: every spec naming `DELETE`, `rawDelete`, `_batch`, the
+  users and sessions routes, plus `brg-003-*`, `brg-005-*`, `ops-audit`, `bmg-003-schema`, `ont-00*`), in band:
+  **827 / 829**. The two reds were count gates: the BRG-003 ratchet (above) and `ops-rate-limit`'s route tally,
+  `admin` 101 → 102 — **s11's own miss**: it added `POST /admin/world/migrate` and never ran that spec. Reviewed and
+  recorded there (left in the `admin` budget). Re-run: the six gate and conformance specs **60 / 60**.
+
+**Found.** A Links field's pairs stay after either end is deleted, both engines — bug
+[`P116-ONT-003-pairs`](../../bugs/p116-ont-003-pairs-a-deleted-records-links-pairs-stay-behind.md) (open, small; no
+ruling needed: a pair with a gone end means nothing).
