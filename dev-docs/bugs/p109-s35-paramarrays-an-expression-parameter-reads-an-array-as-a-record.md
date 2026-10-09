@@ -9,7 +9,6 @@ severity: low
 area: runtime / expression parameters (noodl-runtime/src/expression-evaluator.ts `createNoodlContext` — `Arrays` was a Proxy over `scope.get(prop).data`, a RECORD's data; read through node.ts :340 `evaluateExpression`, subscribed through node.ts :366 `subscribeToChanges`)
 found: P109 s35, 2026-10-09 (fixing P107-C150 — the same subscription serves both paths)
 evidence: packages/noodl-runtime/test/expression-evaluator.test.js "hands Arrays.x as the array, as window.Noodl.Arrays does" — red on the pre-fix file (`Arrays.c150Context` was not the array), green after
-kit: runtime
 regression: packages/noodl-runtime/test/expression-evaluator.test.js "createNoodlContext › hands Arrays.x as the array, as window.Noodl.Arrays does"
 ---
 

@@ -36,6 +36,7 @@ import {
 } from '../project/pageRegistration';
 import type { NodeIdRemap } from '../project/nodeIds';
 import { deconflictNodeIds, remapNote } from '../project/nodeIds';
+import { tickedPayload } from '../project/runOnChangePins';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import type { RenderLedger } from '../renderVerdict';
 import { drawsSomething } from '../visualRoots';
@@ -568,7 +569,7 @@ export function registerAuthorTools(
         });
         if (!validation.ok) rejectWith(validation, `create_component "${path}"`, examples);
 
-        const { revision } = store.writeComponent(path, candidate, { expectNew: true });
+        const { revision, ticked } = store.writeComponent(path, candidate, { expectNew: true });
         ledger.invalidate();
         // AAQ-005: a page component is not a page until a Router lists it. The
         // editor's apply has done this since AAQ-001; this door did not, so
@@ -585,6 +586,7 @@ export function registerAuthorTools(
           registry: 'updated',
           ...registrationSummary(registration),
           ...remapPayload(remapped),
+          ...tickedPayload(ticked),
           ...successPayload(validation),
           // AWP-006 — after the write, because a rejected candidate is not
           // evidence that anybody intends to build a data app.
@@ -724,7 +726,7 @@ export function registerAuthorTools(
         });
         if (!validation.ok) rejectWith(validation, `update_component "${stored.key}"`, examples);
 
-        const { revision, unchanged } = store.writeComponent(stored.key, candidate, { ifRevision: args.if_revision });
+        const { revision, unchanged, ticked } = store.writeComponent(stored.key, candidate, { ifRevision: args.if_revision });
         ledger.invalidate();
         // Updates register too, exactly as the editor's apply does: a page that
         // exists but was never listed is the state this task is about, and
@@ -739,6 +741,7 @@ export function registerAuthorTools(
           ...(applied ? { applied } : {}),
           ...registrationSummary(registration),
           ...remapPayload(remapped),
+          ...tickedPayload(ticked),
           ...successPayload(validation),
           ...backendRevealPayload(disclosure?.revealForNodes(candidate.nodes.nodes) ?? []),
           ...visualRootsPayload(candidate, args.set?.visual_roots),

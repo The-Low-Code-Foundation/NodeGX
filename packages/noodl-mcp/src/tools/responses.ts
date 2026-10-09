@@ -12,6 +12,7 @@
  * than silently at the consumer.
  */
 
+import type { RunOnChangeTickedSummary } from '../project/runOnChangePins';
 import type {
   CatalogExample,
   ExampleRow,
@@ -494,7 +495,8 @@ export interface CreateComponentResponse
     PageRegistrationSummary,
     NodeIdRemapSummary,
     BackendDisclosureSummary,
-    VisualRootsSummary {
+    VisualRootsSummary,
+    RunOnChangeTickedSummary {
   created: string;
   legacyName: string;
   type: string;
@@ -513,7 +515,8 @@ export interface UpdateComponentResponse
     PageRegistrationSummary,
     NodeIdRemapSummary,
     BackendDisclosureSummary,
-    VisualRootsSummary {
+    VisualRootsSummary,
+    RunOnChangeTickedSummary {
   updated: string;
   revision: string;
   /** Present for the `operations` form; absent for `set`. */

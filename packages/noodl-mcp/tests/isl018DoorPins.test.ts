@@ -19,7 +19,8 @@ import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { planRunOnValueChangeMigration } from '@nodegx/project-contract/run-on-value-change-migration';
 
 import { createServer } from '../src/server';
-import type { UpdateComponentResponse } from '../src/tools/responses';
+import { TICKED_WHY } from '../src/project/runOnChangePins';
+import type { CreateComponentResponse, UpdateComponentResponse } from '../src/tools/responses';
 import { call, copyFixture, type TestSession } from './helpers';
 
 async function open(projectDir: string): Promise<TestSession> {
@@ -92,11 +93,15 @@ describe('ISL-018 — the door says "ticked" on the Run-driven nodes it writes i
   it('format 4: the Function it creates carries runOnChange-in-name: true, first in its bag, and the clean-up writes nothing to it', async () => {
     const dir = fixtureAt('4');
     const session = await open(dir);
+    let created: CreateComponentResponse;
     try {
-      await must(session, 'create_component', { path: PATH, nodes: NODES, connections: CONNECTIONS });
+      created = await must<CreateComponentResponse>(session, 'create_component', { path: PATH, nodes: NODES, connections: CONNECTIONS });
     } finally {
       await session.close();
     }
+    // §5 "Report it": the response names the box it ticked and says why (s36: an agent over stdio read nothing of
+    // the pin and told its person the boxes "stay at their defaults").
+    expect(created.ticked).toEqual({ boxes: [{ node: 'fn', parameter: 'runOnChange-in-name' }], why: TICKED_WHY });
     const fn = onDisk(dir, PATH).nodes.find((n) => n.id === 'fn')!;
     expect(fn.parameters?.['runOnChange-in-name']).toBe(true);
     expect(Object.keys(fn.parameters ?? {})[0]).toBe('runOnChange-in-name');
@@ -109,11 +114,13 @@ describe('ISL-018 — the door says "ticked" on the Run-driven nodes it writes i
   it('control — format 5: the same write pins nothing, and the planner names the box (the instrument sees it)', async () => {
     const dir = fixtureAt('5');
     const session = await open(dir);
+    let created: CreateComponentResponse;
     try {
-      await must(session, 'create_component', { path: PATH, nodes: NODES, connections: CONNECTIONS });
+      created = await must<CreateComponentResponse>(session, 'create_component', { path: PATH, nodes: NODES, connections: CONNECTIONS });
     } finally {
       await session.close();
     }
+    expect(created.ticked).toBeUndefined();
     const fn = onDisk(dir, PATH).nodes.find((n) => n.id === 'fn')!;
     expect(fn.parameters?.['runOnChange-in-name']).toBeUndefined();
     expect(cleanUpWrites(dir, PATH)).toEqual({ fn: ['runOnChange-in-name'] });
@@ -134,17 +141,19 @@ describe('ISL-018 — the door says "ticked" on the Run-driven nodes it writes i
     session = await open(dir);
     try {
       // Touch only the label: fn is not this call's, so the clean-up still repairs it.
-      await must(session, 'update_component', {
+      const label = await must<UpdateComponentResponse>(session, 'update_component', {
         path: PATH,
         operations: [{ op: 'update_node', id: 'label', parameters: { text: 'Hello' } }]
       });
+      expect(label.ticked).toBeUndefined();
       expect(cleanUpWrites(dir, PATH)).toEqual({ fn: ['runOnChange-in-name'] });
 
       // Wire fn2's Run: the agent made it signal-driven, so it says what it means.
-      await must(session, 'update_component', {
+      const wired = await must<UpdateComponentResponse>(session, 'update_component', {
         path: PATH,
         operations: [{ op: 'add_connection', connection: { fromId: 'greet-btn', fromProperty: 'onClick', toId: 'fn2', toProperty: 'run' } }]
       });
+      expect(wired.ticked?.boxes).toEqual([{ node: 'fn2', parameter: 'runOnChange-in-name' }]);
     } finally {
       await session.close();
     }
@@ -166,6 +175,7 @@ describe('ISL-018 — the door says "ticked" on the Run-driven nodes it writes i
         set: { nodes: NODES, connections: CONNECTIONS }
       });
       expect(same.unchanged).toBe(true);
+      expect(same.ticked).toBeUndefined();
       expect(fs.readFileSync(path.join(dir, 'components', PATH, 'nodes.json'), 'utf8')).toBe(before);
     } finally {
       await session.close();
@@ -176,13 +186,44 @@ describe('ISL-018 — the door says "ticked" on the Run-driven nodes it writes i
     const dir = fixtureAt('4');
     const session = await open(dir);
     const nodes = NODES.map((n) => (n.id === 'fn' ? { ...n, parameters: { ...n.parameters, 'runOnChange-in-name': false } } : n));
+    let created: CreateComponentResponse;
     try {
-      await must(session, 'create_component', { path: PATH, nodes, connections: CONNECTIONS });
+      created = await must<CreateComponentResponse>(session, 'create_component', { path: PATH, nodes, connections: CONNECTIONS });
     } finally {
       await session.close();
     }
+    expect(created.ticked).toBeUndefined();
     const fn = onDisk(dir, PATH).nodes.find((n) => n.id === 'fn')!;
     expect(fn.parameters?.['runOnChange-in-name']).toBe(false);
     expect(cleanUpWrites(dir, PATH)).toEqual({});
+  });
+
+  it('apply_plan says which boxes it ticked, by component', async () => {
+    const dir = fixtureAt('4');
+    const session = await open(dir);
+    const logic = [
+      { id: 'ins', type: 'Component Inputs', ports: [{ name: 'go', plug: 'output', type: 'signal' }] },
+      { id: 'fn', type: 'JavaScriptFunction', parameters: { functionScript: "Outputs.msg = 'hi ' + Inputs.name;", 'in-name': 'Ada' } }
+    ];
+    try {
+      const plan = await must<{ planId: string; operations: Array<{ id: string }> }>(session, 'create_plan', {
+        request: 'Add a greeting step',
+        operations: [{ kind: 'create', target: 'Logic/Greet', intent: 'Says hello when asked' }]
+      });
+      await must(session, 'stage_plan_operation', {
+        plan_id: plan.planId,
+        operation_id: plan.operations[0].id,
+        nodes: logic,
+        connections: [{ fromId: 'ins', fromProperty: 'go', toId: 'fn', toProperty: 'run' }]
+      });
+      const applied = await must<{ ticked?: { boxes: unknown[]; why: string } }>(session, 'apply_plan', { plan_id: plan.planId });
+      expect(applied.ticked).toEqual({
+        boxes: [{ component: 'Logic/Greet', node: 'fn', parameter: 'runOnChange-in-name' }],
+        why: TICKED_WHY
+      });
+    } finally {
+      await session.close();
+    }
+    expect(cleanUpWrites(dir, 'Logic/Greet')).toEqual({});
   });
 });

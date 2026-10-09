@@ -1,6 +1,6 @@
 # ISL-018 — What the door writes is what the editor saves
 
-**Status: 🟢 s17 (2026-10-05): the open case ruled ("Agent writes 'ticked'") and built — the door pins its own nodes, 12 test projects settled, the `noodl-mcp` suite read and attributed (§8 s17); owed: AC5 (an agent round, then the editor's clean-up log), AC7 on the DBT demo (its owner's, `P109-S6-DEF038`); three repo projects left with their owners.** Was: 🟡 s3 (2026-10-02): AC2 measured, ruled ("a format step, 4→5" — neither of §5's options) and built (`b2ba0320a`); driven in the editor. `test:ci` 2,998 / 0 failures at `9a2972ec2`. Owed: the door writing into a project still at 4 (below). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F25](AUDIT-2026-10-01.md) · P80
+**Status: 🟢 s36 (2026-10-09): AC5 met over the real protocol — an agent's Run-driven Function in a format-4 project, the editor's clean-up 0 writes (control: 2 written and logged), the rows drawn in the preview; the door now says which boxes it ticked (`ticked`, P109-S36-PINUNREPORTED); the people's door (`dist/noodl-mcp.cjs`) predates the pin (P109-S36-STALEMCPDIST). Owed: AC7 on the DBT demo (its owner's). Was: 🟢 s17 (2026-10-05): the open case ruled ("Agent writes 'ticked'") and built — the door pins its own nodes, 12 test projects settled, the `noodl-mcp` suite read and attributed (§8 s17); owed: AC5 (an agent round, then the editor's clean-up log), AC7 on the DBT demo (its owner's, `P109-S6-DEF038`); three repo projects left with their owners.** Was: 🟡 s3 (2026-10-02): AC2 measured, ruled ("a format step, 4→5" — neither of §5's options) and built (`b2ba0320a`); driven in the editor. `test:ci` 2,998 / 0 failures at `9a2972ec2`. Owed: the door writing into a project still at 4 (below). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F25](AUDIT-2026-10-01.md) · P80
 [DEF-038](../phase-80-the-defects-the-templates-found/DEF-038-THE-OTHER-GENERATOR-DISAGREES.md) (✅ built 2026-09-03, in
 the generators only) · **Side:** product (MCP door, `noodl-mcp`; the load-time migration in `@nodegx/project-contract`)
 
@@ -245,3 +245,47 @@ ones); and the 20 known projects are settled once by a script.
   67/67.
 - The spec gained AC3's other clause: an explicit `runOnChange-in-name: false` from the caller is kept (the planner only
   answers absent boxes). 5/5.
+
+### Session 36 (2026-10-09) — AC5 driven over the real protocol; the pin was not reported, and the people's door did not have it
+
+**Set-up.** A scratch copy of `templates/landing-pages`, format 4. Before the agent, the clean-up planner
+(`scripts/isl018-settle-format4.ts --root`) reads **0 writes**, so anything later is the agent's. The door was built
+from today's `src` into a scratch-named bundle beside `dist/` and removed after.
+🔴 **The checkout's `dist/noodl-mcp.cjs` (built 2026-10-02 22:19) has no pin.** `pinAuthoredRunOnChange` appears 0 times
+in it and 3 times in the fresh bundle, and the dev editor's `.mcp.json` points every agent at that file. Filed
+`P109-S36-STALEMCPDIST` (high). The agent was Claude Code (`claude -p`, Sonnet 5.5) with a project-local
+`--mcp-config` and only the door's tools allowed, run from the project folder. The editor was `npm run dev:debug` on a
+throwaway `NOODL_USER_DATA_DIR`. Each arm was opened from its own copy, because the open migrates and saves at 5.
+
+| round | the person asked | what the agent built | boxes on the Run-driven node | planner |
+|---|---|---|---|---|
+| 1 | a Reading List page; when it opens, sort five books newest first and show them | Static Data → a sort Function (no Run wire) → For Each | none: **no governed node** | 0 |
+| 2 | a button that flips the order | a Switch's state into the sort (still no Run) | none: **no governed node** | 0 |
+| 3 | load once on open: did mount → Function's Run, "not worked out continuously" | `rlLoad`, Run from did mount, `books` fed, `howMany` 5 | `false` × 2, **sent by the agent** | 0 |
+| 4 | the same, without "not continuously" | the same shape | `false` × 2, **sent by the agent** (it read the door's guidance on the box) | 0 |
+| 5 | the same, "leave its run-on-value-change settings at their defaults" | the same shape; the agent sent **no** `runOnChange` key | **`true` × 2, first in the bag: the door's pin** | 0 |
+
+- **Rounds 1 to 4 graded nothing of the door**, and that is a finding in its own right. Given the request in a
+  person's words, an agent through this door builds value-driven graphs. When asked to wire Run, it answers the box
+  itself (rounds 3 and 4). Only round 5 exercised the pin over stdio. Cost: $2.10, $1.82, $1.20, $1.15, $0.78.
+- **Known-firing control (editor):** round 3's project with the agent's two answers stripped. The planner reads
+  2 writes. On the open the editor logged `[NDA-017] migrated 2 value input(s) on 1 node(s) to passive …`, wrote
+  `false` on both and saved format 5. So an absent line in this editor is a reading.
+- **AC5 (round 5):** opened in the editor, **0 `[NDA-017]` lines**, `version: "5"`, both `true`s kept on disk. In the
+  editor's preview (`--target=viewer`, `/reading-list`) **all five rows are drawn, newest first**. Screenshot
+  looked at, the rows scrolled into view. Round 4 opened the same way: 0 lines, the agent's `false`s kept.
+  ⚠️ The rows do not tell the arms apart here: round 4's `false` draws them too, because Static Data reaches the
+  Function before did mount. The write count is the clause that grades.
+- 🔴 **Found: the door said nothing.** Round 5's `update_component` response had no word of the two boxes it ticked
+  (keys: `updated, revision, applied, validation, visualRoots, visualRootsDerived, done, notDone`). The agent told
+  its person "I didn't touch these settings, so they stay at their defaults". §5's "Report it" had not been built.
+  Filed and fixed: `P109-S36-PINUNREPORTED`.
+
+**Built (s36):** `pinAuthoredRunOnChange` returns the boxes it ticked. `ProjectStore.writeComponent` returns them
+as `ticked`, except on an unchanged write. `create_component`, `update_component` and `apply_plan` answer
+`ticked: { boxes: [{ component?, node, parameter }], why }`, the `why` linted with `written.py` (0 flags). This adds
+no tool schema or description, so the resident surface is unchanged. The spec (`isl018DoorPins.test.ts`, 6/6) has
+the response read on every row: ticked on create and on the update that wires Run; none at format 5, on the
+label-only update, on the no-op rewrite or on a caller's `false`; and a new apply_plan row naming the component.
+**Reverted arms** (each restored by `cp`, `cmp` clean): no payload → the 3 ticking rows red; the payload on an
+unchanged write → the ISL-019 row red.

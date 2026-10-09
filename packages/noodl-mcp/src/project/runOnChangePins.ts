@@ -44,15 +44,25 @@ const incomingOf = (connections: Connection[] | undefined, id: string): string =
   );
 
 /**
- * Pin `true` on every governed box the clean-up would write `false` on, for the nodes this write authors. Mutates
- * `files` in place and returns how many boxes it wrote.
+ * One box the door ticked: the node, and the parameter it wrote `true` on (`runOnChange-in-books`). `component` is
+ * set where one response covers several components (apply_plan).
  */
-export function pinAuthoredRunOnChange(key: string, files: ComponentFiles, onDisk: ComponentFiles | null): number {
+export interface TickedBox {
+  component?: string;
+  node: string;
+  parameter: string;
+}
+
+/**
+ * Pin `true` on every governed box the clean-up would write `false` on, for the nodes this write authors. Mutates
+ * `files` in place and returns the boxes it wrote.
+ */
+export function pinAuthoredRunOnChange(key: string, files: ComponentFiles, onDisk: ComponentFiles | null): TickedBox[] {
   const nodes = files.nodes.nodes ?? [];
   const plan = planRunOnValueChangeMigration({
     components: [{ name: key, graph: { roots: nodes as never, connections: files.connections.connections as never } }]
   });
-  if (plan.writes.length === 0) return 0;
+  if (plan.writes.length === 0) return [];
 
   const before = new Map<string, Node>();
   for (const n of onDisk?.nodes.nodes ?? []) before.set(n.id, n);
@@ -66,7 +76,7 @@ export function pinAuthoredRunOnChange(key: string, files: ComponentFiles, onDis
   const byNode = new Map<string, string[]>();
   for (const w of plan.writes) byNode.set(w.nodeId, [...(byNode.get(w.nodeId) ?? []), w.parameter]);
 
-  let written = 0;
+  const written: TickedBox[] = [];
   for (const node of nodes) {
     const parameters = byNode.get(node.id);
     if (!parameters || !authored(node)) continue;
@@ -75,7 +85,25 @@ export function pinAuthoredRunOnChange(key: string, files: ComponentFiles, onDis
     for (const p of parameters) rebuilt[p] = true;
     for (const name of Object.keys(existing)) if (!(name in rebuilt)) rebuilt[name] = existing[name];
     node.parameters = rebuilt as Node['parameters'];
-    written += parameters.length;
+    for (const p of parameters) written.push({ node: node.id, parameter: p });
   }
   return written;
+}
+
+/**
+ * What a write response says when the door ticked boxes (ISL-018 §5, "Report it"): which, and why, so the agent can
+ * see the door changed its graph and send `false` where it meant one. Nothing when it ticked none.
+ */
+export interface RunOnChangeTickedSummary {
+  ticked?: { boxes: TickedBox[]; why: string };
+}
+
+export const TICKED_WHY =
+  'This project was saved before the "run on value change" setting existed. The editor upgrades it the next time ' +
+  'it opens. That upgrade unticks every unset box on a node whose Run is wired. The door wrote these boxes as ' +
+  'ticked, which is what an unset box means today. Each node still runs when these values change. Send the ' +
+  'parameter as false to switch one off.';
+
+export function tickedPayload(boxes: readonly TickedBox[] | undefined): RunOnChangeTickedSummary {
+  return boxes && boxes.length > 0 ? { ticked: { boxes: [...boxes], why: TICKED_WHY } } : {};
 }

@@ -72,6 +72,7 @@ import { completionPayload } from './completion';
 import type { ComponentFiles } from '../graph';
 import { reconcileHierarchy } from '../graph';
 import { deconflictNodeIds, remapNote } from '../project/nodeIds';
+import { type TickedBox, tickedPayload } from '../project/runOnChangePins';
 import { pathToLegacyName, toPathForm, validateComponentPath } from '../paths';
 import { componentIsPage, registerPages, registrationSummary } from '../project/pageRegistration';
 import type { ProjectBinding } from '../project/ProjectBinding';
@@ -1045,14 +1046,16 @@ export function registerPlanTools(
       // a doc that names a component the component write then failed on would
       // be the more misleading leftover of the two.
       const applied: Array<{ operation: string; target: string; revision: string }> = [];
+      const ticked: TickedBox[] = [];
       for (const op of componentOps) {
         const files = serverPlan.staged.get(op.id);
         if (!files) continue;
         const key = op.kind === 'create' ? op.target : store.readComponent(op.target).key;
-        const { revision } = store.writeComponent(key, files, {
+        const written = store.writeComponent(key, files, {
           expectNew: op.kind === 'create'
         });
-        applied.push({ operation: op.id, target: op.target, revision });
+        applied.push({ operation: op.id, target: op.target, revision: written.revision });
+        for (const box of written.ticked ?? []) ticked.push({ component: key, ...box });
       }
       // AAQ-005 — register the pages this plan put into the project, in plan
       // order, after the components are in. Same rule and same shared decision
@@ -1108,6 +1111,7 @@ export function registerPlanTools(
         docs: docsWritten,
         skipped: [...skip],
         ...registrationSummary(registration),
+        ...tickedPayload(ticked),
         ...(settingsWritten.length > 0 ? { settings: settingsWritten } : {}),
         ...validationBlock(surviving, summarize(surviving)),
         ...(rendered ? { render: rendered.summary } : {}),

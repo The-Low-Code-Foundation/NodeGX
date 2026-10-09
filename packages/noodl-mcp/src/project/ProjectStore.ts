@@ -28,7 +28,7 @@ import { ToolError } from '../errors';
 import type { ComponentFiles } from '../graph';
 import { toPathForm } from '../paths';
 import { WriteClock, type ReproducibleOutput } from './writeClock';
-import { pinAuthoredRunOnChange, projectWillBeCleanedUp } from './runOnChangePins';
+import { pinAuthoredRunOnChange, projectWillBeCleanedUp, type TickedBox } from './runOnChangePins';
 
 const COMPONENT_FILES = ['component.json', 'nodes.json', 'connections.json'] as const;
 
@@ -595,7 +595,7 @@ export class ProjectStore {
     key: string,
     files: ComponentFiles,
     options: { expectNew?: boolean; ifRevision?: string } = {}
-  ): { revision: string; dir: string; unchanged?: true } {
+  ): { revision: string; dir: string; unchanged?: true; ticked?: TickedBox[] } {
     const registry = this.readRegistry();
     const existing = registry.components[key];
 
@@ -613,11 +613,12 @@ export class ProjectStore {
     // run-on-value-change boxes of the nodes this write authors, before the no-op check (so a rewrite of a
     // pinned node is still a no-op).
     const willBeCleanedUp = projectWillBeCleanedUp(this.readProjectFile()?.version);
+    let ticked: TickedBox[] = [];
 
     if (existing) {
       this.assertNoDrift(key, dir, options.ifRevision);
       const onDisk = this.readFilesIfPresent(dir);
-      if (willBeCleanedUp) pinAuthoredRunOnChange(key, files, onDisk ?? null);
+      if (willBeCleanedUp) ticked = pinAuthoredRunOnChange(key, files, onDisk ?? null);
       if (onDisk && sameComponentContent(onDisk, files)) {
         return { revision: this.takeSnapshot(key, dir, onDisk), dir, unchanged: true };
       }
@@ -627,7 +628,7 @@ export class ProjectStore {
         `Directory components/${entryPath} already holds component files but is not in the registry. Refusing to overwrite.`
       );
     } else if (willBeCleanedUp) {
-      pinAuthoredRunOnChange(key, files, null);
+      ticked = pinAuthoredRunOnChange(key, files, null);
     }
 
     fs.mkdirSync(dir, { recursive: true });
@@ -650,7 +651,7 @@ export class ProjectStore {
     this.updateRegistry(registry, now);
 
     const revision = this.takeSnapshot(key, dir, files);
-    return { revision, dir };
+    return { revision, dir, ...(ticked.length > 0 ? { ticked } : {}) };
   }
 
   deleteComponent(input: string): { removed: string[] } {
