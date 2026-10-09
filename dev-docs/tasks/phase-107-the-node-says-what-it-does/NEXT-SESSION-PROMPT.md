@@ -51,9 +51,14 @@ NSP-022)** — unchanged by s68 and s69 (s69 added no node).
    Watch for these, already suspected: the native-scroll path (overflow on the Group itself) is not the unbounded axis; a
    shrinking `fill` meets the browser's min-content floor (the model's `floor` is 0).
 4. **When the box is quiet:** the full node-spec package suite once (`-w 2`), and NSP-013's deep run for s11–s14.
+5. **The world's HISTORY for C120 / C126 (P109 is waiting on it — told 2026-10-09, s68):** `src/world.ts` models only
+   `history.pushState` (:123, :2123, :2804); a Component Stack's fix needs `history.back()` and `history.replaceState`, with
+   their `popstate` as the browser fires it, on both targets. world.ts is P107's (the format, stranger-guarded: rewrite the
+   hashes and re-run `tests/stranger.test.ts` in the same commit). Light (no browser) — do it before or between steps 3–5,
+   then tell P109 (`opennoodl-1e`) it can fix C120 / C126.
 
-**Human decisions: none open.** **P109 holds:** C150, C151, the Page Stack (C120, C126), the Router (S18). **P112 holds:**
-P107-SIZE.
+**Human decisions: none open.** **P109 holds:** the Page Stack (C120, C126 — waiting on item 5), the Router (S18). C150 and
+C151 fixed by P109 in `024e2ee55` (Expression spec v5). **P112 holds:** P107-SIZE.
 
 **The census was not regenerated in s66–s69** (it is out of CI and reads the working tree) — regenerate from a clean
 export when next convenient, as below.
