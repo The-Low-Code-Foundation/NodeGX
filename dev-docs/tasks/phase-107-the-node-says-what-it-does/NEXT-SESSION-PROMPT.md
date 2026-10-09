@@ -31,7 +31,7 @@ on the export · 2 exempt · 17 owed (all NSP-022)**, unchanged since s68.
    could not have been otherwise for a percent in a scroll. The `s4` reading it called undecidable is this hole.
 3. **P107-C154** (low, filed; no reach on the shelf). Native platform scroll on: a percent child of a scrolling column grows
    into the visible height (140 round 40 px of content). Off: it is its content, which is the model's reading. The fix's first
-   question is which reading is the product's. It goes to P109 (R16). **P109 has not been told yet** (below).
+   question is which reading is the product's. It goes to P109 (R16), told in s71.
 4. **The Tag moves no box** (`tags` fixture; the runtime's sheet resets a Text's margins). `layout-map.ts` `BOX_NEUTRAL` lets
    a node with a Tag be graded: template parents in reach went from 498 to 623 of 1,207. Most of the rest set a `cssClassName`
    (R17) or wrap.
@@ -47,12 +47,11 @@ stranger's seed-0 rows), exit 0, 532 s. `tsc --noEmit` clean, `browser-check` PA
 
 ## What s72 does
 
-1. **Tell P109 about C154**, in one line (the file is `dev-docs/bugs/p107-c154-…`), if s71 did not (see the commit message).
-2. **Take up the next task. NSP-018, "the spec speaks"** (depends on NSP-011 ✅): port descriptions and `get_node_type` come
+1. **Take up the next task. NSP-018, "the spec speaks"** (depends on NSP-011 ✅): port descriptions and `get_node_type` come
    from the spec. It is the step before NSP-019 (Richard's surface) and NSP-021. Read its task file and memory's
    `port-descriptions-now-render.md` (`Ports.renderParams` is the seam) first. A ready task is a go.
    NSP-020 (ports without a viewer, rows only since s20) and NSP-010 (a change is a version) are also ready.
-3. **When the box is quiet:** NSP-013's deep run for s11–s14, and the census regenerated from a clean export (below). Neither
+2. **When the box is quiet:** NSP-013's deep run for s11–s14, and the census regenerated from a clean export (below). Neither
    was done in s66–s71.
 
 **Human decisions: none open.** C154's "which reading is the product's" is P109's to bring to Richard if they want it.
