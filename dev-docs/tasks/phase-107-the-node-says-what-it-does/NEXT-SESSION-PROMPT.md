@@ -58,8 +58,13 @@ at 125/147 (1.3 s). The node-spec package suite: see the commit message.
 4. **When the box is quiet:** NSP-013's deep run for s11–s14 (`NSP_DEEP=10000 NSP_ONLY=…`, one spec at a time).
 
 **Human decisions: one — CSS Definition (above).** When P109 lands a ruled fix (C120, C126, C129–C145, S18), the scenario's behaviour
-moves with it in the same commit — a spec version (Repeater v3 for C129–C131, C135–C137, C140, C142, C143; Columns v2 for C132–C134; the
-Page Stack (v8) for C120, C126, C139; Drag v2 for C138; the Router for S18; the Expression v2 for C144, C145).
+moves with it in the same commit — a spec version. **P109 already moved two (told s64):** For Each is v3 (`e22334e0d`: C128, C135,
+C140, C141 fixed) and the Drag v2 (C106). Next: For Each v4 for C129–C131, C136, C137, C142, C143; Columns v2 for C132–C134; the Page
+Stack (v8) for C120, C126, C139; Drag v3 for C138; the Router for S18; the Expression v2 for C144, C145.
+
+**Known red at the 2026-10-09 seed (20735), not P107's to fix today:** `tests/stranger.test.ts` round 4's Options keeps a mutant
+(`person.blur` swap-branch) — identical with and without s64's change, and P109 saw it on the base. A seed-rotation survivor: kill it
+by its shape in the Dropdown's scenarios (a blur that unmounts beside one that does nothing), not by the stranger's files.
 
 ## Before you start
 
