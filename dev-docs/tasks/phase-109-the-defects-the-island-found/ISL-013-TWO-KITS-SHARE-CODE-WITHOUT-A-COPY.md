@@ -1,6 +1,6 @@
 # ISL-013 — Two kits share code and data without a copy
 
-**Status: 🟡 s34 (2026-10-09): slice 2 built (`676395627`) — AC1 driven on a deployed page (5 arms), AC4 (garden-3d-kit takes garden-kit's helpers by `requires` + `getModule`, no copy; the island drawn in 3D and 2D on the deployed template, looked at), AC5 (one job table, garden-kit's), AC6 (34 of 38 modules byte-identical; the 4 others the two adopting kits); AC3: a refused kit goes on the failure list Settings → Kits reads — the editor drive is §8 s34's last entry. s28 (2026-10-07): slice 1 built — `requires` and `Noodl.getModule` on every loader (page, SSR, the door's catalog reader, cloud functions); AC2 met at loader level, AC3 met but for Settings → Kits. Left: AC1's deployed drive, AC3's Settings → Kits, AC4 (the garden kits adopt it), AC5 (the job table), AC6 (the per-template byte census). Ruled s18 (2026-10-05): "A kit says what it needs" — a manifest `requires`, loaded first whatever its name, read through a public call, refused by name when missing (rulings 1 (a) and 2 (a)).** **Earlier status: ⬜ not started — scoped 2026-10-01 at `27d891bf3`.** **Source:** [the island audit](AUDIT-2026-10-01.md) row
+**Status: ✅ s34 (2026-10-09): every AC met — slice 2 built (`676395627`): AC1 driven on a deployed page (5 arms), AC4 (garden-3d-kit takes garden-kit's helpers by `requires` + `getModule`, no copy; the island drawn in 3D and 2D on the deployed template, looked at), AC5 (one job table, garden-kit's), AC6 (34 of 38 modules byte-identical; the 4 others the two adopting kits); AC3: a refused kit is named in Settings → Kits, driven in the editor (§8 s34). Left to others: P18's two export bootstraps; the garden library entries' version (Richard's, with publishing them). s28 (2026-10-07): slice 1 built — `requires` and `Noodl.getModule` on every loader (page, SSR, the door's catalog reader, cloud functions); AC2 met at loader level, AC3 met but for Settings → Kits. Left: AC1's deployed drive, AC3's Settings → Kits, AC4 (the garden kits adopt it), AC5 (the job table), AC6 (the per-template byte census). Ruled s18 (2026-10-05): "A kit says what it needs" — a manifest `requires`, loaded first whatever its name, read through a public call, refused by name when missing (rulings 1 (a) and 2 (a)).** **Earlier status: ⬜ not started — scoped 2026-10-01 at `27d891bf3`.** **Source:** [the island audit](AUDIT-2026-10-01.md) row
 **F17** · found by P106 [IG-007](../phase-106-the-island-grows/IG-007-GARDEN-3D.md) (the 3D kit borrows the 2D
 kit's helpers) and P108 IW-002 (the job table), 2026-09-28 → 09-30 · **Side:** product (module manifest and injector,
 the runtime's module list, kit docs and types)
@@ -206,4 +206,15 @@ home, the same win card (`ac1-3d-06-win`, `ac4-nogl-02-win`, looked at).
 
 **Gates.** module-inject 41/41, kit-catalog 81/81, scaffold 76/76, SSR kit specs 27/27, cloud kit specs 21/21, the garden gates
 144/144, noodl-mcp 3,692/3,706 (the same 11).
+
+**AC3 in the editor** (dev stack on a scratch profile, `NOODL_USER_DATA_DIR`; the 3D fixture with garden-3d-kit alone in
+`noodl_modules`, opened from a scratch recents list; Settings → Node kits): the Garden 3D Kit card reads, in its red failure box,
+*kit "Garden 3D Kit" failed to load: it needs "garden-kit", which is not installed in this project. None of its nodes are
+available — a node from this kit will report as an unknown type.* The element is the one on top at its centre
+(`elementFromPoint`); screenshot looked at. Not controlled in the editor (that needs a second launch on the old injector); the
+injector's spec is red on HEAD's.
+
+**ISL-013 ✅.** AC1 (deployed, five arms), AC2 (slice 1, every loader), AC3 (console, server log, cloud result,
+`get_project_info`, Settings → Kits), AC4 (the garden, no copy, 3D and 2D on deployed pages), AC5 (one table), AC6 (census).
+The template's copies (§7's trap) went with ISL-017's ruling 2: it records the library entries, so nothing to regenerate.
 

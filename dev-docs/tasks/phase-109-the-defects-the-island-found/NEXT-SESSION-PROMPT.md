@@ -1,96 +1,90 @@
-# Next session — P109 session 34
+# Next session — P109 session 35
 
 **Phase:** [README](README.md) · **Audit:** [AUDIT-2026-10-01.md](AUDIT-2026-10-01.md) · scoped at `27d891bf3`.
-**Session 33 (2026-10-09, on `cline-dev`):** every row built in worktree `p109-isl049` (branch `p109-isl050`), graded on the runtime at
-seeds 13 and 20732 with the interpreter's mutants at both, each spec's interpreter trace diffed across the fix, and a control (the
-previous commit's file) red on exactly the scenarios it moved; landed by compare-and-swap.
-**ISL-050 ✅** C132 `11fef09c6` (a number on a size port that holds none is read in its default unit; Columns **v3**).
-**ISL-051 ✅ (5 of 5)** — took in P107's C146–C148 the same day: C145 `5ee9edda4` (the Expression's reserved names, ruled "Block the
-three names"; Expression **v3**; lexer ×3, catalogs regenerated), C147 `cb7ea0fab` (a Function's `throw null`), C148 `cf6b4b8f8` (the
-Script's four catches), C146 `2d765dac2` (a Function's Error cleared to blank text; Function **v2**).
-**ISL-048 at 26 of 29** — C114 `4e2d846d5` (Children Count in the frame a stack mounts; Page Stack **v16**), plus RouterNavigate **v3**
-`491e8af72` (C118's debt, below). Board: **27 of 51 closed**.
+**Session 34 (2026-10-09, on `cline-dev`):** built in worktree `p109-isl049` (branch `p109-isl050`), landed by compare-and-swap.
+Board: **28 of 51 closed**.
+
+- **ISL-048 at 27 of 29** — C139 `c22c9aceb`: a Component Stack input **Keep Pages When Unmounted** (`keepPagesWhenUnmounted`,
+  default off); a remount keeps the pages unless, while off, its Components were written, its Name moved key, or (Use Routes)
+  the address moved. Page Stack **v17**. Use Routes decided, not asked: the address is the stack's, so a moved address resets.
+- **ISL-013 ✅** — slice 2 `676395627`: garden-3d-kit `requires` garden-kit and reads its world helpers and job table through
+  `Noodl.getModule` (22 byte-identical copies and the `__noodl_modules` walk gone); a refused kit is pushed onto
+  `__noodl_module_failures`, so Settings → Kits names it. AC1 (five arms) and AC4 (3D and 2D) driven on deployed pages, AC3 in the
+  editor, AC6 census 34/38 identical (the rest the two adopting kits).
+- **ISL-051 ✅ 6 of 6** — took in P107's C149 and fixed it, `dde400937`: a Visual Function whose blocks send a reserved signal
+  fails the run (Error kept, no Success, no Done). Visual Function **v2**.
+- `63eebbc9b`: the workshop drive's Grown-ups clause expected the pre-P108-s9 line (`guRend3dLine`; the page shows `guRend3dKept`).
 
 ## Do, in this order
 
-1. **ISL-048's C139** (ruled "Keep them only when an option is ticked"). A new Component Stack input beside Use Routes: name it in the
-   house style (Keep When Leaving is the Page node's; a candidate is **Keep Pages When Unmounted**, port `keepPagesWhenUnmounted`,
-   default off), describe it (what it keeps, that Mounted off still removes the element, Off: back to the start component). The remount's
-   reset comes from `_registerPageStack` → `NavigationHandler.registerPageStack` → `reset()` (navigation-stack.tsx :196-216); with the
-   option on, a mount that finds the stack still holding its pages keeps them. Page Stack spec **v17**; both catalogs regenerated in the
-   worktree (`scripts/node-catalog/generate.js`, `merge.js`, `scripts/cloud-node-library/generate.js`, then each `--check`); the
-   noodl-mcp suite (baseline: 3,692 / 3,706, the same 11 every time). Decide Use Routes with the option on (the address may have moved
-   while unmounted) — read it, and ask Richard only if both answers are defensible.
-2. C120, C126 still wait on P107's world (history back, an entry replaced). Then ISL-013 slice 2, ISL-018 AC5, ISL-012 AC3.
-   **Track G** waits on Richard's order.
+1. C120, C126 (ISL-048's last two) still wait on P107's world (history back, an entry replaced) — ask P107 if it has moved.
+2. ISL-018 AC5 (an agent round, then the editor's clean-up log), ISL-012 AC3 (a full server render with hydration).
+3. **Track G** waits on Richard's order.
 
-## What s33 learned
+## What s34 learned
 
-- **A fix to a shared handler moves every spec that plays it.** C118 (s30) re-graded the Router and never RouterNavigate, which reaches
-  the same handler through the world (`world.ts` `router.resolve`): red at every seed for three sessions. After any fix, grade the specs
-  that share its handler, not only the node's own.
-- **Older tests pin a defect as behaviour.** C132's ruling reversed fb-019 rows 5–6 and GAM-015's no-default row; C146's reversed
-  isl-005 and fun-007's `undefined` clear. Restate them to the ruling, each red on the pre-fix code — never delete.
-- **A new runtime export reaches the viewer through generated declarations.** `@noodl/runtime/src/utils` types from
-  `noodl-runtime/dist-types` (a worktree symlinks the primary's), and ts-jest type-checks viewer files the runtime target loads: a new
-  export failed every Script scenario with an EMPTY message (a TSError) until the declarations were rebuilt — in every checkout. Keep
-  the runtime's exported surface unchanged, or rebuild the primary's types after landing. To check one in a worktree: emit to the
-  scratchpad (`tsc -p tsconfig.types.json --outDir …`), point the worktree's link there, type-check, restore the link.
-- **A probe that fails with an empty message has caught a non-Error** — wrap `runConformance` in the probe and print what it catches.
-- **React runs mount effects as the target's `act` exits — after the drain.** Work a mount starts lands outside any update: a direct
-  send is in the frame, a `scheduleAfterInputsHaveUpdated` waits a frame. `OutputProperty.sendValue` does not dedupe, so pulling a queued
-  send forward needs a "changed since" flag (C114).
-- **A bug file can name one read where the catch has two** (C147: the editor warning's `e.stack`). The runtime target HAS an editor
-  connection — the warning arms are graded.
-- **Day-seed mutant survivors are interpreter-side** and cannot come from a runtime change; one at seed 20735 on RouterNavigate was
-  pinned with a scenario. Text Input, Options, Range, Radio Button, Circle survivors at 20735 / 20732 are P107's (told).
+- **A deployed drive grades the deploy ENGINE's build date, not the source.** `nodegx deploy` runs
+  `noodl-preview/dist/nodegx-deploy.cjs` and copies `noodl-editor/src/external/deploy/index.js` — both gitignored. They were
+  older than ISL-013 slice 1, so kits loaded alphabetically and `Noodl.getModule` did not exist on the page, while every loader
+  spec was green. Before any deployed drive after a change to `@nodegx/module-inject` or `static/deploy`: `npx webpack --config
+  webpack-configs/webpack.deploy.dev.js --no-watch` (noodl-viewer-react) and `node build.mjs` (noodl-preview). Recorded on
+  P109-S5-STALEDEPLOYCLI (ISL-034). Slice 1's deployed drive was never run — that is why nobody saw it for two days.
+- **A test that says it "will fail loudly the day someone fixes it" is a test to restate, not delete** (C149: the lifecycle
+  suite's SEPARATE PRE-EXISTING DEFECT row). Restate it to the fix, red on the pre-fix file.
+- **A contract plant anchors on source text.** When the fix rewrites the anchored line, the plant throws "must contain …
+  exactly once" — re-anchor it on the new check, and show it red.
+- **A census of copies first** (ISL-013): all 22 copied definitions were byte-identical, which is what made the swap a pure
+  identity, provable by `toBe`, not by comparing answers on a list of inputs.
+- **A drive's red can be the drive.** The one workshop red was a clause stale since P108 s9; read the `saw:` line before the code.
+- **Stopping only your own run:** a peer may already be doing the step (P107 rewrote the stranger hash for `world.ts` in
+  `af99f545f`); kill by the jest's cwd (your worktree), never by name.
 
-## Gate readings taken s33 (2026-10-09)
+## Gate readings taken s34 (2026-10-09)
 
-- Every registry spec (105) on the runtime at 13 and 20732 with C132 in: the only reds were RouterNavigate (fixed, v3) and a Text Input
-  mutant at 20732 — both identical on the pre-fix runtime.
-- Batch heads: spec package 955 / 955 (without `stranger.test.ts`), viewer 1,837 / 1,837, runtime suite green but for graph.test's one
-  load-timed scenario ("[C1 C11] a wire made after the first frame…": 94 / 94 alone), runtime / viewer / spec tsc 0, catalogs `--check`
-  clean, noodl-mcp 3,692 / 3,706 (CMP-001 AC2, CMP-004 ×4, D54, DEF-038, FLD-013, TPL-007, CN-004, AAQ-011), function-contract +
-  script-contract 43 / 43.
-- Export expression/jsfun tests 1,095 / 1,100: date-family (3) and navigate-to-path (2) fail identically with the old lexer — P18's.
-- `bugs.js check`: the same 5 problems, none P109's s33.
+- Page Stack v17: 158/158 on the runtime at 13 and 20732; mutants 0 survivors (771/772). Logic Builder v2: 15/15 + 200/200 at
+  13, 20732, 20735; mutants 0 (118/118, 103/103).
+- Spec package 963/963 (no `stranger.test.ts`), viewer 1,837/1,837, runtime suite at baseline (graph.test's load-timed scenario;
+  day-seed 20735 survivors on Circle, Options, Radio Button, Range, Text Input — every scenario and sequence passing, P107's),
+  noodl-mcp 3,692/3,706 (the same 11), module-inject 41/41, kit-catalog 81/81, scaffold 76/76, SSR kit 27/27, cloud kit 21/21.
+- `bugs.js check`: 6 problems — the same 5 plus P107's untracked C150 (theirs).
 
 ## Decisions for Richard (not yours)
 
-- **C143's Refresh half** (carried): a row fading out moves to the bottom when the list is refreshed. Recommended: leave it.
-- Carried: **Track G's order** (ISL-039 data-loss blockers, ISL-040 security holes, or ISL-013 slice 2 first); the layout of an
-  unlabelled control in a real browser; `P109-S24-SIGNINWITHERRORKEPT`, `P109-S22-BUILTINBOUNDARY`, `P109-S20-LISTDEFAULTTYPE`,
-  `P109-S18-REFRESHROWSTATE`, ISL-010 AC4 and the Effort port, pushing `cline-dev`, publishing the Garden kits at the origin.
+- **New (s34):** the garden library entries stay at 1.0.0 though garden-3d-kit now refuses to load without Garden Kit (its card
+  and README say so). Bump with publishing them?
+- Carried: C143's Refresh half (recommended: leave it); Track G's order; the layout of an unlabelled control in a real browser;
+  `P109-S24-SIGNINWITHERRORKEPT`, `P109-S22-BUILTINBOUNDARY`, `P109-S20-LISTDEFAULTTYPE`, `P109-S18-REFRESHROWSTATE`, ISL-010 AC4
+  and the Effort port, pushing `cline-dev`, publishing the Garden kits at the origin.
 
 ## Handed over (owed by another phase)
 
-- **P107 (opennoodl-a1):** told of every version and landing above, and of the `script-contract.test.ts` plant re-anchored. Theirs: the
-  day-seed survivors (Text Input 20732, and the 20735 class), the Video rows C96–C100, C120 / C126's world.
-- **P18 (export):** none of s33's fixes checked on the exported app — the export's `expression-ports.ts` now reserves `run`,
-  `expression`, `evaluateAtLoad` (byte-identical copy; an exported `run + 1` reads a global and throws — it never worked); the size
-  merge (C132) in the export's runtime twin, if any; the Function's and Script's throw of nothing; Children Count at a stack's mount. The
-  5 failing export tests above. Plus s32's, s31's and s30's lists.
-- **Release notes, add (s33):** a number wired into a size that has none yet (a Columns' Medium Below) is read in pixels; an Expression
-  that reads `run`, `expression` or `evaluateAtLoad` says the name is reserved instead of failing; a Function or Script whose code throws
-  null keeps working and says so; a Function's Error clears once it works again; a Component Stack turned back on counts its pages at once.
+- **P107 (opennoodl-a1):** told of Page Stack v17 and Logic Builder v2 (and the re-anchored plant). Theirs: the day-seed
+  survivors, the Video rows C96–C100, C120 / C126's world, C150 (filed s68, untracked when s34 ended).
+- **P18 (export):** the export's two kit bootstraps (`parse/kitSource.ts`, `emit/kits.ts`) still have no `requires` order and no
+  `getModule` — so garden-3d-kit, which now throws without `getModule('garden-kit')`, would not load in an exported app (read, not run); the Visual Function's reserved-signal wrapper (C149) if the
+  export carries one; plus s33's list (reserved Expression names, the size merge, throw of nothing, Children Count at a mount).
+- **Release notes, add (s34):** a Component Stack can keep its pages while Mounted is off (Keep Pages When Unmounted); a kit can
+  read another kit by naming it in `requires` (the garden 3D kit now needs Garden Kit); Settings → Kits names a kit that was not
+  loaded because a kit it needs is missing; a Visual Function that sends a signal named like its own reports a failure, not a
+  failure and a success.
 
 ## Worktrees
 
-`p109-isl049` (branch `p109-isl050`, at `4e2d846d5`) holds nothing unlanded; its untracked probes are `zz-s31-alltrace`, `zz-s31-mut`,
-`zz-s32-killer` (spec) and `zz-s31-probe` (now prints what it catches), `zz-s32-rtrace`, `zz-s33-c114` (runtime) — never commit them.
-s31's and s30's (`p109-isl048`, `p109-drag`, `p109-c127`, `p109-s31-land`, `p109-c77`, `p109-c101`, `p109-s30-*`, `p109-isl031-drag`,
-`p109-s12`) are spent. Remove with `git worktree remove` when convenient.
+`p109-isl049` (branch `p109-isl050`, at `dde400937`) holds nothing unlanded; its untracked probes (`zz-s31-*`, `zz-s32-*`,
+`zz-s33-c114`) — never commit them. The older ones (`p109-isl048`, `p109-drag`, `p109-c127`, `p109-s31-land`, `p109-c77`,
+`p109-c101`, `p109-s30-*`, `p109-isl031-drag`, `p109-s12`) are spent; remove with `git worktree remove` when convenient.
 
 ## Recipes
 
-- **Land:** commit in the worktree; in the primary tree, in ONE command: `merge-base --is-ancestor <cline-dev> <new>` (else rebase the
-  worktree first), `git status --porcelain` each path `git diff --name-only old new` lists (abort on any), `git update-ref
-  refs/heads/cline-dev <new> <old>`, `git checkout HEAD -- <each path>`. Then the docs commit by pathspec (`dev-docs/bugs/README.md` is a
-  peer's open edit — leave it).
-- **Trace diff across a fix:** `TYPES='<type>' OUT=<file> npx jest tests/zz-s31-alltrace.test.ts` before and after.
-- **A control:** copy the fixed file aside, `git show HEAD:<file> > <file>`, run the probe, copy back, `cmp`. One control per row: when
-  rows share a file, commit them separately so each control reverts only its own hunks.
-- **Hop-count sweep:** `sed -i '' '<line>s/hops = N/hops = N±1/'` on a copy of the spec, run the probe, restore.
-- **The registry on the runtime takes ~25 min a seed** (Text 4 min, Group 4, Circle 2): run it in the background with a long timeout,
-  or grade with `NSP_ONLY` and the specs a change can reach.
+- **Land:** commit in the worktree; `git rebase cline-dev` there if it moved; in the primary tree, in ONE command:
+  `merge-base --is-ancestor`, `git status --porcelain` each path the diff lists (abort on any), `git update-ref refs/heads/cline-dev
+  <new> <old>`, `git checkout HEAD -- <each path>`. Docs by pathspec (`dev-docs/bugs/README.md` is a peer's open edit).
+- **Grade one spec on the runtime:** `NSP_ONLY="<type>" NSP_SEED=<n> npx jest test/node-spec/conformance.test.ts`
+  (noodl-runtime); interpreter mutants: `TYPES="<type>" SEED=13,20732 npx jest tests/zz-s31-mut.test.ts` (spec package).
+- **A control:** copy the fixed file aside, `git show HEAD:<file> > <file>`, run the probe (`PROBE_NODES`, `PROBE_MATCH`), copy
+  back, `cmp`. When HEAD lacks a new input the control is red for that reason alone — use behavioural mutants of the fixed file.
+- **Deployed drives (ISL-013):** rebuild the engine first (above); `drive-ig007-3d.js assemble` → `nodegx deploy … 
+  --allow-development-engine` → the drive; the template via `drive-cg003-pages.js assemble`, then `drive-ig007-workshop.js
+  --mode 3d|nogl`. The scratch AC1 drive is in the s34 scratchpad only.
+- **Editor drive without touching Richard's profile:** `NOODL_USER_DATA_DIR=<scratch>` with `firstRunLegal.json` copied in and a
+  one-entry `recently_opened_project.json`; `cdp click "[data-test=launcher-project-card]"`; `npm run dev:stop` after.
