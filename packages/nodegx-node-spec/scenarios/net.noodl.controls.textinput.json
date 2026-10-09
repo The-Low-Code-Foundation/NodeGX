@@ -23662,6 +23662,111 @@
     ]
   },
   {
+    "name": "Block Pointer Events on: an Insert Text queued is drained by a release, a touch or a lift as a Set is — the insert, the act, then a Clear: the Insert lands at the act (Done, Value, Value Changed) and the Clear empties it after — enabled, and disabled too (no release, touch or lift reported on a disabled field — C64 — but the blocker still drains)",
+    "because": "pointerlisteners.ts :113-133, :180-183 — the blocker's drain runs every queued callback, an Insert Text's as a Set's (text-input.ts :263); the scenario above queues only a Set, so the disabled release's Insert branch was reached by generated sequences alone, and at seed 20732 a release that drained nothing survived (s68)",
+    "params": {
+      "blockTouch": true,
+      "runOnChange-startValue": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "textToInsert",
+        "value": "i"
+      },
+      {
+        "signal": "insert"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "set": "textToInsert",
+        "value": "i"
+      },
+      {
+        "signal": "insert"
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "set": "textToInsert",
+        "value": "i"
+      },
+      {
+        "signal": "insert"
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "textToInsert",
+        "value": "j"
+      },
+      {
+        "signal": "insert"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "set": "textToInsert",
+        "value": "j"
+      },
+      {
+        "signal": "insert"
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "set": "textToInsert",
+        "value": "j"
+      },
+      {
+        "signal": "insert"
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle"
+    ]
+  },
+  {
     "name": "a Text Area with Block Pointer Events on: a press or a click drains the frame BEFORE its own report — a Set queued, the act, then a Clear: the Set is answered before Pointer Down (Done on the first press; Unchanged after it, the press having put the keyboard on the field) — enabled, and disabled too (a disabled field reports no press, but the pointer event still reaches the blocker)",
     "because": "as the release, touch and lift (pointerlisteners.ts :113-133, the browser's pointerdown before mousedown); on a Text Area, whose press reports as the spec does (a one-line field's is row C68)",
     "params": {
