@@ -24,6 +24,11 @@ export const ValueChanged = defineNode({
   type: 'Value Changed',
   version: 1,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/valuechanged.ts',
+  // NSP-018 — the hand-written code this node replaces (read by nothing yet; `spec-ledger` counts it)
+  idioms: [
+    { says: 'an effect that runs when a value changes', example: 'useEffect(() => onChange(value), [value])' },
+    { says: 'comparing against the previous value', example: 'if (value !== prev.current) { prev.current = value; onChange() }' }
+  ],
 
   // initialize (:14-17): lastValue undefined, changeCount 0
   state: { last: undefined as unknown, count: 0 },

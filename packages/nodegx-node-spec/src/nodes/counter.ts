@@ -14,6 +14,11 @@ export const Counter = defineNode({
   type: 'Counter',
   version: 1,
   source: 'packages/noodl-runtime/src/nodes/std-library/counter.ts',
+  // NSP-018 — the hand-written code this node replaces (read by nothing yet; `spec-ledger` counts it)
+  idioms: [
+    { says: 'a number in state with +1 / −1 / reset handlers', example: 'const [n, setN] = useState(0)' },
+    { says: 'a clamped counter', example: 'setN((n) => Math.min(n + 1, max))' }
+  ],
 
   // initialize (:29-37): currentValue 0, startValue 0, startValueSet false. The limits live in
   // `_internal` too (:34-36) but they are plain copies of inputs, so here they are inputs.
@@ -99,25 +104,27 @@ export const Counter = defineNode({
     // otherwise ++, flag currentCount, pulse countChanged, `done` (:55-58).
     increase: (s, i) =>
       i.limitsEnabled && s.count >= i.limitsMax
-        ? { outcome: 'unchanged' }
-        : { set: { count: s.count + 1 }, emit: ['countChanged'], outcome: 'done' },
+        ? { says: 'at Max Value with Limits Enabled', outcome: 'unchanged' }
+        : { says: 'otherwise the count goes up by one', set: { count: s.count + 1 }, emit: ['countChanged'], outcome: 'done' },
 
     // :64-76, the mirror: at Min → `unchanged` (:66-69); otherwise -- (:71-75).
     decrease: (s, i) =>
       i.limitsEnabled && s.count <= i.limitsMin
-        ? { outcome: 'unchanged' }
-        : { set: { count: s.count - 1 }, emit: ['countChanged'], outcome: 'done' },
+        ? { says: 'at Min Value with Limits Enabled', outcome: 'unchanged' }
+        : { says: 'otherwise the count goes down by one', set: { count: s.count - 1 }, emit: ['countChanged'], outcome: 'done' },
 
     // :107-117 (FH-022 slice 3). Already at Start Value → `unchanged`, Count Changed silent
     // (:109-112); otherwise back to start, pulse, `done` (:113-116). Note the comparison is
     // against `startValue`, not `0` — the docblock at :96-101 says why the obvious repair is wrong.
     reset: (s) =>
       s.count === s.start
-        ? { outcome: 'unchanged' }
-        : { set: { count: s.start }, emit: ['countChanged'], outcome: 'done' },
+        ? { says: 'already at Start Value', outcome: 'unchanged' }
+        : { says: 'otherwise the count goes back to Start Value', set: { count: s.start }, emit: ['countChanged'], outcome: 'done' },
 
     // :125-133. The asymmetric setter: the FIRST Start Value also seeds the count and pulses
     // Count Changed ("once at page load", :186); later ones only move where Reset returns to.
     startValue: (s, v) =>
-      s.startSeen ? { set: { start: v } } : { set: { start: v, count: v, startSeen: true }, emit: ['countChanged'] }
+      s.startSeen
+        ? { says: 'after the first: only where Reset returns to', set: { start: v } }
+        : { says: 'the first one: the count starts there too', set: { start: v, count: v, startSeen: true }, emit: ['countChanged'] }
 });

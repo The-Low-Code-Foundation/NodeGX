@@ -11,6 +11,10 @@
  * the catalog is GENERATED from the specs — and this test is what makes that flip safe, one node
  * at a time. It reads the catalog JSON only (data, not code): the package still depends on
  * nothing in the runtime.
+ *
+ * NSP-018 s72 — descriptions have flipped: `catalog:generate` takes a specced node's port
+ * descriptions from its spec and FAILS when the runtime's registration says other words, so the
+ * description half of this test now holds by construction; it stays as the cheap local reading.
  */
 
 import * as fs from 'fs';

@@ -28,6 +28,10 @@ export const Substring = defineNode({
   // v3 (P109 ISL-032, row D7 ruled "Treat it as -1"): End as the text '-1' runs to the end, as the number does.
   version: 3,
   source: 'packages/noodl-runtime/src/nodes/std-library/substring.ts',
+  // NSP-018 — the hand-written code this node replaces (read by nothing yet; `spec-ledger` counts it)
+  idioms: [
+    { says: 'a slice of a string', example: 'text.substring(start, end)' }
+  ],
 
   // initialize (:26-33): startIndex 0, endIndex -1, inputString ''; the cache and its flag are not state a wire can see
   state: { str: '', start: 0 as unknown, end: -1 as unknown },

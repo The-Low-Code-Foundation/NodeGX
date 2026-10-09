@@ -6509,7 +6509,25 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "increase": [
+          "at Max Value with Limits Enabled → Unchanged; Count Changed stays silent",
+          "otherwise the count goes up by one → Count Changed, Done"
+        ],
+        "decrease": [
+          "at Min Value with Limits Enabled → Unchanged; Count Changed stays silent",
+          "otherwise the count goes down by one → Count Changed, Done"
+        ],
+        "reset": [
+          "already at Start Value → Unchanged; Count Changed stays silent",
+          "otherwise the count goes back to Start Value → Count Changed, Done"
+        ],
+        "startValue": [
+          "after the first: only where Reset returns to → Count Changed stays silent",
+          "the first one: the count starts there too → Count Changed"
+        ]
+      }
     },
     {
       "typeName": "Date To String",

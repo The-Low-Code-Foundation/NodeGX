@@ -379,6 +379,12 @@ export interface CatalogNode {
    * are called.
    */
   parameterEncoding: ParameterEncoding | null;
+  /**
+   * NSP-018 (phase 107) — for a node with an executable spec, what it does in words: for each input port, one line
+   * per case, `<the case> → <what the wire carries>`. Generated from the spec; a port is absent until its cases
+   * have been given their words.
+   */
+  rules?: Record<string, string[]>;
 }
 
 export interface Typecast {

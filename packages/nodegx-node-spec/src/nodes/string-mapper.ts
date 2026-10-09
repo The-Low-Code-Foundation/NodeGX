@@ -57,6 +57,11 @@ export const StringMapper = defineNode({
   // v2 (P109 ISL-026, P107-C4): null on Input String or a numbered port is empty text; v1 ignored the write (the runtime threw).
   version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/stringmapper.ts',
+  // NSP-018 — the hand-written code this node replaces (read by nothing yet; `spec-ledger` counts it)
+  idioms: [
+    { says: 'a lookup table from one string to another, with a fallback', example: '({ draft: \'Draft\', live: \'Published\' })[status] ?? \'Unknown\'' },
+    { says: 'a switch over string cases returning text', example: 'switch (status) { case \'draft\': return \'Draft\'; default: return \'Unknown\' }' }
+  ],
 
   // initialize (:27-30): inputs [], mappings []; the rest is unset until written
   state: {

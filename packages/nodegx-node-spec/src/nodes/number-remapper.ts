@@ -40,6 +40,10 @@ export const NumberRemapper = defineNode({
   type: 'Number Remapper',
   version: 1,
   source: 'packages/noodl-runtime/src/nodes/std-library/numberremapper.ts',
+  // NSP-018 — the hand-written code this node replaces (read by nothing yet; `spec-ledger` counts it)
+  idioms: [
+    { says: 'mapping a number from one range to another', example: 'outMin + ((v - inMin) * (outMax - outMin)) / (inMax - inMin)' }
+  ],
 
   // initialize (:20-48): 0, 0, 1, 0, 1, true. `_remappedValue = 0` (:23) equals `remap` of these.
   state: { input: 0, minIn: 0, maxIn: 1, minOut: 0, maxOut: 1, clamp: true } as RemapState,

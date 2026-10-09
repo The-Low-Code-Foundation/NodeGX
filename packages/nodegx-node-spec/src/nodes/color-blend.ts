@@ -134,6 +134,10 @@ export const ColorBlend = defineNode({
   // shown and sends nothing; v1 rendered '#NaNNaNNaN'.
   version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/colorblend.ts',
+  // NSP-018 — the hand-written code this node replaces (read by nothing yet; `spec-ledger` counts it)
+  idioms: [
+    { says: 'interpolating between colours by a position', example: 'mix(colors[Math.floor(t)], colors[Math.ceil(t)], t % 1)' }
+  ],
 
   // initialize (:75-81): resultColor '#000000', blendValue 0, colors []
   state: { colors: {} as Readonly<Record<string, unknown>>, blendValue: 0 as unknown, result: '#000000' as unknown },

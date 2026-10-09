@@ -14,6 +14,11 @@ export const Switch = defineNode({
   type: 'Switch',
   version: 1,
   source: 'packages/noodl-runtime/src/nodes/std-library/switch.ts',
+  // NSP-018 — the hand-written code this node replaces (read by nothing yet; `spec-ledger` counts it)
+  idioms: [
+    { says: 'a boolean in state that a handler flips', example: 'setOn((on) => !on)' },
+    { says: 'separate on / off handlers setting a flag', example: 'const turnOn = () => setOn(true)' }
+  ],
 
   // initialize (:22-25): state false. `initialized` (:24) is written there and read nowhere else in
   // the file — dead state, not carried.

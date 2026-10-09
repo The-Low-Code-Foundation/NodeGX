@@ -20,6 +20,10 @@ export const Inverter = defineNode({
   type: 'Inverter',
   version: 1,
   source: 'packages/noodl-runtime/src/nodes/std-library/inverter.ts',
+  // NSP-018 — the hand-written code this node replaces (read by nothing yet; `spec-ledger` counts it)
+  idioms: [
+    { says: 'a negated flag', example: 'const hidden = !visible' }
+  ],
 
   // initialize (:27-29): currentValue undefined
   state: { value: undefined as unknown },

@@ -263,6 +263,8 @@ jobs:
       # Regenerates the catalog from the live node registries and fails if
       # the committed artifact (packages/noodl-types/src/node-catalog.*)
       # doesn't match — i.e. node definitions changed without regenerating.
+      # It also fails when a node with an executable spec (phase 107) has a
+      # port description that differs from its spec's (NSP-018).
       - run: npm run catalog:check
       # SIG-003: every port must declare a `group`. An ungrouped port is not
       # filed under a category anyone chose — `ConnectionBar` renders it under

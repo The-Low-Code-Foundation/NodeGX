@@ -35,6 +35,11 @@ export const And = defineNode({
   // description says and as Or gives. v1, as the runtime was, published nothing until the first input.
   version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/and.ts',
+  // NSP-018 — the hand-written code this node replaces (read by nothing yet; `spec-ledger` counts it)
+  idioms: [
+    { says: 'every flag true at once', example: 'const ready = a && b && c' },
+    { says: 'all of a list', example: 'flags.every(Boolean)' }
+  ],
 
   // initialize: `inputs = []`, `result = false` (v2, row D1) — so the first settle publishes
   // `false` before any input arrives, as the port description says. A first input of `false`

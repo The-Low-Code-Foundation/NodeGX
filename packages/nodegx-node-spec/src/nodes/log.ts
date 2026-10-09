@@ -34,6 +34,10 @@ export const Log = defineNode({
   type: 'net.noodl.Log',
   version: 1,
   source: 'packages/noodl-runtime/src/nodes/std-library/log.ts',
+  // NSP-018 — the hand-written code this node replaces (read by nothing yet; `spec-ledger` counts it)
+  idioms: [
+    { says: 'printing a value while it passes through', example: 'console.log(\'total\', total)' }
+  ],
 
   // initialize (:73-75) seeds `level` — an effect's field; the only state a wire sees is the passthrough
   state: { value: undefined as unknown },

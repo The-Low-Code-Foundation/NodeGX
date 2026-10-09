@@ -21,6 +21,10 @@ export const BooleanToString = defineNode({
   // equals itself, so NaN twice is sent twice; `undefined` after the initial '' is a change.
   version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/booleantostring.ts',
+  // NSP-018 — the hand-written code this node replaces (read by nothing yet; `spec-ledger` counts it)
+  idioms: [
+    { says: 'a ternary turning a flag into text', example: 'const label = isOpen ? \'Close\' : \'Open\'' }
+  ],
 
   // initialize (:28-35): trueString '', falseString ''; `currentInput` is never seeded (:20, :73).
   // `inputs`, `currentSelectedIndex`, `indexChanged` (:29-31) are written there and read nowhere

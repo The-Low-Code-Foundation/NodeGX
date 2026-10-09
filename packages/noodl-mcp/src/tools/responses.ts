@@ -336,6 +336,8 @@ export interface NodeTypePortsView {
   export?: NodeTypeExportForPorts;
   inputs: NodeTypeDetail['inputs'];
   outputs: NodeTypeDetail['outputs'];
+  /** NSP-018 — `NodeTypeDetail.rules`, narrowed to the asked ports; absent when none of them has any. */
+  rules?: NodeTypeDetail['rules'];
   runtimeBehavior?: string;
   /** Names that matched no port. Reported rather than dropped. */
   notFound?: string[];

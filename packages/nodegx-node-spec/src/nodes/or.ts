@@ -28,6 +28,11 @@ export const Or = defineNode({
   type: 'Or',
   version: 1,
   source: 'packages/noodl-runtime/src/nodes/std-library/or.ts',
+  // NSP-018 — the hand-written code this node replaces (read by nothing yet; `spec-ledger` counts it)
+  idioms: [
+    { says: 'any flag true', example: 'const busy = a || b || c' },
+    { says: 'some of a list', example: 'flags.some(Boolean)' }
+  ],
 
   // initialize (:23-25): `inputs = []`
   state: { inputs: {} as Readonly<Record<string, boolean>> },

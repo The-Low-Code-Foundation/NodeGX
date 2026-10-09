@@ -429,6 +429,14 @@ export type Inputs<I> = { readonly [K in ValueKeys<I>]: ValueOf<I[K]> };
 // patches
 
 export interface Patch<S, O> {
+  /**
+   * NSP-018 — this branch in one line of words: the case it answers ("at Max Value with Limits Enabled", "otherwise"),
+   * never what the wire carries — the rules generator (scripts/node-spec/rules.js) adds that from `outcome` and `emit`,
+   * and names the pulses a sibling branch sends and this one does not. Read from the source, so a string literal in the
+   * patch's own object literal. Nothing that runs a spec reads it: not a part of a branch's shape, invisible to a target.
+   * Optional while the specs are being given it (`spec-ledger` counts the reducers that have it).
+   */
+  says?: string;
   /** State keys to replace. Only declared keys (rule 2). */
   set?: Partial<S>;
   /**
@@ -933,6 +941,14 @@ export interface WorldPool {
 // ------------------------------------------------------------------------------------------------
 // the spec
 
+/** NSP-018 — one shape of hand-written code a node replaces (`NodeDecl.idioms`). */
+export interface Idiom {
+  /** The shape, in words: "a number in state with +1 / −1 / reset handlers". */
+  says: string;
+  /** One line of the code: "const [n, setN] = useState(0)". */
+  example: string;
+}
+
 export interface NodeDecl<S extends object, I extends InputsDecl, O extends OutputsDecl<S>> {
   /** The catalog `typeName`, e.g. `Counter`, `net.noodl.HTTP`. */
   type: string;
@@ -969,6 +985,13 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
    * "specced (contract)", in a column of its own, never as a node that conforms: what conforms is the contract, not the node.
    */
   contract?: string;
+  /**
+   * NSP-018 — the code this node replaces: the hand-written shapes that do what it does, each in a line and a tiny example
+   * (`{ says: 'a clamped counter', example: 'setN((n) => Math.min(n + 1, max))' }`). Nothing reads it yet: it is the lookup
+   * table a future "import your app into a canvas" agent needs — which node to reach for when it meets the pattern in someone's
+   * code — written while the spec's author has the behaviour in their head. Not served over MCP; `spec-ledger` counts it.
+   */
+  idioms?: readonly Idiom[];
   /**
    * What of the world this node's behaviour depends on (T2/T3). The runner builds a scripted
    * world for a spec that declares any (NSP-007) and refuses to play it on a target that has no
@@ -1086,6 +1109,7 @@ export interface AnyNodeSpec {
   inspect?: (state: never, world: WorldView) => string;
   /** NSP-017 AC3 — a contract, not a behaviour (`NodeDecl.contract`). */
   contract?: string;
+  idioms?: readonly Idiom[];
   needs?: readonly WorldNeed[];
   worldPool?: WorldPool;
   acts?: Readonly<Record<string, ActDecl>>;

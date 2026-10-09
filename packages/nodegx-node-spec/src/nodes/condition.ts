@@ -33,6 +33,11 @@ export const Condition = defineNode({
   type: 'Condition',
   version: 1,
   source: 'packages/noodl-runtime/src/nodes/std-library/condition.ts',
+  // NSP-018 — the hand-written code this node replaces (read by nothing yet; `spec-ledger` counts it)
+  idioms: [
+    { says: 'an if / else on a value that runs one of two handlers', example: 'if (ok) onTrue(); else onFalse()' },
+    { says: 'a ternary choosing between two branches', example: 'ok ? showA() : showB()' }
+  ],
 
   // initialize (:45-48): hasScheduledEvaluation false, hasEvaluated false. `last` is
   // `lastConditionValue` (:80) — the value that ARRIVED, kept for the DEF-046 comparison.

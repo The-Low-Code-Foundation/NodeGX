@@ -53,6 +53,10 @@ export const StringFormat = defineNode({
   // v2 (P109 ISL-032, row D3 ruled "Insert values exactly"): `$&`, `$$`, `$'` and `` $` `` in a value come out as typed.
   version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/stringformat.ts',
+  // NSP-018 — the hand-written code this node replaces (read by nothing yet; `spec-ledger` counts it)
+  idioms: [
+    { says: 'a template literal filling named values into text', example: '`Hello ${name}, you have ${count} messages`' }
+  ],
 
   // initialize (:38-44): format '', cachedResult '', inputValues {}. The cache and its dirty flag
   // are not state a wire can see; `formatted` is a function of `format` and `values`.

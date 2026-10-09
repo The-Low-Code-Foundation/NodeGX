@@ -53,6 +53,8 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
+const { loadSpecs } = require('./load-specs');
+const { saidCoverage } = require('./rules');
 
 const started = Date.now();
 const args = process.argv.slice(2);
@@ -70,7 +72,6 @@ const tiersPath = argValue('--tiers', path.join(phaseDir, 'tiers.json'));
 const exemptionsPath = argValue('--exemptions', path.join(phaseDir, 'exemptions.json'));
 const censusPath = argValue('--census', path.join(phaseDir, 'census.json'));
 const ledgerPath = argValue('--ledger', path.join(phaseDir, 'spec-ledger.json'));
-const registryPath = path.join(specPkg, 'src', 'nodes', 'index.ts');
 const graphDir = path.join(specPkg, 'scenarios', 'graph');
 const reachPath = path.join(root, 'packages', 'nodegx-export', 'tests', 'helpers', 'node-spec-target.ts');
 
@@ -111,25 +112,11 @@ const population = catalog.nodes.filter((n) => n.inNodePicker && !n.isDeprecated
 const popNames = new Set(population.map((n) => n.typeName));
 const display = new Map(population.map((n) => [n.typeName, n.displayName]));
 
-/** The registry, from source: every `.ts` under the package is transpiled in memory as it is required. */
-function loadRegistry() {
-  const prior = require.extensions['.ts'];
-  require.extensions['.ts'] = (m, file) => {
-    const out = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
-      fileName: file,
-      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2019, esModuleInterop: true }
-    }).outputText;
-    m._compile(out, file);
-  };
-  try {
-    const specs = require(registryPath).specs;
-    return Object.keys(specs).map((t) => ({ type: t, contract: typeof specs[t].contract === 'string' && specs[t].contract.length > 0 }));
-  } finally {
-    if (prior) require.extensions['.ts'] = prior;
-    else delete require.extensions['.ts'];
-  }
-}
-const registry = loadRegistry();
+/** The registry, from source (load-specs.js). */
+const loadedSpecs = loadSpecs();
+const registry = Object.keys(loadedSpecs).map((t) => ({ type: t, contract: typeof loadedSpecs[t].contract === 'string' && loadedSpecs[t].contract.length > 0 }));
+// NSP-018 AC2 — how many input reducers have their branches in words (`Patch.says`, rules.js). A count, not a gate (yet).
+const said = saidCoverage(loadedSpecs);
 const specTypes = new Set(registry.map((r) => r.type));
 const contractTypes = new Set(registry.filter((r) => r.contract).map((r) => r.type));
 
@@ -231,6 +218,14 @@ for (const r of rows) if (!r.tier) problems.push(`picker node ${name(r.typeName)
 // the registry holds picker nodes only
 for (const t of specTypes) if (!popNames.has(t)) problems.push(`the registry holds a spec for "${t}", which is not a picker node`);
 
+// NSP-018 AC5 — `idioms` (the code a node replaces) is counted, and every T1 node NSP-011 specced carries one
+const withIdioms = Object.keys(loadedSpecs).filter((t) => (loadedSpecs[t].idioms || []).length > 0);
+for (const [t, row] of Object.entries(tierRows)) {
+  if (row.tier === 'T1' && row.batch === 'NSP-011' && loadedSpecs[t] && !withIdioms.includes(t)) {
+    problems.push(`${name(t)} is a T1 node NSP-011 specced and its spec has no \`idioms\` (NSP-018 AC5) — say the code it replaces`);
+  }
+}
+
 // THE NEW-NODE GATE — a picker node with no spec, no graph claim, no exemption and no owed entry
 const ungraded = rows.filter((r) => !r.runtime && !r.contract && !r.exempt && !r.owed);
 for (const r of ungraded) {
@@ -289,6 +284,8 @@ if (args.includes('--json')) {
         byTier,
         floor,
         problems: [...problems, ...floorProblems],
+        said,
+        idioms: withIdioms.length,
         ms
       },
       null,
@@ -304,6 +301,11 @@ if (args.includes('--json')) {
   console.log(`  by tier:  ${tierLine}`);
   const byGraph = runtime.filter((r) => r.by === 'graph');
   console.log(`  counted:  ${runtime.length - byGraph.length} by a spec in the registry · ${byGraph.length} by an N graph scenario's claims${byGraph.some((r) => r.graphRowOnly) ? ` (${byGraph.filter((r) => r.graphRowOnly).length} only through a known row)` : ''}`);
+  console.log(
+    `  in words: ${said.said} of ${said.reducers} input reducers say what each case does (NSP-018); ${said.specsSaid.length} spec(s) fully: ${said.specsSaid.join(', ') || 'none'}` +
+      (said.unread.length ? `; not readable from the source (built in a factory): ${said.unread.join(', ')}` : '')
+  );
+  console.log(`  idioms:   ${withIdioms.length} of ${registry.length} specs name the code they replace (NSP-018)`);
   for (const r of exempt) console.log(`  exempt:   ${name(r.typeName)} — ${r.exempt}`);
   for (const [b, names] of Object.entries(owedByBatch)) console.log(`  owed:     ${b} ×${names.length} — ${names.join(', ')}`);
 }

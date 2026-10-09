@@ -494,6 +494,14 @@ export interface NodeTypeDetail {
   patterns?: string[];
   antiPatterns?: string[];
   relatedNodes?: string[];
+  /**
+   * NSP-018 (phase 107) — for a node with an executable spec, what it does in words: per input port, one line per
+   * case — `increase: ["at Max Value with Limits Enabled → Unchanged; Count Changed stays silent", …]`. Generated
+   * from the spec the conformance suite grades (the catalog's `rules`), so it cannot say one thing while the node
+   * does another. Here and, narrowed to the asked ports, on the `ports` path; not on the summary, whose size is a
+   * measured contract and a big visual node's rules are not yet priced (phase 107 NSP-018 §5).
+   */
+  rules?: Record<string, string[]>;
   inputs: PortDetail[];
   outputs: PortDetail[];
   /** Present when the node creates ports at runtime — the validator skips
@@ -861,6 +869,8 @@ export function getNodeTypePorts(typeName: string, portNames: readonly string[])
   }
   const caveat = notFound.length > 0 ? partialPortListCaveat(full) : undefined;
   const exportInfo = exportForPorts(full.export, wanted);
+  // NSP-018 — the rules of the asked ports only: what setting or firing THIS port does, from the node's spec
+  const rules = full.rules ? Object.fromEntries(Object.entries(full.rules).filter(([port]) => wanted.has(port))) : {};
   return {
     typeName: full.typeName,
     displayName: full.displayName,
@@ -875,6 +885,7 @@ export function getNodeTypePorts(typeName: string, portNames: readonly string[])
     ...(exportInfo ? { export: exportInfo } : {}),
     inputs,
     outputs,
+    ...(Object.keys(rules).length > 0 ? { rules } : {}),
     // Carried whenever it exists here, not only for misses: a port this call
     // could not find may be one `runtimeBehavior` is the only record of.
     ...(full.runtimeBehavior ? { runtimeBehavior: full.runtimeBehavior } : {}),
@@ -1008,6 +1019,8 @@ export function getNodeTypeDetail(typeName: string): NodeTypeDetail | NodeTypeLo
   if (e?.patterns?.length) detail.patterns = e.patterns;
   if (e?.antiPatterns?.length) detail.antiPatterns = e.antiPatterns;
   if (e?.relatedNodes?.length) detail.relatedNodes = e.relatedNodes;
+  const rules = (n as { rules?: Record<string, string[]> }).rules;
+  if (rules && Object.keys(rules).length) detail.rules = rules;
   if (n.dynamicPorts) {
     const dp = n.dynamicPorts as {
       mechanisms?: string[];

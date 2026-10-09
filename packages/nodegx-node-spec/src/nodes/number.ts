@@ -25,6 +25,10 @@ export const NumberVariable = defineNode({
   // a hidden seed of 0) and a Set before any Value stored that seed and reported Done.
   version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/variables/number.ts',
+  // NSP-018 — the hand-written code this node replaces (read by nothing yet; `spec-ledger` counts it)
+  idioms: [
+    { says: 'a number held in state, set from elsewhere', example: 'const [price, setPrice] = useState(0)' }
+  ],
   state: variableState(NUMBER),
   inspect: (s) => String(s.current),
   outcomes: VARIABLE_OUTCOMES,
