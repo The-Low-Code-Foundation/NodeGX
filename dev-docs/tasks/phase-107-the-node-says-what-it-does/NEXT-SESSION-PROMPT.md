@@ -57,10 +57,16 @@ at 125/147 (1.3 s). The node-spec package suite: see the commit message.
    seam (`registry.writes`, s62) carries it.
 4. **When the box is quiet:** NSP-013's deep run for s11–s14 (`NSP_DEEP=10000 NSP_ONLY=…`, one spec at a time).
 
-**Human decisions: one — CSS Definition (above).** When P109 lands a ruled fix (C120, C126, C129–C145, S18), the scenario's behaviour
-moves with it in the same commit — a spec version. **P109 already moved two (told s64):** For Each is v3 (`e22334e0d`: C128, C135,
-C140, C141 fixed) and the Drag v2 (C106). Next: For Each v4 for C129–C131, C136, C137, C142, C143; Columns v2 for C132–C134; the Page
-Stack (v8) for C120, C126, C139; Drag v3 for C138; the Router for S18; the Expression v2 for C144, C145.
+**Human decisions: two — CSS Definition (above), and C145** (P109 holds it for Richard: reserve `run` / `expression` /
+`evaluateAtLoad` in the lexer — all three copies, the spec's included — or rename the clash). **P109 moved the specs since s64
+(told 2026-10-09, verified):** For Each **v10** — every ISL-049 row landed (`009ad189b` … `2a82213cc`; C131 also changed
+`collection.ts` and `registry.ts` `set`, every registry spec re-graded green at 13 / 20732); Drag **v3** (C138, `40c9fc310`);
+Expression **v2** (C144, `99c61cede` — Error blank, sent once). Still open: Columns v2 for C132–C134, the Page Stack (v8) for C120,
+C126, C139, the Router for S18, the Expression for C145.
+
+**Pin two For Each hop counts (P109 found them unpinned):** the queued copy's act-boundary count and the no-Items rebuild's — ±1 passes
+every scenario. Write the scenario that tells N from N±1 for each (a write landing between the boundaries, as s59's measured costs
+were read), and confirm with a planted ±1 in a COPY of the spec that the suite goes red.
 
 **Known red at the 2026-10-09 seed (20735), not P107's to fix today:** `tests/stranger.test.ts` round 4's Options keeps a mutant
 (`person.blur` swap-branch) — identical with and without s64's change, and P109 saw it on the base. A seed-rotation survivor: kill it
