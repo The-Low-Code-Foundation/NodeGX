@@ -29,7 +29,7 @@
           "description": "We write to them here; it can change."
         },
         {
-          "name": "idElsewhere",
+          "name": "onTheCoursePlatformId",
           "kind": "text",
           "type": "String",
           "description": "A member also has a login on the course platform.",
@@ -56,7 +56,7 @@
       "indexes": [
         {
           "fields": [
-            "idElsewhere"
+            "onTheCoursePlatformId"
           ],
           "unique": true
         }
@@ -521,8 +521,8 @@
   ],
   "claims": [
     {
-      "id": "person/idElsewhere-is-unique",
-      "says": "no two persons have the same idElsewhere",
+      "id": "person/onTheCoursePlatformId-is-unique",
+      "says": "no two persons have the same onTheCoursePlatformId",
       "from": {
         "relation": "on-the-course-platform"
       },
@@ -531,7 +531,7 @@
         "dropIndex": {
           "collection": "Person",
           "fields": [
-            "idElsewhere"
+            "onTheCoursePlatformId"
           ]
         }
       },
@@ -540,20 +540,20 @@
           "make": "Person",
           "as": "person2",
           "data": {
-            "idElsewhere": "idElsewhere-1"
+            "onTheCoursePlatformId": "onTheCoursePlatformId-1"
           }
         },
         {
           "make": "Person",
           "as": "person4",
           "data": {
-            "idElsewhere": "idElsewhere-3"
+            "onTheCoursePlatformId": "onTheCoursePlatformId-3"
           }
         },
         {
           "refuse": "Person",
           "data": {
-            "idElsewhere": "idElsewhere-1"
+            "onTheCoursePlatformId": "onTheCoursePlatformId-1"
           }
         }
       ]

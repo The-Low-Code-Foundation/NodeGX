@@ -436,6 +436,12 @@ export const partOfTree = defineKind({
   evidence: { rows: 1, sources: ['sentinel'], thin: 'one row: a single field in one prototype' }
 });
 
+/** `on-the-course-platform` → `onTheCoursePlatformId`: the field holding a record's id in the other system. */
+function idThere(relationId: string): string {
+  const w = `${relationId} id`.split(/[^A-Za-z0-9]+/).filter(Boolean);
+  return w.map((x, i) => (i ? x.charAt(0).toUpperCase() : x.charAt(0).toLowerCase()) + x.slice(1)).join('');
+}
+
 export const existsElsewhere = defineKind({
   id: 'exists-elsewhere',
   version: 1,
@@ -483,8 +489,10 @@ export const existsElsewhere = defineKind({
       from: 'census'
     }
   ],
-  projection: ({ to }) => ({
-    fields: [{ on: 'from', name: 'idElsewhere', kind: 'text', unique: true }],
+  // Named after the relation, so a noun known in two systems has two fields (bug P116-ONT-003-two-systems): the
+  // relation's id, not the system's words, because a reworded system must not rename what is stored.
+  projection: ({ id, to }) => ({
+    fields: [{ on: 'from', name: idThere(id), kind: 'text', unique: true }],
     rules: [{ on: 'from', says: `every exchange with ${one(to)} is logged, and a skipped one says why`, holds: { logged: one(to) } }]
   }),
   mutants: [

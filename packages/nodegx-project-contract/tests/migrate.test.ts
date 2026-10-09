@@ -565,3 +565,52 @@ describe('R10 — a changed answer to "when what it points at goes" is a step of
     expect(shape(plan(ONE, after))).toEqual(['backup']);
   });
 });
+
+describe('s13 — the verbs a plan reaches: an end, by the field it marks', () => {
+  const VERBS = 'world-verbs';
+  const readVerbsOf = (fixture: string): VerbsFile => JSON.parse(fs.readFileSync(path.join(FIXTURES, fixture, VERBS_FILE), 'utf8'));
+
+  it('a membership that no longer starts and ends reaches the step that ends one, by `until` alone — and the verbs are refused after until it is re-said', () => {
+    const before = readWorld(VERBS);
+    const after = clone(before);
+    after.relations.relations.find((r) => r.id === 'membership')!.answers!.startsEnds = false;
+    const verbs = readVerbsOf(VERBS);
+    const p = plan(before, after);
+    // The plan drops both dates; the end writes one of them.
+    expect(p.reach).toEqual([{ collection: 'Membership', words: "'membership' records", fields: ['since', 'until'], how: 'changed' }]);
+    expect(verbReach(p, verbs, before, after)).toEqual([
+      { verb: 'Archive a person', verbId: 'archive', step: 'their memberships end', stepId: 'memberships-end', calls: 'archive-memberships-end', collection: 'Membership', fields: ['until'], how: 'changed' }
+    ]);
+    // Still on a membership, so nothing to rebind; but an end needs a date to mark, and there is none after.
+    expect(validateWorld({ ...before, verbs }).problems).toEqual([]);
+    expect(validateWorld({ ...after, verbs }).problems.map((x) => [x.file, x.at, x.expected])).toEqual([
+      [VERBS_FILE, 'verbs[1].steps[1].by', 'the date that marks the end — "membership" does not say it starts and ends']
+    ]);
+  });
+
+  it('an end said `by` a date the person named is reached by that date, not by the noun’s other fields', () => {
+    const before = readWorld(VERBS);
+    before.nouns.nouns.find((n) => n.id === 'account')!.properties!.push({ name: 'opened on', kind: 'date' }, { name: 'closed on', kind: 'date' });
+    // Both dates change; the end marks one of them.
+    const after = clone(before);
+    const account = after.nouns.nouns.find((n) => n.id === 'account')!;
+    account.properties = account.properties!.map((x) => (x.kind === 'date' ? { ...x, kind: 'text' as const, freeWords: true } : x));
+    const verbs: VerbsFile = {
+      verbs: [
+        {
+          id: 'close',
+          name: 'Close an account',
+          sentence: 'An account closes on a day.',
+          runs: 'server',
+          steps: [{ id: 'account-closes', says: 'the account closes', does: 'end', on: 'account', by: 'closed on' }]
+        }
+      ]
+    };
+    expect(validateWorld({ ...before, verbs }).problems).toEqual([]);
+    const p = plan(before, after);
+    expect(p.reach.map((r) => [r.collection, r.fields])).toEqual([['Account', ['openedOn', 'closedOn']]]);
+    expect(verbReach(p, verbs, before, after)).toEqual([
+      { verb: 'Close an account', verbId: 'close', step: 'the account closes', stepId: 'account-closes', calls: 'close-account-closes', collection: 'Account', fields: ['closedOn'], how: 'changed' }
+    ]);
+  });
+});

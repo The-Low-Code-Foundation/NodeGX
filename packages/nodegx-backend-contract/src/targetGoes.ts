@@ -32,7 +32,12 @@
  *   and the writes is not seen, and a write that fails part way leaves the rows after it pointing at
  *   nothing — which is every project's state before this rule. The facade has no transaction that
  *   spans an await on every engine (BRG-005 owes one).
- * - **A Relation (a Links field) has no rule.** Its pairs live beside the record, not in a column.
+ * - **A Relation (a Links field) has no rule, because it needs none.** A pair means nothing once
+ *   either end is gone, so every delete takes the record's pairs with it: its own (every Relation
+ *   its collection declares) and every pair naming it from a Relation that points at its collection
+ *   (bug `P116-ONT-003-pairs`). Not a choice the person makes, so nothing in the schema says it. A
+ *   Relation that does not say which collection it points at cannot be found from the far end; its
+ *   owner's own pairs still go.
  * - **A link to the app's users** is a column like any other; the projection never puts a rule on
  *   one, and an account's own deletion runs through `SystemUsers`, which goes through this too.
  *
@@ -106,9 +111,9 @@ export const WHEN_TARGET_GOES_BY_BACKEND: Readonly<Record<BackendType, Capabilit
   }
 });
 
-/** What the rule needs of the backend: the schema to read, and four data-plane calls, promised. */
+/** What the rule needs of the backend: the schema to read, and five data-plane calls, promised. */
 export interface DeleteContext {
-  readonly schema: Pick<IStorageSchema, 'listTables' | 'getTableSchema'>;
+  readonly schema: Pick<IStorageSchema, 'listTables' | 'getTableSchema' | 'getRelatedIds' | 'getRelationOwners'>;
   /** As the master key and NOT capped: every linking row must be seen, not a page of them. */
   query(collection: string, options: { where: Row; sort: string[]; limit: number; skip: number }): Promise<{ results: Row[] }>;
   /** As the master key. */
@@ -117,6 +122,8 @@ export interface DeleteContext {
   save(collection: string, objectId: string, data: Row): Promise<unknown>;
   /** Under `acl` when one is given (the caller's own record), as the master key otherwise. */
   delete(collection: string, objectId: string, acl?: StorageAclOption): Promise<void>;
+  /** As the master key: takes one pair out of a Relation. */
+  unpair(collection: string, objectId: string, field: string, relatedId: string): Promise<void>;
 }
 
 /** One rule a collection's link says about the collection it points at. */
@@ -133,6 +140,8 @@ export interface DeletePlan {
   unlinked: Array<{ collection: string; objectId: string; field: string }>;
   /** What stops it: the rows still linked to a record that would go, per collection and field. */
   blocked: Array<{ collection: string; field: string; target: string; count: number }>;
+  /** Every Relation pair with a record that goes at either end, each once: `collection.field` owns it. */
+  unpaired: Array<{ collection: string; objectId: string; field: string; relatedId: string }>;
 }
 
 /**
@@ -170,6 +179,27 @@ function rulesByTarget(schema: DeleteContext['schema']): Map<string, LinkRule[]>
   return out;
 }
 
+/** Every Relation as `[collection, field, the collection it points at]`; the last is '' when it does not say. */
+function relations(schema: DeleteContext['schema']): Array<[string, string, string]> {
+  const out: Array<[string, string, string]> = [];
+  for (const table of schema.listTables())
+    for (const col of schema.getTableSchema(table)?.columns || []) if (col.type === 'Relation') out.push([table, col.name, col.targetClass || '']);
+  return out;
+}
+
+/** The pairs a record is in, at either end. Sync reads: the schema answers them from what it holds. */
+function pairsOf(rels: Array<[string, string, string]>, schema: DeleteContext['schema'], collection: string, objectId: string): DeletePlan['unpaired'] {
+  const out: DeletePlan['unpaired'] = [];
+  for (const [table, field, target] of rels) {
+    if (table === collection) {
+      const ids = schema.getRelatedIds(table, objectId, field);
+      for (const relatedId of Array.isArray(ids) ? ids : []) out.push({ collection: table, objectId, field, relatedId: String(relatedId) });
+    }
+    if (target === collection) for (const owner of schema.getRelationOwners(table, field, objectId)) out.push({ collection: table, objectId: owner, field, relatedId: objectId });
+  }
+  return out;
+}
+
 const PAGE = 500;
 
 /** The ids of every row whose `field` points at `id`, a page at a time until a page comes back empty. */
@@ -183,13 +213,14 @@ async function linkedIds(ctx: DeleteContext, collection: string, field: string, 
 }
 
 /**
- * What deleting this record would do, read and not written. `null` when no rule reaches it (the
- * delete is the plain one it always was) or when the record is not there (a delete of nothing
- * must not reach for the rows that still name its id).
+ * What deleting this record would do, read and not written. `null` when no rule and no Relation
+ * reaches it (the delete is the plain one it always was) or when the record is not there (a delete
+ * of nothing must not reach for the rows, or the pairs, that still name its id).
  */
 export async function planDelete(ctx: DeleteContext, collection: string, objectId: string): Promise<DeletePlan | null> {
   const rules = rulesByTarget(ctx.schema);
-  if (!rules.has(collection)) return null;
+  const rels = relations(ctx.schema);
+  if (!rules.has(collection) && !rels.some(([table, , target]) => table === collection || target === collection)) return null;
   if ((await ctx.count(collection, { objectId })) === 0) return null;
 
   const key = (c: string, id: string): string => `${c}\u0000${id}`;
@@ -223,7 +254,16 @@ export async function planDelete(ctx: DeleteContext, collection: string, objectI
     row.count++;
     counts.set(k, row);
   }
-  return { gone, unlinked: unlinked.filter((u) => !going.has(key(u.collection, u.objectId))), blocked: [...counts.values()] };
+  // A pair between two records that both go is found from each end; it is taken out once.
+  const unpaired = new Map<string, DeletePlan['unpaired'][number]>();
+  for (const g of gone)
+    for (const p of pairsOf(rels, ctx.schema, g.collection, g.objectId)) unpaired.set([p.collection, p.objectId, p.field, p.relatedId].join('\u0000'), p);
+  return {
+    gone,
+    unlinked: unlinked.filter((u) => !going.has(key(u.collection, u.objectId))),
+    blocked: Array.from(counts.values()),
+    unpaired: Array.from(unpaired.values())
+  };
 }
 
 /**
@@ -240,5 +280,7 @@ export async function deleteKeepingLinks(ctx: DeleteContext, collection: string,
   if (!plan) return null;
   for (const u of plan.unlinked) await ctx.save(u.collection, u.objectId, { [u.field]: null });
   for (const g of plan.gone.slice(1)) await ctx.delete(g.collection, g.objectId);
+  // Last: a pair taken out before its record went would leave the record there without it.
+  for (const p of plan.unpaired) await ctx.unpair(p.collection, p.objectId, p.field, p.relatedId);
   return plan;
 }

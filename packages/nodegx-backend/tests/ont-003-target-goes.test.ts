@@ -17,7 +17,10 @@
  *   - **the caller's own record decides**: a caller who may not delete it changes nothing anywhere;
  *   - **the schema route** refuses a rule that could never be kept (400), and `setWhenTargetGoes`
  *     changes it on a collection that has records; `null` takes it away (the old behaviour, measured);
- *   - **after a restart** the rule is still kept (it lives in the declaration, on both engines).
+ *   - **after a restart** the rule is still kept (it lives in the declaration, on both engines);
+ *   - **a Links field's pairs go with either end** (bug `P116-ONT-003-pairs`): a deleted tag leaves no
+ *     post paired with it, a deleted post leaves no pairs of its own, and a post that goes with its
+ *     account (goes-too) takes its pairs too.
  *
  * PostgreSQL is skipped when no server answers, as BRG-005's suites are.
  */
@@ -278,6 +281,60 @@ for (const engine of ['sqlite', 'postgres'] as const) {
       expect((await b.req('DELETE', `/classes/Company/${co}`)).status).toBe(409);
       expect((await b.req('DELETE', `/classes/Person/${p}`)).status).toBe(200);
       expect((await b.req('DELETE', `/classes/Company/${co}`)).status).toBe(200);
+    });
+  });
+
+  // The facade alone: a Links field's pairs go with the record at either end (bug P116-ONT-003-pairs).
+  suite(`P116-ONT-003-pairs — a deleted record's pairs go with it, on ${engine}`, () => {
+    it('a tag goes, a post goes, a post goes with its account: no pair names any of them after', async () => {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'nodegx-r10-pairs-'));
+      const db = engine === 'postgres' ? `nodegx_r10p_${STAMP}_${++seq}` : null;
+      if (db) psql(ADMIN_URL, `CREATE DATABASE ${db}`);
+      const h = await createAdapter({ dataDir: dir, ...(db ? { storageUrl: ADMIN_URL.replace(/\/[^/?]*(\?|$)/, `/${db}$1`) } : {}) });
+      try {
+        const f = new AdapterFacade(h.adapter);
+        const sm = f.schemaManager;
+        sm.createTable({ name: 'Account', columns: [{ name: 'name', type: 'String' }] });
+        sm.createTable({ name: 'Tag', columns: [{ name: 'name', type: 'String' }] });
+        sm.createTable({
+          name: 'Post',
+          columns: [
+            { name: 'tags', type: 'Relation', targetClass: 'Tag' },
+            { name: 'account', type: 'Pointer', targetClass: 'Account', whenTargetGoes: 'goes-too' }
+          ]
+        });
+        const id = async (c: string, data: Record<string, unknown> = {}): Promise<string> => String((await f.rawCreate(c, data)).objectId);
+        const a = await id('Account');
+        const [t1, t2] = [await id('Tag'), await id('Tag')];
+        const [p1, p2, p3] = [await id('Post'), await id('Post'), await id('Post', { account: ptr('Account', a) })];
+        for (const [p, t] of [[p1, t1], [p2, t1], [p2, t2], [p3, t2]]) await f.addRelation('Post', p, 'tags', t);
+        const tagsOf = (p: string): string[] => [...(sm.getRelatedIds('Post', p, 'tags') as string[])].sort();
+        // Read before: the pairs are there (the control for every read after).
+        expect([tagsOf(p1), tagsOf(p2), tagsOf(p3)]).toEqual([[t1], [t1, t2].sort(), [t2]]);
+
+        await f.rawDelete('Tag', t1);
+        expect([tagsOf(p1), tagsOf(p2)]).toEqual([[], [t2]]);
+        expect(sm.getRelationOwners('Post', 'tags', t1)).toEqual([]);
+
+        await f.rawDelete('Post', p2);
+        expect(tagsOf(p2)).toEqual([]);
+        expect(sm.getRelationOwners('Post', 'tags', t2)).toEqual([p3]);
+
+        await f.rawDelete('Account', a);
+        expect(await f.rawCount('Post', { objectId: p3 })).toBe(0);
+        expect([tagsOf(p3), sm.getRelationOwners('Post', 'tags', t2)]).toEqual([[], []]);
+        // The tag itself stays: a pair going is not its far end going.
+        expect(await f.rawCount('Tag', { objectId: t2 })).toBe(1);
+      } finally {
+        await h.adapter.disconnect();
+        fs.rmSync(dir, { recursive: true, force: true });
+        if (db)
+          try {
+            psql(ADMIN_URL, `DROP DATABASE IF EXISTS ${db} WITH (FORCE)`);
+          } catch {
+            /* best effort */
+          }
+      }
     });
   });
 

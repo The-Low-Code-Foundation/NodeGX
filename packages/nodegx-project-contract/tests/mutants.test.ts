@@ -146,7 +146,7 @@ describe('what is decided before any engine', () => {
     expect(gradeStatically(right, by('on-the-course-platform/id-nowhere'))).toMatchObject({
       verdict: 'killed',
       by: 'no home',
-      why: expect.stringContaining('no field Person.idElsewhere')
+      why: expect.stringContaining('no field Person.onTheCoursePlatformId')
     });
   });
 

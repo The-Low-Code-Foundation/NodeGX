@@ -287,7 +287,8 @@ export class AdapterFacade implements IStorageFacade {
    * the adapter, for the reason the page cap is here: every door that deletes — `/classes` (and so
    * a cloud function's Delete Record, which calls it over loopback), BYOB `/api/:table`, its batch,
    * the account and session sweeps — passes this one method, on every engine. A `blocks` refusal is
-   * thrown as `StillLinked` with nothing changed; a delete no rule reaches is the plain one.
+   * thrown as `StillLinked` with nothing changed; a record's Links pairs (either end) go with it;
+   * a delete no rule and no Relation reaches is the plain one.
    */
   async rawDelete(collection: string, objectId: string, acl?: AclOption): Promise<void> {
     const sm = this.schemaManager;
@@ -298,7 +299,8 @@ export class AdapterFacade implements IStorageFacade {
         query: (c, options) => this.rawQueryAll(c, options),
         count: (c, where) => this.call('count', { collection: c, where }),
         save: (c, id, data) => this.call('save', { collection: c, objectId: id, data }),
-        delete: (c, id, a) => this.call('delete', { collection: c, objectId: id, acl: a })
+        delete: (c, id, a) => this.call('delete', { collection: c, objectId: id, acl: a }),
+        unpair: (c, id, field, relatedId) => this.call('removeRelation', { collection: c, objectId: id, key: field, targetObjectId: relatedId })
       },
       collection,
       objectId,

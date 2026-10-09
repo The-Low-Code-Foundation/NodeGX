@@ -112,6 +112,27 @@ describe('the names', () => {
   });
 });
 
+describe('a noun known in two other systems (bug P116-ONT-003-two-systems)', () => {
+  it('has an id field per system, each named after its relation and each unique', () => {
+    const w = readWorld('world');
+    const there = w.relations.relations.find((r) => r.id === 'on-the-course-platform')!;
+    w.relations.relations.push({ ...clone(there), id: 'mailing', to: 'the mailing system', sentence: 'A member is also on the mailing list.' });
+    const schema = project(w);
+    const person = schema.collections.find((c) => c.name === 'Person')!;
+    expect(person.columns.filter((c) => c.relation === 'on-the-course-platform' || c.relation === 'mailing').map((c) => [c.name, c.relation])).toEqual([
+      ['onTheCoursePlatformId', 'on-the-course-platform'],
+      ['mailingId', 'mailing']
+    ]);
+    expect(schema.claims.map((c) => c.id).filter((id) => /Id-is-unique$/.test(id))).toEqual(['person/onTheCoursePlatformId-is-unique', 'person/mailingId-is-unique']);
+  });
+
+  it('the same system said in other words stores to the same field — the name is the relation’s, not the words’', () => {
+    const w = readWorld('world');
+    w.relations.relations.find((r) => r.id === 'on-the-course-platform')!.to = 'the learning platform';
+    expect(project(w).collections.find((c) => c.name === 'Person')!.columns.map((c) => c.name)).toContain('onTheCoursePlatformId');
+  });
+});
+
 describe('what the projection refuses', () => {
   it('a world the validator refuses, in its words', () => {
     const files = readWorld('world');
