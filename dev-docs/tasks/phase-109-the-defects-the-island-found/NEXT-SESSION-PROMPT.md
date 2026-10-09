@@ -17,9 +17,11 @@
 
 ## Do, in this order
 
-1. **P107-C152 and C153 (new, from P107 s70, `071acfc7e`)** — a Group with Enable Scroll on and Native platform scroll off: the gap
+1. **P107-C152, C153 and C154 (new, from P107 s70–s71, `071acfc7e`, `df215ade6`)** — a Group with Enable Scroll on and Native platform scroll off: the gap
    is dropped (`renderIScroll`'s inner wrapper copies flexDirection and flexWrap, not rowGap / columnGap), and nothing clips (`render`
-   sets overflow only for Clip Content or the native path). Both medium. No task holds them yet: scope them (ISL-038 is the Group's
+   sets overflow only for Clip Content or the native path). Both medium. **And P107-C154** (low, P107 s71 `df215ade6`, no reach on
+   the shelf): with Native platform scroll ON, a percent child of a scrolling Group grows into the visible height (140 px around
+   40 px of content); with it off, the child is its content — pinned beside them. No task holds the three yet: scope them (ISL-038 is the Group's
    closed task; a new ISL-052, or reopen it — say which). Regressions are pinned in `packages/nodegx-node-spec/tests/layout-check.test.ts`;
    after a fix, re-record with `node scripts/node-spec/layout-measure.js --record packages/nodegx-node-spec/layout-fixtures --only scroll-iscroll`
    (one headless Chrome), then flip the pinned assertion.
