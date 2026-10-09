@@ -11,11 +11,10 @@ Board: **28 of 51 closed** (ISL-051 took in two rows and stays ✅).
 
 ## Do, in this order
 
-1. **C120, C126 (ISL-048's last two):** the world (`packages/nodegx-node-spec/src/world.ts`) still models only `pushState` — no
-   `history.back()`, no `replaceState` (read s35). **The two handoffs disagree:** ours said "wait on P107's world", P107's s68 handoff
-   says "P109 holds the Page Stack (C120, C126)". s35 asked P107 who extends the world — read the answer (P107's NEXT-SESSION-PROMPT
-   or the message reply) before building. If it is ours: model `back` and `replace` as `history` events in world.ts and on the runtime
-   target, then C120 ("A Pop steps the browser's history back") and C126 ("Reset goes to the start page"), as ruled.
+1. **C120, C126 (ISL-048's last two) — wait for P107's word.** Settled s35: P107 extends the world (`world.ts` is the format,
+   stranger-guarded) — `history.back()` and `replaceState` with their `popstate`, on both targets; item 5 of P107's s70 handoff
+   (`c2fdb3bf7`). P107 will say when it lands; then build C120 ("A Pop steps the browser's history back") and C126 ("Reset goes to
+   the start page") as ruled. Do not touch world.ts. Until then, go to 2.
 2. ISL-018 AC5 (an agent round, then the editor's clean-up log), ISL-012 AC3 (a full server render with hydration).
 3. **Track G** waits on Richard's order.
 
@@ -52,7 +51,7 @@ Board: **28 of 51 closed** (ISL-051 took in two rows and stays ✅).
 
 ## Handed over (owed by another phase)
 
-- **P107 (opennoodl-a1):** told of Expression v5 (`024e2ee55`) and asked who extends the world for C120/C126. Theirs: the day-seed
+- **P107 (opennoodl-a1):** told of Expression v5 (`024e2ee55`); extends the world's history (back, replace) for C120/C126 — their s70 item 5, they will say when it lands. Theirs: the day-seed
   survivors, the Video rows C96–C100.
 - **P18 (export):** whether the export's Expression hands `Arrays.x` as the array and re-runs on it (read, not run); the two kit
   bootstraps' `requires` / `getModule`; the Visual Function's reserved-signal wrapper (C149); s33's list (reserved Expression names, the
