@@ -2,6 +2,7 @@
 id: P107-C136
 title: With Template Type Explicit and no Template, a Refresh reports Done (and draws nothing) once any Script has compiled — without one it fails `repeater/no-template`
 status: fixed
+commit: 4b63a1316
 phase: P109
 task: ISL-049
 severity: low

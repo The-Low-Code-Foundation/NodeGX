@@ -2,6 +2,7 @@
 id: P107-C131
 title: A list whose items repeat an id draws that item's row after the row that follows it, and every later copy of the same list (a Refresh) takes that row down and builds it again
 status: fixed
+commit: 21107c848
 phase: P109
 task: ISL-049
 severity: low

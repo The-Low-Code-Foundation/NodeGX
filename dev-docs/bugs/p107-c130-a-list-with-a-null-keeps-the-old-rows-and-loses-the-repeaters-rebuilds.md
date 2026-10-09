@@ -2,6 +2,7 @@
 id: P107-C130
 title: Items holding a null keep a Repeater's old rows on screen, and a Refresh, Template or Template Type change made after it in the same frame is lost — with every later Refresh, which is never answered again
 status: fixed
+commit: 009ad189b
 phase: P109
 task: ISL-049
 severity: medium

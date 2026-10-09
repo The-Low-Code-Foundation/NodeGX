@@ -1,7 +1,9 @@
 ---
 id: P107-C145
 title: An Expression that reads a name called run, expression or evaluateAtLoad never gets an input for it and always throws "run is not defined"
-status: open
+status: needs-ruling
+phase: P109
+task: ISL-051
 severity: low
 area: runtime / Expression (noodl-runtime/src/nodes/std-library/expression.ts the `expression` setter :520-524 — `if (self.hasInput(name)) return;` skips a name that is one of the node's own inputs, so it never joins the scope or the compiled function's parameters; `updatePorts` :795-815 still asks the editor to draw a port by that name; expression-ports.ts does not reserve the three)
 found: P107 NSP-017 s64, 2026-10-09

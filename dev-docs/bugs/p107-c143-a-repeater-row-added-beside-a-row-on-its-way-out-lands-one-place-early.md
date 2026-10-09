@@ -2,6 +2,7 @@
 id: P107-C143
 title: A row a Repeater adds while another row is on its way out (its Try Remove waiting, or its removal not yet run) lands one place early and stays there; a Refresh moves the leaving row to the end
 status: fixed
+commit: c4b1da028
 phase: P109
 task: ISL-049
 severity: medium

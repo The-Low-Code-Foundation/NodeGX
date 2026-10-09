@@ -2,6 +2,7 @@
 id: P107-C142
 title: A Repeater reports the signals of several rows that fire in the same update as ONE — the last row's Item Id, the first row's outputs, the last row's signal — so every row's Added after the first is lost, and a row's Leaving is reported as another row's Added
 status: fixed
+commit: 0ece45228 (and 2a82213cc)
 phase: P109
 task: ISL-049
 severity: medium

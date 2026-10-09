@@ -1,7 +1,9 @@
 ---
 id: P107-C144
 title: An Expression's Error keeps the last failure after the expression works again — a wire on Error still shows "The expression threw …" beside a good Result
-status: open
+status: scheduled
+phase: P109
+task: ISL-051
 severity: low
 area: runtime / Expression (noodl-runtime/src/nodes/std-library/expression.ts `_calculateExpression` :409-415 — a working evaluation sets `lastError = undefined` and never calls `flagOutputDirty('error')`; only `_reportFailure` :355 flags it)
 found: P107 NSP-017 s64, 2026-10-09

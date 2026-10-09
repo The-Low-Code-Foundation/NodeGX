@@ -2,6 +2,7 @@
 id: P107-C137
 title: A Repeater Refresh pulsed while a rebuild is running is never answered — no Done, no Failure — although a rebuild runs for it
 status: fixed
+commit: cb85d2d69
 phase: P109
 task: ISL-049
 severity: medium
