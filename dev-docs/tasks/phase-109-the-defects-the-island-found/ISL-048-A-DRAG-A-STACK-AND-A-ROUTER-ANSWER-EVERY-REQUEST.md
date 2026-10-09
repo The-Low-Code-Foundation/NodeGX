@@ -1,6 +1,6 @@
 # ISL-048 — A drag, a stack and a router answer every request
 
-**Status: 🟡 s32 (2026-10-09): 25 of 29 fixed — C138 `40c9fc310` (§11); left C139, C114, and C120, C126 (P107's world). s31 (2026-10-08): 11 of 27 fixed — the Component Stack's never-answered six (C107–C112, §9); all four asks ruled (C103, C104 as recommended in session; C120, C126 on P107's rulings page). s30 (2026-10-08): 5 of 27 fixed — C101, C115, C116, C117, C118 (§8); C119–C127 joined from P107 s58; 4 to ask (C103, C104, C120, C126).** Scoped s30 at `a6caefdde`. **Source:** 27 bugs P107 NSP-016 filed (18 at scoping, C119–C127 from s58) in s55–s57 after
+**Status: 🟡 s33 (2026-10-09): RouterNavigate v3 `491e8af72` (§12, C118's debt). s32 (2026-10-09): 25 of 29 fixed — C138 `40c9fc310` (§11); left C139, C114, and C120, C126 (P107's world). s31 (2026-10-08): 11 of 27 fixed — the Component Stack's never-answered six (C107–C112, §9); all four asks ruled (C103, C104 as recommended in session; C120, C126 on P107's rulings page). s30 (2026-10-08): 5 of 27 fixed — C101, C115, C116, C117, C118 (§8); C119–C127 joined from P107 s58; 4 to ask (C103, C104, C120, C126).** Scoped s30 at `a6caefdde`. **Source:** 27 bugs P107 NSP-016 filed (18 at scoping, C119–C127 from s58) in s55–s57 after
 ISL-038 was scoped (the Drag C101–C106, §7.16; the Component Stack C107–C114, §7.17; the Page Router C115–C118, §7.18), handed to
 P109 under R16 ("Hand all to P109"): 1 high · 7 medium · 10 low, **2 to ask** (C103, C104). **Side:** noodl-viewer-react
 (`components/visual/Drag/Drag.tsx`, `nodes/navigation/navigation-stack.tsx`, `router.tsx`, `router-handler.ts`), the Drag,
@@ -233,3 +233,17 @@ after every fix, not only the one the row names.
 
 **Left (4):** C139 (ruled: a new Component Stack option that keeps its pages through Mounted off and on), C114 (Children Count a frame
 late after a remount — read why first), C120 and C126 (wait on P107's world: the browser's history stepping back, an entry replaced).
+
+## 12. Session 33 (2026-10-09) — C118 left RouterNavigate behind
+
+The wide re-grade for ISL-050's C132 found **RouterNavigate v2 red at every seed**: "two names registered: a blank Router is NOT Main on
+this side — queued" and "… Router never set (undefined) is queued too". C118 (`d85e4e6d9`, §8) made `RouterHandler.navigate` read a
+blank name as Main and moved the Router spec to v4, but RouterNavigate's world lookup (`world.ts` `router.resolve`) still matched the
+name as handed. Control: `router-handler.ts` from before `d85e4e6d9` conforms 23 / 23, and the seed-13 generated divergence goes too.
+
+| Commit | What changed | Grade |
+|---|---|---|
+| `491e8af72` | `router.resolve` reads `routerName(name)` (`name \|\| 'Main'`); RouterNavigate spec **v3**, the two scenarios renamed. Also pinned: the `afterInputs` drop-set of `answered` on a lone Unchanged survived at seed 20735 (v2 the same) — a scenario where a later frame with no press reports nothing | 24 / 24 + 200 / 200 at 13, 20732, 20735; mutants 74 / 74 at all three; control red on exactly the two renamed |
+
+The s32 lesson again, one phase-step wider: **a fix to a shared handler moves every spec that plays it, not only the spec of the node
+it was filed on** — C118 re-graded the Router and never RouterNavigate, which reaches the same handler through the world.
