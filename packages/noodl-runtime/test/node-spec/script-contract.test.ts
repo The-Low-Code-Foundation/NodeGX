@@ -169,8 +169,9 @@ const PLANTS: Array<Plant & { rule: string; red: string }> = [
   {
     rule: "a throw in a signal's function ends that call only",
     file: 'node',
-    find: "console.log(\n          'Error in JS node signal function code.',",
-    replace: "internal.definedObject = undefined;\n        console.log(\n          'Error in JS node signal function code.',",
+    // P109 ISL-051 (C148): the signal catch logs through `logScriptError` now — the plant still opens that catch
+    find: "logScriptError('signal function', e);",
+    replace: "internal.definedObject = undefined;\n        logScriptError('signal function', e);",
     red: "a throw in a signal's function"
   },
   {

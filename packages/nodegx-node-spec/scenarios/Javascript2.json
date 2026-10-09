@@ -212,6 +212,39 @@
     ]
   },
   {
+    "name": "a throw of null, in a run or a signal's function, ends that call and the next one runs (row C148)",
+    "because": "javascript.ts :492-508, :520-537 — every catch read the thrown value's prototype and threw before the scheduled flag cleared, so the code never ran again; fixed in P109 ISL-051",
+    "params": {
+      "code": "define({\n  inputs: { a: '*', poke: 'signal' },\n  outputs: { ran: 'number', poked: 'number' },\n  change: function (inputs, outputs) {\n    this.r = (this.r || 0) + 1;\n    outputs.ran = this.r;\n    if (this.r === 2) throw null;\n  },\n  poke: function (inputs, outputs) {\n    this.p = (this.p || 0) + 1;\n    outputs.poked = this.p;\n    if (this.p === 1) throw undefined;\n  }\n})"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 2
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 3
+      },
+      "settle",
+      {
+        "signal": "poke"
+      },
+      "settle",
+      {
+        "signal": "poke"
+      },
+      "settle"
+    ]
+  },
+  {
     "name": "code that does not compile, or throws while read, leaves the code before running — after its destroy",
     "because": "javascript.ts :309 (destroy first), :380-391 (a failure returns); javascriptnodeparser.js :21-43",
     "params": {
