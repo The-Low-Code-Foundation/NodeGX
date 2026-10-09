@@ -29,6 +29,7 @@ Flows with a natural back relationship: wizards, mobile-style master→detail dr
 | `clip` | Boolean | `true` | Clips a pushed component that is bigger than the stack |
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
 | `dataAttributes` | Stringlist | — | data-* names (data-testid) for tests and scripts to find this element by; each gets a value input |
+| `keepPagesWhenUnmounted` | Boolean | `false` | Keeps the stack's components, and what is on them, while Mounted is off, so turning it back on shows the one that was on top. Its Components or Name changing meanwhile, or (with Use Routes) Back or Forward, still starts it again. Off: turning Mounted back on starts at the start component |
 | `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind |
 | `name` | String (PackStack id) | `Main` | Name the Push and Pop nodes address this stack by; leave it as Main if there is only one |
 | `pages` | Proplist | — | The components this stack can show, and which of them it starts on |
@@ -78,7 +79,7 @@ Flows with a natural back relationship: wizards, mobile-style master→detail dr
 
 _This node's port list changes at runtime (declared-port-groups, runtime-discovered); the tables above may be incomplete for a given instance._
 
-Per-page signal outputs and transition parameters are generated from the "pages" parameter.
+Each page in the "pages" parameter adds a Component input (`pageComp-<pageId>`) and, with "useRoutes" on, a Path input (`pagePath-<pageId>`: the page's URL path, by default its label in lower case with dashes); "startPage" picks one of the pages.
 
 | Condition | Inputs shown | Outputs shown |
 |---|---|---|

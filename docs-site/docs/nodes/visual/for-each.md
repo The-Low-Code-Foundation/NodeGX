@@ -54,7 +54,7 @@ component = '/MyComponent';` | JavaScript run per item that sets `component` to 
 |---|---|---|---|
 | `completed` | Signal | — | Fires after every invocation, whatever the outcome — wire this to carry on regardless. Failure still fires and still carries its reason, so this cannot hide an error |
 | `done` | Signal | — | Fires once a Refresh has torn the list down and rebuilt it from the current Items, including when that leaves the list empty |
-| `itemsRendered` | Signal | — | Fires once every item component exists and has been added; item creation is spread across frames, so this is the only honest moment to measure or scroll the list |
+| `itemsRendered` | Signal | — | Fires when rows were added or removed, once every item component exists; item creation is spread across frames, so this is the only honest moment to measure or scroll the list |
 
 ### Failure outputs
 
