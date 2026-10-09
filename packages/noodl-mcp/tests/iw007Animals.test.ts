@@ -216,13 +216,19 @@ describe('IW-007 AC2 + AC3 (lane A) — feeding on the land: the bowl filled fro
 const LIBRARY = path.join(__dirname, '..', '..', '..', 'library', 'modules');
 const BUILT_2D = path.join(LIBRARY, 'garden-kit', 'project', 'noodl_modules', 'garden-kit', 'index.js');
 const BUILT_3D = path.join(LIBRARY, 'garden-3d-kit', 'project', 'noodl_modules', 'garden-3d-kit', 'index.js');
-/** Load built kit sources into one bare context (the 2D kit first, as a page loads both); the modules they defined. */
-function loadKits(sources: string[]): any[] {
+/**
+ * Load built kit sources into one bare context (garden-kit first, as a page loads both: the 3D kit `requires` it, P109
+ * ISL-013); the modules they defined. `getModule` answers a kit's `exports` by its folder, as the deploy bootstrap does.
+ */
+function loadKits(sources: string[], folders = ['garden-kit', 'garden-3d-kit']): any[] {
   const modules: any[] = [];
-  const context: Record<string, any> = { Noodl: { defineModule: (m: any) => modules.push(m) }, React, console, setTimeout, clearTimeout };
-  context.__noodl_modules = modules;
+  let folder: string | undefined;
+  const context: Record<string, any> = { Noodl: { defineModule: (m: any) => modules.push(Object.assign(m, { folder })), getModule: (id: string) => { for (let i = modules.length - 1; i >= 0; i--) if (modules[i] && modules[i].folder === id) return modules[i].exports; } }, React, console, setTimeout, clearTimeout };
   vm.createContext(context);
-  sources.forEach((src, i) => vm.runInContext(src, context, { filename: `kit${i}/index.js` }));
+  sources.forEach((src, i) => {
+    folder = folders[i];
+    vm.runInContext(src, context, { filename: `${folder}/index.js` });
+  });
   return modules;
 }
 const garden = (src = fs.readFileSync(BUILT_2D, 'utf8')) => loadKits([src])[0].reactNodes.find((n: any) => n.name === 'garden-kit.Garden');

@@ -25,8 +25,8 @@
  *
  * ── Where the pure parts live (the kit gate grades them without a browser) ──
  *
- *   Garden3D.world   parseMap / parseThings / parseRobots / rose — garden-kit’s helpers when that kit is on the page
- *                    (found through window.__noodl_modules at render time), else the copies below (`LOCAL_WORLD`).
+ *   Garden3D.world   parseMap / parseThings / parseRobots / rose — garden-kit’s helpers, its `exports` (P109 ISL-013:
+ *                    manifest.json `requires` garden-kit, and this file reads it through `Noodl.getModule`).
  *   Garden3D.scene   buildScene(world, THREE) — every mesh of a world, instanced tiles counted as one each.
  *   Garden3D.camera  pose / project / rayFromNdc / pickTile / frameRect / clampCamera — hand-rolled maths, no THREE.
  *   Garden3D.engine  create({ THREE, root, canvas, overlay, … }) — the browser half; `Supported` is decided here.
@@ -80,363 +80,37 @@
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // The world helpers — garden-kit’s when it is on the page, these copies when it is not
+  // The world helpers — garden-kit’s, read through `Noodl.getModule`
   // ═══════════════════════════════════════════════════════════════════════════
 
-  // COPIED from library/modules/garden-kit/src/kit.js (the 2D `Garden` node’s world.* helpers), so that this kit
-  // stands alone in a project that installs it without garden-kit. When garden-kit IS on the page its own helpers are
-  // used instead (see `worldHelpers`), and the kit gate pins these copies to the originals on a shared set of inputs.
-  // P108 IW-002 (lane D): L is the wall tile (WALL_TILE, below; the engine blocks it) — drawn by both kits.
-  var DEFAULT_LEGEND = { G: 'grass', P: 'path', W: 'water', T: 'tree', R: 'rock', H: 'house', F: 'bed', B: 'postbox', L: 'wall', '.': 'grass', ' ': 'grass' };
-  var KINDS = ['grass', 'path', 'water', 'tree', 'rock', 'house', 'bed', 'postbox', 'wall'];
-
-  function parseMap(v) {
-    var m = v;
-    if (typeof v === 'string') {
-      try {
-        m = JSON.parse(v);
-      } catch (e) {
-        m = v;
-      }
-    }
-    var rows = null;
-    var legend = DEFAULT_LEGEND;
-    if (typeof m === 'string') rows = m.split('\n');
-    else if (Array.isArray(m)) rows = m;
-    else if (m && typeof m === 'object') {
-      if (typeof m.rows === 'string') rows = m.rows.split('\n');
-      else if (Array.isArray(m.rows)) rows = m.rows;
-      if (m.legend && typeof m.legend === 'object') {
-        legend = {};
-        for (var k in DEFAULT_LEGEND) legend[k] = DEFAULT_LEGEND[k];
-        for (var c in m.legend) legend[c] = m.legend[c];
-      }
-    }
-    if (!rows) rows = [];
-    rows = rows.map(function (r) {
-      return String(r === undefined || r === null ? '' : r);
-    });
-    var w = 0;
-    for (var i = 0; i < rows.length; i++) if (rows[i].length > w) w = rows[i].length;
-    var cells = [];
-    for (var y = 0; y < rows.length; y++) {
-      for (var x = 0; x < w; x++) {
-        var ch = x < rows[y].length ? rows[y].charAt(x) : 'G';
-        var kind = legend[ch];
-        if (KINDS.indexOf(kind) === -1) kind = 'grass';
-        cells.push({ x: x, y: y, ch: ch, kind: kind });
-      }
-    }
-    return { w: w, h: rows.length, rows: rows, legend: legend, cells: cells };
+  // P109 ISL-013: this kit draws the world garden-kit draws, so it reads garden-kit’s helpers and job table (that kit’s
+  // `exports`) rather than keeping copies. manifest.json `requires` garden-kit: it is loaded first on every loader — the
+  // page, a server render, cloud functions, the MCP server’s catalog — whatever the folders are called, and without it this
+  // kit is not loaded at all (the console, the server log and get_project_info name it). So it is read here, at definition.
+  var GARDEN = typeof Noodl !== 'undefined' && typeof Noodl.getModule === 'function' ? Noodl.getModule('garden-kit') : undefined;
+  if (!GARDEN || typeof GARDEN.parseMap !== 'function' || !GARDEN.job) {
+    throw new Error('garden-3d-kit needs garden-kit (its manifest requires it): Noodl.getModule("garden-kit") found no world helpers');
   }
-
-  function parseThings(v) {
-    var list = readJson(v, []);
-    if (!Array.isArray(list)) return [];
-    return list.filter(function (t) {
-      return t && typeof t === 'object' && typeof t.kind === 'string' && isFinite(Number(t.x)) && isFinite(Number(t.y));
-    });
-  }
-
-  function parseRobots(v) {
-    var list = readJson(v, []);
-    if (list && !Array.isArray(list) && typeof list === 'object') list = [list];
-    if (!Array.isArray(list)) return [];
-    return list
-      .filter(function (r) {
-        return r && typeof r === 'object';
-      })
-      .map(function (r, i) {
-        var d = Math.round(Number(r.d));
-        if (!isFinite(d)) d = 0;
-        d = ((d % 4) + 4) % 4;
-        var o = {
-          x: isFinite(Number(r.x)) ? Number(r.x) : 0,
-          y: isFinite(Number(r.y)) ? Number(r.y) : 0,
-          d: d,
-          colour: typeof r.colour === 'string' && r.colour ? r.colour : typeof r.color === 'string' && r.color ? r.color : '#FF7A59',
-          eyes: r.eyes === 'happy' || r.eyes === 'wink' ? r.eyes : 'round',
-          hat: r.hat === 'cap' || r.hat === 'sun' || r.hat === 'crown' ? r.hat : 'none',
-          name: typeof r.name === 'string' ? r.name : i === 0 ? 'Pip' : '',
-          bump: isFinite(Number(r.bump)) ? Number(r.bump) : 0,
-          can: isFinite(Number(r.can)) && r.can !== null && r.can !== '' ? Math.max(0, Math.floor(Number(r.can))) : null,
-          canMax: isFinite(Number(r.canMax)) && Number(r.canMax) > 0 ? Math.floor(Number(r.canMax)) : 3,
-          carry: Array.isArray(r.carry) ? r.carry.map(String) : [],
-          // P106 IG-005 (brief s4 §4.3): what the robot wears for its job. Missing = the can (every robot before IG-005 was
-          // Pip with his can); '' or anything unknown = none.
-          accessory: r.accessory === undefined || r.accessory === null ? 'can' : ['can', 'hod', 'satchel', 'bell'].indexOf(r.accessory) !== -1 ? r.accessory : ''
-        };
-        // P108 IW-002 (lane D): a robot that holds the can (the engine's `holds: 'can'`) carries it whatever it wears; the
-        // field is there only when it holds it, so a robot row without it parses exactly as before.
-        if (r.holds === 'can') o.holds = 'can';
-        // P108 s8: a pad press's walk — every tile the robot stepped onto, in order, the last its x, y (Record step's via).
-        // Drawn a tile at a time; a via that does not join where the robot was drawn is ignored (walkTiles).
-        if (Array.isArray(r.via) && r.via.length > 1) {
-          var via = r.via.map(function (t) { return Array.isArray(t) ? [Number(t[0]), Number(t[1])] : [NaN, NaN]; });
-          if (via.every(function (t) { return isFinite(t[0]) && isFinite(t[1]); })) o.via = via;
-        }
-        return o;
-      });
-  }
-
+  var parseMap = GARDEN.parseMap;
+  var parseThings = GARDEN.parseThings;
+  var parseRobots = GARDEN.parseRobots;
   /** A rising count is a new event; a mount, the same value, a fall or junk is not (the Boost-count rule). */
-  function rose(before, after) {
-    var a = Number(before);
-    var b = Number(after);
-    if (!isFinite(b)) return false;
-    return b > (isFinite(a) ? a : 0);
-  }
-
-  // ── P108 IW-002 AC6 (lane D): the job model, drawn ─────────────────────────────────────────────────────────────
-  // COPIES of the ONE table in packages/noodl-mcp/tests/cg002Content.ts (JOB_VOCABULARY, SITE_STAGES, WALL_TILE): the
-  // engine writes these names, both world kits draw them, and ig007Garden3d pins every copy (garden-kit's and
-  // garden-3d-kit's) to the table, and the helpers below to each other. A thing with none of the job fields (every thing
-  // of the 13 requests) is drawn exactly as before; so is a world with Watch empty and Picking off.
-  var WALL_TILE = 'L';
-  var SITE_STAGES = ['dirt', 'gravel', 'cobbles', 'path'];
-  var JOB_VOCABULARY = [
-    { kind: 'tulip', role: 'target', fields: ['have', 'need', 'watered', 'droop'], blocks: true, wear: 'tulip' },
-    { kind: 'site', role: 'target', fields: ['have', 'need', 'item', 'stage', 'walked', 'build', 'of', 'keep', 'bstage'], item: 'stone', blocks: false, wear: 'site' },
-    { kind: 'basket', role: 'container', fields: ['count', 'capacity', 'item'], item: 'egg', blocks: true, wear: 'basket' },
-    { kind: 'bowl', role: 'container', fields: ['count', 'capacity', 'item', 'food', 'animal', 'name'], item: 'food', blocks: true, wear: 'bowl' },
-    { kind: 'store', role: 'container', fields: ['count', 'capacity', 'item'], item: 'stone', blocks: true, wear: 'store' },
-    { kind: 'can', role: 'carrier', fields: ['level', 'max'], blocks: true },
-    { kind: 'rock', role: 'source', fields: ['left', 'max'], item: 'stone', blocks: true, wear: 'rock' },
-    { kind: 'hen', role: 'source', fields: ['pen', 'capacity'], blocks: true, wear: 'hen' },
-    { kind: 'postbox', role: 'source', fields: [], blocks: true, wear: 'postbox' },
-    { kind: 'door', role: 'container', fields: ['count', 'capacity', 'item', 'owner'], item: 'letter', blocks: true, wear: 'door' },
-    // P108 IW-007 (s5 base): planks from a tree, carrots from a patch (drawn by lanes B and A).
-    { kind: 'tree', role: 'source', fields: ['left', 'max'], item: 'plank', blocks: true, wear: 'tree' },
-    { kind: 'patch', role: 'source', fields: ['left', 'max'], item: 'carrot', blocks: true, wear: 'patch' }
-  ];
-  /** The most pips a meter draws (the mockup's); a bigger need shows its numbers only. */
-  var METER_PIPS_MAX = 8;
-  /** The items a meter has an icon for (the mockup's 💧 🪨 🥚, drawn in CSS); anything else wears a plain dot. */
-  var METER_ICONS = { water: 1, stone: 1, egg: 1, food: 1, letter: 1, ball: 1 };
-
-  function jobRow(kind) {
-    for (var i = 0; i < JOB_VOCABULARY.length; i++) if (JOB_VOCABULARY[i].kind === kind) return JOB_VOCABULARY[i];
-    return null;
-  }
-  /** A whole number ≥ 0, or null when the field is absent or junk (absent is not 0: a thing with no meter keeps its old look). */
-  function wholeOf(v) {
-    if (v === undefined || v === null || v === '' || typeof v === 'boolean') return null;
-    var n = Number(v);
-    return isFinite(n) ? Math.max(0, Math.floor(n)) : null;
-  }
-  /**
-   * A thing's meter as both kits draw it (the mockup's chip over the thing), or null when it carries none:
-   *   tulip with `need` or `have`: drinks have/need (a tulip with neither is the 13 requests' one-pour tulip: no meter);
-   *   site: stones have/need; basket · bowl · store with a `capacity`: count/capacity, the icon its `item` (else the
-   *   table's); can with `level` or `max`: level/max; rock with `max`: left/max.
-   * `full` (drawn green) is a target's or a container's; a carrier and a source are never "done".
-   */
-  function meterOf(t) {
-    if (!t || typeof t !== 'object') return null;
-    var row = jobRow(t.kind);
-    if (!row) return null;
-    var have = 0;
-    var need = 0;
-    var icon = 'dot';
-    if (t.kind === 'tulip') {
-      if (wholeOf(t.need) === null && wholeOf(t.have) === null) return null;
-      need = wholeOf(t.need) || 1;
-      have = wholeOf(t.have);
-      if (have === null) have = t.watered === true ? need : 0;
-      icon = 'water';
-    } else if (t.kind === 'site') {
-      need = wholeOf(t.need) || 1;
-      have = wholeOf(t.have) || 0;
-      icon = String(t.item || row.item);
-    } else if (row.role === 'container') {
-      // Only a job's container has a capacity: a bowl the engine fed carries `count` beside `food` but no capacity
-      // (the bowl requests' bowls, never full) — it keeps its old look, no meter.
-      if (!wholeOf(t.capacity)) return null;
-      need = wholeOf(t.capacity);
-      // P108 IW-003 (lane B): the engine's rule — a bowl's count, else its food (a seeded bowl names only its food).
-      have = wholeOf(t.count) !== null ? wholeOf(t.count) : wholeOf(t.food) || 0;
-      icon = String(t.item || row.item);
-    } else if (t.kind === 'can') {
-      if (wholeOf(t.level) === null && wholeOf(t.max) === null) return null;
-      need = wholeOf(t.max) || 0;
-      have = wholeOf(t.level) || 0;
-      icon = 'water';
-    } else if (t.kind === 'rock') {
-      if (!wholeOf(t.max)) return null;
-      need = wholeOf(t.max);
-      have = wholeOf(t.left) || 0;
-      icon = 'stone';
-    } else if (t.kind === 'patch') {
-      // P108 IW-007 (lane A): the carrot patch, like a rock — the carrots left of its max (a source: never "done").
-      if (!wholeOf(t.max)) return null;
-      need = wholeOf(t.max);
-      have = wholeOf(t.left) || 0;
-      icon = 'carrot';
-    } else if (t.kind === 'tree') {
-      // P108 s8: her land's tree, like a rock — the planks left of its max (it had no chip: the planks left went unseen).
-      if (!wholeOf(t.max)) return null;
-      need = wholeOf(t.max);
-      have = wholeOf(t.left) || 0;
-      icon = 'plank';
-    } else return null;
-    if (need > 0 && have > need) have = need;
-    var meter = {
-      kind: t.kind,
-      icon: METER_ICONS[icon] ? icon : 'dot',
-      have: have,
-      need: need,
-      pips: need > 0 && need <= METER_PIPS_MAX ? need : 0,
-      text: need > 0 ? have + '/' + need : String(have),
-      full: (row.role === 'target' || row.role === 'container') && need > 0 && have >= need
-    };
-    // P108 s8 (ruled: "keep the wait, but show it"): a source under its max grows back (on the island's tick) — its chip
-    // says so. Only when it does, so every other meter reads as before.
-    if ((t.kind === 'rock' || t.kind === 'tree' || t.kind === 'patch') && need > 0 && have < need) meter.grows = true;
-    return meter;
-  }
-  /** A path site's look: its `stage` when the engine wrote one, else the engine's own rule by have/need (0 · under half · under full · full). */
-  function siteStage(t) {
-    if (t && SITE_STAGES.indexOf(t.stage) !== -1) return t.stage;
-    var need = (t && wholeOf(t.need)) || 1;
-    var have = (t && wholeOf(t.have)) || 0;
-    return SITE_STAGES[have <= 0 ? 0 : have * 2 < need ? 1 : have < need ? 2 : 3];
-  }
-  /** A hen's pen `[x0, y0, x1, y1]` (corners, inclusive) as { x, y, w, h } in tiles, or null. */
-  function penOf(t) {
-    if (!t || t.kind !== 'hen' || !Array.isArray(t.pen) || t.pen.length !== 4) return null;
-    var p = t.pen.map(Number);
-    for (var i = 0; i < 4; i++) if (!isFinite(p[i])) return null;
-    var x0 = Math.floor(Math.min(p[0], p[2]));
-    var y0 = Math.floor(Math.min(p[1], p[3]));
-    return { x: x0, y: y0, w: Math.floor(Math.max(p[0], p[2])) - x0 + 1, h: Math.floor(Math.max(p[1], p[3])) - y0 + 1 };
-  }
-  /** The Watch port as chip refs { id?, kind, x, y } (a list, one ref, or its JSON; anything without a kind is dropped). */
-  function watchRefs(v) {
-    var list = readJson(v, []);
-    if (list && !Array.isArray(list) && typeof list === 'object') list = [list];
-    if (!Array.isArray(list)) return [];
-    return list.filter(function (r) {
-      return r && typeof r === 'object' && typeof r.kind === 'string' && r.kind !== '';
-    });
-  }
-  /**
-   * What each watched chip rings (brief §4.4, resolved the way the engine resolves a chip): the thing with its `id`, else
-   * the first thing of its kind on its tile, else — a `can` — the robot that holds the can (or, when no robot says
-   * `holds`, the first with a can level), else the tile itself (an "ahead" chip). Indexes into things and robots, and
-   * "x,y" tiles, each once.
-   */
-  function resolveWatch(v, things, robots) {
-    var out = { things: [], robots: [], tiles: [] };
-    var add = function (list, k) {
-      if (list.indexOf(k) === -1) list.push(k);
-    };
-    watchRefs(v).forEach(function (ref) {
-      var i;
-      if (ref.id !== undefined && ref.id !== null && ref.id !== '')
-        for (i = 0; i < things.length; i++)
-          if (things[i].id !== undefined && things[i].id !== null && String(things[i].id) === String(ref.id)) return add(out.things, i);
-      for (i = 0; i < things.length; i++) if (things[i].kind === ref.kind && Number(things[i].x) === Number(ref.x) && Number(things[i].y) === Number(ref.y)) return add(out.things, i);
-      if (ref.kind === 'can') {
-        for (i = 0; i < robots.length; i++) if (robots[i].holds === 'can') return add(out.robots, i);
-        for (i = 0; i < robots.length; i++) if (robots[i].can !== null && robots[i].can !== undefined) return add(out.robots, i);
-      }
-      var x = wholeOf(ref.x);
-      var y = wholeOf(ref.y);
-      if (x !== null && y !== null) add(out.tiles, x + ',' + y);
-    });
-    return out;
-  }
-  var JOB_LOOK = { JOB_VOCABULARY: JOB_VOCABULARY, SITE_STAGES: SITE_STAGES, WALL_TILE: WALL_TILE, METER_PIPS_MAX: METER_PIPS_MAX, meterOf: meterOf, siteStage: siteStage, penOf: penOf, watchRefs: watchRefs, resolveWatch: resolveWatch };
-
-  /**
-   * P108 s7: which robots' name pills go ABOVE their robot (true), so no two pills cover each other — at a plot's home a
-   * helper stands on the next tile, and on the island a tile is far narrower than a name ("Cobble ²ip"). Items in robot
-   * order, in px: { x, below, above, w, h } — x the pill's centre, below the top edge of a pill under the robot, above the
-   * bottom edge of a pill over it. Greedy, the LOWEST on screen first (then robot order): a pill stays under its robot
-   * unless that meets a pill already placed; then it goes over, unless that meets one too (then under, as before) — so of
-   * a robot standing right above another, it is the upper one whose pill goes over. No width (no name) takes no room. A COPY of
-   * garden-kit's (pinned by ig007Garden3d): here the pills are placed in screen px every frame.
-   */
-  /**
-   * P108 s8: the tiles of a robot's walk, from the tile it was last drawn on (prev, [x, y]) — its via when the via starts
-   * one step from prev, goes one step at a time and ends where the robot is; else null (a stale via, or none). The same
-   * rule as garden-kit's walkTiles.
-   */
-  function walkTiles(prev, r) {
-    var v = r && r.via;
-    if (!prev || !Array.isArray(v) || v.length < 2) return null;
-    var last = v[v.length - 1];
-    if (last[0] !== r.x || last[1] !== r.y) return null;
-    var a = prev;
-    for (var i = 0; i < v.length; i++) {
-      if (Math.abs(v[i][0] - a[0]) + Math.abs(v[i][1] - a[1]) !== 1) return null;
-      a = v[i];
-    }
-    return v;
-  }
-  /** The way a robot faces stepping from tile a to tile b (0 up, 1 right, 2 down, 3 left). */
-  function stepFacing(a, b) {
-    return b[1] < a[1] ? 0 : b[0] > a[0] ? 1 : b[1] > a[1] ? 2 : 3;
-  }
-
-  function pillSides(items) {
-    var placed = [], out = [];
-    function meets(a) {
-      for (var k = 0; k < placed.length; k++) {
-        var b = placed[k];
-        if (a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b) return true;
-      }
-      return false;
-    }
-    var list = Array.isArray(items) ? items : [], order = [];
-    for (var n = 0; n < list.length; n++) {
-      out.push(false);
-      order.push(n);
-    }
-    var lowOf = function (k) {
-      return Number((list[k] || {}).below) || 0;
-    };
-    order.sort(function (a, b) {
-      return lowOf(b) - lowOf(a) || a - b;
-    });
-    for (var o = 0; o < order.length; o++) {
-      var i = order[o], it = list[i] || {}, w = Number(it.w) || 0, hh = Number(it.h) || 0, x = Number(it.x) || 0, lo = Number(it.below) || 0, hi = Number(it.above) || 0;
-      if (!(w > 0) || !(hh > 0)) continue;
-      var down = { l: x - w / 2, r: x + w / 2, t: lo, b: lo + hh };
-      var up = { l: x - w / 2, r: x + w / 2, t: hi - hh, b: hi };
-      var goUp = meets(down) && !meets(up);
-      placed.push(goUp ? up : down);
-      out[i] = goUp;
-    }
-    return out;
-  }
-
-  var LOCAL_WORLD = { parseMap: parseMap, parseThings: parseThings, parseRobots: parseRobots, rose: rose, pillSides: pillSides, walkTiles: walkTiles, stepFacing: stepFacing, DEFAULT_LEGEND: DEFAULT_LEGEND, KINDS: KINDS, job: JOB_LOOK, source: 'local' };
-
-  /**
-   * garden-kit’s `Garden.world` if that kit is on the page. Modules land in `window.__noodl_modules` in load order and
-   * garden-3d-kit sorts BEFORE garden-kit, so this is read at render time, never at definition.
-   */
-  function siblingWorld() {
-    var list = null;
-    if (typeof window !== 'undefined' && window.__noodl_modules) list = window.__noodl_modules;
-    else if (typeof globalThis !== 'undefined' && globalThis.__noodl_modules) list = globalThis.__noodl_modules;
-    if (!Array.isArray(list)) return null;
-    for (var i = 0; i < list.length; i++) {
-      var m = list[i];
-      var nodes = m && Array.isArray(m.reactNodes) ? m.reactNodes : [];
-      for (var j = 0; j < nodes.length; j++) {
-        var n = nodes[j];
-        if (n && n.name === 'garden-kit.Garden' && n.world && typeof n.world.parseMap === 'function') return n.world;
-      }
-    }
-    return null;
-  }
-
-  function worldHelpers() {
-    var s = siblingWorld();
-    return s ? { parseMap: s.parseMap, parseThings: s.parseThings, parseRobots: s.parseRobots, rose: s.rose || rose, source: 'sibling' } : LOCAL_WORLD;
-  }
+  var rose = GARDEN.rose;
+  /** P108 s8: the tiles of a robot's walk from the tile it was last drawn on, or null (garden-kit's walkTiles). */
+  var walkTiles = GARDEN.walkTiles;
+  var stepFacing = GARDEN.stepFacing;
+  /** P108 s7: which robots' name pills go above their robot, so no two cover each other — placed in screen px every frame. */
+  var pillSides = GARDEN.pillSides;
+  var wholeOf = GARDEN.wholeOf;
+  // ── P108 IW-002 AC6 (lane D): the job model, drawn — garden-kit’s one copy of cg002Content’s table, and its meters ──────
+  var JOB_LOOK = GARDEN.job;
+  var METER_ICONS = GARDEN.METER_ICONS;
+  var METER_PIPS_MAX = JOB_LOOK.METER_PIPS_MAX;
+  var meterOf = JOB_LOOK.meterOf;
+  var siteStage = JOB_LOOK.siteStage;
+  var penOf = JOB_LOOK.penOf;
+  var watchRefs = JOB_LOOK.watchRefs;
+  var resolveWatch = JOB_LOOK.resolveWatch;
 
   // ═══════════════════════════════════════════════════════════════════════════
   // The look — the mockup’s palette as hex numbers, a height per tile kind
@@ -3109,10 +2783,9 @@
     noodlNodeAsProp: true,
 
     /** The pure parts, for the kit gate. */
-    world: LOCAL_WORLD,
-    worldHelpers: worldHelpers,
+    world: GARDEN,
     scene: { buildScene: buildScene, buildRobot: buildRobot, THING_BUILDERS: THING_BUILDERS, PALETTE: PALETTE, TILE_HEIGHT: TILE_HEIGHT, PICK_LIFT: PICK_LIFT },
-    /** P108 IW-002: the job table's copies and the meter / watch helpers (pinned to garden-kit's and to cg002Content). */
+    /** P108 IW-002: the job table and the meter / watch helpers — garden-kit's (P109 ISL-013). */
     job: JOB_LOOK,
     camera: CAMERA_API,
     engine: ENGINE_API,
@@ -3124,10 +2797,9 @@
         var canvas = React.useRef(null);
         var overlay = React.useRef(null);
         var engine = React.useRef(null);
-        var helpers = worldHelpers();
-        var grid = helpers.parseMap(props.map);
-        var things = helpers.parseThings(props.things);
-        var robots = helpers.parseRobots(props.robots);
+        var grid = parseMap(props.map);
+        var things = parseThings(props.things);
+        var robots = parseRobots(props.robots);
         var stepMs = Math.max(0, Number(props.stepMs));
         if (!isFinite(stepMs)) stepMs = 380;
         var cameraMode = props.camera === 'island' || props.camera === 'follow' ? props.camera : 'plot';
@@ -3170,7 +2842,7 @@
           engine.current = eng;
           if (root.current) {
             root.current.gd3 = eng;
-            root.current.setAttribute('data-helpers', helpers.source);
+            root.current.setAttribute('data-helpers', 'garden-kit');
           }
           if (typeof props.onSupported === 'function') props.onSupported(eng.supported);
           supportedState[1](eng.supported);
@@ -3221,7 +2893,7 @@
         var cheers = React.useRef(null);
         if (cheers.current === null) cheers.current = { seen: props.celebrate, n: 0 };
         if (cheers.current.seen !== props.celebrate) {
-          if (helpers.rose(cheers.current.seen, props.celebrate)) cheers.current.n++;
+          if (rose(cheers.current.seen, props.celebrate)) cheers.current.n++;
           cheers.current.seen = props.celebrate;
         }
         var cheerN = cheers.current.n;

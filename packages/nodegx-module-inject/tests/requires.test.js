@@ -78,6 +78,19 @@ describe('ISL-013 — requires: the kits a kit needs load first', () => {
     expect(tags.modulesMain).toContain('The kit \\"aa-user\\" was not loaded: it needs \\"zz-base\\", which is not installed in this project');
   });
 
+  test('a refused kit is on the page\'s failure list, so Settings → Kits names it as well as the console', async () => {
+    const tags = buildInjectionTags(await injected({ 'aa-user': { name: 'aa-user', main: 'index.js', requires: ['zz-base'] } }), '/');
+    const errors = [];
+    const page = { console: { error: (m) => errors.push(m) } };
+    page.window = page;
+    const context = require('vm').createContext(page);
+    for (const [, body] of tags.modulesMain.matchAll(/<script type="text\/javascript">([\s\S]*?)<\/script>/g)) require('vm').runInContext(body, context);
+    expect(page.__noodl_module_failures).toEqual([
+      { module: 'aa-user', reason: 'refused', message: 'it needs "zz-base", which is not installed in this project' }
+    ]);
+    expect(errors).toEqual(['The kit "aa-user" was not loaded: it needs "zz-base", which is not installed in this project']);
+  });
+
   test('a kit that needs a refused kit is refused too, and a cycle refuses both', async () => {
     const chain = await injected({
       'aa-top': { main: 'index.js', requires: ['mm-middle'] },

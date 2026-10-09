@@ -135,12 +135,17 @@ describe('R5 — the Workshop’s run cap (Richard: ~400 ticks)', () => {
 
 describe('two robots’ name pills never cover each other (pillSides; s6: “Cobble ²ip” at home)', () => {
   const LIBRARY = path.join(__dirname, '..', '..', '..', 'library', 'modules');
+  // The 3D kit `requires` garden-kit and reads it through `getModule` (P109 ISL-013): garden-kit loads first, as on a page.
   const kit = (dir: string, file: string, name: string) => {
     const modules: any[] = [];
-    const context: Record<string, any> = { Noodl: { defineModule: (m: any) => modules.push(m) }, React, console, setTimeout, clearTimeout };
+    let folder = '';
+    const context: Record<string, any> = { Noodl: { defineModule: (m: any) => modules.push(Object.assign(m, { folder })), getModule: (id: string) => { for (let i = modules.length - 1; i >= 0; i--) if (modules[i] && modules[i].folder === id) return modules[i].exports; } }, React, console, setTimeout, clearTimeout };
     vm.createContext(context);
-    vm.runInContext(fs.readFileSync(path.join(LIBRARY, dir, 'project', 'noodl_modules', dir, file), 'utf8'), context, { filename: `${dir}/${file}` });
-    return modules[0].reactNodes.find((n: any) => n.name === name);
+    for (const d of dir === 'garden-kit' ? [dir] : ['garden-kit', dir]) {
+      folder = d;
+      vm.runInContext(fs.readFileSync(path.join(LIBRARY, d, 'project', 'noodl_modules', d, file), 'utf8'), context, { filename: `${d}/${file}` });
+    }
+    return modules[modules.length - 1].reactNodes.find((n: any) => n.name === name);
   };
   const two = kit('garden-kit', 'index.js', 'garden-kit.Garden').world.pillSides as (i: unknown[]) => boolean[];
   const three = kit('garden-3d-kit', 'index.js', 'garden-3d-kit.Garden3D').world.pillSides as (i: unknown[]) => boolean[];

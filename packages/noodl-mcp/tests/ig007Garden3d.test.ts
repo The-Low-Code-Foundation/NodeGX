@@ -27,8 +27,8 @@
  * - **AC10 of CG-001** the built file carries no `fetch(`, no URL, no `url(`;
  * - the catalog overlay lists `Garden 3D` with `inNodePicker: true`, the way CG-001 measured
  *   garden-kit's two nodes (extractor over the two-module fixture);
- * - the copied helpers agree with garden-kit's on a shared set of inputs, and the sibling
- *   helpers are used when garden-kit is on the page.
+ * - P109 ISL-013: the world helpers are garden-kit's own (its `exports`, read through
+ *   `Noodl.getModule`; the manifest `requires` it) — one copy; alone, the kit is not loaded and says why.
  *
  * @module noodl-mcp/tests/ig007Garden3d.test
  */
@@ -65,6 +65,8 @@ const SAMPLED_POINTS = 20;
 interface KitModule {
   nodes: Array<Record<string, any>>;
   reactNodes: Array<Record<string, any>>;
+  exports?: Record<string, any>;
+  folder?: string;
 }
 
 type Vec = { x: number; y: number; z: number; set: (x: number, y: number, z: number) => void };
@@ -131,13 +133,23 @@ function threeStub(opts: { rendererThrows?: boolean } = {}) {
   return { THREE, counts };
 }
 
-/** Load the built kit(s) into a bare context; `first` loads before the 3D kit (the 2D kit, for the sibling arm). */
-function loadKits(first?: string): { kit: KitModule; modules: KitModule[]; context: Record<string, any> } {
+/**
+ * Load the built kits into a bare context the way a page does: the manifest `requires` garden-kit, so it loads first
+ * (P109 ISL-013), and `Noodl.getModule` answers a kit's `exports` by its folder, as the deploy bootstrap does. `alone`
+ * loads the 3D kit with nothing before it — what the injector refuses (the kit throws if it is run anyway).
+ */
+function loadKits(opts: { alone?: boolean } = {}): { kit: KitModule; modules: KitModule[]; context: Record<string, any> } {
   const modules: KitModule[] = [];
+  let folder: string | undefined;
   const context: Record<string, any> = {
     Noodl: {
       defineModule(m: KitModule) {
+        if (m && !m.folder && folder) m.folder = folder;
         modules.push(m);
+      },
+      getModule(id: string) {
+        for (let i = modules.length - 1; i >= 0; i--) if (modules[i] && modules[i].folder === id) return modules[i].exports;
+        return undefined;
       }
     },
     React,
@@ -145,10 +157,12 @@ function loadKits(first?: string): { kit: KitModule; modules: KitModule[]; conte
     setTimeout: (fn: () => void, ms: number) => setTimeout(fn, ms),
     clearTimeout: (id: ReturnType<typeof setTimeout>) => clearTimeout(id)
   };
-  // The deploy prelude keeps every module in `__noodl_modules`; the 3D kit finds garden-kit's helpers there.
-  context.__noodl_modules = modules;
   vm.createContext(context);
-  if (first) vm.runInContext(fs.readFileSync(first, 'utf8'), context, { filename: path.basename(path.dirname(first)) + '/index.js' });
+  if (!opts.alone) {
+    folder = 'garden-kit';
+    vm.runInContext(fs.readFileSync(BUILT_2D, 'utf8'), context, { filename: 'garden-kit/index.js' });
+  }
+  folder = 'garden-3d-kit';
   vm.runInContext(fs.readFileSync(BUILT, 'utf8'), context, { filename: 'garden-3d-kit/index.js' });
   const kit = modules[modules.length - 1];
   if (!kit) throw new Error('index.js never called Noodl.defineModule');
@@ -263,7 +277,7 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
   let kit2d: KitModule;
 
   beforeAll(() => {
-    const both = loadKits(BUILT_2D);
+    const both = loadKits();
     kit = both.kit;
     kit2d = both.modules[0];
   });
@@ -1102,43 +1116,30 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       }
     });
 
-    it('🔴 the copied parse helpers give garden-kit’s answers on every input shape (the two copies cannot drift unseen)', () => {
-      const a = node2d().world;
-      const b = node().world;
-      const maps = [MOCKUP, null, { not: 'rows' }, '{bad', ['GG', 'GGGG'], 'GG\nGG', { rows: ['ab'], legend: { a: 'water', b: 'not-a-kind' } }, JSON.stringify(MOCKUP), { rows: 'GT\nRH' }, 7];
-      for (const m of maps) expect(JSON.stringify(b.parseMap(m))).toBe(JSON.stringify(a.parseMap(m)));
-      const things = [null, '', '[{"kind":"tulip","x":1,"y":2},{"x":1},{"kind":"puddle","x":"a","y":1},7]', [{ kind: 'bowl', x: '3', y: 4, full: true }], { not: 'a list' }];
-      for (const t of things) expect(JSON.stringify(b.parseThings(t))).toBe(JSON.stringify(a.parseThings(t)));
-      const robots = [null, { x: 1, y: 2 }, [{ d: -1, color: '#123', eyes: 'happy', hat: 'sun' }, { d: 6.4, hat: 'nope', bump: '2' }], '[{"x":"3","y":3,"name":"Bo"}]', 'junk', [7, null], ...VOCAB_ROBOTS,
-        // P106 IG-005 (brief s4 §4.3): the accessory, every shape.
-        [{ accessory: 'hod' }, { accessory: 'satchel' }, { accessory: 'bell' }, { accessory: 'can' }, { accessory: '' }, { accessory: 'jetpack' }, { accessory: null }, {}]];
-      // P106 s2 (brief §4): the copy carries `can`, `canMax`, `carry` — garden-kit gets the same three lines in lane A.
-      // Green on both sides of the merge: every field garden-kit answers is answered the same (order-free), and the copy's
-      // only extra fields are exactly those three, each by the §4 rule. After the merge the extras are empty and the
-      // clause is full equality; if garden-kit ever answers them differently, the first half goes red.
-      for (const r of robots) {
-        const want = a.parseRobots(r) as Array<Record<string, unknown>>;
-        const got = b.parseRobots(r) as Array<Record<string, unknown>>;
-        expect(got.length).toBe(want.length);
-        got.forEach((g, i) => {
-          const shared = Object.fromEntries(Object.keys(want[i]).map((k) => [k, g[k]]));
-          expect({ input: r, i, fields: shared }).toEqual({ input: r, i, fields: want[i] });
-          const extra = Object.keys(g).filter((k) => !(k in want[i])).sort();
-          expect({ input: r, i, extra: extra.filter((k) => !['can', 'canMax', 'carry'].includes(k)) }).toEqual({ input: r, i, extra: [] });
-        });
-        const raw = (b.parseRobots(r) as Array<Record<string, unknown>>).map((g) => ({ can: g.can, canMax: g.canMax, carry: g.carry }));
-        expect({ input: r, vocab: raw }).toEqual({ input: r, vocab: rawRobots(r).map(vocab) });
+    // P109 ISL-013 (s34): the copy gate and the sibling arm that stood here are gone because there is nothing left to
+    // compare — the 3D kit's helpers ARE garden-kit's (the identity below), not because either was red (ISL-025 W15).
+    it('🔴 one copy: every world helper the 3D kit draws with is garden-kit’s own (its `exports`), and the built 3D kit carries none of its own', () => {
+      const exported = kit2d.exports!;
+      expect(exported).toBeDefined();
+      expect(node2d().world).toBe(exported);
+      expect(node().world).toBe(exported);
+      expect(node().job).toBe(exported.job);
+      for (const k of ['parseMap', 'parseThings', 'parseRobots', 'rose', 'pillSides', 'walkTiles', 'stepFacing', 'wholeOf', 'DEFAULT_LEGEND', 'KINDS', 'METER_ICONS', 'job'])
+        expect({ k, own: typeof exported[k] !== 'undefined' }).toEqual({ k, own: true });
+      const built = fs.readFileSync(BUILT, 'utf8');
+      // Known-firing beside the absences: the same reader finds garden-kit's definitions in its own built file.
+      const built2d = fs.readFileSync(BUILT_2D, 'utf8');
+      for (const def of ['function parseMap(', 'function parseRobots(', 'var JOB_VOCABULARY = [', 'function meterOf(', 'function pillSides(']) {
+        expect({ def, in2d: built2d.includes(def) }).toEqual({ def, in2d: true });
+        expect({ def, in3d: built.includes(def) }).toEqual({ def, in3d: false });
       }
-      for (const [x, y] of [[0, 1], [1, 1], [2, 1], ['a', 3], [3, NaN], [null, 2]]) expect(b.rose(x, y)).toBe(a.rose(x, y));
-      expect(b.DEFAULT_LEGEND).toEqual(a.DEFAULT_LEGEND);
-      expect(b.KINDS).toEqual(a.KINDS);
+      expect(built).not.toContain('__noodl_modules');
+      expect(built).toContain("Noodl.getModule('garden-kit')");
     });
 
-    it('with garden-kit on the page the sibling helpers are used; alone, the local copy', () => {
-      expect(node().worldHelpers().source).toBe('sibling');
-      expect(node().worldHelpers().parseMap).toBe(node2d().world.parseMap);
-      const alone = loadKits();
-      expect(alone.kit.reactNodes[0].worldHelpers().source).toBe('local');
+    it('🔴 the manifest requires garden-kit; run alone the kit registers nothing and says it needs garden-kit', () => {
+      expect(JSON.parse(fs.readFileSync(MANIFEST, 'utf8')).requires).toEqual(['garden-kit']);
+      expect(() => loadKits({ alone: true })).toThrow(/garden-3d-kit needs garden-kit/);
     });
   });
 
@@ -1293,11 +1294,16 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       return { eng, dom, ev, taps, chips, rings };
     };
 
-    it('🔴 the pinned copies: both kits’ JOB_VOCABULARY, SITE_STAGES and WALL_TILE are cg002Content’s ONE table; L is the wall in both legends; the meter and watch helpers give garden-kit’s answers', () => {
+    it('🔴 the one table: garden-kit’s JOB_VOCABULARY, SITE_STAGES and WALL_TILE are cg002Content’s, and the 3D kit draws with that same object; L is the wall in the legend', () => {
+      // P109 ISL-013 AC5 (s34): the kits hold one copy (garden-kit's, read by the 3D kit through `exports`); the pin left
+      // is the generator's table against it. The meter and watch helpers are one set of functions now, so the rows below
+      // compare a function with itself — kept as a smoke run over every shape; the known-firing resolution grades an answer.
       const one = { JOB_VOCABULARY: JSON.parse(JSON.stringify(JOB_VOCABULARY)), SITE_STAGES: [...SITE_STAGES], WALL_TILE };
-      for (const [name, job] of [['garden-kit', node2d().world.job], ['garden-3d-kit', W().job], ['garden-3d-kit (node)', node().job]] as const)
-        expect({ name, tables: { JOB_VOCABULARY: job.JOB_VOCABULARY, SITE_STAGES: job.SITE_STAGES, WALL_TILE: job.WALL_TILE } }).toEqual({ name, tables: one });
-      for (const w of [node2d().world, W()]) expect([w.DEFAULT_LEGEND[WALL_TILE], w.KINDS.includes('wall')]).toEqual(['wall', true]);
+      const job = node2d().world.job;
+      expect({ tables: { JOB_VOCABULARY: job.JOB_VOCABULARY, SITE_STAGES: job.SITE_STAGES, WALL_TILE: job.WALL_TILE } }).toEqual({ tables: one });
+      expect(W().job).toBe(job);
+      expect(node().job).toBe(job);
+      expect([W().DEFAULT_LEGEND[WALL_TILE], W().KINDS.includes('wall')]).toEqual(['wall', true]);
       const a = node2d().world.job;
       const b = W().job;
       const things: unknown[] = [
@@ -1491,7 +1497,7 @@ describe('P108 IW-003 (lane B) — garden-3d-kit builds Biscuit’s ball and foo
   const { REQUESTS } = require('./cg002Content');
   const { ENGINE, helper } = require('./cg002Scripts');
   /* eslint-enable @typescript-eslint/no-var-requires */
-  const kit = loadKits(BUILT_2D).kit;
+  const kit = loadKits().kit;
   const node = kit.reactNodes.find((n) => n.name === 'garden-3d-kit.Garden3D')!;
   const W = node.world;
   const meshesIn = (g: any) => {
@@ -1558,7 +1564,7 @@ describe('P108 IW-003 lane S — garden-3d-kit builds Sami’s bench by stage, t
   let kit: KitModule;
   let kit2d: KitModule;
   beforeAll(() => {
-    const both = loadKits(BUILT_2D);
+    const both = loadKits();
     kit = both.kit;
     kit2d = both.modules[0];
   });
@@ -1623,7 +1629,7 @@ describe('P108 IW-007 lane B — garden-3d-kit builds her land: the spa and the 
   let kit: KitModule;
   let kit2d: KitModule;
   beforeAll(() => {
-    const both = loadKits(BUILT_2D);
+    const both = loadKits();
     kit = both.kit;
     kit2d = both.modules[0];
   });
@@ -1681,7 +1687,7 @@ describe('P108 s8 — the 3D world draws a walk a tile at a time', () => {
   let kit3: KitModule;
   let kit2: KitModule;
   beforeAll(() => {
-    const both = loadKits(BUILT_2D);
+    const both = loadKits();
     kit3 = both.kit;
     kit2 = both.modules[0];
   });

@@ -506,10 +506,15 @@ function buildInjectionTags(modules, pathPrefix) {
     for (let i = 0; i < browserModules.length; i++) {
       const m = browserModules[i];
       const marksFolder = !!m.folder && (required.has(m.name) || required.has(m.folder));
-      // ISL-013 ruling 2 (a): a kit whose needed kit is missing is not loaded, and the page's console says which and why
+      // ISL-013 ruling 2 (a): a kit whose needed kit is missing is not loaded, and the page's console says which and why.
+      // The same fact goes on CN-015's failure list, which the viewer hands the editor, so Settings → Kits names it too —
+      // without it the kit there reads "Installed. Reload the preview", which no reload changes.
       if (m.refused) {
         modulesMain +=
-          '<script type="text/javascript">console.error(' + jsString('The kit "' + m.name + '" was not loaded: ' + m.refused) + ');</script>\n';
+          '<script type="text/javascript">' +
+          'window.__noodl_module_failures = window.__noodl_module_failures || [];' +
+          'window.__noodl_module_failures.push({module: ' + jsString(m.name) + ', reason: "refused", message: ' + jsString(m.refused) + '});' +
+          'console.error(' + jsString('The kit "' + m.name + '" was not loaded: ' + m.refused) + ');</script>\n';
         continue;
       }
       if (m.index) {

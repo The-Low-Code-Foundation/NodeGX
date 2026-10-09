@@ -554,11 +554,13 @@ function fakeDom() {
   return { doc, root, canvas, overlay: mk() };
 }
 function kit3d(text = fs.readFileSync(BUILT_3D, 'utf8')) {
+  // garden-kit first, as a page loads them: the 3D kit `requires` it and reads it through `getModule` (P109 ISL-013)
   const modules: any[] = [];
-  const context: Record<string, any> = { Noodl: { defineModule: (m: any) => modules.push(m) }, React, console, setTimeout, clearTimeout };
-  context.__noodl_modules = modules;
+  let folder = 'garden-kit';
+  const context: Record<string, any> = { Noodl: { defineModule: (m: any) => modules.push(Object.assign(m, { folder })), getModule: (id: string) => { for (let i = modules.length - 1; i >= 0; i--) if (modules[i] && modules[i].folder === id) return modules[i].exports; } }, React, console, setTimeout, clearTimeout };
   vm.createContext(context);
   vm.runInContext(fs.readFileSync(BUILT_2D, 'utf8'), context);
+  folder = 'garden-3d-kit';
   vm.runInContext(text, context);
   return modules[modules.length - 1].reactNodes.find((n: any) => n.name === 'garden-3d-kit.Garden3D');
 }

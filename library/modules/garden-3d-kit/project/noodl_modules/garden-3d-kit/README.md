@@ -64,7 +64,11 @@ stills the glides, turns, recoils, hops and pops.
 - `icon.png` (the library-shelf icon) is garden-kit’s (itself game-kit’s) icon, copied as a placeholder.
 - No other asset: every shape is a primitive; no Kenney or downloaded pack (IG-007 §6).
 
-The parse helpers (`parseMap`, `parseThings`, `parseRobots`) are garden-kit’s own when that kit is on the same
-page (found through `window.__noodl_modules` at render time); a copy inside this file stands in when it is
-not, and the kit gate pins the copy to the original. The desktop shell lists three.js in its
-`licenses/NOTICE.txt`.
+The desktop shell lists three.js in its `licenses/NOTICE.txt`.
+
+## It needs Garden Kit
+
+It needs Garden Kit in the same project. The 3D kit draws with Garden Kit’s world helpers, such as `parseMap` and
+the job table. It reads them through `Noodl.getModule('garden-kit')`. Its manifest lists `garden-kit` under
+`requires`, so Garden Kit always loads first. Without Garden Kit this kit does not load. The browser console names
+the kit that is missing.

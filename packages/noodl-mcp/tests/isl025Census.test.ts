@@ -145,9 +145,11 @@ export const WORKAROUNDS: Row[] = [
   {
     w: 'W15',
     what: 'JOB_VOCABULARY copied into both kits, pinned equal by a test',
-    files: ['library/modules/garden-3d-kit/src/kit3d.js', 'library/modules/garden-kit/src/kit.js'],
+    // P109 ISL-013 AC5 (s34): garden-kit's table is the kits' one home and garden-3d-kit reads it through `exports`
+    // (`requires`), so the copy is the 3D kit's, built and source; the pin left is the generator's table against garden-kit's.
+    files: ['library/modules/garden-3d-kit/src/kit3d.js', 'library/modules/garden-3d-kit/project/noodl_modules/garden-3d-kit/index.js'],
     pattern: /var JOB_VOCABULARY = \[/,
-    state: 'present'
+    state: 'removed'
   },
   {
     w: 'W16',

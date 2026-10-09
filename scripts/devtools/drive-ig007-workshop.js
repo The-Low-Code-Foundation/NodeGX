@@ -243,7 +243,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     const ready = await until(`(() => { const e = ${ROOT}; return e ? { supported: e.getAttribute('data-supported'), ready: e.getAttribute('data-ready'), helpers: e.getAttribute('data-helpers'), w: e.getAttribute('data-w'), h: e.getAttribute('data-h') } : null; })()`, (v) => v && v.ready === 'true' && v.w === '8', 12000);
     const wl = await worlds();
     readings.boot3d = { ready, worlds: wl, mounts: await mounts(), stored: await stored() };
-    check('AC1: the Workshop draws Garden 3D (Supported true, Ready, the 8×6 tulip plot, garden-kit’s helpers) and no 2D world', ready && ready.supported === 'true' && ready.ready === 'true' && ready.w === '8' && ready.h === '6' && ready.helpers === 'sibling' && wl.gd3 === 1 && wl.gd === 0, readings.boot3d);
+    check('AC1: the Workshop draws Garden 3D (Supported true, Ready, the 8×6 tulip plot, garden-kit’s helpers) and no 2D world', ready && ready.supported === 'true' && ready.ready === 'true' && ready.w === '8' && ready.h === '6' && ready.helpers === 'garden-kit' && wl.gd3 === 1 && wl.gd === 0, readings.boot3d);
     await wait(800);
     await shot('ac1-3d-01-start');
     const start = await agree('start');

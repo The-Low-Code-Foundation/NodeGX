@@ -130,7 +130,7 @@ export interface NodeLibraryDataNodeType {
 export interface NodeLibraryModuleFailure {
   /** The manifest name — the same string `ProjectNodeKit.displayName` carries. */
   module: string;
-  /** `threw` or `script-not-loaded`. */
+  /** `threw` or `script-not-loaded` (CN-015), or `refused`: a kit it `requires` is missing (ISL-013). */
   reason: string;
   /** What the browser reported. */
   message: string;

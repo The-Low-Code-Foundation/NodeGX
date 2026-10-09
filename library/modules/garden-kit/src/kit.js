@@ -1311,10 +1311,10 @@
   }
 
   // ── P108 IW-002 AC6 (lane D): the job model, drawn ─────────────────────────────────────────────────────────────
-  // COPIES of the ONE table in packages/noodl-mcp/tests/cg002Content.ts (JOB_VOCABULARY, SITE_STAGES, WALL_TILE): the
-  // engine writes these names, both world kits draw them, and ig007Garden3d pins every copy (garden-kit's and
-  // garden-3d-kit's) to the table, and the helpers below to each other. A thing with none of the job fields (every thing
-  // of the 13 requests) is drawn exactly as before; so is a world with Watch empty and Picking off.
+  // The kits' one copy of the table in packages/noodl-mcp/tests/cg002Content.ts (JOB_VOCABULARY, SITE_STAGES, WALL_TILE): the
+  // engine writes these names and both world kits draw them — garden-3d-kit reads this one through `exports` (P109 ISL-013),
+  // and ig007Garden3d pins it to the generator's table. A thing with none of the job fields (every thing of the 13 requests)
+  // is drawn exactly as before; so is a world with Watch empty and Picking off.
   var WALL_TILE = 'L';
   var SITE_STAGES = ['dirt', 'gravel', 'cobbles', 'path'];
   var JOB_VOCABULARY = [
@@ -1946,8 +1946,8 @@
    * order, in px: { x, below, above, w, h } — x the pill's centre, below the top edge of a pill under the robot, above the
    * bottom edge of a pill over it. Greedy, the LOWEST on screen first (then robot order): a pill stays under its robot
    * unless that meets a pill already placed; then it goes over, unless that meets one too (then under, as before) — so of
-   * a robot standing right above another, it is the upper one whose pill goes over. No width (no name) takes no room. Both kits
-   * hold this one function (garden-3d-kit's copy is pinned to it).
+   * a robot standing right above another, it is the upper one whose pill goes over. No width (no name) takes no room. garden-3d-kit
+   * places its pills with this one (`exports`, P109 ISL-013).
    */
   function pillSides(items) {
     var placed = [], out = [];
@@ -1981,6 +1981,13 @@
     return out;
   }
 
+  /**
+   * The pure parts of a world: the Garden node's `world` (for the kit gate) and this kit's `exports`. P109 ISL-013: garden-3d-kit
+   * draws the same world and reads these through `Noodl.getModule('garden-kit')` (its manifest `requires` this kit, so it loads
+   * after it on every loader) — one copy, where it used to keep its own and walk `__noodl_modules` for this one.
+   */
+  var WORLD = { parseMap: parseMap, parseThings: parseThings, parseRobots: parseRobots, robotPlaces: robotPlaces, pillSides: pillSides, walkTiles: walkTiles, stepFacing: stepFacing, rose: rose, DEFAULT_LEGEND: DEFAULT_LEGEND, KINDS: KINDS, rockSize: rockSize, loadOf: loadOf, wholeOf: wholeOf, METER_ICONS: METER_ICONS, job: JOB_LOOK };
+
   /** @type {import('./types/node-kit').ReactNodeDefinition} */
   var Garden = {
     name: 'garden-kit.Garden',
@@ -1996,7 +2003,7 @@
     noodlNodeAsProp: true,
 
     /** The pure parts, for the kit gate. */
-    world: { parseMap: parseMap, parseThings: parseThings, parseRobots: parseRobots, robotPlaces: robotPlaces, pillSides: pillSides, walkTiles: walkTiles, stepFacing: stepFacing, rose: rose, DEFAULT_LEGEND: DEFAULT_LEGEND, KINDS: KINDS, rockSize: rockSize, loadOf: loadOf, job: JOB_LOOK },
+    world: WORLD,
     sprite: { minPx: ROBOT_MIN_PX, svgPct: ROBOT_SVG_PCT, face: { x: FACE_X, y: FACE_Y, w: FACE_W, h: FACE_H }, faceFraction: FACE_FRACTION, robotSvg: robotSvg, sprites: SPRITES },
     css: WORLD_CSS,
 
@@ -2569,7 +2576,9 @@
   /** @type {import('./types/node-kit').NodeKitModule} */
   var kit = {
     nodes: [],
-    reactNodes: h ? [BlockList, Garden, Divider].concat(blocksNode ? [blocksNode] : []) : []
+    reactNodes: h ? [BlockList, Garden, Divider].concat(blocksNode ? [blocksNode] : []) : [],
+    // P109 ISL-013: what garden-3d-kit reads (`Noodl.getModule('garden-kit')`) — the world helpers and the job table, one copy
+    exports: WORLD
   };
 
   Noodl.defineModule(kit);

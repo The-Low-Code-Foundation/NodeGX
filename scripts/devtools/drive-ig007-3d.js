@@ -356,7 +356,7 @@ withDeployedSite({ dir: DIR, gpu: true, chromeArgs: ['--use-angle=swiftshader', 
   // ── SUPP + READY ─────────────────────────────────────────────────────────
   const ready = await until(`({ supported: Noodl.Variables.get('supported'), ready: Noodl.Variables.get('ready'), attrs: (() => { const e = ${ROOT}; if (!e) return null; const o = {}; for (const a of e.attributes) o[a.name] = a.value; return o; })() })`, (v) => v.attrs && v.attrs['data-ready'] === 'true' && v.ready >= 1, 10000);
   readings.ready = ready;
-  check('SUPP: Supported came out of the port as true, the root agrees, and garden-kit’s helpers were found on the page', ready.supported === true && ready.attrs && ready.attrs['data-supported'] === 'true' && ready.attrs['data-helpers'] === 'sibling', ready);
+  check('SUPP: Supported came out of the port as true, the root agrees, and garden-kit’s helpers were found on the page', ready.supported === true && ready.attrs && ready.attrs['data-supported'] === 'true' && ready.attrs['data-helpers'] === 'garden-kit', ready);
   check('READY: Ready fired once (the Counter reads 1) and the root carries data-ready', ready.ready === 1 && ready.attrs && ready.attrs['data-ready'] === 'true' && ready.attrs['data-w'] === '8' && ready.attrs['data-h'] === '6', ready);
 
   // ── PIXELS ───────────────────────────────────────────────────────────────
