@@ -296,6 +296,13 @@ jobs:
       # nodes exporting while the corpus metric read a healthy 85%. This ratchets picker
       # coverage: a fall fails, and a rise fails until the floor is raised in the same commit.
       - run: npm run export-ledger:picker
+      # NSP-009 (phase 107): the same ratchet for the node specs. The number of picker nodes whose
+      # behaviour is written down and checked can only go up (a fall fails, a rise fails until
+      # `floor` in dev-docs/tasks/phase-107-the-node-says-what-it-does/spec-ledger.json is raised
+      # in the same commit), and a new picker node with no spec, no exemption and no owed entry
+      # fails, named. The grading itself is the `test-packages` job (every registered spec at 200
+      # sequences with its mutants, every graph scenario); this step counts, it does not re-run.
+      - run: npm run spec-ledger:check
       # SUB-012: the catalog validator's duplicate-node-id rule, against its
       # committed corrupt/clean fixture pair. A project with two nodes sharing
       # an id used to pass every gate with zero failures.
