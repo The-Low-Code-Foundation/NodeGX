@@ -122,9 +122,14 @@ export const RouterNavigate = defineNode({
   }
 }).on(
   {
-    openInNewTab: (_s, v) => ({ set: { openInNewTab: !!v }, send: [] }),
+    openInNewTab: (_s, v) => ({ says: 'always: whether the next navigation opens a new tab', set: { openInNewTab: !!v }, send: [] }),
     // :46-48, :112-128 — every press is answered once the handler hands the frame's navigate on, or (no router) never
-    navigate: (s) => ({ set: { scheduled: true, presses: s.presses + 1 }, send: [], outcome: 'pending' })
+    navigate: (s) => ({
+      says: 'always: one navigation at the end of the frame, however many presses — Done (or Unchanged) for each when a router takes it, Error and Failure for each when none can; never answered while no router is on the page',
+      set: { scheduled: true, presses: s.presses + 1 },
+      send: [],
+      outcome: 'pending'
+    })
   },
   {
     // The frame's end, in the runtime's callback order: first the Done / Unchanged answers that landed since the last

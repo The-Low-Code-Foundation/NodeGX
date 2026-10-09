@@ -211,7 +211,8 @@ function rulesInWords(reducers, nameOf) {
     out[port] = branches.map((b) => {
       // in the order a frame settles them (interpreter.ts): the pulses, then the outcome
       const wire = b.emit.map((e) => (OUTCOME_NAMES[e] && !nameOf('output', e, true) ? OUTCOME_NAMES[e] : nameOf('output', e)));
-      if (b.outcome && b.outcome !== 'deferred') wire.push(OUTCOME_NAMES[b.outcome] || b.outcome);
+      // `deferred` / `pending`: the outcome comes later (afterInputs, a world answer), so the branch itself puts none on the wire
+      if (b.outcome && b.outcome !== 'deferred' && b.outcome !== 'pending') wire.push(OUTCOME_NAMES[b.outcome] || b.outcome);
       const silent = pulsed.filter((e) => !b.emit.includes(e)).map((e) => nameOf('output', e));
       const tail = [wire.join(', '), silent.length ? `${silent.join(', ')} ${silent.length > 1 ? 'stay' : 'stays'} silent` : '']
         .filter(Boolean)

@@ -9,7 +9,7 @@
 > and a merge prefers the spec — one catalog, two sources, the spec winning where it exists.
 
 **Opened 2026-09-29.** **Depends on NSP-011.**
-**Status: 🟡 s73 (2026-10-09): AC1, AC3, AC4, AC5 met; AC2 counting — 38 of 507 input reducers have their words (the pilot five and NSP-011's 13, 16 specs fully), the typecheck gate waits for the rest.**
+**Status: 🟡 s73 (2026-10-09): AC1, AC3, AC4, AC5 met; AC2 counting — 59 of 507 input reducers have their words (24 specs fully: the pilot five, NSP-011's 13, and the most-used logic nodes), the typecheck gate waits for the rest.**
 
 ## 1. The person sentence
 
@@ -146,13 +146,36 @@ Boolean To String's Selector Changed fires on any different raw Selector value, 
 flips". The honest second case reads "a different value, even one that picks the same string". That is a ruling for
 P109: correct the words or compare truthiness.
 
+**Batch 2: the most-used logic nodes (59 of 507, 24 specs fully).** Ranked by how often the shelf templates
+(`templates/`) place each unworded spec: Group 1,791 · Text 1,251 · Function 1,054 · Set Variable 614 · Button 537 ·
+Expression 344 · Variable 228 · For Each 191 · Text Input 167 · Router Navigate 131 · States 106. Worded: Function,
+Set Variable, Expression, Variable, Router Navigate, States, Static Data, Cloud Function. `rulesInWords` now leaves a
+`pending` outcome off the wire, as it did `deferred` (Router Navigate read "→ pending"). Most of these nodes do
+their visible work at the end of the frame or when the world answers, so the words carry it. The tail after the
+arrow is only what the reducer itself sends.
+
+**Found by writing the words: [P107-C155](../../bugs/p107-c155-the-spec-format-cannot-say-a-port-is-wired.md)**.
+Function's Script setter runs the code only `if (!this.isInputConnected('run'))` (:386); so does Expression's text
+setter (:611). The spec format has no notion of a wired port, and the runtime target never wires one, so both targets
+take the unwired arm and agree by construction. Five branch sites are left after NDA-017 §2: Function, Expression,
+Run Tasks, Page, and `layout.ts`. The words name the precondition: "new code, with Run not wired: …".
+
+**Not worded yet, and why (the next batch's design question):** Group (22 reducers), Text, Button, For Each and Text Input
+build some patches the reader cannot see through. Group returns a shared `NOTHING` constant (an identifier, not a
+literal). Group's Focus builds its pulse as `emit: [...listing.emit]`, which the reader refuses, rightly. For Each returns
+`run(s, view, (w) => …)`, whose patch is computed from a mutable draft, and its Refresh is `{ ...run(…), outcome }`,
+a spread. Options: rewrite those branches as literals (Group's `NOTHING` → `{ says, send: [] }`; Focus split into its
+listed / not-listed cases), or give the format a reducer-level form for a computed patch, such as
+`said('words', patch)`, read as words with an unknown wire. Lean: literals where the branch count is small, since the
+tail after the arrow is the point. For Each's `run` is the one that may need the second form.
+
 **Census:** `spec-census:check` was red at HEAD (test-mention counts from other phases' committed tests, +1 in a
 dozen places). Regenerated from a clean `git archive HEAD` export. With and without s73's inputs the output is
 byte-identical. `spec-census:check` is in no CI workflow.
 
 ## 6. Left
 
-1. **AC2's words for the other 469 reducers** (s73), batch by batch (the pilot five and NSP-011's 13 are done). Then
+1. **AC2's words for the other 448 reducers** (s73), batch by batch (the pilot five, NSP-011's 13 and the top logic nodes are done; next by template use: Group, Text, Button, For Each, Text Input; see §5.1 for the computed-patch question). Then
    flip `says?` to `says` in `Patch`, which is the typecheck gate. Every patch-returning function then owes one, so decide
    first whether `afterInputs` / `world` / `person` patches get read as rules too.
 2. **The record-relation pair:** the rules reader can't see reducers written inside `relationNode`. Teach it the factory,

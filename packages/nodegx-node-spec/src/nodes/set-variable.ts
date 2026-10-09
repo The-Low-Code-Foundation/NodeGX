@@ -89,10 +89,15 @@ export const SetVariable = defineNode({
   }
 }).on(
   {
-    name: (_s, v) => ({ set: { name: v }, send: [] }), // :100-102
-    setWith: (_s, v) => ({ set: { setWith: v }, send: [] }), // :129-131
+    name: (_s, v) => ({ says: 'always: the variable the next Do writes', set: { name: v }, send: [] }), // :100-102
+    setWith: (_s, v) => ({ says: 'always: how the next Do converts Value', set: { setWith: v }, send: [] }), // :129-131
     // :137-145 — a token per press, one store per frame
-    do: (s) => ({ set: { dos: s.dos + 1, scheduled: true }, outcome: 'deferred', send: [] })
+    do: (s) => ({
+      says: 'always: Value is written to the variable at the end of the frame, once however many Dos arrived — Done for each Do; Error, and Failure for each Do, when Name is empty',
+      set: { dos: s.dos + 1, scheduled: true },
+      outcome: 'deferred',
+      send: []
+    })
   },
   {
     // :228-250 — the one dynamic port, registered on first write whatever `Set as` says (:218-222)

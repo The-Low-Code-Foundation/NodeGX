@@ -136,9 +136,13 @@ export const StaticData = defineNode({
   }
 }).on(
   {
-    type: (_s, v) => ({ set: { type: v }, send: [] }), // :99-101
-    csv: (_s, v) => ({ set: { csv: v, scheduled: true }, send: [] }), // :110-113
-    json: (_s, v) => ({ set: { json: v, scheduled: true }, send: [] }) // :122-125
+    type: (_s, v) => ({ says: 'always: kept; the data is read again only when CSV or JSON changes', set: { type: v }, send: [] }), // :99-101
+    csv: (_s, v) => ({ says: 'always: the data is read again at the end of the frame, as Type says (CSV when unset) — Items and Count follow', set: { csv: v, scheduled: true }, send: [] }), // :110-113
+    json: (_s, v) => ({
+      says: 'always: the data is read again at the end of the frame, as Type says — Items and Count follow; with Type JSON, Error and Failure if it does not parse (Failure once per message)',
+      set: { json: v, scheduled: true },
+      send: []
+    }) // :122-125
   },
   {
     // :194-238 parseData. 'nothing due', 'a Type that reads nothing' and 'the same failure again'

@@ -315,10 +315,17 @@ export const JavaScriptFunction = defineNode({
     functionScript: (s, v) => {
       // :771-775 clearRunDiagnostics — a message cleared to blank text and sent (v2, row C146); blank already: nothing
       const cleared: Partial<FunctionState> = s.lastError ? { lastError: '' } : {};
-      if (v === undefined) return { set: { ...cleared, script: undefined, compiled: false, parseError: undefined }, send: s.lastError ? ['error'] : [] };
+      if (v === undefined)
+        return {
+          says: 'no code: nothing to run, and a later Run is answered Unchanged (a message on Error is cleared)',
+          set: { ...cleared, script: undefined, compiled: false, parseError: undefined },
+          send: s.lastError ? ['error'] : []
+        };
       const text = v as string;
       const parseError = parse(text);
+      // P107-C155: the runtime asks for this run only while Run is not wired (:386); the spec has no wired port
       return {
+        says: 'new code, with Run not wired: compiled and run at the end of the frame — Success, or Error and Failure if it does not compile or throws',
         set: {
           ...cleared,
           script: text,
@@ -330,7 +337,12 @@ export const JavaScriptFunction = defineNode({
       };
     },
     // :425-430, :493-498 — a token, and the frame's run
-    run: (s) => ({ set: { tokens: s.tokens + 1, ...schedule }, outcome: 'deferred', send: [] })
+    run: (s) => ({
+      says: 'always: one run at the end of the frame, however many Runs arrived — Success, and Done for each Run; Error, and Failure for each Run, if the code does not compile or throws; Unchanged for each Run when there is no code',
+      set: { tokens: s.tokens + 1, ...schedule },
+      outcome: 'deferred',
+      send: []
+    })
   },
   {
     // :504-722 — the one run of the frame

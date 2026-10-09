@@ -1,7 +1,7 @@
 # P107 — next session
 
-**Written 2026-10-09 (s72).** Read the [README](README.md) §2–§7 (R18 is the newest ruling) and
-[NSP-018 §5–§6](NSP-018-THE-SPEC-SPEAKS.md), which is what s72 built and what is left.
+**Written 2026-10-09 (s73).** Read the [README](README.md) §2–§7 (R18 is the newest ruling) and
+[NSP-018 §5.1 and §6](NSP-018-THE-SPEC-SPEAKS.md). That is what s73 built and what is left.
 
 ## Board (from the task files)
 
@@ -9,63 +9,60 @@
 |---|---|---|
 | NSP-000 … NSP-015 | as s44 (NSP-013 left: AC2, the export half with no reach here, and the deep run for s11–s14; NSP-014 / NSP-015 left: AC2's export half, P18's) | s1 … s44 |
 | NSP-016 the visual nodes | ✅ s71 (all four ACs) | `aa8abb06f` … `df215ade6` |
-| **NSP-018 the spec speaks** | 🟡 **s72: AC1, AC3, AC4, AC5 met; AC2 counting — 4 of 507 input reducers in words (Counter)** | s72 |
+| **NSP-018 the spec speaks** | 🟡 **s73: AC1, AC3, AC4, AC5 met; AC2 counting — 59 of 507 input reducers in words, 24 specs fully** | s72, s73 |
 | NSP-009 the ratchet | ✅ s64; s65: a `contract` column | `6a1ed0084`, s65 |
 | NSP-017 the escape hatches | 🟡 s64–s68. Left: AC1's export half (P18's) | s64 … s68 |
 | NSP-023 the spec without React | ✅ (s50) | s45 … s57 |
-| NSP-006 the stranger | ✅ rounds 1–4 (hashes rewritten s70, s72) | `649e6864d`, s70, s72 |
+| NSP-006 the stranger | ✅ rounds 1–4 (hashes rewritten s70, s72, s73) | `649e6864d`, s70, s72, s73 |
 | NSP-020 ports without a viewer | 📋 rows only (s20) | s20 |
 | NSP-010, NSP-019, NSP-021 | 📋 not started (NSP-019 depends on NSP-018 only; NSP-021 carries a P112 note, uncommitted since 2 Oct, not ours) | — |
 | NSP-022 the cloud-only nodes | 📋 (needs a second runtime target) | s21 |
 
-**`node scripts/node-spec/spec-ledger.js --check` (s72, 2026-10-09): holds at 125 of 147 on the runtime · 3 as a contract
-· 2 on the export · 2 exempt · 17 owed (all NSP-022)**, unchanged since s68. New lines: **`in words: 4 of 507 input
-reducers`** (Counter fully; Add / Remove Record Relation not readable, built in a factory) and **`idioms: 18 of 108 specs`**.
+**`node scripts/node-spec/spec-ledger.js --check` (s73): holds at 125 of 147 on the runtime · 3 as a contract · 2 on
+the export · 2 exempt · 17 owed (all NSP-022)**, unchanged since s68. **`in words: 59 of 507`** (was 4), `idioms: 18 of 108`.
 
-## What s72 settled
+## What s73 settled
 
-1. **AC1: the descriptions flipped.** `catalog:generate` / `catalog:check` (CI's `node-catalog` job) load the specs from
-   source (`scripts/node-spec/load-specs.js`), write a specced port's description from its spec, and **fail** naming the port
-   when the runtime's registration says other words. Planted in the runtime's `counter.ts` → exit 1; restored.
-2. **AC2: the format and the pipe, not the words yet.** `Patch.says?` (spec.ts) → `scripts/node-spec/rules.js` reads it
-   from the AST → the catalog's `rules: { [inputPort]: string[] }` → `catalog:merge` → `get_node_type`. Counter has
-   all eight cases. **Required now = 510 `tsc` errors** (measured, spec.ts restored), so the gate flips only when the count
-   reads 507 of 507.
-3. **AC3: `rules` rides full detail and the `ports` path (narrowed), NOT the default summary.** Reason: the CMP-006 traffic
-   (45 calls: 26 default, 18 ports, 1 full) and the summary's measured-size contract. `noodl-mcp/tests/nsp018RulesOnTheWire.test.ts`
-   asserts the summary carries none; overturn that with a measurement, not quietly. Planted → the two relay tests red.
-4. **AC4: `docs:nodes:check` was ALREADY red** (two pages stale from P109's ISL-048 / ISL-049 regenerating the enriched
-   catalog and not the docs). Regenerated, committed alone (`7c706085d`). **Where the s71 handoff was silent:** nothing in
-   it named this. A catalog change owes `catalog:generate` → `catalog:merge` → `docs:nodes`, all three.
-5. **AC5: `idioms`** on the 13 NSP-011 T1 nodes and the pilot five; `spec-ledger --check` fails an NSP-011 T1 spec without
-   one (planted on Or). React names in `idioms` are on purpose (it describes the code a node replaces). That is R11's one
-   exception, written in NSP-018 §5.
-6. **`noodl-mcp`'s `tsc --noEmit` is red on 10 errors in other phases' test files** (`cg001…cg003`, `ig007`, `iw007`,
-   `p108s8Feedback` — P108's garden kits). None in files s72 touched. Not ours. Left alone.
+1. **The reader dropped pulses.** `scripts/node-spec/rules.js` read only literal `emit` elements, so Switch's Flip (a
+   ternary pulse) came out one pulse short. A said branch's `emit` and `outcome` must now be literal, and a spread is
+   refused. Each throws naming file:line. Split a computed pulse into cases, each with its `says`.
+2. **The reader follows helpers.** It reads through a named call (same file, or a `./sibling` import in `src/nodes`) and
+   through a reducer given by name (`saveValue: onSet`). It reads `as const`, and skips idioms. The Variables' words
+   live once in `variable-base.ts`. Graded in `tests/rules-reader.test.ts` (12, two plants).
+3. **Words for 24 specs:** the pilot five, NSP-011's 13, then by template use Function, Set Variable, Expression,
+   Variable, Router Navigate, States, Static Data, Cloud Function. Deferred work (end of frame, a world answer) is said
+   in the words; the tail after the arrow is only what the reducer itself sends.
+4. **Two rows found by writing the words.** [P107-D38](../../bugs/p107-d38-boolean-to-string-s-selector-changed-fires-without-a-flip.md)
+   (Boolean To String's Selector Changed fires on any different value, not only a flip: a ruling for P109).
+   [P107-C155](../../bugs/p107-c155-the-spec-format-cannot-say-a-port-is-wired.md) (**ours**: the format has no wired
+   port, so Function's and Expression's "run on a new text only while Run is not wired" is graded on the unwired arm
+   only; five runtime sites).
+5. **The census was stale at HEAD** (other phases' committed tests). Regenerated from a clean export; s73's inputs
+   change nothing in it. `spec-census:check` is in no CI workflow.
 
-## What s73 does
+## What s74 does
 
-1. **NSP-018 AC2, the words, batch by batch.** Start with the rest of the pilot five (Switch, Condition, String Format; And
-   and Or have no `.on` reducers, their inputs are derived, so they count 0), then NSP-011's 13. Write each `says` from the reducer and its source cites:
-   the case, never the wire (rules.js adds that). Read the output with `node scripts/node-spec/rules.js <Type>`. Then
-   `catalog:generate` → `catalog:merge` → `docs:nodes:check`, and re-run `noodl-mcp/tests/nsp018RulesOnTheWire.test.ts`.
-   **Before the flip to required,** decide whether `afterInputs` / `world` / `person` patches are read as rules too (the
-   flip makes every patch owe a `says`), and teach the reader the `relationNode` factory.
-2. **Or NSP-019 (Richard reads it: the inspector shows a node's rules)**, which is now unblocked for Counter. It needs
-   the catalog's `rules` to reach the editor. Read its task file first.
-3. **When the box is quiet:** NSP-013's deep run for s11–s14, and the census regenerated from a clean export (below).
-   Neither has been done since s66.
+1. **NSP-018 AC2, the next batch by template use: Group (22), Text (16), Button (6), For Each (5), Text Input (18).**
+   First decide the computed-patch question (NSP-018 §5.1, last paragraph). Group's `NOTHING` constant and Focus's
+   `emit: [...listing.emit]` can become literals. For Each's `run(s, view, cb)` builds its patch from a draft and its
+   Refresh spreads one, so it may need a reducer-level form (`said('words', patch)`, an unknown wire). Re-rank first (unworded specs by `"type"` count in `templates/`):
+   `node -e "const fs=require('fs'),p=require('path');const {loadSpecs}=require('./scripts/node-spec/load-specs');const {readReducers}=require('./scripts/node-spec/rules');const S=loadSpecs(),R=readReducers(),c={};(function w(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const f=p.join(d,e.name);if(e.isDirectory()){if(e.name!=='node_modules')w(f)}else if(f.endsWith('.json'))for(const m of fs.readFileSync(f,'utf8').matchAll(/\"type\":\s*\"([^\"]+)\"/g))c[m[1]]=(c[m[1]]||0)+1}})('templates');console.log(Object.entries(S).map(([t,s])=>[t,Object.keys(s.on||{}),R[t]||{}]).filter(([,k,r])=>k.some(q=>!(r[q]||[]).length)).map(([t,k])=>[t,k.length,c[t]||0]).sort((a,b)=>b[2]-a[2]).slice(0,15).map(x=>x.join(' ')).join('\n'))"`
+2. **Or C155 (ours):** a wired-port notion in the format (`wired` in inputs-seen, a stub source wired by the runtime
+   target, scenarios for the wired arm of Function / Expression / Run Tasks / Page / layout). Format files are
+   stranger-guarded.
+3. **Or NSP-019** (the inspector shows a node's rules). Now 24 specs have rules to show.
+4. **When the box is quiet:** NSP-013's deep run for s11–s14.
 
-**Human decisions: none open.** NSP-018 §6.3 (`rules` on the default summary) is a measurement to make, not a ruling.
-**P109 holds:** C152, C153, C154, the Page Stack, the Router (S18). **P112 holds:** P107-SIZE.
+**Human decisions: none open for P107.** D38 is P109's to put to Richard. **P109 holds:** C152, C153, C154, D38, the
+Page Stack, the Router (S18). **P112 holds:** P107-SIZE.
 
-**Gates (s72, 2026-10-09, before the s72 commits on `7c706085d`):** the node-spec suite once, `-w 2`: **31 / 31 suites,
-1,836 passed, 18 skipped, exit 0, 510 s** (stranger hashes rewritten first; the pre-rewrite run was red ONLY on the hash
-check, 45 passed). `tsc --noEmit` (node-spec) clean. Runtime `NSP_ONLY=Counter conformance -w 1`: 6 passed, exit 0.
-`noodl-mcp`: `nsp018…`, `cmp006…`, `cmp009…`, `toolDisclosure` 4 / 4 suites, 54 tests; `[surface] 8261 / 8280`.
-`catalog:check`, `catalog:merge:check`, `docs:nodes:check`, `spec-ledger --check`: all exit 0. **Not run:** the
-editor's `tsc` (the `noodl-types` change is one optional interface field; load was 6), the full `noodl-mcp` suite,
-`test:main`. Plants: four, each restored by `cp` and `cmp`-checked (NSP-018 §5).
+**Gates (s73):** batch 1 (`e8955b1dd`): `tsc --noEmit` (node-spec) clean; node-spec rules-reader, stranger (hashes rewritten), spec-ledger,
+pilot, batch, catalog-parity, counter: **7 / 7 suites, 457 passed, 18 skipped, exit 0** (stranger 421 s). Runtime `NSP_ONLY=Switch`
+and `NSP_ONLY="Color Blend"` conformance `-w 1`: 6 passed each, exit 0. Batch 2: `tsc` clean; rules-reader, catalog-parity,
+batch-escape, -data, -navigation, -time, -records, spec-ledger: **8 / 8 suites, 510 passed, exit 0** (run after a peer's
+`-w 2` suite exited). Both batches: `noodl-mcp` `nsp018RulesOnTheWire` 5 / 5; `catalog:check`, `catalog:merge:check`,
+`docs:nodes:check`, `spec-ledger --check` exit 0. **Not run:** the full node-spec suite, the editor's `tsc`, the full
+`noodl-mcp` suite, `test:main`. Plants: two on the reader, each red on exactly its cases, restored by `cp` and `cmp`-checked.
 
 ## Before you start
 
@@ -89,6 +86,8 @@ editor's `tsc` (the `noodl-types` change is one optional interface field; load w
   packages/nodegx-core/tests packages/nodegx-export/tests packages/noodl-mcp/tests dev-docs/tasks/phase-107-the-node-says-what-it-does
   scripts/node-spec | tar -x -C <dir>`, copy your changed census inputs in, run `node <dir>/scripts/node-spec/census.js`, copy
   census.json and CENSUS.md back. The census counts zz files: delete them first.
+- **The rules reader (s73):** `node scripts/node-spec/rules.js <Type>` prints a spec's lines. A `says` goes on the patch
+  literal; a branch reached only through a constant, a spread or a mutable draft is invisible to it (see §5.1).
 - **The catalog pipe (s72):** a change to a spec's descriptions, `says` or the runtime's registration owes
   `node scripts/node-catalog/generate.js` → `npm run catalog:merge` → `npm run docs:nodes`, all three, then the three
   `--check`s. `generate.js` now reads the specs too; a description disagreement throws there, naming both sentences.

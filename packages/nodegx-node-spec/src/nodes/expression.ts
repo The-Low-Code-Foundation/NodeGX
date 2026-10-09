@@ -384,15 +384,22 @@ export const Expression = defineNode({
       for (const target of watched(deps)) w.watch(target);
       // :234-244 `_scheduleLoadEvaluation`
       const pendingLoad = referenced.length > 0 && !s.arrived ? true : s.pendingLoad;
+      // P107-C155: the runtime asks for this evaluation only while Run is not wired (:611); the spec has no wired port
       return {
+        says: 'new text, with Run not wired: its inputs become the names it reads, and it is evaluated at the end of the frame — On True or On False; before any input has arrived, only if Evaluate At Load is ticked',
         set: { body: PREAMBLE + 'return (' + text + ');', referenced, reserved: expressionNodeInputsRead(text), scope, names: Object.keys(scope), compiledWith: undefined, unticked, pendingLoad, deps, ...schedule },
         send: []
       };
     },
     // :599-603 — a token, and the frame's evaluation
-    run: (s) => ({ set: { tokens: s.tokens + 1, ...schedule }, outcome: 'deferred', send: [] }),
+    run: (s) => ({
+      says: 'always: evaluated once at the end of the frame, however many Runs arrived — On True or On False, and Done for each Run; Error, and Failure for each Run, if it does not compile or throws',
+      set: { tokens: s.tokens + 1, ...schedule },
+      outcome: 'deferred',
+      send: []
+    }),
     // :618-620
-    evaluateAtLoad: (_s, v) => ({ set: { evaluateAtLoad: v }, send: [] })
+    evaluateAtLoad: (_s, v) => ({ says: 'always: whether an evaluation before any input has arrived goes ahead', set: { evaluateAtLoad: v }, send: [] })
   },
   {
     // :258-320 — the one evaluation of the frame

@@ -618,23 +618,30 @@ export const States = defineNode({
       const w = draft(s);
       w.states = v ? (v as unknown as string).split(',') : [];
       if (w.states.length > 0 && !w.state) schedule(w, w.startState || w.states[0]);
-      return { set: { states: w.states, queue: w.queue, scheduled: w.scheduled } };
+      return {
+        says: 'always: the list of states; while none is current, the first (or Start State) is entered at the end of the frame',
+        set: { states: w.states, queue: w.queue, scheduled: w.scheduled }
+      };
     },
     // :296-327 — a reserved name is refused on the error channel and gets no output; every other name's output exists already
-    values: (_s, v) => ({ set: { values: v ? (v as unknown as string).split(',') : [] } }),
+    values: (_s, v) => ({ says: 'always: the values that differ between states, each an output', set: { values: v ? (v as unknown as string).split(',') : [] } }),
     // :365-368
-    useTransitions: (_s, v) => ({ set: { useTransitions: v } }),
+    useTransitions: (_s, v) => ({ says: 'always: whether the next move animates its values or jumps', set: { useTransitions: v } }),
     // :333-357
     toggle: (s) => {
       const w = draft(s);
       if (!w.states || w.states.length === 0) {
         w.error = NO_STATES_MESSAGE; // :339-345 → :634-639
-        return { set: { error: w.error }, outcome: 'failure', error: NO_STATES_CODE };
+        return { says: 'no States: refused, and Error says so', set: { error: w.error }, outcome: 'failure', error: NO_STATES_CODE };
       }
       const idx = w.states.indexOf(w.state as string);
       const nextIdx = (idx + 1) % w.states.length;
-      if (schedule(w, w.states[nextIdx], 'toggle') === 'unchanged') return { outcome: 'unchanged' }; // :678 — nothing queued
-      return { set: { queue: w.queue, scheduled: w.scheduled }, outcome: 'deferred' };
+      if (schedule(w, w.states[nextIdx], 'toggle') === 'unchanged') return { says: 'already in, or already heading to, the next state', outcome: 'unchanged' }; // :678 — nothing queued
+      return {
+        says: 'otherwise it moves to the next state, wrapping round after the last, at the end of the frame — State Changed, then Done',
+        set: { queue: w.queue, scheduled: w.scheduled },
+        outcome: 'deferred'
+      };
     }
   },
   {

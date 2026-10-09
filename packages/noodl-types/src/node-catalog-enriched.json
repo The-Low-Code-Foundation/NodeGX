@@ -5252,6 +5252,11 @@
         "known": false,
         "reason": "Ports are computed by the editor from the selected cloud function component's inputs and outputs (CloudFunctionAdapter)."
       },
+      "rules": {
+        "call": [
+          "always: one call at the end of the frame, however many presses — when it answers, its results and Done for each press, or Error and Failure for each; with no cloud services, Error and Failure for each at the end of the frame"
+        ]
+      },
       "enrichment": {
         "typeName": "CloudFunction2",
         "summary": "Calls a cloud function component from the browser: send parameters, run the server-side graph, receive its results.",
@@ -9718,6 +9723,17 @@
             "valueType": "boolean",
             "example": "runOnChange-Sa1"
           }
+        ]
+      },
+      "rules": {
+        "expression": [
+          "new text, with Run not wired: its inputs become the names it reads, and it is evaluated at the end of the frame — On True or On False; before any input has arrived, only if Evaluate At Load is ticked"
+        ],
+        "run": [
+          "always: evaluated once at the end of the frame, however many Runs arrived — On True or On False, and Done for each Run; Error, and Failure for each Run, if it does not compile or throws"
+        ],
+        "evaluateAtLoad": [
+          "always: whether an evaluation before any input has arrived goes ahead"
         ]
       },
       "enrichment": {
@@ -17972,6 +17988,15 @@
           }
         ],
         "notes": "Names are interpolated verbatim, including spaces — a value called `bg color` produces a port called `value-true-bg color`, not `value-true-bgColor`."
+      },
+      "rules": {
+        "functionScript": [
+          "no code: nothing to run, and a later Run is answered Unchanged (a message on Error is cleared)",
+          "new code, with Run not wired: compiled and run at the end of the frame — Success, or Error and Failure if it does not compile or throws"
+        ],
+        "run": [
+          "always: one run at the end of the frame, however many Runs arrived — Success, and Done for each Run; Error, and Failure for each Run, if the code does not compile or throws; Unchanged for each Run when there is no code"
+        ]
       },
       "enrichment": {
         "typeName": "JavaScriptFunction",
@@ -29813,6 +29838,14 @@
         "known": false,
         "reason": "Ports are computed by the editor from the target page component's parameters (RouterNavigateAdapter)."
       },
+      "rules": {
+        "openInNewTab": [
+          "always: whether the next navigation opens a new tab"
+        ],
+        "navigate": [
+          "always: one navigation at the end of the frame, however many presses — Done (or Unchanged) for each when a router takes it, Error and Failure for each when none can; never answered while no router is on the page"
+        ]
+      },
       "enrichment": {
         "typeName": "RouterNavigate",
         "summary": "Navigate: tells a named Router to switch to a target page, passing typed path parameters, when its navigate signal fires.",
@@ -30393,6 +30426,17 @@
       "parameterEncoding": {
         "known": false,
         "reason": "The `name` parameter selects which variable is written; it does not appear in any port name. The single dynamic port is `value`, whose *type* follows the `setWith` parameter."
+      },
+      "rules": {
+        "name": [
+          "always: the variable the next Do writes"
+        ],
+        "setWith": [
+          "always: how the next Do converts Value"
+        ],
+        "do": [
+          "always: Value is written to the variable at the end of the frame, once however many Dos arrived — Done for each Do; Error, and Failure for each Do, when Name is empty"
+        ]
       },
       "enrichment": {
         "typeName": "Set Variable",
@@ -31508,6 +31552,22 @@
         ],
         "notes": "Names are interpolated verbatim, including spaces — a value called `bg color` produces a port called `value-true-bg color`, not `value-true-bgColor`."
       },
+      "rules": {
+        "states": [
+          "always: the list of states; while none is current, the first (or Start State) is entered at the end of the frame"
+        ],
+        "values": [
+          "always: the values that differ between states, each an output"
+        ],
+        "useTransitions": [
+          "always: whether the next move animates its values or jumps"
+        ],
+        "toggle": [
+          "no States: refused, and Error says so → Failure",
+          "already in, or already heading to, the next state → Unchanged",
+          "otherwise it moves to the next state, wrapping round after the last, at the end of the frame — State Changed, then Done"
+        ]
+      },
       "enrichment": {
         "typeName": "States",
         "summary": "Named state machine: define states and values, set each value per state, and outputs switch or tween when the state changes.",
@@ -31689,6 +31749,17 @@
         "patterns": [],
         "seededBy": [],
         "notes": "This node computes no port names. Its dynamic behaviour is visibility only: every port it can ever have is listed in `inputs`/`outputs` above, and `dynamicPorts.declaredPortGroups` says which parameter values reveal which of them."
+      },
+      "rules": {
+        "type": [
+          "always: kept; the data is read again only when CSV or JSON changes"
+        ],
+        "csv": [
+          "always: the data is read again at the end of the frame, as Type says (CSV when unset) — Items and Count follow"
+        ],
+        "json": [
+          "always: the data is read again at the end of the frame, as Type says — Items and Count follow; with Type JSON, Error and Failure if it does not parse (Failure once per message)"
+        ]
       },
       "enrichment": {
         "typeName": "Static Data",
@@ -37022,6 +37093,18 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "name": [
+          "with Name ticked under Run On Value Change: bound to that variable now, Value with it → Fetched",
+          "with it unticked: Name changes, Value waits for Fetch → Fetched stays silent"
+        ],
+        "fetch": [
+          "always: bound to the variable Name names, Value with it → Fetched, Done"
+        ],
+        "value": [
+          "always: written to the variable at the end of the frame — Changed if that moved it and Variable changes is ticked under Run On Value Change; Error and Failure when Name is empty"
+        ]
+      },
       "enrichment": {
         "typeName": "Variable2",
         "summary": "Reads and writes one named app-wide variable; every node bound to the same name sees the same value.",

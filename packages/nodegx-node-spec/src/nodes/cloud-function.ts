@@ -204,7 +204,12 @@ export const CloudFunction = defineNode({
 }).on(
   {
     // :143-145 → :231-243 — a token per press, one call per frame
-    call: (s) => ({ set: { presses: s.presses + 1, scheduled: true }, send: [], outcome: 'pending' })
+    call: (s) => ({
+      says: 'always: one call at the end of the frame, however many presses — when it answers, its results and Done for each press, or Error and Failure for each; with no cloud services, Error and Failure for each at the end of the frame',
+      set: { presses: s.presses + 1, scheduled: true },
+      send: [],
+      outcome: 'pending'
+    })
   },
   {
     derived: {

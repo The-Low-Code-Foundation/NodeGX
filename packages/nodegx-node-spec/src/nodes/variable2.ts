@@ -111,11 +111,18 @@ export const Variable2 = defineNode({
 }).on(
   {
     // :174-180 — the checkbox alone decides (`shouldRunOnValueChange`, no compare)
-    name: (_s, v, i) => (i['runOnChange-name'] ? { set: { name: v }, send: ['name', 'value'], emit: ['fetched'] } : { set: { name: v }, send: ['name'] }),
+    name: (_s, v, i) =>
+      i['runOnChange-name']
+        ? { says: 'with Name ticked under Run On Value Change: bound to that variable now, Value with it', set: { name: v }, send: ['name', 'value'], emit: ['fetched'] }
+        : { says: 'with it unticked: Name changes, Value waits for Fetch', set: { name: v }, send: ['name'] },
     // :187-194 — setVariableName(name) then done, in the same call
-    fetch: () => ({ send: ['name', 'value'], emit: ['fetched'], outcome: 'done' }),
+    fetch: () => ({ says: 'always: bound to the variable Name names, Value with it', send: ['name', 'value'], emit: ['fetched'], outcome: 'done' }),
     // :201-204 — stored, the write scheduled once per frame
-    value: (_s, v) => ({ set: { value: v, storeScheduled: true }, send: [] })
+    value: (_s, v) => ({
+      says: 'always: written to the variable at the end of the frame — Changed if that moved it and Variable changes is ticked under Run On Value Change; Error and Failure when Name is empty',
+      set: { value: v, storeScheduled: true },
+      send: []
+    })
   },
   {
     // :214-250 — 'nothing due' and 'stored' return one shape (the flag cleared): neither shows on
