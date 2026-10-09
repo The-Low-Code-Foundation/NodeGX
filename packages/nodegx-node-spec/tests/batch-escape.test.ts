@@ -9,7 +9,7 @@
 import { Expression } from '../src/nodes';
 import { EQUIVALENT_MUTANTS, interpreterAdapter, runConformance, specs } from '../src';
 
-const BATCH = ['Expression'];
+const BATCH = ['Expression', 'JavaScriptFunction'];
 
 describe('NSP-017 — every batch spec conforms on the interpreter: scenarios, 200 sequences, every mutant killed or declared', () => {
   for (const type of BATCH) {

@@ -45,7 +45,10 @@ function ledger(flags: string[], copies: { catalog?: Json; census?: Json; ledger
 }
 
 /** The real ledger file with its floor set to what the script reads today — the control every plant moves one thing from. */
-const atFloor = (runtime = reading.runtime, exp = reading.export.length): Json => ({ ...read(path.join(PHASE, 'spec-ledger.json')), floor: { runtime, export: exp } });
+const atFloor = (runtime = reading.runtime, exp = reading.export.length, contract = reading.contract.length): Json => ({
+  ...read(path.join(PHASE, 'spec-ledger.json')),
+  floor: { runtime, contract, export: exp }
+});
 
 beforeAll(() => {
   dir = fs.mkdtempSync(path.join(os.tmpdir(), 'spec-ledger-'));
@@ -60,7 +63,7 @@ test('the reading counts the population the census counts, and splits it into gr
   expect(reading.population).toBe(census.population);
   const tiers = Object.values(reading.byTier as Record<string, { nodes: number; runtime: number; exempt: number; owed: number }>);
   expect(tiers.reduce((a, t) => a + t.nodes, 0)).toBe(census.population);
-  expect(reading.runtime + reading.exempt.length + reading.owed.length).toBe(reading.population);
+  expect(reading.runtime + reading.contract.length + reading.exempt.length + reading.owed.length).toBe(reading.population);
   expect(reading.runtime).toBe(reading.bySpec + reading.byGraph.length);
   // EXPORT_REACH is read from the helper's AST: the two latch nodes NSP-005 drove on the export
   expect(reading.export).toEqual(expect.arrayContaining(['Counter', 'Switch']));
@@ -135,5 +138,21 @@ describe('AC3 — the ledger and the census count one population, both direction
     const r = ledger(['--check'], { census: copy, ledger: atFloor() });
     expect(r.status).toBe(1);
     expect(r.err).toContain('census.json lists "zz.NSP009.Gone", which is not a picker node');
+  });
+});
+
+describe('NSP-017 AC3 — a contract spec is counted in a column of its own, never as a node that conforms', () => {
+  test('the Function is specced as a contract: in `contract`, not in `runtime`, not owed', () => {
+    expect(reading.contract).toContain('JavaScriptFunction');
+    expect(reading.owed).not.toContain('JavaScriptFunction');
+    // known-firing beside it: a behaviour spec of the same batch (the Expression) is counted in `runtime`, not as a contract
+    expect(reading.contract).not.toContain('Expression');
+    expect(reading.bySpec + reading.byGraph.length).toBe(reading.runtime);
+  });
+
+  test('the contract floor is held like the others: a planted fall fails, named', () => {
+    const r = ledger(['--check'], { ledger: atFloor(reading.runtime, reading.export.length, reading.contract.length + 1) });
+    expect(r.status).toBe(1);
+    expect(r.err).toContain('SPEC COVERAGE FELL on the contract');
   });
 });

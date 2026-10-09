@@ -1434,7 +1434,19 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     if (s.signalOutputs?.has(port)) return true;
     const output = s.h.metadata.outputs[port];
     const t = output && output.type;
+    if (!output) return derivedSignalOutput(s, port);
     return !!t && (t === 'signal' || (typeof t === 'object' && (t as { name?: string }).name === 'signal'));
+  }
+  /**
+   * NSP-017 s65 — a DERIVED signal output, by the spec's declaration for the placing's params: a Function's `out-<z>` reads the
+   * function its code calls (simplejavascript.ts `getScriptOutputValue` asks `_isSignalType` with the bare name, so it never knows),
+   * and the connection-time read must not take that for a value.
+   */
+  function derivedSignalOutput(s: State, port: string): boolean {
+    const outputs = specFor(s.h.type)?.derived?.outputs;
+    if (!outputs) return false;
+    const params = ((s.h.node as unknown as { model?: { parameters?: Record<string, unknown> } }).model?.parameters ?? {}) as Record<string, unknown>;
+    return outputs(params)[port]?.type === 'signal';
   }
 
   function intercept(s: State): void {
@@ -1803,9 +1815,13 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     // `removeListenersWithRef` because `_onNodeDeleted` calls it FIRST (node.ts :1312-1315): without it
     // every teardown threw on its first line, `dispose` swallowed the throw, and no node's delete
     // listeners ever ran — Delay's and Repeat's timers were never stopped (NSP-013 s12, T7)
-    (node as unknown as { model?: unknown }).model = { type, parameters: { ...params }, removeListenersWithRef: () => undefined };
-    // the derived outputs the spec declares for these params — registered as a wire would make the runtime do
+    // NSP-017 s65 — `outputPorts`: the derived outputs, as a loaded project's saved `dynamicports` give the model (nodemodel.ts
+    // `createFromExportData` → `addOutputPort`); the Function reads its signal ports there (simplejavascript.ts :600-618, :843-846)
     const spec = specFor(type);
+    const outputPorts: Record<string, { name: string; type: string }> = {};
+    for (const [name, decl] of Object.entries(spec?.derived?.outputs?.(params) ?? {})) outputPorts[name] = { name, type: decl.type as string };
+    (node as unknown as { model?: unknown }).model = { type, parameters: { ...params }, outputPorts, removeListenersWithRef: () => undefined };
+    // the derived outputs the spec declares for these params — registered as a wire would make the runtime do
     if (spec?.derived?.outputs) {
       for (const name of Object.keys(spec.derived.outputs(params))) (node as unknown as NodeInstance).registerOutputIfNeeded(name);
     }

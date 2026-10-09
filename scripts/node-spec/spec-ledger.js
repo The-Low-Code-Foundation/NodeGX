@@ -18,6 +18,9 @@
  *                   claim's subject is a node of that type, or a component instance, which grades the `Component Outputs` inside it
  *                   (what an instance reports is its Component Outputs' doing). A node only PLACED in a scenario to drive another is
  *                   not graded by it.
+ *   contract    NSP-017 AC3 — a spec that declares `contract` (the person writes the node's code: Function, Script, Visual Function).
+ *               It runs the same code and grades the contract around it with fixtures, so it is counted in a column of its own —
+ *               "specced (contract)" — and never in `runtime`: what conforms is the contract, not the node.
  *   export      the specs with a declared reach on the export (`EXPORT_REACH` in nodegx-export's test helper, read from the AST).
  *   exempt      `exemptions.json` — no spec owed, each with its reason. Printed, never hidden.
  *   owed        `spec-ledger.json` `owed` — picker nodes whose spec is still to be written, each with the task that writes it.
@@ -33,7 +36,7 @@
  * deep pass is local and on demand (R5): `npm run spec-ledger -- --deep "<type>[,<type>]"`.
  *
  * THE RATCHET (`--check`), in `spec-ledger.json` beside tiers.json:
- *   floor     { runtime, export } — exactly as `pickerCoverageFloor`: a fall fails, and a rise fails until the floor is raised in the
+ *   floor     { runtime, contract, export } — exactly as `pickerCoverageFloor`: a fall fails, and a rise fails until the floor is raised in the
  *             same commit, so the gain is held and the decision is in the diff.
  *   owed      the written reason a picker node may be in the picker without a spec yet. THE NEW-NODE GATE: a picker node with no
  *             spec, no graph claim, no exemption and no `owed` entry fails, named. An `owed` node that is now graded fails too
@@ -119,13 +122,16 @@ function loadRegistry() {
     m._compile(out, file);
   };
   try {
-    return Object.keys(require(registryPath).specs);
+    const specs = require(registryPath).specs;
+    return Object.keys(specs).map((t) => ({ type: t, contract: typeof specs[t].contract === 'string' && specs[t].contract.length > 0 }));
   } finally {
     if (prior) require.extensions['.ts'] = prior;
     else delete require.extensions['.ts'];
   }
 }
-const specTypes = new Set(loadRegistry());
+const registry = loadRegistry();
+const specTypes = new Set(registry.map((r) => r.type));
+const contractTypes = new Set(registry.filter((r) => r.contract).map((r) => r.type));
 
 /** The graph: type → the scenario files whose `N` claims grade it (and whether every one of them is a known row). */
 const graphGraded = new Map();
@@ -172,15 +178,18 @@ const reach = exportReach();
 const rows = population
   .map((n) => {
     const t = n.typeName;
-    const spec = specTypes.has(t);
+    const contract = contractTypes.has(t);
+    const spec = specTypes.has(t) && !contract;
     const graph = graphGraded.get(t);
     return {
       typeName: t,
       displayName: n.displayName,
       tier: tierRows[t] ? tierRows[t].tier : null,
       batch: tierRows[t] ? tierRows[t].batch : null,
-      runtime: spec || !!graph,
-      by: spec ? 'spec' : graph ? 'graph' : null,
+      // a contract node is never counted as conforming, whatever grades it (a graph claim about its contract included)
+      runtime: spec || (!!graph && !contract),
+      contract,
+      by: spec ? 'spec' : graph ? 'graph' : contract ? 'contract' : null,
       graphFiles: graph ? [...graph.files] : [],
       graphRowOnly: !spec && !!graph && graph.rowOnly,
       export: spec && reach.includes(t),
@@ -191,13 +200,14 @@ const rows = population
   .sort((a, b) => a.typeName.localeCompare(b.typeName));
 
 const runtime = rows.filter((r) => r.runtime);
+const contracted = rows.filter((r) => r.contract && !r.runtime);
 const exported = rows.filter((r) => r.export);
 const exempt = rows.filter((r) => r.exempt);
 const owedRows = rows.filter((r) => r.owed);
 const byTier = Object.fromEntries(
   TIERS.map((t) => {
     const rs = rows.filter((r) => r.tier === t);
-    return [t, { nodes: rs.length, runtime: rs.filter((r) => r.runtime).length, exempt: rs.filter((r) => r.exempt).length, owed: rs.filter((r) => r.owed).length }];
+    return [t, { nodes: rs.length, runtime: rs.filter((r) => r.runtime).length, contract: rs.filter((r) => r.contract && !r.runtime).length, exempt: rs.filter((r) => r.exempt).length, owed: rs.filter((r) => r.owed).length }];
   })
 );
 const pct = population.length ? (100 * runtime.length) / population.length : 0;
@@ -222,7 +232,7 @@ for (const r of rows) if (!r.tier) problems.push(`picker node ${name(r.typeName)
 for (const t of specTypes) if (!popNames.has(t)) problems.push(`the registry holds a spec for "${t}", which is not a picker node`);
 
 // THE NEW-NODE GATE — a picker node with no spec, no graph claim, no exemption and no owed entry
-const ungraded = rows.filter((r) => !r.runtime && !r.exempt && !r.owed);
+const ungraded = rows.filter((r) => !r.runtime && !r.contract && !r.exempt && !r.owed);
 for (const r of ungraded) {
   problems.push(
     `NEW-NODE GATE: picker node ${name(r.typeName)} has no spec, no graph claim, no exemption and no owed entry.\n` +
@@ -235,15 +245,15 @@ for (const [t, reason] of Object.entries(owed)) {
   if (!popNames.has(t)) problems.push(`${rel(ledgerPath)} owes a spec for "${t}", which is not a picker node — remove it`);
   else if (typeof reason !== 'string' || !reason.trim()) problems.push(`${rel(ledgerPath)} owes a spec for ${name(t)} with no reason`);
   const r = rows.find((x) => x.typeName === t);
-  if (r && r.runtime) problems.push(`${name(t)} is graded on the runtime now (by its ${r.by}) — remove it from ${rel(ledgerPath)} \`owed\``);
+  if (r && (r.runtime || r.contract)) problems.push(`${name(t)} is graded on the runtime now (by its ${r.by}) — remove it from ${rel(ledgerPath)} \`owed\``);
   if (r && r.exempt) problems.push(`${name(t)} is both exempt and owed — it is one or the other`);
 }
-for (const r of exempt) if (r.runtime) problems.push(`${name(r.typeName)} is exempt but graded (by its ${r.by}) — remove the exemption`);
+for (const r of exempt) if (r.runtime || r.contract) problems.push(`${name(r.typeName)} is exempt but graded (by its ${r.by}) — remove the exemption`);
 
 // the floor — exactly as pickerCoverageFloor
 const floor = ledger.floor || {};
 const floorProblems = [];
-for (const [key, have] of [['runtime', runtime.length], ['export', exported.length]]) {
+for (const [key, have] of [['runtime', runtime.length], ['contract', contracted.length], ['export', exported.length]]) {
   const f = floor[key];
   if (typeof f !== 'number') floorProblems.push(`${rel(ledgerPath)} has no numeric \`floor.${key}\` — add it (${have} today)`);
   else if (have < f)
@@ -258,7 +268,9 @@ for (const [key, have] of [['runtime', runtime.length], ['export', exported.leng
 // output
 
 const ms = Date.now() - started;
-const tierLine = TIERS.map((t) => `${t} ${byTier[t].runtime}/${byTier[t].nodes}${byTier[t].exempt ? ` (+${byTier[t].exempt} exempt)` : ''}`).join(' · ');
+const tierLine = TIERS.map(
+  (t) => `${t} ${byTier[t].runtime}/${byTier[t].nodes}${byTier[t].contract ? ` (+${byTier[t].contract} contract)` : ''}${byTier[t].exempt ? ` (+${byTier[t].exempt} exempt)` : ''}`
+).join(' · ');
 const owedByBatch = owedRows.reduce((m, r) => ((m[r.batch] = m[r.batch] || []).push(r.displayName), m), {});
 
 if (args.includes('--json')) {
@@ -268,6 +280,7 @@ if (args.includes('--json')) {
         population: population.length,
         runtime: runtime.length,
         percent: Number(pct.toFixed(2)),
+        contract: contracted.map((r) => r.typeName),
         export: exported.map((r) => r.typeName),
         exempt: exempt.map((r) => r.typeName),
         owed: owedRows.map((r) => r.typeName),
@@ -285,6 +298,7 @@ if (args.includes('--json')) {
 } else {
   console.log(
     `\nSPEC COVERAGE: ${runtime.length} of ${population.length} picker nodes conform on the runtime (${pct.toFixed(1)}%); ` +
+      `${contracted.length} specced as a contract (${contracted.map((r) => r.displayName).join(', ') || 'none'}); ` +
       `${exported.length} on the export, inside a declared reach (${exported.map((r) => r.displayName).join(', ') || 'none'}); ${exempt.length} exempt; ${owedRows.length} owed`
   );
   console.log(`  by tier:  ${tierLine}`);
@@ -302,7 +316,7 @@ if (args.includes('--check')) {
     console.error(`\nspec-ledger: FAILED in ${Date.now() - started} ms.`);
     process.exit(1);
   }
-  console.log(`spec-ledger: holds at ${runtime.length}/${population.length} on the runtime, ${exported.length} on the export (${Date.now() - started} ms).`);
+  console.log(`spec-ledger: holds at ${runtime.length}/${population.length} on the runtime, ${contracted.length} as a contract, ${exported.length} on the export (${Date.now() - started} ms).`);
 } else if (all.length && !args.includes('--json')) {
   console.log(`\n  ⚠️  ${all.length} problem(s) — run with --check to see them as the PR job will.`);
 }

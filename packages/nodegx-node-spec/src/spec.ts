@@ -937,6 +937,13 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
   /** What the editor's hover/inspect shows for an instance — the runtime's `getInspectInfo`. */
   inspect?: (state: Readonly<S>, world: WorldView) => string;
   /**
+   * NSP-017 AC3 — the person writes this node's code, so the code is the behaviour: the spec is a CONTRACT — it runs the same
+   * code the same way and says what the code can see and how its results come out, graded with a fixed set of user-code fixtures
+   * (one per rule). The sentence says what the fixtures cover. The ledger (`npm run spec-ledger`) counts such a spec as
+   * "specced (contract)", in a column of its own, never as a node that conforms: what conforms is the contract, not the node.
+   */
+  contract?: string;
+  /**
    * What of the world this node's behaviour depends on (T2/T3). The runner builds a scripted
    * world for a spec that declares any (NSP-007) and refuses to play it on a target that has no
    * seam for one (`TargetAdapter.install`) — running a clock-dependent node against the real
@@ -1051,6 +1058,8 @@ export interface AnyNodeSpec {
   outputs: Record<string, ErasedValueOutput | SignalOutputDecl>;
   outcomes?: readonly Outcome[];
   inspect?: (state: never, world: WorldView) => string;
+  /** NSP-017 AC3 — a contract, not a behaviour (`NodeDecl.contract`). */
+  contract?: string;
   needs?: readonly WorldNeed[];
   worldPool?: WorldPool;
   acts?: Readonly<Record<string, ActDecl>>;

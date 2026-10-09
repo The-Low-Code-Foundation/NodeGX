@@ -1,7 +1,7 @@
 # NSP-017 — The escape hatches: the Expression grammar, and the Function/Script contracts
 
 **Opened 2026-09-29.** **Depends on NSP-011.**
-**Status: 🟡 s65 (2026-10-09): the CSS Definition exempt — Richard ruled "leave it out" (README R17, `exemptions.json`); C145 ruled "block the three names" (P109's). s64: the Expression conforms on the runtime (1 of 5) — 33 scenarios, at 200 on six seeds and at 10,000, every mutant killed; rows C144, C145. §3's premise measured wrong for the Expression (its text is JavaScript, not a grammar of ours) — §6. Left: Function, Script, Visual Function (the port contract), AC1's export half, AC3.**
+**Status: 🟡 s65 (2026-10-09): the Function specced as a CONTRACT (AC2 planted and shown, AC3 built — the ledger's own column); rows C146, C147 — §6.2. The CSS Definition exempt — Richard ruled "leave it out" (README R17, `exemptions.json`); C145 ruled "block the three names" (P109's). s64: the Expression conforms on the runtime (1 of 5) — 33 scenarios, at 200 on six seeds and at 10,000, every mutant killed; rows C144, C145. §3's premise measured wrong for the Expression (its text is JavaScript, not a grammar of ours) — §6. Left: Script, Visual Function (their contracts), AC1's export half, AC3.**
 
 ## 1. The person sentence
 
@@ -94,11 +94,77 @@ raised and Expression removed from `owed` in the same commit — the ratchet's f
 **AC3 ("specced (contract)", a distinct status)** is not needed for the Expression: it has a behaviour spec, graded like any other.
 It stays for Function, Script and Visual Function, whose code the spec cannot run as the runtime does without the author's text.
 
-### 6.2 Rows
+### 6.2 s65 (2026-10-09) — the Function, a contract; the CSS Definition exempt
+
+**Two rulings first (README R17).** The CSS Definition: **"Leave it out"** — exempt as web-only by nature (`exemptions.json`); the
+recommendation had been to spec its stylesheet as a page effect, so nothing grades that an export or a new runtime adds its CSS. And
+C145: **"Block the three names"** — P109's.
+
+**The Function (`JavaScriptFunction`) is a CONTRACT (AC3).** The spec (`packages/nodegx-node-spec/src/nodes/function.ts`, v1, with
+`contract:` set) runs the author's code the same way the runtime does — the same five parameters (`Inputs`, `Outputs`, `Noodl`,
+`Component`, `Scripts`), the same prefix, the same receiver — and writes down everything around it, each rule with its line:
+
+- **ports** — `Inputs.x` → `in-x` with its `runOnChange-in-x`; `Outputs.y = …` → `out-y`; `Outputs.z()` → the signal `out-z`; the
+  written lists' rows with their type pickers. The reader is `@nodegx/project-contract/function-ports`, carried as a byte-identical
+  copy (`src/nodes/function-ports.ts`, held by `tests/function-ports-parity.test.ts`) — the package depends on nothing in the repo;
+- **when the code runs** — once a frame, at its end: the Script set, Run, a CHANGED value on a ticked input (`undefined` and every
+  object count as changed); a Script set to nothing asks for no run;
+- **what the code sees** — `Inputs` is the node's own object (what the code writes there is what the next arrival is compared with),
+  `this` is kept across runs, `Noodl` carries `Inputs` and `Outputs`;
+- **what comes out** — a write sends only when `!==` the last write; a signal output is a function on `Outputs`, fired at once; Success
+  when the (async) code has finished, then Done for each Run;
+- **a throw** (sync, or after an `await`) — Error in JavaScript's words, Failure or each Run answered `failure`; **a compile failure**
+  — the engine's message, the same; **no script** — a Run answered Unchanged.
+
+**THE FIXTURES** (`FUNCTION_FIXTURES`, exported): ten scripts, one per rule — `sum`, `count` (`this` counts the runs: once a frame,
+once per changed input), `signal`, `throws`, `late` (a write, an `await`, a throw), `bare` (a string thrown), `broken`, `empty`,
+`fresh` (a new object every run), `rewrite` (the code writes to `Inputs`). They are the Script port's examples, so the generator plays
+them as an author edits the Script while the app runs. **The spec's await:** a fixture awaits only a settled value (`await null`), which
+resumes inside the settle's own yield, so the spec runs the body with its `await`s removed — the same effects in the same order.
+**The play's ports:** every fixture's outputs are on the node from the placing (what a project's saved `dynamicports` give the model);
+the runtime face now builds the lone node's `model.outputPorts` from the spec's derived outputs, and reads a derived SIGNAL output as a
+signal (the Function's signal getter returns the function the code calls — it was read as a value and could not be canonicalised).
+
+**Publish on change — NSP-017 §5's "most surprising rule", its first fixture — cannot be seen on a lone node** (its trace never
+repeats an unchanged value), so it is graded through the graph: `scenarios/graph/t14-a-function-publishes-on-change.json`, three
+scenarios, one Function feeding another that counts its runs — the same value written again: the second does not run (an absence
+claim beside two known-firing ones); a fresh object every run: it runs every time; the same value written in a run that fires a
+signal (GAM-011): it runs again.
+
+**AC2, planted and shown** (`noodl-runtime/test/node-spec/function-contract.test.ts`): thirteen rules, each broken by ONE textual
+change to an in-memory copy of `simplejavascript.ts`, registered on a fresh target; the scenario that names the rule goes red every
+time, and the copy with no change conforms on all 27 scenarios and bears every graph claim out. (Dropping the call's `await` was the
+first plant for "the code is async" and was replaced: it leaves the code's rejection unheard, and jest fails the whole test on it before
+a scenario can be read — s59's lesson. The plant used compiles the code as a plain `Function`: `await` no longer parses.)
+
+**AC3, built.** `NodeDecl.contract` (spec.ts) names what a contract's fixtures cover; `spec-ledger.js` counts such a spec in a column
+of its own — "1 specced as a contract (Function)" — with its own floor (`floor.contract`), never in `runtime`, whatever grades it (a
+graph claim about it included). The new-node gate and `owed` treat it as graded. Two ledger tests: the Function is a contract and the
+Expression is not; a planted contract-floor fall fails, named.
+
+**How it was built.** Probe first, both targets side by side: 16 cases SAME on the first try, then two found on the runtime — the
+face's signal read (above) and **C147** (`throw null` reports nothing). Mutants at seed 13 left 16 survivors: `lastReported` (the
+editor's once-per-message report) was spec state no port can read — removed; three are a stuck flag on a frame end with no script
+(STUCK_FLAG, declared as Map Collection's are); the rest were holes, each closed by a scenario read off its shape (an unticked input
+read at the next Run; a checkbox written while the app runs, with settles between; a type picker written while the app runs — with
+inputs no other play holds, because a swap hands the RICHEST sibling example and one from the same play reads the same).
+
+**Readings.** Interpreter (`tests/batch-escape.test.ts`, seeds 13, 20735, 7, 20729): 27 scenarios, 200 generated, 0 divergences, 180 /
+180 mutants killed (3 declared equivalent). Graph: t14's 3 scenarios hold on the runtime and the recorded traces bear them out
+(`tests/graph.test.ts` 126 / 126). AC2: 15 / 15. `spec-ledger --check`: holds at 125 / 147 on the runtime, 1 as a contract, 2 on the
+export; 19 owed. Runtime `NSP_ONLY=JavaScriptFunction`: 27 / 27 scenarios, 200 / 200 generated, 0 divergences, 177 / 180 mutants killed + 3 declared equivalent, on seeds 20735, 13, 20734 and 7; at 10,000 (`npm run spec-ledger -- --deep JavaScriptFunction`, seed 20735): 0 divergences, 60 s.
+
+Not in v1: Uses (the project's script files — a graph seam, ISL-005: `undriven`), `Component`, Noodl's globals, a write to an output no
+fixture names (`Outputs[key]`), and the editor's warnings (not on the wire). Script (`Javascript2`) and Visual Function are next.
+
+### 6.3 Rows
 
 | row | what | severity | where |
 |---|---|---|---|
 | **C144** | An Expression's **Error keeps the last failure after the expression works again**: a working evaluation empties the node's error without sending it (expression.ts :409-415; only `_reportFailure` :355 flags it). The D25 / C47 / D26 family. The spec writes the runtime's behaviour (R3 (a)); the fix moves it in the same commit (Expression v2) | low | [P107-C144](../../bugs/p107-c144-an-expression-s-error-keeps-the-last-failure-after-it-works-again.md) |
 | **C145** | An Expression that **reads `run`, `expression` or `evaluateAtLoad` never gets an input for it** and always throws "run is not defined" — the setter skips a name that is already one of the node's inputs (:520-524), while the editor still draws the port | low | [P107-C145](../../bugs/p107-c145-an-expression-that-reads-run-expression-or-evaluateatload-always-throws.md) |
 
-Both are P109's under R16.
+| **C146** | A Function's **Error keeps the last failure after a run that works**, and a new Script empties it without sending it (simplejavascript.ts :645-652 never touches `lastError`; `clearRunDiagnostics` :771-775 flags `undefined`, which is never sent). The C144 twin; D25's ruling ("clear it to blank text") covers it. The spec writes the runtime's behaviour (R3 (a)); the fix moves it to v2 | low | [P107-C146](../../bugs/p107-c146-a-function-s-error-keeps-the-last-failure-after-a-run-that-works.md) |
+| **C147** | A Function whose code **throws `null` or `undefined` reports nothing** — no Error, no Failure, a Run never answered: the error logger's `Object.getPrototypeOf(err)` throws inside the catch (utils.ts :24-34, simplejavascript.ts :654). The spec says the intent (Error "null", a failure) and no fixture throws null: an unhandled rejection fails the whole jest suite on the runtime target. Measured beside a `throw 'x'` control | medium | [P107-C147](../../bugs/p107-c147-a-function-whose-code-throws-null-or-undefined-reports-nothing.md) |
+
+All four are P109's under R16.

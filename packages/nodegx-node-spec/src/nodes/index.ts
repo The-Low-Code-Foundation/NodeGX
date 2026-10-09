@@ -106,6 +106,7 @@ import { Uuid } from './uuid';
 import { ValueChanged } from './value-changed';
 import { Variable2 } from './variable2';
 import { Expression } from './expression';
+import { JavaScriptFunction } from './function';
 
 export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   // NSP-004 — the pilot five
@@ -220,7 +221,9 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [TextAccumulator.type]: TextAccumulator,
   [StreamBuffer.type]: StreamBuffer,
   // NSP-017 s64 — the escape hatches: the Expression, whose text is JavaScript the spec runs as the runtime does
-  [Expression.type]: Expression
+  [Expression.type]: Expression,
+  // NSP-017 s65 — the Function: a contract (the person's code is the behaviour), graded with one fixture per rule
+  [JavaScriptFunction.type]: JavaScriptFunction
 });
 
 export { EQUIVALENT_MUTANTS } from './equivalent-mutants';
@@ -229,6 +232,8 @@ export { OWN_ELEMENT };
 export { ROUTER_PAGES } from './page-router';
 // NSP-016 s59 — the play's row templates a Repeater builds; a target registers the same
 export { REPEATER_TEMPLATES, type RowTemplate } from './repeater';
+// NSP-017 s65 — the Function's fixtures: one script per rule of its contract
+export { FUNCTION_FIXTURES } from './function';
 
 export function specFor(typeName: string): AnyNodeSpec | undefined {
   return specs[typeName];
@@ -237,6 +242,7 @@ export function specFor(typeName: string): AnyNodeSpec | undefined {
 export {
   And,
   Expression,
+  JavaScriptFunction,
   Collection2,
   CollectionClear,
   CollectionInsert,

@@ -368,6 +368,13 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     // nothing is the branch of one that did (v2's thirty "no word waiting" twins are gone with it); what is left meets no element
     ...['afterInputs', ...['hover', 'leave', 'press', 'release', 'click', 'touch', 'lift', 'focus', 'blur', 'slide'].map((act) => `person.${act}`)].map((reducer) => ({ reducer, kind: 'drop-set' as const, branch: '"set":[],"emit":[]', why: SLIDER_OFF_PAGE }))
   ],
+  // NSP-017 s65 — the Function: a frame end with no script and no Run (an input arrived before any code) does nothing but
+  // clear its flag; left set, it does nothing again every frame, and the Script or a Run that could change it schedules anyway
+  JavaScriptFunction: [
+    { reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled","tokens"],"emit":[],"outcome":null,"outcomes":[]', why: STUCK_FLAG },
+    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["scheduled","tokens"],"emit":[],"outcome":null,"outcomes":[]', swappedWith: '"set":[],"emit":[]', why: STUCK_FLAG },
+    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":[],"emit":[]', swappedWith: '"set":["scheduled","tokens"],"emit":[],"outcome":null,"outcomes":[]', why: STUCK_FLAG }
+  ],
   'Map Collection': [
     { reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG },
     { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["scheduled"],"emit":[]', swappedWith: '"set":[],"emit":[]', why: STUCK_FLAG },
