@@ -119,10 +119,10 @@ export const NumberRemapper = defineNode({
     }
   }
 }).on({
-  inputValue: (_s, v) => ({ set: { input: v } }),
-  minInputValue: (_s, v) => ({ set: { minIn: v } }),
-  maxInputValue: (_s, v) => ({ set: { maxIn: v } }),
-  minOutputValue: (_s, v) => ({ set: { minOut: v } }),
-  maxOutputValue: (_s, v) => ({ set: { maxOut: v } }),
-  clamp: (_s, v) => ({ set: { clamp: v } })
+  inputValue: (_s, v) => ({ says: 'always: Remapped Value follows', set: { input: v } }),
+  minInputValue: (_s, v) => ({ says: 'always: Remapped Value follows', set: { minIn: v } }),
+  maxInputValue: (_s, v) => ({ says: 'always: Remapped Value follows', set: { maxIn: v } }),
+  minOutputValue: (_s, v) => ({ says: 'always: Remapped Value follows', set: { minOut: v } }),
+  maxOutputValue: (_s, v) => ({ says: 'always: Remapped Value follows', set: { maxOut: v } }),
+  clamp: (_s, v) => ({ says: 'always: Remapped Value follows', set: { clamp: v } })
 });

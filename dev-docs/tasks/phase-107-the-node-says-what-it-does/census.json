@@ -817,8 +817,8 @@
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 8,
-        "noodl-mcp": 28,
-        "total": 48
+        "noodl-mcp": 29,
+        "total": 49
       },
       "testsTyped": {
         "noodl-runtime": 7,
@@ -826,12 +826,12 @@
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 4,
-        "noodl-mcp": 11,
-        "total": 24
+        "noodl-mcp": 12,
+        "total": 25
       },
       "dynamicPorts": true,
       "dynamicPortMechanisms": 2,
-      "placesWritten": 35,
+      "placesWritten": 36,
       "exempt": null,
       "warnings": []
     },
@@ -982,8 +982,8 @@
         "noodl-viewer-cloud": 1,
         "nodegx-core": 0,
         "nodegx-export": 4,
-        "noodl-mcp": 2,
-        "total": 13
+        "noodl-mcp": 3,
+        "total": 14
       },
       "testsTyped": {
         "noodl-runtime": 3,
@@ -1420,26 +1420,26 @@
       "emitLibs": [],
       "exportStatus": "translated",
       "tests": {
-        "noodl-runtime": 11,
+        "noodl-runtime": 12,
         "noodl-viewer-react": 5,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 3,
         "noodl-mcp": 5,
-        "total": 24
+        "total": 25
       },
       "testsTyped": {
-        "noodl-runtime": 8,
+        "noodl-runtime": 9,
         "noodl-viewer-react": 2,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 0,
         "noodl-mcp": 3,
-        "total": 13
+        "total": 14
       },
       "dynamicPorts": true,
       "dynamicPortMechanisms": 1,
-      "placesWritten": 14,
+      "placesWritten": 15,
       "exempt": null,
       "warnings": []
     },
@@ -2997,8 +2997,8 @@
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 7,
-        "noodl-mcp": 0,
-        "total": 9
+        "noodl-mcp": 1,
+        "total": 10
       },
       "testsTyped": {
         "noodl-runtime": 0,
@@ -5113,8 +5113,8 @@
         "noodl-viewer-cloud": 1,
         "nodegx-core": 0,
         "nodegx-export": 0,
-        "noodl-mcp": 1,
-        "total": 2
+        "noodl-mcp": 2,
+        "total": 3
       },
       "testsTyped": {
         "noodl-runtime": 0,

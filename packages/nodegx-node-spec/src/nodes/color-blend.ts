@@ -122,10 +122,11 @@ export function blend(colors: Readonly<Record<string, unknown>>, blendValue: unk
 type BlendState = { colors: Readonly<Record<string, unknown>>; blendValue: unknown; result: unknown };
 
 /** Every setter stores and recomputes (:86-91, :101-104); a Blend Value that is not a number leaves the result where it was (v2, D8). */
-function recompute(s: BlendState, delta: Partial<BlendState>): { set: Partial<BlendState> } {
+function recompute(s: BlendState, delta: Partial<BlendState>): { says: string; set: Partial<BlendState> } {
   const n = { ...s, ...delta };
   const r = blend(n.colors, n.blendValue);
-  return { set: r === undefined ? delta : { ...delta, result: r } };
+  if (r === undefined) return { says: 'Blend Value not a number: the colour last shown stays', set: delta };
+  return { says: 'otherwise Result is the colour at Blend Value, mixed between its two neighbours', set: { ...delta, result: r } };
 }
 
 export const ColorBlend = defineNode({

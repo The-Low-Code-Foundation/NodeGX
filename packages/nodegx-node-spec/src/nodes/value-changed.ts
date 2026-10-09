@@ -57,5 +57,8 @@ export const ValueChanged = defineNode({
   }
 }).on({
   // :31-39 — same (`===`) → nothing; else count, pulse, remember
-  value: (s, v) => (s.last === v ? {} : { set: { last: v, count: s.count + 1 }, emit: ['valueChanged'] })
+  value: (s, v) =>
+    s.last === v
+      ? { says: 'the same value as the last one (by identity): nothing' }
+      : { says: 'a different value, or the first one', set: { last: v, count: s.count + 1 }, emit: ['valueChanged'] }
 });

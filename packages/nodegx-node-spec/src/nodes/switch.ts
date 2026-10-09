@@ -85,13 +85,26 @@ export const Switch = defineNode({
   // :118-129 `setStateByAction(next)`: already there → `unchanged` and nothing else (:120-123,
   // ERG-001 §4's register — the bare `return` that stopped a chain dead); otherwise move,
   // pulse the sibling then `switched` (:125-126, :130-137), then `done` (:128).
-  on: (s) => (s.on ? { outcome: 'unchanged' } : { set: { on: true }, emit: ['switchedToOn', 'switched'], outcome: 'done' }),
-  off: (s) => (s.on ? { set: { on: false }, emit: ['switchedToOff', 'switched'], outcome: 'done' } : { outcome: 'unchanged' }),
-  // :48-56 — Flip cannot no-op: `setStateByAction(!state)` never meets the unchanged guard
-  flip: (s) => ({ set: { on: !s.on }, emit: [s.on ? 'switchedToOff' : 'switchedToOn', 'switched'], outcome: 'done' }),
+  on: (s) =>
+    s.on
+      ? { says: 'already on', outcome: 'unchanged' }
+      : { says: 'while off: it switches on', set: { on: true }, emit: ['switchedToOn', 'switched'], outcome: 'done' },
+  off: (s) =>
+    s.on
+      ? { says: 'while on: it switches off', set: { on: false }, emit: ['switchedToOff', 'switched'], outcome: 'done' }
+      : { says: 'already off', outcome: 'unchanged' },
+  // :48-56 — Flip cannot no-op: `setStateByAction(!state)` never meets the unchanged guard. Two branches, not one with
+  // a ternary pulse: the rules reader reads `emit` literally (NSP-018 s73)
+  flip: (s) =>
+    s.on
+      ? { says: 'while on: it switches off', set: { on: false }, emit: ['switchedToOff', 'switched'], outcome: 'done' }
+      : { says: 'while off: it switches on', set: { on: true }, emit: ['switchedToOn', 'switched'], outcome: 'done' },
 
   // :64-68 — the setter announces EVERY write, including one to the state it already has
   // ("announces a switch on Switched even though nothing switched", :62; NDA-012's Logic row 1).
   // No outcome: a value arriving is not an invocation.
-  onFromStart: (_s, v) => ({ set: { on: v }, emit: [v ? 'switchedToOn' : 'switchedToOff', 'switched'] })
+  onFromStart: (_s, v) =>
+    v
+      ? { says: 'true: the switch is on, announced even if it already was', set: { on: true }, emit: ['switchedToOn', 'switched'] }
+      : { says: 'false: the switch is off, announced even if it already was', set: { on: false }, emit: ['switchedToOff', 'switched'] }
 });

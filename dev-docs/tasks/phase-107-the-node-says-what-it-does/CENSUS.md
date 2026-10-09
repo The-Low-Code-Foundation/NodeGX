@@ -52,7 +52,7 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | 2 | **Text** | T5 | NSP-016 | 64 | 0 | sseLib.ts | 62 | 100 |
 | 3 | **Set Variable** | T1 | NSP-012 | 49 | 12 | — | 36 | 42 |
 | 4 | **Repeater** (`For Each`) | T5 | NSP-016 | 46 | 24 | — | 21 | 48 |
-| 5 | **Component Inputs** | T4 | NSP-015 | 35 | 10 | — | 24 | 48 |
+| 5 | **Component Inputs** | T4 | NSP-015 | 36 | 10 | — | 25 | 49 |
 | 6 | **Component Outputs** | T4 | NSP-015 | 34 | 20 | — | 13 | 25 |
 | 7 | **String** | T1 | NSP-011 | 27 | 1 | — | 25 | 36 |
 | 8 | **Function** (`JavaScriptFunction`) | T6 | NSP-017 | 25 | 0 | — | 24 | 44 |
@@ -69,7 +69,7 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 |---|---|---|---|---|:-:|:-:|---:|---|---|---:|---|
 | **And** | `And` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/and.ts` |  | ✓ | 3 |  | translated | 1 / 4 |  |
 | **Condition** | `Condition` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/condition.ts` | ✓ |  | 7 |  | translated | 9 / 19 |  |
-| **Counter** | `Counter` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/counter.ts` | ✓ |  | 3 |  | translated | 6 / 13 |  |
+| **Counter** | `Counter` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/counter.ts` | ✓ |  | 3 |  | translated | 6 / 14 |  |
 | **String Format** | `String Format` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/stringformat.ts` |  | ✓ | 3 |  | translated | 3 / 5 | dynamic ports from a parameter — proves NSP-001's derived-port design |
 | **Switch** | `Switch` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/switch.ts` | ✓ |  | 4 |  | translated | 6 / 10 |  |
 
@@ -162,7 +162,7 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | **Record** | `DbModel2` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/dbmodelnode2.ts` | ✓ | ✓ | 4 |  | translated | 6 / 12 |  |
 | **Delete Record** | `DeleteDbModelProperties` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/deletedbmodelpropertiesnode.ts` | ✓ | ✓ | 0 |  | translated | 3 / 12 |  |
 | **Filter Records** | `FilterDBModels` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/filterdbmodelsnode.ts` | ✓ | ✓ | 2 |  | translated | 3 / 5 | client-side over the store ('one subscription, no requests' — filterdbmodelsnode.ts:42), so T1 with the store as a world fake |
-| **HTTP Request** | `net.noodl.HTTP` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/httpnode.ts` | ✓ | ✓ | 1 |  | translated | 6 / 9 |  |
+| **HTTP Request** | `net.noodl.HTTP` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/httpnode.ts` | ✓ | ✓ | 1 |  | translated | 6 / 10 |  |
 | **Server-Sent Events** | `net.noodl.SSE` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/agent/sse.ts` | ✓ |  | 1 | sseLib | translated | 3 / 7 |  |
 | **Log In** | `net.noodl.user.LogIn` | T3 | browser | `noodl-viewer-react/src/nodes/std-library/user/login.ts` | ✓ |  | 2 |  | translated | 3 / 6 |  |
 | **Log Out** | `net.noodl.user.LogOut` | T3 | browser | `noodl-viewer-react/src/nodes/std-library/user/logout.ts` | ✓ |  | 2 |  | translated | 3 / 6 |  |
@@ -184,7 +184,7 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 
 | node | type name | tier | runs in | runtime file | out | dyn | plan | libs | export | tests | note |
 |---|---|---|---|---|:-:|:-:|---:|---|---|---:|---|
-| **Component Inputs** | `Component Inputs` | T4 | browser+cloud | `noodl-runtime/src/nodes/componentinputs.ts` |  | ✓ | 10 |  | translated | 24 / 48 | the interface every component depends on — parent + child scenarios, placed more than once |
+| **Component Inputs** | `Component Inputs` | T4 | browser+cloud | `noodl-runtime/src/nodes/componentinputs.ts` |  | ✓ | 10 |  | translated | 25 / 49 | the interface every component depends on — parent + child scenarios, placed more than once |
 | **Component Outputs** | `Component Outputs` | T4 | browser+cloud | `noodl-runtime/src/nodes/componentoutputs.ts` |  | ✓ | 20 |  | translated | 13 / 25 |  |
 | **Close Popup** | `NavigationClosePopup` | T4 | browser | `noodl-viewer-react/src/nodes/navigation/closepopup.ts` | ✓ | ✓ | 5 |  | translated | 5 / 7 | returns values to the Show Popup that opened it — the round trip is the scenario |
 | **Show Popup** | `NavigationShowPopup` | T4 | browser | `noodl-viewer-react/src/nodes/navigation/showpopup.ts` | ✓ | ✓ | 7 |  | translated | 10 / 13 |  |
@@ -228,7 +228,7 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | node | type name | tier | runs in | runtime file | out | dyn | plan | libs | export | tests | note |
 |---|---|---|---|---|:-:|:-:|---:|---|---|---:|---|
 | **CSS Definition** | `CSS Definition` | T6 | browser | `noodl-viewer-react/src/nodes/visual/css-definition.ts` |  |  | 5 |  | translated | 1 / 5 | web-only by nature — exempt (R17, 2026-10-09: exemptions.json) |
-| **Expression** | `Expression` | T6 | browser+cloud | `noodl-runtime/src/nodes/std-library/expression.ts` | ✓ | ✓ | 0 |  | translated | 13 / 24 | its text is JavaScript the node compiles (new Function), not a grammar of ours — the spec runs the same text and says everything around it (NSP-017 §6, s64) |
+| **Expression** | `Expression` | T6 | browser+cloud | `noodl-runtime/src/nodes/std-library/expression.ts` | ✓ | ✓ | 0 |  | translated | 14 / 25 | its text is JavaScript the node compiles (new Function), not a grammar of ours — the spec runs the same text and says everything around it (NSP-017 §6, s64) |
 | **Script** | `Javascript2` | T6 | browser | `noodl-viewer-react/src/nodes/std-library/javascript.ts` |  | ✓ | 1 | scriptLib | translated | 2 / 6 |  |
 | **Function** | `JavaScriptFunction` | T6 | browser+cloud | `noodl-runtime/src/nodes/std-library/simplejavascript.ts` | ✓ | ✓ | 0 |  | translated | 24 / 44 |  |
 | **Visual Function** | `Logic Builder` | T6 | browser+cloud | `noodl-runtime/src/nodes/std-library/logic-builder.ts` | ✓ | ✓ | 0 |  | translated | 4 / 11 | the Blockly node; the user's blocks are the behaviour |
@@ -251,7 +251,7 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | **Request** | `noodl.cloud.request` | T3 | cloud | `noodl-viewer-cloud/src/nodes/cloud/request.ts` |  | ✓ | 0 |  | backend-only | 10 / 15 | the inbound request — a protocol's first event |
 | **Response** | `noodl.cloud.response` | T3 | cloud | `noodl-viewer-cloud/src/nodes/cloud/response.ts` | ✓ | ✓ | 0 |  | backend-only | 9 / 14 | the outbound response — a protocol's last event |
 | **Secret** | `noodl.cloud.secret` | T3 | cloud | `noodl-viewer-cloud/src/nodes/cloud/secret.ts` | ✓ |  | 0 |  | backend-only | 0 / 3 |  |
-| **Send Email** | `noodl.cloud.sendemail` | T3 | cloud | `noodl-viewer-cloud/src/nodes/cloud/sendemail.ts` | ✓ |  | 0 |  | backend-only | 0 / 2 |  |
+| **Send Email** | `noodl.cloud.sendemail` | T3 | cloud | `noodl-viewer-cloud/src/nodes/cloud/sendemail.ts` | ✓ |  | 0 |  | backend-only | 0 / 3 |  |
 | **Update User** | `noodl.cloud.updateuser` | T3 | cloud | `noodl-viewer-cloud/src/nodes/cloud/updateuser.ts` | ✓ | ✓ | 0 |  | backend-only | 0 / 0 |  |
 | **Verify Session Token** | `noodl.cloud.verifysessiontoken` | T3 | cloud | `noodl-viewer-cloud/src/nodes/cloud/verifysessiontoken.ts` | ✓ |  | 0 |  | backend-only | 0 / 0 |  |
 

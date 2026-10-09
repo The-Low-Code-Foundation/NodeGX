@@ -90,7 +90,7 @@ export const StringFormat = defineNode({
 }).on(
   {
     // :54-60 — store the format. The :55 same-value guard only skips a reschedule; not carried.
-    format: (_s, v) => ({ set: { format: v } })
+    format: (_s, v) => ({ says: 'always: the new template — each {name} in it becomes a text input, and Formatted follows', set: { format: v } })
   },
   {
     derived: {

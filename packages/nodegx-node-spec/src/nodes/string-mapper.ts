@@ -106,8 +106,10 @@ export const StringMapper = defineNode({
   }
 }).on(
   {
-    inputString: (_s, v) => ({ set: { current: v === undefined ? undefined : v === null ? '' : String(v), scheduled: true } }),
-    defaultMapping: (_s, v) => ({ set: { fallback: v, scheduled: true } })
+    inputString: (_s, v) => ({
+      says: 'always: looked up among the numbered inputs at the end of the frame (null counts as empty text); Mapped String follows',
+      set: { current: v === undefined ? undefined : v === null ? '' : String(v), scheduled: true } }),
+    defaultMapping: (_s, v) => ({ says: 'always: what Mapped String becomes at the end of the frame when nothing matches', set: { fallback: v, scheduled: true } })
   },
   {
     derived: {

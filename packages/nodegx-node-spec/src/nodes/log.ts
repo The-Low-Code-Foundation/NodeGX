@@ -107,7 +107,7 @@ export const Log = defineNode({
     }
   }
 }).on({
-  value: (_s, v) => ({ set: { value: v } }),
+  value: (_s, v) => ({ says: 'always: passed straight through to Value; nothing is written', set: { value: v } }),
   // :164-191 — the line is written (sink or console) and `done` reported in the same call
-  log: () => ({ outcome: 'done' })
+  log: () => ({ says: 'always: the line is written now, from Message, Level and Data as they stand', outcome: 'done' })
 });

@@ -853,7 +853,18 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "value": [
+          "undefined: ignored → Changed stays silent",
+          "the same as the last one, or Run On Value Change unticked: held for the next Set → Changed stays silent",
+          "a new value that converts to what is already stored: held, nothing changes → Changed stays silent",
+          "a new value, with Run On Value Change ticked: stored straight away (an empty one as Treat Empty As says) → Changed"
+        ],
+        "saveValue": [
+          "always: at the end of the frame the last Value is stored — Changed and Done if that changed it, otherwise Unchanged (or what Treat Unchanged As says)"
+        ]
+      }
     },
     {
       "typeName": "Boolean To String",
@@ -931,7 +942,21 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "trueString": [
+          "the same text: nothing, not even a send",
+          "new text: kept, and sent on Current Value if Selector picks String for true"
+        ],
+        "falseString": [
+          "the same text: nothing, not even a send",
+          "new text: kept, and sent on Current Value if Selector picks String for false"
+        ],
+        "input": [
+          "the same value: nothing, not even a send → Selector Changed stays silent",
+          "a different value, even one that picks the same string: Current Value follows → Selector Changed"
+        ]
+      }
     },
     {
       "typeName": "Button",
@@ -5956,7 +5981,18 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "value": [
+          "undefined: ignored → Changed stays silent",
+          "the same as the last one, or Run On Value Change unticked: held for the next Set → Changed stays silent",
+          "a new value that converts to what is already stored: held, nothing changes → Changed stays silent",
+          "a new value, with Run On Value Change ticked: stored straight away (an empty one as Treat Empty As says) → Changed"
+        ],
+        "saveValue": [
+          "always: at the end of the frame the last Value is stored — Changed and Done if that changed it, otherwise Unchanged (or what Treat Unchanged As says)"
+        ]
+      }
     },
     {
       "typeName": "Color Blend",
@@ -6018,6 +6054,12 @@
       "parameterEncoding": {
         "known": false,
         "reason": "The port helper needs project context this generator cannot supply headlessly — a live component, a connected node, or a backend schema."
+      },
+      "rules": {
+        "blendValue": [
+          "Blend Value not a number: the colour last shown stays",
+          "otherwise Result is the colour at Blend Value, mixed between its two neighbours"
+        ]
       }
     },
     {
@@ -6347,7 +6389,16 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "condition": [
+          "a changed value, with Run On Value Change ticked: tested at the end of the frame — On True or On False, from the frame's last value",
+          "the same value, or Run On Value Change unticked: kept for the next test, and asks for none"
+        ],
+        "eval": [
+          "always: tested at the end of the frame — On True or On False, from the frame's last Condition → Done"
+        ]
+      }
     },
     {
       "typeName": "Counter",
@@ -16485,7 +16536,12 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "value": [
+          "always: Result becomes its opposite"
+        ]
+      }
     },
     {
       "typeName": "JavaScriptFunction",
@@ -19953,7 +20009,18 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "value": [
+          "undefined: ignored → Changed stays silent",
+          "the same as the last one, or Run On Value Change unticked: held for the next Set → Changed stays silent",
+          "a new value that converts to what is already stored: held, nothing changes → Changed stays silent",
+          "a new value, with Run On Value Change ticked: stored straight away (an empty one as Treat Empty As says) → Changed"
+        ],
+        "saveValue": [
+          "always: at the end of the frame the last Value is stored — Changed and Done if that changed it, otherwise Unchanged (or what Treat Unchanged As says)"
+        ]
+      }
     },
     {
       "typeName": "Number Blend",
@@ -20135,7 +20202,27 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "inputValue": [
+          "always: Remapped Value follows"
+        ],
+        "minInputValue": [
+          "always: Remapped Value follows"
+        ],
+        "maxInputValue": [
+          "always: Remapped Value follows"
+        ],
+        "minOutputValue": [
+          "always: Remapped Value follows"
+        ],
+        "maxOutputValue": [
+          "always: Remapped Value follows"
+        ],
+        "clamp": [
+          "always: Remapped Value follows"
+        ]
+      }
     },
     {
       "typeName": "On App Error",
@@ -29542,7 +29629,18 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "value": [
+          "undefined: ignored → Changed stays silent",
+          "the same as the last one, or Run On Value Change unticked: held for the next Set → Changed stays silent",
+          "a new value that converts to what is already stored: held, nothing changes → Changed stays silent",
+          "a new value, with Run On Value Change ticked: stored straight away (an empty one as Treat Empty As says) → Changed"
+        ],
+        "saveValue": [
+          "always: at the end of the frame the last Value is stored — Changed and Done if that changed it, otherwise Unchanged (or what Treat Unchanged As says)"
+        ]
+      }
     },
     {
       "typeName": "String Format",
@@ -29608,6 +29706,11 @@
             "valueType": "string",
             "example": "Sa1"
           }
+        ]
+      },
+      "rules": {
+        "format": [
+          "always: the new template — each {name} in it becomes a text input, and Formatted follows"
         ]
       }
     },
@@ -29695,6 +29798,14 @@
       "parameterEncoding": {
         "known": false,
         "reason": "The port helper needs project context this generator cannot supply headlessly — a live component, a connected node, or a backend schema."
+      },
+      "rules": {
+        "inputString": [
+          "always: looked up among the numbered inputs at the end of the frame (null counts as empty text); Mapped String follows"
+        ],
+        "defaultMapping": [
+          "always: what Mapped String becomes at the end of the frame when nothing matches"
+        ]
       }
     },
     {
@@ -30026,7 +30137,18 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "start": [
+          "always: Result follows"
+        ],
+        "end": [
+          "always: Result follows"
+        ],
+        "string": [
+          "always: read as text (null counts as empty); Result follows"
+        ]
+      }
     },
     {
       "typeName": "Switch",
@@ -30174,7 +30296,25 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "on": [
+          "already on → Unchanged; Switched To On, Switched stay silent",
+          "while off: it switches on → Switched To On, Switched, Done"
+        ],
+        "off": [
+          "while on: it switches off → Switched To Off, Switched, Done",
+          "already off → Unchanged; Switched To Off, Switched stay silent"
+        ],
+        "flip": [
+          "while on: it switches off → Switched To Off, Switched, Done; Switched To On stays silent",
+          "while off: it switches on → Switched To On, Switched, Done; Switched To Off stays silent"
+        ],
+        "onFromStart": [
+          "true: the switch is on, announced even if it already was → Switched To On, Switched; Switched To Off stays silent",
+          "false: the switch is off, announced even if it already was → Switched To Off, Switched; Switched To On stays silent"
+        ]
+      }
     },
     {
       "typeName": "Text",
@@ -33941,7 +34081,13 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "value": [
+          "the same value as the last one (by identity): nothing → Value Changed stays silent",
+          "a different value, or the first one → Value Changed"
+        ]
+      }
     },
     {
       "typeName": "Variable",
@@ -38989,7 +39135,15 @@
         }
       ],
       "dynamicPorts": null,
-      "parameterEncoding": null
+      "parameterEncoding": null,
+      "rules": {
+        "value": [
+          "always: passed straight through to Value; nothing is written"
+        ],
+        "log": [
+          "always: the line is written now, from Message, Level and Data as they stand → Done"
+        ]
+      }
     },
     {
       "typeName": "net.noodl.Now",

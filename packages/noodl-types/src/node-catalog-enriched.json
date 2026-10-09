@@ -916,6 +916,17 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "value": [
+          "undefined: ignored → Changed stays silent",
+          "the same as the last one, or Run On Value Change unticked: held for the next Set → Changed stays silent",
+          "a new value that converts to what is already stored: held, nothing changes → Changed stays silent",
+          "a new value, with Run On Value Change ticked: stored straight away (an empty one as Treat Empty As says) → Changed"
+        ],
+        "saveValue": [
+          "always: at the end of the frame the last Value is stored — Changed and Done if that changed it, otherwise Unchanged (or what Treat Unchanged As says)"
+        ]
+      },
       "enrichment": {
         "typeName": "Boolean",
         "summary": "Per-instance true/false holder: stores one boolean locally, optionally latching new values until a Set signal fires.",
@@ -1028,6 +1039,20 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "trueString": [
+          "the same text: nothing, not even a send",
+          "new text: kept, and sent on Current Value if Selector picks String for true"
+        ],
+        "falseString": [
+          "the same text: nothing, not even a send",
+          "new text: kept, and sent on Current Value if Selector picks String for false"
+        ],
+        "input": [
+          "the same value: nothing, not even a send → Selector Changed stays silent",
+          "a different value, even one that picks the same string: Current Value follows → Selector Changed"
+        ]
+      },
       "enrichment": {
         "typeName": "Boolean To String",
         "summary": "Picks between two strings based on a boolean: outputs String for true or String for false.",
@@ -6365,6 +6390,17 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "value": [
+          "undefined: ignored → Changed stays silent",
+          "the same as the last one, or Run On Value Change unticked: held for the next Set → Changed stays silent",
+          "a new value that converts to what is already stored: held, nothing changes → Changed stays silent",
+          "a new value, with Run On Value Change ticked: stored straight away (an empty one as Treat Empty As says) → Changed"
+        ],
+        "saveValue": [
+          "always: at the end of the frame the last Value is stored — Changed and Done if that changed it, otherwise Unchanged (or what Treat Unchanged As says)"
+        ]
+      },
       "enrichment": {
         "typeName": "Color",
         "summary": "Per-instance color holder: stores one color locally so many visual inputs can share a single editable source.",
@@ -6456,6 +6492,12 @@
       "parameterEncoding": {
         "known": false,
         "reason": "The port helper needs project context this generator cannot supply headlessly — a live component, a connected node, or a backend schema."
+      },
+      "rules": {
+        "blendValue": [
+          "Blend Value not a number: the colour last shown stays",
+          "otherwise Result is the colour at Blend Value, mixed between its two neighbours"
+        ]
       },
       "enrichment": {
         "typeName": "Color Blend",
@@ -6898,6 +6940,15 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "condition": [
+          "a changed value, with Run On Value Change ticked: tested at the end of the frame — On True or On False, from the frame's last value",
+          "the same value, or Run On Value Change unticked: kept for the next test, and asks for none"
+        ],
+        "eval": [
+          "always: tested at the end of the frame — On True or On False, from the frame's last Condition → Done"
+        ]
+      },
       "enrichment": {
         "typeName": "Condition",
         "summary": "Boolean gate: routes an evaluation into On True / On False signals and holds Is True / Is False as readable booleans.",
@@ -17637,6 +17688,11 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "value": [
+          "always: Result becomes its opposite"
+        ]
+      },
       "enrichment": {
         "typeName": "Inverter",
         "summary": "Logical NOT: outputs the boolean opposite of its input.",
@@ -21436,6 +21492,17 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "value": [
+          "undefined: ignored → Changed stays silent",
+          "the same as the last one, or Run On Value Change unticked: held for the next Set → Changed stays silent",
+          "a new value that converts to what is already stored: held, nothing changes → Changed stays silent",
+          "a new value, with Run On Value Change ticked: stored straight away (an empty one as Treat Empty As says) → Changed"
+        ],
+        "saveValue": [
+          "always: at the end of the frame the last Value is stored — Changed and Done if that changed it, otherwise Unchanged (or what Treat Unchanged As says)"
+        ]
+      },
       "enrichment": {
         "typeName": "Number",
         "summary": "Per-instance numeric holder: stores one number locally, optionally latching new values until a Set signal fires.",
@@ -21663,6 +21730,26 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "inputValue": [
+          "always: Remapped Value follows"
+        ],
+        "minInputValue": [
+          "always: Remapped Value follows"
+        ],
+        "maxInputValue": [
+          "always: Remapped Value follows"
+        ],
+        "minOutputValue": [
+          "always: Remapped Value follows"
+        ],
+        "maxOutputValue": [
+          "always: Remapped Value follows"
+        ],
+        "clamp": [
+          "always: Remapped Value follows"
+        ]
+      },
       "enrichment": {
         "typeName": "Number Remapper",
         "summary": "Linearly maps a number from one range to another, optionally clamped — e.g. 0–100 progress to 0–1 opacity.",
@@ -31805,6 +31892,17 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "value": [
+          "undefined: ignored → Changed stays silent",
+          "the same as the last one, or Run On Value Change unticked: held for the next Set → Changed stays silent",
+          "a new value that converts to what is already stored: held, nothing changes → Changed stays silent",
+          "a new value, with Run On Value Change ticked: stored straight away (an empty one as Treat Empty As says) → Changed"
+        ],
+        "saveValue": [
+          "always: at the end of the frame the last Value is stored — Changed and Done if that changed it, otherwise Unchanged (or what Treat Unchanged As says)"
+        ]
+      },
       "enrichment": {
         "typeName": "String",
         "summary": "Per-instance text holder: stores one string locally, with a Length output and optional latch-until-Set behaviour.",
@@ -31905,6 +32003,11 @@
             "valueType": "string",
             "example": "Sa1"
           }
+        ]
+      },
+      "rules": {
+        "format": [
+          "always: the new template — each {name} in it becomes a text input, and Formatted follows"
         ]
       },
       "enrichment": {
@@ -32020,6 +32123,14 @@
       "parameterEncoding": {
         "known": false,
         "reason": "The port helper needs project context this generator cannot supply headlessly — a live component, a connected node, or a backend schema."
+      },
+      "rules": {
+        "inputString": [
+          "always: looked up among the numbered inputs at the end of the frame (null counts as empty text); Mapped String follows"
+        ],
+        "defaultMapping": [
+          "always: what Mapped String becomes at the end of the frame when nothing matches"
+        ]
       },
       "enrichment": {
         "typeName": "String Mapper",
@@ -32433,6 +32544,17 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "start": [
+          "always: Result follows"
+        ],
+        "end": [
+          "always: Result follows"
+        ],
+        "string": [
+          "always: read as text (null counts as empty); Result follows"
+        ]
+      },
       "enrichment": {
         "typeName": "Substring",
         "summary": "Extracts part of a string between a start index (inclusive) and end index (exclusive).",
@@ -32607,6 +32729,24 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "on": [
+          "already on → Unchanged; Switched To On, Switched stay silent",
+          "while off: it switches on → Switched To On, Switched, Done"
+        ],
+        "off": [
+          "while on: it switches off → Switched To Off, Switched, Done",
+          "already off → Unchanged; Switched To Off, Switched stay silent"
+        ],
+        "flip": [
+          "while on: it switches off → Switched To Off, Switched, Done; Switched To On stays silent",
+          "while off: it switches on → Switched To On, Switched, Done; Switched To Off stays silent"
+        ],
+        "onFromStart": [
+          "true: the switch is on, announced even if it already was → Switched To On, Switched; Switched To Off stays silent",
+          "false: the switch is off, announced even if it already was → Switched To Off, Switched; Switched To On stays silent"
+        ]
+      },
       "enrichment": {
         "typeName": "Switch",
         "summary": "A remembered on/off boolean, driven by On / Off / Flip signals — the graph's toggle and one-bit memory.",
@@ -36555,6 +36695,12 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "value": [
+          "the same value as the last one (by identity): nothing → Value Changed stays silent",
+          "a different value, or the first one → Value Changed"
+        ]
+      },
       "enrichment": {
         "typeName": "Value Changed",
         "summary": "Turns value changes into events: fires a signal every time its input receives a different value.",
@@ -42211,6 +42357,14 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "value": [
+          "always: passed straight through to Value; nothing is written"
+        ],
+        "log": [
+          "always: the line is written now, from Message, Level and Data as they stand → Done"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.Log",
         "summary": "Writes a line to the log — the structured backend log inside a cloud function, the browser console in an app.",

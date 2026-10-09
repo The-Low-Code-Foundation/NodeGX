@@ -152,7 +152,7 @@ export const CHANGED = {
 export const VARIABLE_OUTCOMES = ['done', 'unchanged'] as const;
 
 type VariableInputsSeen = { readonly treatEmptyAs: string; readonly treatUnchangedAs: string; readonly 'runOnChange-value': boolean };
-type ValuePatch = { set?: Partial<VariableState>; emit?: readonly ['changed'] };
+type ValuePatch = { says?: string; set?: Partial<VariableState>; emit?: readonly ['changed'] };
 type SetsPatch = ValuePatch & { outcomes?: ReadonlyArray<{ port: 'saveValue'; outcome: Outcome; error?: string }> };
 
 /** :248-296 `setValueTo`, as a pure function of (current, hasBeenSet, value, Treat empty as). */
@@ -172,19 +172,28 @@ export function setValueTo(
 
 /** :150-171 — the `value` setter. */
 export function onValue(args: VariableArgs, s: Readonly<VariableState>, v: unknown, i: VariableInputsSeen): ValuePatch {
-  if (v === undefined) return {}; // :154 — abstains
+  if (v === undefined) return { says: 'undefined: ignored' }; // :154 — abstains
   const previous = s.latest; // :164
   // :168 `shouldRunOnValueChanged('value', previous, value)` = valueDidChange && the checkbox
-  if (!(valueDidChange(previous, v) && i['runOnChange-value'])) return { set: { latest: v } }; // :165
+  if (!(valueDidChange(previous, v) && i['runOnChange-value']))
+    return { says: 'the same as the last one, or Run On Value Change unticked: held for the next Set', set: { latest: v } }; // :165
   const r = setValueTo(args, s, v, i.treatEmptyAs); // :169
   // not changed ⇒ hasBeenSet was already true and current === casted (:285): nothing to set but the pending value
-  if (!r.changed) return { set: { latest: v } };
-  return { set: { latest: v, current: r.current, hasBeenSet: true }, emit: ['changed'] }; // :286-292
+  if (!r.changed) return { says: 'a new value that converts to what is already stored: held, nothing changes', set: { latest: v } };
+  return {
+    says: 'a new value, with Run On Value Change ticked: stored straight away (an empty one as Treat Empty As says)',
+    set: { latest: v, current: r.current, hasBeenSet: true },
+    emit: ['changed']
+  }; // :286-292
 }
 
 /** :196-207 — a `Set` pulse: mint the outcome now, do the work at frame end. */
 export function onSet(s: Readonly<VariableState>) {
-  return { set: { sets: s.sets + 1 }, outcome: 'deferred' as const };
+  return {
+    says: 'always: at the end of the frame the last Value is stored — Changed and Done if that changed it, otherwise Unchanged (or what Treat Unchanged As says)',
+    set: { sets: s.sets + 1 },
+    outcome: 'deferred' as const
+  };
 }
 
 /** node.ts reportOutcome :1013-1030 — `Treat Unchanged as`, applied to an `unchanged` only. */

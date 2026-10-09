@@ -9,8 +9,8 @@
  * — the port's display name (the catalog keys the lines by the port's name instead), the branch's `says`, then what the branch puts on the wire: its `outcome`, the signals it
  * `emit`s, in the order a frame settles them, and the signals a sibling branch of the same reducer emits and this one does not ("stays silent"). The words
  * are the spec author's; everything after the arrow is the spec's structure. Read statically (the TypeScript AST), so a
- * `says` must be a string literal in the patch's own object literal; a branch built by a helper outside the reducer is
- * not seen here.
+ * `says` must be a string literal in the patch's own object literal, and so must a said branch's `emit` elements and
+ * `outcome` (s73: a computed one throws); a branch built by a helper outside the reducer is not seen here.
  *
  *   node scripts/node-spec/rules.js [Type …]   print the rules (all said specs, or the named ones)
  */
@@ -24,6 +24,8 @@ const nodesDir = path.join(root, 'packages', 'nodegx-node-spec', 'src', 'nodes')
 const OUTCOME_NAMES = { done: 'Done', unchanged: 'Unchanged', failure: 'Failure', completed: 'Completed' };
 
 function stringOf(ts, node) {
+  // `'deferred' as const`, `('a')`
+  while (node && (ts.isAsExpression(node) || ts.isParenthesizedExpression(node) || (ts.isSatisfiesExpression && ts.isSatisfiesExpression(node)))) node = node.expression;
   if (node && (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node))) return node.text;
   return undefined;
 }
@@ -43,16 +45,52 @@ function propOf(ts, obj, key) {
 /**
  * `{ [type]: { [reducerPort]: Branch[] } }` for every spec file, where a Branch is `{ says, outcome?, emit: string[], file, line }`.
  * Every input reducer is present, a reducer with no said branch as `[]`; a `says` that is not a literal throws (the generator
- * cannot read it).
+ * cannot read it). `dir`: the spec files to read (a test's fixtures; default the package's `src/nodes`).
  */
-function readReducers() {
+function readReducers(dir = nodesDir) {
   const ts = require(path.join(root, 'node_modules', 'typescript'));
+  const files = new Map(); // file name in nodesDir → its parsed source, read once
+  const parse = (name) => {
+    if (!files.has(name)) {
+      const file = path.join(dir, name);
+      const text = fs.readFileSync(file, 'utf8');
+      files.set(name, { source: ts.createSourceFile(file, text, ts.ScriptTarget.ES2019, true), rel: path.relative(root, file).split(path.sep).join('/') });
+    }
+    return files.get(name);
+  };
+  // s73: a reducer that calls a named helper (`value: (s, v, i) => onValue(BOOLEAN, s, v, i)`, variable-base.ts) has its
+  // branches in the helper. Resolve the callee — a function in the same file, or one imported from a sibling node file —
+  // and read its body as the reducer's. Words written once in a shared helper are every caller's.
+  const functionNamed = (src, name) => {
+    for (const st of src.statements) {
+      if (ts.isFunctionDeclaration(st) && st.name && st.name.text === name && st.body) return st.body;
+      if (ts.isVariableStatement(st)) {
+        for (const d of st.declarationList.declarations) {
+          if (ts.isIdentifier(d.name) && d.name.text === name && d.initializer && (ts.isArrowFunction(d.initializer) || ts.isFunctionExpression(d.initializer))) return d.initializer.body;
+        }
+      }
+    }
+    return undefined;
+  };
+  const resolveCall = (src, name) => {
+    const here = functionNamed(src, name);
+    if (here) return { body: here, at: [...files.values()].find((f) => f.source === src) };
+    for (const st of src.statements) {
+      if (!ts.isImportDeclaration(st) || !ts.isStringLiteral(st.moduleSpecifier) || !st.moduleSpecifier.text.startsWith('./')) continue;
+      const named = st.importClause && st.importClause.namedBindings;
+      if (!named || !ts.isNamedImports(named) || !named.elements.some((e) => e.name.text === name && !e.propertyName)) continue;
+      const fileName = st.moduleSpecifier.text.slice(2) + '.ts';
+      if (!fs.existsSync(path.join(dir, fileName))) continue;
+      const at = parse(fileName);
+      const body = functionNamed(at.source, name);
+      if (body) return { body, at };
+    }
+    return undefined;
+  };
+
   const out = {};
-  for (const name of fs.readdirSync(nodesDir).filter((f) => f.endsWith('.ts')).sort()) {
-    const file = path.join(nodesDir, name);
-    const text = fs.readFileSync(file, 'utf8');
-    const source = ts.createSourceFile(file, text, ts.ScriptTarget.ES2019, true);
-    const rel = path.relative(root, file).split(path.sep).join('/');
+  for (const name of fs.readdirSync(dir).filter((f) => f.endsWith('.ts')).sort()) {
+    const { source } = parse(name);
     const visit = (node) => {
       // defineNode({ type: '…', … }).on({ reducers }, …)
       if (
@@ -71,22 +109,48 @@ function readReducers() {
             const port = r.name && propertyName(ts, r.name);
             if (!port) continue;
             const branches = [];
-            const walk = (n) => {
-              if (ts.isObjectLiteralExpression(n)) {
+            const followed = new Set();
+            const walk = (n, at) => {
+              // an `idioms` entry (`{ says, example }`) is not a branch
+              if (ts.isObjectLiteralExpression(n) && !propOf(ts, n, 'example')) {
                 const saysNode = propOf(ts, n, 'says');
                 if (saysNode) {
                   const says = stringOf(ts, saysNode);
-                  const { line } = source.getLineAndCharacterOfPosition(saysNode.getStart());
-                  if (says === undefined) throw new Error(`${rel}:${line + 1}: ${type}.${port} — a \`says\` must be a string literal (the rules are read from the source)`);
+                  const { line } = at.source.getLineAndCharacterOfPosition(saysNode.getStart());
+                  if (says === undefined) throw new Error(`${at.rel}:${line + 1}: ${type}.${port} — a \`says\` must be a string literal (the rules are read from the source)`);
+                  // s73: the wire half must be literal too. A pulse chosen by a ternary (`emit: [on ? 'a' : 'b']`) was
+                  // DROPPED here, so the line named fewer pulses than the branch sends — write the two cases as two branches.
+                  const unreadable = (what) =>
+                    new Error(`${at.rel}:${line + 1}: ${type}.${port} — a said branch's \`${what}\` must be literal (split a computed one into branches, each with its \`says\`)`);
+                  // a spread can carry an `emit` or `outcome` the reader would not see
+                  if (n.properties.some((p) => ts.isSpreadAssignment(p))) throw unreadable('...spread');
                   const emitNode = propOf(ts, n, 'emit');
-                  const emit =
-                    emitNode && ts.isArrayLiteralExpression(emitNode) ? emitNode.elements.map((e) => stringOf(ts, e)).filter((e) => e !== undefined) : [];
-                  branches.push({ says, outcome: stringOf(ts, propOf(ts, n, 'outcome')), emit, file: rel, line: line + 1 });
+                  if (emitNode && !ts.isArrayLiteralExpression(emitNode)) throw unreadable('emit');
+                  const emit = emitNode ? emitNode.elements.map((e) => stringOf(ts, e)) : [];
+                  if (emit.includes(undefined)) throw unreadable('emit');
+                  const outcomeNode = propOf(ts, n, 'outcome');
+                  const outcome = stringOf(ts, outcomeNode);
+                  if (outcomeNode && outcome === undefined) throw unreadable('outcome');
+                  branches.push({ says, outcome, emit, file: at.rel, line: line + 1 });
                 }
               }
-              ts.forEachChild(n, walk);
+              if (ts.isCallExpression(n) && ts.isIdentifier(n.expression)) {
+                const target = resolveCall(at.source, n.expression.text);
+                if (target && !followed.has(target.body)) {
+                  followed.add(target.body);
+                  walk(target.body, target.at);
+                }
+              }
+              ts.forEachChild(n, (c) => walk(c, at));
             };
-            walk(r);
+            // a reducer given by name (`saveValue: onSet`, or shorthand) is that function's body
+            const ref = ts.isShorthandPropertyAssignment(r) ? r.name : ts.isPropertyAssignment(r) && ts.isIdentifier(r.initializer) ? r.initializer : undefined;
+            const named = ref && resolveCall(source, ref.text);
+            if (named) {
+              followed.add(named.body);
+              walk(named.body, named.at);
+            }
+            walk(r, parse(name));
             (out[type] = out[type] || {})[port] = branches;
           }
         }

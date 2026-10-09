@@ -53,5 +53,5 @@ export const Inverter = defineNode({
   }
 }).on({
   // :41-44 — store, flag `result` (every write, even the same value; the wire dedups)
-  value: (_s, v) => ({ set: { value: v } })
+  value: (_s, v) => ({ says: 'always: Result becomes its opposite', set: { value: v } })
 });

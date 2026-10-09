@@ -128,12 +128,21 @@ export const Condition = defineNode({
     // checkbox is ticked (node.ts :217-219 `valueDidChange(previous, next) && runOnValueChange`).
     // A value arriving reports no outcome (:96-98: "only the port mints").
     condition: (s, v, i) =>
-      valueDidChange(s.last, v) && i['runOnChange-condition'] ? { set: { last: v, scheduled: true } } : { set: { last: v } },
+      valueDidChange(s.last, v) && i['runOnChange-condition']
+        ? {
+            says: "a changed value, with Run On Value Change ticked: tested at the end of the frame — On True or On False, from the frame's last value",
+            set: { last: v, scheduled: true }
+          }
+        : { says: 'the same value, or Run On Value Change unticked: kept for the next test, and asks for none', set: { last: v } },
 
     // :96-100 — an Evaluate always schedules a test and always reports `done` once the frame has
     // tested (:184-188 `reportOutcomes(tokens, 'done')`, one per pulse even when the tests coalesce).
     // The outcome queues to the settle the test lands in, after the frame's signals.
-    eval: () => ({ set: { scheduled: true }, outcome: 'done' })
+    eval: () => ({
+      says: "always: tested at the end of the frame — On True or On False, from the frame's last Condition",
+      set: { scheduled: true },
+      outcome: 'done'
+    })
   },
   {
     // :174-189 — the one test per frame: mark evaluated, publish both booleans, pulse exactly one

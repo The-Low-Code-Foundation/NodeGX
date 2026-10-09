@@ -77,8 +77,8 @@ export const Substring = defineNode({
     }
   }
 }).on({
-  start: (_s, v) => ({ set: { start: v } }),
-  end: (_s, v) => ({ set: { end: v } }),
+  start: (_s, v) => ({ says: 'always: Result follows', set: { start: v } }),
+  end: (_s, v) => ({ says: 'always: Result follows', set: { end: v } }),
   // :76-80 — null / undefined are empty text (v2, row C4)
-  string: (_s, v) => ({ set: { str: v === null || v === undefined ? '' : String(v) } })
+  string: (_s, v) => ({ says: 'always: read as text (null counts as empty); Result follows', set: { str: v === null || v === undefined ? '' : String(v) } })
 });

@@ -9,7 +9,7 @@
 > and a merge prefers the spec — one catalog, two sources, the spec winning where it exists.
 
 **Opened 2026-09-29.** **Depends on NSP-011.**
-**Status: 🟡 s72 (2026-10-09): AC1, AC3, AC4, AC5 met; AC2 built and counting — 4 of 507 input reducers have their words (Counter), the typecheck gate waits for the rest.**
+**Status: 🟡 s73 (2026-10-09): AC1, AC3, AC4, AC5 met; AC2 counting — 38 of 507 input reducers have their words (the pilot five and NSP-011's 13, 16 specs fully), the typecheck gate waits for the rest.**
 
 ## 1. The person sentence
 
@@ -116,9 +116,43 @@ spec without one.** Plant: Or's renamed away → `"Or" is a T1 node NSP-011 spec
 exit 1; restored. **R11 note:** `idioms` is the one place React names belong in a spec (`useState`, `useEffect`). It
 describes the code a node *replaces*, not the node's behaviour, and the task's own example is React.
 
+## 5.1 s73, 2026-10-09 — the pilot five and NSP-011 in words; the reader stops dropping pulses
+
+**38 of 507, 16 specs fully** (`spec-ledger`: Counter, Switch, Condition, String Format, Boolean, Number, String, Color,
+Boolean To String, Color Blend, Inverter, Log, Number Remapper, String Mapper, Substring, Value Changed; And and Or
+have no input reducers). Catalog regenerated → merged → docs (the pages don't render `rules` yet); the three `--check`s
+exit 0.
+
+**The reader dropped pulses.** `rules.js` kept only the string-literal elements of `emit`, so Switch's Flip
+(`emit: [s.on ? 'switchedToOff' : 'switchedToOn', 'switched']`) would have read "Switched, Done", one pulse short. A
+said branch's `emit` and `outcome` must now be literal and a spread in it is refused. Each throws naming file:line and
+the reducer. Switch's Flip and State are split into their two cases. That is behaviour-neutral, because mutants come
+from the patches the reducer returns, not from how the source is laid out; Switch conformance on the runtime is still green.
+
+**The reader follows helpers.** A reducer that calls a named function (same file, or a `./sibling` import in
+`src/nodes`) or is one (`saveValue: onSet`) is read through it. The four Variables' words live once, in
+`variable-base.ts`. `'deferred' as const` reads as a literal. An `idioms` entry (`{ says, example }`) is never a branch.
+`tests/rules-reader.test.ts` (12) grades it on fixture files beside a control on the real tree. Two plants: the emit
+guard removed → exactly the ternary case red; helper-following off → exactly the three following cases red. Both
+restored by `cp`, `cmp`-identical.
+
+**Deferred work is said in words, for now.** Condition and String Mapper do their visible work in `afterInputs`, which
+the reader does not read. Their input reducers' words say what the end of the frame will do ("tested at the end of
+the frame — On True or On False, from the frame's last value"). The tail after the arrow is still only what the
+reducer itself puts on the wire.
+
+**Found by writing the words: [P107-D38](../../bugs/p107-d38-boolean-to-string-s-selector-changed-fires-without-a-flip.md)**.
+Boolean To String's Selector Changed fires on any different raw Selector value, and its description says "when Selector
+flips". The honest second case reads "a different value, even one that picks the same string". That is a ruling for
+P109: correct the words or compare truthiness.
+
+**Census:** `spec-census:check` was red at HEAD (test-mention counts from other phases' committed tests, +1 in a
+dozen places). Regenerated from a clean `git archive HEAD` export. With and without s73's inputs the output is
+byte-identical. `spec-census:check` is in no CI workflow.
+
 ## 6. Left
 
-1. **AC2's words for the other 503 reducers**, batch by batch (the pilot five's other four first, then NSP-011's 13). Then
+1. **AC2's words for the other 469 reducers** (s73), batch by batch (the pilot five and NSP-011's 13 are done). Then
    flip `says?` to `says` in `Patch`, which is the typecheck gate. Every patch-returning function then owes one, so decide
    first whether `afterInputs` / `world` / `person` patches get read as rules too.
 2. **The record-relation pair:** the rules reader can't see reducers written inside `relationNode`. Teach it the factory,

@@ -83,9 +83,18 @@ export const BooleanToString = defineNode({
   // equals the initial `''` and sends nothing, so a Selector flip to a missing string in the same
   // frame leaves the wire EMPTY, not `''` (found s12 by generated seed 799069363 once the daily
   // rotation stopped replaying one corpus, NSP-013 §6.1b T4).
-  trueString: (s, v) => (s.t === v ? { send: [] } : { set: { t: v }, send: s.sel ? ['currentValue'] : [] }),
+  trueString: (s, v) =>
+    s.t === v
+      ? { says: 'the same text: nothing, not even a send', send: [] }
+      : { says: 'new text: kept, and sent on Current Value if Selector picks String for true', set: { t: v }, send: s.sel ? ['currentValue'] : [] },
   // :56-63 — the mirror (:57, :60-62)
-  falseString: (s, v) => (s.f === v ? { send: [] } : { set: { f: v }, send: s.sel ? [] : ['currentValue'] }),
+  falseString: (s, v) =>
+    s.f === v
+      ? { says: 'the same text: nothing, not even a send', send: [] }
+      : { says: 'new text: kept, and sent on Current Value if Selector picks String for false', set: { f: v }, send: s.sel ? [] : ['currentValue'] },
   // :70-76 — same raw value (`===`) → nothing, not even a send; otherwise store, flag, pulse
-  input: (s, v) => (s.sel === v ? { send: [] } : { set: { sel: v }, emit: ['inputChanged'] })
+  input: (s, v) =>
+    s.sel === v
+      ? { says: 'the same value: nothing, not even a send', send: [] }
+      : { says: 'a different value, even one that picks the same string: Current Value follows', set: { sel: v }, emit: ['inputChanged'] }
 });
