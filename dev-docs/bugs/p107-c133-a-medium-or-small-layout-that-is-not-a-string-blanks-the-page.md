@@ -2,6 +2,7 @@
 id: P107-C133
 title: A Columns whose Medium Layout or Small Layout holds a number (or any value that is not a string) blanks the page when the container narrows into that band
 status: fixed
+commit: 8d2fe2678
 phase: P109
 task: ISL-050
 severity: high

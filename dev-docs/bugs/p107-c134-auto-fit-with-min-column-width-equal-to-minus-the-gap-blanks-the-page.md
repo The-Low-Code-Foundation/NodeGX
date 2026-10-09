@@ -2,6 +2,7 @@
 id: P107-C134
 title: A Columns on Auto Fit whose Min Column Width plus Horizontal Gap is 0 (Min 16, Gap −16) blanks the page — the column count divides by zero
 status: fixed
+commit: 73d7696ec
 phase: P109
 task: ISL-050
 severity: medium
