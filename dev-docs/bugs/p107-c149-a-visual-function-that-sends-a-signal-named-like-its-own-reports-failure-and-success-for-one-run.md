@@ -1,14 +1,16 @@
 ---
 id: P107-C149
 title: A Visual Function whose blocks send a signal named like one of its own (done, failure…) pulses Failure, then Success and Done, for the same Run — and Error is emptied in the same instant
-status: open
+status: fixed
+commit: dde400937
+task: ISL-051
 phase: P109
 severity: low
 area: runtime / Visual Function (noodl-runtime/src/nodes/std-library/logic-builder.ts — the `sendSignalOnOutput` the code is handed, :566-573, calls `_fail` with NO token, so `_fail` pulses Failure on its own (:307-311) and returns to the code; the run then reaches the success path, which empties `executionError` and sends Error (:492-493), fires Success (:500) and answers the Run Done (:502). The value-side twin, a reserved name WRITTEN, fails the run instead (:483-490))
 found: P107 NSP-017 s67, 2026-10-09
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-017-THE-ESCAPE-HATCHES.md §6.5; the Visual Function spec's scenario "a signal sent to a name the node owns", which conforms on the runtime at seeds 20735, 13, 7, 20734 and the day's — one Run: `!failure`, `!success`, outcome `done`, and Error recorded as nothing (the message and the blank land in one frame). Control, the same shape with `sendSignalOnOutput("ping")` (scenario "a signal sent fires at once"): `!ping`, `!success`, `done`, no Failure
 kit: node-spec
-regression: packages/nodegx-node-spec/scenarios/Logic Builder.json "a signal sent to a name the node owns: Error and Failure at once, then the run goes on — Error blank, Success, Done"
+regression: packages/nodegx-node-spec/scenarios/Logic Builder.json "a signal sent to a name the node owns: the values land, then Error says so, a failure — no Success, no Done (v2, row C149)"
 ---
 
 **What a person sees.** A person puts a `send signal` block in a Visual Function and types `done` (or `failure`, `success`, `error`,
@@ -32,3 +34,9 @@ value) and, after the code returns, fail the run through its token — Error kee
 (`logic-builder/reserved-port-name`), no Success, no Done. The Visual Function spec says what the runtime does today (R3 (a)); the fix
 moves it to v2 in the same commit, with the scenario above changed to the new answer. No ruling needed: the value side already decided
 what a reserved name does to a run.
+
+**Fixed 2026-10-09 (P109 ISL-051 s34, `dde400937`), as proposed.** While the code runs, the first reserved name sent is
+remembered; after the code the values land and the run fails through its token — Error keeps the reason, the Run is answered
+failure (`logic-builder/reserved-port-name`), no Success, no Done. A send outside a run (a block's own timer) still fails at
+once. Visual Function spec v2.
+

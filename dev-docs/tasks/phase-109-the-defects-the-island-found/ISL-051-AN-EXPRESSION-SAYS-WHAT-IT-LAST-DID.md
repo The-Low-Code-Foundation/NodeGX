@@ -1,6 +1,6 @@
 # ISL-051 — An Expression says what it last did
 
-**Status: ✅ s33 (2026-10-09): 5 of 5 fixed — C144 `99c61cede` (§7); C145 `5ee9edda4`, C147 `cb7ea0fab`, C148 `cf6b4b8f8`, C146 `2d765dac2` (§8). s33 took in the Function's C146–C147 (P107 `7c5b2a842`) and the Script's C148 (P107 `dfc25b3ce`): the same "say what it last did" — the script hosts' Error and their throws.** Scoped s32 at `bd849bf0c`. **Source:** 2 bugs P107 NSP-017 s64 filed on the Expression
+**Status: ✅ s34 (2026-10-09): 6 of 6 fixed — took in the Visual Function's C149 (P107 `0d9b9b0e4`) and fixed it, `dde400937` (§9). s33 (2026-10-09): 5 of 5 fixed — C144 `99c61cede` (§7); C145 `5ee9edda4`, C147 `cb7ea0fab`, C148 `cf6b4b8f8`, C146 `2d765dac2` (§8). s33 took in the Function's C146–C147 (P107 `7c5b2a842`) and the Script's C148 (P107 `dfc25b3ce`): the same "say what it last did" — the script hosts' Error and their throws.** Scoped s32 at `bd849bf0c`. **Source:** 2 bugs P107 NSP-017 s64 filed on the Expression
 and handed to P109 under R16 (`12728097b`): 2 low, **1 to ask** (C145). **Side:** noodl-runtime (`nodes/std-library/expression.ts`,
 `expression-ports.ts`), the Expression spec (`packages/nodegx-node-spec`, v1), and the export's copy of the port rules (P18's).
 
@@ -22,6 +22,7 @@ the editor draws for a name the node can never read (C145).
 | [P107-C146](../../bugs/p107-c146-a-function-s-error-keeps-the-last-failure-after-a-run-that-works.md) | Function | low | **fixed** `2d765dac2` | as ruled for D25 / C144 | A Function's Error keeps the last failure after a run that works, and a new Script empties it without sending it |
 | [P107-C147](../../bugs/p107-c147-a-function-whose-code-throws-null-or-undefined-reports-nothing.md) | Function | medium | **fixed** `cb7ea0fab` | as proposed | A Function whose code throws null or undefined reports nothing — no Error, no Failure, a Run never answered |
 | [P107-C148](../../bugs/p107-c148-a-script-whose-code-throws-null-or-undefined-never-runs-it-again.md) | Script | medium | **fixed** `cf6b4b8f8` | as proposed | A Script whose code throws null or undefined never runs that code again |
+| [P107-C149](../../bugs/p107-c149-a-visual-function-that-sends-a-signal-named-like-its-own-reports-failure-and-success-for-one-run.md) | Visual Function | low | **fixed** `dde400937` | as proposed (the value side's answer) | A Visual Function whose blocks send a signal named like one of its own pulses Failure, then Success and Done, for the same Run — and Error is emptied in the same instant |
 
 C144 follows the ruling D25 already has ("Clear it to blank text", Track F rulings page, 2026-10-05: a success sends blank text on
 Error, once). C145's proposal offers two fixes that a person would see differently — **the question for Richard** (in plain words):
@@ -82,3 +83,16 @@ expression/jsfun tests 1,095 / 1,100 (the 5 — date-family, navigate-to-path �
   runtime target has an editor connection, so that line alone kept C147 red.
 - **No port changes when the load runs.** With `run` reserved, `run + 1` has no ports, so the load evaluates it and the node says the
   name is reserved at once — not only on a Run.
+
+## 9. Session 34 (2026-10-09) — C149, a reserved signal sent
+
+Handed over by P107 s67 under R16. The `send signal` block's refusal of a name the node owns (`done`, `failure`, …) called
+`_fail` with no token: Failure pulsed alone, the code ran on, and the success path emptied Error and fired Success and Done —
+three answers to one Run. A name WRITTEN as a value already failed the run; the fix gives the signal side that answer.
+
+| Commit | What changed | Grade |
+|---|---|---|
+| `dde400937` | `logic-builder.ts`: while the code runs, the first reserved name sent is remembered; after the code the values land and the run fails through its token (Error keeps the reason, no Success, no Done). A send outside a run (a block's own timer) fails at once, as before; a throw clears the flag. Visual Function spec **v2**; the scenario renamed. Restated, each red on the pre-fix file: the contract's plant and logic-builder-warning-lifecycle's "SEPARATE PRE-EXISTING DEFECT" row (written to fail the day this was fixed) | 15/15 + 200/200 on the runtime at 13, 20732, 20735; mutants 0 survivors (118/118, 103/103); control red on exactly the C149 scenario and the signal-input one that ends with a reserved signal; contract 22/22; runtime suite at its baseline; spec package 963/963 |
+
+Handed to P18: the export's Visual Function, if it carries the same wrapper.
+
