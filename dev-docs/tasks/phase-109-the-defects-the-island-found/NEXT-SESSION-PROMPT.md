@@ -1,84 +1,71 @@
-# Next session — P109 session 35
+# Next session — P109 session 36
 
 **Phase:** [README](README.md) · **Audit:** [AUDIT-2026-10-01.md](AUDIT-2026-10-01.md) · scoped at `27d891bf3`.
-**Session 34 (2026-10-09, on `cline-dev`):** built in worktree `p109-isl049` (branch `p109-isl050`), landed by compare-and-swap.
-Board: **28 of 51 closed**.
+**Session 35 (2026-10-09, on `cline-dev`):** built in worktree `p109-isl049` (branch `p109-isl050`), landed by compare-and-swap.
+Board: **28 of 51 closed** (ISL-051 took in two rows and stays ✅).
 
-- **ISL-048 at 27 of 29** — C139 `c22c9aceb`: a Component Stack input **Keep Pages When Unmounted** (`keepPagesWhenUnmounted`,
-  default off); a remount keeps the pages unless, while off, its Components were written, its Name moved key, or (Use Routes)
-  the address moved. Page Stack **v17**. Use Routes decided, not asked: the address is the stack's, so a moved address resets.
-- **ISL-013 ✅** — slice 2 `676395627`: garden-3d-kit `requires` garden-kit and reads its world helpers and job table through
-  `Noodl.getModule` (22 byte-identical copies and the `__noodl_modules` walk gone); a refused kit is pushed onto
-  `__noodl_module_failures`, so Settings → Kits names it. AC1 (five arms) and AC4 (3D and 2D) driven on deployed pages, AC3 in the
-  editor, AC6 census 34/38 identical (the rest the two adopting kits).
-- **ISL-051 ✅ 6 of 6** — took in P107's C149 and fixed it, `dde400937`: a Visual Function whose blocks send a reserved signal
-  fails the run (Error kept, no Success, no Done). Visual Function **v2**.
-- `63eebbc9b`: the workshop drive's Grown-ups clause expected the pre-P108-s9 line (`guRend3dLine`; the page shows `guRend3dKept`).
+- **ISL-051 ✅ 9 of 9** — `024e2ee55`: **C150** an Expression reading `Arrays.x` re-runs when the array changes (the subscription is to
+  `Collection.get`, not a record named like it); **C151** the Noodl API lands after the names the function was compiled with
+  (`compiledWith`; the never-shortened argument array gone); **P109-S35-PARAMARRAYS** (found by C150's fix) an input set as an
+  expression reads `Arrays.x` as the array too (`createNoodlContext`). Expression spec **v5**: two scenarios renamed, one added.
 
 ## Do, in this order
 
-0. **New from P107 s68 (R16), both with a proposed fix — take them into ISL-051 (the Expression family):**
-   [P107-C150](../../bugs/p107-c150-an-expression-reading-an-array-never-re-runs-when-the-array-changes.md) (medium: an Expression
-   reading `Arrays.x` never re-runs when the array changes — `expression-evaluator.ts` `subscribeToChanges` listens to a Model of
-   that name) and [P107-C151](../../bugs/p107-c151-an-expression-hands-the-noodl-api-to-the-wrong-parameter.md) (low: a stray input
-   hands the Noodl API to the wrong parameter, so Variables reads nothing). Expression spec **v4** pins today's behaviour
-   (`f4a244785`); the fix moves it to **v5** with the named scenario. ISL-051 reopens to 6 of 8 when taken in.
-1. C120, C126 (ISL-048's last two) still wait on P107's world (history back, an entry replaced) — ask P107 if it has moved.
+1. **C120, C126 (ISL-048's last two):** the world (`packages/nodegx-node-spec/src/world.ts`) still models only `pushState` — no
+   `history.back()`, no `replaceState` (read s35). **The two handoffs disagree:** ours said "wait on P107's world", P107's s68 handoff
+   says "P109 holds the Page Stack (C120, C126)". s35 asked P107 who extends the world — read the answer (P107's NEXT-SESSION-PROMPT
+   or the message reply) before building. If it is ours: model `back` and `replace` as `history` events in world.ts and on the runtime
+   target, then C120 ("A Pop steps the browser's history back") and C126 ("Reset goes to the start page"), as ruled.
 2. ISL-018 AC5 (an agent round, then the editor's clean-up log), ISL-012 AC3 (a full server render with hydration).
 3. **Track G** waits on Richard's order.
 
-## What s34 learned
+## What s35 learned
 
-- **A deployed drive grades the deploy ENGINE's build date, not the source.** `nodegx deploy` runs
-  `noodl-preview/dist/nodegx-deploy.cjs` and copies `noodl-editor/src/external/deploy/index.js` — both gitignored. They were
-  older than ISL-013 slice 1, so kits loaded alphabetically and `Noodl.getModule` did not exist on the page, while every loader
-  spec was green. Before any deployed drive after a change to `@nodegx/module-inject` or `static/deploy`: `npx webpack --config
-  webpack-configs/webpack.deploy.dev.js --no-watch` (noodl-viewer-react) and `node build.mjs` (noodl-preview). Recorded on
-  P109-S5-STALEDEPLOYCLI (ISL-034). Slice 1's deployed drive was never run — that is why nobody saw it for two days.
-- **A test that says it "will fail loudly the day someone fixes it" is a test to restate, not delete** (C149: the lifecycle
-  suite's SEPARATE PRE-EXISTING DEFECT row). Restate it to the fix, red on the pre-fix file.
-- **A contract plant anchors on source text.** When the fix rewrites the anchored line, the plant throws "must contain …
-  exactly once" — re-anchor it on the new check, and show it red.
-- **A census of copies first** (ISL-013): all 22 copied definitions were byte-identical, which is what made the swap a pure
-  identity, provable by `toBe`, not by comparing answers on a list of inputs.
-- **A drive's red can be the drive.** The one workshop red was a clause stale since P108 s9; read the `saw:` line before the code.
-- **Stopping only your own run:** a peer may already be doing the step (P107 rewrote the stranger hash for `world.ts` in
-  `af99f545f`); kill by the jest's cwd (your worktree), never by name.
+- **One subscription served two readers.** `subscribeToChanges` is called by the Expression node AND by every input set as an
+  expression (`node.ts` :366), which read `Arrays` through different APIs. Grep a shared function's callers before moving it.
+- **An import can carry a global patch.** A top-level `require('./collection')` in the evaluator turned the viewer's p82 Dropdown test
+  red: loading `collection.ts` installs `on`/`off`/`get` on `Array.prototype`, and every node loads the evaluator. Required lazily.
+- **A scenario can claim a change its data never makes.** `set [a, b, a]` over `[a, b]` dedupes to no change — "the list replaced" was
+  heard by neither version. Read the trace's values, not the scenario's name.
+- **A fix can blind a mutant the defect made visible.** With the stale argument array gone, the quiet-frame swap only showed on a text
+  over a name outside the swapped patch's `compiledWith` (`[a, b]`). To pick the killing scenario, log the swapped patch: a temporary
+  `appendFileSync` in `src/runner/mutants.ts`'s `swap-branch` case behind an env var, restored from a copy after (`git diff --quiet`).
 
-## Gate readings taken s34 (2026-10-09)
+## Gate readings taken s35 (2026-10-09, worktree at `7ee55891e` + the fix)
 
-- Page Stack v17: 158/158 on the runtime at 13 and 20732; mutants 0 survivors (771/772). Logic Builder v2: 15/15 + 200/200 at
-  13, 20732, 20735; mutants 0 (118/118, 103/103).
-- Spec package 963/963 (no `stranger.test.ts`), viewer 1,837/1,837, runtime suite at baseline (graph.test's load-timed scenario;
-  day-seed 20735 survivors on Circle, Options, Radio Button, Range, Text Input — every scenario and sequence passing, P107's),
-  noodl-mcp 3,692/3,706 (the same 11), module-inject 41/41, kit-catalog 81/81, scaffold 76/76, SSR kit 27/27, cloud kit 21/21.
-- `bugs.js check`: 6 problems — the same 5 plus P107's untracked C150 (theirs).
+- Expression v5 on the runtime: 43/43 + 200/200 at 13, 20732, 20735, 7, 20734, 20733, 20729; 10,000 at 20735, 0 divergences.
+  Interpreter mutants 178/178 at 13 and 20732. Control (HEAD's two runtime files): red on exactly the C150 and C151 scenarios.
+- Evaluator tests 44/44 (3 new, red on HEAD's file); spec package 966/966 (no `stranger`, no `zz-`); viewer 1,837/1,837;
+  runtime suite at baseline — day-seed 20735 survivors on Circle, Radio Button, Range, Text Input (P107's; Options was killed
+  `af99f545f`), graph.test's load-timed scenario (96/96 alone); runtime tsc 0, spec tsc 0; spec-ledger holds 125/147.
+- `bugs.js check`: 1 problem, a peer's file name (`p78-tpl008pj-nested-signal-…`).
 
 ## Decisions for Richard (not yours)
 
-- **New (s34):** the garden library entries stay at 1.0.0 though garden-3d-kit now refuses to load without Garden Kit (its card
-  and README say so). Bump with publishing them?
-- Carried: C143's Refresh half (recommended: leave it); Track G's order; the layout of an unlabelled control in a real browser;
-  `P109-S24-SIGNINWITHERRORKEPT`, `P109-S22-BUILTINBOUNDARY`, `P109-S20-LISTDEFAULTTYPE`, `P109-S18-REFRESHROWSTATE`, ISL-010 AC4
-  and the Effort port, pushing `cline-dev`, publishing the Garden kits at the origin.
+- **New (s35):** an Expression reading one item of an array — `Arrays.cart.get(0).qty` — re-runs when an item is added or removed,
+  but not when that item's own `qty` changes (the array does not pass on its items' changes). Should it? Recommended: yes, as a Repeater
+  row hears its own record — but it means listening to every item of every array an Expression reads.
+- Carried: the garden library entries at 1.0.0 (bump with publishing?); C143's Refresh half (recommended: leave it); Track G's order;
+  the layout of an unlabelled control in a real browser; `P109-S24-SIGNINWITHERRORKEPT`, `P109-S22-BUILTINBOUNDARY`,
+  `P109-S20-LISTDEFAULTTYPE`, `P109-S18-REFRESHROWSTATE`, ISL-010 AC4 and the Effort port, pushing `cline-dev`, publishing the Garden
+  kits at the origin.
 
 ## Handed over (owed by another phase)
 
-- **P107 (opennoodl-a1):** told of Page Stack v17 and Logic Builder v2 (and the re-anchored plant). Theirs: the day-seed
-  survivors, the Video rows C96–C100, C120 / C126's world, C150 (filed s68, untracked when s34 ended).
-- **P18 (export):** the export's two kit bootstraps (`parse/kitSource.ts`, `emit/kits.ts`) still have no `requires` order and no
-  `getModule` — so garden-3d-kit, which now throws without `getModule('garden-kit')`, would not load in an exported app (read, not run); the Visual Function's reserved-signal wrapper (C149) if the
-  export carries one; plus s33's list (reserved Expression names, the size merge, throw of nothing, Children Count at a mount).
-- **Release notes, add (s34):** a Component Stack can keep its pages while Mounted is off (Keep Pages When Unmounted); a kit can
-  read another kit by naming it in `requires` (the garden 3D kit now needs Garden Kit); Settings → Kits names a kit that was not
-  loaded because a kit it needs is missing; a Visual Function that sends a signal named like its own reports a failure, not a
-  failure and a success.
+- **P107 (opennoodl-a1):** told of Expression v5 (`024e2ee55`) and asked who extends the world for C120/C126. Theirs: the day-seed
+  survivors, the Video rows C96–C100.
+- **P18 (export):** whether the export's Expression hands `Arrays.x` as the array and re-runs on it (read, not run); the two kit
+  bootstraps' `requires` / `getModule`; the Visual Function's reserved-signal wrapper (C149); s33's list (reserved Expression names, the
+  size merge, throw of nothing, Children Count at a mount).
+- **Release notes, add (s35):** an Expression that reads an Array updates when the array changes; an Expression beside an input its
+  text no longer reads still reads Variables and Objects; an input set as an expression can read `Arrays`. (s34's four still owed.)
 
 ## Worktrees
 
-`p109-isl049` (branch `p109-isl050`, at `dde400937`) holds nothing unlanded; its untracked probes (`zz-s31-*`, `zz-s32-*`,
-`zz-s33-c114`) — never commit them. The older ones (`p109-isl048`, `p109-drag`, `p109-c127`, `p109-s31-land`, `p109-c77`,
-`p109-c101`, `p109-s30-*`, `p109-isl031-drag`, `p109-s12`) are spent; remove with `git worktree remove` when convenient.
+`p109-isl049` (branch `p109-isl050`) holds nothing unlanded; its untracked probes (`zz-s31-*`, `zz-s32-*`, `zz-s33-c114`) — never
+commit them; the full runtime suite runs them too (`zz-s32-rtrace` fails there — discount it). The older ones (`p109-isl048`,
+`p109-drag`, `p109-c127`, `p109-s31-land`, `p109-c77`, `p109-c101`, `p109-s30-*`, `p109-isl031-drag`, `p109-s12`) are spent; remove with
+`git worktree remove` when convenient.
 
 ## Recipes
 

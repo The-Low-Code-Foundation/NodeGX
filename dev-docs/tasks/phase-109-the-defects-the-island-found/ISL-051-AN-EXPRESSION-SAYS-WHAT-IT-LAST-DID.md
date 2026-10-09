@@ -1,6 +1,6 @@
 # ISL-051 — An Expression says what it last did
 
-**Status: ✅ s34 (2026-10-09): 6 of 6 fixed — took in the Visual Function's C149 (P107 `0d9b9b0e4`) and fixed it, `dde400937` (§9). s33 (2026-10-09): 5 of 5 fixed — C144 `99c61cede` (§7); C145 `5ee9edda4`, C147 `cb7ea0fab`, C148 `cf6b4b8f8`, C146 `2d765dac2` (§8). s33 took in the Function's C146–C147 (P107 `7c5b2a842`) and the Script's C148 (P107 `dfc25b3ce`): the same "say what it last did" — the script hosts' Error and their throws.** Scoped s32 at `bd849bf0c`. **Source:** 2 bugs P107 NSP-017 s64 filed on the Expression
+**Status: ✅ s35 (2026-10-09): 9 of 9 fixed — took in the Expression's C150 and C151 (P107 `f4a244785`, R16) and a third its fix found (P109-S35-PARAMARRAYS), `024e2ee55` (§10).** ✅ s34 (2026-10-09): 6 of 6 fixed — took in the Visual Function's C149 (P107 `0d9b9b0e4`) and fixed it, `dde400937` (§9). s33 (2026-10-09): 5 of 5 fixed — C144 `99c61cede` (§7); C145 `5ee9edda4`, C147 `cb7ea0fab`, C148 `cf6b4b8f8`, C146 `2d765dac2` (§8). s33 took in the Function's C146–C147 (P107 `7c5b2a842`) and the Script's C148 (P107 `dfc25b3ce`): the same "say what it last did" — the script hosts' Error and their throws.** Scoped s32 at `bd849bf0c`. **Source:** 2 bugs P107 NSP-017 s64 filed on the Expression
 and handed to P109 under R16 (`12728097b`): 2 low, **1 to ask** (C145). **Side:** noodl-runtime (`nodes/std-library/expression.ts`,
 `expression-ports.ts`), the Expression spec (`packages/nodegx-node-spec`, v1), and the export's copy of the port rules (P18's).
 
@@ -22,6 +22,9 @@ the editor draws for a name the node can never read (C145).
 | [P107-C146](../../bugs/p107-c146-a-function-s-error-keeps-the-last-failure-after-a-run-that-works.md) | Function | low | **fixed** `2d765dac2` | as ruled for D25 / C144 | A Function's Error keeps the last failure after a run that works, and a new Script empties it without sending it |
 | [P107-C147](../../bugs/p107-c147-a-function-whose-code-throws-null-or-undefined-reports-nothing.md) | Function | medium | **fixed** `cb7ea0fab` | as proposed | A Function whose code throws null or undefined reports nothing — no Error, no Failure, a Run never answered |
 | [P107-C148](../../bugs/p107-c148-a-script-whose-code-throws-null-or-undefined-never-runs-it-again.md) | Script | medium | **fixed** `cf6b4b8f8` | as proposed | A Script whose code throws null or undefined never runs that code again |
+| [P107-C150](../../bugs/p107-c150-an-expression-reading-an-array-never-re-runs-when-the-array-changes.md) | Expression | medium | **fixed** `024e2ee55` | as proposed (the array half; a member's key: Richard's) | An Expression reading an Array (`Arrays.cart.size()`) never re-runs when the array changes — the count stays where it was |
+| [P107-C151](../../bugs/p107-c151-an-expression-hands-the-noodl-api-to-the-wrong-parameter.md) | Expression | low | **fixed** `024e2ee55` | as proposed | An Expression beside a stray input, or whose text once read more names, reads `Variables` as nothing |
+| [P109-S35-PARAMARRAYS](../../bugs/p109-s35-paramarrays-an-expression-parameter-reads-an-array-as-a-record.md) | expression parameters | low | **fixed** `024e2ee55` | found by C150's fix | An input set as an expression reads `Arrays.items` as a record — `.length` undefined |
 | [P107-C149](../../bugs/p107-c149-a-visual-function-that-sends-a-signal-named-like-its-own-reports-failure-and-success-for-one-run.md) | Visual Function | low | **fixed** `dde400937` | as proposed (the value side's answer) | A Visual Function whose blocks send a signal named like one of its own pulses Failure, then Success and Done, for the same Run — and Error is emptied in the same instant |
 
 C144 follows the ruling D25 already has ("Clear it to blank text", Track F rulings page, 2026-10-05: a success sends blank text on
@@ -95,4 +98,30 @@ three answers to one Run. A name WRITTEN as a value already failed the run; the 
 | `dde400937` | `logic-builder.ts`: while the code runs, the first reserved name sent is remembered; after the code the values land and the run fails through its token (Error keeps the reason, no Success, no Done). A send outside a run (a block's own timer) fails at once, as before; a throw clears the flag. Visual Function spec **v2**; the scenario renamed. Restated, each red on the pre-fix file: the contract's plant and logic-builder-warning-lifecycle's "SEPARATE PRE-EXISTING DEFECT" row (written to fail the day this was fixed) | 15/15 + 200/200 on the runtime at 13, 20732, 20735; mutants 0 survivors (118/118, 103/103); control red on exactly the C149 scenario and the signal-input one that ends with a reserved signal; contract 22/22; runtime suite at its baseline; spec package 963/963 |
 
 Handed to P18: the export's Visual Function, if it carries the same wrapper.
+
+## 10. Session 35 (2026-10-09) — the Noodl globals: an Array heard, the API in its place
+
+Handed over by P107 s68 under R16 with the Expression spec v4 (`f4a244785`), which pinned both as the runtime did them. **AC1:** both
+re-measured at `7ee55891e` through the control below — HEAD's runtime red on exactly v5's C150 and C151 scenarios.
+
+| Commit | What changed | Grade |
+|---|---|---|
+| `024e2ee55` | **C150:** `subscribeToChanges` listens to the ARRAY (`Collection.get(arrId)`, `change` — every add and remove sends one) instead of a record named like it. **PARAMARRAYS:** `createNoodlContext`'s `Arrays.x` is the array too, so the expression-parameter path reads what it now listens to. **C151:** `_compileFunction` records `compiledWith`; the arguments are those names' values, then the API (`inputValues` gone). Expression spec **v5**: the array watched as a collection, the `values` state gone; C150's and C151's scenarios renamed to the new answers (C150's list replacement made a real one — `[a, b, a]` deduped to the members it had and sent nothing); one scenario added (`c * 2`, unticked, then a Run) because v4's mutant on the quiet frame was only visible through the stale array | runtime 43 / 43 + 200 / 200 at 13, 20732, 20735, 7, 20734, 20733, 20729; 10,000 at 20735, 0 divergences; interpreter mutants 178 / 178 at 13 and 20732; control (HEAD's two runtime files) red on exactly the C150 and C151 scenarios; evaluator tests 44 / 44, the 3 new red on HEAD's file; spec package 966 / 966; spec-ledger holds 125 / 147; viewer 1,837 / 1,837; runtime suite at its baseline (the four day-seed survivors — Circle, Radio Button, Range, Text Input, P107's; graph.test's load-timed scenario, 96 / 96 alone) |
+
+**Not decided (Richard's):** whether an Expression reading a MEMBER of an array (`Arrays.list.get(0).k`) re-runs when that member's
+key moves. Today it does not (the array does not re-notify members' changes), and v5 says so.
+
+Handed to P18: whether the export's Expression hands `Arrays.x` as the array and re-runs on it (read, not run).
+
+**What s35 found.**
+- **One subscription served two readers.** `subscribeToChanges` is called by the Expression node AND by every input set as an
+  expression (node.ts :366), and the two read `Arrays` through different APIs. Moving the subscription alone would have left the
+  parameter path reading a record while listening to an array — grep a shared function's callers before moving it.
+- **An import can carry a global patch.** Importing `collection` into the evaluator turned the viewer's p82 Dropdown test red: loading
+  `collection.ts` installs `on`/`off`/`get` on `Array.prototype`, and the evaluator is loaded by every node. Required lazily instead —
+  the import graph as it was. A test that checks `typeof arr.on` is reading which modules happen to be loaded.
+- **A scenario can claim a change its data never makes.** `set [a, b, a]` on a list holding `[a, b]` dedupes to no change, so "the list
+  replaced" was never heard by either version. Read the trace's values, not the scenario's name.
+- **A fix can blind a mutant the defect made visible.** The stale argument array was what showed the quiet-frame swap; with it gone the
+  swap's `compiledWith` (`[a, b]`, the swapped patch's) only shows on a text over a name outside it. Log the swapped patch to choose it.
 
