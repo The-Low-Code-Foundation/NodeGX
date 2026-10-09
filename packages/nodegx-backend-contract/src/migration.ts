@@ -170,7 +170,7 @@ export async function dryRunMigration(ctx: MigrationContext, plan: MigrationPlan
           const k = JSON.stringify(key);
           seen.set(k, (seen.get(k) || 0) + 1);
         }
-        const over = [...seen.values()].filter((n) => n > 1).reduce((a, n) => a + n, 0);
+        const over = Array.from(seen.values()).filter((n) => n > 1).reduce((a, n) => a + n, 0);
         if (over > 0) dry.refusals.push({ says: c.says, rows: over });
       } else if (c.refuse === 'more-than-one') {
         const seen = new Map<string, number>();
@@ -178,7 +178,7 @@ export async function dryRunMigration(ctx: MigrationContext, plan: MigrationPlan
           const id = idOf(row[c.by]);
           if (id) seen.set(id, (seen.get(id) || 0) + 1);
         }
-        const over = [...seen.values()].filter((n) => n > 1).length;
+        const over = Array.from(seen.values()).filter((n) => n > 1).length;
         if (over > 0) dry.refusals.push({ says: c.says, rows: over });
       } else {
         const on = new Set((await allRows(ctx, c.record)).map((r) => idOf(r[c.by])).filter(Boolean));
@@ -473,7 +473,7 @@ export function rulesAfterMigration<E extends object>(
             for (const [k, v] of Object.entries(hop.where)) where[say(k, fieldNow(at, k))] = v;
             hop.where = where;
             const landing = tableNow(at);
-            for (const [key, now] of columns)
+            for (const [key, now] of Array.from(columns))
               if (key.startsWith(`${landing}.`) && JSON.stringify(Object.values(where)).includes(`"${key.slice(landing.length + 1)}"`))
                 out.problems.push(`the rule at collections.${name}.permissions.${op} narrows a hop by "${key.slice(landing.length + 1)}" inside a filter; say it again as "${now}"`);
           }
