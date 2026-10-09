@@ -37,9 +37,9 @@ interface NoodlDependencies {
  * about that set is knowable statically, which is why the catalog records the mechanism
  * rather than the ports.
  *
- * `scope` holds the current value of each such input by name; `inputNames`/`inputValues`
- * are the same data flattened into positional arrays, because the compiled function takes
- * its inputs as ordered arguments.
+ * `scope` holds the current value of each such input by name; `inputNames` is its keys as the
+ * text last set them, and `compiledWith` the names the function was compiled with — the
+ * arguments are built from those, because the compiled function takes them positionally.
  */
 interface ExpressionNodeInstance extends NodeInstance {
   _internal: {
@@ -86,7 +86,14 @@ interface ExpressionNodeInstance extends NodeInstance {
     currentExpression: string;
     compiledFunction?: (...args: unknown[]) => unknown;
     inputNames: string[];
-    inputValues: unknown[];
+    /**
+     * P109 ISL-051 (P107-C151) — the parameter names the current function was compiled with, `Noodl` excepted.
+     *
+     * The arguments were one array written in `inputNames` order and never shortened, with the API appended after all of it.
+     * `inputNames` is the scope's keys when the text was set; the function takes the scope's keys when it compiles — a stray
+     * input registered in between, or a text that once read more names, and `Noodl` landed on a port's value or on nothing.
+     */
+    compiledWith: string[];
     noodlDependencies: NoodlDependencies;
     unsubscribe: (() => void) | null;
     /**
@@ -120,7 +127,7 @@ interface ExpressionNodeInstance extends NodeInstance {
   _scheduleLoadEvaluation(): void;
   /** The answer over inputs that have not arrived, or `NOT_EVALUATED` when there is none to give. */
   _evaluateOverUnsetInputs(): unknown;
-  /** The compiled function's arguments: every input's current value, then the Noodl API. */
+  /** The compiled function's arguments: the current value of each name it was compiled with, then the Noodl API. */
   _argumentsForEvaluation(): unknown[];
   /** Record a value arrival and re-run if this input is ticked. */
   _onInputValueArrived(name: string, value: unknown): void;
@@ -166,7 +173,7 @@ const ExpressionNode: NodeDefinitionOptions = {
     internal.currentExpression = '';
     internal.compiledFunction = undefined;
     internal.inputNames = [];
-    internal.inputValues = [];
+    internal.compiledWith = [];
 
     // New: Expression evaluator integration
     internal.noodlDependencies = { variables: [], objects: [], arrays: [] };
@@ -441,15 +448,13 @@ const ExpressionNode: NodeDefinitionOptions = {
     },
     _argumentsForEvaluation: function (this: ExpressionNodeInstance) {
       const internal = this._internal;
-      for (let i = 0; i < internal.inputNames.length; ++i) {
-        const inputValue = internal.scope[internal.inputNames[i]];
-        internal.inputValues[i] = inputValue;
-      }
+      // P107-C151: built fresh from the names the function was compiled with, so the API is always the parameter after them.
+      const values = internal.compiledWith.map((name) => internal.scope[name]);
 
       // Get proper Noodl API and append as last parameter for backward compatibility
       const JavascriptNodeParser = require('../../javascriptnodeparser');
       const noodlAPI = JavascriptNodeParser.createNoodlAPI(this.context && this.context.modelScope);
-      return internal.inputValues.concat([noodlAPI]);
+      return values.concat([noodlAPI]);
     },
     _evaluateOverUnsetInputs: function (this: ExpressionNodeInstance) {
       const internal = this._internal;
@@ -472,6 +477,7 @@ const ExpressionNode: NodeDefinitionOptions = {
     _compileFunction: function (this: ExpressionNodeInstance) {
       const expression = this._internal.currentExpression;
       const args = Object.keys(this._internal.scope);
+      this._internal.compiledWith = args.slice();
 
       // Add 'Noodl' as last parameter for backward compatibility
       args.push('Noodl');

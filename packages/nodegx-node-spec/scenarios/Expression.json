@@ -169,6 +169,26 @@
     ]
   },
   {
+    "name": "an unticked port's value runs nothing, and the quiet frame keeps the function compiled for this text: a Run then reads c through it (Result 6)",
+    "because": "expression.ts `_compileFunction` records `compiledWith` once per text and `_argumentsForEvaluation` hands those names' values, then the API (row C151, v5) — a frame that schedules nothing must not touch them",
+    "params": {
+      "expression": "c * 2",
+      "runOnChange-c": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "c",
+        "value": 3
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
     "name": "a text that will not compile, run by a value: answers 0, writes Error, pulses Failure once, then only On False — and a settle with nothing new does nothing",
     "because": "expression.ts :397-405, :346-378 (the report once per message); the trailing settle is the shape that kills dropping a repeat's state (seed 20729: the frame's flag left set re-runs the text)",
     "params": {
@@ -738,8 +758,8 @@
     ]
   },
   {
-    "name": "an Array the text reads is never heard (row C150): an item added, the list replaced, a member's key written — no re-run, Result stays; a Run reads the new size; a write to a RECORD named like the array re-runs it",
-    "because": "expression-evaluator.ts :273-281 subscribes to `scope.get(arrId)`, a record of the array's name, never the array (Collection.get) — row C150; the runtime's answer is the spec's (R3 (a)) until it is fixed",
+    "name": "an Array the text reads is heard (row C150, v5): an item added, the list replaced — it re-runs, Result 2 then 1; a member's key written is not heard; a write to a RECORD named like the array is not heard",
+    "because": "expression-evaluator.ts subscribes to the array itself (`Collection.get(arrId)`, its `change`), which is what `Arrays.x` reads; v4 subscribed to `scope.get(arrId)`, a record of that name (row C150). The array does not re-notify a member's own change",
     "params": {
       "expression": "Arrays.list.size()"
     },
@@ -768,8 +788,6 @@
             "at": 10,
             "array": "list",
             "set": [
-              "a",
-              "b",
               "a"
             ]
           },
@@ -934,8 +952,8 @@
     ]
   },
   {
-    "name": "the Noodl API lands in the wrong place (row C151): placed beside a STRAY input the text does not read, Variables reads nothing (no Result, On False); after a text that read two ports, a text reading one hands a stale port value as Noodl — Variables reads nothing again (NaN)",
-    "because": "expression.ts :442-452 writes the values over one argument array that is never shortened and appends the API after all of it; the function takes Noodl after the names it was compiled with — a stray makes that parameter undefined, a longer old array fills it with a stale value (row C151, v4)",
+    "name": "the Noodl API lands after the names the function was compiled with (row C151, v5): beside a STRAY input the text does not read, Variables.v reads 7; after a text that read two ports, a text reading one reads Variables again (8)",
+    "because": "expression.ts `_argumentsForEvaluation` builds the arguments from `compiledWith`, then the API; v4 wrote them over one argument array never shortened and appended the API after all of it, so a stray or a longer old array put Noodl in the wrong parameter (row C151)",
     "params": {
       "expression": "Variables.v",
       "s": 5
