@@ -53,8 +53,8 @@
  * spec compiles and runs the same code on the same record. Code that does not compile leaves no function (the one before is dropped,
  * NDA-012 D1); the declared default is never compiled (a default never runs its setter). Either way a rebuild is asked for. Per record,
  * Template Type Dynamic runs the function: no function, a throw (raised, :507-520), nothing set or (v3, row C135) a component that is not
- * text is no component — no row. A rebuild needs a
- * Template or a compiled Script (:745) — whichever Template Type picks, so a Script that compiled lets a rebuild with no Template pass.
+ * text is no component — no row. A rebuild needs what Template Type uses (:745): a Template on Explicit, a compiled Script
+ * otherwise (v6, row C136: v5 took either, so a Script that compiled let an Explicit rebuild with no Template pass).
  *
  * THE FRAME'S END (node.ts :759-763). The Repeater's frame-end callbacks run in the order they were asked for — the copy and the
  * rebuild. v4 — the copy cannot throw (row C130: v3's copy of a list with a `null` threw there, ended the frame's callbacks, and a
@@ -66,7 +66,7 @@
  *     not have throws (`getComponentModel` nodecontext.ts :616-636), caught in `addItem` (v3, row C128): no row, and the queue runs on
  *     five act boundaries later.
  *   - **a removal**: the record's row goes (:658-685).
- *   - **a rebuild** (`refresh` :723-810): no Template (falsy) — every Refresh it answers fails `repeater/no-template`; no Items (falsy)
+ *   - **a rebuild** (`refresh` :723-810): nothing Template Type uses (v6) — every Refresh it answers fails `repeater/no-template`; no Items (falsy)
  *     — `repeater/no-items`. Otherwise the Items are copied again (what that copy queues is dropped), EVERY row goes, and a row is built
  *     for each record in the list, in order, as an addition builds one (a component the project does not have: no row, four act
  *     boundaries); then every Refresh it answers is Done. (A copy that throws would fail every Refresh it answers,
@@ -466,7 +466,8 @@ export const Repeater = defineNode({
   // v3 (P109 ISL-049, s32): nothing the Repeater meets stops its queue — a component the project does not have, a Script's component
   // that is not text, a mapping that throws, a copy that throws are each caught where they happen (rows C128, C135, C140, C141)
   // v5 (P109 ISL-049, s32): Items Rendered only after a run of the queue that added or removed a row (row C129)
-  version: 5,
+  // v6 (P109 ISL-049, s32): a rebuild checks only what Template Type uses (row C136)
+  version: 6,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/data/foreach.tsx',
   needs: ['person', 'registry', 'project'],
   worldPool: {
@@ -1066,8 +1067,8 @@ function refresh(w: Work): void {
   const settle = (outcome: 'done' | 'failure', error?: string) => {
     for (let i = 0; i < tokens; i++) w.outcomes.push(error === undefined ? { port: 'refresh', outcome } : { port: 'refresh', outcome, error });
   };
-  // :745-752 — a Template, or a Script that compiled, whichever Template Type picks
-  if (!(st.template || st.compiles)) {
+  // :745-752 — v6 (row C136, ruled): only what Template Type uses — Template on Explicit (or never set), a compiled Script otherwise
+  if (st.templateType === undefined || st.templateType === 'explicit' ? !st.template : !st.compiles) {
     settle('failure', 'repeater/no-template');
     st.hops = 1;
     return;

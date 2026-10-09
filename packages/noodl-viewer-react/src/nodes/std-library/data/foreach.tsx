@@ -786,8 +786,18 @@ const ForEachDefinition: NodeDefinitionOptions = {
 
       // ERG-001 split this one condition in two so the diagnosis names which half is missing.
       // Behaviour is unchanged — both still return before any teardown.
-      if (!(internal.template || internal.templateFunction)) {
-        settle('failure', 'repeater/no-template', 'The Repeater has no Template, so there is nothing to build each item from');
+      // ISL-049 (P107-C136), ruled "Fail with "no template" whenever Explicit has no Template": the check reads only what
+      // Template Type uses. It asked for "a Template or a compiled Script", so on Explicit a Script left over from Dynamic let
+      // a Refresh report Done with nothing to build from.
+      const explicit = internal.templateType === undefined || internal.templateType === 'explicit';
+      if (explicit ? !internal.template : !internal.templateFunction) {
+        settle(
+          'failure',
+          'repeater/no-template',
+          explicit
+            ? 'The Repeater has no Template, so there is nothing to build each item from'
+            : 'The Repeater picks each component with its Script, and it has no Script that compiles, so there is nothing to build each item from'
+        );
         return;
       }
       if (!internal.items) {

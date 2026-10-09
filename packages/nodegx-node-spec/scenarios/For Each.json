@@ -3341,8 +3341,8 @@
   ]
  },
  {
-  "name": "the matrix — a new list, then Template Type dynamic (the rebuild builds nothing behind the builds); its frame ends at a settle",
-  "because": "NSP-016 §7.20 THE MATRIX: every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "name": "the matrix — a new list, then Template Type dynamic (no Script: the rebuild fails behind the additions, row C136); its frame ends at a settle",
+  "because": "NSP-016 §7.20 THE MATRIX: every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed — renamed in P109 s32 (v6: a rebuild checks only what Template Type uses)",
   "params": {
    "template": "Row",
    "items": [
@@ -3407,8 +3407,8 @@
   ]
  },
  {
-  "name": "the matrix — a new list, then Template Type dynamic (the rebuild builds nothing behind the builds); a click on row 0 before the settle",
-  "because": "NSP-016 §7.20 THE MATRIX: every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "name": "the matrix — a new list, then Template Type dynamic (no Script: the rebuild fails behind the additions, row C136); a click on row 0 before the settle",
+  "because": "NSP-016 §7.20 THE MATRIX: every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed — renamed in P109 s32 (v6: a rebuild checks only what Template Type uses)",
   "params": {
    "template": "Row",
    "items": [
@@ -3477,8 +3477,8 @@
   ]
  },
  {
-  "name": "the matrix — a new list, then Template Type dynamic (the rebuild builds nothing behind the builds); clicks on rows 1 and 0 before the settle",
-  "because": "NSP-016 §7.20 THE MATRIX: every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "name": "the matrix — a new list, then Template Type dynamic (no Script: the rebuild fails behind the additions, row C136); clicks on rows 1 and 0 before the settle",
+  "because": "NSP-016 §7.20 THE MATRIX: every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed — renamed in P109 s32 (v6: a rebuild checks only what Template Type uses)",
   "params": {
    "template": "Row",
    "items": [
@@ -3551,8 +3551,8 @@
   ]
  },
  {
-  "name": "the matrix — a new list, then Template Type dynamic (the rebuild builds nothing behind the builds); a click, a new list, a click",
-  "because": "NSP-016 §7.20 THE MATRIX: every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "name": "the matrix — a new list, then Template Type dynamic (no Script: the rebuild fails behind the additions, row C136); a click, a new list, a click",
+  "because": "NSP-016 §7.20 THE MATRIX: every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed — renamed in P109 s32 (v6: a rebuild checks only what Template Type uses)",
   "params": {
    "template": "Row",
    "items": [
@@ -4925,8 +4925,8 @@
   ]
  },
  {
-  "name": "a Script that does not compile drops the one before it: no rows, and a Refresh with a Template is Done; with no Template it fails repeater/no-template",
-  "because": "foreach.tsx `templateScript` :352-376 (compiled as it arrives), `getTemplateForModel` :501-537 (run per record), `refresh` :745",
+  "name": "a Script that does not compile drops the one before it: its rebuild fails repeater/no-template and the rows stay, and a Refresh fails too, with a Template or without (row C136)",
+  "because": "foreach.tsx `templateScript` :352-376 (compiled as it arrives), `getTemplateForModel` :501-537 (run per record), `refresh` :745 — renamed in P109 s32 (v6: a rebuild checks only what Template Type uses)",
   "params": {
    "template": "Row",
    "items": [
@@ -5054,8 +5054,8 @@
   ]
  },
  {
-  "name": "Template Type Explicit with Template empty: a Refresh fails repeater/no-template — until a Script compiles, then it is Done and draws nothing (row C136)",
-  "because": "foreach.tsx `refresh` :745 asks for a Template or a compiled Script, whichever Template Type uses",
+  "name": "Template Type Explicit with Template empty: a Refresh fails repeater/no-template, and still does once a Script compiles (row C136)",
+  "because": "foreach.tsx `refresh` :745 asks for a Template or a compiled Script, whichever Template Type uses — renamed in P109 s32 (v6: a rebuild checks only what Template Type uses)",
   "params": {
    "template": "",
    "items": [
@@ -6404,8 +6404,8 @@
   ]
  },
  {
-  "name": "the Script matrix — a Script that does not compile (no rows); its frame ends at a settle",
-  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "name": "the Script matrix — a Script that does not compile (the rebuild fails, the rows stay, row C136); its frame ends at a settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed — renamed in P109 s32 (v6: a rebuild checks only what Template Type uses)",
   "params": {
    "template": "Row",
    "items": [
@@ -6460,8 +6460,8 @@
   ]
  },
  {
-  "name": "the Script matrix — a Script that does not compile (no rows); a click on row 0 before the settle",
-  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "name": "the Script matrix — a Script that does not compile (the rebuild fails, the rows stay, row C136); a click on row 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed — renamed in P109 s32 (v6: a rebuild checks only what Template Type uses)",
   "params": {
    "template": "Row",
    "items": [
@@ -6520,8 +6520,8 @@
   ]
  },
  {
-  "name": "the Script matrix — a Script that does not compile (no rows); clicks on rows 1 and 0 before the settle",
-  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "name": "the Script matrix — a Script that does not compile (the rebuild fails, the rows stay, row C136); clicks on rows 1 and 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed — renamed in P109 s32 (v6: a rebuild checks only what Template Type uses)",
   "params": {
    "template": "Row",
    "items": [
@@ -6584,8 +6584,8 @@
   ]
  },
  {
-  "name": "the Script matrix — a Script that does not compile (no rows); a click, a new list, a click",
-  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "name": "the Script matrix — a Script that does not compile (the rebuild fails, the rows stay, row C136); a click, a new list, a click",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed — renamed in P109 s32 (v6: a rebuild checks only what Template Type uses)",
   "params": {
    "template": "Row",
    "items": [
@@ -7693,8 +7693,8 @@
   ]
  },
  {
-  "name": "the Script matrix — a Script written while Template Type is Explicit and Template is empty: a rebuild passes, and draws nothing; its frame ends at a settle",
-  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "name": "the Script matrix — a Script written while Template Type is Explicit and Template is empty: the rebuild fails as it does with no Script (row C136); its frame ends at a settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed — renamed in P109 s32 (v6: a rebuild checks only what Template Type uses)",
   "params": {
    "template": "Row",
    "items": [
@@ -7749,8 +7749,8 @@
   ]
  },
  {
-  "name": "the Script matrix — a Script written while Template Type is Explicit and Template is empty: a rebuild passes, and draws nothing; a click on row 0 before the settle",
-  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "name": "the Script matrix — a Script written while Template Type is Explicit and Template is empty: the rebuild fails as it does with no Script (row C136); a click on row 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed — renamed in P109 s32 (v6: a rebuild checks only what Template Type uses)",
   "params": {
    "template": "Row",
    "items": [
@@ -7809,8 +7809,8 @@
   ]
  },
  {
-  "name": "the Script matrix — a Script written while Template Type is Explicit and Template is empty: a rebuild passes, and draws nothing; clicks on rows 1 and 0 before the settle",
-  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "name": "the Script matrix — a Script written while Template Type is Explicit and Template is empty: the rebuild fails as it does with no Script (row C136); clicks on rows 1 and 0 before the settle",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed — renamed in P109 s32 (v6: a rebuild checks only what Template Type uses)",
   "params": {
    "template": "Row",
    "items": [
@@ -7873,8 +7873,8 @@
   ]
  },
  {
-  "name": "the Script matrix — a Script written while Template Type is Explicit and Template is empty: a rebuild passes, and draws nothing; a click, a new list, a click",
-  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
+  "name": "the Script matrix — a Script written while Template Type is Explicit and Template is empty: the rebuild fails as it does with no Script (row C136); a click, a new list, a click",
+  "because": "NSP-016 §7.22 THE MATRIX (v2, Script): every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed — renamed in P109 s32 (v6: a rebuild checks only what Template Type uses)",
   "params": {
    "template": "Row",
    "items": [
@@ -8559,7 +8559,7 @@
  },
  {
   "name": "a rebuild that builds nothing, started by a click, settles when one of its act boundaries is left: a Refresh pulsed one act before that is dropped (row C137)",
-  "because": "foreach.tsx `refresh` :729-734 — it takes the Refreshes waiting at its start and, at its end, `settle` puts back only those (`pendingRefreshOutcomes = answered`) before answering them; one pulsed while it ran is overwritten; measured: N records looked at, N of its N + 1 boundaries",
+  "because": "foreach.tsx `refresh` :729-734 — it takes the Refreshes waiting at its start and, at its end, `settle` puts back only those (`pendingRefreshOutcomes = answered`) before answering them; one pulsed while it ran is overwritten; measured: N records looked at, N of its N + 1 boundaries — P109 s32: a Script that compiles and names no component (v6, row C136: Dynamic with no Script now fails its check, and builds nothing no more)",
   "params": {
    "template": "Row",
    "items": [
@@ -8582,6 +8582,10 @@
    {
     "set": "templateType",
     "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "/* names no component */"
    },
    {
     "act": "tapRow",
@@ -8616,7 +8620,7 @@
  },
  {
   "name": "a rebuild that builds nothing, started by a click, settles when one of its act boundaries is left: a Refresh pulsed at that act is kept, and the next rebuild answers it",
-  "because": "foreach.tsx `refresh` :729-734 — it takes the Refreshes waiting at its start and, at its end, `settle` puts back only those (`pendingRefreshOutcomes = answered`) before answering them; one pulsed while it ran is overwritten; measured: N records looked at, N of its N + 1 boundaries",
+  "because": "foreach.tsx `refresh` :729-734 — it takes the Refreshes waiting at its start and, at its end, `settle` puts back only those (`pendingRefreshOutcomes = answered`) before answering them; one pulsed while it ran is overwritten; measured: N records looked at, N of its N + 1 boundaries — P109 s32: a Script that compiles and names no component (v6, row C136: Dynamic with no Script now fails its check, and builds nothing no more)",
   "params": {
    "template": "Row",
    "items": [
@@ -8639,6 +8643,10 @@
    {
     "set": "templateType",
     "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "/* names no component */"
    },
    {
     "act": "tapRow",
@@ -8677,7 +8685,7 @@
  },
  {
   "name": "a Refresh before the click that starts the rebuild is answered by it; a second, after the click, is dropped (row C137)",
-  "because": "foreach.tsx `refresh` :729-734 — it takes the Refreshes waiting at its start and, at its end, `settle` puts back only those (`pendingRefreshOutcomes = answered`) before answering them; one pulsed while it ran is overwritten",
+  "because": "foreach.tsx `refresh` :729-734 — it takes the Refreshes waiting at its start and, at its end, `settle` puts back only those (`pendingRefreshOutcomes = answered`) before answering them; one pulsed while it ran is overwritten — P109 s32: a Script that compiles and names no component (v6, row C136: Dynamic with no Script now fails its check, and builds nothing no more)",
   "params": {
    "template": "Row",
    "items": [
@@ -8700,6 +8708,10 @@
    {
     "set": "templateType",
     "value": "dynamic"
+   },
+   {
+    "set": "templateScript",
+    "value": "/* names no component */"
    },
    {
     "signal": "refresh"
