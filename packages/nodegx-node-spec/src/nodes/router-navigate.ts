@@ -16,7 +16,7 @@
  *     navigates are answered in one millisecond, a LATER one's Failure is reported before an earlier one's Done
  *     (found by the deep run, s19: the first spec settled both in arrival order).
  * A navigate no router answers to (world.ts ROUTE: one registered name takes everything; otherwise the name
- * as handed, a blank one included — there is no `Main` rule on this side) is queued and, in a play, never
+ * as handed, a blank one as Main — v3, row C118: v1 and v2 had no `Main` rule on this side) is queued and, in a play, never
  * answered. One settle per navigate even when two routers share the name (:99-103). Error keeps its last
  * message — nothing clears it.
  * The ports: `router` (an enum of the project's Routers, drawn only when there are two or more), `target`
@@ -79,7 +79,9 @@ export const RouterNavigate = defineNode({
   // v2 (NSP-015 s19, the same session): a Done or Unchanged is reported at the end of the frame its answer lands in,
   // a Failure at once — so when two navigates are answered in one millisecond, a later one's Failure comes before an
   // earlier one's Done. v1 reported every answer at once, in arrival order. Found by the 10,000 deep run.
-  version: 2,
+  // v3 (P109 ISL-050 s33, for ISL-048's C118 `d85e4e6d9`): a blank or unset Router is Main when two names are registered — the handler
+  // reads `name || 'Main'` as `registerRouter` does. C118 moved the handler and the Router spec (v4) but not this one.
+  version: 3,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/router-navigate.ts',
   needs: ['router'],
   worldPool: {

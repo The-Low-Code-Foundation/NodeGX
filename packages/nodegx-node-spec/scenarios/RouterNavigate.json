@@ -130,8 +130,8 @@
     ]
   },
   {
-    "name": "two names registered: a blank Router is NOT Main on this side — queued",
-    "because": "router-handler.ts :59 looks up the name as handed; only registerRouter (:70) maps blank to Main",
+    "name": "two names registered: a blank Router is Main — Main answers (v3, row C118)",
+    "because": "router-handler.ts :54-56 `name || 'Main'` (P107-C118, fixed in P109 ISL-048), as registerRouter (:70) reads it",
     "world": {
       "router": {
         "names": [
@@ -159,8 +159,8 @@
     ]
   },
   {
-    "name": "two names registered: Router never set (undefined) is queued too",
-    "because": "router-handler.ts :59 — `this._routers[undefined]`",
+    "name": "two names registered: Router never set (undefined) is Main too (v3, row C118)",
+    "because": "router-handler.ts :54-56 — `undefined || 'Main'`",
     "world": {
       "router": {
         "names": [
@@ -397,6 +397,46 @@
       "settle",
       {
         "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an Unchanged is reported once: a later frame with no press reports nothing (v3)",
+    "because": "router-navigate.ts :134-143 — each settle callback runs once; P109 s33 pins it, a seed-20735 survivor (the cleared list, dropped)",
+    "world": {
+      "router": {
+        "names": [
+          "Main"
+        ],
+        "answers": [
+          {
+            "answer": "unchanged"
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "/Home"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "target",
+        "value": "/Detail"
+      },
+      "settle",
+      {
+        "set": "pm-id",
+        "value": 1
       },
       "settle"
     ]

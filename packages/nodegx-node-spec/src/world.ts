@@ -193,8 +193,8 @@
  *               world's (router-handler.ts :51-67): it hands the request on ONE MILLISECOND LATER, a
  *               world timer (`setTimeout(…, 1)`), and only then picks the routers: when the script
  *               registers routers under exactly ONE name, that name, whatever the node handed;
- *               otherwise the name AS HANDED, as a property key — there is no blank-is-`Main` rule on
- *               this side (a router registers under `name || 'Main'`, :70, but `navigate` looks up
+ *               otherwise the name AS HANDED, as a property key, a blank one as `Main` (`name || 'Main'`,
+ *               as a router registers, :70 — row C118, fixed in P109 ISL-048; before it `navigate` looked up
  *               `String(name)`). A name with no router is QUEUED and, since no router registers during
  *               a play, never answered. Every router under the name answers; the node settles once. A
  *               router answers by the script's `answers`, the first rule whose `match` fits (`target`
@@ -1990,10 +1990,10 @@ export class WorldRouter {
     for (const l of this.listeners) l(e);
   }
 
-  /** The handler's lookup at +1 ms (router-handler.ts :54-59): the one registered name when there is exactly one, else the name as handed. */
+  /** The handler's lookup at +1 ms (router-handler.ts :54-62): the one registered name when there is exactly one, else the name as handed, a blank one as Main (row C118, fixed in P109 ISL-048). */
   resolve(name: unknown): string {
     const keys = Array.from(new Set((this.script.names ?? []).map(routerName)));
-    return keys.length === 1 ? keys[0] : String(name);
+    return keys.length === 1 ? keys[0] : routerName(name);
   }
 
   /** How many routers answer a navigate handed under `name`. */
