@@ -174,6 +174,8 @@ interface ForEachInstance extends NodeInstance {
     /** The Items value whose empty entries were last reported — see `_copyItems`. */
     reportedEmptyEntriesIn?: unknown;
     hasScheduledCopyItems?: boolean;
+    /** A row was added or removed since the queue started running — see `_signalItemsRendered`. */
+    rowsChanged?: boolean;
     hasScheduledTriggerItemOutputSignal?: boolean;
     target?: ForEachItemNode;
     onItemsCollectionChanged(): void;
@@ -202,7 +204,7 @@ interface ForEachInstance extends NodeInstance {
   _operationThrew(e: unknown): void;
   _copyItems(): void;
   /** Fires `Items Rendered` once the operation queue has drained. See NDA-004 §3. */
-  _signalItemsRendered(didWork: boolean): void;
+  _signalItemsRendered(): void;
   didMount(): void;
   willUnmount(): void;
   scheduleCopyItems(): void;
@@ -414,7 +416,7 @@ const ForEachDefinition: NodeDefinitionOptions = {
       group: 'Events',
       displayName: 'Items Rendered',
       description:
-        'Fires once every item component exists and has been added; item creation is spread across frames, so this is the only honest moment to measure or scroll the list'
+        'Fires when rows were added or removed, once every item component exists; item creation is spread across frames, so this is the only honest moment to measure or scroll the list'
     },
 
     // ERG-001 §4. `Refresh`'s own outcome, and it is deliberately *not* `Items Rendered`:
@@ -694,6 +696,7 @@ const ForEachDefinition: NodeDefinitionOptions = {
 
       internal.itemNodes.push(itemNode);
       internal.target.addChild(itemNode, index);
+      internal.rowsChanged = true;
     },
     removeItem: function (this: ForEachInstance, model: ModelLike) {
       const internal = this._internal;
@@ -707,6 +710,7 @@ const ForEachDefinition: NodeDefinitionOptions = {
       }
       const child = findChild();
       if (!child) return;
+      internal.rowsChanged = true;
 
       const forEachActions = child.nodeScope.getNodesWithType('For Each Actions') as (NodeInstance & {
         tryRemove(callback: () => void): void;
@@ -825,6 +829,7 @@ const ForEachDefinition: NodeDefinitionOptions = {
       // reused the *existing* item nodes for records that didn't change is possible — but
       // is a separate, riskier change against item-node identity (component state, mounted
       // DOM) that this fix does not need in order to make Refresh correct.
+      if (internal.itemNodes.length > 0) internal.rowsChanged = true;
       this._deleteAllItemNodes();
 
       //check if we have a target to add nodes to
@@ -869,11 +874,13 @@ const ForEachDefinition: NodeDefinitionOptions = {
 
       const repeaterCreateComponentsAsync = NoodlRuntime.instance.getProjectSettings().repeaterCreateComponentsAsync;
 
-      // Whether this drain actually built anything. `_runQueueOperations` is called on every
+      // Whether this drain added or removed a row. `_runQueueOperations` is called on every
       // `_queueOperation`, so without this the signal would also fire for drains that had
       // nothing to do — and a completion signal that fires when nothing completed is worse
-      // than none, because an author cannot tell the two apart.
-      let didWork = false;
+      // than none, because an author cannot tell the two apart. ISL-049 (P107-C129), ruled "Fire it
+      // only when rows were added or removed": it used to count any operation that ran, so the
+      // start-up rebuild with no Items, a Refresh that failed and an item with no component all fired it.
+      this._internal.rowsChanged = false;
 
       if (repeaterCreateComponentsAsync) {
         //create items in chunks of roughly 25ms at a time
@@ -883,7 +890,6 @@ const ForEachDefinition: NodeDefinitionOptions = {
 
           while (this._internal.queuedOperations.length && performance.now() - start < 25) {
             const op = this._internal.queuedOperations.shift();
-            didWork = true;
             try {
               await op();
             } catch (e) {
@@ -895,7 +901,7 @@ const ForEachDefinition: NodeDefinitionOptions = {
             setTimeout(runOps, 0);
           } else {
             this.runningOperations = false;
-            this._signalItemsRendered(didWork);
+            this._signalItemsRendered();
           }
         };
 
@@ -903,7 +909,6 @@ const ForEachDefinition: NodeDefinitionOptions = {
       } else {
         while (this._internal.queuedOperations.length) {
           const op = this._internal.queuedOperations.shift();
-          didWork = true;
           try {
             await op();
           } catch (e) {
@@ -912,7 +917,7 @@ const ForEachDefinition: NodeDefinitionOptions = {
         }
 
         this.runningOperations = false;
-        this._signalItemsRendered(didWork);
+        this._signalItemsRendered();
       }
     },
     /**
@@ -931,8 +936,8 @@ const ForEachDefinition: NodeDefinitionOptions = {
      * `refresh()` returning means only that the work was *queued*; the queue emptying means
      * it was done.
      */
-    _signalItemsRendered(this: ForEachInstance, didWork: boolean) {
-      if (!didWork || this._deleted) return;
+    _signalItemsRendered(this: ForEachInstance) {
+      if (!this._internal.rowsChanged || this._deleted) return;
       this.sendSignalOnOutput('itemsRendered');
     },
     _onNodeDeleted: function (this: ForEachInstance) {
@@ -970,8 +975,8 @@ const ForEachDefinition: NodeDefinitionOptions = {
         // list. `Collection.set` already handles a falsy source (`src = src || []`,
         // collection.ts:485), so clearing needs no special case beyond letting it through.
         //
-        // The `remove` events that `set` raises are queued as operations (`initialize`), so
-        // `didWork` is true and `Items Rendered` fires — a graph waiting on the list stays live.
+        // The `remove` events that `set` raises are queued as operations (`initialize`), each takes
+        // a row away, and `Items Rendered` fires — a graph waiting on the list stays live.
         // ⚠️ Clearing a list that is *already* empty queues nothing and so signals nothing;
         // that is the `Run Tasks` empty-list shape and `OUTCOME-CONTRACT.md` / ERG-001 owns it.
         const repeaterDisabledWhenUnmounted = NoodlRuntime.instance.getProjectSettings().repeaterDisabledWhenUnmounted;

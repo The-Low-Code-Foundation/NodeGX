@@ -3971,8 +3971,8 @@
   ]
  },
  {
-  "name": "placed with nothing: Items Rendered all the same (row C129)",
-  "because": "the placing's rebuild has no Template: it fails with no one to answer, and the queue's run ends — Items Rendered (:868-871)",
+  "name": "placed with nothing: no Items Rendered (row C129)",
+  "because": "the placing's rebuild has no Template: it fails with no one to answer, and the queue's run ends — Items Rendered (:868-871) — renamed in P109 s32 (v5: only rows added or removed fire it)",
   "params": {},
   "steps": [
    "settle",
@@ -3984,8 +3984,8 @@
   ]
  },
  {
-  "name": "a Refresh with no Items fails repeater/no-items, and Items Rendered fires (row C129)",
-  "because": "refresh :749-752; _signalItemsRendered :868-871 fires after any run of the queue",
+  "name": "a Refresh with no Items fails repeater/no-items, and Items Rendered does not fire (row C129)",
+  "because": "refresh :749-752; _signalItemsRendered :868-871 fires after any run of the queue — renamed in P109 s32 (v5: only rows added or removed fire it)",
   "params": {
    "template": "Row"
   },
@@ -15734,8 +15734,8 @@
   ]
  },
  {
-  "name": "an addition whose component the project does not have: no row, and the queue runs on five act boundaries later — Items Rendered after the fifth click (row C128)",
-  "because": "P109 s32 (ISL-049, row C128) — the act boundaries the queue runs on after the caught failure, counted by clicks with no settle between (a count one off is red here)",
+  "name": "an addition whose component the project does not have: no row, and the queue runs on five act boundaries later — the removal queued behind it takes row 0 after the fifth click (row C128)",
+  "because": "P109 s32 (ISL-049, row C128) — the act boundaries the queue runs on after the caught failure, counted by clicks with no settle between (a count one off is red here); since v5 Items Rendered does not fire for an addition with no row (row C129), so a removal behind it is what the clicks see",
   "params": {
    "template": "Row",
    "templateType": "dynamic",
@@ -15758,6 +15758,20 @@
       "kind": "Row",
       "label": "A"
      },
+     {
+      "id": "x",
+      "kind": "Missing",
+      "label": "X"
+     }
+    ]
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "set": "items",
+    "value": [
      {
       "id": "x",
       "kind": "Missing",

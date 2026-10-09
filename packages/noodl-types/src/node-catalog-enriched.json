@@ -11315,7 +11315,7 @@
             "name": "signal"
           },
           "isSignal": true,
-          "description": "Fires once every item component exists and has been added; item creation is spread across frames, so this is the only honest moment to measure or scroll the list"
+          "description": "Fires when rows were added or removed, once every item component exists; item creation is spread across frames, so this is the only honest moment to measure or scroll the list"
         }
       ],
       "dynamicPorts": {

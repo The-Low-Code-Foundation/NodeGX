@@ -71,7 +71,8 @@
  *     for each record in the list, in order, as an addition builds one (a component the project does not have: no row, four act
  *     boundaries); then every Refresh it answers is Done. (A copy that throws would fail every Refresh it answers,
  *     `repeater/items-copy-threw`, and leave the rows — v3; since v4 nothing in a play makes it throw.)
- *   When the queue empties, **Items Rendered** — after every run of the queue, including one that built nothing (row C129).
+ *   When the queue empties, **Items Rendered** — v5 (row C129, ruled): only when the run added or removed a row (a row landed, a
+ *   removal found its record's row, a rebuild took down rows it held); v4 fired it after every run, one that built nothing too.
  *
  * THE ROW'S INPUTS (v2, `addItem` :592-629, `_mapInputs` :538-555). At its landing a row is given its inputs by the input mapping AS IT
  * IS THEN (`inputMappingScript` :968-1000 — compiled as it arrives when it is text that is not empty; what does not compile leaves none;
@@ -392,6 +393,8 @@ type State = {
   queue: Op[];
   /** `runningOperations` — the queue is working */
   running: boolean;
+  /** v5 `rowsChanged` — this run of the queue added or removed a row (row C129) */
+  changed: boolean;
   /** the act boundaries before the queue runs on, after an operation that did not build */
   hops: number;
   /**
@@ -462,7 +465,8 @@ export const Repeater = defineNode({
   // v4 (P109 ISL-049, s32): an empty entry in Items has no row, and the rest are drawn (row C130)
   // v3 (P109 ISL-049, s32): nothing the Repeater meets stops its queue — a component the project does not have, a Script's component
   // that is not text, a mapping that throws, a copy that throws are each caught where they happen (rows C128, C135, C140, C141)
-  version: 4,
+  // v5 (P109 ISL-049, s32): Items Rendered only after a run of the queue that added or removed a row (row C129)
+  version: 5,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/data/foreach.tsx',
   needs: ['person', 'registry', 'project'],
   worldPool: {
@@ -491,6 +495,7 @@ export const Repeater = defineNode({
     tokens: 0,
     queue: [],
     running: false,
+    changed: false,
     hops: 0,
     settling: null,
     owed: false,
@@ -529,7 +534,7 @@ export const Repeater = defineNode({
     // :394-402
     itemActionItemId: { type: 'string', from: (s) => s.itemId, displayName: 'Item Id', group: 'Values', description: 'Id of the item whose Repeater Item node last raised an action' },
     // :408-414
-    itemsRendered: { type: 'signal', displayName: 'Items Rendered', group: 'Events', description: 'Fires once every item component exists and has been added; item creation is spread across frames, so this is the only honest moment to measure or scroll the list' }
+    itemsRendered: { type: 'signal', displayName: 'Items Rendered', group: 'Events', description: 'Fires when rows were added or removed, once every item component exists; item creation is spread across frames, so this is the only honest moment to measure or scroll the list' }
   }
 }).on(
   {
@@ -761,16 +766,17 @@ function enqueue(w: Work, op: Op): void {
   w.st.queue.push(op);
   if (w.st.running) return;
   w.st.running = true;
+  w.st.changed = false;
   w.resume = true;
   next(w);
 }
 
-/** The runner goes on (:851-858): the next operation, or — the queue empty — Items Rendered and idle (row C129) */
+/** The runner goes on (:851-858): the next operation, or — the queue empty — idle, and Items Rendered if a row changed (row C129) */
 function next(w: Work): void {
   const op = w.st.queue.shift();
   if (op === undefined) {
     w.st.running = false;
-    w.pulses.push('itemsRendered');
+    if (w.st.changed) w.pulses.push('itemsRendered');
     return;
   }
   start(w, op);
@@ -813,7 +819,7 @@ function atYield(w: Work): void {
     const op = w.st.queue.shift();
     if (op === undefined) {
       w.st.running = false;
-      w.pulses.push('itemsRendered');
+      if (w.st.changed) w.pulses.push('itemsRendered');
       return;
     }
     start(w, op);
@@ -928,6 +934,7 @@ function land(w: Work, b: Building): void {
   // counting a row on its way out (an addition lands one place early beside one: row C143)
   raise(w, row, forwardOf(row.template, 'added'));
   w.st.rows.splice(b.index, 0, row);
+  w.st.changed = true;
   if (b.kind === 'add') return;
   // a rebuild goes on: the next record's row
   rebuildFrom(w, b.rest, b.index + 1, b.tokens);
@@ -942,6 +949,7 @@ function land(w: Work, b: Building): void {
 function removeItem(w: Work, rec: RecordRef): void {
   const i = w.st.rows.findIndex((r) => r.rec === rec && r.leaving !== 'wired');
   if (i < 0) return;
+  w.st.changed = true;
   const row = w.st.rows[i];
   const t = REPEATER_TEMPLATES[row.template];
   if (!Object.values(t.nodes).some((n) => n.type === 'For Each Actions')) {
@@ -1074,6 +1082,7 @@ function refresh(w: Work): void {
   copy(w, st.items);
   st.queue.length = before;
   // :779 — every row the Repeater holds goes (`itemNodes`): v2 — not one on its way out, which stays where it is
+  if (st.rows.some((r) => !r.leaving)) st.changed = true;
   st.rows = st.rows.filter((r) => r.leaving);
   // :797-805 — a row per record of the list, in order
   rebuildFrom(w, [...(st.own as CollectionRef)], 0, tokens);
