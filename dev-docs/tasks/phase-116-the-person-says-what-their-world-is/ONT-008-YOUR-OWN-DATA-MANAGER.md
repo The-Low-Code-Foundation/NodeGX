@@ -52,6 +52,14 @@ reach, which is NSP-005's word.
   text (sentence, ranked questions with what each prevents, `projectsTo`, evidence in words). This task's surface is
   where "`describe()` of every kind renders as a tile's long text" is shown.
 
+- **What ONT-006 and ONT-007 hand this view (s9–s10), built and graded, nothing to re-derive:**
+  `migrationWords(plan)` is the "before anything moves" panel; `plan.reach` rows with `how: 'renamed'` and `was` are
+  "both names until then" (ONT-007 AC3's manager half); `verbReach()` rows say which verbs a change reaches and what a
+  step must be re-said on (`rebind`); a button per verb with `verbWords()` under it; a run's steps sorted by the verb's
+  order — the engine records them topologically, a skipped arm can come first (ONT-006 §6.6) — and the arm's `sees`
+  read from the arm step's output; the runner's record shows an answer an arm gave with `by` (ONT-006 §6.7).
+  `validate_world` already returns the verbs' words and functions, so a stranger's agent reads them from the MCP.
+
 - **A working wireframe is not the mockup** (memory). The suite grades reach and correctness; Richard grades whether he
   could put it in front of the ops team, in ONT-009.
 - **The project token paints nothing on an editor surface** (memory). A home-made page draws with the canvas look's

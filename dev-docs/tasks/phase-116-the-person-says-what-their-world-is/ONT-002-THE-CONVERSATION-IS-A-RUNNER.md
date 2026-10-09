@@ -168,3 +168,9 @@ sets `signsIn`). Run them first next session.
   volunteered. A world written through the runner should read 0; ONT-009 measures a real one.
 - **`askWords` grammar** was wrong in every question since ONT-001 ("a account", "companys"); fixed in `mutants.ts`,
   not in the kinds. `worldPath()`'s "the persons reached from…" (`paths.ts`) still says *persons*; its spec pins it.
+
+**s10, 2026-10-09 (Opus 5.5) — the runner reads the verbs.** A question the relation has not answered, which a verb's
+failure arm `answers`, is not asked: it is on the record with the arm's `sees` and `by` (ONT-006 §6.7). An arm may answer
+only a question answered in words. `validate_world`/`write_world` read and write `verbs.json`; the surface is unchanged at
+8,261 tokens.
+

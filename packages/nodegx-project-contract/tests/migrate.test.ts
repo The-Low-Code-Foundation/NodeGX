@@ -12,7 +12,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { componentReach, diffWorld, nounRenames, permissionReach, validateWorld, workflowReach, migrationWords, planMigration, WORLD_FILES, type ComponentGraph, type MigrationPlan, type WorkflowGraph, type WorldFiles } from '../world';
+import { componentReach, diffWorld, nounRenames, permissionReach, validateWorld, verbReach, workflowReach, migrationWords, planMigration, VERBS_FILE, WORLD_FILES, type ComponentGraph, type MigrationPlan, type VerbsFile, type WorkflowGraph, type WorldFiles } from '../world';
 
 const FIXTURES = path.join(__dirname, 'fixtures');
 const BEFORE = 'world-bombshell-before';
@@ -135,6 +135,26 @@ describe('the bombshell reaches the screens that name what it changes', () => {
     ]);
   });
 
+  it('s10 — and the verb whose step makes a person: AC1’s verb, read off the step’s own binding, not the step on the account', () => {
+    const before = readWorld(BEFORE);
+    const after = readWorld(AFTER);
+    const verbs = readVerbs(BEFORE);
+    // The verbs bind to the world before, and still do after: the bombshell renames nothing they name.
+    expect(validateWorld({ ...before, verbs }).problems).toEqual([]);
+    expect(validateWorld({ ...after, verbs }).problems).toEqual([]);
+    expect(verbReach(plan(before, after), verbs, before, after)).toEqual([
+      { verb: 'A company joins', verbId: 'join', step: 'add its first member on its account', stepId: 'first-member', calls: 'join-first-member', collection: 'Person', fields: ['account'], how: 'changed' }
+    ]);
+  });
+
+  it('s10 — the control: were accounts reached, the update is, by the field it names', () => {
+    const before = readWorld(BEFORE);
+    const p = { reach: [{ collection: 'Account', words: 'accounts', fields: ['name', 'tier'], how: 'changed' as const }], before: plan(before, readWorld(AFTER)).before };
+    expect(verbReach(p, readVerbs(BEFORE), before, before)).toEqual([
+      { verb: 'A company joins', verbId: 'join', step: 'put the company\'s name on the account', stepId: 'name-account', calls: 'join-name-account', collection: 'Account', fields: ['name'], how: 'changed' }
+    ]);
+  });
+
   it('and would see the accounts page if accounts were reached (the control)', () => {
     const rows = componentReach({ reach: [{ collection: 'Account', words: 'accounts', fields: [], how: 'changed' }] }, readComponents(BEFORE));
     expect(rows.map((r) => r.component)).toEqual(['/Pages/Accounts']);
@@ -143,6 +163,24 @@ describe('the bombshell reaches the screens that name what it changes', () => {
 
 describe('the mirror — several accounts become one', () => {
   const p = plan(readWorld(AFTER), readWorld(BEFORE));
+
+  it('s10 — a verb’s step on the membership itself is reached as removed, and is on nothing after', () => {
+    const verbs: VerbsFile = {
+      verbs: [
+        {
+          id: 'add-seat',
+          name: 'Add a seat',
+          sentence: 'Put a person on an account.',
+          runs: 'server',
+          steps: [{ id: 'seat', says: 'put the person on the account', does: 'make', on: 'membership' }]
+        }
+      ]
+    };
+    expect(validateWorld({ ...readWorld(AFTER), verbs }).problems).toEqual([]);
+    expect(verbReach(p, verbs, readWorld(AFTER), readWorld(BEFORE))).toEqual([
+      { verb: 'Add a seat', verbId: 'add-seat', step: 'put the person on the account', stepId: 'seat', calls: 'add-seat-seat', collection: 'Membership', fields: [], how: 'removed', rebind: { from: 'membership', to: null } }
+    ]);
+  });
 
   it('adds the link, fills it from the records, then lets the records go', () => {
     expect(shape(p)).toEqual(['backup', 'addColumn:Person', 'move:recordToLink', 'deleteTable:Membership']);
@@ -266,6 +304,11 @@ describe('the extends mistakes only a diff can read (ONT-005 §6.6)', () => {
   });
 });
 
+/** The fixture's `verbs.json`, read beside the three files (s10). */
+function readVerbs(fixture: string): VerbsFile {
+  return JSON.parse(fs.readFileSync(path.join(FIXTURES, fixture, VERBS_FILE), 'utf8'));
+}
+
 /** The world with one noun called something else: a new id, a new word, and the id it `was`. */
 function renamed(w: WorldFiles, from: string, to: string, name: string): WorldFiles {
   const out = clone(w);
@@ -321,6 +364,22 @@ describe('AC3 — a noun renamed keeps its records', () => {
       ['/Pages/Members', 'Person', ['account']]
     ]);
     expect(migrationWords(p)).toContain('Reaches subscriptions (Subscription, was Account): renamed.');
+  });
+
+  it('s10 — reaches the verb’s step on the renamed noun, and says what it must be on now; until it is, the verbs are refused', () => {
+    const verbs = readVerbs(BEFORE);
+    expect(verbReach(plan(ONE, SUBSCRIBED), verbs, ONE, SUBSCRIBED)).toEqual([
+      { verb: 'A company joins', verbId: 'join', step: 'add its first member on its account', stepId: 'first-member', calls: 'join-first-member', collection: 'Person', fields: ['account'], how: 'changed' },
+      { verb: 'A company joins', verbId: 'join', step: 'put the company\'s name on the account', stepId: 'name-account', calls: 'join-name-account', collection: 'Subscription', fields: [], how: 'renamed', rebind: { from: 'account', to: 'subscription' } }
+    ]);
+    const stale = validateWorld({ ...SUBSCRIBED, verbs });
+    expect(stale.ok).toBe(false);
+    expect(stale.problems.every((x) => x.file === VERBS_FILE)).toBe(true);
+    // Re-said on the new id, they bind again.
+    const resaid = clone(verbs);
+    resaid.verbs[0].about!.nouns = ['person', 'subscription'];
+    resaid.verbs[0].steps[1].on = 'subscription';
+    expect(validateWorld({ ...SUBSCRIBED, verbs: resaid }).problems).toEqual([]);
   });
 
   it('a rename under a rule takes the rule off first and puts it back after — the adapter refuses to rename under it', () => {

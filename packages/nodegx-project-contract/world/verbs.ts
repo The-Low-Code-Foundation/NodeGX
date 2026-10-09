@@ -349,6 +349,11 @@ export function validateVerbs(verbs: unknown, world: Pick<WorldFiles, 'nouns' | 
               const k = r && kindById(r.kind);
               if (!r) say(`${aat}.answers.relation`, `one of ${list([...relations.keys()])}`, ans.relation, `${aat} ("${vid}/${sid}") answers for ${show(ans.relation)}, which is not a relation of this world.`);
               else if (k && !k.questions.some((q) => q.id === ans.question)) say(`${aat}.answers.question`, `one of ${list(k.questions.map((q) => q.id))}`, ans.question, `${aat} ("${vid}/${sid}") answers "${ans.question}", which a ${k.id} does not ask; it asks ${list(k.questions.map((q) => q.id))}.`);
+              // An arm's answer is its words (what is skipped, what the person sees): it cannot be a yes or one of a list (s10).
+              else if (k) {
+                const words = k.questions.filter((q) => q.answer.type === 'words').map((q) => q.id);
+                if (!words.includes(ans.question as string)) say(`${aat}.answers.question`, `a question answered in words: one of ${list(words)}`, ans.question, `${aat} ("${vid}/${sid}") answers "${ans.question}", which is answered ${k.questions.find((q) => q.id === ans.question)!.answer.type === 'yes-no' ? 'yes or no' : 'with one of a list'}, not in an arm's words; write it in relations[${ans.relation}].answers.`);
+              }
             }
           }
         });

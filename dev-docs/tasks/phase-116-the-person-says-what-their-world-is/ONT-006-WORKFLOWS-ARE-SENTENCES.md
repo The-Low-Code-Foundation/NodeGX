@@ -1,6 +1,6 @@
 # ONT-006 — Workflows are sentences
 
-**Opened 2026-10-08.** **Depends on ONT-001 and NSP-014** (✅). **Status: 🟡 s9 (2026-10-09, Fable 5.1) — AC1 ✅ (the engine and the world), AC2 ✅ (three rows, both engines), AC3 ✅; §3.4's view is ONT-008's; the MCP's two world tools do not read the fourth file yet. See §6.**
+**Opened 2026-10-08.** **Depends on ONT-001 and NSP-014** (✅). **Status: 🟡 s9 (2026-10-09, Fable 5.1) — AC1 ✅ (the engine and the world), AC2 ✅ (three rows, both engines), AC3 ✅; §3.4's view is ONT-008's. **s10 (Opus 5.5):** the MCP's world tools read and write the fourth file; a write that leaves the verbs out grades them against the world it writes; the runner takes an arm's answer; the reach names verbs (ONT-007 §6.10). See §6.**
 
 > **Model check, before anything (Richard, 2026-10-08):** this task wants **Fable 5.1** — it invents a small language (a verb over the graph with named failure arms); the sentence shape wrong is a phase-level mistake, not a bug. Your system prompt says which model you are. If it is not the one named here, stop before any work and say so in one line ("this task is marked for Fable 5.1; you are on <model> — switch with /model, or say go"), and wait for Richard's word. Do not start on the wrong model because the check felt like a formality.
 
@@ -89,13 +89,32 @@ Readings 2026-10-09 ~18:25 CEST on the working tree over HEAD `6b4e37b13`, in ba
 
 ### 6.5 Owed
 
-- **The MCP's world tools do not read the fourth file.** `validate_world` grades the three files; `write_world` takes three. An agent on Claude Code writes `verbs.json` by hand and validates it with the package; on the MCP alone it cannot. Both tools gain `verbs` (deferred group, 0 resident tokens either way — the surface measurement is owed with it).
-- **`workflowReach`'s sibling** (ONT-007 §6.9 #6): a verb whose step is `on` a reached noun is reached, by the verb's words; then ONT-007 AC1 is re-read against a verb.
-- **The runner counts an arm's `answers`**: ONT-002's `nextQuestions()` could take an arm that `answers` `hereFirst` as the answer, instead of asking it — not built; the question stays asked until the relation's `answers` says it.
+- ~~The MCP's world tools do not read the fourth file.~~ s10, §6.7.
+- ~~`workflowReach`'s sibling.~~ s10: `verbReach()`, ONT-007 §6.10; AC1 ✅ there.
+- ~~The runner counts an arm's `answers`.~~ s10, §6.7.
 - The real cloud functions (`enrol-person-here`, …) are the agent's to write; the claims grade them the same way once they exist (ONT-009).
 
 ### 6.6 Found
 
 - **Bug `P116-ONT-003-two-systems`** (medium): two `exists-elsewhere` relations from one noun both make `idElsewhere`, and the projection refuses the world — a person in two other systems, the corpus's common case, cannot be said.
 - **The engine records steps in its own order**: a skipped arm can be recorded before the steps that ran (topological, not the verb's). A view that lists a run's steps in the verb's order sorts by the verb (ONT-008).
+
+### 6.7 s10, 2026-10-09 — the fourth file on the MCP, the write rule, the runner (Opus 5.5)
+
+| Piece | Where | What it does |
+|---|---|---|
+| `validate_world` reads `verbs.json` | `noodl-mcp/src/tools/worldTools.ts` | Read when it is there (its text joins the revision only then, so a world of three files keeps its revision); graded with the three through `nextQuestions` → `validateWorld`; the answer gains `verbs`: `outside`, and per verb its words (`verbWords`) and the functions it calls (`projectVerb`'s — what the agent writes). Unreadable ⇒ `partial`, named in `unreadable`. |
+| `write_world` takes `verbs` | same | Optional. Left out, the verbs on disk are kept. |
+| The write rule grades kept verbs | `world/write.ts` `planWorldWrite` | **Found:** a write that left the verbs out validated only the three files, so taking out a relation (or renaming a noun) a verb names was written, and `verbs.json` pointed at nothing. Now the kept verbs are graded against the candidate; a verbs file on disk that is not JSON stops such a write ("pass the verbs with the write"). Mutant-checked in the contract and through the MCP. |
+| The runner takes an arm's answer | `world/runner.ts` `nextQuestions` | A question the relation has not answered, which a failure arm `answers`, is not asked: it goes on the record with `said` = the arm's `sees` and `by: { verb, step, arm }`. The relation's own answer, when there is one, stays the record. |
+| An arm answers in words only | `world/verbs.ts` `validateVerbs` | **Decision (s10, for Fable/Richard to revisit):** an arm's answer is its words — what is skipped, what the person sees — so it may answer only a question whose answer is `words` (`exists-elsewhere`: `hereFirst`, `nameThere`, `endsThere`). An arm naming a yes/no or one-of question is refused with where to write it instead (`relations[<id>].answers`). |
+| The brief | `world/brief.ts` | "What the person does": the fourth file, optional, a step's one way to fail, the functions are the agent's to write; "Verbs you leave out are kept". Passes the content-authoring `written.py` lint; pinned in `brief.test.ts`. |
+
+**Graded** (2026-10-09, over `d53e5f283` then `333ffbc65`, in band): contract **192 / 192** (`verbs.test.ts` 25 → 31;
+`brief.test.ts` pins the new paragraph), both tsconfigs clean (two type errors in s9's specs that only
+`tsconfig.tests.json` sees, fixed). `noodl-mcp` `ont002WorldTools toolDisclosure` **30 / 30** (`ont002WorldTools` 7 → 12),
+`[surface] 8261 tokens / 20 resident tools — 19 under` — unchanged, both tools deferred (one arm: the working tree; s9's
+8,261 on HEAD is the other). Backend `ont-006-verbs ont-007-migration ont-005-mutants ont-003-claims ont-003-write`
+**122 / 122**. Mutants: the kept-verbs grade off (red in the contract and the MCP); the arm lookup off; the relation's
+answer replaced by the arm's; the words-only refusal off — each red on its own spec only.
 

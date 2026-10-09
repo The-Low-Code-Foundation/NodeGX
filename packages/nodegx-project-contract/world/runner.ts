@@ -71,6 +71,8 @@ export interface AnswerRecord {
   said: string | boolean;
   /** `asked`: the runner would have asked it. `volunteered`: no answer to it changes the schema or the kind. */
   how: 'asked' | 'volunteered';
+  /** Answered by a verb's failure arm, not in the relation's answers (s10): `said` is what the person sees when it is taken. */
+  by?: { verb: string; step: string; arm: string };
 }
 
 export interface ForTheRecord {
@@ -135,17 +137,27 @@ export function nextQuestions(files: WorldFiles, options: { limit?: number } = {
   const record: AnswerRecord[] = [];
   const forTheRecord: ForTheRecord[] = [];
   const inertOf = (r: Relation, qid: string) => inert.find((i) => i.relation === r.id && i.question === qid);
+  // A failure arm that `answers` a question answers it in its words: what is skipped and what the person sees (ONT-006 §6.5).
+  const byArm = new Map<string, { said: string; by: NonNullable<AnswerRecord['by']> }>();
+  for (const v of files.verbs?.verbs || [])
+    for (const st of v.steps)
+      for (const arm of st.fails || []) {
+        const key = arm.answers && `${arm.answers.relation}/${arm.answers.question}`;
+        if (key && !byArm.has(key)) byArm.set(key, { said: arm.sees, by: { verb: v.id, step: st.id, arm: arm.id } });
+      }
 
   relations.forEach((r, ri) => {
     const kind = kindById(r.kind)!;
     const answers = r.answers || {};
     kind.questions.forEach((q, qi) => {
       const ask = askWords(q, r);
-      if (q.id in answers) {
+      const arm = q.id in answers ? undefined : byArm.get(`${r.id}/${q.id}`);
+      if (q.id in answers || arm) {
         // Volunteered: answered, and the runner would not have asked — no incident behind it, no
         // seed of the kind killed by it, and no answer to it would change the kind or the schema.
         const wouldAsk = lived(q.from) || kind.mutants.some((m) => m.kills === q.id) || answerMatters(files, r.id, q) !== false;
-        record.push({ relation: r.id, kind: kind.id, question: q.id, ask, said: answers[q.id], how: wouldAsk ? 'asked' : 'volunteered' });
+        const how = wouldAsk ? 'asked' : 'volunteered';
+        record.push(arm ? { relation: r.id, kind: kind.id, question: q.id, ask, said: arm.said, how, by: arm.by } : { relation: r.id, kind: kind.id, question: q.id, ask, said: answers[q.id], how });
         return;
       }
       // The mutants this question kills, standing: its own (unanswered), and the kind's seeds it kills.

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/world-v1.json#/definitions/verbsFile",
+  "verbs": [
+    {
+      "id": "join",
+      "name": "A company joins",
+      "sentence": "When a company joins, add its first member on its account, then put the company's name on the account.",
+      "when": "a company joins",
+      "runs": "server",
+      "about": { "nouns": ["person", "account"], "relations": ["membership"] },
+      "steps": [
+        { "id": "first-member", "says": "add its first member on its account", "does": "make", "on": "person" },
+        { "id": "name-account", "says": "put the company's name on the account", "does": "update", "on": "account", "fields": ["name"] }
+      ]
+    }
+  ]
+}

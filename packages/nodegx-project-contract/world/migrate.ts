@@ -20,9 +20,11 @@
  * plan as data and runs it through the schema surface and the data plane, the way `runClaim`
  * runs a claim. A change this module cannot migrate yet is refused in words, never guessed at.
  */
-import type { Noun, Relation, WorldFiles, WorldProperty } from './files';
+import type { Noun, Relation, VerbsFile, WorldFiles, WorldProperty } from './files';
 import { plural } from './mutants';
 import { fieldName, projectWorld, type WorldCheck, type WorldCollection, type WorldColumn, type WorldIndex, type WorldSchema } from './project';
+import { endField, functionRef } from './verb-project';
+import { verbSubjects } from './verbs';
 
 // ---------------------------------------------------------------------- the diff --
 
@@ -750,7 +752,8 @@ const cloudFunctionOf = (componentPath: string): string | undefined => /__cloud_
  * The workflows a plan reaches (§3.2): a workflow step reads or writes records only by calling a
  * cloud function (`call-function`, `for-each`: `ref` is the function's name), and a cloud
  * function is a component — so a workflow is reached when a step of it calls a component
- * `componentReach` found. Until ONT-006's verbs exist, a workflow is what a verb would project to.
+ * `componentReach` found. It ties a step to a collection only through the function's graph; a
+ * verb says it in the step (`verbReach`).
  */
 export function workflowReach(components: readonly ComponentReachRow[], workflows: readonly WorkflowGraph[]): WorkflowReachRow[] {
   const byFunction = new Map<string, ComponentReachRow[]>();
@@ -763,6 +766,69 @@ export function workflowReach(components: readonly ComponentReachRow[], workflow
     for (const s of w.steps) {
       if (!s.ref) continue;
       for (const row of byFunction.get(s.ref) || []) out.push({ workflow: w.name || w.id, step: s.name || s.id, calls: s.ref, collection: row.collection, fields: row.fields });
+    }
+  return out;
+}
+
+// ----------------------------------------------------------------- the verbs --
+
+export interface VerbReachRow {
+  /** The verb, in the person's words, and its id. */
+  verb: string;
+  verbId: string;
+  /** The step, as the person said it, and its id. */
+  step: string;
+  stepId: string;
+  /** The function the step calls (`<verb>-<step>`, the component `/#__cloud__/<ref>`); a `keep` calls none. */
+  calls?: string;
+  /** The reached collection, by the name it will have. */
+  collection: string;
+  /** Changed fields the step writes: all of them for a `make`, the ones an `update` names, an `end`'s field. */
+  fields: string[];
+  how: ReachRow['how'];
+  /**
+   * The step's `on` once the plan has run, when it must be re-said: a renamed noun's new id, or
+   * `null` when nothing in the world after is what the step was on (a noun gone, a relation no
+   * longer a record of its own). The verbs file is refused against the world after until it is.
+   */
+  rebind?: { from: string; to: string | null };
+}
+
+/**
+ * The verbs a plan reaches (§3.2, s10): a step `on` a noun or an own-record relation whose
+ * collection the plan makes, changes, renames or removes — read off the step's own binding, not
+ * through the function's graph as a workflow is. `before` is the world the verbs were written
+ * over; `after`, the one the plan migrates to. Pure.
+ */
+export function verbReach(plan: Pick<MigrationPlan, 'reach' | 'before'>, verbs: VerbsFile, before: WorldFiles, after: WorldFiles): VerbReachRow[] {
+  const reached = new Map(plan.reach.flatMap((r) => [[r.collection, r] as const, ...(r.was ? [[r.was, r] as const] : [])]));
+  const collectionOf = new Map<string, string>();
+  for (const c of plan.before.collections) collectionOf.set('noun' in c.made ? c.made.noun : c.made.relation, c.name);
+  const renames = nounRenames(before, after);
+  const bindsAfter = verbSubjects(after);
+  const out: VerbReachRow[] = [];
+  for (const v of verbs.verbs)
+    for (const s of v.steps) {
+      if (!s.on) continue;
+      const name = collectionOf.get(s.on);
+      const r = name ? reached.get(name) : undefined;
+      if (!r) continue;
+      let writes: string[] = [];
+      if (s.does === 'make') writes = r.fields;
+      else if (s.does === 'update') writes = (s.fields || []).map(fieldName);
+      else if (s.does === 'end') writes = [endField(s, before)].filter((f): f is string => !!f);
+      const to = renames.get(s.on) ?? (bindsAfter.has(s.on) ? s.on : null);
+      out.push({
+        verb: v.name,
+        verbId: v.id,
+        step: s.says,
+        stepId: s.id,
+        ...(s.does === 'keep' ? {} : { calls: functionRef(v, s) }),
+        collection: r.collection,
+        fields: r.fields.filter((f) => writes.includes(f)),
+        how: r.how,
+        ...(to === s.on ? {} : { rebind: { from: s.on, to } })
+      });
     }
   return out;
 }

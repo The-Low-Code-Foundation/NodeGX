@@ -1,6 +1,6 @@
 # ONT-007 — The diff is the migration
 
-**Opened 2026-10-08.** **Depends on ONT-003.** **Status: 🟡 s9 (2026-10-09) — AC2 ✅, AC3 ✅ (s8), AC1 🟡 (a workflow stands for a verb; ONT-006's verbs exist since s9 — re-read owed, §6.9 #6); the reach review ✅ s9 (Fable: seven findings, four fixed, one pinned failing, two named); the route owed on the executor-home ruling. See §6.**
+**Opened 2026-10-08.** **Depends on ONT-003.** **Status: 🟡 s10 (2026-10-09) — AC1 ✅ s10 (the reach names a verb: `verbReach()`, §6.10), AC2 ✅, AC3 ✅ (s8); the reach review ✅ s9 (Fable: seven findings, four fixed, one pinned failing, two named); the route owed on the executor-home ruling. See §6.**
 
 > **Model check, before anything (Richard, 2026-10-08):** this task wants **Opus 5.5 to build; Fable 5.1 to review the reach** — 'what survives' is where the error hides, and the suite grades only what someone thought to claim. Your system prompt says which model you are. If it is not the one named here, stop before any work and say so in one line ("this task is marked for Opus 5.5 to build; you are on <model> — switch with /model, or say go"), and wait for Richard's word. Do not start on the wrong model because the check felt like a formality.
 
@@ -229,4 +229,32 @@ reaches, then measured on both engines. Each finding with what was done:
 - What the fixes did NOT change: every s7/s8 reading above stays green at the same counts.
 
 **Found, for other tasks:** the executor-home ruling stands (§6.5); the two bugs of §6.8 stand.
+
+### 6.10 s10, 2026-10-09 — the verbs a plan reaches (Opus 5.5)
+
+§6.9 #6's sibling. A workflow ties a step to a collection only through the function's graph; a verb says it in the step
+(`on` a noun or an own-record relation), so the reach reads it there.
+
+| Piece | Where | What it does |
+|---|---|---|
+| `verbReach(plan, verbs, before, after)` | `world/migrate.ts`, beside `workflowReach` | Every step `on` something whose collection (read off `plan.before`'s `made`) the plan makes, changes, renames or removes — matched by the old name too, as `componentReach` is. A row: the verb and the step in the person's words and by id, `calls` (`<verb>-<step>`, the component `workflowReach` would find; a `keep` calls none), the collection by the name it will have, `fields` (the changed fields the step writes: all of them for a `make`, the ones an `update` names, an `end`'s field; none for `remove`, `keep`, `ask`), `how`. `rebind: { from, to }` when the step's `on` must be re-said after: a renamed noun's new id, or `null` when nothing in the world after is what it was on. |
+| The fixture's verb | `tests/fixtures/world-bombshell-before/docs/world/verbs.json` | "A company joins": `first-member` makes a person (reached), `name-account` updates the account's name (not reached — the control inside the same verb). Validates over the world before and after. Every other reader of the fixture reads three files. |
+
+**AC1 re-read:** the bombshell's reach names a collection (`Person`), a component (`/#__cloud__/enrol`, `/Pages/Members`),
+a workflow (`onboard`) and now **a verb** (`join` / `first-member`, `fields: ['account']`). The records half was ✅ in s7.
+AC1 ✅.
+
+**What the rename says:** account → subscription reaches `name-account` as `renamed`, `rebind: { from: 'account', to:
+'subscription' }`, and the verbs file is refused against the world after until it is re-said (measured: every problem
+names `verbs.json`; re-said on the new id, it validates). With s10's write rule (ONT-006 §6.7) a `write_world` of the
+renamed world that leaves the verbs out is refused for the same reason, so a rename cannot leave the verbs on a noun that
+is gone. The mirror (several accounts → one) reaches a step on `membership` as `removed`, `rebind: { to: null }`.
+
+**Graded** (2026-10-09 ~19:20 CEST, over `333ffbc65`): `migrate.test.ts` 40 → **44 / 44**. Four mutants, each red on
+its own spec only: a `make` that writes nothing; an `update` that writes nothing (the forced-Account control); the
+rename's new id forgotten; a step on nothing after reported as still bound. Backend `ont-006-verbs ont-007-migration`
+**71 / 71**, unchanged.
+
+**Not claimed:** the `end` arm of `fields` has no spec — neither fixture world has a dated end the plan reaches.
+`rebindVerbs()` (re-saying the ids for the person) is not built; the rows say what to re-say.
 

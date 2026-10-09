@@ -15,6 +15,7 @@ import Ajv from 'ajv';
 
 import {
   DEFAULT_NODE,
+  nextQuestions,
   planWorldWrite,
   projectVerb,
   VERB_NODES,
@@ -351,3 +352,50 @@ describe('the write rule knows the fourth file', () => {
     expect(planWorldWrite({ disk, candidate: WORLD, ifRevision: worldRevision(disk) }).ok).toBe(true);
   });
 });
+
+describe('s10 — the runner takes a failure arm’s answer (ONT-006 §6.5)', () => {
+  /** The world with the learning platform's `hereFirst` taken out of the relation's answers. */
+  const unsaid = (): WorldFiles => {
+    const w = clone(WORLD);
+    delete w.relations.relations.find((r) => r.id === 'learning')!.answers!.hereFirst;
+    return w;
+  };
+  const asked = (w: WorldFiles) => {
+    const r = nextQuestions(w, { limit: 50 });
+    if (!r.ok) throw new Error(r.problems.map((p) => p.message).join('\n'));
+    return r;
+  };
+
+  it('the control: with no verbs, the question the enrolment note paid for is asked', () => {
+    const { verbs: _v, ...three } = unsaid();
+    void _v;
+    expect(asked(three).ask.map((q) => `${(q.about as { relation?: string }).relation}/${q.question}`)).toContain('learning/hereFirst');
+  });
+
+  it('with the enrolment verb, its arm answers it: not asked, on the record in what the person sees, with where it lives', () => {
+    const r = asked(unsaid());
+    expect(r.ask.map((q) => `${(q.about as { relation?: string }).relation}/${q.question}`)).not.toContain('learning/hereFirst');
+    const arm = WORLD.verbs!.verbs[0].steps.find((st) => st.id === 'learning-account')!.fails![0];
+    expect(r.record.find((x) => x.relation === 'learning' && x.question === 'hereFirst')).toMatchObject({
+      said: arm.sees,
+      how: 'asked',
+      by: { verb: 'enrol', step: 'learning-account', arm: 'no-account-there' }
+    });
+  });
+
+  it('the relation’s own answer, when there is one, is the record — the arm does not replace it', () => {
+    const rec = asked(WORLD).record.find((x) => x.relation === 'learning' && x.question === 'hereFirst')!;
+    expect(rec.said).toBe(WORLD.relations.relations.find((r) => r.id === 'learning')!.answers!.hereFirst);
+    expect(rec.by).toBeUndefined();
+  });
+
+  it('an arm cannot answer a question that is answered yes or no: refused, with where to write it', () => {
+    const v = clone(WORLD.verbs!);
+    v.verbs[0].steps.find((st) => st.id === 'learning-account')!.fails![0].answers = { relation: 'learning', question: 'thereFirst' };
+    const verdict = validateVerbs(v, WORLD);
+    expect(verdict.ok).toBe(false);
+    expect(verdict.problems.map((p) => p.message).join('\n')).toMatch(/answers "thereFirst", which is answered yes or no, not in an arm's words; write it in relations\[learning\]\.answers\./);
+    expect(verdict.problems[0].expected).toBe('a question answered in words: one of hereFirst, nameThere, endsThere');
+  });
+});
+
