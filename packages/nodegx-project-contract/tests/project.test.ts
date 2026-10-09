@@ -14,7 +14,7 @@ import * as path from 'path';
 import { applyMutant, collectionName, fieldName, projectWorld, schemaText, WORLD_FILES, WORLD_KINDS, type WorldFiles, type WorldSchema } from '../world';
 
 const FIXTURES = path.join(__dirname, 'fixtures');
-const WORLDS = ['world', 'world-every-kind', 'world-membership'] as const;
+const WORLDS = ['world', 'world-every-kind', 'world-membership', 'world-categories', 'world-categories-unanswered'] as const;
 
 function readWorld(fixture: string): WorldFiles {
   const read = (f: string) => JSON.parse(fs.readFileSync(path.join(FIXTURES, fixture, f), 'utf8'));
@@ -70,7 +70,7 @@ describe('nothing said is dropped', () => {
         expect([r.id, f.name, schema.notHeld.some((n) => n.collection === c && n.field === fieldName(f.name))]).toEqual([r.id, f.name, true]);
       }
     }
-    expect(rules).toBeGreaterThan(0);
+    if (files.relations.relations.length) expect(rules).toBeGreaterThan(0);
     for (const n of schema.notHeld) expect([n.says, said(n.collection, n.says), n.why.length > 0]).toEqual([n.says, true, true]);
   });
 

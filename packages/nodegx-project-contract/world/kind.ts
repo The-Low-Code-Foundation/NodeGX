@@ -75,13 +75,40 @@ export interface Question {
   from: 'census' | 'note' | 'oral';
 }
 
+/**
+ * How a mistake is made, so ONT-005 can make it and grade it. A world-level shape re-says the
+ * relation wrongly and projects that (the validator still gates it); a schema-level shape
+ * re-types the projected schema and keeps everything else, the way `applyMutant` does.
+ */
+export type MutantShape =
+  /** World: the same relation with this question left unanswered — the kind's default is the mistake. */
+  | { unanswered: string }
+  /** World: the relation made as a neighbouring kind (the wrong tile), with these answers and no details on the link. */
+  | { asKind: string; answers?: Readonly<Record<string, string | boolean>> }
+  /** World: the relation never said. */
+  | { unsaid: true }
+  /** World, `extends` only: the far record folded into the near one — its fields put on the {to}; the {from} and the relation gone. */
+  | { foldedIn: true }
+  /** Schema: every link the relation made kept as a text field holding the other record's id; required, rules, all else kept. */
+  | { asText: true }
+  /** Schema: the property the relation is about, typed as this tile instead (free text where a list belongs). */
+  | { property: FieldKind }
+  /** Schema: one of the kind's fields, or one of its rules (by its hold's key), taken out; everything else kept. */
+  | { without: { field: string } | { rule: string } }
+  /** The mistake is the kind itself: the answer that changes the kind was never asked. Killed by the question, before any projection. */
+  | { changesKind: true };
+
 export interface MutantSeed {
   id: string;
   /** The mistake, as it was made. */
   mistake: string;
   /** Why it is a mistake of THIS kind. */
   why: string;
-  from: 'census' | 'note' | 'oral';
+  /** `task`: ONT-005 §3.1's list, read from the corpus and Richard's rows at scoping. */
+  from: 'census' | 'note' | 'oral' | 'task';
+  /** The question whose answer kills it (an id of this kind's), or `the kind` when only picking the kind would. */
+  kills: string;
+  shape: MutantShape;
 }
 
 /**
@@ -200,9 +227,10 @@ export type Kind = Readonly<KindDecl>;
  * Declares a relation kind. One literal, unlike `defineNode`'s two calls: a kind has no
  * reducers whose parameters need the declaration's types fixed first.
  *
- * It refuses, at load, the two things a declaration can get wrong that no type catches:
- * a question id used twice (an answer would mean two things) and a `changesKind` whose
- * answer is not one the question can be given.
+ * It refuses, at load, the things a declaration can get wrong that no type catches:
+ * a question id used twice (an answer would mean two things), a `changesKind` whose
+ * answer is not one the question can be given, and a mutant killed by, or shaped on, a
+ * question the kind does not ask (ONT-005).
  */
 export function defineKind(decl: KindDecl): Kind {
   const seen = new Set<string>();
@@ -215,6 +243,14 @@ export function defineKind(decl: KindDecl): Kind {
         q.answer.type === 'yes-no' ? typeof when === 'boolean' : q.answer.type === 'one-of' ? q.answer.values.includes(String(when)) : false;
       if (!fits) throw new Error(`Kind "${decl.id}", question "${q.id}": changesKind.when ${JSON.stringify(when)} is not an answer it can be given.`);
     }
+  }
+  const ids = new Set(decl.questions.map((q) => q.id));
+  for (const m of decl.mutants) {
+    if (m.kills !== 'the kind' && !ids.has(m.kills)) throw new Error(`Kind "${decl.id}", mutant "${m.id}": killed by "${m.kills}", which the kind does not ask.`);
+    const s = m.shape;
+    if ('unanswered' in s && !ids.has(s.unanswered)) throw new Error(`Kind "${decl.id}", mutant "${m.id}": leaves "${s.unanswered}" unanswered, which the kind does not ask.`);
+    if ('changesKind' in s && !decl.questions.some((q) => q.id === m.kills && q.changesKind))
+      throw new Error(`Kind "${decl.id}", mutant "${m.id}": is a change of kind, but "${m.kills}" changes no kind.`);
   }
   return Object.freeze({ ...decl, questions: Object.freeze([...decl.questions]), mutants: Object.freeze([...decl.mutants]) });
 }

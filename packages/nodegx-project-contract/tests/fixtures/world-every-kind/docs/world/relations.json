@@ -7,7 +7,12 @@
       "to": "company",
       "kind": "belongs-to",
       "sentence": "Every account is one company's, and stays that company's.",
-      "answers": { "several": false, "required": true, "whenTargetGoes": "blocks", "moves": false }
+      "answers": {
+        "several": false,
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
     },
     {
       "id": "membership",
@@ -18,11 +23,39 @@
       "answers": {
         "counts": "A person counts as a member only while they are on an account that pays.",
         "several": false,
+        "sameTime": true,
         "startsEnds": true,
         "whenEnds": "The membership stays, with the day it ended.",
         "details": "their role on the account: holder or member"
       },
-      "properties": [{ "name": "role", "kind": "choice", "values": ["holder", "member"] }]
+      "properties": [
+        {
+          "name": "role",
+          "kind": "choice",
+          "values": ["holder", "member"]
+        }
+      ]
+    },
+    {
+      "id": "booking",
+      "from": "person",
+      "to": "slot",
+      "kind": "is-on",
+      "sentence": "A person books a slot; one slot takes one booking, and a person may book several.",
+      "answers": {
+        "counts": "A booking counts once the slot is taken; a person with no booking is still a person.",
+        "several": true,
+        "sameTime": false,
+        "startsEnds": false,
+        "whenEnds": "A cancelled booking stays, marked cancelled, and the slot is free again.",
+        "details": "whether it was cancelled"
+      },
+      "properties": [
+        {
+          "name": "cancelled",
+          "kind": "yesno"
+        }
+      ]
     },
     {
       "id": "session-tags",
@@ -30,7 +63,10 @@
       "to": "tag",
       "kind": "together",
       "sentence": "A session has tags; a tag is on a session once.",
-      "answers": { "needsDetails": false, "twice": false }
+      "answers": {
+        "needsDetails": false,
+        "twice": false
+      }
     },
     {
       "id": "plan-size",
@@ -38,7 +74,12 @@
       "property": "plan",
       "kind": "one-of",
       "sentence": "An account's plan is small, medium or large.",
-      "answers": { "needsDetails": false, "whoAdds": "a developer", "sameForEveryone": true, "retires": true }
+      "answers": {
+        "needsDetails": false,
+        "whoAdds": "a developer",
+        "sameForEveryone": true,
+        "retires": true
+      }
     },
     {
       "id": "session-speakers",
@@ -46,14 +87,22 @@
       "to": "person",
       "kind": "many-by-list",
       "sentence": "A session lists who speaks at it.",
-      "answers": { "otherWay": false, "grows": false, "entryDetails": false }
+      "answers": {
+        "otherWay": false,
+        "grows": false,
+        "entryDetails": false
+      }
     },
     {
       "id": "topic-tree",
       "from": "topic",
       "kind": "part-of-tree",
       "sentence": "A topic can sit under a broader topic.",
-      "answers": { "depth": "Three levels at most.", "ownAncestor": false, "moves": true }
+      "answers": {
+        "depth": "Three levels at most.",
+        "ownAncestor": false,
+        "moves": true
+      }
     },
     {
       "id": "on-the-course-platform",
@@ -72,14 +121,21 @@
       "from": "person",
       "kind": "same-as",
       "sentence": "Sometimes two people turn out to be one person, written down twice.",
-      "answers": { "howTell": "The same email.", "whoDecides": "One of us, by hand.", "undo": false }
+      "answers": {
+        "howTell": "The same email.",
+        "whoDecides": "One of us, by hand.",
+        "undo": false
+      }
     },
     {
       "id": "leaves",
       "from": "person",
       "kind": "ends",
       "sentence": "A person can leave, and we keep what they did.",
-      "answers": { "comesBack": true, "backAs": "the old one" }
+      "answers": {
+        "comesBack": true,
+        "backAs": "the old one"
+      }
     },
     {
       "id": "attended",
@@ -87,8 +143,18 @@
       "to": "session",
       "kind": "happened-to",
       "sentence": "A person came to a session.",
-      "answers": { "forever": true, "undo": "a new record", "who": true, "outlives": false },
-      "properties": [{ "name": "late", "kind": "yesno" }]
+      "answers": {
+        "forever": true,
+        "undo": "a new record",
+        "who": true,
+        "outlives": false
+      },
+      "properties": [
+        {
+          "name": "late",
+          "kind": "yesno"
+        }
+      ]
     },
     {
       "id": "note-author",
@@ -96,7 +162,11 @@
       "to": "person",
       "kind": "owned-by",
       "sentence": "Only whoever wrote a note may change it; the two of us can read every note.",
-      "answers": { "whoElse": "the two of us who run things", "whenOwnerEnds": "passes to someone" }
+      "answers": {
+        "whoElse": "the two of us who run things",
+        "path": false,
+        "whenOwnerEnds": "passes to someone"
+      }
     },
     {
       "id": "person-profile",
@@ -104,7 +174,13 @@
       "to": "person",
       "kind": "extends",
       "sentence": "A person has one profile, and a profile is one person's.",
-      "answers": { "filterBy": "None of it.", "grows": "a few", "moreThanOne": false, "standsAlone": false, "computed": "written by a person" }
+      "answers": {
+        "filterBy": "None of it.",
+        "grows": "a few",
+        "moreThanOne": false,
+        "standsAlone": false,
+        "computed": "written by a person"
+      }
     },
     {
       "id": "invite-for",
@@ -112,7 +188,11 @@
       "to": "person",
       "kind": "by-name",
       "sentence": "An invite is for a person, by their email.",
-      "answers": { "changes": true, "shared": false, "shouldLink": false }
+      "answers": {
+        "changes": true,
+        "shared": false,
+        "shouldLink": false
+      }
     },
     {
       "id": "note-about",
@@ -120,7 +200,11 @@
       "to": ["person", "account"],
       "kind": "points-at-one-of",
       "sentence": "A note is about a person or about an account.",
-      "answers": { "more": false, "whenTargetGoes": "stays-unlinked", "repoint": false }
+      "answers": {
+        "more": false,
+        "whenTargetGoes": "stays-unlinked",
+        "repoint": false
+      }
     }
   ]
 }

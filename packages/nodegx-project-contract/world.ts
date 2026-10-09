@@ -17,3 +17,4 @@ export * from './world/validate';
 export * from './world/write';
 export * from './world/project';
 export * from './world/paths';
+export * from './world/mutants';

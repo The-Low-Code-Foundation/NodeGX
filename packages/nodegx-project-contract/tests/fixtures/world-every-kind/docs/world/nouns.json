@@ -6,8 +6,15 @@
       "name": "Person",
       "sentence": "A person is anyone we know: a member, someone who came to a session, someone we wrote to.",
       "properties": [
-        { "name": "name", "kind": "text" },
-        { "name": "email", "kind": "text", "sentence": "We write to them here; it can change." }
+        {
+          "name": "name",
+          "kind": "text"
+        },
+        {
+          "name": "email",
+          "kind": "text",
+          "sentence": "We write to them here; it can change."
+        }
       ]
     },
     {
@@ -15,53 +22,110 @@
       "name": "Account",
       "sentence": "An account is what pays us: a company's membership, with the people on it.",
       "properties": [
-        { "name": "plan", "kind": "choice", "values": ["small", "medium", "large"], "sentence": "The size of membership they pay for." }
+        {
+          "name": "plan",
+          "kind": "choice",
+          "values": ["small", "medium", "large"],
+          "sentence": "The size of membership they pay for."
+        }
       ]
     },
     {
       "id": "company",
       "name": "Company",
       "sentence": "A company is where people work; it may or may not have an account with us.",
-      "properties": [{ "name": "name", "kind": "text" }]
+      "properties": [
+        {
+          "name": "name",
+          "kind": "text"
+        }
+      ]
     },
     {
       "id": "session",
       "name": "Session",
       "sentence": "A session is one meeting on one date that people sign up for and come to.",
       "properties": [
-        { "name": "title", "kind": "text" },
-        { "name": "held on", "kind": "date" }
+        {
+          "name": "title",
+          "kind": "text"
+        },
+        {
+          "name": "held on",
+          "kind": "date"
+        }
       ]
     },
     {
       "id": "tag",
       "name": "Tag",
       "sentence": "A tag is a word we put on sessions so people can find them.",
-      "properties": [{ "name": "label", "kind": "text" }]
+      "properties": [
+        {
+          "name": "label",
+          "kind": "text"
+        }
+      ]
     },
     {
       "id": "topic",
       "name": "Topic",
       "sentence": "A topic is what a session is about; topics sit under broader topics.",
-      "properties": [{ "name": "title", "kind": "text" }]
+      "properties": [
+        {
+          "name": "title",
+          "kind": "text"
+        }
+      ]
     },
     {
       "id": "profile",
       "name": "Profile",
       "sentence": "A profile is the longer story about one person, written by them.",
-      "properties": [{ "name": "bio", "kind": "text" }]
+      "properties": [
+        {
+          "name": "bio",
+          "kind": "text"
+        }
+      ]
     },
     {
       "id": "invite",
       "name": "Invite",
       "sentence": "An invite is an email we send to bring someone to a session.",
-      "properties": [{ "name": "email", "kind": "text" }]
+      "properties": [
+        {
+          "name": "email",
+          "kind": "text"
+        }
+      ]
     },
     {
       "id": "note",
       "name": "Note",
       "sentence": "A note is what one of us wrote down about a person or an account.",
-      "properties": [{ "name": "body", "kind": "text" }]
+      "properties": [
+        {
+          "name": "body",
+          "kind": "text"
+        }
+      ]
+    },
+    {
+      "id": "slot",
+      "name": "Slot",
+      "sentence": "A slot is one appointment time we offer: a start, and whether the day is on.",
+      "properties": [
+        {
+          "name": "starts",
+          "kind": "date"
+        },
+        {
+          "name": "open",
+          "kind": "yesno",
+          "sentence": "Off days, breaks and public holidays are slots that are not open."
+        }
+      ]
     }
   ]
 }

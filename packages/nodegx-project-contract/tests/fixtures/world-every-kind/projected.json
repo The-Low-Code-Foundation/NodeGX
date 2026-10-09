@@ -324,6 +324,30 @@
       "indexes": []
     },
     {
+      "name": "Slot",
+      "made": {
+        "noun": "slot"
+      },
+      "sentence": "A slot is one appointment time we offer: a start, and whether the day is on.",
+      "notHeld": [],
+      "description": "A slot is one appointment time we offer: a start, and whether the day is on.",
+      "columns": [
+        {
+          "name": "starts",
+          "kind": "date",
+          "type": "Date"
+        },
+        {
+          "name": "open",
+          "kind": "yesno",
+          "type": "Boolean",
+          "description": "Off days, breaks and public holidays are slots that are not open."
+        }
+      ],
+      "checks": [],
+      "indexes": []
+    },
+    {
       "name": "Membership",
       "made": {
         "relation": "membership"
@@ -393,6 +417,52 @@
               "exists": false
             }
           }
+        }
+      ]
+    },
+    {
+      "name": "Booking",
+      "made": {
+        "relation": "booking"
+      },
+      "sentence": "A person books a slot; one slot takes one booking, and a person may book several.",
+      "notHeld": [
+        "when a person goes, the 'booking' records linked to it go too",
+        "when a slot goes, the 'booking' records linked to it go too"
+      ],
+      "description": "A person books a slot; one slot takes one booking, and a person may book several. Not kept by the database yet: when a person goes, the 'booking' records linked to it go too; when a slot goes, the 'booking' records linked to it go too.",
+      "columns": [
+        {
+          "name": "person",
+          "kind": "link",
+          "type": "Pointer",
+          "targetClass": "Person",
+          "required": true,
+          "description": "A person books a slot; one slot takes one booking, and a person may book several.",
+          "relation": "booking"
+        },
+        {
+          "name": "slot",
+          "kind": "link",
+          "type": "Pointer",
+          "targetClass": "Slot",
+          "required": true,
+          "description": "A person books a slot; one slot takes one booking, and a person may book several.",
+          "relation": "booking"
+        },
+        {
+          "name": "cancelled",
+          "kind": "yesno",
+          "type": "Boolean"
+        }
+      ],
+      "checks": [],
+      "indexes": [
+        {
+          "fields": [
+            "slot"
+          ],
+          "unique": true
         }
       ]
     },
@@ -1213,6 +1283,196 @@
       ]
     },
     {
+      "id": "booking/person-is-required",
+      "says": "a booking cannot exist without its person",
+      "from": {
+        "relation": "booking"
+      },
+      "held": true,
+      "mutant": {
+        "dropRequired": {
+          "collection": "Booking",
+          "field": "person"
+        }
+      },
+      "steps": [
+        {
+          "make": "Person",
+          "as": "person2",
+          "data": {}
+        },
+        {
+          "make": "Slot",
+          "as": "slot4",
+          "data": {}
+        },
+        {
+          "make": "Booking",
+          "as": "whole",
+          "data": {
+            "person": {
+              "ref": "person2"
+            },
+            "slot": {
+              "ref": "slot4"
+            }
+          }
+        },
+        {
+          "make": "Person",
+          "as": "person6",
+          "data": {}
+        },
+        {
+          "make": "Slot",
+          "as": "slot8",
+          "data": {}
+        },
+        {
+          "refuse": "Booking",
+          "data": {
+            "slot": {
+              "ref": "slot8"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "booking/slot-is-required",
+      "says": "a booking cannot exist without its slot",
+      "from": {
+        "relation": "booking"
+      },
+      "held": true,
+      "mutant": {
+        "dropRequired": {
+          "collection": "Booking",
+          "field": "slot"
+        }
+      },
+      "steps": [
+        {
+          "make": "Person",
+          "as": "person2",
+          "data": {}
+        },
+        {
+          "make": "Slot",
+          "as": "slot4",
+          "data": {}
+        },
+        {
+          "make": "Booking",
+          "as": "whole",
+          "data": {
+            "person": {
+              "ref": "person2"
+            },
+            "slot": {
+              "ref": "slot4"
+            }
+          }
+        },
+        {
+          "make": "Person",
+          "as": "person6",
+          "data": {}
+        },
+        {
+          "make": "Slot",
+          "as": "slot8",
+          "data": {}
+        },
+        {
+          "refuse": "Booking",
+          "data": {
+            "person": {
+              "ref": "person6"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "booking/slot-is-unique",
+      "says": "one person on a slot at a time",
+      "from": {
+        "relation": "booking"
+      },
+      "held": true,
+      "mutant": {
+        "dropIndex": {
+          "collection": "Booking",
+          "fields": [
+            "slot"
+          ]
+        }
+      },
+      "steps": [
+        {
+          "make": "Slot",
+          "as": "slot2",
+          "data": {}
+        },
+        {
+          "make": "Person",
+          "as": "person4",
+          "data": {}
+        },
+        {
+          "make": "Booking",
+          "as": "booking5",
+          "data": {
+            "person": {
+              "ref": "person4"
+            },
+            "slot": {
+              "ref": "slot2"
+            }
+          }
+        },
+        {
+          "make": "Slot",
+          "as": "slot7",
+          "data": {}
+        },
+        {
+          "make": "Person",
+          "as": "person9",
+          "data": {}
+        },
+        {
+          "make": "Booking",
+          "as": "booking10",
+          "data": {
+            "person": {
+              "ref": "person9"
+            },
+            "slot": {
+              "ref": "slot7"
+            }
+          }
+        },
+        {
+          "make": "Person",
+          "as": "person12",
+          "data": {}
+        },
+        {
+          "refuse": "Booking",
+          "data": {
+            "person": {
+              "ref": "person12"
+            },
+            "slot": {
+              "ref": "slot2"
+            }
+          }
+        }
+      ]
+    },
+    {
       "id": "attended/person-is-required",
       "says": "an attended cannot exist without its person",
       "from": {
@@ -1649,6 +1909,86 @@
       ]
     },
     {
+      "id": "booking/person-goes-too",
+      "says": "when a person goes, the 'booking' records linked to it go too",
+      "from": {
+        "relation": "booking"
+      },
+      "held": false,
+      "steps": [
+        {
+          "make": "Person",
+          "as": "person1",
+          "data": {}
+        },
+        {
+          "make": "Slot",
+          "as": "slot3",
+          "data": {}
+        },
+        {
+          "make": "Booking",
+          "as": "booking4",
+          "data": {
+            "slot": {
+              "ref": "slot3"
+            },
+            "person": {
+              "ref": "person1"
+            }
+          }
+        },
+        {
+          "remove": "Person",
+          "row": "person1"
+        },
+        {
+          "gone": "Booking",
+          "row": "booking4"
+        }
+      ]
+    },
+    {
+      "id": "booking/slot-goes-too",
+      "says": "when a slot goes, the 'booking' records linked to it go too",
+      "from": {
+        "relation": "booking"
+      },
+      "held": false,
+      "steps": [
+        {
+          "make": "Slot",
+          "as": "slot1",
+          "data": {}
+        },
+        {
+          "make": "Person",
+          "as": "person3",
+          "data": {}
+        },
+        {
+          "make": "Booking",
+          "as": "booking4",
+          "data": {
+            "person": {
+              "ref": "person3"
+            },
+            "slot": {
+              "ref": "slot1"
+            }
+          }
+        },
+        {
+          "remove": "Slot",
+          "row": "slot1"
+        },
+        {
+          "gone": "Booking",
+          "row": "booking4"
+        }
+      ]
+    },
+    {
       "id": "topic-tree/parent-blocks",
       "says": "a topic cannot go while any topics are linked to it",
       "from": {
@@ -1845,6 +2185,20 @@
       "says": "when an account goes, the 'membership' records linked to it go too",
       "why": "a link holds the other record’s id, and no engine behind the contract follows it when that record is deleted",
       "claim": "membership/account-goes-too"
+    },
+    {
+      "collection": "Booking",
+      "field": "person",
+      "says": "when a person goes, the 'booking' records linked to it go too",
+      "why": "a link holds the other record’s id, and no engine behind the contract follows it when that record is deleted",
+      "claim": "booking/person-goes-too"
+    },
+    {
+      "collection": "Booking",
+      "field": "slot",
+      "says": "when a slot goes, the 'booking' records linked to it go too",
+      "why": "a link holds the other record’s id, and no engine behind the contract follows it when that record is deleted",
+      "claim": "booking/slot-goes-too"
     },
     {
       "collection": "Topic",

@@ -9,6 +9,11 @@
  *
  * Every relation NodeGX itself has produced so far is a string id (ONT-000 §6): no template and
  * no lessons-backend field uses a Link. That is the first mutant of `belongs-to` below.
+ *
+ * ONT-005: every mutant seed carries the question that kills it and an executable `shape`
+ * (`kind.ts` `MutantShape`); `world/mutants.ts` makes each one and the backend grades it on two
+ * engines. A seed `from: 'task'` is one of ONT-005 §3.1's ten, read from the corpus and Richard's
+ * rows at scoping, that no census or oral seed already named.
  */
 import { defineKind, type Kind, type ProjectedField, type ProjectedRule } from './kind';
 
@@ -71,13 +76,17 @@ export const belongsTo = defineKind({
       id: 'id-as-text',
       mistake: 'the link stored as a text field holding the other record\'s id',
       why: 'nothing checks the id names a record, and nothing follows it when the record goes; every relation the templates and the lessons backend have is this',
-      from: 'census'
+      from: 'census',
+      kills: 'the kind',
+      shape: { asText: true }
     },
     {
       id: 'one-that-was-several',
       mistake: "a one-to-many made on 'this user only belongs to one company', then they belong to several, with real data in the field",
       why: "a 'belongs-to' that was an 'is-on'; 'could it ever be several' was not asked before data existed",
-      from: 'oral'
+      from: 'oral',
+      kills: 'several',
+      shape: { changesKind: true }
     }
   ],
   evidence: { rows: 78, sources: ['template:members-area', 'template:planning', 'template:todo-list', 'lessons', 'acme', 'tirion', 'sentinel'] }
@@ -158,13 +167,33 @@ export const isOn = defineKind({
       id: 'links-column',
       mistake: 'a Links field between the two, with nowhere to put since when, until when or in what role',
       why: 'a pairing with details made as one without',
-      from: 'census'
+      from: 'census',
+      kills: 'details',
+      shape: { asKind: 'together', answers: { needsDetails: false, twice: false } }
     },
     {
       id: 'no-slot-rule',
       mistake: 'appointment slots shown as free, with no rule that one slot takes one booking, so two people land on one slot',
       why: "a booking is a person on a slot at a time; 'can two be on it at the same time' was not asked",
-      from: 'oral'
+      from: 'oral',
+      kills: 'sameTime',
+      shape: { unanswered: 'sameTime' }
+    },
+    {
+      id: 'link-column',
+      mistake: 'one Link on the {from} naming its current {to}: one account, no history',
+      why: "a Link holds one value; the {to}s it was on before, and since when, are overwritten — 'can it be on several' was answered for today only",
+      from: 'task',
+      kills: 'several',
+      shape: { asKind: 'belongs-to', answers: { several: false } }
+    },
+    {
+      id: 'no-end',
+      mistake: 'no start and no end on being on it, so a thing that ends has no end date',
+      why: "'at a time' cannot be told from 'ever': the one-at-a-time rule then counts every link that was ever made",
+      from: 'task',
+      kills: 'startsEnds',
+      shape: { unanswered: 'startsEnds' }
     }
   ],
   evidence: { rows: 20, sources: ['template:members-area', 'lessons', 'acme', 'tirion'] }
@@ -211,7 +240,9 @@ export const together = defineKind({
       id: 'pair-twice',
       mistake: 'a pairing with no rule that a pair is listed once',
       why: "'can the same pair be listed twice' was not asked",
-      from: 'census'
+      from: 'census',
+      kills: 'twice',
+      shape: { asKind: 'many-by-list', answers: { otherWay: false, grows: false, entryDetails: false } }
     }
   ],
   evidence: { rows: 4, sources: ['sentinel'], thin: 'one source: every row is from one prototype' }
@@ -241,6 +272,8 @@ export const oneOf = defineKind({
       ask: 'Who adds to the list of {field}s?',
       prevents: 'a list kept in the code, so every new value is a call to the developer',
       answer: { type: 'one-of', values: ['the people using it', 'a developer'] },
+      // ONT-005: a list the people add to is a thing of its own (tags as a Choice is the mistake).
+      changesKind: { when: 'the people using it', to: 'belongs-to' },
       from: 'census'
     },
     {
@@ -270,13 +303,25 @@ export const oneOf = defineKind({
       id: 'free-text',
       mistake: 'a text field where a list belongs',
       why: 'every misspelling becomes a new value, and no screen can offer the list',
-      from: 'census'
+      from: 'census',
+      kills: 'the kind',
+      shape: { property: 'text' }
     },
     {
       id: 'category-as-text',
       mistake: 'a string field made for product categories, when it should have been a link to a category',
       why: "a fixed list typed as free text; when categories need details or ordering it is a 'belongs-to' to a category record",
-      from: 'oral'
+      from: 'oral',
+      kills: 'needsDetails',
+      shape: { changesKind: true }
+    },
+    {
+      id: 'open-list-as-choice',
+      mistake: 'a fixed list where an open one belongs: tags, which the people using it add to, made as a Choice',
+      why: 'every new value is a call to the developer; a list the people add to is a thing of its own, with records',
+      from: 'task',
+      kills: 'whoAdds',
+      shape: { changesKind: true }
     }
   ],
   evidence: { rows: 24, sources: ['acme'], thin: 'one source: every row is from one business' }
@@ -326,7 +371,9 @@ export const manyByList = defineKind({
       id: 'dozens-on-the-parent',
       mistake: 'relation fields where the parent record has dozens of relations, and later a nested query to find the right parent',
       why: 'a list on the parent that nobody can query from the other side',
-      from: 'oral'
+      from: 'oral',
+      kills: 'otherWay',
+      shape: { changesKind: true }
     }
   ],
   evidence: { rows: 8, sources: ['tirion'], thin: 'one source: every row is from one prototype' }
@@ -381,7 +428,9 @@ export const partOfTree = defineKind({
       id: 'loop',
       mistake: 'a tree with no rule against a thing sitting under itself',
       why: "'can it be its own ancestor' was not asked",
-      from: 'census'
+      from: 'census',
+      kills: 'ownAncestor',
+      shape: { unanswered: 'ownAncestor' }
     }
   ],
   evidence: { rows: 1, sources: ['sentinel'], thin: 'one row: a single field in one prototype' }
@@ -443,7 +492,17 @@ export const existsElsewhere = defineKind({
       id: 'silent-skip',
       mistake: 'an id from the other system with no log of what was sent and what was skipped',
       why: "the enrolment note: 'can it exist here before there' was not asked, so the skip was silent",
-      from: 'note'
+      from: 'note',
+      kills: 'hereFirst',
+      shape: { without: { rule: 'logged' } }
+    },
+    {
+      id: 'id-nowhere',
+      mistake: "the other system's id stored nowhere",
+      why: 'nothing here can be matched to anything there; every sync starts from a name',
+      from: 'task',
+      kills: 'the kind',
+      shape: { unsaid: true }
     }
   ],
   evidence: { rows: 16, sources: ['acme', 'tirion', 'sentinel'] }
@@ -498,7 +557,9 @@ export const sameAs = defineKind({
       id: 'merge-by-delete',
       mistake: 'a duplicate merged by deleting it',
       why: 'nothing is left to undo a wrong merge with',
-      from: 'census'
+      from: 'census',
+      kills: 'undo',
+      shape: { without: { rule: 'neverDeleted' } }
     }
   ],
   evidence: { rows: 5, sources: ['acme', 'tirion', 'sentinel'] }
@@ -553,7 +614,9 @@ export const ends = defineKind({
       id: 'end-by-delete',
       mistake: 'ending a thing by deleting it',
       why: 'its history and everything linked to it goes too',
-      from: 'note'
+      from: 'note',
+      kills: 'whatStays',
+      shape: { unsaid: true }
     }
   ],
   evidence: { rows: 13, sources: ['lessons', 'acme', 'tirion'] }
@@ -627,7 +690,9 @@ export const happenedTo = defineKind({
       id: 'editable-history',
       mistake: 'a log that anyone may edit or delete',
       why: 'a record of what happened that can be changed is not one',
-      from: 'census'
+      from: 'census',
+      kills: 'forever',
+      shape: { without: { rule: 'neverEdited' } }
     }
   ],
   evidence: { rows: 44, sources: ['template:planning', 'template:todo-list', 'lessons', 'acme', 'tirion', 'sentinel'] }
@@ -681,7 +746,9 @@ export const ownedBy = defineKind({
       id: 'visible-to-all',
       mistake: 'records with no owner rule, readable by everyone signed in',
       why: "'who else may see it' was not asked",
-      from: 'census'
+      from: 'census',
+      kills: 'whoElse',
+      shape: { without: { rule: 'onlyThrough' } }
     }
   ],
   evidence: { rows: 71, sources: ['template:members-area', 'template:planning', 'template:todo-list', 'acme', 'tirion'] }
@@ -748,19 +815,25 @@ export const extendsKind = defineKind({
       id: 'piled-in',
       mistake: "piling all the profile fields into the user table thinking there's only a few; later a dozen, some users using half",
       why: 'extra detail folded into the thing it extends',
-      from: 'oral'
+      from: 'oral',
+      kills: 'grows',
+      shape: { foldedIn: true }
     },
     {
       id: 'filter-field-split-off',
       mistake: 'a field in the profile table later used very often to filter users; too late to move once users have profiles',
       why: 'the field you filter or sort the main thing by was split off into the extension',
-      from: 'oral'
+      from: 'oral',
+      kills: 'filterBy',
+      shape: { without: { rule: 'shape' } }
     },
     {
       id: 'sort-key-copied',
       mistake: "a 'profile updated' field copied onto the user and kept in sync by hand, to sort users by it",
       why: 'a derived field copied onto the parent and maintained by hand',
-      from: 'oral'
+      from: 'oral',
+      kills: 'filterBy',
+      shape: { without: { rule: 'shape' } }
     }
   ],
   evidence: { rows: 11, sources: ['lessons', 'acme', 'tirion', 'sentinel'] }
@@ -809,7 +882,9 @@ export const byName = defineKind({
       id: 'the-text-itself',
       mistake: 'the email or code stored as text where a link would be',
       why: 'a change to the email breaks every record that named it',
-      from: 'census'
+      from: 'census',
+      kills: 'shouldLink',
+      shape: { asText: true }
     }
   ],
   evidence: { rows: 6, sources: ['lessons'], thin: 'one source: every row is from one backend' }
@@ -865,7 +940,9 @@ export const pointsAtOneOf = defineKind({
       id: 'id-without-kind',
       mistake: 'an id with no kind beside it',
       why: 'nothing can tell which collection to look in',
-      from: 'census'
+      from: 'census',
+      kills: 'the kind',
+      shape: { without: { field: 'pointsAtKind' } }
     }
   ],
   evidence: { rows: 2, sources: ['lessons'], thin: 'one source: two fields of one backend' }
