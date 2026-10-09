@@ -105,6 +105,7 @@ import { UniqueId } from './unique-id';
 import { Uuid } from './uuid';
 import { ValueChanged } from './value-changed';
 import { Variable2 } from './variable2';
+import { Expression } from './expression';
 
 export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   // NSP-004 — the pilot five
@@ -217,7 +218,9 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [JSONStreamParser.type]: JSONStreamParser,
   [PatternExtractor.type]: PatternExtractor,
   [TextAccumulator.type]: TextAccumulator,
-  [StreamBuffer.type]: StreamBuffer
+  [StreamBuffer.type]: StreamBuffer,
+  // NSP-017 s64 — the escape hatches: the Expression, whose text is JavaScript the spec runs as the runtime does
+  [Expression.type]: Expression
 });
 
 export { EQUIVALENT_MUTANTS } from './equivalent-mutants';
@@ -233,6 +236,7 @@ export function specFor(typeName: string): AnyNodeSpec | undefined {
 
 export {
   And,
+  Expression,
   Collection2,
   CollectionClear,
   CollectionInsert,

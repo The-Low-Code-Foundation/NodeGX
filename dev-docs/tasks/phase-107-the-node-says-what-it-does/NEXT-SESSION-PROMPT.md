@@ -1,63 +1,65 @@
 # P107 — next session
 
-**Written 2026-10-08 (s63).** Read the [README](README.md) §2–§7 (R16 is the newest ruling). s63's record is
-[NSP-016 §7.24](NSP-016-VISUAL-NODES.md) (the Repeater v2 complete: Try Remove, a row on its way out, the rows' signals; Component
-Children exempt); s62's is §7.23.
+**Written 2026-10-09 (s64).** Read the [README](README.md) §2–§7 (R16 is the newest ruling). s64's records are
+[NSP-009 §5](NSP-009-THE-RATCHET.md) (the ratchet, built) and [NSP-017 §6](NSP-017-THE-ESCAPE-HATCHES.md) (the Expression).
 
 ## Board (from the task files)
 
 | task | built | committed |
 |---|---|---|
 | NSP-000 … NSP-015 | as s44 (NSP-013 left: AC2 — the export half, no reach here — and the deep run for s11–s14; NSP-014 / NSP-015 left: AC2's export half, P18) | s1 … s44 |
-| **NSP-016 the visual nodes** | 🟡 **AC1–AC3 met: 19 of 19 handled — 18 conform, Component Children exempt.** The Repeater v2 is complete (291 scenarios). Left: AC4 (geometry) waits for NSP-017 | `aa8abb06f` … s63 |
+| NSP-016 the visual nodes | 🟡 AC1–AC3 met: 19 of 19 handled — 18 conform, Component Children exempt. Left: AC4 (geometry), after NSP-017 (R10) | `aa8abb06f` … s63 |
+| **NSP-009 the ratchet** | ✅ **s64: `npm run spec-ledger[:check]`, `spec-ledger.json` (floor + `owed`), a step in the PR workflow (`node-catalog` job), 10 tests** | `6a1ed0084` |
+| **NSP-017 the escape hatches** | 🟡 **s64: the Expression conforms (1 of 5); rows C144, C145.** Left: Function (`JavaScriptFunction`), Script (`Javascript2`), Visual Function (`Logic Builder`) — the port contract and AC3's "specced (contract)" status; CSS Definition (a question for Richard, below); AC1's export half | s64 |
 | NSP-023 the spec without React | ✅ all six ACs (s50) | s45 … s57 |
 | NSP-006 the stranger | ✅ rounds 1–4 | `649e6864d` |
-| **NSP-009 the ratchet** | 🟡 **begun: `exemptions.json` (s63), read by the census.** Left: `spec-ledger.js`, the floor, the new-node gate, CI | s63 |
 | NSP-020 ports without a viewer | rows only | s20 |
 | NSP-022 the cloud-only nodes | 📋 (needs a second runtime target) | s21 |
 
-**124 of 147 conform on the runtime (84.4%) · 1 exempt** — T1 46/46 · T2 11/11 · T3 22/39 · T4 27/27 · T5 18/19 + 1 exempt.
+**`npm run spec-ledger`: 125 of 147 conform on the runtime (85.0%) · 2 on the export · 1 exempt · 21 owed** — T1 46/46 · T2 11/11 ·
+T3 22/39 · T4 27/27 · T5 18/19 (+1 exempt) · T6 1/5. **The board is no longer counted by hand: read the script's line.**
 
-## What s63 settled
+## What s64 settled
 
-1. **Try Remove, on both targets.** Two more row templates (`Leaving`: Try Remove wired to the row's `Leaving`; `Quiet`: unwired) hold a
-   Repeater Item whose Added is the row's `Added` and which a click tells Remove Completed. A removed row with a Repeater Item stays the
-   PARENT's child (wired: until its Remove Completed; unwired: until the next drain) but leaves `itemNodes` at once: a person taps it, an
-   addition counts it (row C143: lands one place early), a rebuild leaves it (and lands its rows before it).
-2. **The rows' signals are heard in drains, one report per pass** (row C142: the last row's Item Id, the FIRST row's outputs, the last
-   signal). Raised outside a drain → the next drain, in the order the ROWS WERE MADE; before / after the Repeater's frame-end work by
-   whether the Repeater had an input since the last drain (after, and its rebuild deleted the row: lost); raised by the frame-end work →
-   heard alone in the next pass. The face's drains: a settle's frame AND a second after its yield; a press before its click; the click's
-   own. An `advance` does not drain. All MEASURED with the runtime's update loop logged in memory (the probe below).
-3. **Component Children exempt** — `exemptions.json` beside `tiers.json`; the census validates it both ways, writes `exempt` on the row
-   and `totals.exempt`, and prints it (CENSUS.md "Exempt", the script's own line).
-4. **The census is generated from a clean HEAD export**, not the working tree: the committed census.json was already stale at HEAD
-   (built from a tree holding P18's uncommitted `plan.ts` / ledger edits). s63 regenerated it from `git archive HEAD <inputs>` + its own
-   census inputs (recipe below).
-5. **Where the handoff was off:** it said the press drains "before the click is delivered" because the click's handler drains first —
-   the handler drains AFTER calling the node (pointerlisteners.ts :178); the drain before the click is the pointer-DOWN handler's. Same
-   outcome, different mechanism. It named one third template; the unwired rule needed a fourth.
+1. **The ratchet (NSP-009) is built and in CI.** The ledger counts from the files: a spec in the registry (loaded from source), an `N`
+   graph scenario's CLAIM about the node (a node only placed to drive another is not graded by it), `EXPORT_REACH`, `exemptions.json`,
+   and `spec-ledger.json` `owed` (NSP-017's four and NSP-022's seventeen, each with the task that writes it). It does NOT re-run the
+   suites: the `test-packages` job already grades every registered spec at 200 with its mutants. **A new spec means, in its commit:
+   remove it from `owed` and raise `floor.runtime`** — `spec-ledger:check` says so, named, if you forget (it did, for the Expression).
+2. **The Expression is not a grammar of ours** — NSP-017 §3 was wrong, measured: the node compiles its text as JavaScript (`new
+   Function`); `expression-evaluator.ts` / `expression-type-coercion.ts` serve expression-typed PORTS on any node. The spec runs the same
+   text the same way and writes down everything around it. Its lexer is a third byte-identical copy (`src/nodes/expression-ports.ts`,
+   `tests/expression-ports-parity.test.ts`).
+3. **Rows C144** (Error keeps the last failure after the expression works again — the D25 / C47 family) **and C145** (a text reading
+   `run`, `expression` or `evaluateAtLoad` always throws "… is not defined"; the editor still draws the port). Both P109's under R16;
+   each fix moves the Expression to v2 in the same commit.
+4. **The census was regenerated from a clean HEAD export** with `tiers.json`'s Expression note corrected ("its grammar is ours" was
+   false); the rest of the diff was P109's drift since s63.
+5. **The deep run reads no `NSP_SEED`** — `conformance.test.ts`'s deep block passes no `seed`, so a deep run is always the UTC day's.
+   s64's two "deep seeds" were one. To deep-run another seed, add `seed: daySeed` to that block (a one-line change) first.
 
-**Readings (2026-10-08).** Probe cases side by side: 28, identical. Interpreter with mutants (291): CONFORMS at 200 on the ten seeds and
-at 10,000 on 20734 (246 / 246) and 20733 (250 / 250, after the survivor's scenario). Runtime `NSP_ONLY="For Each"`: CONFORMS at 200 on
-20734, 13, 20733, 20729, 7, 20735 (0 divergences, every mutant killed) and at 10,000 on 20734 (0 divergences, 246 / 246, 226 s). The
-node-spec package suite (`-w 2`): 22 / 22 suites, 968 passed, exit 0, 565 s; runtime target + graph 106 / 106; page model passes.
+**Readings (2026-10-09).** Expression on the runtime: 33 / 33 scenarios, 0 divergences, 175 / 175 mutants at 200 on seeds 20735,
+20734, 13, 20733, 20729, 7 and at 10,000 (20735, 55 s). Interpreter: `tests/batch-escape.test.ts` passes. `spec-ledger --check`: holds
+at 125/147 (1.3 s). The node-spec package suite: see the commit message.
 
-## What s64 does
+## What s65 does
 
-1. **NSP-009 — the ratchet.** `scripts/node-spec/spec-ledger.js` computes the coverage line the board now counts by hand: the specs
-   (`specs` × tiers.json), the graph-graded T4 nodes, On App Error, and `exemptions.json` — printed, never hidden. Read NSP-009 §2–§3
-   first; the per-tier totals must equal the census's (AC3, both directions). Then the floor (`spec-ledger.json`, ratcheting both ways
-   like `pickerCoverageFloor`) and the new-node gate (a picker node with neither a spec nor an exemption fails — AC2 on a COPY of the
-   catalog). "Counts as specced only if every mutant is killed and it conforms at the R5 budget" — decide how the script knows that
-   without running every suite (a recorded result per spec? read it from the test output?) and ask Richard if it is a choice.
-2. **Or NSP-017** (the escape hatches, 5 T6 nodes) — it unblocks NSP-016's AC4 (geometry).
-3. **When the box is quiet:** NSP-013's deep run for s11–s14 (`NSP_DEEP=10000 NSP_ONLY=…`, one spec at a time).
+1. **Ask Richard about CSS Definition (one question, plain words, recommendation first):** it is the node that adds a stylesheet to
+   the page for as long as it exists (ref-counted per node, removed with the last one) — nine of the ten templates carry one. It has no
+   outputs, so NSP-017's "spec only its outputs" leaves nothing. **Recommended: spec it as a page effect** (the style element added,
+   replaced on a Style change, removed when the last instance goes — the face can read `document.head`), because an export or a new
+   runtime must inject the same CSS; the alternative is to exempt it as "web-only by nature" in `exemptions.json`.
+2. **NSP-017 — Function (`JavaScriptFunction`)**: the port contract (how `Inputs.x` arrive, *publish only on change* — memory says a
+   fresh object publishes every run, its first fixture — how signals go out, what a synchronous and an asynchronous throw do, the
+   sandbox). Read `simplejavascript.ts` and `javascriptnodeparser.ts` first; then Script and Visual Function. AC3: the ledger gets a
+   `contract` status for these (a distinct column in `spec-ledger.js`, never counted as a behaviour spec).
+3. **Or the Expression v2**: `Variables` / `Objects` / `Arrays` read by the text, re-run when the global moves — the world's REGISTRY
+   seam (`registry.writes`, s62) carries it.
+4. **When the box is quiet:** NSP-013's deep run for s11–s14 (`NSP_DEEP=10000 NSP_ONLY=…`, one spec at a time).
 
-**Human decisions: none outstanding.** When P109 lands a ruled fix (C120, C126, C129–C143, S18), the scenario's behaviour moves with it in
-the same commit — a spec version (Repeater v3 for C129–C131, C135–C137, C140, C142, C143; Columns v2 for C132–C134; the Page Stack (v8) for
-C120, C126, C139; Drag v2 for C138; the Router for S18). C142's fix (one report per signal) removes `report`'s grouping; C143's (place
-rows among the Repeater's own) removes the early landing and the rebuild's move.
+**Human decisions: one — CSS Definition (above).** When P109 lands a ruled fix (C120, C126, C129–C145, S18), the scenario's behaviour
+moves with it in the same commit — a spec version (Repeater v3 for C129–C131, C135–C137, C140, C142, C143; Columns v2 for C132–C134; the
+Page Stack (v8) for C120, C126, C139; Drag v2 for C138; the Router for S18; the Expression v2 for C144, C145).
 
 ## Before you start
 

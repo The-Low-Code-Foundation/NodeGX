@@ -1276,13 +1276,13 @@
       ],
       "exportStatus": "translated",
       "tests": {
-        "noodl-runtime": 1,
-        "noodl-viewer-react": 8,
+        "noodl-runtime": 0,
+        "noodl-viewer-react": 10,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 1,
         "noodl-mcp": 1,
-        "total": 11
+        "total": 12
       },
       "testsTyped": {
         "noodl-runtime": 0,
@@ -1409,7 +1409,7 @@
       "isVisual": false,
       "tier": "T6",
       "batch": "NSP-017",
-      "note": "not really an escape hatch — its grammar is ours; the most valuable spec in the batch",
+      "note": "its text is JavaScript the node compiles (new Function), not a grammar of ours — the spec runs the same text and says everything around it (NSP-017 §6, s64)",
       "runtimeFile": "packages/noodl-runtime/src/nodes/std-library/expression.ts",
       "runtimeFiles": [
         "packages/noodl-runtime/src/nodes/std-library/expression.ts"
@@ -6681,12 +6681,12 @@
       "exportStatus": "translated",
       "tests": {
         "noodl-runtime": 3,
-        "noodl-viewer-react": 13,
+        "noodl-viewer-react": 15,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 22,
         "noodl-mcp": 60,
-        "total": 98
+        "total": 100
       },
       "testsTyped": {
         "noodl-runtime": 0,

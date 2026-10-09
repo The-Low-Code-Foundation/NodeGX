@@ -150,7 +150,7 @@
     "net.noodl.visual.columns": {"tier":"T5","batch":"NSP-016"},
     "net.noodl.visual.icon": {"tier":"T5","batch":"NSP-016"},
 
-    "Expression": {"tier":"T6","batch":"NSP-017","note":"not really an escape hatch — its grammar is ours; the most valuable spec in the batch"},
+    "Expression": {"tier":"T6","batch":"NSP-017","note":"its text is JavaScript the node compiles (new Function), not a grammar of ours — the spec runs the same text and says everything around it (NSP-017 §6, s64)"},
     "JavaScriptFunction": {"tier":"T6","batch":"NSP-017"},
     "Javascript2": {"tier":"T6","batch":"NSP-017"},
     "Logic Builder": {"tier":"T6","batch":"NSP-017","note":"the Blockly node; the user's blocks are the behaviour"},
