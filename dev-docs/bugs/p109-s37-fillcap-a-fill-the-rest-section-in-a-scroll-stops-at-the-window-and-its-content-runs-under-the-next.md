@@ -2,6 +2,7 @@
 id: P109-S37-FILLCAP
 title: In a scrolling Group, a section set to fill the rest (a % height, Fixed not ticked) stops at the window's height when its content is longer, and its content runs under the next item
 status: fixed
+commit: afac7de50
 phase: P109
 task: ISL-052
 severity: medium

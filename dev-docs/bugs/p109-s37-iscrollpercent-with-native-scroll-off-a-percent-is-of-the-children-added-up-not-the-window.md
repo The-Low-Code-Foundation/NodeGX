@@ -2,6 +2,7 @@
 id: P109-S37-ISCROLLPERCENT
 title: With Native platform scroll off, a size in % inside a scrolling Group is a % of its children added up, not of the window — swipeable slides at 100% come out the wrong width
 status: fixed
+commit: afac7de50
 phase: P109
 task: ISL-052
 severity: medium

@@ -2,6 +2,7 @@
 id: P107-C154
 title: In a scrolling Group (Native platform scroll on, the default) a percent child grows into the visible height — with it off, the same child is its content
 status: fixed
+commit: afac7de50
 phase: P109
 task: ISL-052
 severity: low

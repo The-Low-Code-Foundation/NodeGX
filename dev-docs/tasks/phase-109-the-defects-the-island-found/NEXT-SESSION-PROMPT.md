@@ -1,60 +1,51 @@
-# Next session — P109 session 37
+# Next session — P109 session 38
 
 **Phase:** [README](README.md) · **Audit:** [AUDIT-2026-10-01.md](AUDIT-2026-10-01.md) · scoped at `27d891bf3`.
-**Session 36 (2026-10-09, on `cline-dev`):** ISL-018 built in the primary tree; ISL-048 built in worktree `p109-isl049` (branch
-`p109-isl050`), landed by compare-and-swap. Board: **29 of 51 closed** (ISL-048 ✅).
+**Session 37 (2026-10-09, on `cline-dev`):** built in worktree `p109-isl049` (branch `p109-isl052`), landed by compare-and-swap.
+Board: **30 of 52 closed** (ISL-052 new and ✅).
 
-- **ISL-048 ✅ 29 of 29** — `08d62276b`, as ruled, on P107's session history (`b7950a3b9`): **C120** a Pop steps the browser's
-  history back over the entry its push made, and counts that Back as its own; a Replace overwrites the entry; on any `popstate` a
-  stack whose address names its top does nothing. **C126** a Reset press or a Components edit builds the Start Page and writes its
-  address. Page Stack spec **v18** (13 renamed, 5 read-backs moved to the person's Back and Forward, 4 added). Task §13.
-- **ISL-018 AC5 met** — `c5be13465`. Claude Code over the stdio door in a format-4 copy of landing-pages; the editor's clean-up 0
-  writes, its control 2 written and logged; the rows drawn in the preview. Rounds 1–4 graded nothing of the door (agents build
-  value-driven graphs, or answer the box themselves); round 5 did. Found and fixed: the door ticked boxes and said nothing
-  (**P109-S36-PINUNREPORTED**, now `ticked: { boxes, why }` on create, update and apply_plan). Found: **P109-S36-STALEMCPDIST** (high,
-  open) — the dev editor's `.mcp.json` runs the checkout's `dist/noodl-mcp.cjs`, built 2026-10-02, without the pin. Rebuilt at
-  `08d62276b` (below); the lasting fix (the server says when it is older than its `src`) is not built.
+- **ISL-052 ✅ 7 of 7** ([task](ISL-052-A-SCROLLING-GROUP-LAYS-OUT-AS-IT-DOES-WITHOUT-THE-SCROLL.md)) — P107's C152, C153 and
+  P109-S37-ISCROLLALIGN (`0859bbbde`: with Native platform scroll off the inner box takes the gap and the alignment, the Group
+  clips); then **ruled by Richard** — *inside a scrolling Group the room is the visible window, unless the content is longer,
+  and then the content wins* — and built (`afac7de50`): C154, P109-S37-FILLCAP (a long "fill the rest" ran under the footer),
+  ISCROLLPERCENT (with it off, a % was of the children added up), CENTRECUT (a centred long list lost its top). Every child of
+  the native and off twins in four fixtures lands in the same place; the layout check 8 / 8; control and one planted variant
+  per piece red.
+- **The viewer build** (P116-ONT-007-viewerbuild, `06ec2d4e7`): three Map iterations in P116's migration executor, refused at
+  ES5 — and a production webpack with errors writes no bundle. P116's next commit repeated it in `targetGoes.ts:226`; **P116
+  (opennoodl-5d) has the fix in its tree and said it lands within the hour** (22:50).
 
 ## Do, in this order
 
-1. **P107-C152, C153 and C154 (new, from P107 s70–s71, `071acfc7e`, `df215ade6`)** — a Group with Enable Scroll on and Native platform scroll off: the gap
-   is dropped (`renderIScroll`'s inner wrapper copies flexDirection and flexWrap, not rowGap / columnGap), and nothing clips (`render`
-   sets overflow only for Clip Content or the native path). Both medium. **And P107-C154** (low, P107 s71 `df215ade6`, no reach on
-   the shelf): with Native platform scroll ON, a percent child of a scrolling Group grows into the visible height (140 px around
-   40 px of content); with it off, the child is its content — pinned beside them. No task holds the three yet: scope them (ISL-038 is the Group's
-   closed task; a new ISL-052, or reopen it — say which). Regressions are pinned in `packages/nodegx-node-spec/tests/layout-check.test.ts`;
-   after a fix, re-record with `node scripts/node-spec/layout-measure.js --record packages/nodegx-node-spec/layout-fixtures --only scroll-iscroll`
-   (one headless Chrome), then flip the pinned assertion.
+1. **Check P116's `targetGoes.ts` landed** (`git show cline-dev:packages/nodegx-backend-contract/src/targetGoes.ts | grep -c
+   "\[\.\.\.counts"` → 0) and the viewer builds clean (`npx webpack --config webpack-configs/webpack.viewer.prod.js` in
+   noodl-viewer-react: "compiled successfully", exit 0, the bundle's mtime new). Until then 5 viewer suites do not run and the PR
+   gate `ci:build:viewer` is red. If it has not landed, ask P116 once; do not edit their open file.
 2. ISL-012 AC3 (a full server render with hydration). ISL-018's only remaining AC is AC7 on the DBT demo, its owner's.
 3. P109-S36-STALEMCPDIST's lasting fix, if Richard wants it now (about ISL-014's size).
 4. **Track G** waits on Richard's order.
 
-## What s36 learned
+## What s37 learned
 
-- **An agent round grades a door only where the agent leaves the field the door fills.** Four rounds of natural requests gave 0 → 0:
-  the agent built value-driven graphs, or answered the box itself (it read the door's own guidance). Read the agent's tool call
-  (`runOnChange` sent or not) before calling a 0 a pass, and keep a control that writes.
-- **A `popstate` reaches every listener on the page,** and the world hands each its own event object: a shared "ours" mark cannot
-  be told apart there, and a microtask clear fails in a browser (microtasks run between listeners). Count per listener, and keep
-  what the address already shows.
-- **A ruling can blind other rows' scenarios.** Under C126 a Reset no longer reads the address, so five scenarios that used it to read
-  a written URL back (C121–C124) would have stopped grading them while staying green. Moved to the person's Back and Forward.
-- **`npm run build` in a worktree writes the primary's `dist/`** (four of its files are symlinks), and builds `cloud-bundle.cjs` from
-  the worktree's `bundleEntry.js` — without the primary's uncommitted P78 D84 lines. It was rebuilt from the primary at once.
+- **A ruling asked over abstract boxes is not asked.** Richard twice: "I still don't understand". What landed: a page of three
+  real screens (a checkout, onboarding slides, an inbox), the working phone beside today's, each opened in the state that shows
+  the fault (https://claude.ai/artifact/VG6KyQgitumwDgycJbXJW1). Measure every caption on the runtime first.
+- **A box-position check cannot see how far a scroller scrolls.** A Fixed % of the inner box put the slides in the right places
+  inside a box one window wide that better-scroll could not move past: green on every box. `layout-measure.js` now records a
+  Group's inner box as `inner`.
+- **A production webpack with errors writes nothing**, and the last bundle stays on disk: a measurement after "compiled with N
+  errors" measures the old code. Twice in s37 (once from a planted variant left built). Read the bundle's mtime.
+- **The worktree's `packages/noodl-editor/src/external/viewer` was a symlink into the primary** — and the viewer build has
+  `clean: true`. Replaced with a real copy in `p109-isl049` before building; do the same in any new worktree.
 
-## Gate readings taken s36 (2026-10-09)
+## Gate readings taken s37 (2026-10-09)
 
-- Page Stack v18 on the runtime at 13, 20732, 20735, 7: 162/162, 200/200, 0 divergences; mutants 846/847 (868/869 at 20735), 0
-  survivors, the one an equivalent. Interpreter mutants 846/847 at 13 and 20732, 0 unreached. Control (HEAD's runtime file): red on
-  exactly 16. Router, RouterNavigate, PageStackNavigate, …NavigateBack, …NavigateToPath conform at 13. Viewer 1,837/1,837; spec
-  package 1,780/1,783 before the page-model fix, page model 42/42 after (`WORLD_KINDS` lacked `popstate`, red on `cline-dev` since
-  `b7950a3b9`). Re-run after the rebase onto `68b4a766b`: Page Stack at 13 the same.
-- `noodl-mcp` suite at `d53e5f283` + the change: 3,812 / 3,830, 18 red in 13 suites, exit 1 — **the same 18 by name with HEAD's five
-  files** (a pair). `isl018DoorPins` 6/6; two reverted arms red on exactly their rows. `noodl-mcp` tsc: 10 errors, all in other
-  phases' test files.
-- `bugs.js check`: 5 problems, none P109's.
-- `dist/` rebuilt 19:35: `noodl-mcp.cjs` from the clean worktree (pin present); `cloud-bundle.cjs` from the primary (D84 kept;
-  smoke: a load that logs `[NDA-017]` sends it to stderr, stdout is JSON).
+- Layout check 8 / 8 at `afac7de50` (206 boxes match; KNOWN: 2 FLOOR, 32 ROOM). Control (HEAD's `layout.ts`, `Group.tsx`,
+  `react-component-node.ts`): red on the rule's test and KNOWN. Planted: no min-content, Fixed % of the inner box, no window-high
+  inner box, no `safe` — each red.
+- Viewer 1,837 / 1,837 with P116's pending `targetGoes.ts` line applied locally (without it, 5 suites fail to run: TS2802).
+  Viewer tsc: no errors in the three files. Backend contract `migration.test.ts` 20 / 20, tsc clean.
+- `bugs.js check`: none of P109's.
 
 ## Decisions for Richard (not yours)
 
@@ -68,19 +59,28 @@
 
 ## Handed over (owed by another phase)
 
+- **P107 (opennoodl-49), told s37:** ISL-052 landed as ruled; their model owes P109-S37-SCROLLROOM (32 boxes KNOWN as ROOM;
+  four new fixtures; the measuring records `inner`).
+
 - **P107 (opennoodl-49):** told C120/C126 landed and that `popstate` was sorted into `WORLD_KINDS`. Theirs: the day-seed survivors,
   the Video rows C96–C100, and the frame a landed back is heard in if the two targets ever disagree (they asked to be told).
 - **P78 / TPL-011:** `packages/noodl-mcp/src/cloud/bundleEntry.js`'s D84 lines are still uncommitted (since 2026-09-26) and the
   shipped `cloud-bundle.cjs` depends on them.
 - **P18 (export):** carried from s35 (Arrays in the export's Expression; the kit bootstraps; the Visual Function's reserved signal;
   s33's list).
+- **P18 (export):** the scroll rule (ISL-052 §2) — an exported scrolling Group lays out as the runtime now does, or as the
+  model does; theirs to decide when P107's model moves.
+- **Release notes, add (s37):** a scrolling Group with Native platform scroll off keeps its gap and alignment and hides what lies
+  outside it; inside any scrolling Group a "fill the rest" section grows with its content, a Fixed % is of the visible window
+  (one slide per screen works), and a centred list too long to fit starts at the top.
 - **Release notes, add (s36):** a Component Stack's Pop steps the browser's history back, and a Replace no longer adds an entry; a
   Reset goes to the start page; the agent's door says when it ticked a "run on value change" box. (s34's four and s35's three still
   owed.)
 
 ## Worktrees
 
-`p109-isl049` (branch `p109-isl050`) is at `08d62276b`, nothing unlanded; its untracked probes (`zz-s31-*`, `zz-s32-*`, `zz-s33-c114`)
+`p109-isl049` (branch `p109-isl052`) is at the s37 docs commit, nothing unlanded; its viewer folder is a real copy now (not the
+symlink), so a build there stays there; its untracked probes (`zz-s31-*`, `zz-s32-*`, `zz-s33-c114`)
 — never commit them. 🔴 Its `packages/noodl-mcp/dist/` files are symlinks into the primary: do not `npm run build` there without
 meaning to replace the primary's. The older worktrees are spent; remove with `git worktree remove` when convenient.
 

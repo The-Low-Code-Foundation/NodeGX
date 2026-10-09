@@ -2,6 +2,7 @@
 id: P109-S37-CENTRECUT
 title: A scrolling Group set to centre pushes a list longer than its window past the top — the first item's start is cut off and no scrolling reaches it
 status: fixed
+commit: afac7de50
 phase: P109
 task: ISL-052
 severity: medium
