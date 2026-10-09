@@ -22,12 +22,12 @@
  * names that record (every row with that id is the one record, its fields the last row's), one without is a new anonymous record (ten
  * draws) unless this list has seen that very object before; then records the new list lacks are removed, the rest put in place, new ones
  * added — each removal and each addition one operation on the Repeater's queue (`initialize` :240-254), the addition at its place in
- * the list. An item that is `null` (or `undefined`) THROWS there (`Model.instanceOf(null)` reads `.target`, model.ts :265): the items
- * before it have become records, and nothing is moved.
+ * the list. v4 (P109 ISL-049, row C130): an item that is `null` (or `undefined`) has no record and no row, and the rest are copied
+ * (`_copyItems`; v3 threw there — `Model.instanceOf(null)` reads `.target`, model.ts :265 — and nothing was moved).
  *
  * ITEMS (:301-320): a value is copied at the frame's end (`scheduleCopyItems` :895-921, once per frame, whatever came last); the same
  * value again — the same object, or `null` after `null` — is nothing. A string is evaluated by the port first (`array-literal`).
- * Anything that is not a list empties it (`set` reads no `length`), a list with a `null` in it throws (above).
+ * Anything that is not a list empties it (`set` reads no `length`); a `null` in a list is skipped (above).
  *
  * A REGISTRY ARRAY AS ITEMS (v2, `bindCollection` :476-485, `onItemsCollectionChanged` :257-269). Written to Items, a registry
  * array is LISTENED to (the one Items held before is not, whatever it was); its own `change` — the app adding, removing or
@@ -45,7 +45,7 @@
  * v3 (P109 ISL-049): NOTHING STOPS THE QUEUE. v2 recorded four throws inside it that left `runningOperations` true for good (rows C128,
  * C135, C140); each is caught now where it happens — the build of a component the project does not have (`repeater/template-component-
  * not-found`, no row), a Script's component that is not text (`repeater/template-script-threw`, no row), a mapping's throw (`repeater/
- * input-mapping-threw`, the row keeps what it set), a rebuild's copy (its Refreshes fail `repeater/items-copy-threw`, the rows stay) — and
+ * input-mapping-threw`, the row keeps what it set), a rebuild's copy (its Refreshes fail `repeater/items-copy-threw`, the rows stay; v4: unreached in a play) — and
  * the runner catches anything else (`repeater/operation-threw`). The errors are the bus's, outside the trace (graded in viewer-react's
  * nda-012 corpus test).
  *
@@ -57,8 +57,8 @@
  * Template or a compiled Script (:745) — whichever Template Type picks, so a Script that compiled lets a rebuild with no Template pass.
  *
  * THE FRAME'S END (node.ts :759-763). The Repeater's frame-end callbacks run in the order they were asked for — the copy and the
- * rebuild. A copy that throws ends the frame's callbacks there: a rebuild asked for after it is lost, and since it is still "asked for",
- * no later Template, Template Type or Refresh asks again (row C130).
+ * rebuild. v4 — the copy cannot throw (row C130: v3's copy of a list with a `null` threw there, ended the frame's callbacks, and a
+ * rebuild asked for after it was lost for good, still "asked for").
  *
  * THE QUEUE (`_runQueueOperations` :815-860): one operation at a time, in order.
  *   - **an addition**: the item's component (none: no row); then the row's node id (eight draws, guid.ts) and the build (`await
@@ -69,8 +69,8 @@
  *   - **a rebuild** (`refresh` :723-810): no Template (falsy) — every Refresh it answers fails `repeater/no-template`; no Items (falsy)
  *     — `repeater/no-items`. Otherwise the Items are copied again (what that copy queues is dropped), EVERY row goes, and a row is built
  *     for each record in the list, in order, as an addition builds one (a component the project does not have: no row, four act
- *     boundaries); then every Refresh it answers is Done. A copy that throws (a `null`) fails every Refresh it answers
- *     (`repeater/items-copy-threw`), and the rows stay (v3, row C128).
+ *     boundaries); then every Refresh it answers is Done. (A copy that throws would fail every Refresh it answers,
+ *     `repeater/items-copy-threw`, and leave the rows — v3; since v4 nothing in a play makes it throw.)
  *   When the queue empties, **Items Rendered** — after every run of the queue, including one that built nothing (row C129).
  *
  * THE ROW'S INPUTS (v2, `addItem` :592-629, `_mapInputs` :538-555). At its landing a row is given its inputs by the input mapping AS IT
@@ -459,9 +459,10 @@ function outputsOf(template: unknown): { values: string[]; tapped: boolean; sign
 export const Repeater = defineNode({
   type: 'For Each',
   // v2 (NSP-016 s61): Script is graded — Template Type Dynamic runs it per record, as v1 left undriven
+  // v4 (P109 ISL-049, s32): an empty entry in Items has no row, and the rest are drawn (row C130)
   // v3 (P109 ISL-049, s32): nothing the Repeater meets stops its queue — a component the project does not have, a Script's component
   // that is not text, a mapping that throws, a copy that throws are each caught where they happen (rows C128, C135, C140, C141)
-  version: 3,
+  version: 4,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/data/foreach.tsx',
   needs: ['person', 'registry', 'project'],
   worldPool: {
@@ -673,7 +674,7 @@ function scheduleRefresh(w: Work): void {
   w.st.callbacks.push('refresh');
 }
 
-/** The Repeater's frame-end callbacks (node.ts :759-763): a throw ends them there, and the rest of the frame's are lost (row C130) */
+/** The Repeater's frame-end callbacks (node.ts :759-763), in the order asked for */
 function frameWork(w: Work): void {
   const callbacks = w.st.callbacks;
   w.st.callbacks = [];
@@ -681,48 +682,39 @@ function frameWork(w: Work): void {
     if (cb === 'copy') {
       // :900-920
       w.st.copyScheduled = false;
-      if (copy(w, w.st.items) === THROWS) return;
+      copy(w, w.st.items);
     } else enqueue(w, { kind: 'refresh' });
   }
 }
 
 // ---------------------------------------------------------------------------------------------
-// THE LIST — the registry's array is the runtime's diff; the throw on an item that is `null` is the runtime's own
+// THE LIST — the registry's array is the runtime's diff
 // ---------------------------------------------------------------------------------------------
 
-const THROWS = Symbol('throws');
 /** v3 — a build of a component the project does not have, caught (row C128): no row, the queue runs on */
 const MISSING = Symbol('missing');
 /**
  * v3 — the act boundaries the queue runs on after, measured on the runtime (P109 s32): an addition whose build was not found (its
  * rejection reaches `addItem`'s catch through `getComponentModel`, `createComponentInstanceNode` and `createNode`); a record a rebuild
- * looked at whose build was not found; a copy that threw — the queue's own (the runner's catch) and a rebuild's (its Refreshes fail)
+ * looked at whose build was not found. (v4: no copy throws in a play — the runtime still catches one, a listener elsewhere throwing)
  */
 const HOPS_ADD_MISSING = 5;
 const LOOK_MISSING = 4;
-// never reached in a play — a registry array holds records, never a null: 1, as a copy that does not throw (unmeasured)
-const HOPS_COPY_THREW = 1;
-const HOPS_REFRESH_COPY_THREW = 1;
 
 /**
- * `collection.set(src)` (collection.ts :569-700) on the Repeater's own list: each addition and removal one queued operation (:240-254).
- * `Model.instanceOf(item)` reads `item.target` — a `null` or `undefined` item throws there, after the items before it were converted.
+ * `_copyItems` → `collection.set(src)` (collection.ts :569-700) on the Repeater's own list: each addition and removal one queued
+ * operation (:240-254). v4 — a `null` or `undefined` item is left out first (row C130).
  */
-function copy(w: Work, src: unknown): void | typeof THROWS {
+function copy(w: Work, src: unknown): void {
   return hearingRecords(w, () => copyInto(w, src));
 }
 
-function copyInto(w: Work, src: unknown): void | typeof THROWS {
+function copyInto(w: Work, src: unknown): void {
   const own = w.st.own as CollectionRef;
   const source = (src || []) as ArrayLike<unknown>;
-  const n = source.length;
-  for (let i = 0; i < n; i++) {
-    const item = source[i];
-    if (item === null || item === undefined) {
-      convert(w, own, source, i);
-      return THROWS;
-    }
-  }
+  let empty = false;
+  for (let i = 0; i < source.length; i++) if (source[i] === null || source[i] === undefined) empty = true;
+  if (empty) src = Array.prototype.filter.call(source, (item: unknown) => item !== null && item !== undefined);
   const ops: Op[] = [];
   const list = own as unknown as { on(e: string, f: (a: { item: RecordRef; index: number }) => void): void; off(e: string, f: (a: { item: RecordRef; index: number }) => void): void };
   const add = (a: { item: RecordRef; index: number }) => void ops.push({ kind: 'add', rec: a.item, index: a.index });
@@ -757,29 +749,6 @@ function hearingRecords<T>(w: Work, f: () => T): T {
   } finally {
     for (const off of offs) off();
     hearFields(w, told);
-  }
-}
-
-/** The conversion loop of `set` (:584-631) up to item `upTo`: what becomes a record before the throw (the same cache the diff keeps) */
-function convert(w: Work, own: CollectionRef, source: ArrayLike<unknown>, upTo: number): void {
-  const holder = own as unknown as { _plainItemModels?: WeakMap<object, RecordRef> };
-  if (!holder._plainItemModels) Object.defineProperty(holder, '_plainItemModels', { value: new WeakMap(), enumerable: false, writable: true });
-  const cache = holder._plainItemModels!;
-  for (let i = 0; i < upTo; i++) {
-    const item = source[i];
-    if (w.view.registry.isRecord(item)) continue;
-    const plain = item as Record<string, unknown>;
-    const isObject = typeof plain === 'object' && plain !== null;
-    const model = isObject ? cache.get(plain) : undefined;
-    if (model === undefined) {
-      const made = w.view.registry.create(plain);
-      if (isObject) cache.set(plain, made);
-    } else {
-      for (const key in plain) {
-        if (key === 'id') continue;
-        if (model.data[key] !== plain[key]) model.set(key, plain[key]);
-      }
-    }
   }
 }
 
@@ -858,8 +827,8 @@ function start(w: Work, op: Op): void {
     w.st.hops = 1;
   } else if (op.kind === 'copy') {
     // v2 (:261-268) — Items as it is NOW copied into the list; what the diff adds and removes is queued behind what waits
-    // v3 — a copy that throws is the runner's to catch (`_operationThrew`, row C128): the queue runs on
-    w.st.hops = copy(w, w.st.items) === THROWS ? HOPS_COPY_THREW : 1;
+    copy(w, w.st.items);
+    w.st.hops = 1;
   } else if (op.kind === 'add') {
     const b = addItem(w, op.rec, op.index);
     if (b === MISSING) w.st.hops = HOPS_ADD_MISSING;
@@ -1102,13 +1071,7 @@ function refresh(w: Work): void {
   }
   // :770-772 — the copy again; what it queued is dropped
   const before = st.queue.length;
-  // v3 — a copy that throws fails every Refresh it answers, and the rows stay (row C128)
-  if (copy(w, st.items) === THROWS) {
-    settle('failure', 'repeater/items-copy-threw');
-    st.queue.length = before;
-    st.hops = HOPS_REFRESH_COPY_THREW;
-    return;
-  }
+  copy(w, st.items);
   st.queue.length = before;
   // :779 — every row the Repeater holds goes (`itemNodes`): v2 — not one on its way out, which stays where it is
   st.rows = st.rows.filter((r) => r.leaving);

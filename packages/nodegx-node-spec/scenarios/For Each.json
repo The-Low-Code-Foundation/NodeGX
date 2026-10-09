@@ -518,7 +518,7 @@
   ]
  },
  {
-  "name": "the matrix — a list with a null in it (the copy throws, row C130); its frame ends at a settle",
+  "name": "the matrix — a list with a null in it (the null has no row, row C130); its frame ends at a settle",
   "because": "NSP-016 §7.20 THE MATRIX: every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
   "params": {
    "template": "Row",
@@ -573,7 +573,7 @@
   ]
  },
  {
-  "name": "the matrix — a list with a null in it (the copy throws, row C130); a click on row 0 before the settle",
+  "name": "the matrix — a list with a null in it (the null has no row, row C130); a click on row 0 before the settle",
   "because": "NSP-016 §7.20 THE MATRIX: every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
   "params": {
    "template": "Row",
@@ -632,7 +632,7 @@
   ]
  },
  {
-  "name": "the matrix — a list with a null in it (the copy throws, row C130); clicks on rows 1 and 0 before the settle",
+  "name": "the matrix — a list with a null in it (the null has no row, row C130); clicks on rows 1 and 0 before the settle",
   "because": "NSP-016 §7.20 THE MATRIX: every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
   "params": {
    "template": "Row",
@@ -695,7 +695,7 @@
   ]
  },
  {
-  "name": "the matrix — a list with a null in it (the copy throws, row C130); a click, a new list, a click",
+  "name": "the matrix — a list with a null in it (the null has no row, row C130); a click, a new list, a click",
   "because": "NSP-016 §7.20 THE MATRIX: every request × how its frame ends (a settle; a click before it, which drains the graph; clicks across act boundaries) followed by an observer — clicks on each row and a Refresh — so the mutants of each shape are killed here, not by a seed",
   "params": {
    "template": "Row",
@@ -4109,8 +4109,8 @@
   ]
  },
  {
-  "name": "a list with a null in it, rebuilt: the Refresh fails (repeater/items-copy-threw), the rows stay, and the next list is drawn (row C128)",
-  "because": "refresh :771 copies again — Model.instanceOf(null) throws (model.ts :265) — renamed in P109 s32 (v3: the queue goes on)",
+  "name": "a list with a null in it, rebuilt: the null has no row, the rest are drawn, and the Refresh is Done (row C130)",
+  "because": "refresh :771 copies again — Model.instanceOf(null) throws (model.ts :265) — renamed in P109 s32 (v3: the queue goes on) — renamed in P109 s32 (v4: a null has no row)",
   "params": {
    "template": "Row",
    "items": [
@@ -4164,8 +4164,8 @@
   ]
  },
  {
-  "name": "a list with a null in it keeps the old rows; a Refresh asked after it in the frame is lost, and so is every later one (row C130)",
-  "because": "the copy throws inside the frame-end callbacks (node.ts :759-763) — the rebuild callback after it never runs, and hasScheduledRefresh stays true (:453-468)",
+  "name": "a list with a null in it draws the rest; a Refresh asked after it in the frame is answered, and so is every later one (row C130)",
+  "because": "the copy throws inside the frame-end callbacks (node.ts :759-763) — the rebuild callback after it never runs, and hasScheduledRefresh stays true (:453-468) — renamed in P109 s32 (v4: a null has no row)",
   "params": {
    "template": "Row",
    "items": [
@@ -15985,8 +15985,8 @@
   ]
  },
  {
-  "name": "a Refresh whose copy of Items throws (a null): Refresh fails, the rows stay, and Items Rendered fires at the next click (row C128)",
-  "because": "P109 s32 (ISL-049, row C128) — the act boundaries the queue runs on after the caught failure, counted by clicks with no settle between (a count one off is red here)",
+  "name": "a Refresh of a list with a null: the rows go, the null has none, and the rebuild lands and is Done at the yield (row C130)",
+  "because": "P109 s32 (ISL-049) — written for v3's caught copy (row C128); since v4 the copy skips the null (row C130), so the rebuild runs",
   "params": {
    "template": "Row",
    "items": [

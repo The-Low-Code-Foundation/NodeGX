@@ -171,6 +171,8 @@ interface ForEachInstance extends NodeInstance {
     pendingRefreshOutcomes: OutcomeToken[];
     /** Messages already raised during the current rebuild — see `reportTemplateProblem`. */
     reportedTemplateProblems?: Set<string>;
+    /** The Items value whose empty entries were last reported — see `_copyItems`. */
+    reportedEmptyEntriesIn?: unknown;
     hasScheduledCopyItems?: boolean;
     hasScheduledTriggerItemOutputSignal?: boolean;
     target?: ForEachItemNode;
@@ -198,6 +200,7 @@ interface ForEachInstance extends NodeInstance {
   _queueOperation(op: QueuedOperation): void;
   _runQueueOperations(): Promise<void>;
   _operationThrew(e: unknown): void;
+  _copyItems(): void;
   /** Fires `Items Rendered` once the operation queue has drained. See NDA-004 §3. */
   _signalItemsRendered(didWork: boolean): void;
   didMount(): void;
@@ -260,11 +263,11 @@ const ForEachDefinition: NodeDefinitionOptions = {
 
       if (repeaterDisabledWhenUnmounted && !this.isMounted) {
         this._internal.mountedOperations.push(() => {
-          this._internal.collection.set(this._internal.items);
+          this._copyItems();
         });
       } else {
         this._queueOperation(() => {
-          this._internal.collection.set(this._internal.items);
+          this._copyItems();
         });
       }
     };
@@ -806,10 +809,11 @@ const ForEachDefinition: NodeDefinitionOptions = {
       // (and thus meant to run after it) is left alone.
       const queueLengthBeforeResync = internal.queuedOperations.length;
       try {
-        internal.collection.set(internal.items);
+        this._copyItems();
       } catch (e) {
-        // ISL-049 (P107-C128). A copy that throws (Items holding a null) used to stop the queue for good, its Refreshes
-        // never answered. Now it fails them, and the rows stay as they were.
+        // ISL-049 (P107-C128). A copy that throws used to stop the queue for good, its Refreshes never answered. Now it
+        // fails them, and the rows stay as they were. Since C130 an empty entry is skipped, so what is left to throw here is
+        // a record's listener elsewhere in the app.
         internal.queuedOperations.length = queueLengthBeforeResync;
         settle('failure', 'repeater/items-copy-threw', `The Repeater could not copy its Items, so it did not rebuild: ${(e as Error)?.message ?? String(e)}`);
         return;
@@ -974,12 +978,46 @@ const ForEachDefinition: NodeDefinitionOptions = {
 
         if (repeaterDisabledWhenUnmounted && !this.isMounted) {
           this._internal.mountedOperations.push(() => {
-            this._internal.collection.set(this._internal.items);
+            this._copyItems();
           });
         } else {
-          this._internal.collection.set(this._internal.items);
+          // ISL-049 (P107-C130). A frame-end callback that throws ends the node's callbacks there (node.ts `update`), and
+          // a rebuild asked for in the same frame was lost with its flag still set — no later Refresh was ever answered.
+          try {
+            this._copyItems();
+          } catch (e) {
+            this._operationThrew(e);
+          }
         }
       });
+    },
+    /**
+     * Copy Items into the Repeater's own list. ISL-049 (P107-C130), ruled "Skip the empty entry and report it once": an
+     * entry that is `null` or `undefined` made `Collection.set` throw (`Model.instanceOf` reads `.target`), so the whole new
+     * list was refused and the old rows stayed. Now it has no row, every other entry does, and it is reported once per
+     * Items value.
+     */
+    _copyItems(this: ForEachInstance) {
+      const internal = this._internal;
+      const items = internal.items as unknown as ArrayLike<unknown> | null | undefined;
+      let empty = 0;
+      if (items && typeof items.length === 'number') {
+        for (let i = 0; i < items.length; i++) if (items[i] === null || items[i] === undefined) empty++;
+      }
+      if (empty === 0) {
+        internal.collection.set(internal.items);
+        return;
+      }
+      if (internal.reportedEmptyEntriesIn !== items) {
+        internal.reportedEmptyEntriesIn = items;
+        this.raiseRuntimeError(
+          'repeater/items-empty-entry',
+          empty === 1
+            ? "The Repeater's Items has an empty entry (null or undefined), so it has no row"
+            : `The Repeater's Items has ${empty} empty entries (null or undefined), so they have no rows`
+        );
+      }
+      internal.collection.set(Array.prototype.filter.call(items, (item: unknown) => item !== null && item !== undefined));
     },
     itemOutputSignalTriggered: function (
       this: ForEachInstance,

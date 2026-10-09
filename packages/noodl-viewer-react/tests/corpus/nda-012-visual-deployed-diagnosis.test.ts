@@ -68,6 +68,7 @@ interface DrivableNode extends NodeInstance {
   addItem(model: unknown, index: number): Promise<void>;
   _mapInputs(itemNode: unknown, model: unknown): void;
   _queueOperation(op: () => unknown): void;
+  _copyItems(): void;
 }
 
 async function build(module: { node: { name: string } }, parameters: Record<string, unknown> = {}) {
@@ -450,3 +451,52 @@ describe('ISL-049 — a Repeater names what it cannot build and goes on', () => 
     expect(codes(graph)).toEqual([]);
   });
 });
+
+/**
+ * P109 ISL-049, row C130 — ruled "Skip the empty entry and report it once". Which rows are drawn is graded by the For Each
+ * scenarios on the runtime target; the report is graded here.
+ */
+describe('ISL-049 — a list with an empty entry draws the rest and says so once', () => {
+  const size = (node: DrivableNode) => (node._internal.collection as { size(): number }).size();
+
+  it('copies every entry but the empty ones, and reports them once for that list', async () => {
+    const { graph, node } = await build(ForEachModule, { template: '/Row' });
+    const items = [{ id: 'a' }, null, { id: 'b' }, undefined];
+
+    node.setInputValue('items', items);
+    graph.update();
+    node._copyItems();
+
+    expect(size(node)).toBe(2);
+    expect(codes(graph)).toEqual(['repeater/items-empty-entry']);
+    expect(graph.errors[0].message).toContain('2 empty entries');
+  });
+
+  it('says nothing about a list with no empty entry', async () => {
+    const { graph, node } = await build(ForEachModule, { template: '/Row' });
+
+    node.setInputValue('items', [{ id: 'a' }, { id: 'b' }]);
+    graph.update();
+
+    expect(size(node)).toBe(2);
+    expect(codes(graph)).toEqual([]);
+  });
+
+  // The second half: a copy that throws at the frame's end no longer drops the rebuild asked for in the same frame
+  it('keeps the frame-end rebuild when the copy throws', async () => {
+    const { graph, node } = await build(ForEachModule, { template: '/Row' });
+    graph.update();
+    node._copyItems = () => {
+      throw new Error('a listener threw');
+    };
+
+    node.setInputValue('items', [{ id: 'a' }]);
+    node.setInputValue('template', '/Other');
+    graph.update();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(codes(graph)).toContain('repeater/operation-threw');
+    expect(node._internal.hasScheduledRefresh).toBe(false);
+  });
+});
+
