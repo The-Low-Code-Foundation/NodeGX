@@ -69,6 +69,9 @@ interface DrivableNode extends NodeInstance {
   _mapInputs(itemNode: unknown, model: unknown): void;
   _queueOperation(op: () => unknown): void;
   _copyItems(): void;
+  itemOutputSignalTriggered(name: string, model: unknown, itemNode: unknown): void;
+  registerOutputIfNeeded(name: string): void;
+  getItemOutput(name: string): unknown;
 }
 
 async function build(module: { node: { name: string } }, parameters: Record<string, unknown> = {}) {
@@ -497,6 +500,42 @@ describe('ISL-049 — a list with an empty entry draws the rest and says so once
 
     expect(codes(graph)).toContain('repeater/operation-threw');
     expect(node._internal.hasScheduledRefresh).toBe(false);
+  });
+});
+
+/**
+ * P107-C142 — the rows' signals heard in one update. A trace keeps a settle's last value per port, so the For Each scenarios show
+ * every signal and the last row's values; which values each signal goes out with is graded here, at the node.
+ */
+describe('ISL-049 — each row\'s signal goes out with its own row', () => {
+  it('reports two rows heard in one update one after the other: Item Id, outputs, then the signal', async () => {
+    const { graph, node } = await build(ForEachModule);
+    node.registerOutputIfNeeded('itemOutputSignal-Added');
+    node.registerOutputIfNeeded('itemOutputSignal-Leaving');
+    node.registerOutputIfNeeded('itemOutput-Label');
+    const sent: string[] = [];
+    const n = node as unknown as { sendSignalOnOutput(name: string): void; flagOutputDirty(name: string): void };
+    const send = n.sendSignalOnOutput.bind(node);
+    const flag = n.flagOutputDirty.bind(node);
+    n.sendSignalOnOutput = (name) => (sent.push(`signal ${name}`), send(name));
+    n.flagOutputDirty = (name) => (
+      sent.push(`${name} ${name === 'itemActionItemId' ? node._internal.itemActionItemId : node.getItemOutput(name.slice('itemOutput-'.length))}`),
+      flag(name)
+    );
+    const row = (label: string) => ({ _outputs: { Label: { value: label } } });
+
+    node.itemOutputSignalTriggered('Leaving', Model.create({ id: 'c142-a' }), row('A'));
+    node.itemOutputSignalTriggered('Added', Model.create({ id: 'c142-b' }), row('B'));
+    graph.update();
+
+    expect(sent).toEqual([
+      'itemActionItemId c142-a',
+      'itemOutput-Label A',
+      'signal itemOutputSignal-Leaving',
+      'itemActionItemId c142-b',
+      'itemOutput-Label B',
+      'signal itemOutputSignal-Added'
+    ]);
   });
 });
 

@@ -104,8 +104,8 @@
  * THE ROWS' SIGNALS (v2, `creatorCallbacks.onOutputChanged` :633-639, `itemOutputSignalTriggered` :922-947; nodecontext.ts
  * `updateDirtyNodes` :453-490). A row's output signal — `Added` at its landing, `Leaving` at its Try Remove, `Tapped` at a click —
  * reaches the Repeater only when it has that output (the PLACED Template's), and only where the row's graph updates: in a DRAIN. A drain
- * is passes over the nodes waiting to update; Item Id is set as each row's signal is heard, and ONE report ends the pass — the outputs
- * the Repeater has, read from the FIRST row heard, and the signal of the LAST (row C142). A signal raised outside a drain (at a yield,
+ * is passes over the nodes waiting to update; the pass ends with a report per signal heard, in order — that row's Item Id, the outputs
+ * the Repeater has, then its signal (v9, row C142: v8 made ONE report, the FIRST row's outputs and the LAST's signal). A signal raised outside a drain (at a yield,
  * at an act boundary, by a write made elsewhere) waits for the next drain: those raised before the Repeater had an input since the
  * last drain are heard before its frame-end work, the rest after it (a row the Repeater's rebuild deleted says nothing); among them,
  * the rows are heard in the order they were MADE, not the order they spoke (measured). A signal the frame-end work raises (the copy's
@@ -469,7 +469,8 @@ export const Repeater = defineNode({
   // v6 (P109 ISL-049, s32): a rebuild checks only what Template Type uses (row C136)
   // v7 (P109 ISL-049, s32): a Refresh pulsed while a rebuild runs is answered by the rebuild it asked for (row C137)
   // v8 (P109 ISL-049, s32): items that repeat an id are one row at the first item's place, kept there by every copy (row C131)
-  version: 8,
+  // v9 (P109 ISL-049, s32): every row's signal heard in a pass is reported with its own row (row C142)
+  version: 9,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/data/foreach.tsx',
   needs: ['person', 'registry', 'project'],
   worldPool: {
@@ -1033,30 +1034,31 @@ function hear(w: Work, list: readonly Raised[], into: Array<{ row: Row; name: st
   for (const r of [...list].sort((a, b) => a.born - b.born)) {
     const row = w.st.rows.find((x) => x.born === r.born);
     if (!row) continue;
-    // `itemOutputSignalTriggered` :922-930 — Item Id at once; the outputs and the signal after the pass
-    w.st.itemId = row.rec.getId();
-    w.send.add('itemActionItemId');
+    // `itemOutputSignalTriggered` — queued; v9: the Item Id, the outputs and the signal each go after the pass, row by row
     into.push({ row, name: r.name });
   }
 }
 
 /**
- * The pass's end (`itemOutputSignalTriggered` :931-944): ONE report for every signal heard in the pass — the outputs it has read from
- * the FIRST row heard, then the signal of the LAST (row C142: a second row's signal in a pass is reported with the first row's outputs,
- * and the first's signal is lost when the names differ). The row is read as it was when it was heard.
+ * The pass's end (`itemOutputSignalTriggered`'s after-update): v9 (row C142) — one report per signal heard, in order: that row's Item
+ * Id, the outputs it has, then its signal (v8 made ONE report of them all — the FIRST row's outputs, the LAST's signal and Item Id). The
+ * row is read as it was when it was heard. (A trace keeps a settle's last value per port, so it shows the last row's values and every
+ * signal; the order within a settle is graded by viewer-react's `nda-012-visual-deployed-diagnosis.test.ts`.)
  */
 function report(w: Work, heard: ReadonlyArray<{ row: Row; name: string }>): void {
-  if (heard.length === 0) return;
-  const row = heard[0].row;
-  const reads = ROW_OUTPUT[row.template];
-  const outs = { ...w.st.outs };
-  for (const name of Object.keys(REPEATER_TEMPLATES[row.template].outputs)) {
-    if (!w.st.registered.values.includes(name)) continue;
-    outs[name] = row.inputs[reads[name]];
-    w.sendDerived.add(`itemOutput-${name}`);
+  for (const { row, name: signal } of heard) {
+    w.st.itemId = row.rec.getId();
+    w.send.add('itemActionItemId');
+    const reads = ROW_OUTPUT[row.template];
+    const outs = { ...w.st.outs };
+    for (const name of Object.keys(REPEATER_TEMPLATES[row.template].outputs)) {
+      if (!w.st.registered.values.includes(name)) continue;
+      outs[name] = row.inputs[reads[name]];
+      w.sendDerived.add(`itemOutput-${name}`);
+    }
+    w.st.outs = outs;
+    w.pulses.push(`itemOutputSignal-${signal}`);
   }
-  w.st.outs = outs;
-  w.pulses.push(`itemOutputSignal-${heard[heard.length - 1].name}`);
 }
 
 /** `refresh` (:723-810) */

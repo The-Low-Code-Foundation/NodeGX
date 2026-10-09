@@ -144,7 +144,8 @@ interface ForEachInstance extends NodeInstance {
     /** Latest value of each forwarded item output, keyed without the prefix. */
     itemOutputs: Record<string, unknown>;
     itemActionItemId?: string;
-    itemActionSignal?: string;
+    /** The rows' signals heard this update, in order — see `itemOutputSignalTriggered`. */
+    pendingItemSignals?: Array<{ name: string; model: ModelLike; itemNode: ForEachItemNode }>;
     itemActionParameters?: Record<string, unknown>;
     /** Serialised so that adds and removes cannot interleave — see `_runQueueOperations`. */
     queuedOperations: QueuedOperation[];
@@ -1028,23 +1029,33 @@ const ForEachDefinition: NodeDefinitionOptions = {
       model: ModelLike,
       itemNode: ForEachItemNode
     ) {
-      this._internal.itemActionItemId = model.getId();
-      this._internal.itemActionSignal = name;
-      this.flagOutputDirty('itemActionItemId');
+      // ISL-049 (P107-C142). Every row whose signal is heard in one update used to fall into ONE report: the
+      // after-update read the outputs of the first row (its closure's) and sent the signal of the last (a shared
+      // field), with the last row's Item Id — so a second row's Added was lost, and a row's Leaving was reported as
+      // another's Added. Each call is queued, and the after-update reports them in order: that row's Item Id, its
+      // outputs, then its signal.
+      const pending = (this._internal.pendingItemSignals ??= []);
+      pending.push({ name, model, itemNode });
 
       // Send signal and update item outputs after they have been correctly updated
       if (!this._internal.hasScheduledTriggerItemOutputSignal) {
         this._internal.hasScheduledTriggerItemOutputSignal = true;
         this.context.scheduleAfterUpdate(() => {
           this._internal.hasScheduledTriggerItemOutputSignal = false;
-          for (const key in itemNode._outputs) {
-            const _output = 'itemOutput-' + key;
-            if (this.hasOutput(_output)) {
-              this._internal.itemOutputs[key] = itemNode._outputs[key].value;
-              this.flagOutputDirty(_output);
+          const heard = this._internal.pendingItemSignals ?? [];
+          this._internal.pendingItemSignals = [];
+          for (const signal of heard) {
+            this._internal.itemActionItemId = signal.model.getId();
+            this.flagOutputDirty('itemActionItemId');
+            for (const key in signal.itemNode._outputs) {
+              const _output = 'itemOutput-' + key;
+              if (this.hasOutput(_output)) {
+                this._internal.itemOutputs[key] = signal.itemNode._outputs[key].value;
+                this.flagOutputDirty(_output);
+              }
             }
+            this.sendSignalOnOutput('itemOutputSignal-' + signal.name);
           }
-          this.sendSignalOnOutput('itemOutputSignal-' + this._internal.itemActionSignal);
         });
       }
     },

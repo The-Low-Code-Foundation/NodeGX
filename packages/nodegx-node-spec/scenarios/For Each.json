@@ -18913,8 +18913,8 @@
   ]
  },
  {
-  "name": "two rows land in one rebuild: one Added, the second row's Item Id with the first row's Label (row C142)",
-  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case L1)",
+  "name": "two rows land in one rebuild: an Added for each, reported with its own row (row C142)",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case L1) — renamed in P109 s32 (v9: every row’s signal is reported with its own row)",
   "params": {
    "template": "Leaving",
    "items": [
@@ -19349,8 +19349,8 @@
   ]
  },
  {
-  "name": "a row's Leaving and a new row's Added waiting for one drain: one report — Added, read from the leaving row (row C142)",
-  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case Q1L)",
+  "name": "a row's Leaving and a new row's Added waiting for one drain: a report each — Leaving from the leaving row, then Added (row C142)",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case Q1L) — renamed in P109 s32 (v9: every row’s signal is reported with its own row)",
   "params": {
    "template": "Leaving",
    "items": {
@@ -19422,8 +19422,8 @@
   ]
  },
  {
-  "name": "every row leaves at once: the first removal is heard in its own drain, the other two together — two Leaving (row C142)",
-  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case Q3)",
+  "name": "every row leaves at once: the first removal is heard in its own drain, the other two together — three Leaving (row C142)",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case Q3) — renamed in P109 s32 (v9: every row’s signal is reported with its own row)",
   "params": {
    "template": "Leaving",
    "items": [
@@ -19606,8 +19606,8 @@
   ]
  },
  {
-  "name": "two rows leave between drains: heard in the order they were made, not the order they spoke — b says it first, a is read (row C142)",
-  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case T4)",
+  "name": "two rows leave between drains: heard in the order they were made, not the order they spoke — b says it first, and a is reported before it (row C142)",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case T4) — renamed in P109 s32 (v9: every row’s signal is reported with its own row)",
   "params": {
    "template": "Leaving",
    "items": {
@@ -19665,8 +19665,8 @@
   ]
  },
  {
-  "name": "two rows leave between drains: heard in the order they were made, not the order they spoke — a says it first, b is read (row C142)",
-  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case T4b)",
+  "name": "two rows leave between drains: heard in the order they were made, not the order they spoke — a says it first, and b is reported before it (row C142)",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case T4b) — renamed in P109 s32 (v9: every row’s signal is reported with its own row)",
   "params": {
    "template": "Leaving",
    "items": {
