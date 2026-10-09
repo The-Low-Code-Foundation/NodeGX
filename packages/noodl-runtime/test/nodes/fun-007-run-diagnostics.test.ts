@@ -314,7 +314,8 @@ describe("FUN-007 §2 — the throw is mapped back to the author's document", ()
     await graph.settle(4);
 
     expect(warningsWithKey(graph, RUN_ERROR_KEY)).toHaveLength(0);
-    expect(graph.node('fn').getOutput('error').value).toBeUndefined();
+    // P109 ISL-051 (P107-C146, ruled as D25 "Clear it to blank text"): blank text, sent — `undefined` never reached the wire
+    expect(graph.node('fn').getOutput('error').value).toBe('');
   });
 
   /**

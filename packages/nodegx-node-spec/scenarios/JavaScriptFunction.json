@@ -380,8 +380,8 @@
     ]
   },
   {
-    "name": "a run that works after a throw leaves Error as it was (row C146)",
-    "because": "simplejavascript.ts :645-652 (nothing writes lastError on success)",
+    "name": "a run that works after a throw clears Error to blank text, sent once, before Success (v2, row C146)",
+    "because": "simplejavascript.ts :645-652 — as ruled for D25 / C144, \"Clear it to blank text\"",
     "params": {
       "functionScript": "await null;\nOutputs.late = Inputs.a;\nif (Inputs.b) throw new Error(\"late\")"
     },
@@ -403,8 +403,8 @@
     ]
   },
   {
-    "name": "a new Script after a throw empties Error without sending it: the wire keeps the old message (row C146)",
-    "because": "simplejavascript.ts :367, :771-775 (flagOutputDirty of undefined — never sent)",
+    "name": "a new Script after a throw clears Error to blank text and sends it (v2, row C146)",
+    "because": "simplejavascript.ts :367, :771-775 clearRunDiagnostics — blank text, sent, only when there was a message",
     "params": {
       "functionScript": "throw new Error(\"boom \" + Inputs.a)"
     },
@@ -422,7 +422,7 @@
     ]
   },
   {
-    "name": "a Script edited to one that will not compile, then fixed: Failure, then the code runs again and this is kept",
+    "name": "a Script edited to one that will not compile, then fixed: Failure, then Error cleared to blank and the code runs again, this kept (v2, row C146)",
     "because": "simplejavascript.ts :361-388, :534-561, :830-833",
     "params": {
       "functionScript": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n"

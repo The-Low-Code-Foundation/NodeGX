@@ -38,9 +38,10 @@
  *     Failure pulses. Success does not fire.
  *   - A SCRIPT THAT WILL NOT COMPILE (:534-561, :818-842): Error is the engine's message, every waiting Run is answered `failure`
  *     (`function/script-not-compiled`), or Failure pulses. A Run with NO script answers Unchanged (:563-567).
- *   - ERROR IS NEVER CLEARED BY A RUN THAT WORKS (:645-652 — nothing writes `lastError` on success): a working run leaves the last
- *     failure on Error. Setting the Script empties it but SENDS `undefined` (:771-775, clearRunDiagnostics), which is never sent, so a
- *     wire on Error keeps the old message (row C146 — the D25 / C47 / C144 family, ruled "clear it to blank text").
+ *   - ERROR IS CLEARED ON THE WIRE (v2, row C146 — the D25 / C47 / C144 family, ruled "Clear it to blank text"): a run that works
+ *     after a failure, or a new Script (:771-775, clearRunDiagnostics), writes Error as blank text and sends it, once; with Error
+ *     already blank nothing is sent. v1 left a working run's Error as it was, and a new Script emptied it to `undefined`, which is
+ *     never sent — so a wire on Error kept the old message.
  *   - A THROW OF NOTHING (row C147, fixed in P109 ISL-051): `throw null` / `throw undefined` is a throw like any other — Error "null"
  *     or "undefined". The runtime's logger read the value's prototype inside the catch and threw, so the node reported nothing.
  *
@@ -227,7 +228,8 @@ const schedule = { scheduled: true } as const;
 
 export const JavaScriptFunction = defineNode({
   type: 'JavaScriptFunction',
-  version: 1,
+  // v2 (P109 ISL-051, s33): Error cleared to blank text and sent by a run that works and by a new Script (row C146)
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/simplejavascript.ts',
   contract:
     'ports from the code and the written lists; when the code runs (the Script, Run, a changed ticked input; once a frame); Inputs, this and Noodl as the code sees them; publish on change; signal outputs; Success and Done after an await; a throw, sync or async; a compile failure; no script — FUNCTION_FIXTURES, one per rule',
@@ -311,9 +313,9 @@ export const JavaScriptFunction = defineNode({
   {
     // :361-388 — the text: the diagnostics cleared, the code compiled (or its failure kept), a run asked for
     functionScript: (s, v) => {
-      // :771-775 clearRunDiagnostics — `undefined` written and flagged: never sent (C3), so the wire keeps the old message (row C146)
-      const cleared: Partial<FunctionState> = s.lastError !== undefined ? { lastError: undefined } : {};
-      if (v === undefined) return { set: { ...cleared, script: undefined, compiled: false, parseError: undefined }, send: s.lastError !== undefined ? ['error'] : [] };
+      // :771-775 clearRunDiagnostics — a message cleared to blank text and sent (v2, row C146); blank already: nothing
+      const cleared: Partial<FunctionState> = s.lastError ? { lastError: '' } : {};
+      if (v === undefined) return { set: { ...cleared, script: undefined, compiled: false, parseError: undefined }, send: s.lastError ? ['error'] : [] };
       const text = v as string;
       const parseError = parse(text);
       return {
@@ -324,7 +326,7 @@ export const JavaScriptFunction = defineNode({
           parseError,
           ...schedule
         },
-        send: s.lastError !== undefined ? ['error'] : []
+        send: s.lastError ? ['error'] : []
       };
     },
     // :425-430, :493-498 — a token, and the frame's run
@@ -363,10 +365,10 @@ export const JavaScriptFunction = defineNode({
           outcomes: Array.from({ length: n }, () => ({ port: 'run' as const, outcome: 'failure' as const, error: 'function/script-threw' }))
         };
       }
-      // :645-652 — Success, then Done for each Run; Error is left as it was (row C146)
+      // :645-652 — a message on Error cleared to blank text and sent (v2, row C146), then Success, then Done for each Run
       return {
-        set,
-        send: [],
+        set: s.lastError ? { ...set, lastError: '' } : set,
+        send: s.lastError ? ['error'] : [],
         sendDerived: r.sent,
         emitDerived: r.fired,
         emit: ['success'],

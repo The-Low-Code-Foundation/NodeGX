@@ -647,6 +647,12 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
           // run's throw and the previous run's silence are now stale, and whatever this run
           // has to say is said before anything downstream of `Success` gets to move.
           this.reportOutputSilence();
+          // P109 ISL-051 (P107-C146), as ruled for its twins D25 and C144 ("Clear it to blank text"): a run that works after a
+          // failure left Error on the wire. A message is cleared to blank text and sent, once, before Success.
+          if (this._internal.lastError) {
+            this._internal.lastError = '';
+            this.flagOutputDirty('error');
+          }
           this.sendSignalOnOutput('success');
           reportOutcomes(this, tokens, 'done');
         }
@@ -770,8 +776,10 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
      * publish an `undefined` down every `Error` wire in the project for nothing.
      */
     clearRunDiagnostics: function (this: SimpleJavascriptNodeInstance) {
-      if (this._internal.lastError !== undefined) {
-        this._internal.lastError = undefined;
+      // P107-C146: blank text, sent — `undefined` is never sent, so a wire on Error kept the old message. Only when there is a
+      // message, so a Script set at load sends nothing.
+      if (this._internal.lastError) {
+        this._internal.lastError = '';
         this.flagOutputDirty('error');
       }
 

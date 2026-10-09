@@ -218,7 +218,8 @@ describe('ISL-005 — what goes wrong is named, once', () => {
     graph.graphModel.setScripts({ 'w.js': 'exports.ok = "fixed";' });
     await graph.settle(6);
     expect(fn(graph, 'f').outputValues.answer).toBe('fixed');
-    expect(fn(graph, 'f').lastError).toBeUndefined();
+    // P109 ISL-051 (P107-C146, ruled as D25 "Clear it to blank text"): cleared to blank text, which a wire on Error receives
+    expect(fn(graph, 'f').lastError).toBe('');
     // Found driving AC4 in the editor (build session 4): the file was fixed and the Function ran, and the
     // warning stayed on the node, saying the file was broken.
     expect(fileWarnings()).toHaveLength(0);
