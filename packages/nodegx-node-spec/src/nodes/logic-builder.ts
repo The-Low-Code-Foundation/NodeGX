@@ -42,9 +42,9 @@
  *     compiled: " and the engine's own words; the run is answered `failure` (`logic-builder/code-not-compiled`).
  *   - NO CODE (:416-421): no Generated Code (or empty): the run is answered Unchanged, and nothing else happens.
  *   - A NAME THE NODE OWNS, written by the code (:466-490): the other values still land (sent in order), then Error says the name and
- *     the run is answered `failure` (`logic-builder/reserved-port-name`) — no Success. SENT as a signal (:566-573): Error says so and
- *     Failure pulses at once, outside the run's answer — and the run goes on: Error is cleared (blank text, sent), Success fires and
- *     the run is answered Done.
+ *     the run is answered `failure` (`logic-builder/reserved-port-name`) — no Success. SENT as a signal (:582-597), the same answer
+ *     (v2, P109 ISL-051 row C149): the send does nothing then; after the code the values land, Error says the first such name and
+ *     the run is answered `failure` — no Success, no Done. (v1: Failure pulsed at once and the run went on to Success and Done.)
  *
  * THE PLAY'S PORTS. An author edits the blocks while the app runs and the editor re-sends the ports for each edit (:822-888). A play
  * may set any fixture's code, so the node carries every fixture's OUTPUTS from the start (`derived.outputs`, below) — what a loaded
@@ -175,7 +175,7 @@ const reservedSignal = (name: string) => '"' + name + '" is one of the node\'s o
 type Pulse = 'failure' | 'success' | { derived: string };
 
 /** :378-526 — one run, started by `trigger`. */
-function run(s: Readonly<LogicBuilderState>, trigger: string, world: { send(port: string, state?: Readonly<Record<string, unknown>>): void }) {
+function run(s: Readonly<LogicBuilderState>, trigger: string, _world: { send(port: string, state?: Readonly<Record<string, unknown>>): void }) {
   const code = s.code || '';
   // :385-422 — no code: Unchanged; code that will not compile: Error, a failure
   if (!code) return { outcome: 'unchanged' as const };
@@ -187,14 +187,11 @@ function run(s: Readonly<LogicBuilderState>, trigger: string, world: { send(port
   const inputs: Record<string, unknown> = { ...s.inputs };
   const written: Record<string, unknown> = {};
   const pulses: Pulse[] = [];
-  let error = s.error;
-  // :566-576 — a signal fires at once; a name the node owns fails at once (Failure, no answer) and the run goes on
+  // :582-597 — a signal fires at once; a name the node owns is remembered (the first) and fails the run after the code (v2, C149)
+  let refused: string | null = null;
   const send = (name: string) => {
     if (RESERVED_OUTPUTS.indexOf(name) !== -1) {
-      error = reservedSignal(name);
-      // :285-286 — Error is sent at the fail, then cleared at the run's end: the wire sees both
-      world.send('error', { ...s, error });
-      pulses.push('failure');
+      if (refused === null) refused = name;
       return;
     }
     pulses.push({ derived: name });
@@ -218,6 +215,10 @@ function run(s: Readonly<LogicBuilderState>, trigger: string, world: { send(port
     }
     outputs[name] = written[name];
     sent.push(name);
+  }
+  if (refused !== null) {
+    // :487-497 (v2, C149) — the signal side answers as the value side does
+    return { set: { inputs, outputs, error: reservedSignal(refused) }, send: ['error' as const], sendDerived: sent, pulses, outcome: 'failure' as const, error: 'logic-builder/reserved-port-name' };
   }
   if (reserved !== null) {
     // :483-490
@@ -258,7 +259,8 @@ const signalPort = (): InputDecl => ({ type: 'signal', outcome: true });
 
 export const LogicBuilder = defineNode({
   type: 'Logic Builder',
-  version: 1,
+  // v2 (P109 ISL-051, s34): a name the node owns SENT fails the run as one written does — no Success, no Done (row C149)
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/logic-builder.ts',
   contract:
     'ports from the blocks, never the code, each kind decided once; runs on Run and on each declared signal input, the whole program, never on a value; Inputs kept across runs, Outputs fresh; __triggerSignal__, __p, __s; signals at once, values after the code, every run; a throw drops the values; a compile failure; no code; a name the node owns written or sent — LOGIC_BUILDER_FIXTURES, one per rule',

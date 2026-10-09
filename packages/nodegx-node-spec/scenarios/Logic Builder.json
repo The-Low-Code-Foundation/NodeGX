@@ -415,8 +415,8 @@
     ]
   },
   {
-    "name": "a signal sent to a name the node owns: Error and Failure at once, then the run goes on — Error blank, Success, Done",
-    "because": ":566-573, :282-312 (no token: Failure pulsed), :492-502",
+    "name": "a signal sent to a name the node owns: the values land, then Error says so, a failure — no Success, no Done (v2, row C149)",
+    "because": ":582-597, :487-497 (the value side’s answer, :483-490)",
     "params": {
       "workspace": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_send_signal\",\"fields\":{\"NAME\":\"done\"}},{\"type\":\"noodl_get_input\",\"fields\":{\"NAME\":\"a\"}},{\"type\":\"noodl_set_output\",\"fields\":{\"NAME\":\"sum\"}}]}}",
       "generatedCode": "__s(\"s1\");\nsendSignalOnOutput(\"done\");\n__s(\"s2\");\nOutputs[\"sum\"] = __p(\"v1\", Inputs[\"a\"]);\n"

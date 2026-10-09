@@ -103,30 +103,23 @@ describe('Logic Builder — a failure warning comes down on the next good run', 
     expect(calledWithKey(h.sendWarning, RESERVED_CODE)).toBe(true);
   });
 
-  it('⚠️ SEPARATE PRE-EXISTING DEFECT — a refused signal send still reports success', () => {
+  it('a refused signal send fails the run — Error keeps the reason and Success is not sent (P107-C149)', () => {
     /**
-     * 🔴 **Found by this suite, not fixed by it, and recorded here so it is not rediscovered.**
-     *
-     * The reserved-*output* check returns out of `_executeLogic` (`logic-builder.ts`, the
-     * `reservedName` branch). The reserved-*signal* check does not: it lives inside the
-     * `sendSignalOnOutput` wrapper, so it fails, returns from the wrapper, and execution carries
-     * straight on to the success path — which sets `executionError = null` and pulses `Success`.
-     *
-     * So a Visual Function that sends a reserved signal name raises a runtime error, pulses
-     * `Failure`, AND THEN pulses `Success` with an empty `Error` port. The dotted node is the only
-     * honest surface; a graph sequenced on `Error` or `Success` is told the run was fine.
-     *
-     * ⚠️ Asserted as it actually behaves, deliberately. Changing it means changing what `Success`
-     * means on this node, which is ERG-001 territory and a decision rather than a tidy-up — so
-     * this test documents the behaviour and will fail loudly the day someone fixes it, which is
-     * when this comment should be read.
+     * Was pinned here as a SEPARATE PRE-EXISTING DEFECT, "asserted as it actually behaves … will fail loudly the day someone
+     * fixes it": the reserved-*signal* check failed inside the `sendSignalOnOutput` wrapper and the run carried on to the
+     * success path — Error emptied, Success pulsed. Fixed in P109 ISL-051 (row C149, s34) the way the reserved-*output*
+     * check already answered: the refusal is remembered while the code runs and fails the run after it, through its token.
      */
     const h = createHarness('sendSignalOnOutput("done");\n');
+    const sent = jest.spyOn(h.node, 'sendSignalOnOutput');
 
     h.run();
 
     expect(calledWithKey(h.sendWarning, RESERVED_CODE)).toBe(true);
-    expect(h.node.getOutput('error').value).toBe('');
+    expect(h.node.getOutput('error').value).toBe('"done" is one of the node\'s own output signals and cannot be sent from the blocks');
+    expect(sent.mock.calls.map((c) => c[0])).not.toContain('success');
+    // Known-firing beside that absence: the failure is announced on the same channel.
+    expect(sent.mock.calls.map((c) => c[0])).toContain('failure');
   });
 
   it('does NOT clear it while the program is still broken', () => {

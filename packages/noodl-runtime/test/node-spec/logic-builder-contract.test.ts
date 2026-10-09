@@ -166,9 +166,10 @@ const PLANTS: Array<{ rule: string; find: string; replace: string; red: string }
     red: 'a value written to a name the node owns'
   },
   {
-    rule: 'a signal sent to a name the node owns is refused with a Failure',
-    find: "if (RESERVED_OUTPUTS.indexOf(name) !== -1) {\n            self._fail(",
-    replace: "if (false) {\n            self._fail(",
+    // P109 ISL-051 row C149 (s34): the signal side now answers as the value side — the run fails, no Success, no Done.
+    rule: 'a signal sent to a name the node owns fails the run, and the values land',
+    find: 'if (internal.refusedSignal) {',
+    replace: 'if (false) {',
     red: 'a signal sent to a name the node owns'
   },
   {
