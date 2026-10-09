@@ -5,7 +5,7 @@ phase 107 makes possible and ended with a working prototype: a NodeGX graph runn
 specs, drawn as the editor's canvas, lifted into 3D, and editable (add a node, drag a wire, set a property), with
 missions a copy of the graph checks. The prototype is kept in [`prototype/`](prototype/README.md); a second, better one, Under the Lid (2026-10-03), in [`prototype-under-the-lid/`](prototype-under-the-lid/README.md) (reading 12).
 **Status: 🟡 IN PROGRESS — s1 (2026-10-03): OWN-000 built (NEEDS.md, CENSUS.md, the second prototype kept); OWN-002 built (the browser entry, the build, the size); OWN-005 built (`@nodegx/canvas-look`, generated, gated; the prototype reads it); OWN-003 step 1 measured (the runtime loads in a page: 807 KB, 80 types, 65 ms; R1 to ask); OWN-010's ledger half built 2026-10-02. Six rulings to ask (§8).** **Prefix: `OWN`.**
-Task files: [OWN-000](OWN-000-THE-PROTOTYPE-MEASURED.md) … [OWN-010](OWN-010-EVERY-BUG-TEACHES-THE-KIT.md). The board is §6.
+Task files: [OWN-000](OWN-000-THE-PROTOTYPE-MEASURED.md) … [OWN-011](OWN-011-ONE-INSTALL.md). The board is §6.
 
 > "Would someone who wants to view their NodeGX project as some crazy 3D mapping they've invented … would 107 open up
 > the path a bit more easily for their Claude Code to mock them up something … completely independently of NodeGX
@@ -26,6 +26,38 @@ opens their real project in it, and knows it is finished because a suite says so
 already has but keeps inside its own editor: the project format, the node specs, a way to run a graph, the real app's
 preview, the canvas look. The method is the brief their agent reads. The proof is three agents who have never seen
 this repo each building a different editor from the kit alone, and Richard building his own.
+
+## 0.1 The direction, 2026-10-05
+
+Richard set NodeGX's direction on 2026-10-05 in [DIRECTION.md](../../DIRECTION.md). NodeGX is a framework installed from
+npm, and the editor is optional. This phase builds one of its four reasons, do it yourself, and the packages people
+install. Four things follow.
+
+- **R2's recommendation is now the direction.** The kit is published at 0.x. R6 (an open blocker stops a release) still
+  needs its ruling.
+- **The one install command is [OWN-011](OWN-011-ONE-INSTALL.md)** (DIRECTION.md D1, ruled 2026-10-06). It sets up a
+  project, the MCP server and the preview with no editor.
+- **OWN-006's fixtures include projects an agent wrote through the MCP.** "The editor at any time" is a promise. The
+  editor suite is what grades it.
+- **Any editor is a client, a vendor's included.** A polished editor for vibe-coded apps will come from a large vendor.
+  The kit aims to be a format that editor could open, not its rival.
+
+## 0.2 Which model, Opus or Fable (Richard, 2026-10-09)
+
+Richard asked that every session tell him whether he is on the right model for the work, at the start and during.
+
+- **Fable 5.1** (`claude-fable-5-1`) is the most capable model, for hard reasoning and long autonomous work. It costs
+  2.5 times as much as Opus ($10 / $50 per million tokens in / out, against $4 / $20), and its turns are slower. It is worth
+  that where a wrong design is expensive to undo: moving the format across three consumers, a runner graded against 76
+  scenarios, the shape of the suite.
+- **Opus 5.5** (`claude-opus-5-5`) is the default. It is right when the task file already says what to build and a gate says
+  when it is done: a slice with a fixed shape, docs, a census re-run, packaging, the handoff.
+
+**The rule.** Each task file has a **Model** line. A session's first message names the model it is running on (its
+system prompt says which), the model the task's line recommends, and, if they differ, one line on why to switch. That
+comes before the first build step. Mid-session, if the work turns into the other kind (an Opus slice reaches a design
+question the task file did not settle, or a Fable session is down to doc edits), say so once, at that point. Richard
+switches with `/model` and the session carries on. Never stop and wait for the answer.
 
 ## 1. What was measured before scoping
 
@@ -130,6 +162,7 @@ inside the editor or the repo, moved to where an outsider can use it.
 | [OWN-007](OWN-007-THE-BRIEF.md) | **The brief.** The method as one document an agent reads first, served where R3 rules, every sentence earned by a trap someone hit. | docs + MCP | OWN-001…006 |
 | [OWN-008](OWN-008-THREE-STRANGERS.md) | **Three strangers.** Three fresh agents, the kit and a one-line wish each (a 3D map, a children's block editor, a table); each must pass the suite on the todo template. Their questions become sentences in the brief. | proof | OWN-007 |
 | [OWN-009](OWN-009-RICHARDS-OWN.md) | **Richard's own.** Richard asks his own Claude Code for the editor he wants and uses it on a real project. The phase closes on his words. | Richard | OWN-008 |
+| [OWN-011](OWN-011-ONE-INSTALL.md) | **One install.** One command makes a project, the MCP entry and the preview from published packages, with no editor and no checkout; a stranger's run on a clean machine is the test. Added 2026-10-06 (DIRECTION.md D1). | packages + MCP | R2, OWN-001, OWN-002, OWN-004 |
 | [OWN-010](OWN-010-EVERY-BUG-TEACHES-THE-KIT.md) | **Every bug teaches the kit.** A ledger bug about a node, the format or the kit names its package (`kit:`) and, once fixed, the regression that ships in that package's suite (`regression:`); bugs about specced nodes are played through the spec before they are filed; each release's changelog is generated from the ledger and the spec `changes` entries; an open blocker stops a release. The ledger half is built. | ledger + release | the ledger, NSP-010, R2 |
 
 **Order:** OWN-000 → OWN-001, OWN-002 and OWN-005 in parallel → OWN-003 (after R1) → OWN-004 → OWN-006 → OWN-007 →

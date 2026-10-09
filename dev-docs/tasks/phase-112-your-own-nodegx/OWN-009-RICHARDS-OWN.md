@@ -2,6 +2,7 @@
 
 **Opened 2026-10-02.** **Depends on OWN-008.**
 **Status: 📋 not started.** The phase closes on Richard's words.
+**Model:** Richard's choice for his own editor. The session that helps him: Opus. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
 ## 1. The person sentence
 

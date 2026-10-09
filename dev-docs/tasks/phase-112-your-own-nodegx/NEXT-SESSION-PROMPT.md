@@ -60,6 +60,9 @@ is committed now: `fedccd7d0` and `751414e71`).
 
 ## What to do next, in order
 
+**First, in your first message: say which model you are running on and whether the task's Model line says Richard
+should switch** (README §0.2). Say it again if the work changes kind mid-session. Do not wait for an answer.
+
 0. **Tag the backlog** (`node scripts/bugs.js kits --suggest`, OWN-010 §3.2) when a package is touched.
 1. **Ask the six rulings** (README §8), R1 now with OWN-003 §6's numbers. R5 is answered in practice (the package
    exists, private); R2 decides publishing, and the backend-contract dependency (finding 3) is part of that ask.

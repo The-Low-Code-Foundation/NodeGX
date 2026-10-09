@@ -2,6 +2,7 @@
 
 **Opened 2026-10-02.** **Depends on OWN-001 to OWN-006** (it describes them) **and R3** (where it lives).
 **Status: 📋 not started.**
+**Model:** **Opus.** The brief is written from traps already recorded in the task files; it needs care, not new reasoning. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
 ## 1. The person sentence
 

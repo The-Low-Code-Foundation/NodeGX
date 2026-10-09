@@ -5,6 +5,7 @@ will contribute to the continuous improvement of whatever npm thing we create fr
 **Depends on** the ledger (`dev-docs/bugs/`, already built), P107 NSP-010 (a behaviour change is a version), and R2
 (publishing). The first part is built (§6); the rest waits for the packages to exist.
 **Status: 🟡 the ledger half built 2026-10-02; the package half not started.**
+**Model:** **Opus.** Tagging the ledger, the changelog and the release gate are well specified. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
 ## 1. The person sentence
 

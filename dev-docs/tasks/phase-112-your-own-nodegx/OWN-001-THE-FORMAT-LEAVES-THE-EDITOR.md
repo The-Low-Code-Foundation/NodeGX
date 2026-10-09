@@ -3,6 +3,7 @@
 **Opened 2026-10-02.** **Depends on nothing.** P107 NSP-021 §5 names the home: *"The project file format is
 `@nodegx/project-contract`'s; do not grow a second one here."*
 **Status: 📋 not started.**
+**Model:** **Fable** for the slices that rewire the editor and the MCP and carry the two shapes of the format (three consumers, one wrong boundary is costly to undo). **Opus** for the slices whose shape is already fixed: the in-memory files, the write planner, the format page. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
 ## 1. The person sentence
 

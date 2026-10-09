@@ -3,6 +3,8 @@
 **Opened 2026-09-30 (s1), from Richard's ruling that the editor is a target (README §1, R6).**
 **Depends on NSP-018, NSP-020.** The phase's last thesis test, beside NSP-006.
 **Status: 📋 not started.**
+**Shared with phase 112 (2026-10-02):** OWN-000 builds §3.1's census here, in this folder, and OWN-006 runs §3.3's
+round trip as two adapters in its editor suite. Build each once; both phases cite it.
 
 ## 1. The person sentence
 

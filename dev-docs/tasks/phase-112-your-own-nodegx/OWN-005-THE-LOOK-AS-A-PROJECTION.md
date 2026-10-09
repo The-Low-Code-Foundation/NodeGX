@@ -3,6 +3,7 @@
 **Opened 2026-10-02.** **Depends on R5** (README §8). Can start before it: the generator is useful even if the
 package stays private.
 **Status: 🟢 built, s1 (2026-10-03), before R5: the package is private until R5 and R2 rule. Gates in §6.**
+**Model:** Built. A follow-up (a new theme token, the parity gate) is Opus work. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
 ## 1. The person sentence
 

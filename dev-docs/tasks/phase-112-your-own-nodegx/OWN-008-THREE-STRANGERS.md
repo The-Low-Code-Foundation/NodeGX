@@ -2,6 +2,7 @@
 
 **Opened 2026-10-02.** **Depends on OWN-007** (and therefore on everything before it).
 **Status: 📋 not started.** The phase's thesis test.
+**Model:** **Opus, on purpose, for the three strangers**: the test is whether the kit is enough for the model a person has by default. The session that runs them and reads their questions: Opus. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
 ## 1. The person sentence
 

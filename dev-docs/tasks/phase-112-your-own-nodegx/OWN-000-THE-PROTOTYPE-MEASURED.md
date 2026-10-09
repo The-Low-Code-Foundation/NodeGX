@@ -2,6 +2,7 @@
 
 **Opened 2026-10-02.** **Depends on nothing.** Shares its second half with P107 NSP-021 §3.1 (build once, cite twice).
 **Status: 🟢 built, s1 (2026-10-03). The NSP-021 census (§3.3) is being written in P107's folder; see §6.**
+**Model:** Built. A follow-up (re-running the census) is Opus work. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
 ## 1. The person sentence
 

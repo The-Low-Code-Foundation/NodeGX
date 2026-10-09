@@ -2,6 +2,7 @@
 
 **Opened 2026-10-02.** **Depends on OWN-002 and on R1** (README §8).
 **Status: 🟡 step 1 measured, s1 (2026-10-03); R1 to ask with §6. Steps 2–4 wait for the ruling.**
+**Model:** **Fable.** Porting the test helper to a page and naming each divergence from the 76 scenarios is hard reasoning over two runtimes; a wrong reading here becomes every editor's wrong answer. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
 ## 1. The person sentence
 

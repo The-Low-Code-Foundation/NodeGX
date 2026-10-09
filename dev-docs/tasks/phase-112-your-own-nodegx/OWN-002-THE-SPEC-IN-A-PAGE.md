@@ -2,6 +2,7 @@
 
 **Opened 2026-10-02.** **Depends on nothing.**
 **Status: 🟢 built, s1 (2026-10-03). Gates in §6.**
+**Model:** Built. A follow-up (the size budget, a new spec in the browser check) is Opus work. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
 ## 1. The person sentence
 

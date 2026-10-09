@@ -2,6 +2,7 @@
 
 **Opened 2026-10-02.** **Depends on OWN-001** (the in-memory project) **and R4** (README §8).
 **Status: 📋 not started.**
+**Model:** **Opus.** Embedding the preview and feeding it from memory is wiring with a clear finish line. Switch to Fable only if the preview's internals resist and the task turns into design. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
 ## 1. The person sentence
 
