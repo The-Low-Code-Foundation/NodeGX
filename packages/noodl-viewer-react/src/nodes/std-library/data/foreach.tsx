@@ -1060,17 +1060,17 @@ const ForEachDefinition: NodeDefinitionOptions = {
           this._internal.hasScheduledTriggerItemOutputSignal = false;
           const heard = this._internal.pendingItemSignals ?? [];
           this._internal.pendingItemSignals = [];
-          for (const signal of heard) {
-            this._internal.itemActionItemId = signal.model.getId();
+          for (const { name, model, itemNode } of heard) {
+            this._internal.itemActionItemId = model.getId();
             this.flagOutputDirty('itemActionItemId');
-            for (const key in signal.itemNode._outputs) {
+            for (const key in itemNode._outputs) {
               const _output = 'itemOutput-' + key;
               if (this.hasOutput(_output)) {
-                this._internal.itemOutputs[key] = signal.itemNode._outputs[key].value;
+                this._internal.itemOutputs[key] = itemNode._outputs[key].value;
                 this.flagOutputDirty(_output);
               }
             }
-            this.sendSignalOnOutput('itemOutputSignal-' + signal.name);
+            this.sendSignalOnOutput('itemOutputSignal-' + name);
           }
         });
       }
