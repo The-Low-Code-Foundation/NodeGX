@@ -78,6 +78,7 @@ export function planTouchesWhatTheSchemaRouteRefuses(plan: MigrationPlanData): s
       if (own(b.table)) out.push(`${at} changes "${b.table}", one of the backend's own collections`);
       if (b.action === 'renameTable' && (own(b.newName) || b.newName === '_User')) out.push(`${at} renames a collection to "${b.newName}", a name the backend keeps`);
       if (b.table === '_User' && (b.action === 'renameTable' || b.action === 'deleteTable')) out.push(`${at} renames or deletes the accounts`);
+      if (b.table === '_User' && b.action === 'describeTable') out.push(`${at} says again what the accounts are; their words are the backend's`);
       const field = b.action === 'dropColumn' ? b.column : b.action === 'renameColumn' ? b.oldName : undefined;
       if (field !== undefined) {
         if (SYSTEM_FIELDS.includes(field)) out.push(`${at}: "${field}" is set by the backend on every record`);

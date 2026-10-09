@@ -185,7 +185,7 @@ export interface TableSchemaResponse {
 /** `POST /admin/schema` — one of the five mutation actions. */
 export interface SchemaMutationResponse {
   success: boolean;
-  action: 'createTable' | 'addColumn' | 'renameColumn' | 'renameTable' | 'changeColumnType' | 'deleteTable' | 'setIndexes' | 'setChecks' | 'dropColumn';
+  action: 'createTable' | 'addColumn' | 'renameColumn' | 'renameTable' | 'describeTable' | 'changeColumnType' | 'deleteTable' | 'setIndexes' | 'setChecks' | 'dropColumn';
   table: string;
   /** Present on createTable / deleteTable: whether the DDL actually ran. */
   created?: boolean;
@@ -516,7 +516,7 @@ export class ByobAdminRoutes {
         // case where a declaration has CHANGED.
         // P116 ONT-003: a collection made from what a person said carries their sentence. It is
         // kept with the table's declaration on both engines and never interpreted; like the rest
-        // of `createTable` it is written once — a changed description is ONT-007's migration.
+        // of `createTable` it is written once — a changed description is ONT-007's migration (`describeTable`).
         const description = describedAs(body.description).description;
         const created = sm.createTable({
           name: table,
@@ -594,6 +594,28 @@ export class ByobAdminRoutes {
         sendJSON(res, 200, { success: true, action: 'renameTable', table, renamedTo: newName } satisfies SchemaMutationResponse);
         return;
       }
+      case 'describeTable': {
+        // P116 ONT-007 s11: the words on a collection (and its fields), said again — a changed answer
+        // that changes only what the store does not keep. Never interpreted; `_User` keeps the backend's.
+        if (typeof sm.describeTable !== 'function') {
+          throw new HttpError(501, 'This adapter cannot say again what a collection is.');
+        }
+        if (table.startsWith('_')) throw new HttpError(400, `"${table}" is one of the backend's own collections; its words are the backend's.`);
+        const columns = body.columns === undefined ? {} : body.columns;
+        if (!columns || typeof columns !== 'object' || Array.isArray(columns) || !Object.values(columns).every((v) => v === null || typeof v === 'string')) {
+          throw new HttpError(400, 'Say each field\'s words as { "<field>": "<words>" } (null takes them away).');
+        }
+        if (body.description !== null && typeof body.description !== 'string') throw new HttpError(400, 'Say the collection\'s words as text (description), or null to take them away.');
+        try {
+          sm.describeTable(table, body.description as string | null, columns as Record<string, string | null>);
+        } catch (e) {
+          throw new HttpError(400, e instanceof Error ? e.message : String(e));
+        }
+        await this.awaitSchemaQueue(ctx, table);
+        ctx.audit({ describedTable: table, fields: Object.keys(columns) });
+        sendJSON(res, 200, { success: true, action: 'describeTable', table } satisfies SchemaMutationResponse);
+        return;
+      }
       case 'changeColumnType': {
         // AAQ-002. Optional on the interface (an older adapter predates it), so
         // its absence is a 501 rather than an `is not a function` at request time.
@@ -657,7 +679,7 @@ export class ByobAdminRoutes {
         throw new HttpError(
           400,
           `Unknown schema action: ${String(body.action)}. Expected one of createTable, addColumn, ` +
-            'renameColumn, renameTable, changeColumnType, dropColumn, deleteTable, setIndexes, setChecks.'
+            'renameColumn, renameTable, describeTable, changeColumnType, dropColumn, deleteTable, setIndexes, setChecks.'
         );
     }
   }

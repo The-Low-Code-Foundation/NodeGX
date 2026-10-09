@@ -68,7 +68,8 @@ describe('the bombshell — one account becomes several', () => {
   const p = plan(readWorld(BEFORE), readWorld(AFTER));
 
   it('backs up first, makes the records, moves the links, keeps the rules, and drops the old field last', () => {
-    expect(shape(p)).toEqual(['backup', 'createTable:Membership', 'move:linkToRecord', 'setChecks:Membership', 'dropColumn:Person']);
+    // s11: and says again what a person is — the words on Person change with the answer (§6.9 #5).
+    expect(shape(p)).toEqual(['backup', 'createTable:Membership', 'move:linkToRecord', 'setChecks:Membership', 'describeTable:Person', 'dropColumn:Person']);
     expect(p.steps[2]).toEqual({
       move: { linkToRecord: { from: 'Person', field: 'account', record: 'Membership', fromField: 'person', toField: 'account' } },
       says: "every person's account becomes their first 'membership' record; its since, until, role left empty, because nobody said what they were"
@@ -91,7 +92,7 @@ describe('the bombshell — one account becomes several', () => {
 
   it('every schema step is a body the schema route takes', () => {
     // `nodegx-backend/src/server/byob-admin.ts` `mutateSchema`: the actions it answers. The backend spec posts them.
-    const ROUTE = ['createTable', 'addColumn', 'renameColumn', 'changeColumnType', 'dropColumn', 'deleteTable', 'setIndexes', 'setChecks'];
+    const ROUTE = ['createTable', 'addColumn', 'renameColumn', 'renameTable', 'describeTable', 'changeColumnType', 'dropColumn', 'deleteTable', 'setIndexes', 'setChecks'];
     for (const s of p.steps) if ('schema' in s) expect(ROUTE).toContain(s.schema.action);
   });
 });
@@ -183,7 +184,7 @@ describe('the mirror — several accounts become one', () => {
   });
 
   it('adds the link, fills it from the records, then lets the records go', () => {
-    expect(shape(p)).toEqual(['backup', 'addColumn:Person', 'move:recordToLink', 'deleteTable:Membership']);
+    expect(shape(p)).toEqual(['backup', 'addColumn:Person', 'move:recordToLink', 'describeTable:Person', 'deleteTable:Membership']);
   });
 
   it('stops on a person on two accounts or on none, and counts the details it would lose', () => {
@@ -397,7 +398,7 @@ describe('AC3 — a noun renamed keeps its records', () => {
 
   it('a rename and the bombshell in one change: renamed first, then the records made under the new names', () => {
     const p = plan(ONE, renamed(readWorld(AFTER), 'account', 'subscription', 'Subscription'));
-    expect(shape(p)).toEqual(['backup', 'renameTable:Account', 'renameColumn:Person', 'createTable:Membership', 'move:linkToRecord', 'setChecks:Membership', 'dropColumn:Person']);
+    expect(shape(p)).toEqual(['backup', 'renameTable:Account', 'renameColumn:Person', 'createTable:Membership', 'move:linkToRecord', 'setChecks:Membership', 'describeTable:Person', 'dropColumn:Person']);
     expect(p.steps[4]).toMatchObject({ move: { linkToRecord: { from: 'Person', field: 'subscription', record: 'Membership', toField: 'subscription' } } });
     expect(p.checks).toEqual([]);
   });
@@ -499,5 +500,39 @@ describe('s9 — rules put on records that already break them are read before an
     wider.nouns.nouns[1].properties!.find((p) => p.name === 'tier')!.values = ['basic', 'gold', 'platinum'];
     expect(plan(TIERED, wider).checks.map((c) => ('refuse' in c ? c.refuse : c.loses))).toEqual(['outside-list']);
     expect(plan(TIERED, renamed(TIERED, 'account', 'subscription', 'Subscription')).checks).toEqual([]);
+  });
+});
+
+describe('s11 — a changed answer that changes only the words is a step of its own (§6.9 #5)', () => {
+  const ONE = readWorld(BEFORE);
+  it('a noun said again in other words: the backup, then the collection described — nothing else, and no reach', () => {
+    const after = clone(ONE);
+    after.nouns.nouns[0].sentence = 'A person is someone we serve, on the account that pays for them.';
+    const p = plan(ONE, after);
+    expect(shape(p)).toEqual(['backup', 'describeTable:Person']);
+    const step = p.steps[1] as { schema: { action: string; description: string; columns: Record<string, string | null> } };
+    expect(step.schema.description).toBe(p.after.collections.find((c) => c.name === 'Person')!.description);
+    expect(step.schema.description).toContain('someone we serve');
+    expect(step.schema.columns).toEqual({});
+    expect(p.reach).toEqual([]);
+    expect(p.checks).toEqual([]);
+  });
+
+  it('the same world twice says nothing again — the control', () => {
+    expect(shape(plan(ONE, clone(ONE)))).toEqual(['backup']);
+  });
+
+  it("a field's words said again are carried by name, and the collection's words with them", () => {
+    const after = clone(ONE);
+    const rel = after.relations.relations[0] as unknown as Record<string, unknown>;
+    rel.sentence = 'A member is on one account, the one that pays.';
+    const p = plan(ONE, after);
+    const described = p.steps.filter((s) => 'schema' in s && s.schema.action === 'describeTable') as Array<{ schema: { table: string; columns: Record<string, string | null> } }>;
+    expect(described.length).toBeGreaterThan(0);
+    for (const d of described) {
+      const now = p.after.collections.find((c) => c.name === d.schema.table)!;
+      for (const [field, words] of Object.entries(d.schema.columns)) expect(now.columns.find((c) => c.name === field)!.description ?? null).toBe(words);
+    }
+    expect(described.some((d) => Object.keys(d.schema.columns).length > 0)).toBe(true);
   });
 });

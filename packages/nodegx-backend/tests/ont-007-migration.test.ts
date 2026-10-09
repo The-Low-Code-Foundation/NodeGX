@@ -703,9 +703,9 @@ for (const engine of [sqlite(), postgres()]) {
       // `whenTargetGoes`, `setOnce`, `whatStays`… project into the collection's description (ONT-003: the rules
       // the store does not keep, in words). The schema route writes a description once, at `createTable`, and has
       // no action that changes it (byob-admin.ts: "a changed description is ONT-007's migration"). So the plan
-      // has no step for it, the reach no row, and the Schema card keeps the old words. Pinned as failing: this
-      // goes green when a `describeTable` action and its step exist.
-      it.failing('is carried to the collection the backend holds', async () => {
+      // had no step for it, the reach no row, and the Schema card kept the old words. Pinned as failing in s9;
+      // green since s11: `describeTable` on the surface and both engines, and the plan's step for it.
+      it('is carried to the collection the backend holds, and a restart reads it', async () => {
         const h = await engine.make();
         const ctx = onTheRealTables(h.adapter);
         applyWorld(ctx, bombshell.before);
@@ -715,6 +715,7 @@ for (const engine of [sqlite(), postgres()]) {
         const want = bombshell.after.collections.find((c) => c.name === 'Person')!.description;
         expect(want).not.toBe(bombshell.before.collections.find((c) => c.name === 'Person')!.description);
         expect(ctx.schema.getTableSchema('Person')!.description).toBe(want);
+        expect(onTheRealTables((await engine.reopen(h)).adapter).schema.getTableSchema('Person')!.description).toBe(want);
       });
     });
   });

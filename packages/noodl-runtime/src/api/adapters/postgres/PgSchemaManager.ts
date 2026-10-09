@@ -729,6 +729,37 @@ export class PgSchemaManager {
     return true;
   }
 
+  /** P116 ONT-007 s11 — the SQLite manager's `describeTable`: the words, kept and never interpreted. A fresh object (the memo). */
+  describeTable(tableName: string, description: string | null, columns: Record<string, string | null> = {}): boolean {
+    const st = this.s;
+    const schema = st.schemas.get(tableName);
+    if (!schema) throw new Error(`There is no collection called "${tableName}"`);
+    const fresh = freshSchema(schema);
+    const say = (target: { [key: string]: unknown }, words: string | null | undefined): void => {
+      const text = typeof words === 'string' ? words.trim() : '';
+      if (text) target.description = text;
+      else delete target.description;
+    };
+    say(fresh, description);
+    for (const [name, words] of Object.entries(columns)) {
+      const col = (fresh.columns || []).find((c) => c.name === name);
+      if (!col) throw new Error(`"${tableName}" has no field "${name}"`);
+      say(col as unknown as { [key: string]: unknown }, words);
+    }
+    st.schemas.set(tableName, fresh);
+    const snapshot = JSON.stringify(fresh);
+    this.enqueue(
+      `describeTable("${tableName}")`,
+      async () => {
+        await this.pool.run(UPSERT_SCHEMA, [tableName, snapshot]);
+      },
+      () => {
+        st.schemas.set(tableName, schema);
+      }
+    );
+    return true;
+  }
+
   renameColumn(tableName: string, oldName: string, newName: string): boolean {
     if (!newName || !/^[a-zA-Z][a-zA-Z0-9_]*$/.test(newName)) {
       throw new Error('Invalid column name');

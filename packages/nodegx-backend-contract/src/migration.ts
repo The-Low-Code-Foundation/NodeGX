@@ -37,6 +37,7 @@ export type MigrationSchemaBody =
   | { action: 'addColumn'; table: string; column: StorageColumn & { required?: true; description?: string } }
   | { action: 'renameTable'; table: string; newName: string }
   | { action: 'renameColumn'; table: string; oldName: string; newName: string }
+  | { action: 'describeTable'; table: string; description: string; columns: Record<string, string | null> }
   | { action: 'setChecks'; table: string; checks: StorageCheckDecl[] }
   | { action: 'setIndexes'; table: string; indexes: StorageIndexDecl[] }
   | { action: 'dropColumn'; table: string; column: string }
@@ -221,6 +222,10 @@ function applySchema(ctx: MigrationContext, body: MigrationSchemaBody): void {
     case 'renameColumn':
       sm.renameColumn(body.table, body.oldName, body.newName);
       return;
+    case 'describeTable':
+      if (typeof sm.describeTable !== 'function') throw new Error('the schema surface cannot say again what a collection is');
+      sm.describeTable(body.table, body.description, body.columns);
+      return;
     case 'setChecks':
       if (typeof sm.reconcileChecks !== 'function') throw new Error('the schema surface has no reconcileChecks');
       sm.reconcileChecks(body.table, body.checks);
@@ -324,6 +329,7 @@ const SCHEMA_ACTIONS: ReadonlyArray<MigrationSchemaBody['action']> = [
   'addColumn',
   'renameTable',
   'renameColumn',
+  'describeTable',
   'setChecks',
   'setIndexes',
   'dropColumn',

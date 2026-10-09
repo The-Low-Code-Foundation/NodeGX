@@ -263,6 +263,33 @@ for (const engine of ['sqlite', 'postgres'] as const) {
       });
     });
 
+    describe('POST /admin/schema describeTable — the words said again (s11)', () => {
+      let b: Backend;
+      beforeAll(async () => {
+        b = await startBackend(engine);
+        await pushWorld(b, BOMBSHELL.before);
+      });
+      afterAll(() => b.stop());
+      const describedAs = async (table: string) => (await b.req<{ description?: string; columns: Array<{ name: string; description?: string }> }>('GET', `/admin/schema/${table}`)).json;
+
+      it("says the collection's and a field's words again, and null takes a field's away", async () => {
+        const r = await b.req('POST', '/admin/schema', { action: 'describeTable', table: 'Person', description: 'Someone we serve.', columns: { name: 'What they are called.', account: null } });
+        expect(r.status).toBe(200);
+        const now = await describedAs('Person');
+        expect(now.description).toBe('Someone we serve.');
+        expect(now.columns.find((c) => c.name === 'name')!.description).toBe('What they are called.');
+        expect(now.columns.find((c) => c.name === 'account')).not.toHaveProperty('description');
+      });
+
+      it('a field the collection does not have, and the accounts, are 400 in words — nothing changes', async () => {
+        const nope = await b.req<{ error: string }>('POST', '/admin/schema', { action: 'describeTable', table: 'Person', description: 'x', columns: { shoeSize: 'y' } });
+        expect(nope.status).toBe(400);
+        expect(nope.json.error).toBe('"Person" has no field "shoeSize"');
+        expect((await describedAs('Person')).description).toBe('Someone we serve.');
+        expect((await b.req('POST', '/admin/schema', { action: 'describeTable', table: '_User', description: 'x' })).status).toBe(400);
+      });
+    });
+
     describe('the rename moves the rules, and the running backend judges by them', () => {
       let b: Backend;
       const session: Record<string, Record<string, string>> = {};

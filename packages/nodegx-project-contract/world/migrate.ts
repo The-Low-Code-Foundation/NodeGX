@@ -172,6 +172,8 @@ export type SchemaBody =
   | { action: 'addColumn'; table: string; column: Omit<WorldColumn, 'kind' | 'relation'> }
   | { action: 'renameTable'; table: string; newName: string }
   | { action: 'renameColumn'; table: string; oldName: string; newName: string }
+  /** s11: the words on a kept collection, and on its kept fields whose words changed (`null`: none now). */
+  | { action: 'describeTable'; table: string; description: string; columns: Record<string, string | null> }
   | { action: 'setChecks'; table: string; checks: WorldCheck[] }
   | { action: 'setIndexes'; table: string; indexes: WorldIndex[] }
   | { action: 'dropColumn'; table: string; column: string }
@@ -509,6 +511,7 @@ function planBetween(before: WorldFiles, after: WorldFiles, sb: WorldSchema, sa:
   const created: MigrationStep[] = [];
   const added: MigrationStep[] = [];
   const rules: MigrationStep[] = [];
+  const described: MigrationStep[] = [];
   const dropped: MigrationStep[] = [];
   const deleted: MigrationStep[] = [];
   const ba = new Map(sb.collections.map((c) => [c.name, c]));
@@ -570,6 +573,16 @@ function planBetween(before: WorldFiles, after: WorldFiles, sb: WorldSchema, sa:
         checks.push({ refuse: 'duplicates', collection: c.name, fields: [...i.fields], says: `two ${wordsOf(c)} that share ${i.fields.join(' and ')} cannot both keep it` });
       }
     }
+    // s11 (§6.9 #5): a changed answer that changes only what the store does not keep changes only the words
+    // — the collection's, or a kept field's. Said again by a step of its own, or the Schema card keeps the old
+    // sentence. No reach row: nothing a component, a rule or a verb reads has moved.
+    const columns: Record<string, string | null> = {};
+    for (const col of c.columns) {
+      const old = was.columns.find((x) => x.name === col.name);
+      if (old && (old.description ?? null) !== (col.description ?? null)) columns[col.name] = col.description ?? null;
+    }
+    if ((was.description ?? '') !== (c.description ?? '') || Object.keys(columns).length)
+      described.push({ schema: { action: 'describeTable', table: c.name, description: c.description, columns }, says: `say what ${wordsOf(c)} are in the words said now` });
     if (fields.size) reach.push({ collection: c.name, words: wordsOf(c), fields: [...fields], how: 'changed' });
   }
   for (const c of sb.collections) {
@@ -587,6 +600,7 @@ function planBetween(before: WorldFiles, after: WorldFiles, sb: WorldSchema, sa:
     ...added,
     ...moves,
     ...rules,
+    ...described,
     ...dropped,
     ...deleted
   ];

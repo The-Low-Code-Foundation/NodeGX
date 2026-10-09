@@ -492,6 +492,35 @@ class SchemaManager {
   }
 
   /**
+   * P116 ONT-007 s11: say again what a collection — and any of its fields — is, in the words the
+   * person said now. The words are kept with the declaration and never interpreted; `createTable`
+   * writes them once, and this is the one thing that changes them. An empty or null text takes the
+   * words away. Throws on a collection or a field the declaration does not have.
+   */
+  describeTable(tableName: string, description: string | null, columns: Record<string, string | null> = {}): boolean {
+    const schema = this.getTableSchema(tableName);
+    if (!schema) throw new Error(`There is no collection called "${tableName}"`);
+    const fresh = freshSchema(schema);
+    const say = (target: { [key: string]: unknown }, words: string | null | undefined): void => {
+      const text = typeof words === 'string' ? words.trim() : '';
+      if (text) target.description = text;
+      else delete target.description;
+    };
+    say(fresh, description);
+    for (const [name, words] of Object.entries(columns)) {
+      const col = (fresh.columns || []).find((c) => c.name === name);
+      if (!col) throw new Error(`"${tableName}" has no field "${name}"`);
+      say(col as unknown as { [key: string]: unknown }, words);
+    }
+    this.ensureSchemaTable();
+    this.db
+      .prepare(`UPDATE "_Schema" SET "schema" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "name" = ?`)
+      .run(JSON.stringify(fresh), tableName);
+    this._schemaCache.set(tableName, fresh);
+    return true;
+  }
+
+  /**
    * Rename a column in a table (SQLite 3.25.0+)
    *
    * @returns Whether column was renamed

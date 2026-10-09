@@ -357,7 +357,7 @@ export interface StorageSupabaseExportOptions {
 }
 
 /**
- * The schema surface — 17 names, every one called by `nodegx-backend` today.
+ * The schema surface — 18 names, every one called by `nodegx-backend` today.
  *
  * This replaces `persistence/SchemaManagerLike.ts`, whose own docstring asked
  * to be replaced ("it is a stand-in, and it says so on purpose"). The list is
@@ -402,6 +402,14 @@ export interface IStorageSchema {
    * (`_`-prefixed). Optional — `byob-admin.ts` answers 501 without it.
    */
   renameTable?(oldName: string, newName: string): boolean;
+  /**
+   * P116 ONT-007 s11: say again what a collection — and any of its fields — is, in the person's
+   * words now (`description`; `columns` by field name). Kept with the declaration and never
+   * interpreted, like `createTable`'s `description`, which writes them once; this is what changes
+   * them. Empty or null takes the words away. Throws on a collection or a field it does not
+   * have. Optional — `byob-admin.ts` answers 501 without it.
+   */
+  describeTable?(table: string, description: string | null, columns?: Record<string, string | null>): boolean;
   /**
    * BMG-003: drop a column (a Relation's junction table goes with it). Throws
    * `code: 'COLUMN_IN_USE'` naming the declared index, check or search opt-in
