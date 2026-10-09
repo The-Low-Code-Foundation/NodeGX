@@ -143,6 +143,12 @@ type State = {
   name: unknown;
   /** `_internal.useRoutes` (:279-288) — `!!value` */
   useRoutes: boolean;
+  /** v17, row C139 — `_internal.keepPagesWhenUnmounted` (Keep Pages When Unmounted) — `!!value` */
+  keepPages: boolean;
+  /** v17, row C139 — while unmounted, something that resets a mounted stack happened (Components written, a Name with another key) */
+  resetOwed: boolean;
+  /** v17, row C139 — the address when Mounted went off */
+  addressAtUnmount: string | undefined;
   /** the handler's key this stack is registered under, or none (`_pageStacks[name]`) */
   regKey: string | null;
   /** the handler's queue (`_navigationQueue`): requests to a name no stack held */
@@ -203,7 +209,8 @@ export const ComponentStack = defineNode({
   // v14 (P109 ISL-048, s31): the browser's Back or Forward resets only a stack with Use Routes on (row C119)
   // v15 (P109 ISL-048, s31): a Name written that keeps the stack's key does not reset it (row C113)
   // v16 (P109 ISL-048, s33): a reset counts its pages with Stack Depth — a stack mounted at a frame's paint says Children Count in that frame (row C114)
-  version: 16,
+  // v17 (P109 ISL-048, s33): Keep Pages When Unmounted — a remount keeps the pages unless a mounted stack would have reset meanwhile (row C139)
+  version: 17,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx',
   needs: ['person', 'clock', 'location', 'project'],
   worldPool: {
@@ -223,6 +230,9 @@ export const ComponentStack = defineNode({
     isMounted: false,
     name: undefined,
     useRoutes: false,
+    keepPages: false,
+    resetOwed: false,
+    addressAtUnmount: undefined,
     regKey: null,
     waiting: [],
     pages: undefined,
@@ -259,6 +269,8 @@ export const ComponentStack = defineNode({
     name: { type: 'string', default: 'Main', coerce: 'none', displayName: 'Name', group: 'General', description: 'Name the Push and Pop nodes address this stack by; leave it as Main if there is only one', portability: 'logic', examples: ['Main', 'Other', '', null] },
     // :279-288
     useRoutes: { type: 'boolean', default: false, coerce: 'none', displayName: 'Use Routes', group: 'General', description: 'Puts the top component in the browser URL, so back and forward move through the stack', portability: 'logic' },
+    // v17, row C139 (P109 ISL-048) — read when the stack mounts
+    keepPagesWhenUnmounted: { type: 'boolean', default: false, coerce: 'none', displayName: 'Keep Pages When Unmounted', group: 'General', description: "Keeps the stack's components, and what is on them, while Mounted is off, so turning it back on shows the one that was on top. Its Components or Name changing meanwhile, or (with Use Routes) Back or Forward, still starts it again. Off: turning Mounted back on starts at the start component", portability: 'logic' },
     // :303-314
     pages: { type: 'proplist', coerce: 'none', displayName: 'Components', group: 'Components', description: 'The components this stack can show, and which of them it starts on', portability: 'logic', examples: [THREE, THREE.slice(0, 1), THREE.slice(0, 2), THREE.slice(1), []] },
     // :315-326
@@ -312,6 +324,8 @@ export const ComponentStack = defineNode({
           deregister(w);
           w.st.name = v;
           if (w.st.isMounted) register(w);
+          // v17, row C139 — a mounted stack would have reset: the next mount does
+          else w.st.resetOwed = true;
         },
         view
       ),
@@ -323,11 +337,15 @@ export const ComponentStack = defineNode({
           // a value that is not a list is none (row C109, fixed in P109 ISL-048)
           w.st.pages = Array.isArray(v) ? v : undefined;
           if (w.st.isMounted) scheduleReset(w);
+          // v17, row C139 — a mounted stack would have reset: the next mount does
+          else w.st.resetOwed = true;
         },
         view
       ),
     // :279-288 — stored; read by the next reset and the next URL pushed
     useRoutes: (s, v, _i, view) => run(s, (w) => void (w.st.useRoutes = !!v), view),
+    // v17, row C139 — stored; read when the stack mounts
+    keepPagesWhenUnmounted: (s, v, _i, view) => run(s, (w) => void (w.st.keepPages = !!v), view),
     // :315-326, :463-479 — every Reset of the frame is answered by the one reset at the frame's end
     reset: (s, _i, view) => ({ ...run(s, (w) => (scheduleReset(w), void (w.st.resetTokens += 1)), view), outcome: 'pending' }),
     // react-component-node.ts :2310-2320
@@ -738,8 +756,11 @@ const norm = (name: unknown): unknown => name || 'Main';
 /** `_pageStacks[name]` — an object key */
 const keyOf = (name: unknown): string => String(name);
 
-/** `registerPageStack` (:62-104): under its name; what waited for that name runs (a first push resets first), else a reset */
-function register(w: Work): void {
+/**
+ * `registerPageStack` (:62-104): under its name; what waited for that name runs (a first push resets first), else a reset. On a mount
+ * that keeps the pages (v17, row C139) neither reset runs (`reset` returns for the handler's call): what waited lands on the kept pages.
+ */
+function register(w: Work, keep = false): void {
   const name = norm(w.st.name);
   w.st.regKey = keyOf(name);
   let hasReset = false;
@@ -752,14 +773,14 @@ function register(w: Work): void {
       continue;
     }
     if (e.op === 'push' && !hasReset) {
-      replay.push({ kind: 'reset', tokens: 0 });
+      if (!keep) replay.push({ kind: 'reset', tokens: 0 });
       hasReset = true;
     }
     replay.push({ kind: e.op, v: e.v });
     hasNavigated = true;
   }
   w.st.waiting = rest;
-  if (!hasNavigated) replay.push({ kind: 'reset', tokens: 0 });
+  if (!hasNavigated && !keep) replay.push({ kind: 'reset', tokens: 0 });
   for (const item of replay) enqueue(w, item);
 }
 /** `deregisterPageStack` (:106-121), with the current name */
@@ -783,13 +804,20 @@ function paint(w: Work): boolean {
     w.st.onPage = true;
     w.st.isMounted = true;
     w.emit.push('didMount');
-    register(w);
+    // v17, row C139 — Keep Pages When Unmounted: a stack holding its pages, owing no reset, the address where it was left (Use Routes)
+    const addressMoved = w.st.useRoutes && w.href !== w.st.addressAtUnmount;
+    const keep = w.st.keepPages && w.st.stack.length > 0 && !w.st.resetOwed && !addressMoved;
+    w.st.resetOwed = false;
+    register(w, keep);
     return true;
   }
   if (!w.st.mounted && w.st.onPage) {
     w.st.onPage = false;
     w.st.isMounted = false;
     w.emit.push('willUnmount');
+    // v17, row C139 — what the next mount compares against
+    w.st.resetOwed = false;
+    w.st.addressAtUnmount = w.href;
     deregister(w);
   }
   return false;

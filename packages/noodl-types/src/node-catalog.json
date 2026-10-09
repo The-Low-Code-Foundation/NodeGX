@@ -22605,6 +22605,18 @@
           "index": 100015
         },
         {
+          "name": "keepPagesWhenUnmounted",
+          "displayName": "Keep Pages When Unmounted",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": false,
+          "description": "Keeps the stack's components, and what is on them, while Mounted is off, so turning it back on shows the one that was on top. Its Components or Name changing meanwhile, or (with Use Routes) Back or Forward, still starts it again. Off: turning Mounted back on starts at the start component"
+        },
+        {
           "name": "mounted",
           "displayName": "Mounted",
           "group": "General",

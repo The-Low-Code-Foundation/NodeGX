@@ -287,11 +287,13 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
   },
   // s56 — the Component Stack (component-stack.ts): everything is the node's own — its pages, its queue, the handler's names; the frame's
   // end runs its callbacks (a reset, the callers' requests), the transition's tick, and the paint, which registers and so resets
+  // v17 (s33, row C139) — Keep Pages When Unmounted, a reset owed while off and the address at the unmount are the node's; the paint
+  // (a mount, an unmount) clears or records the last two
   'Page Stack': {
-    node: ['mounted', 'isMounted', 'name', 'useRoutes', 'regKey', 'waiting', 'pages', 'pageInfo', 'startPageId', 'stack', 'children', 'deleted', 'nextPage', 'running', 'queue', 'busy', 'hops', 'owed', 'callbacks', 'resetScheduled', 'resetTokens', 'countLate', 'top', 'depth', 'count'],
+    node: ['mounted', 'isMounted', 'name', 'useRoutes', 'keepPages', 'resetOwed', 'addressAtUnmount', 'regKey', 'waiting', 'pages', 'pageInfo', 'startPageId', 'stack', 'children', 'deleted', 'nextPage', 'running', 'queue', 'busy', 'hops', 'owed', 'callbacks', 'resetScheduled', 'resetTokens', 'countLate', 'top', 'depth', 'count'],
     attr: { onPage },
     held: {},
-    frameEnd: ['isMounted', 'regKey', 'waiting', 'stack', 'children', 'deleted', 'nextPage', 'running', 'queue', 'busy', 'hops', 'owed', 'callbacks', 'resetScheduled', 'resetTokens', 'countLate', 'top', 'depth', 'count']
+    frameEnd: ['isMounted', 'resetOwed', 'addressAtUnmount', 'regKey', 'waiting', 'stack', 'children', 'deleted', 'nextPage', 'running', 'queue', 'busy', 'hops', 'owed', 'callbacks', 'resetScheduled', 'resetTokens', 'countLate', 'top', 'depth', 'count']
   },
   // s57 — the Page Router (page-router.ts): everything is the node's own — its pages, its queue, the handler's names, the navigates
   // waiting out their millisecond; the frame's end runs its callbacks (a reset, the Navigates' hand-ons) and the paint, which

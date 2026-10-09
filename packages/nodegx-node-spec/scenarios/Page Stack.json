@@ -5243,6 +5243,396 @@
     ]
   },
   {
+    "name": "Keep Pages When Unmounted ticked: Mounted off and on keeps the pages pushed — Stack Depth stays 2, nothing rebuilt (v17, row C139)",
+    "because": "P107-C139, ruled \"Keep them only when an option is ticked\" — navigation-stack.tsx `didMount`: the handler's mount reset is skipped",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "keepPagesWhenUnmounted": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "Keep Pages When Unmounted off (the default): Mounted off and on starts again at the start component (row C139)",
+    "because": "NavigationHandler.registerPageStack — a mount resets; the option is off by default",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "Keep Pages When Unmounted ticked, Components written while off: the remount starts again (v17, row C139)",
+    "because": "a mounted stack resets when its Components are written; one that was off owes that reset to its next mount",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "keepPagesWhenUnmounted": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "pages",
+        "value": [
+          {
+            "id": "p1",
+            "label": "Home"
+          },
+          {
+            "id": "p2",
+            "label": "Detail"
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "Keep Pages When Unmounted ticked, Name moved to another key while off: the remount starts again (v17, row C139)",
+    "because": "a mounted stack registered under a new key resets; one that was off owes it to its next mount",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "keepPagesWhenUnmounted": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "name",
+        "value": "Other"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "Keep Pages When Unmounted ticked, a push that waited while off lands on the kept pages (v17, row C139)",
+    "because": "registerPageStack replays what waited; on a mount that keeps the pages there is no reset before it",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "keepPagesWhenUnmounted": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "Keep Pages When Unmounted ticked with Use Routes, the address where it was left: the remount keeps the pages (v17, row C139)",
+    "because": "navigation-stack.tsx `didMount` — the address at the mount is the one at the unmount",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "keepPagesWhenUnmounted": true,
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "location": "https://app.example/#/home"
+    }
+  },
+  {
+    "name": "Keep Pages When Unmounted ticked with Use Routes, a Back while off: the remount starts again at the page in the address (v17, row C139)",
+    "because": "a mounted stack with Use Routes resets on popstate; one that was off did not hear it, so the moved address resets it at the mount",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "keepPagesWhenUnmounted": true,
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "traverse",
+        "value": "#/home"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "location": "https://app.example/#/home"
+    }
+  },
+  {
     "name": "ROUTES: placed at #/detail — the start page is the page in the URL: Detail, Stack Depth 1",
     "because": "resetAsync :523-531 matchPageFromUrl (:683-742): the hash's path against each page's pattern (its label, lowercased)",
     "params": {

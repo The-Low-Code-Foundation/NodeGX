@@ -122,6 +122,14 @@ interface PageStackInstance extends ReactNodeInstance {
     isTransitioning?: boolean;
     name?: string;
     useRoutes?: boolean;
+    /** P107-C139 — Keep Pages When Unmounted. */
+    keepPagesWhenUnmounted?: boolean;
+    /** P107-C139 — while unmounted, something happened that resets a mounted stack: the next mount resets. */
+    resetOwed?: boolean;
+    /** P107-C139 — the address when Mounted went off, to tell a Back or Forward the stack did not hear. */
+    addressAtUnmount?: string;
+    /** P107-C139 — the mount is keeping the pages: the handler's mount reset is skipped. */
+    keepAtMount?: boolean;
     pages?: PageListItem[];
     startPageId?: string;
     startPage?: string;
@@ -200,6 +208,17 @@ const PageStack = {
       if (this._internal.isMounted) return;
       this._internal.isMounted = true;
 
+      // P109 ISL-048 (P107-C139, ruled "Keep them only when an option is ticked"): with Keep Pages When Unmounted ticked, a stack
+      // that still holds its pages comes back as it was — unless, while it was off, something happened that resets a mounted
+      // stack: its Components written, its Name moved to another key, or (with Use Routes) the address moved by a Back or Forward
+      // it could not hear. Off, or with nothing kept, the handler's mount reset builds the start component, as before.
+      const internal = this._internal;
+      // Bare `location`, as `_getLocationPath` reads it (the SSR server shims globalThis.location)
+      const addressMoved =
+        !!internal.useRoutes && typeof location !== 'undefined' && location.href !== internal.addressAtUnmount;
+      internal.keepAtMount = !!internal.keepPagesWhenUnmounted && internal.stack.length > 0 && !internal.resetOwed && !addressMoved;
+      internal.resetOwed = false;
+
       // didMount also fires server-side (triggerDidMount during SSR); the URL
       // listeners are browser-only, the stack registration is not.
       if (typeof window !== 'undefined') {
@@ -214,10 +233,14 @@ const PageStack = {
       }
 
       this._registerPageStack();
+      internal.keepAtMount = false;
     };
 
     this.props.willUnmount = () => {
       this._internal.isMounted = false;
+      // P107-C139 — what the next mount compares against
+      this._internal.resetOwed = false;
+      this._internal.addressAtUnmount = typeof location !== 'undefined' ? location.href : undefined;
 
       if (typeof window !== 'undefined') {
         window.removeEventListener('popstate', this.onScheduleReset);
@@ -284,6 +307,9 @@ const PageStack = {
 
         if (this._internal.isMounted) {
           this._registerPageStack();
+        } else {
+          // P107-C139 — a mounted stack would have reset: the next mount does
+          this._internal.resetOwed = true;
         }
       }
     },
@@ -304,6 +330,19 @@ const PageStack = {
       default: false,
       set: function (this: PageStackInstance, value) {
         this._internal.useRoutes = !!value;
+      }
+    },
+    // P109 ISL-048 (P107-C139), ruled 2026-10-08 "Keep them only when an option is ticked" — beside Use Routes, the other choice
+    // about what the stack remembers. Read when the stack mounts (`didMount` above).
+    keepPagesWhenUnmounted: {
+      type: 'boolean',
+      displayName: 'Keep Pages When Unmounted',
+      description:
+        "Keeps the stack's components, and what is on them, while Mounted is off, so turning it back on shows the one that was on top. Its Components or Name changing meanwhile, or (with Use Routes) Back or Forward, still starts it again. Off: turning Mounted back on starts at the start component",
+      group: 'General',
+      default: false,
+      set: function (this: PageStackInstance, value) {
+        this._internal.keepPagesWhenUnmounted = !!value;
       }
     },
     clip: {
@@ -331,6 +370,9 @@ const PageStack = {
         this._internal.pages = Array.isArray(value) ? value : undefined;
         if (this._internal.isMounted) {
           this.scheduleReset();
+        } else {
+          // P107-C139 — a mounted stack would have reset: the next mount does
+          this._internal.resetOwed = true;
         }
       }
     },
@@ -523,6 +565,8 @@ const PageStack = {
       return group;
     },
     reset(this: PageStackInstance, outcomes?: OutcomeToken[]) {
+      // P107-C139 — the handler's mount reset (no outcomes; a Reset press always has them) on a mount that keeps the pages
+      if (outcomes === undefined && this._internal.keepAtMount) return;
       this._internal.asyncQueue.enqueue(this.resetAsync.bind(this, outcomes));
     },
     async resetAsync(this: PageStackInstance, outcomes?: OutcomeToken[]) {
