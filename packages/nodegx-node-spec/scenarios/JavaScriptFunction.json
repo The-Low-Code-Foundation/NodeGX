@@ -246,6 +246,29 @@
     ]
   },
   {
+    "name": "a throw of null or undefined is a throw: Error \"null\", Failure, and a Run answered failure (row C147)",
+    "because": "simplejavascript.ts :653-721 — the logger (utils.ts) read the value's prototype inside the catch and threw, so nothing was reported; fixed in P109 ISL-051",
+    "params": {
+      "functionScript": "if (Inputs.a) throw undefined;\nthrow null"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "set": "in-a",
+        "value": 1
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
     "name": "a script that will not compile: Error is the engine's message, Failure at load, a Run answered failure",
     "because": "simplejavascript.ts :534-561, :818-842",
     "params": {

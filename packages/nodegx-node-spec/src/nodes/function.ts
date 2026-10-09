@@ -41,6 +41,8 @@
  *   - ERROR IS NEVER CLEARED BY A RUN THAT WORKS (:645-652 — nothing writes `lastError` on success): a working run leaves the last
  *     failure on Error. Setting the Script empties it but SENDS `undefined` (:771-775, clearRunDiagnostics), which is never sent, so a
  *     wire on Error keeps the old message (row C146 — the D25 / C47 / C144 family, ruled "clear it to blank text").
+ *   - A THROW OF NOTHING (row C147, fixed in P109 ISL-051): `throw null` / `throw undefined` is a throw like any other — Error "null"
+ *     or "undefined". The runtime's logger read the value's prototype inside the catch and threw, so the node reported nothing.
  *
  * THE SPEC'S AWAIT. A fixture awaits only a value that has already settled (`await null`), which resumes inside the settle's own
  * yield (the runtime target's settle: frame, yield, drain) — what comes before and after it lands in the same settle. So the spec
@@ -80,7 +82,7 @@ export const FUNCTION_FIXTURES = {
   throws: 'throw new Error("boom " + Inputs.a)',
   /** a throw after an await, and a write before it: the write lands, then the failure — the same settle */
   late: 'await null;\nOutputs.late = Inputs.a;\nif (Inputs.b) throw new Error("late")',
-  /** a throw that is not an Error: Error is its text (a `throw null` / `throw undefined` is row C147: it reports nothing) */
+  /** a throw that is not an Error: Error is its text (`throw null` too — row C147, fixed in P109 ISL-051) */
   bare: 'throw "bare " + Inputs.a',
   /** a script that will not compile */
   broken: 'Outputs.sum = (',

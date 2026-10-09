@@ -28,7 +28,7 @@ import { ScriptFileError, scriptAlias, scriptUsesOf, type ScriptFiles, type Scri
 import { functionScriptPortNames } from '@nodegx/project-contract/function-ports';
 
 const JavascriptNodeParser = require('../../javascriptnodeparser');
-const { logJavaScriptNodeError } = require('../../utils');
+const { logJavaScriptNodeError, thrownMessage } = require('../../utils');
 
 /** One row of the `scriptInputs`/`scriptOutputs` proplist the author edits. */
 interface ScriptPortSpec {
@@ -653,7 +653,7 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
       } catch (e) {
         logJavaScriptNodeError(e);
 
-        const rawMessage = e && e.message ? String(e.message) : String(e);
+        const rawMessage = thrownMessage(e);
 
         /**
          * FUN-007 §2 and §3.
@@ -686,7 +686,8 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
           this.context.editorConnection.sendWarning(this.nodeScope.componentOwner.name, this.id, RUN_WARNING_KEY, {
             showGlobally: true,
             message: runtimeErrorMessage(rawMessage, position, hint),
-            stack: e.stack,
+            // P107-C147: `throw null` has no stack, and reading one off it threw inside this catch
+            stack: e ? e.stack : undefined,
             line: position ? position.line : undefined,
             column: position ? position.column : undefined,
             hint
