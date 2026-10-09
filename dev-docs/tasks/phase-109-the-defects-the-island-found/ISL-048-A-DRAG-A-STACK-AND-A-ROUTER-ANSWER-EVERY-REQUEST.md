@@ -1,6 +1,6 @@
 # ISL-048 — A drag, a stack and a router answer every request
 
-**Status: 🟡 s31 (2026-10-08): 11 of 27 fixed — the Component Stack's never-answered six (C107–C112, §9); all four asks ruled (C103, C104 as recommended in session; C120, C126 on P107's rulings page). s30 (2026-10-08): 5 of 27 fixed — C101, C115, C116, C117, C118 (§8); C119–C127 joined from P107 s58; 4 to ask (C103, C104, C120, C126).** Scoped s30 at `a6caefdde`. **Source:** 27 bugs P107 NSP-016 filed (18 at scoping, C119–C127 from s58) in s55–s57 after
+**Status: 🟡 s32 (2026-10-09): 25 of 29 fixed — C138 `40c9fc310` (§11); left C139, C114, and C120, C126 (P107's world). s31 (2026-10-08): 11 of 27 fixed — the Component Stack's never-answered six (C107–C112, §9); all four asks ruled (C103, C104 as recommended in session; C120, C126 on P107's rulings page). s30 (2026-10-08): 5 of 27 fixed — C101, C115, C116, C117, C118 (§8); C119–C127 joined from P107 s58; 4 to ask (C103, C104, C120, C126).** Scoped s30 at `a6caefdde`. **Source:** 27 bugs P107 NSP-016 filed (18 at scoping, C119–C127 from s58) in s55–s57 after
 ISL-038 was scoped (the Drag C101–C106, §7.16; the Component Stack C107–C114, §7.17; the Page Router C115–C118, §7.18), handed to
 P109 under R16 ("Hand all to P109"): 1 high · 7 medium · 10 low, **2 to ask** (C103, C104). **Side:** noodl-viewer-react
 (`components/visual/Drag/Drag.tsx`, `nodes/navigation/navigation-stack.tsx`, `router.tsx`, `router-handler.ts`), the Drag,
@@ -56,7 +56,7 @@ the fix has two reasonable answers that a person would see differently: ask in p
 | [P107-C125](../../bugs/p107-c125-a-page-path-of-null-empties-a-component-stack.md) | Component Stack | low | fixed `230565982` | as proposed | A Component Stack page whose Path is wired null empties the stack at every reset that reaches it |
 | [P107-C126](../../bugs/p107-c126-a-component-stacks-reset-shows-the-url-page-not-the-start-page.md) | Component Stack | low | scheduled | ruled (as leaned) | With Use Routes, a Component Stack's Reset (and a Components edit) rebuilds the page in the URL, not the start page its Reset port promises |
 | [P107-C127](../../bugs/p107-c127-the-catalog-does-not-know-a-component-stack-page-has-a-path.md) | catalog | low | fixed `df238bd79` | as proposed | The node catalog does not know a Component Stack page has a Path — `pagePath-<pageId>` is missing, so the MCP cannot set one |
-| [P107-C138](../../bugs/p107-c138-a-drag-start-drag-x-that-arrives-as-text-joins-with-the-movement.md) | Drag | low | scheduled | ruled | A Drag's Start Drag X (or Y) that arrives over a wire as text joins with the movement as text — a 10 px drag from "50" puts the element at "5010" |
+| [P107-C138](../../bugs/p107-c138-a-drag-start-drag-x-that-arrives-as-text-joins-with-the-movement.md) | Drag | low | **fixed** `40c9fc310` | ruled | A Drag's Start Drag X (or Y) that arrives over a wire as text joins with the movement as text — a 10 px drag from "50" puts the element at "5010" |
 | [P107-C139](../../bugs/p107-c139-a-component-stack-turned-off-with-mounted-loses-its-pages.md) | Component Stack | low | scheduled | ruled | A Component Stack turned off with Mounted and back on comes back at its start page — the pages pushed, and anything typed on them, are gone; ruled: keep them when an option is ticked |
 
 **Added s30 (P107 s58, `841f0dfe3`):** C119–C127, the Component Stack with Use Routes (NSP-016 §7.19) and one catalog row — 4
@@ -217,3 +217,19 @@ option is ticked; ruled against the lean — a new input needs a name, a descrip
 **Left (5 of 29):** C120 and C126 (ruled; wait on P107's world — history back and replace), C114 (Children Count a frame late after
 a remount: read why first), C138 and C139 (ruled).
 **The export:** not checked (P18's).
+
+## 11. Session 32 (2026-10-09) — the Drag reads text as a number
+
+**AC1:** C138 re-measured by its scenario on the runtime at `f1ade5ba9` (the runtime joined "50" with the movement, as Drag v2
+modelled). Built in worktree `p109-isl049`, landed by compare-and-swap.
+
+| Row | Commit | What changed | Grade |
+|---|---|---|---|
+| C138 | `40c9fc310` | Start Drag X / Y read text as a number, in an `onChange` (the generated `inputProps` setter overwrites a node's own `set`); a number, NaN included, goes on as it came. Drag spec **v3**; the old scenario renamed, and a twin with a list as Start Drag X added — the only way left to see Constrain to parent with no layout | runtime 23 / 23 at seeds 13 and 20732; interpreter mutants 0 survivors at both (without the twin, `useParentBounds` drop-set survived at 20732); control red on exactly the C138 scenario; viewer Drag tests 88 / 88 |
+
+**What s32 found:** a fix that makes a value well-formed can stop the only scenario that showed a neighbouring port: the no-layout
+bounds code is an identity on numbers, so Constrain to parent was graded only through text joining. Sweep the mutants at both seeds
+after every fix, not only the one the row names.
+
+**Left (4):** C139 (ruled: a new Component Stack option that keeps its pages through Mounted off and on), C114 (Children Count a frame
+late after a remount — read why first), C120 and C126 (wait on P107's world: the browser's history stepping back, an entry replaced).

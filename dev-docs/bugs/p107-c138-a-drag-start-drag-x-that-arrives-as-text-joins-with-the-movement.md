@@ -2,6 +2,7 @@
 id: P107-C138
 title: A Drag's Start Drag X (or Y) that arrives over a wire as text joins with the movement as text — a 10 px drag from "50" puts the element at "5010"
 status: fixed
+commit: 40c9fc310
 phase: P109
 task: ISL-048
 severity: low
