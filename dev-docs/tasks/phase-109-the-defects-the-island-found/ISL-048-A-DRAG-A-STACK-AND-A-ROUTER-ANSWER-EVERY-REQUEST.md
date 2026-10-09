@@ -1,6 +1,6 @@
 # ISL-048 — A drag, a stack and a router answer every request
 
-**Status: 🟡 s34 (2026-10-09): 27 of 29 fixed — C139 `c22c9aceb` (§12.2: Keep Pages When Unmounted, Page Stack v17); left C120, C126 (P107's world). s33 (2026-10-09): 26 of 29 fixed — C114 `4e2d846d5` (§12); RouterNavigate v3 `491e8af72` (§12, C118's debt); left C139, and C120, C126 (P107's world). s32 (2026-10-09): 25 of 29 fixed — C138 `40c9fc310` (§11); left C139, C114, and C120, C126 (P107's world). s31 (2026-10-08): 11 of 27 fixed — the Component Stack's never-answered six (C107–C112, §9); all four asks ruled (C103, C104 as recommended in session; C120, C126 on P107's rulings page). s30 (2026-10-08): 5 of 27 fixed — C101, C115, C116, C117, C118 (§8); C119–C127 joined from P107 s58; 4 to ask (C103, C104, C120, C126).** Scoped s30 at `a6caefdde`. **Source:** 27 bugs P107 NSP-016 filed (18 at scoping, C119–C127 from s58) in s55–s57 after
+**Status: ✅ s36 (2026-10-09): 29 of 29 fixed — C120 and C126 `08d62276b` as ruled, on P107's session history (`b7950a3b9`); Page Stack spec v18 (§13). s34 (2026-10-09): 27 of 29 fixed — C139 `c22c9aceb` (§12.2: Keep Pages When Unmounted, Page Stack v17); left C120, C126 (P107's world). s33 (2026-10-09): 26 of 29 fixed — C114 `4e2d846d5` (§12); RouterNavigate v3 `491e8af72` (§12, C118's debt); left C139, and C120, C126 (P107's world). s32 (2026-10-09): 25 of 29 fixed — C138 `40c9fc310` (§11); left C139, C114, and C120, C126 (P107's world). s31 (2026-10-08): 11 of 27 fixed — the Component Stack's never-answered six (C107–C112, §9); all four asks ruled (C103, C104 as recommended in session; C120, C126 on P107's rulings page). s30 (2026-10-08): 5 of 27 fixed — C101, C115, C116, C117, C118 (§8); C119–C127 joined from P107 s58; 4 to ask (C103, C104, C120, C126).** Scoped s30 at `a6caefdde`. **Source:** 27 bugs P107 NSP-016 filed (18 at scoping, C119–C127 from s58) in s55–s57 after
 ISL-038 was scoped (the Drag C101–C106, §7.16; the Component Stack C107–C114, §7.17; the Page Router C115–C118, §7.18), handed to
 P109 under R16 ("Hand all to P109"): 1 high · 7 medium · 10 low, **2 to ask** (C103, C104). **Side:** noodl-viewer-react
 (`components/visual/Drag/Drag.tsx`, `nodes/navigation/navigation-stack.tsx`, `router.tsx`, `router-handler.ts`), the Drag,
@@ -277,3 +277,44 @@ the address agreeing.
 grades nothing, so the controls are behavioural mutants of the fixed file.
 
 **Left (2):** C120 and C126 (P107's world: history back, an entry replaced).
+
+## 13. Session 36 (2026-10-09) — the browser's history: C120 and C126, as ruled
+
+P107 added the world's session history in `b7950a3b9`: `history.replaceState`, and `history.back()` landing at the next yield as a
+`popstate`. Both rows were then built as ruled on P107's rulings page, in worktree `p109-isl049`, and landed by compare-and-swap.
+
+| Row | Commit | What changed | Grade |
+|---|---|---|---|
+| C120 | `08d62276b` | A push records whether it made a history entry. Its Pop's end calls `history.back()` over that entry and counts the Back as the stack's own (`ownBacks`), so its `popstate` resets nothing. A page whose push made no entry has the address replaced. A Replace uses `history.replaceState`. On any `popstate`, a stack whose address names the page and parameters on top does nothing (`_addressShowsTop`, as the Page Router keeps a page it already shows). | below |
+| C126 | `08d62276b` | A Reset press or a Components edit builds the Start Page (`pendingResetToStart` beside the frame's tokens), and pushes its URL when the address names another page. The mount and the browser's Back or Forward still read the address. | below |
+
+**Why two guards on `popstate`.** A `popstate` reaches every listener on the page: the Page Router and every other Component Stack.
+A parent stack with Use Routes rebuilds on any reset, which would delete the child that popped. A shared "this one is ours" mark
+cannot be told apart on the runtime target, where the world hands each listener its own event object. And a microtask clear would
+fail in a browser, where microtasks run between listeners. So each stack counts its own Backs, and every stack also keeps a page
+whose address it already shows.
+
+**Page Stack spec v18.** 13 scenarios renamed to what they now do. 5 URL read-backs (C121, C122 ×2 and its control, C123) moved
+from a Reset to the person's Back and Forward: under C126 a Reset no longer reads the address, so they would have stopped grading
+their rows. 2 scenarios (C123's label start page, the `''` path) moved their URL write from the Pop to the Reset's address write.
+4 added: a Pop over a page pushed with Use Routes off (replace), the stack's own Back with the address changed before it lands
+(ownBacks), a Back to the address already on top (nothing resets), and a Reset at the start page's own address (nothing written).
+
+**Grades.** Runtime at seeds 13, 20732, 20735 and 7: 162/162 scenarios, 200/200 sequences, 0 divergences. Mutants 846/847 (868/869 at
+20735), 0 survivors, the one left the known equivalent (a placing on a node placed off the page). Interpreter mutants at 13 and
+20732: 846/847, 0 survivors, 0 unreached. **Control** (HEAD's runtime file against v18): red on exactly 16 scenarios, the 13 the
+rulings move and 3 of the 4 added (the fourth, nothing written, is graded by the mutants). The 5 read-backs pass under HEAD, as
+they should. Router, RouterNavigate, PageStackNavigate, PageStackNavigateBack and PageStackNavigateToPath conform on the runtime at 13.
+Viewer 1,837/1,837; spec package tsc 0, viewer tsc 0. Re-run after the rebase onto `68b4a766b`: Page Stack at 13 the same.
+
+**Found and fixed beside it.** The page model's pinned `WORLD_KINDS` (`tests/page-model.helper.ts`) had no `popstate`. It was red on
+`cline-dev` from `b7950a3b9`, before this change. Sorted in, since this spec is the kind's first caller, and the two new state
+fields were classified as the node's own. Page model 42/42.
+
+**Consequence recorded, not asked.** A person's Back or Forward to an entry whose address names the page on top now keeps the
+stack rather than rebuilding it. A browser reaches that only through two entries with one address, which the stack no longer writes
+(C126 writes only when the address moves). **Edge recorded, not built:** a Back of the stack's own that lands on the first entry
+fires nothing, so its count waits for the next `popstate`. The world can make this (a traverse to the current address alone resets
+its history); a browser cannot from the stack's own pushes.
+
+**ISL-048: 29 of 29.** ✅

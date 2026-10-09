@@ -21,3 +21,11 @@ grades it in-process (ts-jest on `src`), so its spec is green while the people's
 Fix, short term: `npm run build` in `packages/noodl-mcp` from a clean tree. Proposed lasting fix (about the
 size of ISL-014's): the server compares its own build time with its `src` inputs at start-up, and says so in
 `get_project_info` when it is older, as the kit reader does.
+
+**Rebuilt 2026-10-09 19:35 (s36), the short-term fix; the lasting one is still open.** `dist/noodl-mcp.cjs` was built at `08d62276b`
+from a clean worktree. A worktree's `dist/noodl-mcp.cjs`, `cloud-bundle.cjs`, `node-catalog.json` and `nodegx-observe.cjs` are
+symlinks into the primary's `dist/`, so `npm run build` there writes the primary's files. 🔴 That also rebuilt `cloud-bundle.cjs`
+from the worktree's `src/cloud/bundleEntry.js`, which lacks the primary's uncommitted P78 D84 lines (logs to stderr, so the
+bundler's stdout stays one JSON document). It was rebuilt again from the primary's sources at once. Smoke test: on a format-4
+copy whose load logs `[NDA-017] migrated …`, the line went to stderr and stdout parsed as JSON. Running servers keep the old
+bundle until their sessions restart.

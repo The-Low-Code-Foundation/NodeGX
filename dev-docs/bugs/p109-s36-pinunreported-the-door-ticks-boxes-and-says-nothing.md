@@ -2,6 +2,7 @@
 id: P109-S36-PINUNREPORTED
 title: The door ticks "run on value change" boxes in an old project and its write response says nothing
 status: fixed
+commit: c5be13465
 severity: medium
 area: mcp / create_component, update_component, apply_plan
 found: P109 ISL-018 AC5 s36, 2026-10-09
