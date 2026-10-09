@@ -149,6 +149,16 @@ export const LAYOUT_ROLES: Readonly<Record<string, LayoutRole>> = {
 /** The classes whose ports never carry a role: the model cannot say them (RESEARCH-LAYOUT-SEMANTICS.md §2). */
 export const UNMAPPED_CLASSES: readonly Portability[] = ['layout-not-shared', 'web-only'];
 
+/**
+ * Unmapped ports MEASURED to move no box of their own, so a node that sets one is still graded. Each carries its evidence.
+ * They keep no role and stay `web-only`: what they change is the content size the model takes as given.
+ */
+export const BOX_NEUTRAL: Readonly<Record<string, string>> = {
+  as:
+    "the Tag: the runtime's sheet resets a Text's margins (`.ndl-visual-text { margin: 0 }`), and a Group's section, nav or span lays out as its div does; " +
+    'an h1–h6 changes only the browser font, the Text content (layout-fixtures/measured/tags.json, s71)'
+};
+
 export interface LayoutOfOptions {
   /**
    * How the node's parent stacks it: the runtime's `parentLayout`. `undefined` is a node whose parent gave none (the
@@ -266,7 +276,7 @@ export function layoutOf(spec: { readonly inputs: Decls }, params: Readonly<Reco
     if (role) byRole.set(role, name);
     const cls = (decl as { portability?: Portability }).portability;
     const set = params[name] !== undefined && params[name] !== (decl as { default?: unknown }).default;
-    if (set && cls && !role && (UNMAPPED_CLASSES.includes(cls) || cls === 'layout-expressible')) {
+    if (set && cls && !role && !(name in BOX_NEUTRAL) && (UNMAPPED_CLASSES.includes(cls) || cls === 'layout-expressible')) {
       outside.push(`${name} (${cls}) is set`);
     }
   }

@@ -1,0 +1,129 @@
+{
+  "name": "min-content-floor",
+  "rule": "a shrinking fill (100% in a row) beside a fixed sibling: holding a 150 px child it stops at that min-content (the model's floor is 0); holding a Text it shrinks, since the Text breaks anywhere",
+  "nodes": [
+    {
+      "id": "rows",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "rowGap": {
+          "value": 10,
+          "unit": "px"
+        }
+      },
+      "children": [
+        {
+          "id": "r1",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 300,
+              "unit": "px"
+            },
+            "height": {
+              "value": 60,
+              "unit": "px"
+            },
+            "flexDirection": "row"
+          },
+          "children": [
+            {
+              "id": "f1",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 200,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 50,
+                  "unit": "px"
+                }
+              }
+            },
+            {
+              "id": "g1",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 100,
+                  "unit": "%"
+                },
+                "height": {
+                  "value": 50,
+                  "unit": "px"
+                }
+              },
+              "children": [
+                {
+                  "id": "k1",
+                  "type": "Group",
+                  "parameters": {
+                    "sizeMode": "explicit",
+                    "width": {
+                      "value": 150,
+                      "unit": "px"
+                    },
+                    "height": {
+                      "value": 20,
+                      "unit": "px"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "r2",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 300,
+              "unit": "px"
+            },
+            "height": {
+              "value": 60,
+              "unit": "px"
+            },
+            "flexDirection": "row"
+          },
+          "children": [
+            {
+              "id": "f2",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 250,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 50,
+                  "unit": "px"
+                }
+              }
+            },
+            {
+              "id": "t2",
+              "type": "Text",
+              "parameters": {
+                "text": "Antidisestablishmentarianism"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

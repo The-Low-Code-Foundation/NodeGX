@@ -1,0 +1,74 @@
+{
+  "name": "centred-shell",
+  "rule": "a padded column centred across, holding a 100% Group with a max width that centres itself (34 + 51 placements in the templates): the max clamps at 1280, not at 390",
+  "nodes": [
+    {
+      "id": "shell",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "column",
+        "alignItems": "center",
+        "paddingTop": {
+          "value": 24,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 24,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 24,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 24,
+          "unit": "px"
+        }
+      },
+      "children": [
+        {
+          "id": "inner",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "contentHeight",
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "maxWidth": {
+              "value": 600,
+              "unit": "px"
+            },
+            "alignX": "center",
+            "flexDirection": "column",
+            "rowGap": {
+              "value": 8,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "title",
+              "type": "Text",
+              "parameters": {
+                "text": "A heading"
+              }
+            },
+            {
+              "id": "body",
+              "type": "Text",
+              "parameters": {
+                "text": "A sentence long enough to wrap onto a second line inside four hundred pixels of column, and then a third."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

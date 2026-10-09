@@ -1,0 +1,1014 @@
+{
+  "fixture": "header-row",
+  "measuredWith": "scripts/node-spec/layout-measure.js (header: what each field is)",
+  "viewports": {
+    "1280x800": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "consoleErrors": [],
+      "nodes": [
+        {
+          "id": "page",
+          "type": "Page",
+          "parent": "c8bb6f9f-bced-b608-7774-0c5dc72680e1",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 800
+          },
+          "size": {
+            "w": 1280,
+            "h": 800
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-2c5kktzbp1w",
+          "scroll": {
+            "sw": 1280,
+            "sh": 800,
+            "cw": 1280,
+            "ch": 800
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "rows",
+          "type": "Group",
+          "parent": "page",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 360,
+            "h": 82
+          },
+          "size": {
+            "w": 360,
+            "h": 82
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-pt2h9k2s1e",
+          "scroll": {
+            "sw": 360,
+            "sh": 82,
+            "cw": 360,
+            "ch": 82
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "hr",
+          "type": "Group",
+          "parent": "rows",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 360,
+            "h": 40
+          },
+          "size": {
+            "w": 360,
+            "h": 40
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-fh8w99eoqj",
+          "scroll": {
+            "sw": 360,
+            "sh": 40,
+            "cw": 360,
+            "ch": 40
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "avatar",
+          "type": "Group",
+          "parent": "hr",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 40,
+            "h": 40
+          },
+          "size": {
+            "w": 40,
+            "h": 40
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-midw50kz1z",
+          "scroll": {
+            "sw": 40,
+            "sh": 40,
+            "cw": 40,
+            "ch": 40
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "words",
+          "type": "Group",
+          "parent": "hr",
+          "box": {
+            "x": 52,
+            "y": 0,
+            "w": 254.75,
+            "h": 40
+          },
+          "size": {
+            "w": 255,
+            "h": 40
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-pt2h9k2s1e",
+          "scroll": {
+            "sw": 255,
+            "sh": 40,
+            "cw": 255,
+            "ch": 40
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 52,
+            "y": 0
+          }
+        },
+        {
+          "id": "name",
+          "type": "Text",
+          "parent": "words",
+          "box": {
+            "x": 52,
+            "y": 0,
+            "w": 254.75,
+            "h": 20
+          },
+          "size": {
+            "w": 255,
+            "h": 20
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-visual-text  ndl-d-2433hheeg5x",
+          "scroll": {
+            "sw": 255,
+            "sh": 20,
+            "cw": 255,
+            "ch": 20
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "role",
+          "type": "Text",
+          "parent": "words",
+          "box": {
+            "x": 52,
+            "y": 20,
+            "w": 254.75,
+            "h": 20
+          },
+          "size": {
+            "w": 255,
+            "h": 20
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-visual-text  ndl-d-2433hheeg5x",
+          "scroll": {
+            "sw": 255,
+            "sh": 20,
+            "cw": 255,
+            "ch": 20
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 20
+          }
+        },
+        {
+          "id": "when",
+          "type": "Text",
+          "parent": "hr",
+          "box": {
+            "x": 318.75,
+            "y": 10,
+            "w": 41.25,
+            "h": 20
+          },
+          "size": {
+            "w": 41,
+            "h": 20
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-visual-text  ndl-d-1la2vkdeab5",
+          "scroll": {
+            "sw": 41,
+            "sh": 20,
+            "cw": 41,
+            "ch": 20
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 318.75,
+            "y": 10
+          }
+        },
+        {
+          "id": "sb",
+          "type": "Group",
+          "parent": "rows",
+          "box": {
+            "x": 0,
+            "y": 56,
+            "w": 360,
+            "h": 26
+          },
+          "size": {
+            "w": 360,
+            "h": 26
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-fh8w99eoqj",
+          "scroll": {
+            "sw": 360,
+            "sh": 26,
+            "cw": 360,
+            "ch": 26
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 56
+          }
+        },
+        {
+          "id": "sbt",
+          "type": "Text",
+          "parent": "sb",
+          "box": {
+            "x": 0,
+            "y": 59,
+            "w": 62.4375,
+            "h": 20
+          },
+          "size": {
+            "w": 62,
+            "h": 20
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-visual-text  ndl-d-1la2vkdeab5",
+          "scroll": {
+            "sw": 62,
+            "sh": 20,
+            "cw": 62,
+            "ch": 20
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 3
+          }
+        },
+        {
+          "id": "sbb",
+          "type": "net.noodl.controls.button",
+          "parent": "sb",
+          "box": {
+            "x": 295.734375,
+            "y": 56,
+            "w": 64.265625,
+            "h": 26
+          },
+          "size": {
+            "w": 64,
+            "h": 26
+          },
+          "padding": [
+            5,
+            20,
+            5,
+            20
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-controls-button ndl-d-242neady18a",
+          "scroll": {
+            "sw": 64,
+            "sh": 26,
+            "cw": 64,
+            "ch": 26
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 295.734375,
+            "y": 0
+          }
+        }
+      ]
+    },
+    "390x844": {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "consoleErrors": [],
+      "nodes": [
+        {
+          "id": "page",
+          "type": "Page",
+          "parent": "c8bb6f9f-bced-b608-7774-0c5dc72680e1",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 390,
+            "h": 844
+          },
+          "size": {
+            "w": 390,
+            "h": 844
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-2c5kktzbp1w",
+          "scroll": {
+            "sw": 390,
+            "sh": 844,
+            "cw": 390,
+            "ch": 844
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "rows",
+          "type": "Group",
+          "parent": "page",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 360,
+            "h": 82
+          },
+          "size": {
+            "w": 360,
+            "h": 82
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-pt2h9k2s1e",
+          "scroll": {
+            "sw": 360,
+            "sh": 82,
+            "cw": 360,
+            "ch": 82
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "hr",
+          "type": "Group",
+          "parent": "rows",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 360,
+            "h": 40
+          },
+          "size": {
+            "w": 360,
+            "h": 40
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-fh8w99eoqj",
+          "scroll": {
+            "sw": 360,
+            "sh": 40,
+            "cw": 360,
+            "ch": 40
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "avatar",
+          "type": "Group",
+          "parent": "hr",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 40,
+            "h": 40
+          },
+          "size": {
+            "w": 40,
+            "h": 40
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-midw50kz1z",
+          "scroll": {
+            "sw": 40,
+            "sh": 40,
+            "cw": 40,
+            "ch": 40
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "words",
+          "type": "Group",
+          "parent": "hr",
+          "box": {
+            "x": 52,
+            "y": 0,
+            "w": 254.75,
+            "h": 40
+          },
+          "size": {
+            "w": 255,
+            "h": 40
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-pt2h9k2s1e",
+          "scroll": {
+            "sw": 255,
+            "sh": 40,
+            "cw": 255,
+            "ch": 40
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 52,
+            "y": 0
+          }
+        },
+        {
+          "id": "name",
+          "type": "Text",
+          "parent": "words",
+          "box": {
+            "x": 52,
+            "y": 0,
+            "w": 254.75,
+            "h": 20
+          },
+          "size": {
+            "w": 255,
+            "h": 20
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-visual-text  ndl-d-2433hheeg5x",
+          "scroll": {
+            "sw": 255,
+            "sh": 20,
+            "cw": 255,
+            "ch": 20
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "role",
+          "type": "Text",
+          "parent": "words",
+          "box": {
+            "x": 52,
+            "y": 20,
+            "w": 254.75,
+            "h": 20
+          },
+          "size": {
+            "w": 255,
+            "h": 20
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-visual-text  ndl-d-2433hheeg5x",
+          "scroll": {
+            "sw": 255,
+            "sh": 20,
+            "cw": 255,
+            "ch": 20
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 20
+          }
+        },
+        {
+          "id": "when",
+          "type": "Text",
+          "parent": "hr",
+          "box": {
+            "x": 318.75,
+            "y": 10,
+            "w": 41.25,
+            "h": 20
+          },
+          "size": {
+            "w": 41,
+            "h": 20
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-visual-text  ndl-d-1la2vkdeab5",
+          "scroll": {
+            "sw": 41,
+            "sh": 20,
+            "cw": 41,
+            "ch": 20
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 318.75,
+            "y": 10
+          }
+        },
+        {
+          "id": "sb",
+          "type": "Group",
+          "parent": "rows",
+          "box": {
+            "x": 0,
+            "y": 56,
+            "w": 360,
+            "h": 26
+          },
+          "size": {
+            "w": 360,
+            "h": 26
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-fh8w99eoqj",
+          "scroll": {
+            "sw": 360,
+            "sh": 26,
+            "cw": 360,
+            "ch": 26
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 56
+          }
+        },
+        {
+          "id": "sbt",
+          "type": "Text",
+          "parent": "sb",
+          "box": {
+            "x": 0,
+            "y": 59,
+            "w": 62.4375,
+            "h": 20
+          },
+          "size": {
+            "w": 62,
+            "h": 20
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-visual-text  ndl-d-1la2vkdeab5",
+          "scroll": {
+            "sw": 62,
+            "sh": 20,
+            "cw": 62,
+            "ch": 20
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 3
+          }
+        },
+        {
+          "id": "sbb",
+          "type": "net.noodl.controls.button",
+          "parent": "sb",
+          "box": {
+            "x": 295.734375,
+            "y": 56,
+            "w": 64.265625,
+            "h": 26
+          },
+          "size": {
+            "w": 64,
+            "h": 26
+          },
+          "padding": [
+            5,
+            20,
+            5,
+            20
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-controls-button ndl-d-242neady18a",
+          "scroll": {
+            "sw": 64,
+            "sh": 26,
+            "cw": 64,
+            "ch": 26
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 295.734375,
+            "y": 0
+          }
+        }
+      ]
+    }
+  }
+}

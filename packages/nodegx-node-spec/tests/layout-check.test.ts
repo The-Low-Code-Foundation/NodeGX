@@ -51,7 +51,16 @@ interface Recording {
  * Mismatches measured and not yet fixed — `<fixture>/<viewport>/<child>` → the row. Each is a defect in the runtime or a
  * named limit of the model; this list is what step 5 found.
  */
-const KNOWN: Record<string, string> = {};
+const FLOOR = "named limit (layout.ts header): flexbox's automatic minimum — a shrinking fill stops at its min-content, the model's floor is 0";
+const C154 = 'P107-C154: on the native-scroll path a percent along a scroll grows into the visible height (the iScroll path and the model: its content)';
+const KNOWN: Record<string, string> = {
+  'min-content-floor/1280x800/g1': FLOOR,
+  'min-content-floor/390x844/g1': FLOOR,
+  'scroll-percent-content/1280x800/pct': C154,
+  'scroll-percent-content/1280x800/fix': C154,
+  'scroll-percent-content/390x844/pct': C154,
+  'scroll-percent-content/390x844/fix': C154
+};
 
 const fixtures: Fixture[] = fs
   .readdirSync(DIR)
@@ -74,6 +83,22 @@ function grade(fixture: Fixture, vpName: string, rec: Recording['viewports'][str
   const out: Graded = { mismatches: {}, matched: [], reported: [] };
   const measured = new Map(rec.nodes.map((n) => [n.id, n]));
   const viewport = { width: rec.viewport.width, height: rec.viewport.height };
+  // A node's content: a LEAF's is its measured box (the model does not measure text); a node with children of its own
+  // has the content its children give it (`hugSize`), never its own measured box — that box is the answer being graded,
+  // and a `fill` or a percent the model reads as "its content" would match it whatever the browser did (s71: a percent
+  // child in a scroll measured 140 high round 40 px of content, and matched).
+  const contentOf = (node: FixtureNode, parentAxis: LayoutAxis | undefined): { width: number; height: number } => {
+    const m = measured.get(node.id);
+    if (!m?.box) throw new Error(`${fixture.name}/${vpName}: ${node.id} was not measured`);
+    const self = layoutOf(specs[node.type], node.parameters ?? {}, { parentAxis, viewport });
+    const kids = (node.children ?? []).filter((c) => layoutOf(specs[c.type], c.parameters ?? {}, { viewport }).present);
+    if (kids.length === 0 || !self.parent) return { width: m.box.w, height: m.box.h };
+    const axis = self.parent.axis;
+    return hugSize(
+      self.parent,
+      kids.map((c) => ({ ...layoutOf(specs[c.type], c.parameters ?? {}, { parentAxis: axis, viewport }).child, content: contentOf(c, axis) }))
+    );
+  };
   const visit = (node: FixtureNode, parentAxis: LayoutAxis | undefined) => {
     const spec = specs[node.type];
     if (!spec) throw new Error(`${fixture.name}: no spec for ${node.type}`);
@@ -90,7 +115,7 @@ function grade(fixture: Fixture, vpName: string, rec: Recording['viewports'][str
       const present = placed.filter((p) => p.l.present);
       const children: LayoutChild[] = present.map((p) => {
         if (!p.m?.box) throw new Error(`${fixture.name}/${vpName}: ${p.c.id} was not measured`);
-        return { ...p.l.child, content: { width: p.m.box.w, height: p.m.box.h } };
+        return { ...p.l.child, content: contentOf(p.c, self.parent!.axis) };
       });
       const result = layoutChildren({ ...self.parent, width: m.box.w, height: m.box.h }, children);
       present.forEach((p, i) => {
@@ -135,7 +160,7 @@ describe('NSP-016 AC4 — the model against the measured runtime, fixture by fix
 
   test('the mismatches are the KNOWN rows — a new one fails, and so does a known one that stopped', () => {
     if (process.env.NSP_LAYOUT_SHOW) console.log([...Object.entries(all.mismatches).map(([k, v]) => `MISMATCH ${k}: ${v}`), ...all.reported.map((r) => `REPORTED ${r}`), `matched ${all.matched.length}`].join('\n'));
-    expect(all.mismatches).toEqual(KNOWN);
+    expect(Object.keys(all.mismatches).sort()).toEqual(Object.keys(KNOWN).sort());
   });
 
   test('something was graded, beside the mismatches', () => {
@@ -180,5 +205,11 @@ describe('the runtime defects the measuring found (open rows, still firing)', ()
     // s3 lies at 200–300 (220–320 natively), below the 200 px scroller: the native path hides it, this path draws it
     const outside = (m: Map<string, Measured>) => m.get('s3')!.inParent!.y >= m.get('scroller')!.box!.h;
     expect([outside(native), native.get('s3')!.hit, outside(iscroll), iscroll.get('s3')!.hit]).toEqual([true, false, true, true]);
+  });
+
+  test('P107-C154 — with Native platform scroll on (the default), a percent child of a scrolling column grows into the 200 px it shows: 140 high round 40 px of content', () => {
+    const native = read('scroll-percent-content');
+    // the model's reading (unbounded: a percent there is its content) is the iScroll path's, measured s71 by hand: 40 high, the next child at 40
+    expect([native.get('pct')!.box!.h, native.get('pin')!.box!.h, native.get('fix')!.inParent!.y]).toEqual([140, 40, 150]);
   });
 });

@@ -1,0 +1,80 @@
+{
+  "name": "text-column",
+  "rule": "content children in a column (the templates' second shape: a padded column with a gap, Texts at 100% wide and their own height; 46 parents in 8 templates): the Text's height is the browser's, its place is the model's",
+  "nodes": [
+    {
+      "id": "col",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 400,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "paddingTop": {
+          "value": 16,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 16,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 16,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 16,
+          "unit": "px"
+        },
+        "rowGap": {
+          "value": 8,
+          "unit": "px"
+        }
+      },
+      "children": [
+        {
+          "id": "short",
+          "type": "Text",
+          "parameters": {
+            "text": "Hello"
+          }
+        },
+        {
+          "id": "long",
+          "type": "Text",
+          "parameters": {
+            "text": "A sentence long enough to wrap onto a second line inside four hundred pixels of column, and then a third."
+          }
+        },
+        {
+          "id": "hugged",
+          "type": "Text",
+          "parameters": {
+            "text": "Hug me",
+            "sizeMode": "contentSize"
+          }
+        },
+        {
+          "id": "centred",
+          "type": "Text",
+          "parameters": {
+            "text": "Centred",
+            "sizeMode": "contentSize",
+            "alignX": "center"
+          }
+        },
+        {
+          "id": "righted",
+          "type": "Text",
+          "parameters": {
+            "text": "Right",
+            "sizeMode": "contentSize",
+            "alignX": "right"
+          }
+        }
+      ]
+    }
+  ]
+}

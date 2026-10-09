@@ -1,0 +1,564 @@
+{
+  "fixture": "page-shell",
+  "measuredWith": "scripts/node-spec/layout-measure.js (header: what each field is)",
+  "viewports": {
+    "1280x800": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "consoleErrors": [],
+      "nodes": [
+        {
+          "id": "page",
+          "type": "Page",
+          "parent": "dd59fd03-e4b2-fb2e-e81f-0f25a381a48e",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 800
+          },
+          "size": {
+            "w": 1280,
+            "h": 800
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-2c5kktzbp1w",
+          "scroll": {
+            "sw": 1280,
+            "sh": 800,
+            "cw": 1280,
+            "ch": 800
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "pg",
+          "type": "Group",
+          "parent": "page",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 800
+          },
+          "size": {
+            "w": 1280,
+            "h": 800
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-pt2h9k2s1e",
+          "scroll": {
+            "sw": 1280,
+            "sh": 800,
+            "cw": 1280,
+            "ch": 800
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "head",
+          "type": "Group",
+          "parent": "pg",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 32
+          },
+          "size": {
+            "w": 1280,
+            "h": 32
+          },
+          "padding": [
+            12,
+            0,
+            0,
+            12
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-midw50kz1z",
+          "scroll": {
+            "sw": 1280,
+            "sh": 32,
+            "cw": 1280,
+            "ch": 32
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "ht",
+          "type": "Text",
+          "parent": "head",
+          "box": {
+            "x": 12,
+            "y": 12,
+            "w": 1268,
+            "h": 20
+          },
+          "size": {
+            "w": 1268,
+            "h": 20
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-visual-text  ndl-d-2433hheeg5x",
+          "scroll": {
+            "sw": 1268,
+            "sh": 20,
+            "cw": 1268,
+            "ch": 20
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 12,
+            "y": 12
+          }
+        },
+        {
+          "id": "foot",
+          "type": "Group",
+          "parent": "pg",
+          "box": {
+            "x": 0,
+            "y": 768,
+            "w": 1280,
+            "h": 32
+          },
+          "size": {
+            "w": 1280,
+            "h": 32
+          },
+          "padding": [
+            0,
+            0,
+            12,
+            12
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-midw50kz1z",
+          "scroll": {
+            "sw": 1280,
+            "sh": 32,
+            "cw": 1280,
+            "ch": 32
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 768
+          }
+        },
+        {
+          "id": "ft",
+          "type": "Text",
+          "parent": "foot",
+          "box": {
+            "x": 12,
+            "y": 768,
+            "w": 1268,
+            "h": 20
+          },
+          "size": {
+            "w": 1268,
+            "h": 20
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-visual-text  ndl-d-2433hheeg5x",
+          "scroll": {
+            "sw": 1268,
+            "sh": 20,
+            "cw": 1268,
+            "ch": 20
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 12,
+            "y": 0
+          }
+        }
+      ]
+    },
+    "390x844": {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "consoleErrors": [],
+      "nodes": [
+        {
+          "id": "page",
+          "type": "Page",
+          "parent": "dd59fd03-e4b2-fb2e-e81f-0f25a381a48e",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 390,
+            "h": 844
+          },
+          "size": {
+            "w": 390,
+            "h": 844
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-2c5kktzbp1w",
+          "scroll": {
+            "sw": 390,
+            "sh": 844,
+            "cw": 390,
+            "ch": 844
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "pg",
+          "type": "Group",
+          "parent": "page",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 390,
+            "h": 844
+          },
+          "size": {
+            "w": 390,
+            "h": 844
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-pt2h9k2s1e",
+          "scroll": {
+            "sw": 390,
+            "sh": 844,
+            "cw": 390,
+            "ch": 844
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "head",
+          "type": "Group",
+          "parent": "pg",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 390,
+            "h": 32
+          },
+          "size": {
+            "w": 390,
+            "h": 32
+          },
+          "padding": [
+            12,
+            0,
+            0,
+            12
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-midw50kz1z",
+          "scroll": {
+            "sw": 390,
+            "sh": 32,
+            "cw": 390,
+            "ch": 32
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "ht",
+          "type": "Text",
+          "parent": "head",
+          "box": {
+            "x": 12,
+            "y": 12,
+            "w": 378,
+            "h": 20
+          },
+          "size": {
+            "w": 378,
+            "h": 20
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-visual-text  ndl-d-2433hheeg5x",
+          "scroll": {
+            "sw": 378,
+            "sh": 20,
+            "cw": 378,
+            "ch": 20
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 12,
+            "y": 12
+          }
+        },
+        {
+          "id": "foot",
+          "type": "Group",
+          "parent": "pg",
+          "box": {
+            "x": 0,
+            "y": 812,
+            "w": 390,
+            "h": 32
+          },
+          "size": {
+            "w": 390,
+            "h": 32
+          },
+          "padding": [
+            0,
+            0,
+            12,
+            12
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-midw50kz1z",
+          "scroll": {
+            "sw": 390,
+            "sh": 32,
+            "cw": 390,
+            "ch": 32
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 812
+          }
+        },
+        {
+          "id": "ft",
+          "type": "Text",
+          "parent": "foot",
+          "box": {
+            "x": 12,
+            "y": 812,
+            "w": 378,
+            "h": 20
+          },
+          "size": {
+            "w": 378,
+            "h": 20
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-visual-text  ndl-d-2433hheeg5x",
+          "scroll": {
+            "sw": 378,
+            "sh": 20,
+            "cw": 378,
+            "ch": 20
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 12,
+            "y": 0
+          }
+        }
+      ]
+    }
+  }
+}

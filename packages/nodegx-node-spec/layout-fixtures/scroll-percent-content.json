@@ -1,0 +1,76 @@
+{
+  "name": "scroll-percent-content",
+  "rule": "a percent height inside a scrolling column, where the percent child has content of its own (40 px) and room is left over: unbounded (the model), it is its content; bounded, it would grow",
+  "nodes": [
+    {
+      "id": "sc",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "scrollEnabled": true,
+        "rowGap": {
+          "value": 10,
+          "unit": "px"
+        }
+      },
+      "children": [
+        {
+          "id": "pct",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 50,
+              "unit": "%"
+            }
+          },
+          "children": [
+            {
+              "id": "pin",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 80,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 40,
+                  "unit": "px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "fix",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 50,
+              "unit": "px"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
