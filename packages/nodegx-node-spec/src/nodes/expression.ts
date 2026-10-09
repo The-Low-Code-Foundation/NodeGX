@@ -43,12 +43,23 @@
  *     writes Error as blank text and sends it, once; a later one finds it blank and sends nothing (v1 emptied it without sending it,
  *     so a wire on Error kept the last failure).
  *
- * Not in v1: an expression reading `Variables`, `Objects` or `Arrays` re-runs when the global moves (:537-563 — the world's
- * REGISTRY seam carries it, v2), and Run wired at load (:587 — a graph rule; the lone node's Run is never wired).
+ *   - THE NOODL GLOBALS (v4, s68 — the world's REGISTRY): the text reads `Variables`, `Objects` and `Arrays` through the API
+ *     handed as the last argument (:449-452 — `window.Noodl`, the viewer's noodl-js-api.ts :26-28, :54-74): Variables is the
+ *     `--ndl--global-variables` record, `Objects.x` the record `x`, `Arrays.x` the array `x`, each made on first read. Setting
+ *     the text subscribes to what `detectDependencies` finds in it (:555-579 — expression-evaluator.ts, carried verbatim in
+ *     `./expression-dependencies.ts`), dropping what the last text subscribed to, and a change it hears re-runs the node as an
+ *     always-ticked arrival (`_scheduleAutomaticEvaluation` :232-236 — nothing while a port the text reads has never had a value):
+ *     a Variable it names (or a change that names no key), any key of an Object it names — and, for an Array it names, any key of
+ *     a RECORD of that name, never the array (expression-evaluator.ts :273-281: row C150 — the array's own changes, and its
+ *     members', are not heard; a Run reads them).
+ *
+ * Not in v4: Run wired at load (:587 — a graph rule; the lone node's Run is never wired), and a node deleted (:178-184 — the
+ * subscription dropped; no play deletes a node).
  */
 
-import { defineNode, type InputDecl } from '../spec';
+import { defineNode, type ChangeEvent, type InputDecl, type WorldView } from '../spec';
 import { valueDidChange } from './condition';
+import { detectDependencies, type ExpressionDependencies } from './expression-dependencies';
 import { expressionNodeInputsRead, expressionPorts, isReservedExpressionName } from './expression-ports';
 
 /** :753-778 — declared in front of every expression. */
@@ -80,11 +91,33 @@ const PREAMBLE = [
 
 const RUN_ON_CHANGE = 'runOnChange-';
 
+/** expression-evaluator.ts :250 — the record the Variables are kept on. */
+const VARIABLES = '--ndl--global-variables';
+
 /**
- * :432-435 — the Noodl API handed as the last argument. v1's examples read no Noodl global, so the handle is an empty stand-in; v2
- * (the registry) hands the world's.
+ * :449-452 — the Noodl API handed as the last argument: `window.Noodl` as the viewer fills it (noodl-js-api.ts :26-28, :54-74),
+ * over the play's registry. Variables read at each use; the proxies over two functions, every property a name, as the viewer's.
  */
-const NOODL_API = Object.freeze({});
+function noodlApi(w: WorldView): unknown {
+  return {
+    get Variables() {
+      return w.registry.model(VARIABLES);
+    },
+    Objects: new Proxy(function () {}, { get: (_t, prop) => w.registry.model(prop) }),
+    Arrays: new Proxy(function () {}, { get: (_t, prop) => w.registry.collection(prop) })
+  };
+}
+
+const NO_DEPENDENCIES: ExpressionDependencies = { variables: [], objects: [], arrays: [] };
+
+/**
+ * expression-evaluator.ts :240-287 `subscribeToChanges` — what one text listens to: the Variables record when it names a Variable,
+ * each Object's record, and — row C150 — a RECORD named like each Array, never the array.
+ */
+function watched(d: ExpressionDependencies): string[] {
+  const ids = [...(d.variables.length > 0 ? [VARIABLES] : []), ...d.objects, ...d.arrays];
+  return ids.filter((id, i) => ids.indexOf(id) === i);
+}
 
 type Failure = { code: 'expression/compile-failed' | 'expression/threw' | 'expression/reserved-name'; message: string };
 
@@ -120,6 +153,10 @@ export type ExpressionState = {
   lastError: string | undefined;
   /** :100 `lastReportedError` */
   lastReported: string | undefined;
+  /** :76 `noodlDependencies` (v4) — what the current text subscribed to. */
+  deps: ExpressionDependencies;
+  /** :89 `inputValues` (v4) — the argument array, written at each call and never shortened (row C151). */
+  values: readonly unknown[];
 };
 
 /** :455-477 `_compileFunction` — the function, or the engine's message. */
@@ -131,8 +168,17 @@ function compile(names: readonly string[], body: string): { fn?: (...args: unkno
   }
 }
 
-/** :425-436 — the values in `names` order, then the API, handed positionally to a function compiled with `compiledWith`. */
-const argumentsFor = (s: Readonly<ExpressionState>): unknown[] => [...s.names.map((n) => s.scope[n]), NOODL_API];
+/**
+ * :442-453 `_argumentsForEvaluation` — the values in `names` order written over the node's ONE argument array (:89 `inputValues`,
+ * never shortened), then the API after ALL of it, handed positionally to a function compiled with `compiledWith`: when the array
+ * is longer or shorter than `compiledWith`, the `Noodl` parameter gets a stale value or nothing (row C151). Returns the array as it
+ * now stands, to keep.
+ */
+function argumentsFor(s: Readonly<ExpressionState>, w: WorldView): { args: unknown[]; values: unknown[] } {
+  const values = [...s.values];
+  s.names.forEach((n, i) => (values[i] = s.scope[n]));
+  return { args: [...values, noodlApi(w)], values };
+}
 
 /** The compiled function (compiling with the scope's names now when it has not compiled since the text was set) and the names it took. */
 function compiled(s: Readonly<ExpressionState>): { fn?: (...args: unknown[]) => unknown; error?: string; compiledWith: readonly string[] | undefined } {
@@ -144,16 +190,17 @@ function compiled(s: Readonly<ExpressionState>): { fn?: (...args: unknown[]) => 
 const NOT_EVALUATED = Symbol('not evaluated');
 
 /** :437-454 `_evaluateOverUnsetInputs` — the answer over ports that have not arrived, or none. */
-function overUnset(s: Readonly<ExpressionState>): { value: unknown; compiledWith: readonly string[] | undefined } {
+function overUnset(s: Readonly<ExpressionState>, w: WorldView): { value: unknown; compiledWith: readonly string[] | undefined; values: readonly unknown[] } {
   const c = compiled(s);
-  if (!c.fn) return { value: NOT_EVALUATED, compiledWith: undefined };
+  if (!c.fn) return { value: NOT_EVALUATED, compiledWith: undefined, values: s.values };
+  const a = argumentsFor(s, w);
   let value: unknown;
   try {
-    value = c.fn(...argumentsFor(s));
+    value = c.fn(...a.args);
   } catch {
-    return { value: NOT_EVALUATED, compiledWith: c.compiledWith };
+    return { value: NOT_EVALUATED, compiledWith: c.compiledWith, values: a.values };
   }
-  return { value: value !== value ? NOT_EVALUATED : value, compiledWith: c.compiledWith };
+  return { value: value !== value ? NOT_EVALUATED : value, compiledWith: c.compiledWith, values: a.values };
 }
 
 /** `reservedNameMessage` (v3, row C145) — what the node says about a text that reads one of its own input names. */
@@ -165,15 +212,17 @@ function reservedNameMessage(names: readonly string[]): string {
 }
 
 /** :379-424 `_calculateExpression` — the answer (`0` on a failure) and the failure. */
-function calculate(s: Readonly<ExpressionState>): { value: unknown; failure?: Failure; compiledWith: readonly string[] | undefined } {
+function calculate(s: Readonly<ExpressionState>, w: WorldView): { value: unknown; failure?: Failure; compiledWith: readonly string[] | undefined; values: readonly unknown[] } {
   // v3, row C145: a text that reads the node's own input names fails before anything is compiled
-  if (s.reserved.length > 0) return { value: 0, failure: { code: 'expression/reserved-name', message: reservedNameMessage(s.reserved) }, compiledWith: s.compiledWith };
+  if (s.reserved.length > 0) return { value: 0, failure: { code: 'expression/reserved-name', message: reservedNameMessage(s.reserved) }, compiledWith: s.compiledWith, values: s.values };
   const c = compiled(s);
-  if (!c.fn) return { value: 0, failure: { code: 'expression/compile-failed', message: 'The expression could not be compiled: ' + (c.error || 'syntax error') }, compiledWith: undefined };
+  if (!c.fn) return { value: 0, failure: { code: 'expression/compile-failed', message: 'The expression could not be compiled: ' + (c.error || 'syntax error') }, compiledWith: undefined, values: s.values };
+  // :419 — the array is written before the call, so a call that throws has written it too
+  const a = argumentsFor(s, w);
   try {
-    return { value: c.fn(...argumentsFor(s)), compiledWith: c.compiledWith };
+    return { value: c.fn(...a.args), compiledWith: c.compiledWith, values: a.values };
   } catch (e) {
-    return { value: 0, failure: { code: 'expression/threw', message: 'The expression threw: ' + (e as Error).message }, compiledWith: c.compiledWith };
+    return { value: 0, failure: { code: 'expression/threw', message: 'The expression threw: ' + (e as Error).message }, compiledWith: c.compiledWith, values: a.values };
   }
 }
 
@@ -192,8 +241,31 @@ export const Expression = defineNode({
   // v3 (P109 ISL-051, s33): a text that reads run, expression or evaluateAtLoad gets no port for it and fails, every evaluation, with
   // `expression/reserved-name` (row C145, ruled "Block the three names"); in v2 the editor drew the port and the text threw "run is not defined"
   // v2 (P109 ISL-051, s32): a working evaluation after a failure sends Error as blank text, once (row C144)
-  version: 3,
+  // v4 (s68): the Noodl globals — Variables, Objects, Arrays read from the world's registry, and the changes the node subscribes to
+  // re-run it (an Array's own changes are not heard: row C150); v3 handed the text an empty API
+  version: 4,
   source: 'packages/noodl-runtime/src/nodes/std-library/expression.ts',
+  needs: ['registry'],
+  worldPool: {
+    registries: [
+      {},
+      {
+        models: { [VARIABLES]: { v: 1, w: 'x' }, o: { k: 'a' }, a: { k: 1 }, b: { k: 2 } },
+        collections: { list: ['a'] },
+        writes: [
+          { at: 1, record: VARIABLES, key: 'v', value: 2 },
+          { at: 1, array: 'list', add: 'b' },
+          { at: 10, record: 'o', key: 'k', value: 'b' },
+          { at: 10, record: VARIABLES, key: 'w', value: 'y' },
+          { at: 100, record: 'a', key: 'k', value: 3 },
+          { at: 100, record: 'list', key: 'k', value: 1 },
+          { at: 1000, array: 'list', set: [] },
+          { at: 1000, record: VARIABLES, key: 'v' }
+        ]
+      }
+    ],
+    advances: [1, 10, 100, 1000]
+  },
 
   state: {
     body: '',
@@ -211,7 +283,9 @@ export const Expression = defineNode({
     cached: null,
     evaluated: false,
     lastError: undefined,
-    lastReported: undefined
+    lastReported: undefined,
+    deps: NO_DEPENDENCIES,
+    values: []
   } as ExpressionState,
   // :479-482
   inspect: (s) => String(s.cached),
@@ -244,7 +318,15 @@ export const Expression = defineNode({
         '({ v: a })',
         'b',
         // the node's own input name: no port, and every evaluation fails as a reserved name (v3, row C145)
-        'run'
+        'run',
+        // v4 — the Noodl globals: a Variable, an Object, an Array (never heard: row C150), a port beside a global, one the lexer misses
+        'Variables.v',
+        'Variables.w + a',
+        'Objects.o.k',
+        'Arrays.list.size()',
+        'Arrays.list.get(0).k',
+        'Noodl.Variables.v + Noodl.Objects.o.k',
+        "Variables['v'] > 1"
       ]
     },
     // :590-604
@@ -288,7 +370,7 @@ export const Expression = defineNode({
 }).on(
   {
     // :502-588 — the text: ports re-derived, the function forgotten, the load evaluation asked for
-    expression: (s, v) => {
+    expression: (s, v, _i, w) => {
       const text = v as string;
       const ports = expressionPorts(text);
       const scope: Record<string, unknown> = { ...s.scope };
@@ -302,10 +384,14 @@ export const Expression = defineNode({
       // :520-535 — a new port, unless one by that name is already there (a stray; the declared inputs' names are reserved, row C145)
       for (const name of ports) if (!(name in scope)) scope[name] = undefined;
       const referenced = ports;
+      // :555-579 (v4) — the last text's subscription dropped, this one's made
+      const deps = detectDependencies(text);
+      for (const id of watched(s.deps)) w.unwatch({ model: id });
+      for (const id of watched(deps)) w.watch({ model: id });
       // :234-244 `_scheduleLoadEvaluation`
       const pendingLoad = referenced.length > 0 && !s.arrived ? true : s.pendingLoad;
       return {
-        set: { body: PREAMBLE + 'return (' + text + ');', referenced, reserved: expressionNodeInputsRead(text), scope, names: Object.keys(scope), compiledWith: undefined, unticked, pendingLoad, ...schedule },
+        set: { body: PREAMBLE + 'return (' + text + ');', referenced, reserved: expressionNodeInputsRead(text), scope, names: Object.keys(scope), compiledWith: undefined, unticked, pendingLoad, deps, ...schedule },
         send: []
       };
     },
@@ -316,29 +402,29 @@ export const Expression = defineNode({
   },
   {
     // :258-320 — the one evaluation of the frame
-    afterInputs: (s) => {
+    afterInputs: (s, _i, w) => {
       if (!s.scheduled) return { set: {}, send: [] };
       const n = s.tokens;
       const last = s.cached;
       const had = s.evaluated;
       // :269-277 — the load's evaluation over ports that never arrived
       if (s.pendingLoad && n === 0 && !s.arrived) {
-        const answer = s.evaluateAtLoad ? overUnset(s) : { value: NOT_EVALUATED, compiledWith: s.compiledWith };
-        if (answer.value === NOT_EVALUATED) return { set: { scheduled: false, pendingLoad: false, compiledWith: answer.compiledWith }, send: [] };
+        const answer = s.evaluateAtLoad ? overUnset(s, w) : { value: NOT_EVALUATED, compiledWith: s.compiledWith, values: s.values };
+        if (answer.value === NOT_EVALUATED) return { set: { scheduled: false, pendingLoad: false, compiledWith: answer.compiledWith, values: answer.values }, send: [] };
         const value = answer.value;
         return {
-          set: { scheduled: false, pendingLoad: false, compiledWith: answer.compiledWith, cached: value, evaluated: true },
+          set: { scheduled: false, pendingLoad: false, compiledWith: answer.compiledWith, values: answer.values, cached: value, evaluated: true },
           send: !had || last !== value ? [...VALUES] : [],
           emit: [value ? 'isTrueEv' : 'isFalseEv']
         };
       }
-      const r = calculate(s);
+      const r = calculate(s, w);
       const changed = !had || last !== r.value;
       const send: Array<(typeof VALUES)[number] | 'error'> = changed ? [...VALUES] : [];
       if (r.failure) {
         // :346-378 `_reportFailure` — Error written, the report once per message, every Run answered `failure`
         const repeat = s.lastReported === r.failure.message;
-        const set: Partial<ExpressionState> = { scheduled: false, pendingLoad: false, compiledWith: r.compiledWith, cached: r.value, evaluated: true, tokens: 0, lastError: r.failure.message };
+        const set: Partial<ExpressionState> = { scheduled: false, pendingLoad: false, compiledWith: r.compiledWith, values: r.values, cached: r.value, evaluated: true, tokens: 0, lastError: r.failure.message };
         if (!repeat) set.lastReported = r.failure.message;
         const verdict = r.value ? 'isTrueEv' : 'isFalseEv';
         const failure = r.failure;
@@ -351,11 +437,23 @@ export const Expression = defineNode({
       }
       // :411-420 — a working evaluation re-arms the report; an error it finds is cleared to blank text and sent, once (v2, row C144)
       return {
-        set: { scheduled: false, pendingLoad: false, compiledWith: r.compiledWith, cached: r.value, evaluated: true, tokens: 0, lastError: s.lastError ? '' : s.lastError, lastReported: undefined },
+        set: { scheduled: false, pendingLoad: false, compiledWith: r.compiledWith, values: r.values, cached: r.value, evaluated: true, tokens: 0, lastError: s.lastError ? '' : s.lastError, lastReported: undefined },
         send: s.lastError ? [...send, 'error'] : send,
         emit: [r.value ? 'isTrueEv' : 'isFalseEv'],
         outcomes: Array.from({ length: n }, () => ({ port: 'run' as const, outcome: 'done' as const }))
       };
+    },
+
+    world: {
+      // expression-evaluator.ts :249-281 (v4) — a change a subscription hears: an always-ticked arrival (:572-578 →
+      // `_scheduleAutomaticEvaluation` :232-236, nothing while a port the text reads has never had a value)
+      change: (s, _i, e: ChangeEvent) => {
+        if (e.kind !== 'model') return { send: [] };
+        const d = s.deps;
+        const heard = (e.id === VARIABLES && d.variables.some((v) => e.name === v || !e.name)) || d.objects.includes(e.id as string) || d.arrays.includes(e.id as string);
+        if (!heard || (s.referenced.length > 0 && !s.arrived)) return { send: [] };
+        return { set: schedule, send: [] };
+      }
     },
 
     derived: {

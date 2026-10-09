@@ -1209,6 +1209,34 @@ function resetRegistry(world: World): void {
 }
 
 /**
+ * NSP-017 s68 — the app's JavaScript API, as the code a person writes reaches it. The Expression, the Function and the Visual
+ * Function hand their code `JavascriptNodeParser.createNoodlAPI()`, which in the browser is `window.Noodl` and in a process with
+ * no window an empty object (javascriptnodeparser.js :497-501) — so on this target `Variables.x` read nothing. The viewer fills
+ * `window.Noodl` at startup (noodl-js-api.ts :26-28, :54-74): Variables is the `--ndl--global-variables` record, `Objects.x` and
+ * `Arrays.x` are `Model.get('x')` and `Collection.get('x')`. The same three, over the runtime's own tables, for the play; the
+ * function is put back after it. Variables is read at each use, because `resetRegistry` empties the tables per play.
+ */
+function installNoodlApi(): () => void {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const parser = require('../../src/javascriptnodeparser') as { createNoodlAPI: (scope?: unknown) => unknown };
+  const original = parser.createNoodlAPI;
+  const api = {
+    Object: Model,
+    Array: Collection,
+    get Variables() {
+      return Model.get('--ndl--global-variables');
+    },
+    // the viewer's proxies exactly: over the two functions, every property a name (symbols too)
+    Objects: new Proxy(Model as object, { get: (_t, prop) => Model.get(prop as string) }),
+    Arrays: new Proxy(Collection as object, { get: (_t, prop) => Collection.get(prop as string) })
+  };
+  parser.createNoodlAPI = () => api;
+  return () => {
+    parser.createNoodlAPI = original;
+  };
+}
+
+/**
  * The picker nodes the VIEWER provides (census `providedBy: noodl-viewer-react`) that this phase
  * has specced (NSP-011: Color, Value Changed, Color Blend; NSP-007: Delay; NSP-012: the event
  * pair and Repeater Item; NSP-013: Repeat, Animate To Value, Screen Resolution, States). `NoodlRuntime` registers the
@@ -3174,6 +3202,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       // NSP-016 s62 — REGISTRY's writes made elsewhere (world.ts): performed on the runtime's own tables, through the verbs a
       // node would call, so a node bound to the entry hears them as it would another node's write
       const offRegistry = w.onRegistryWrite((write) => performRegistryWrite({ model: (id) => Model.get(id as string), collection: (name) => Collection.get(name as string) } as unknown as RegistryTables, write));
+      // NSP-017 s68 — the app's JavaScript API over those tables (`installNoodlApi`)
+      const restoreNoodlApi = installNoodlApi();
       // NSP-013 s12 — the last frame's time is the context's, so it outlived the play that ran the
       // frame: a Repeat started before a play's first settle read the PREVIOUS play's last frame time
       // (repeat.ts :120-122) and ticked early or late. Found only once the runner's sequences stopped
@@ -3190,6 +3220,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       return () => {
         consoleMethods.forEach((m, i) => (console[m] = hostConsole[i]));
         offRegistry();
+        restoreNoodlApi();
         restoreStacks();
         restoreRouters();
         restorePopups();

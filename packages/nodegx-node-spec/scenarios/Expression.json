@@ -623,5 +623,419 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "a Variable the text reads: a write of it elsewhere re-runs the node (Result, On True); a write of another Variable does not, nor the same value written again; a new value does",
+    "because": "expression.ts :555-579 subscribes at the text's write to what detectDependencies finds; expression-evaluator.ts :249-261 hears the Variables record's changes that name a Variable the text reads (v4)",
+    "params": {
+      "expression": "Variables.v"
+    },
+    "world": {
+      "registry": {
+        "models": {
+          "--ndl--global-variables": {
+            "v": 1,
+            "w": "x"
+          }
+        },
+        "writes": [
+          {
+            "at": 1,
+            "record": "--ndl--global-variables",
+            "key": "v",
+            "value": 2
+          },
+          {
+            "at": 10,
+            "record": "--ndl--global-variables",
+            "key": "w",
+            "value": "y"
+          },
+          {
+            "at": 20,
+            "record": "--ndl--global-variables",
+            "key": "v",
+            "value": 2
+          },
+          {
+            "at": 30,
+            "record": "--ndl--global-variables",
+            "key": "v",
+            "value": 0
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 9
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an Object the text reads: a write of ANY key of it elsewhere re-runs the node — the key it reads (Result) and another (On True again, Result unchanged); another Object's write does not",
+    "because": "expression-evaluator.ts :263-271 — every change of the record re-runs it, whichever key (v4)",
+    "params": {
+      "expression": "Objects.o.k"
+    },
+    "world": {
+      "registry": {
+        "models": {
+          "o": {
+            "k": "a"
+          }
+        },
+        "writes": [
+          {
+            "at": 1,
+            "record": "o",
+            "key": "k",
+            "value": "b"
+          },
+          {
+            "at": 10,
+            "record": "o",
+            "key": "z",
+            "value": 1
+          },
+          {
+            "at": 20,
+            "record": "p",
+            "key": "k",
+            "value": "c"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 9
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an Array the text reads is never heard (row C150): an item added, the list replaced, a member's key written — no re-run, Result stays; a Run reads the new size; a write to a RECORD named like the array re-runs it",
+    "because": "expression-evaluator.ts :273-281 subscribes to `scope.get(arrId)`, a record of the array's name, never the array (Collection.get) — row C150; the runtime's answer is the spec's (R3 (a)) until it is fixed",
+    "params": {
+      "expression": "Arrays.list.size()"
+    },
+    "world": {
+      "registry": {
+        "models": {
+          "a": {
+            "k": 1
+          },
+          "b": {
+            "k": 2
+          }
+        },
+        "collections": {
+          "list": [
+            "a"
+          ]
+        },
+        "writes": [
+          {
+            "at": 1,
+            "array": "list",
+            "add": "b"
+          },
+          {
+            "at": 10,
+            "array": "list",
+            "set": [
+              "a",
+              "b",
+              "a"
+            ]
+          },
+          {
+            "at": 20,
+            "record": "a",
+            "key": "k",
+            "value": 5
+          },
+          {
+            "at": 40,
+            "record": "list",
+            "key": "x",
+            "value": 1
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 9
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "advance": 20
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a port beside a global: while the port has never had a value a global's change runs nothing (the load ran over it unset); once it has, a change re-runs the node",
+    "because": "expression.ts :572-578 → `_scheduleAutomaticEvaluation` :232-236 — a global moving is an always-ticked arrival, gated like the load on a port that never arrived (v4)",
+    "params": {
+      "expression": "Variables.v + a",
+      "evaluateAtLoad": false
+    },
+    "world": {
+      "registry": {
+        "models": {
+          "--ndl--global-variables": {
+            "v": 1
+          }
+        },
+        "writes": [
+          {
+            "at": 1,
+            "record": "--ndl--global-variables",
+            "key": "v",
+            "value": 2
+          },
+          {
+            "at": 10,
+            "record": "--ndl--global-variables",
+            "key": "v",
+            "value": 3
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 10
+      },
+      "settle",
+      {
+        "advance": 9
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a new text drops the last one's subscription: after Variables.v is replaced by Objects.o.k, a write of v runs nothing and a write of o re-runs it; replaced again by a text with no global, neither does",
+    "because": "expression.ts :558-562 unsubscribes before it subscribes again (v4)",
+    "params": {
+      "expression": "Variables.v"
+    },
+    "world": {
+      "registry": {
+        "models": {
+          "--ndl--global-variables": {
+            "v": 1
+          },
+          "o": {
+            "k": "a"
+          }
+        },
+        "writes": [
+          {
+            "at": 1,
+            "record": "--ndl--global-variables",
+            "key": "v",
+            "value": 2
+          },
+          {
+            "at": 2,
+            "record": "o",
+            "key": "k",
+            "value": "b"
+          },
+          {
+            "at": 10,
+            "record": "--ndl--global-variables",
+            "key": "v",
+            "value": 3
+          },
+          {
+            "at": 11,
+            "record": "o",
+            "key": "k",
+            "value": "c"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "expression",
+        "value": "Objects.o.k"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "expression",
+        "value": "2 + 2"
+      },
+      "settle",
+      {
+        "advance": 8
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the Noodl API lands in the wrong place (row C151): placed beside a STRAY input the text does not read, Variables reads nothing (no Result, On False); after a text that read two ports, a text reading one hands a stale port value as Noodl — Variables reads nothing again (NaN)",
+    "because": "expression.ts :442-452 writes the values over one argument array that is never shortened and appends the API after all of it; the function takes Noodl after the names it was compiled with — a stray makes that parameter undefined, a longer old array fills it with a stale value (row C151, v4)",
+    "params": {
+      "expression": "Variables.v",
+      "s": 5
+    },
+    "world": {
+      "registry": {
+        "models": {
+          "--ndl--global-variables": {
+            "v": 7
+          }
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "set": "expression",
+        "value": "a + b"
+      },
+      {
+        "set": "a",
+        "value": 1
+      },
+      {
+        "set": "b",
+        "value": 2
+      },
+      "settle",
+      {
+        "set": "expression",
+        "value": "Variables.v + c"
+      },
+      {
+        "set": "c",
+        "value": 1
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the forms the runtime finds: Noodl.Variables.v, Variables['v'] and Noodl.Objects.o.k are each heard; a name only inside a string is not",
+    "because": "expression-evaluator.ts :73-117 detectDependencies — the `Noodl.` prefix, bracket keys, strings stripped (v4)",
+    "params": {
+      "expression": "Noodl.Variables.v + Variables['v'] + Noodl.Objects.o.k + 'Variables.q'"
+    },
+    "world": {
+      "registry": {
+        "models": {
+          "--ndl--global-variables": {
+            "v": 1,
+            "q": 0
+          },
+          "o": {
+            "k": "a"
+          }
+        },
+        "writes": [
+          {
+            "at": 1,
+            "record": "--ndl--global-variables",
+            "key": "v",
+            "value": 2
+          },
+          {
+            "at": 10,
+            "record": "o",
+            "key": "k",
+            "value": "b"
+          },
+          {
+            "at": 20,
+            "record": "--ndl--global-variables",
+            "key": "q",
+            "value": 9
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 9
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ]
   }
 ]

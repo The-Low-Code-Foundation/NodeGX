@@ -1,7 +1,7 @@
 # NSP-017 — The escape hatches: the Expression grammar, and the Function/Script contracts
 
 **Opened 2026-09-29.** **Depends on NSP-011.**
-**Status: 🟡 s67 (2026-10-09): the Visual Function (`Logic Builder`) specced as a CONTRACT — the blocks give the ports, the code written from them is the behaviour; eleven fixtures, 15 scenarios, two graph claims (t15), 20 rules planted in a copy of the node and each shown red (AC2), the ledger's contract column at 3 (AC3); row C149 — §6.5. Every T6 node is now handled (Expression conforms; Function, Script, Visual Function contracts; CSS Definition exempt). Left: AC1's export half (P18's). s66 (2026-10-09): the Script (`Javascript2`) specced as a CONTRACT — its three ways of writing it, thirteen fixtures, 16 scenarios, 26 rules planted in copies of the node and its parser and each shown red (AC2), the ledger's contract column at 2 (AC3); row C148 — §6.4. Left: Visual Function (`Logic Builder`), AC1's export half. s65 (2026-10-09): the Function specced as a CONTRACT (AC2 planted and shown, AC3 built — the ledger's own column); rows C146, C147 — §6.2. The CSS Definition exempt — Richard ruled "leave it out" (README R17, `exemptions.json`); C145 ruled "block the three names" (P109's). s64: the Expression conforms on the runtime (1 of 5) — 33 scenarios, at 200 on six seeds and at 10,000, every mutant killed; rows C144, C145. §3's premise measured wrong for the Expression (its text is JavaScript, not a grammar of ours) — §6. Left: Script, Visual Function (their contracts), AC1's export half, AC3.**
+**Status: 🟡 s68 (2026-10-09): the Expression v4 — `Variables`, `Objects` and `Arrays` read through the world's registry, and the changes the node subscribes to re-run it; the runtime target hands code the app's API (`installNoodlApi`); 42 scenarios on both targets at seven seeds and 10,000; rows C150 (an Array the text reads is never heard — medium), C151 (a stray input hands the API to the wrong parameter) — §6.6. s67 (2026-10-09): the Visual Function (`Logic Builder`) specced as a CONTRACT — the blocks give the ports, the code written from them is the behaviour; eleven fixtures, 15 scenarios, two graph claims (t15), 20 rules planted in a copy of the node and each shown red (AC2), the ledger's contract column at 3 (AC3); row C149 — §6.5. Every T6 node is now handled (Expression conforms; Function, Script, Visual Function contracts; CSS Definition exempt). Left: AC1's export half (P18's). s66 (2026-10-09): the Script (`Javascript2`) specced as a CONTRACT — its three ways of writing it, thirteen fixtures, 16 scenarios, 26 rules planted in copies of the node and its parser and each shown red (AC2), the ledger's contract column at 2 (AC3); row C148 — §6.4. Left: Visual Function (`Logic Builder`), AC1's export half. s65 (2026-10-09): the Function specced as a CONTRACT (AC2 planted and shown, AC3 built — the ledger's own column); rows C146, C147 — §6.2. The CSS Definition exempt — Richard ruled "leave it out" (README R17, `exemptions.json`); C145 ruled "block the three names" (P109's). s64: the Expression conforms on the runtime (1 of 5) — 33 scenarios, at 200 on six seeds and at 10,000, every mutant killed; rows C144, C145. §3's premise measured wrong for the Expression (its text is JavaScript, not a grammar of ours) — §6. Left: Script, Visual Function (their contracts), AC1's export half, AC3.**
 
 ## 1. The person sentence
 
@@ -277,3 +277,45 @@ seeds 20735, 13, 7, 20734 and the day's; at 10,000 (`npm run spec-ledger -- --de
 Interpreter (`tests/batch-escape.test.ts` seed 13, and 20735, 7, 20729, 20732): conforms, every mutant killed. Graph: interpreter
 128 / 128, runtime 96 / 96. AC2: 22 / 22. `spec-ledger --check`: holds at 125 / 147 on the runtime, **3 as a contract (Script,
 Function, Visual Function)**, 2 on the export; 17 owed (all NSP-022).
+
+### 6.6 s68 (2026-10-09) — the Expression v4: the Noodl globals, through the registry seam
+
+**What an Expression reads of the app** — `Variables`, `Objects`, `Arrays`, and when it hears them move — is now in the spec
+(`packages/nodegx-node-spec/src/nodes/expression.ts`, v4, `needs: ['registry']`). Read from the runtime's `expression.ts` :442-453, :555-579
+and `expression-evaluator.ts` :73-117, :240-287, and the viewer's `noodl-js-api.ts` :26-28, :54-74:
+
+- **what the text sees** — the API handed as the last argument is `window.Noodl`: `Variables` the `--ndl--global-variables` record,
+  `Objects.x` the record `x`, `Arrays.x` the array `x`, each made on first read. The spec builds the same three over the play's registry;
+- **what it hears** — setting the text subscribes to what `detectDependencies` finds (carried verbatim in
+  `src/nodes/expression-dependencies.ts`, held by `tests/expression-dependencies-parity.test.ts`, which cuts the two declarations out of
+  both files), dropping the last text's subscription: a Variable it names (another Variable's write, or the same value again, is
+  nothing), ANY key of an Object it names, and — **row C150** — for an Array, a RECORD of that name, never the array. A change heard
+  is an always-ticked arrival: nothing while a port the text reads has never had a value;
+- **where the API lands** — the runtime writes the values over ONE argument array it never shortens and appends the API after all of
+  it, while the function takes `Noodl` after the names it was compiled with: a stray input, or a text that once read more names, hands
+  `Noodl` `undefined` or a stale value, and the globals read nothing (**row C151**). The spec's `values` state is that array.
+
+**The target's seam** (`noodl-runtime/test/helpers/node-spec-target.ts` `installNoodlApi`): in this process `createNoodlAPI` returned
+`{}` (no window), so on the runtime target a global read nothing at all. A play with a world now has the viewer's three accessors over the
+runtime's own tables, put back at the end. The Function and the Visual Function call the same function; their specs read no `Noodl`
+(each "not in v1") and both conform on the runtime with the seam in (Function 28 / 28, Script 17 / 17, Visual Function v2 15 / 15 at
+13; the three contract tests pass).
+
+**Seven scenarios** (42 now): a Variable heard by name; an Object on any key; an Array never heard (C150 — a Run reads the new size, a
+record named like it re-runs it); a port beside a global (the gate, then heard); a new text dropping the old subscription; the API in
+the wrong place (C151 — a stray at the placing, then a stale port value: `NaN`); the forms the finder takes (`Noodl.` prefix, a
+bracket key, not a name inside a string). Each trace was read against its name before it was graded.
+
+**How it was built.** Probe first, on the runtime target with the viewer's API stood in: Variables and Objects re-run, Arrays do not
+(C150, a Run as the control). Then the spec — and its generated runs at seed 20735 found C151 at once (`Arrays.list.size()` threw
+after a text that had read two names); read in `_argumentsForEvaluation`, measured beside a control (Result 7 alone, nothing beside a
+stray), and modelled. The change handler's three mutants were killed by the scenarios.
+
+**Not in v4:** a node deleted (the subscription dropped, :178-184 — no play deletes a node); Run wired at load (a graph rule); a change
+event that names no key (the Variables handler's `!args.name` — no registry write makes one).
+
+**Readings (2026-10-09).** Runtime `NSP_ONLY=Expression`: 42 / 42 scenarios, 200 / 200, 0 divergences, 178 / 178 mutants killed at
+seeds 13, 20735, 7, 20734, 20733, 20729, 20732; at 10,000 (`NSP_DEEP=10000`, seed 20735): 0 divergences, 113 s. Interpreter: conforms,
+178 / 178 at the same seven. Node-spec gates (batch-escape, both parity tests, spec-ledger, catalog-parity, schema, runner): 398 / 398.
+Graph: interpreter 128 / 128, runtime 96 / 96 (one test timed out at load 6.8 and passed alone and in a one-worker rerun).
+`spec-ledger --check` holds at 125 / 147 on the runtime, 3 as a contract, 2 on the export. Rows C150 (medium), C151 (low), P109's under R16.
