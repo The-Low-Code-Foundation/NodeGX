@@ -1,13 +1,16 @@
 ---
 id: P107-C147
 title: A Function whose code throws null or undefined reports nothing — no Error, no Failure, and a Run is never answered
-status: open
+status: fixed
+commit: cb7ea0fab
 phase: P109
+task: ISL-051
 severity: medium
 area: runtime / Function (noodl-runtime/src/utils.ts `logJavaScriptNodeError` :24-34 — `Object.getPrototypeOf(err)` throws "Cannot convert undefined or null to object" for a `null` or `undefined` throw; it is the first line of simplejavascript.ts `runScript`'s catch :654, so the rest of the catch never runs and `runScript`'s promise rejects unheard)
 found: P107 NSP-017 s65, 2026-10-09
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-017-THE-ESCAPE-HATCHES.md §6.2; the s65 probe on the runtime target beside a control — `throw 'x'`: Error "x", Failure, a Run answered failure (function/script-threw), identical on the spec; `throw null`: nothing at all after the load or the Run (no Error value, no Failure, no outcome), and jest reports the unhandled TypeError
 kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/JavaScriptFunction.json "a throw of null or undefined is a throw: Error \"null\", Failure, and a Run answered failure (row C147)"
 ---
 
 **What a person sees.** A Function's code rejects with nothing — `throw null`, `throw undefined`, `Promise.reject()` awaited, or a
@@ -27,3 +30,9 @@ Beside it, `throw 'x'` gives Error "x", Failure, then the Run answered failure.
 Error "null" (or "undefined"), Failure, a Run answered failure (function/script-threw). That is what the Function spec already says;
 add a `throw null` scenario to `JavaScriptFunction.json` in the same commit (the spec plays it today only by its fixture
 `throw "bare " + Inputs.a`, because an unhandled rejection fails the whole jest suite on the runtime target).
+
+**Fixed 2026-10-09 (P109 ISL-051 s33, `cb7ea0fab`), as proposed — and one more read.** `logJavaScriptNodeError` is safe for any
+thrown value (signature unchanged), and `thrownMessage` is the one rule for what a thrown value says. The catch's editor warning also
+read `e.stack`, which threw the same way whenever an editor was connected (the runtime target has one: that line alone turned the
+scenario red) — now read only off a value that has one. Control: utils.ts and simplejavascript.ts from before, red on exactly the C147
+scenario.
