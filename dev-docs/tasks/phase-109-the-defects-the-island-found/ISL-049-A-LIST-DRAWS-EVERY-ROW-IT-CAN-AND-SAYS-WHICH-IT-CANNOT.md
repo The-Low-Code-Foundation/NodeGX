@@ -1,6 +1,6 @@
 # ISL-049 — A list draws every row it can, and says which it cannot
 
-**Status: ⬜ scoped s30 (2026-10-08) at `fff7cd4f0`, grown to 11 in s31 (C135–C137, C140–C143), nothing built.** **Source:** 4 bugs P107 NSP-016 s59 filed on the Repeater
+**Status: 🟡 s32 (2026-10-09): 4 of 11 fixed — C128, C135, C140, C141 in one commit (`e22334e0d`, §7).** Scoped s30 (2026-10-08) at `fff7cd4f0`, grown to 11 in s31 (C135–C137, C140–C143). **Source:** 4 bugs P107 NSP-016 s59 filed on the Repeater
 (For Each) and handed to P109 under R16 (`73d8f7646`): 1 high · 1 medium · 2 low, **3 to ask** (C129, C130, C131). **Side:**
 noodl-viewer-react (`foreach.tsx`), the For Each spec (`packages/nodegx-node-spec/src/nodes/repeater.ts`, v1).
 
@@ -23,14 +23,14 @@ scenarios in `packages/nodegx-node-spec/scenarios/For Each.json`).
 
 | bug | node | severity | status | build | what a person sees |
 |---|---|---|---|---|---|
-| [P107-C128](../../bugs/p107-c128-a-repeater-that-meets-something-it-cannot-build-never-draws-again.md) | Repeater | high | scheduled | as proposed | A Repeater that meets something it cannot build stops for good — a Template the project does not have, or Items holding a null when it rebuilds — and no later Items, Template or Refresh is ever drawn or answered |
+| [P107-C128](../../bugs/p107-c128-a-repeater-that-meets-something-it-cannot-build-never-draws-again.md) | Repeater | high | **fixed** `e22334e0d` | as proposed | A Repeater that meets something it cannot build stops for good — a Template the project does not have, or Items holding a null when it rebuilds — and no later Items, Template or Refresh is ever drawn or answered |
 | [P107-C130](../../bugs/p107-c130-a-list-with-a-null-keeps-the-old-rows-and-loses-the-repeaters-rebuilds.md) | Repeater | medium | scheduled | ruled | Items holding a null keep a Repeater's old rows on screen, and a Refresh, Template or Template Type change made after it in the same frame is lost — with every later Refresh, which is never answered again |
 | [P107-C129](../../bugs/p107-c129-items-rendered-fires-when-the-repeater-built-nothing.md) | Repeater | low | scheduled | ruled | A Repeater's Items Rendered fires after every run of its queue, including one that built nothing — at load with no Items bound, after a Refresh that failed, after a Dynamic rebuild with no Script |
 | [P107-C131](../../bugs/p107-c131-a-repeated-id-draws-its-row-after-the-next-and-rebuilds-it-at-every-copy.md) | Repeater | low | scheduled | ruled | A list whose items repeat an id draws that item's row after the row that follows it, and every later copy of the same list (a Refresh) takes that row down and builds it again |
-| [P107-C135](../../bugs/p107-c135-a-repeater-script-whose-component-is-not-text-stops-the-repeater-for-good.md) | Repeater | medium | scheduled | ruled | A Repeater Script that sets `component` to something that is not text (a number, an object, `true`) stops the Repeater for good — no later Items, Template or Refresh is drawn or answered |
+| [P107-C135](../../bugs/p107-c135-a-repeater-script-whose-component-is-not-text-stops-the-repeater-for-good.md) | Repeater | medium | **fixed** `e22334e0d` | ruled | A Repeater Script that sets `component` to something that is not text (a number, an object, `true`) stops the Repeater for good — no later Items, Template or Refresh is drawn or answered |
 | [P107-C137](../../bugs/p107-c137-a-refresh-pulsed-while-the-repeater-rebuilds-is-never-answered.md) | Repeater | medium | scheduled | ruled | A Repeater Refresh pulsed while a rebuild is running is never answered — no Done, no Failure — although a rebuild runs for it |
-| [P107-C140](../../bugs/p107-c140-a-repeater-input-mapping-that-throws-for-a-record-stops-the-repeater-for-good.md) | Repeater | medium | scheduled | as proposed | A Repeater input mapping (Script under Input Mapping) that throws for a record stops the Repeater for good — that row and every later one is never drawn, and no Refresh is answered |
-| [P107-C141](../../bugs/p107-c141-a-repeater-input-mapping-that-throws-on-a-record-change-throws-into-the-writer.md) | Repeater | medium | scheduled | as proposed | A Repeater input mapping that throws when a record changes throws into whatever wrote the record — another node's Set, a backend's save, a Query — which fails there, though the fault is the Repeater's |
+| [P107-C140](../../bugs/p107-c140-a-repeater-input-mapping-that-throws-for-a-record-stops-the-repeater-for-good.md) | Repeater | medium | **fixed** `e22334e0d` | as proposed | A Repeater input mapping (Script under Input Mapping) that throws for a record stops the Repeater for good — that row and every later one is never drawn, and no Refresh is answered |
+| [P107-C141](../../bugs/p107-c141-a-repeater-input-mapping-that-throws-on-a-record-change-throws-into-the-writer.md) | Repeater | medium | **fixed** `e22334e0d` | as proposed | A Repeater input mapping that throws when a record changes throws into whatever wrote the record — another node's Set, a backend's save, a Query — which fails there, though the fault is the Repeater's |
 | [P107-C142](../../bugs/p107-c142-a-repeater-reports-two-rows-signals-in-one-update-as-one.md) | Repeater | medium | scheduled | as proposed | A Repeater reports the signals of several rows that fire in the same update as ONE — the last row's Item Id, the first row's outputs, the last row's signal — so every row's Added after the first is lost, and a row's Leaving is reported as another row's Added |
 | [P107-C143](../../bugs/p107-c143-a-repeater-row-added-beside-a-row-on-its-way-out-lands-one-place-early.md) | Repeater | medium | scheduled | as proposed | A row a Repeater adds while another row is on its way out (its Try Remove waiting, or its removal not yet run) lands one place early and stays there; a Refresh moves the leaving row to the end |
 | [P107-C136](../../bugs/p107-c136-a-compiled-script-lets-a-refresh-with-no-template-report-done.md) | Repeater | low | scheduled | ruled | With Template Type Explicit and no Template, a Refresh reports Done (and draws nothing) once any Script has compiled — without one it fails `repeater/no-template` |
@@ -64,3 +64,35 @@ dead before declaring anything (P107's ruling, s30).
 - **AC3** — every row fixed as proposed or ruled, one commit each, with a control red on exactly its scenarios and the
   interpreter's mutants killed or declared at two seeds.
 - **AC4** — `node scripts/bugs.js --from P107` lists none of this task's rows as `open` or `needs-ruling`.
+
+## 7. Session 32 (2026-10-09) — nothing a Repeater meets stops it for good
+
+**AC1:** C128, C135 and C140's scenarios re-measured on the runtime at `6f793e72b` before the build: 18 / 18 conform to v2's "the
+queue stops for good". Built in worktree `p109-isl049`, landed by compare-and-swap on P107's `6a1ed0084` (no landing path dirty).
+
+| Row | Commit | What changed | Grade |
+|---|---|---|---|
+| C128, C135, C140, C141 | `e22334e0d` | `foreach.tsx`: the build caught in `addItem` (`repeater/template-component-not-found`, or `repeater/row-build-failed` for a component it has), the dead `!itemNode` branch gone; a Script's non-text component reported as its throw is; `_mapInputs` catches (`repeater/input-mapping-threw`, the row keeps what was set); `refresh`'s copy caught (its Refreshes fail `repeater/items-copy-threw`); the runner's backstop (`repeater/operation-threw`). For Each spec **v3** (`stuck` gone); the runtime face's three never-settling stand-ins removed | runtime 296 / 296 at seeds 13 and 20732, 200 sequences each; interpreter mutants 0 survivors at both (254 / 255, one declared); control red on exactly the 27 scenarios the fix moved; error codes in `nda-012-visual-deployed-diagnosis.test.ts` (6 new, control red on exactly the 4 positive ones); viewer 1,832 / 1,832, viewer tsc 0, spec tsc 0, spec package 966 / 986 (18 skipped; 2 red, below) |
+
+**What s32 found:**
+
+- **The runtime target's face stood in for the defect.** `node-spec-target.ts` `repeaterParent` handed back a promise that never
+  settled at a missing component, a C135 Script and a null rebuild, because the real rejection failed jest. With the fix in
+  `foreach.tsx` alone the runtime still "stopped" — the stand-ins were still there. A face that stands in for a throw has to go
+  with the throw.
+- **C140's regression never reached its row.** Its registry list was empty, so the mapping ran on no record (the s31 lesson
+  again). Replaced by one with three records; a throwing mapping is in the spec's pool now, so the generated sequences reach it.
+- **C141 can be graded by a lone play after all:** the world's REGISTRY write is the writer, and on the base runtime it throws.
+- **Timing a caught failure needs its own scenarios.** The act boundaries the queue runs on after (an addition not found 5, a
+  rebuild's record not found 4, a rebuild's copy that throws 1) passed the 292 recorded scenarios at ±1 — before the fix nothing
+  ran after them. Four scenarios click across act boundaries with no settle (a rebuild's clicks land on rows on their way out,
+  the only rows it leaves); each count one off is red. The queued copy's own count is unreachable in a play (a registry array
+  never holds a null) and is marked so.
+- **One declared equivalent:** `world.resume` drop-set on a yield that pulses and answers nothing. At v2 the stuck queue's yield
+  had that shape and the C128 scenarios killed it; at v3 only an idle yield does, whose set no later step can show (reasoning in
+  `equivalent-mutants.ts`).
+- **Spec package, 2 red:** `page-model.test.ts` (For Each's page model still listed `stuck`: fixed in the commit) and
+  `stranger.test.ts`'s Options (`person.blur` swap-branch at today's seed — the same on the base; P107's, told).
+
+**Left (7):** C129, C130, C131, C136, C137 (ruled), C142, C143 (as proposed). C130's first half (skip a null) leaves `refresh`'s
+copy catch reachable only by a listener that throws; its spec branch then goes.

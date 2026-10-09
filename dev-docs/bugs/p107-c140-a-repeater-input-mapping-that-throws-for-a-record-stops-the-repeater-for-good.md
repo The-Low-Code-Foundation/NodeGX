@@ -2,6 +2,7 @@
 id: P107-C140
 title: A Repeater input mapping (Script under Input Mapping) that throws for a record stops the Repeater for good — that row and every later one is never drawn, and no Refresh is answered
 status: fixed
+commit: e22334e0d
 phase: P109
 task: ISL-049
 severity: medium

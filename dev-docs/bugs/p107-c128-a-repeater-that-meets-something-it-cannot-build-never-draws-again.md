@@ -2,6 +2,7 @@
 id: P107-C128
 title: A Repeater that meets something it cannot build stops for good — a Template the project does not have, or Items holding a null when it rebuilds — and no later Items, Template or Refresh is ever drawn or answered
 status: fixed
+commit: e22334e0d
 phase: P109
 task: ISL-049
 severity: high

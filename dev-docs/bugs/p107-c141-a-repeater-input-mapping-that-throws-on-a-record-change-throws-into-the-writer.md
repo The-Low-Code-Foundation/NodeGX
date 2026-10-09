@@ -2,6 +2,7 @@
 id: P107-C141
 title: A Repeater input mapping that throws when a record changes throws into whatever wrote the record — another node's Set, a backend's save, a Query — which fails there, though the fault is the Repeater's
 status: fixed
+commit: e22334e0d
 phase: P109
 task: ISL-049
 severity: medium

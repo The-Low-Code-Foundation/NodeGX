@@ -2,6 +2,7 @@
 id: P107-C135
 title: A Repeater Script that sets `component` to something that is not text (a number, an object, `true`) stops the Repeater for good — no later Items, Template or Refresh is drawn or answered
 status: fixed
+commit: e22334e0d
 phase: P109
 task: ISL-049
 severity: medium
