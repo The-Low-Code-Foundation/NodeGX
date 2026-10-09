@@ -1,7 +1,7 @@
 # NSP-017 — The escape hatches: the Expression grammar, and the Function/Script contracts
 
 **Opened 2026-09-29.** **Depends on NSP-011.**
-**Status: 🟡 s64 (2026-10-09): the Expression conforms on the runtime (1 of 5) — 33 scenarios, at 200 on six seeds and at 10,000, every mutant killed; rows C144, C145. §3's premise measured wrong for the Expression (its text is JavaScript, not a grammar of ours) — §6. Left: Function, Script, Visual Function (the port contract), CSS Definition, AC1's export half, AC3.**
+**Status: 🟡 s65 (2026-10-09): the CSS Definition exempt — Richard ruled "leave it out" (README R17, `exemptions.json`); C145 ruled "block the three names" (P109's). s64: the Expression conforms on the runtime (1 of 5) — 33 scenarios, at 200 on six seeds and at 10,000, every mutant killed; rows C144, C145. §3's premise measured wrong for the Expression (its text is JavaScript, not a grammar of ours) — §6. Left: Function, Script, Visual Function (the port contract), AC1's export half, AC3.**
 
 ## 1. The person sentence
 
@@ -31,7 +31,7 @@ Census notes:
   how outputs are published (the *publish only on change* rule), how signals are sent, what
   globals exist, what happens on a throw, and what the sandbox forbids. Graded with a fixed set of
   user-code fixtures that exercise each rule.
-- **CSS Definition:** web-only by nature. Exempt with that reason, or spec only what it outputs.
+- **CSS Definition:** web-only by nature. Exempt with that reason, or spec only what it outputs. **Ruled s65 (R17): exempt** — `exemptions.json`.
 
 ## 4. Acceptance criteria
 

@@ -5,7 +5,6 @@
     "export": 2
   },
   "owed": {
-    "CSS Definition": "NSP-017 — the escape hatches: the person writes the code, so the spec says what that code can see and how its results come out; not started",
     "Javascript2": "NSP-017 — the escape hatches: the person writes the code, so the spec says what that code can see and how its results come out; not started",
     "JavaScriptFunction": "NSP-017 — the escape hatches: the person writes the code, so the spec says what that code can see and how its results come out; not started",
     "Logic Builder": "NSP-017 — the escape hatches: the person writes the code, so the spec says what that code can see and how its results come out; not started",

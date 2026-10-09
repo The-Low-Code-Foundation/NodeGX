@@ -45,7 +45,8 @@
       "backend-only": 17
     },
     "exempt": [
-      "Component Children"
+      "Component Children",
+      "CSS Definition"
     ]
   },
   "rows": [
@@ -1010,7 +1011,7 @@
       "isVisual": false,
       "tier": "T6",
       "batch": "NSP-017",
-      "note": "web-only by nature — exempt with that reason, or spec only its outputs",
+      "note": "web-only by nature — exempt (R17, 2026-10-09: exemptions.json)",
       "runtimeFile": "packages/noodl-viewer-react/src/nodes/visual/css-definition.ts",
       "runtimeFiles": [
         "packages/noodl-viewer-react/src/nodes/visual/css-definition.ts"
@@ -1046,7 +1047,7 @@
       "dynamicPorts": false,
       "dynamicPortMechanisms": 0,
       "placesWritten": 7,
-      "exempt": null,
+      "exempt": "Web-only by nature: it has no outputs and nothing on the wire; what it does is add its Style text to the page's head as a <style> element for as long as a node with its id exists (ref-counted per node id, css-definition.ts), replace it when Style changes, and remove it with the last one. That is a page effect of the browser, not a behaviour a reducer can state.",
       "warnings": []
     },
     {
@@ -4274,13 +4275,13 @@
       "emitLibs": [],
       "exportStatus": "translated",
       "tests": {
-        "noodl-runtime": 1,
+        "noodl-runtime": 0,
         "noodl-viewer-react": 3,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 1,
         "noodl-mcp": 6,
-        "total": 11
+        "total": 10
       },
       "testsTyped": {
         "noodl-runtime": 0,

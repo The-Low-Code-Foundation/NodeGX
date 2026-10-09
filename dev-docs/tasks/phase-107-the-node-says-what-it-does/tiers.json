@@ -154,6 +154,6 @@
     "JavaScriptFunction": {"tier":"T6","batch":"NSP-017"},
     "Javascript2": {"tier":"T6","batch":"NSP-017"},
     "Logic Builder": {"tier":"T6","batch":"NSP-017","note":"the Blockly node; the user's blocks are the behaviour"},
-    "CSS Definition": {"tier":"T6","batch":"NSP-017","note":"web-only by nature — exempt with that reason, or spec only its outputs"}
+    "CSS Definition": {"tier":"T6","batch":"NSP-017","note":"web-only by nature — exempt (R17, 2026-10-09: exemptions.json)"}
   }
 }

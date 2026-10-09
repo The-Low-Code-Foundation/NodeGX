@@ -1,7 +1,7 @@
 ---
 id: P107-C145
 title: An Expression that reads a name called run, expression or evaluateAtLoad never gets an input for it and always throws "run is not defined"
-status: needs-ruling
+status: open
 phase: P109
 task: ISL-051
 severity: low
@@ -25,3 +25,11 @@ that does not exist. A wire into "run" lands on the Run signal, not on a variabl
 **Proposed fix.** Reserve the three names in `expression-ports.ts` (all three copies — runtime, export, spec) so the editor draws
 no port and the description can say so, or migrate them to a port name that cannot clash. Either way the text reading `run` should
 say why it cannot, at the port, rather than throw at run time.
+
+**Ruled 2026-10-09 (P107 s65), as recommended: "Block the three names".** The editor draws no port for `run`, `expression` or
+`evaluateAtLoad`, and the Expression says plainly that the name is reserved and must be renamed, instead of failing at run time. No
+saved project changes. The question as asked: *"In an Expression, if someone names a variable run, expression or evaluateAtLoad (for
+example `run * 2`), the editor draws a 'run' port, they wire a number in, and it fails every time with 'run is not defined'. The wire
+actually lands on the node's own Run button. What should happen?"* — options: block the three names (recommended) / make them work
+(rename the node's own ports, a migration of every saved Expression) / leave it. The fix reserves the names in all three copies of
+the lexer (runtime, export, spec) and moves the Expression spec to v3 in the same commit — P109's under R16.

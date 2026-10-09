@@ -12,7 +12,7 @@ How every column is found is in the header of the script. `tests` is an upper bo
 - **69** have dynamic ports — NSP-001's derived-port design is not a corner case.
 - **97** are named as a string literal somewhere in `plan.ts` (the exporter's special cases).
 - P18 export status over the population: translated 121 · stubbed 1 · deferred 8 · backend-only 17.
-- **1** exempt — no spec owed, each with its reason (NSP-009 §2, `exemptions.json`; listed below): Component Children (`Component Children`).
+- **2** exempt — no spec owed, each with its reason (NSP-009 §2, `exemptions.json`; listed below): Component Children (`Component Children`), CSS Definition (`CSS Definition`).
 - **9** nodes are named by **no test file at all**, even loosely: Delete User (`noodl.cloud.deleteuser`), HMAC (`noodl.cloud.hmac`), JWT Sign (`noodl.cloud.jwtsign`), JWT Verify (`noodl.cloud.jwtverify`), List Users In Role (`noodl.cloud.listusersinrole`), Model Request (`noodl.cloud.modelrequest`), Remove User From Role (`noodl.cloud.removeuserfromrole`), Update User (`noodl.cloud.updateuser`), Verify Session Token (`noodl.cloud.verifysessiontoken`). For these the spec would be the first test.
 
 ## Totals by tier
@@ -215,7 +215,7 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | **Radio Button** | `net.noodl.controls.radiobutton` | T5 | browser | `noodl-viewer-react/src/nodes/controls/radiobutton.ts` |  | ✓ | 0 |  | translated | 1 / 7 |  |
 | **Slider** | `net.noodl.controls.range` | T5 | browser | `noodl-viewer-react/src/nodes/controls/slider.ts` |  | ✓ | 0 |  | translated | 1 / 4 |  |
 | **Text Input** | `net.noodl.controls.textinput` | T5 | browser | `noodl-viewer-react/src/nodes/controls/text-input.ts` | ✓ | ✓ | 0 |  | translated | 8 / 19 |  |
-| **Columns** | `net.noodl.visual.columns` | T5 | browser | `noodl-viewer-react/src/nodes/visual/columns.ts` |  | ✓ | 0 |  | translated | 3 / 11 |  |
+| **Columns** | `net.noodl.visual.columns` | T5 | browser | `noodl-viewer-react/src/nodes/visual/columns.ts` |  | ✓ | 0 |  | translated | 3 / 10 |  |
 | **Icon** | `net.noodl.visual.icon` | T5 | browser | `noodl-viewer-react/src/nodes/visual/icon.ts` |  | ✓ | 0 |  | translated | 0 / 4 |  |
 | **Component Stack** | `Page Stack` | T5 | browser | `noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx` | ✓ | ✓ | 4 |  | translated | 1 / 5 |  |
 | **Radio Button Group** | `Radio Button Group` | T5 | browser | `noodl-viewer-react/src/nodes/controls/radiobuttongroup.ts` |  | ✓ | 0 |  | translated | 0 / 5 |  |
@@ -227,7 +227,7 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 
 | node | type name | tier | runs in | runtime file | out | dyn | plan | libs | export | tests | note |
 |---|---|---|---|---|:-:|:-:|---:|---|---|---:|---|
-| **CSS Definition** | `CSS Definition` | T6 | browser | `noodl-viewer-react/src/nodes/visual/css-definition.ts` |  |  | 5 |  | translated | 1 / 5 | web-only by nature — exempt with that reason, or spec only its outputs |
+| **CSS Definition** | `CSS Definition` | T6 | browser | `noodl-viewer-react/src/nodes/visual/css-definition.ts` |  |  | 5 |  | translated | 1 / 5 | web-only by nature — exempt (R17, 2026-10-09: exemptions.json) |
 | **Expression** | `Expression` | T6 | browser+cloud | `noodl-runtime/src/nodes/std-library/expression.ts` | ✓ | ✓ | 0 |  | translated | 13 / 24 | its text is JavaScript the node compiles (new Function), not a grammar of ours — the spec runs the same text and says everything around it (NSP-017 §6, s64) |
 | **Script** | `Javascript2` | T6 | browser | `noodl-viewer-react/src/nodes/std-library/javascript.ts` |  | ✓ | 1 | scriptLib | translated | 2 / 6 |  |
 | **Function** | `JavaScriptFunction` | T6 | browser+cloud | `noodl-runtime/src/nodes/std-library/simplejavascript.ts` | ✓ | ✓ | 0 |  | translated | 24 / 44 |  |
@@ -255,11 +255,12 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | **Update User** | `noodl.cloud.updateuser` | T3 | cloud | `noodl-viewer-cloud/src/nodes/cloud/updateuser.ts` | ✓ | ✓ | 0 |  | backend-only | 0 / 0 |  |
 | **Verify Session Token** | `noodl.cloud.verifysessiontoken` | T3 | cloud | `noodl-viewer-cloud/src/nodes/cloud/verifysessiontoken.ts` | ✓ |  | 0 |  | backend-only | 0 / 0 |  |
 
-## Exempt — in the population, no spec owed (1)
+## Exempt — in the population, no spec owed (2)
 
 | node | type name | batch | reason | ruled | graded |
 |---|---|---|---|---|---|
 | **Component Children** | `Component Children` | NSP-016 | Not a node: the runtime never makes one — nodescope.ts createNodeFromModel returns before createNode, after telling the owning component instance which node is its child root (setChildRoot). It has no ports, no state and nothing on the wire; what it does is where a component instance's children are placed, a graph rule. | Richard, 2026-10-08 (README §7): count it as done, with the reason written down | its placement, by a graph scenario once the graph runner places children (NSP-008) |
+| **CSS Definition** | `CSS Definition` | NSP-017 | Web-only by nature: it has no outputs and nothing on the wire; what it does is add its Style text to the page's head as a <style> element for as long as a node with its id exists (ref-counted per node id, css-definition.ts), replace it when Style changes, and remove it with the last one. That is a page effect of the browser, not a behaviour a reducer can state. | Richard, 2026-10-09 (README R17): leave it out — exempt as web-only, rather than spec the stylesheet on the page | nothing — an export or a new runtime that drops the CSS is not caught by the node-spec suite; the templates' look is graded where they are drawn |
 
 ## Excluded from the population (33)
 
