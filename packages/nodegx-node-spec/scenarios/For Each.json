@@ -4227,8 +4227,8 @@
   ]
  },
  {
-  "name": "two rows with one id are one row, labelled by the last and drawn after the next row; a Refresh draws it there again (row C131)",
-  "because": "set :584-631 — one record per id, its fields the last row's; the placing copies the list twice (its rebuild, then the copy): the second copy writes the first row's fields back (F50) and the diff moves the record after the next one",
+  "name": "two rows with one id are one row, labelled by the last and drawn at the first one's place; a Refresh keeps it there (row C131)",
+  "because": "set :584-631 — one record per id, its fields the last row's; the placing copies the list twice (its rebuild, then the copy): the second copy writes the first row's fields back (F50) and the diff moves the record after the next one — renamed in P109 s32 (v8: one row per id, at the first place)",
   "params": {
    "template": "Row",
    "items": [

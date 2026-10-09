@@ -399,6 +399,11 @@ class CollectionImpl extends Array<RecordRef> {
       }
       bItems.push(model);
     }
+    // P109 ISL-049 (row C131): a record that repeats in the new list keeps its first place (collection.ts, the same filter)
+    const seen = new Set<string>();
+    const unique = bItems.filter((m) => !seen.has(m.getId()) && (seen.add(m.getId()), true));
+    bItems.length = 0;
+    bItems.push(...unique);
 
     return this.withBatch(() => {
       const aItems = this;

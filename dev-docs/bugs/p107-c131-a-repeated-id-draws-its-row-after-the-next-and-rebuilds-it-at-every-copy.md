@@ -1,7 +1,7 @@
 ---
 id: P107-C131
 title: A list whose items repeat an id draws that item's row after the row that follows it, and every later copy of the same list (a Refresh) takes that row down and builds it again
-status: scheduled
+status: fixed
 phase: P109
 task: ISL-049
 severity: low
@@ -9,7 +9,7 @@ area: runtime / Repeater and Array (packages/noodl-runtime/src/collection.ts `se
 found: P107 NSP-016 s59, 2026-10-08
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.20; recorded on the runtime target (the s59 probe traces), and the spec copies it (R3)
 kit: node-spec
-regression: packages/nodegx-node-spec/scenarios/For Each.json "two rows with one id are one row, labelled by the last and drawn after the next row; a Refresh draws it there again (row C131)"
+regression: packages/nodegx-node-spec/scenarios/For Each.json "two rows with one id are one row, labelled by the last and drawn at the first one's place; a Refresh keeps it there (row C131)"
 ---
 
 **What a person sees.** Items `[{id:'a', label:'A'}, {id:'a', label:'A2'}, {id:'b', label:'B'}]` show two rows — that one id is one
@@ -27,3 +27,11 @@ where `a` is expected, removes `a` and re-inserts it at 1 — after `b`.
 items' order and a second copy of the same list moves nothing. A ruling first: should a repeated id be one row (today) or two?
 
 **Ruled 2026-10-08 (P107 "Phase 107 Rulings" page), as recommended: "One row per id, at the first item's place, kept across a Refresh".**
+
+**Fixed (P109 ISL-049, s32, 2026-10-09), as proposed and ruled.** `collection.ts` `set` drops a record that repeats in the new list
+before the diff, by id (the diff's own key), the first place winning; conversion still writes each item's fields in turn, so the last
+item labels the record. A list already refused to hold a record twice (`add`, `addAtIndex`), so this only makes the diff agree with
+it. The spec world's `registry.ts` `set` does the same. For Each spec v8. Every spec that lives by the registry (32) conforms on the
+runtime at seeds 13 and 20732 with its mutants; graph scenarios 91 / 91; noodl-runtime 3,077 / 3,077 (`isl-049-c131-one-row-per-id
+.test.js` added: red on the base `collection.ts` on exactly its positive case). For Each control (the base `collection.ts`) red on
+exactly the 1 scenario the fix moved. **The export (P18) has its own list diff:** not checked.

@@ -19,7 +19,7 @@
  *
  * THE LIST (collection.ts `set` :569-700, the registry's `set` here). The Repeater keeps its OWN list of records (`initialize` :232 —
  * an anonymous array, ten draws). Items is copied into it with `set`, the diff: a plain object becomes a record — one with an `id`
- * names that record (every row with that id is the one record, its fields the last row's), one without is a new anonymous record (ten
+ * names that record (every row with that id is the one record, its fields the last row's, at the first row's place — v8, row C131), one without is a new anonymous record (ten
  * draws) unless this list has seen that very object before; then records the new list lacks are removed, the rest put in place, new ones
  * added — each removal and each addition one operation on the Repeater's queue (`initialize` :240-254), the addition at its place in
  * the list. v4 (P109 ISL-049, row C130): an item that is `null` (or `undefined`) has no record and no row, and the rest are copied
@@ -468,7 +468,8 @@ export const Repeater = defineNode({
   // v5 (P109 ISL-049, s32): Items Rendered only after a run of the queue that added or removed a row (row C129)
   // v6 (P109 ISL-049, s32): a rebuild checks only what Template Type uses (row C136)
   // v7 (P109 ISL-049, s32): a Refresh pulsed while a rebuild runs is answered by the rebuild it asked for (row C137)
-  version: 7,
+  // v8 (P109 ISL-049, s32): items that repeat an id are one row at the first item's place, kept there by every copy (row C131)
+  version: 8,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/data/foreach.tsx',
   needs: ['person', 'registry', 'project'],
   worldPool: {

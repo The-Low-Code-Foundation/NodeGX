@@ -644,6 +644,21 @@ Object.defineProperty(Array.prototype, "set", {
       });
     }
 
+    // ISL-049 (P107-C131), ruled "One row per id, at the first item's place, kept across a Refresh". A list
+    // never holds a record twice (`add` and `addAtIndex` refuse one it has), but the new list did: items that
+    // repeat an id are one record, so the diff below walked `[a, a, b]` against `[a, b]`, found `b` where the
+    // second `a` was, and moved `a` after it — at every copy of the same list. The first place wins; the
+    // record's fields are still each item's in turn (written above), so the last item labels it.
+    {
+      const seen = new Set<string>();
+      bItems = bItems.filter((m) => {
+        const id = m.getId();
+        if (seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      });
+    }
+
     // NDA-002, the contract's second clause: `set` is *one* logical mutation, however many
     // items it moves. The diff below reaches `removeAtIndex`/`addAtIndex`/`add`, each of
     // which used to emit its own `change` on top of its `add`/`remove` — so replacing a
