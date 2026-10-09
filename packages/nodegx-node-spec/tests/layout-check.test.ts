@@ -54,29 +54,9 @@ interface Recording {
  * named limit of the model; this list is what step 5 found.
  */
 const FLOOR = "named limit (layout.ts header): flexbox's automatic minimum — a shrinking fill stops at its min-content, the model's floor is 0";
-const ROOM =
-  'P109-S37-SCROLLROOM (ruled 2026-10-09, ISL-052): inside a scrolling Group the room is the visible window, unless the content is longer — the runtime does it on both paths; the model still reads a scroll as endless (a percentage is its content, nothing centres), for P107 to follow';
 const KNOWN: Record<string, string> = {
   'min-content-floor/1280x800/g1': FLOOR,
-  'min-content-floor/390x844/g1': FLOOR,
-  ...Object.fromEntries(
-    ['1280x800', '390x844'].flatMap((vp) =>
-      [
-        'scroll-percent-content/pct',
-        'scroll-percent-content/fix',
-        'scroll-align/nca',
-        'scroll-align/ncb',
-        'scroll-align/nra',
-        'scroll-align/nrb',
-        'scroll-fill/nsb',
-        'scroll-fill/nsf',
-        ...['nf0', 'nf1', 'nf2', 'ns0', 'ns1', 'ns2', 'nh0'].map((id) => `scroll-slides/${id}`)
-      ].map((key) => {
-        const [fixture, id] = key.split('/');
-        return [`${fixture}/${vp}/${id}`, ROOM];
-      })
-    )
-  )
+  'min-content-floor/390x844/g1': FLOOR
 };
 
 const fixtures: Fixture[] = fs

@@ -208,7 +208,8 @@ describe('overlay — the runtime\'s Layout "None", and a child placed Absolute'
 });
 
 describe('scroll and clip', () => {
-  it('a scrolling column is unbounded: nothing grows, it starts at the start, the rest is clipped', () => {
+  // SCROLLROOM (ruled 2026-10-09): the room inside a scroll is the window unless the content is longer
+  it('a scrolling column whose content is longer than the window: every fill stops at its content, it starts at the start, the rest is clipped', () => {
     const parent = column(100, 100, { scroll: true, mainAlign: 'center' });
     const result = layoutChildren(parent, [kid(100, 60), kid(100, 60, { height: runtimePct(100) }), kid(100, 60, { height: fill(1) })]);
     expect(result.children.map((b) => b.y)).toEqual([0, 60, 120]);
@@ -217,6 +218,26 @@ describe('scroll and clip', () => {
     expect(result.overflows).toBe(true);
     expect(result.children[1].visible).toEqual({ x: 0, y: 60, width: 100, height: 40 });
     expect(result.children[2].visible).toBeNull();
+  });
+
+  it('a fill inside a scroll shares what the window leaves, and a long one keeps its content and pushes the rest on', () => {
+    // the checkout: a header, the items as a fill, a footer — short items fill to the footer, long ones scroll it on
+    const page = (items: number) => boxes(column(100, 200, { scroll: true }), [kid(100, 40), kid(100, items, { height: fill(1) }), kid(100, 30)]);
+    expect(page(20).map((b) => [b.y, b.height])).toEqual([[0, 40], [40, 130], [170, 30]]);
+    expect(page(300).map((b) => [b.y, b.height])).toEqual([[0, 40], [40, 300], [340, 30]]);
+  });
+
+  it('a percentage inside a scroll is of the window: Fixed 100% slides are one window each, shares split it', () => {
+    const slides = (w: SizeRule) => boxes(row(300, 100, { scroll: true }), [kid(10, 100, { width: w }), kid(10, 100, { width: w }), kid(10, 100, { width: w })]);
+    expect(slides(pct(100)).map((b) => [b.x, b.width])).toEqual([[0, 300], [300, 300], [600, 300]]);
+    expect(slides(runtimePct(100)).map((b) => [b.x, b.width])).toEqual([[0, 100], [100, 100], [200, 100]]);
+    expect(boxes(row(300, 100, { scroll: true }), [kid(10, 100, { width: pct(50) })])[0].width).toBe(150);
+  });
+
+  it('a scroll aligns only what fits: centred while it fits, at the start once it is longer (safe)', () => {
+    const centred = (n: number) => boxes(column(100, 200, { scroll: true, mainAlign: 'center' }), Array.from({ length: n }, () => kid(100, 100)));
+    expect(centred(1).map((b) => b.y)).toEqual([50]);
+    expect(centred(3).map((b) => b.y)).toEqual([0, 100, 200]);
   });
 
   it('a clipping parent cuts what is drawn to its padding box', () => {

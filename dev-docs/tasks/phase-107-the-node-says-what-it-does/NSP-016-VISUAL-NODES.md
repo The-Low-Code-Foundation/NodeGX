@@ -2285,3 +2285,19 @@ the old content rule reddened the check. Both restored by `cp` and checked with 
 tolerance, on twenty fixtures in CI. Every mismatch is a filed row or a named limit. **Gates (2026-10-09, s71):** the node-spec
 package suite 31 / 31 suites, 1,836 passed, 18 skipped (the stranger's seed-0 rows), exit 0; `tsc --noEmit` clean;
 `browser-check` PASS.
+
+### 8.4 s73, 2026-10-09 — the model learns the scroll ruling (P109-S37-SCROLLROOM)
+
+Richard ruled C154 on 2026-10-09: *"inside a scrolling Group the room is the visible window, unless the content is longer"*.
+P109 ISL-052 (`0859bbbde`, `afac7de50`) made the runtime do it on both scroll paths, added four fixtures (`scroll-align`,
+`-fill`, `-slides`, `-centre-long`) and listed 30 boxes KNOWN as ROOM, where the model still read a scroll axis as
+unbounded. `src/layout.ts` now gives a scroll axis three rules:
+- **Room:** the window is the room and the reference, so a percentage is of the window and a `fill` shares what the window leaves.
+- **Floor:** along the scroll a `fill` never shrinks below its content, so a long one pushes the rest on and the parent scrolls.
+- **Alignment:** the main-axis alignment applies while the children fit; once they're longer they start at the start (`safe`).
+
+The ROOM rows are out of KNOWN. The only KNOWN rows left are the model's min-content floor (2). **Plants:** the old
+`layout.ts` back → the check red on exactly the 30 ROOM boxes, and `tests/layout.test.ts`'s three new scroll rows red
+(the checkout's fill, the slides' percentages, the safe centre). Restored by `cp`, `cmp`-identical. The old unit row (a
+long scrolling column, every fill at its content) still holds under the new rule and is renamed for what it shows. Gates:
+the three layout suites 819 / 819, `tsc --noEmit` clean.

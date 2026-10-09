@@ -104,8 +104,11 @@ export interface LayoutParent {
   /** Nothing is drawn outside the padding box. */
   readonly clip?: boolean;
   /**
-   * The children scroll along the main axis: the axis is unbounded, so nothing grows or shrinks along it (a `fill` is its
-   * basis) and the children start at the start. What a person sees is clipped to the padding box.
+   * The children scroll along the main axis. The room is the visible window unless the content is longer (ruled
+   * 2026-10-09, P107-C154 / P109-S37-SCROLLROOM): a percentage is of the window, a `fill` shares what the window leaves and
+   * never shrinks below its content (so a long one pushes the rest on, and the parent scrolls), and the main-axis
+   * alignment applies only while the children fit, otherwise they start at the start. What a person sees is clipped
+   * to the padding box.
    */
   readonly scroll?: boolean;
 }
@@ -226,7 +229,7 @@ function crossSize(
   return clamp(size, minOf(child, dim, reference), maxOf(child, dim, reference));
 }
 
-/** The flex basis on the main axis: `undefined` reference = an unbounded axis (a hugging or scrolling parent). */
+/** The flex basis on the main axis: `undefined` reference = an unbounded axis (a hugging parent). */
 function basisOf(child: LayoutChild, dim: Dim, reference: number | undefined): number {
   const rule = child[dim];
   if (rule.kind === 'hug') return child.content[dim];
@@ -250,11 +253,14 @@ function resolveMain(
   dim: Dim,
   available: number | undefined,
   reference: number | undefined,
-  outerExtra: number
+  outerExtra: number,
+  scroll = false
 ): number[] {
   const n = children.length;
   const base = children.map((c) => basisOf(c, dim, reference));
-  const min = children.map((c) => minOf(c, dim, reference) ?? (c[dim].kind === 'fill' ? c.floor ?? 0 : undefined));
+  // Along a scroll a `fill` stops at its content, not its floor: the content is longer, so the parent scrolls (SCROLLROOM)
+  const floorOf = (c: LayoutChild) => (scroll ? Math.max(c.floor ?? 0, c.content[dim]) : c.floor ?? 0);
+  const min = children.map((c) => minOf(c, dim, reference) ?? (c[dim].kind === 'fill' ? floorOf(c) : undefined));
   const max = children.map((c) => maxOf(c, dim, reference));
   const hyp = base.map((b, i) => clamp(b, min[i], max[i]));
   const weight = children.map((c) => {
@@ -398,10 +404,11 @@ export function layoutChildren(parent: LayoutParent, children: readonly LayoutCh
     const marginMain = margins.reduce((a, m) => a + m[v.mainEdges[0]] + m[v.mainEdges[1]], 0);
     const gaps = kids.length > 1 ? gap * (kids.length - 1) : 0;
 
-    const bounded = parent.scroll ? undefined : mainRef;
-    const main = resolveMain(kids, v.main, bounded, bounded, marginMain + gaps);
+    // A scroll's room is the window too (SCROLLROOM); what does not fit past the fills' floors scrolls
+    const main = resolveMain(kids, v.main, mainRef, mainRef, marginMain + gaps, parent.scroll);
 
     const used = main.reduce((a, s) => a + s, 0) + marginMain + gaps;
+    // a scroll aligns `safe`: content longer than the window starts at the start, where scrolling reaches it
     const free = parent.scroll ? Math.max(0, mainRef - used) : mainRef - used;
 
     // Spacers take the free space first; the parent's alignment only gets what they leave (none, when there is any).
@@ -409,7 +416,7 @@ export function layoutChildren(parent: LayoutParent, children: readonly LayoutCh
     let lead = 0;
     let between = 0;
     let spacer = 0;
-    const align = parent.scroll ? 'start' : parent.mainAlign ?? 'start';
+    const align = parent.mainAlign ?? 'start';
     if (spacers > 0 && free > 0) {
       spacer = free / spacers;
     } else if (kids.length > 0) {
