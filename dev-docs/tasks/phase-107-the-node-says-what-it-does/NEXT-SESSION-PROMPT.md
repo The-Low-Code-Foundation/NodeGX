@@ -38,7 +38,9 @@ two hop counts).
    `@noodl/runtime/src/javascriptnodeparser`. 26 / 26 red, control green.
 5. **Row C148** (medium, P109's under R16 — told): a Script whose code throws `null` / `undefined` — in a run or a signal's function —
    never runs it again (every catch's `Object.getPrototypeOf(e)` throws, the scheduled flag is never cleared). C147's logger fix alone
-   fixes the run only. When fixed: add `throw null` scenarios for a run and a signal's function to `Javascript2.json`.
+   fixes the run only. **Landed the same day by P109 (`cf6b4b8f8`)**, with the `throw null` regression scenario in `Javascript2.json`
+   (17 scenarios now) and the AC2 plant for "a throw in a signal's function" re-anchored on the new `logScriptError` line — re-run
+   by s66 after it landed: AC2 43 / 43 (Script and Function), both conform on the runtime.
 
 **Readings (2026-10-09).** Script on the runtime: 16 / 16, 200 / 200, 0 divergences, 32 / 32 mutants on seeds 20735, 13, 7, 20734; at
 10,000: 0 divergences, 84 s. Interpreter: every mutant killed on 13, 20735, 7, 20729. AC2 28 / 28. Function and For Each on the runtime
@@ -56,9 +58,9 @@ conform after the face change. `spec-ledger --check` holds. Package suite: 999 /
 4. **Or the Expression v2**: `Variables` / `Objects` / `Arrays` read by the text (the REGISTRY seam). **When the box is quiet:**
    NSP-013's deep run for s11–s14.
 
-**Human decisions: none open.** **P109 holds:** C145 (ruled), C146, C147, C148, Columns v2 (C132–C134), the Page Stack v8 (C120, C126,
-C139), the Router (S18; RouterNavigate v3 landing, s33). When P109 fixes C146, the Function moves to v2; C147's fix adds a `throw null`
-scenario to the Function; C148's to the Script.
+**Human decisions: none open.** **Landed by P109 on 2026-10-09 (s33):** C145 (Expression v3, `5ee9edda4`), C146 (Function v2,
+`2d765dac2`), C147 (`cb7ea0fab`), C148 (`cf6b4b8f8`), C132 (Columns v3, `11fef09c6`), RouterNavigate v3 (`491e8af72`). **P109 still
+holds:** the Page Stack v8 (C120, C126, C139), the Router (S18).
 
 **The census was not regenerated in s66** (it is out of CI and reads the working tree) — regenerate from a clean export when next
 convenient, as below.
