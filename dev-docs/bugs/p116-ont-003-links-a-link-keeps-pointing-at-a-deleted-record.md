@@ -1,7 +1,7 @@
 ---
 id: P116-ONT-003-links
 title: A Link keeps pointing at a record after that record is deleted, on both engines — nothing a person says about "when it goes" can be kept
-status: needs-ruling
+status: open
 severity: medium
 area: backend / Link (Pointer) — no on-delete rule in the contract (`@noodl/backend-contract` `IStorageSchema`, `StorageColumn`) or either engine (`noodl-runtime/src/api/adapters/local-sql/SchemaManager.ts` `_columnToSQL`, `postgres/ddl.ts`: a Pointer is a TEXT id, no foreign key)
 found: P116 ONT-003 s3, 2026-10-08
@@ -29,3 +29,7 @@ but Pointer columns are not foreign keys today, and a Relation's junction rows a
 backend keeps it above the engine, at delete time. Either is a capability-table row per backend. When it lands,
 the claims above flip from not-held to held and their spec says so by failing ("the label is wrong") until the
 projection is told.
+
+**Ruled 2026-10-09 (Richard, P116 s11, README §9 R10): at delete time, in the backend** — not a foreign key. The
+contract grows an on-delete rule on a Pointer (`goes-too` · `stays-unlinked` · `blocks`) and the backend applies it
+inside the delete, the same on every engine, so a project that already holds broken links keeps working.

@@ -1,6 +1,6 @@
 # ONT-007 — The diff is the migration
 
-**Opened 2026-10-08.** **Depends on ONT-003.** **Status: 🟡 s10 (2026-10-09) — AC1 ✅ s10 (the reach names a verb: `verbReach()`, §6.10), AC2 ✅, AC3 ✅ (s8); the reach review ✅ s9 (Fable: seven findings, four fixed, one pinned failing, two named); the route owed on the executor-home ruling. See §6.**
+**Opened 2026-10-08.** **Depends on ONT-003.** **Status: ✅ s11 (2026-10-09) — AC1 ✅ s10 (the reach names a verb: `verbReach()`, §6.10), AC2 ✅, AC3 ✅ (s8); the reach review ✅ s9 (Fable: seven findings, four fixed, one pinned failing, two named); s11: the executor moved to the contract's `src/` (README §9 R9), the route `POST /admin/world/migrate` built (dry run, backup, steps, the permission rules moved and re-said), `describeTable` on the surface and both engines (s9's pinned failure green); three engine/executor defects found and fixed on the way (§6.11). What is left is ONT-008's (the view) and the small items in §6.11. See §6.**
 
 > **Model check, before anything (Richard, 2026-10-08):** this task wants **Opus 5.5 to build; Fable 5.1 to review the reach** — 'what survives' is where the error hides, and the suite grades only what someone thought to claim. Your system prompt says which model you are. If it is not the one named here, stop before any work and say so in one line ("this task is marked for Opus 5.5 to build; you are on <model> — switch with /model, or say go"), and wait for Richard's word. Do not start on the wrong model because the check felt like a formality.
 
@@ -133,7 +133,7 @@ Readings taken 2026-10-09 ~17:15 CEST on the working tree over HEAD `84018e920`,
 
 ### 6.5 Owed
 
-- **The route.** `POST /admin/world/migrate` (or the MCP's `write_world` growing a `migrate` arm): dry run → words →
+- ~~**The route.**~~ — built s11 (§6.11). `POST /admin/world/migrate` (or the MCP's `write_world` growing a `migrate` arm): dry run → words →
   the person's yes → `POST /admin/backups` → the steps through `mutateSchema`. Today the spec passes the backup
   function (on SQLite the backend's own online snapshot, `snapshotDatabase`; on PostgreSQL a recorder).
 - ~~AC3, the rename~~ — built s8 (§6.7).
@@ -143,7 +143,7 @@ Readings taken 2026-10-09 ~17:15 CEST on the working tree over HEAD `84018e920`,
   keeps rules under `security.json` `collections[<name>]`, and after a rename the rules under the old name protect
   nothing (the collection falls to `defaults`). `renameTable` deliberately does not touch them; the route must move
   `mustMove` rows in the same run, and have the running backend take them up (BMG-016), before it answers.
-- **Where the executor lives, for the route.** `runMigration` is in `@noodl/backend-contract/conformance`; nothing in
+- ~~**Where the executor lives, for the route.**~~ — ruled s11 (README §9 R9: the contract's `src/`) and moved. `runMigration` was in `@noodl/backend-contract/conformance`; nothing in
   `nodegx-backend/src` imports from `conformance/` today and the esbuild config has no alias for it (measured s8:
   `grep -rn backend-contract/conformance src` → none). The route needs the executor moved to `src/` (or a build alias)
   first — a decision, not a detail. Then: the plan as the body (admin-only, same power as `POST /admin/schema`), dry
@@ -258,3 +258,65 @@ rename's new id forgotten; a step on nothing after reported as still bound. Back
 **Not claimed:** the `end` arm of `fields` has no spec — neither fixture world has a dated end the plan reaches.
 `rebindVerbs()` (re-saying the ids for the person) is not built; the rows say what to re-say.
 
+### 6.11 s11, 2026-10-09 — the route, and the words said again (Opus 5.5)
+
+Richard ruled the three owed questions in plain words, each the recommendation (README §9 R8–R10): keep a person's word
+SQL reserves; **the executor lives in the backend contract's main code**; a link's "when it goes" is kept by the backend at
+delete time (bug `P116-ONT-003-links`, now `open`, not built here).
+
+| Piece | Where | What it does |
+|---|---|---|
+| The executor, moved | `nodegx-backend-contract/src/migration.ts` (`conformance/migration.ts` re-exports it — a spec pins they are the same function) | `dryRunMigration` / `runMigration` as before, over a structural `MigrationContext`; `migrationContextOf(facade)` (the facade's `raw*` calls — the master key, an admin route). |
+| A plan from a body | `migrationPlanProblems(plan)` | Shape only, in words: steps/checks/refused present; each step one of backup/schema/move with words; a known schema action naming a table; a known move; a known check. The executor's `applySchema` now throws on an action it does not know — **before, an unknown action was counted as a step done.** |
+| The rules after | `rulesAfterMigration(plan, rules, targetOf)` | Pure. A renamed collection's rules move to its new name (refused if the new name already has rules); each `{ path }` rule's hops are re-said — the field a `follow` hop follows and the field a `from` hop matches `by` (on the collection that hop is on, walked from `_User` as `permissionReach` walks it), a `to` naming the renamed collection, a hop filter's top-level keys; a renamed field said deeper inside a filter is a `problem`. Read before the run, by the schema as it stands. |
+| The route | `nodegx-backend/src/server/admin-world.ts`, `POST /admin/world/migrate` (admin, audited `world.migrate`) | `{ plan }` → the dry run: `says` (the plan's words), `dryRun`, `rules` it would move, `why` when something stops it. `{ plan, run: true[, acceptLosses] }` → refuses what `POST /admin/schema` refuses (the four system fields, the backend's `_`-collections, `_User`'s own and sign-in fields, its words); checks the rules after would pass `validateSecurityConfig`; the backup through the backup subsystem; the steps; then the rules moved in the RUNNING config (`security.save()`) — the next request is judged by them (BMG-016). 409 refused (nothing moved), 200 ran, 500 `partly` (the rules moved for the steps that ran, never the rest). |
+| PostgreSQL's backup | the same route | The backend cannot back up a PostgreSQL store (BRG-008). The run is **409 until the person says where theirs is** (`backupTakenElsewhere: "<words>"`), kept as `backup: { elsewhere }` in the answer and the audit. A decision taken here — the alternative was to refuse PostgreSQL outright. |
+| `describeTable` | `IStorageSchema` (18 names), both schema managers, `SCHEMA_COVERAGE` (uncovered, graded by ONT-007), `POST /admin/schema` (501/400 in words, `_`-collections refused, audited), the executor | Says a collection's words and any of its fields' again; null/empty takes them away; a field it does not have is refused. `planMigration` emits it for a kept collection whose words changed (its own, or a kept field's), after the rules and before the drops — **no reach row**: nothing a component, a rule or a verb reads has moved. §6.9 #5's `it.failing` is now `it`, with a restart read. |
+
+**Found and fixed (each a bug file, `commit: 993a3ff1e`):**
+
+1. **`P116-ONT-007-pagecap` (high, before any production caller).** The executor read 500 a page and stopped at the first
+   short page. The facade caps a page at `queries.maxLimit` (settable at runtime down to `defaultLimit`); under a cap of
+   200 a migration would count 200, move 200, and drop the old field from everyone. The conformance context has no cap,
+   so no grade saw it. Now it reads until a page comes back empty.
+2. **`P116-ONT-007-pgrenamememo` (high).** On PostgreSQL, after a rename, the very next request through a path rule
+   answered **500** — `"subscription" on "Person" is not a declared link (it is String)` — while `GET /admin/schema`
+   showed the link correctly. `declaredProperties()` memoises against the schema OBJECT; `renameColumn` renamed the
+   column in that object and `renameTable` retargeted others' links in theirs (BMG-003 had fixed the same for
+   `addColumn`). Fresh copies now. **Why s8's grade missed it:** it read links back through the wire and the model
+   (`getTableSchema`), never through the adapter's own typed reading — the one a `$path` and `_rowToRecord` use.
+3. **`P116-ONT-007-selflink` (medium, both engines).** `renameTable` retargeted every OTHER collection's links and wrote
+   its own as `{ ...schema, name }`: a topic's `parent` kept pointing at "Topic" after the rename.
+
+**Graded** (2026-10-09 ~19:40–19:58 CEST, in band; a peer's `nodegx-node-spec -w 2` ran for the first part):
+
+- `nodegx-backend-contract` `npx jest` **219 / 219** after the route (`tests/migration.test.ts` 20: the cap, the plan
+  validator, the rules — no engine).
+- `nodegx-backend` `ont-007-route` **19 / 19** at the route commit (SQLite and PostgreSQL over real sockets; the rename
+  on a LOCKED backend: the same people seen before and after as each signed-in person, the moved `nobody` rule refusing
+  on the next request, `security.json` on disk); with 15 more specs around it **298 / 298**, exit 0.
+- Mutants, each red on its own spec: the old page loop (contract 2, route 2); the rules not moved (route 3); PostgreSQL's
+  in-place `renameColumn` and in-place retarget (`ont-007-migration` 1 each — the first version of that case read no
+  memo between the two renames and passed the mutant; a read between them is what made it measure); the planner without
+  its `describeTable` step (`migrate.test.ts` 5).
+- After `describeTable` (19:57): `nodegx-project-contract` **195 / 195** (`migrate.test.ts` 47: the four pinned plans now
+  say Person's words again, and three new cases — a sentence said again is `[backup, describeTable]` with no reach, the
+  same world twice is `[backup]`, a field's words carried by name); `nodegx-backend-contract` **219 / 219**; `noodl-mcp`
+  `ont002WorldTools` + `toolDisclosure` **30 / 30**, `[surface] 8261 tokens / 20 resident tools — 19 under` (unchanged);
+  `nodegx-backend`, 18 specs (the 16 above plus `brg-003-conformance-gate` and `-declared`, which read
+  `SCHEMA_COVERAGE`), **312 / 312, exit 0** — `ont-007-route` 23 (the schema action: words said and taken away, a field it
+  does not have and `_User` refused), §6.9 #5's case an `it` on both engines with a restart read;
+  `npm run ontology-census:check` fresh.
+- `tsc`: contract, backend `tsconfig.json`, runtime, project contract (both configs) clean; backend `tsconfig.tests.json` red only on the four known
+  ISL-010 lines (`P116-ONT-003-tsc`).
+
+**Not built / owed:**
+
+- **The route's read-only twin.** The dry run is a POST on the same pattern, so `admin:readonly` cannot call it
+  (`READONLY_SAFE_ROUTES` is by route, not body). ONT-008's page may want a `POST /admin/world/migrate/dry-run`.
+- **`-renamecolumn`** (a check or index on a renamed field) is still open — the planner takes such rules off first, so a
+  plan never meets it; a hand rename still does.
+- **Rules on a deleted collection or a dropped field** are left as they are (the person's); `permissionReach` names them
+  for the page.
+- **The MCP** has no tool for the route (`write_world` does not grow a `migrate` arm here): the surface budget is the
+  reason to ask before adding one.
