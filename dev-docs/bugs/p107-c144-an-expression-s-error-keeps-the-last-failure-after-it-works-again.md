@@ -2,6 +2,7 @@
 id: P107-C144
 title: An Expression's Error keeps the last failure after the expression works again — a wire on Error still shows "The expression threw …" beside a good Result
 status: fixed
+commit: 99c61cede
 phase: P109
 task: ISL-051
 severity: low

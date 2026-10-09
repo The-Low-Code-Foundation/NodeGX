@@ -1,6 +1,6 @@
 # ISL-051 — An Expression says what it last did
 
-**Status: ⬜ scoped s32 (2026-10-09) at `bd849bf0c`, nothing built.** **Source:** 2 bugs P107 NSP-017 s64 filed on the Expression
+**Status: 🟡 s32 (2026-10-09): 1 of 2 fixed — C144 `99c61cede` (§7); C145 waits on Richard's ruling (§3).** Scoped s32 at `bd849bf0c`. **Source:** 2 bugs P107 NSP-017 s64 filed on the Expression
 and handed to P109 under R16 (`12728097b`): 2 low, **1 to ask** (C145). **Side:** noodl-runtime (`nodes/std-library/expression.ts`,
 `expression-ports.ts`), the Expression spec (`packages/nodegx-node-spec`, v1), and the export's copy of the port rules (P18's).
 
@@ -17,7 +17,7 @@ the editor draws for a name the node can never read (C145).
 
 | bug | node | severity | status | build | what a person sees |
 |---|---|---|---|---|---|
-| [P107-C144](../../bugs/p107-c144-an-expression-s-error-keeps-the-last-failure-after-it-works-again.md) | Expression | low | scheduled | as ruled for D25 | An Expression's Error keeps the last failure after the expression works again — a wire on Error still shows "The expression threw …" beside a good Result |
+| [P107-C144](../../bugs/p107-c144-an-expression-s-error-keeps-the-last-failure-after-it-works-again.md) | Expression | low | **fixed** `99c61cede` | as ruled for D25 | An Expression's Error keeps the last failure after the expression works again — a wire on Error still shows "The expression threw …" beside a good Result |
 | [P107-C145](../../bugs/p107-c145-an-expression-that-reads-run-expression-or-evaluateatload-always-throws.md) | Expression | low | needs-ruling | ask | An Expression that reads a name called run, expression or evaluateAtLoad never gets an input for it and always throws "run is not defined" |
 
 C144 follows the ruling D25 already has ("Clear it to blank text", Track F rulings page, 2026-10-05: a success sends blank text on
@@ -45,3 +45,11 @@ two seeds, a control. The export's copy of the port rules (`expression-ports`, t
 - **AC2** — C145 asked in plain words and ruled.
 - **AC3** — every row fixed as ruled, one commit each, with a control red on exactly its scenarios and the mutants at two seeds.
 - **AC4** — `node scripts/bugs.js --from P107` lists none of this task's rows as `open` or `needs-ruling`.
+
+## 7. Session 32 (2026-10-09) — C144
+
+**AC1:** C144's two scenarios played on the runtime at `642a533fe` conform to Expression v1 (Error left on the wire).
+
+| Row | Commit | What changed | Grade |
+|---|---|---|---|
+| C144 | `99c61cede` | a working evaluation that finds an error writes Error as blank text and sends it, once (D25's ruling). Expression spec v2; the two scenarios renamed | runtime 33 / 33 at seeds 13 and 20732; mutants 175 / 175 at both; control red on exactly the 2; noodl-runtime Expression tests 596 / 596 |
