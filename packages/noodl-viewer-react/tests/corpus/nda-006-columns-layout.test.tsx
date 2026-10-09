@@ -179,6 +179,15 @@ describe('NDA-006 §3: responsive layout', () => {
     expect(calcAutoFit(200, 1000, 20).columnAmount).toBe(4);
   });
 
+  // P109 ISL-050 (P107-C134): a minimum plus a gap of 0 divided by zero, and `new Array(Infinity)` threw in render
+  test('C134: a step at or below 0 is one column, and the count never passes the children', () => {
+    expect(calcAutoFit(16, 500, -16).columnAmount).toBe(1);
+    expect(calcAutoFit(16, 500, -20).columnAmount).toBe(1);
+    expect(calcAutoFit(16, 500, -15.999, 3).columnAmount).toBe(3);
+    // the control: within the children the count is the fit, as before
+    expect(calcAutoFit(200, 1000, 20, 10).columnAmount).toBe(4);
+  });
+
   test('C6: Auto Fit never returns zero columns', () => {
     // A container narrower than one minimum column, and the degenerate "no minimum width"
     // case — both of which produced NaN widths through the fold path.

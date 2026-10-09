@@ -831,9 +831,8 @@
   ]
  },
  {
-  "name": "row C134 — Auto Fit with Min Column Width 16 and Horizontal Gap −16: Default, and a resize sends nothing (the runtime divides by zero, throws while React draws the Columns, and the page goes blank)",
-  "because": "Auto Fit is Default (`resolveColumnLayout` :241-247); R11. P107-C134: `calcAutoFit` :302-311 counts `(width + gap) / (min + gap)` — Infinity at min + gap = 0 — and `new Array(Infinity)` throws in render",
-  "row": "NSP-016 §6 C134",
+  "name": "row C134 — Auto Fit with Min Column Width 16 and Horizontal Gap −16: Default, and a resize sends nothing",
+  "because": "Auto Fit is Default (`resolveColumnLayout` :241-247); R11. P107-C134: `calcAutoFit` :302-311 counts `(width + gap) / (min + gap)` — Infinity at min + gap = 0 — and `new Array(Infinity)` throws in render — P109 s32: fixed (ISL-050), the row mark dropped",
   "params": {
    "sizing": "autoFit",
    "minWidth": 16,

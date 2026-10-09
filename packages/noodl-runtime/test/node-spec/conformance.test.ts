@@ -112,11 +112,7 @@ const WITHHELD: Record<string, Readonly<Record<string, Withheld>>> = {
 };
 
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
-  // s60 — the Columns' own row (C133, a breakpoint layout that was not a string, fixed in P109 ISL-050)
-  'net.noodl.visual.columns': [
-    // s60 deep run (seed 3455271128, shrunk to one step: Auto Fit, Min Column Width 1, Horizontal Gap −1) — C134
-    { row: 'NSP-016 §6 C134 — Auto Fit with Min Column Width + Horizontal Gap = 0 divides by zero and throws while React draws the Columns', matches: (d: Divergence) => threwWith(d, 'Invalid array length') }
-  ],
+  // The Columns' own rows, C133 (a breakpoint layout that was not a string) and C134 (Auto Fit dividing by zero), were fixed in P109 ISL-050
   // s54 — the Video's own rows (C96–C100). The Text, Shape, Image and Group carry none: their C79 (Pointer Events written after Opacity
   // 0 let the invisible element take the pointer) was fixed in P109 ISL-031, the C86–C90 and C95 of the Group in ISL-038
   Video: [

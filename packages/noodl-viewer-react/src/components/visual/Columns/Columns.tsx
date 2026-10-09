@@ -222,7 +222,9 @@ export function resolveColumnLayout(
     ColumnsProps,
     'minWidth' | 'marginX' | 'sizing' | 'mediumBreakpoint' | 'mediumLayout' | 'smallBreakpoint' | 'smallLayout'
   >,
-  containerWidth: number | null
+  containerWidth: number | null,
+  /** How many children the columns hold — Auto Fit never draws more columns (P107-C134). */
+  childCount?: number
 ) {
   const minWidth = toPixels(props.minWidth);
   const marginX = toPixels(props.marginX);
@@ -245,7 +247,7 @@ export function resolveColumnLayout(
     // breakpoint ones — so no band is in force and `Default` is the honest reading. Reporting
     // the band the width falls in would name a layout that is not on screen, which is the one
     // thing these ports exist to make impossible.
-    return { ...calcAutoFit(minWidth, containerWidth, marginX), breakpoint: 'Default' as ColumnsBreakpoint };
+    return { ...calcAutoFit(minWidth, containerWidth, marginX, childCount), breakpoint: 'Default' as ColumnsBreakpoint };
   }
 
   const picked = pickBreakpointLayout(columnLayout, props, containerWidth);
@@ -305,9 +307,14 @@ export function pickBreakpointLayout(
  * zero, so it degrades to a single column, which is the honest answer to "fit columns of no
  * minimum width".
  */
-export function calcAutoFit(minWidth: number, containerWidth: number, marginX: number) {
-  const columnAmount =
-    minWidth > 0 ? Math.max(1, Math.floor((containerWidth + marginX) / (minWidth + marginX))) : 1;
+export function calcAutoFit(minWidth: number, containerWidth: number, marginX: number, childCount?: number) {
+  // P109 ISL-050 (P107-C134), ruled "Treat it as one column, and never draw more columns than there are children": only
+  // `minWidth > 0` was guarded, so a gap of minus the minimum divided by zero, and `new Array(Infinity)` threw in render and
+  // blanked the page; a step just above 0 asked for an enormous count. A step at or below 0 is one column, and the count never
+  // passes the children — as CSS `auto-fit` collapses the empty tracks.
+  const step = minWidth + marginX;
+  const fit = minWidth > 0 && step > 0 ? Math.floor((containerWidth + marginX) / step) : 1;
+  const columnAmount = Math.max(1, childCount === undefined ? fit : Math.min(fit, childCount));
 
   return {
     layout: new Array(columnAmount).fill(1) as number[],
@@ -580,7 +587,7 @@ export function Columns(props: ColumnsProps) {
   // It sits above the early returns because the effect is a hook. `resolveColumnLayout` is pure
   // and cheap, so running it on a render that goes on to return `null` costs an object.
   const columnLayout = readColumnLayoutString(props.layoutString);
-  const resolved = columnLayout === null ? null : resolveColumnLayout(columnLayout, props, containerWidth);
+  const resolved = columnLayout === null ? null : resolveColumnLayout(columnLayout, props, containerWidth, children.length);
   const breakpoint: ColumnsBreakpoint = resolved?.breakpoint ?? 'Default';
 
   /**
