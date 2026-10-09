@@ -1,0 +1,71 @@
+{
+  "name": "justify-space-between",
+  "rule": "space-between puts the free space between the children; Align Items centres them across",
+  "nodes": [
+    {
+      "id": "row",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 400,
+          "unit": "px"
+        },
+        "height": {
+          "value": 100,
+          "unit": "px"
+        },
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "alignItems": "center"
+      },
+      "children": [
+        {
+          "id": "j1",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 50,
+              "unit": "px"
+            },
+            "height": {
+              "value": 50,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "j2",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 50,
+              "unit": "px"
+            },
+            "height": {
+              "value": 30,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "j3",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 50,
+              "unit": "px"
+            },
+            "height": {
+              "value": 70,
+              "unit": "px"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

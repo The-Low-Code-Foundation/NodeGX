@@ -1,0 +1,77 @@
+{
+  "name": "min-max",
+  "rule": "a min or max freezes a fill and the rest is shared again",
+  "nodes": [
+    {
+      "id": "row",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 400,
+          "unit": "px"
+        },
+        "height": {
+          "value": 100,
+          "unit": "px"
+        },
+        "flexDirection": "row"
+      },
+      "children": [
+        {
+          "id": "capped",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "height": {
+              "value": 50,
+              "unit": "px"
+            },
+            "maxWidth": {
+              "value": 100,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "free",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "height": {
+              "value": 50,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "floored",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 10,
+              "unit": "%"
+            },
+            "height": {
+              "value": 50,
+              "unit": "px"
+            },
+            "minWidth": {
+              "value": 120,
+              "unit": "px"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

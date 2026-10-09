@@ -51,11 +51,12 @@ NSP-022)** — unchanged by s68 and s69 (s69 added no node).
    Watch for these, already suspected: the native-scroll path (overflow on the Group itself) is not the unbounded axis; a
    shrinking `fill` meets the browser's min-content floor (the model's `floor` is 0).
 4. **When the box is quiet:** the full node-spec package suite once (`-w 2`), and NSP-013's deep run for s11–s14.
-5. **The world's HISTORY for C120 / C126 (P109 is waiting on it — told 2026-10-09, s68):** `src/world.ts` models only
-   `history.pushState` (:123, :2123, :2804); a Component Stack's fix needs `history.back()` and `history.replaceState`, with
-   their `popstate` as the browser fires it, on both targets. world.ts is P107's (the format, stranger-guarded: rewrite the
-   hashes and re-run `tests/stranger.test.ts` in the same commit). Light (no browser) — do it before or between steps 3–5,
-   then tell P109 (`opennoodl-1e`) it can fix C120 / C126.
+5. ✅ **s70: the world's HISTORY for C120 / C126 — `b7950a3b9`.** world.ts LOCATION, THE SESSION HISTORY: entries + index;
+   `replaceState` (op `replace`), `back()` (op `back`, lands at the next yield, popstate then hashchange, one at a time, nothing on
+   the first entry); spec `Patch.replace` / `historyBack`, `AnswerCall {op:'history', how}`, `WorldHandlers.popstate`; the runtime
+   target lands waiting traversals in `yieldToEventLoop`. Probed on the runtime with a real Page Stack (back after a push → it hears
+   popstate and resets to Home; control stays). P109 (`opennoodl-1e`) told the same day. Their fix is the first real caller: a
+   frame disagreement between the targets on the landing is P107's.
 
 **Human decisions: none open.** **P109 holds:** the Page Stack (C120, C126 — waiting on item 5), the Router (S18). C150 and
 C151 fixed by P109 in `024e2ee55` (Expression spec v5). **P112 holds:** P107-SIZE.

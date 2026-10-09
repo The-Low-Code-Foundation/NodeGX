@@ -1,0 +1,54 @@
+{
+  "name": "row-fill-beside-fixed",
+  "rule": "a percent on a row's axis is a fill (basis and weight the percent): 100% beside a 100 px sibling shrinks to what is left",
+  "nodes": [
+    {
+      "id": "row",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 400,
+          "unit": "px"
+        },
+        "height": {
+          "value": 100,
+          "unit": "px"
+        },
+        "flexDirection": "row"
+      },
+      "children": [
+        {
+          "id": "fixed",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 50,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "fill",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "height": {
+              "value": 50,
+              "unit": "px"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "name": "hug",
+  "rule": "a group sized to its content is its children and its padding; its siblings stack after it",
+  "nodes": [
+    {
+      "id": "col",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 400,
+          "unit": "px"
+        },
+        "height": {
+          "value": 300,
+          "unit": "px"
+        },
+        "flexDirection": "column"
+      },
+      "children": [
+        {
+          "id": "hugger",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "contentSize",
+            "flexDirection": "row",
+            "columnGap": {
+              "value": 5,
+              "unit": "px"
+            },
+            "paddingTop": {
+              "value": 8,
+              "unit": "px"
+            },
+            "paddingRight": {
+              "value": 8,
+              "unit": "px"
+            },
+            "paddingBottom": {
+              "value": 8,
+              "unit": "px"
+            },
+            "paddingLeft": {
+              "value": 8,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "h1",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 40,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 20,
+                  "unit": "px"
+                }
+              }
+            },
+            {
+              "id": "h2",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 60,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 30,
+                  "unit": "px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "after",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 20,
+              "unit": "px"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,474 @@
+{
+  "fixture": "justify-space-between",
+  "measuredWith": "scripts/node-spec/layout-measure.js (header: what each field is)",
+  "viewports": {
+    "1280x800": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "consoleErrors": [],
+      "nodes": [
+        {
+          "id": "page",
+          "type": "Page",
+          "parent": "fb606128-0ee2-3df7-65fa-5d74fad28095",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 800
+          },
+          "size": {
+            "w": 1280,
+            "h": 800
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-2c5kktzbp1w",
+          "scroll": {
+            "sw": 1280,
+            "sh": 800,
+            "cw": 1280,
+            "ch": 800
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "row",
+          "type": "Group",
+          "parent": "page",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 400,
+            "h": 100
+          },
+          "size": {
+            "w": 400,
+            "h": 100
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-fh8w99eoqj",
+          "scroll": {
+            "sw": 400,
+            "sh": 100,
+            "cw": 400,
+            "ch": 100
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "j1",
+          "type": "Group",
+          "parent": "row",
+          "box": {
+            "x": 0,
+            "y": 25,
+            "w": 50,
+            "h": 50
+          },
+          "size": {
+            "w": 50,
+            "h": 50
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-midw50kz1z",
+          "scroll": {
+            "sw": 50,
+            "sh": 50,
+            "cw": 50,
+            "ch": 50
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 25
+          }
+        },
+        {
+          "id": "j2",
+          "type": "Group",
+          "parent": "row",
+          "box": {
+            "x": 175,
+            "y": 35,
+            "w": 50,
+            "h": 30
+          },
+          "size": {
+            "w": 50,
+            "h": 30
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-midw50kz1z",
+          "scroll": {
+            "sw": 50,
+            "sh": 30,
+            "cw": 50,
+            "ch": 30
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 175,
+            "y": 35
+          }
+        },
+        {
+          "id": "j3",
+          "type": "Group",
+          "parent": "row",
+          "box": {
+            "x": 350,
+            "y": 15,
+            "w": 50,
+            "h": 70
+          },
+          "size": {
+            "w": 50,
+            "h": 70
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-midw50kz1z",
+          "scroll": {
+            "sw": 50,
+            "sh": 70,
+            "cw": 50,
+            "ch": 70
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 350,
+            "y": 15
+          }
+        }
+      ]
+    },
+    "390x844": {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "consoleErrors": [],
+      "nodes": [
+        {
+          "id": "page",
+          "type": "Page",
+          "parent": "fb606128-0ee2-3df7-65fa-5d74fad28095",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 390,
+            "h": 844
+          },
+          "size": {
+            "w": 390,
+            "h": 844
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-2c5kktzbp1w",
+          "scroll": {
+            "sw": 400,
+            "sh": 844,
+            "cw": 390,
+            "ch": 844
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "row",
+          "type": "Group",
+          "parent": "page",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 400,
+            "h": 100
+          },
+          "size": {
+            "w": 400,
+            "h": 100
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-fh8w99eoqj",
+          "scroll": {
+            "sw": 400,
+            "sh": 100,
+            "cw": 400,
+            "ch": 100
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": "j1",
+          "type": "Group",
+          "parent": "row",
+          "box": {
+            "x": 0,
+            "y": 25,
+            "w": 50,
+            "h": 50
+          },
+          "size": {
+            "w": 50,
+            "h": 50
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-midw50kz1z",
+          "scroll": {
+            "sw": 50,
+            "sh": 50,
+            "cw": 50,
+            "ch": 50
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 0,
+            "y": 25
+          }
+        },
+        {
+          "id": "j2",
+          "type": "Group",
+          "parent": "row",
+          "box": {
+            "x": 175,
+            "y": 35,
+            "w": 50,
+            "h": 30
+          },
+          "size": {
+            "w": 50,
+            "h": 30
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-midw50kz1z",
+          "scroll": {
+            "sw": 50,
+            "sh": 30,
+            "cw": 50,
+            "ch": 30
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 175,
+            "y": 35
+          }
+        },
+        {
+          "id": "j3",
+          "type": "Group",
+          "parent": "row",
+          "box": {
+            "x": 350,
+            "y": 15,
+            "w": 50,
+            "h": 70
+          },
+          "size": {
+            "w": 50,
+            "h": 70
+          },
+          "padding": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "border": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "position": "relative",
+          "overflow": "visible visible",
+          "className": "ndl-d-midw50kz1z",
+          "scroll": {
+            "sw": 50,
+            "sh": 70,
+            "cw": 50,
+            "ch": 70
+          },
+          "opacity": 1,
+          "transformed": false,
+          "hit": true,
+          "inParent": {
+            "x": 350,
+            "y": 15
+          }
+        }
+      ]
+    }
+  }
+}

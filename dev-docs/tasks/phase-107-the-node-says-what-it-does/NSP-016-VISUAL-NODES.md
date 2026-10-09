@@ -2196,5 +2196,48 @@ budget. `layout.ts` is 2.8 KB of it; the entry was about 266 KB before. `npm run
 for `src/spec.ts` and `src/nodes/dropdown.ts`) + catalog-parity + page-model + types + schema + spec-ledger 443 passed,
 18 skipped (the stranger's seed-0 rows, by design), batch-visual 19 / 19, `tsc --noEmit` clean, `browser-check` PASS.
 
-**Step 3 next** (heavy: a real browser, one run at a time, when the box is quiet).
+**Step 3 next** (heavy: a real browser, one run at a time, when the box is quiet). Done in s70, below.
+
+### 8.2 s70, 2026-10-09 — steps 3–5: the measurement, the first fixtures, the check
+
+**Step 3, the measurement** (`scripts/node-spec/layout-measure.js`). It reuses `render-report.js`'s `withRenderedPage`: one
+headless Chrome, torn down after each project. **Node to element without a viewer change:** every visual node renders inside a
+`NoodlReactComponent` whose props carry the node (`props.noodlNode`, react-component-node.ts :977). The reader walks React's
+fibers from the page's elements to those wrappers and asks each node `getDOMElement()`. A node's parent is the nearest OTHER
+node above it in the fiber tree. Its own inner component carries the node too, so the first version named every node as its
+own parent. **What it measured** is stated per field in the script's header: `box` is `getBoundingClientRect()` (border box
+after transforms); `size` is `offsetWidth/Height`; `inParent` is the box in the parent's padding box (the model's
+coordinates); `hit` is `elementFromPoint` at the centre landing inside the element (a rect is not visibility); `opacity` is
+the product up the tree; `transformed`. A fixture is nested nodes placed on a Page at `/`. **Graded first by hand:** a
+400 × 300 column, padding 20, gap 10, children at (20, 20) and (20, 80). Then a planted control (gap 30, `b` 300 wide) moved
+`b` to (20, 100), 300 wide, at both viewports.
+
+**Step 4, the fixtures** (`packages/nodegx-node-spec/layout-fixtures/`, 11, one rule each): column-gap, row-fill-beside-fixed,
+percent-of-padded-parent, min-max, overlay, scroll-native, scroll-iscroll, align-spacers, justify-space-between, hug,
+transform. **Recorded, as a scenario is:** `layout-measure.js --record <dir> [--only a,b]` writes `measured/<name>.json` (the
+fixture's own nodes at 1280×800 and 390×844). The comparison then runs in CI with no browser.
+
+**Step 5, the check** (`tests/layout-check.test.ts`). For every fixture node with children: `layoutChildren` over `layoutOf` of
+it and its children. Its outer size and each child's `content` come from the measurement (the model does not measure text). Each
+child's layout box (drawn box when transformed) is compared with `inParent` and the measured size, tolerance 0.5 px. A node with
+anything in `outside` is reported, not graded. Mismatches must equal `KNOWN` both ways. `hugSize` is graded on the hug fixture.
+**Result: 62 boxes match, no mismatch, 2 reported** (scroll-iscroll at both viewports: Native platform scroll is `web-only`).
+**Planted twice, because a first-run green proves nothing:** the model's gap set to 0 reddened exactly the rows with a gap
+(column-gap `b`, hug `h2`, scroll-native s2–s4). The mapping's left margin set to 0 reddened exactly `half`, the one node with
+a margin. Both restored.
+
+**Found — two rows on the path the check does not grade** (Native platform scroll off, the better-scroll path):
+- **P107-C152** (medium): the gap is dropped. The inner `scroll-wrapper-internal` copies the direction, not the gap. Children
+  at 0 / 100 / 200, natively 0 / 110 / 220.
+- **P107-C153** (medium): nothing clips. Overflow is set only for Clip Content or the native path. The third child, below the
+  200 px scroller, is drawn and takes a press; natively it is hidden.
+Both are pinned in the check as still firing, each beside the native path's opposite reading (R16: the fix is P109's).
+
+**Seen, not yet a row:** a percent height inside a scrolling column (scroll-native `s4`, 50%) measures 0 high on both paths.
+The model says "a percent there is the content", and the content IS the measurement, so the check cannot tell. A fixture whose
+percent child has content of its own would.
+
+**Left for AC4:** the templates' most-used combinations (rank by the product surface: the shelf templates, the picker's
+defaults). Text and other content nodes as children, where the hug size comes from the browser's text. A percent in a scroll
+with real content (above).
 

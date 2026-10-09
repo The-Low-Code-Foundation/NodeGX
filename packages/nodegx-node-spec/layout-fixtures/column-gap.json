@@ -1,0 +1,74 @@
+{
+  "name": "column-gap",
+  "rule": "a column stacks its children down from its padding, a gap between each",
+  "nodes": [
+    {
+      "id": "col",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 400,
+          "unit": "px"
+        },
+        "height": {
+          "value": 300,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "rowGap": {
+          "value": 10,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 20,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 20,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 20,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 20,
+          "unit": "px"
+        }
+      },
+      "children": [
+        {
+          "id": "a",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 50,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "b",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 200,
+              "unit": "px"
+            },
+            "height": {
+              "value": 60,
+              "unit": "px"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
