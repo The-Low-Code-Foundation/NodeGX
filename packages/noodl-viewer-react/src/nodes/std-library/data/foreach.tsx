@@ -203,6 +203,7 @@ interface ForEachInstance extends NodeInstance {
   _runQueueOperations(): Promise<void>;
   _operationThrew(e: unknown): void;
   _copyItems(): void;
+  _childIndexFor(listIndex: number): number;
   /** Fires `Items Rendered` once the operation queue has drained. See NDA-004 §3. */
   _signalItemsRendered(): void;
   didMount(): void;
@@ -247,8 +248,7 @@ const ForEachDefinition: NodeDefinitionOptions = {
       if (!this._internal.target) return;
 
       this._queueOperation(async () => {
-        const baseIndex = this._internal.target.getChildren().indexOf(this as unknown as ForEachItemNode) + 1;
-        await this.addItem(args.item, baseIndex + args.index);
+        await this.addItem(args.item, this._childIndexFor(args.index));
       });
     });
 
@@ -837,9 +837,6 @@ const ForEachDefinition: NodeDefinitionOptions = {
         return;
       }
 
-      // figure out our index in our target
-      const baseIndex = this._internal.target.getChildren().indexOf(this as unknown as ForEachItemNode) + 1;
-
       // ISL-001 (P78 D85). Iterate a SNAPSHOT taken before the first `await`, not the live
       // collection. `addItem` yields on every row, and a second `Items` value can reach
       // `collection.set` in that gap — from a node later in the same update pass, or a frame
@@ -854,7 +851,7 @@ const ForEachDefinition: NodeDefinitionOptions = {
 
       // Iterate over all models and create items
       for (let i = 0; i < models.length; i++) {
-        await this.addItem(models[i], baseIndex + i);
+        await this.addItem(models[i], this._childIndexFor(i));
       }
 
       // Last, once every item node for this pass exists. ⚠️ Not `Items Rendered`'s moment and
@@ -994,6 +991,25 @@ const ForEachDefinition: NodeDefinitionOptions = {
           }
         }
       });
+    },
+    /**
+     * Where the row for the item at `listIndex` goes among the parent's children: before the Repeater's own row at that place,
+     * else after its last own row, else right after the Repeater. ISL-049 (P107-C143): it was the Repeater's place plus
+     * `listIndex`, which counted a row on its way out (no longer in `itemNodes`, still the parent's child until its Remove
+     * Completed) — every row added after one landed one place early, and stayed there.
+     */
+    _childIndexFor(this: ForEachInstance, listIndex: number) {
+      const internal = this._internal;
+      const children = internal.target.getChildren();
+      let at = children.indexOf(this as unknown as ForEachItemNode) + 1;
+      let own = 0;
+      for (let i = at; i < children.length; i++) {
+        if (internal.itemNodes.indexOf(children[i]) === -1) continue;
+        if (own === listIndex) return i;
+        own++;
+        at = i + 1;
+      }
+      return at;
     },
     /**
      * Copy Items into the Repeater's own list. ISL-049 (P107-C130), ruled "Skip the empty entry and report it once": an

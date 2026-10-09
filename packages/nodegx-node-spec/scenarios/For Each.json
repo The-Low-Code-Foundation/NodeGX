@@ -18983,8 +18983,8 @@
   ]
  },
  {
-  "name": "a row added while another is on its way out lands one place early, and stays there (row C143)",
-  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case L3)",
+  "name": "a row added while another is on its way out lands at its own place, after it, and stays there (row C143)",
+  "because": "NSP-016 §7.24 — measured on the runtime (the s63 probe, case L3) — renamed in P109 s32 (v10: a row on its way out is not counted)",
   "params": {
    "template": "Leaving",
    "items": [

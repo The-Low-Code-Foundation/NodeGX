@@ -99,7 +99,9 @@
  * holds a `For Each Actions` is not deleted when its record leaves the list. Its Try Remove WIRED: the row is marked (`findChild` skips
  * it), says Try Remove, and stays until its Remove Completed; UNWIRED: it goes at the next drain. Either way the Repeater lets go of it
  * at once (`itemNodes`) — a rebuild leaves it, and lands its rows before it — while it is still the parent's child: a person sees it and
- * taps it, and an addition counts it, so a row added beside one on its way out lands one place early (row C143).
+ * taps it. v10 (row C143): a row is placed by the Repeater's OWN rows only (`_childIndexFor`) — before its own row at the record's place,
+ * else after its last own row, else right after the Repeater — so a row on its way out is never counted (v9 counted it: a row added
+ * after one landed one place early). A rebuild has no own rows to place against, so it still lands its rows before a leaving one.
  *
  * THE ROWS' SIGNALS (v2, `creatorCallbacks.onOutputChanged` :633-639, `itemOutputSignalTriggered` :922-947; nodecontext.ts
  * `updateDirtyNodes` :453-490). A row's output signal — `Added` at its landing, `Leaving` at its Try Remove, `Tapped` at a click —
@@ -364,7 +366,8 @@ type Row = {
  */
 type Raised = { born: number; name: string; late: boolean };
 /** The operation waiting on a build (`await createNode`): it lands at the next yield */
-type Building = { kind: 'add'; row: Row; index: number } | { kind: 'refresh'; row: Row; index: number; rest: RecordRef[]; tokens: number };
+/** `index` the record's place in the list; `at` the row's place among the parent's children, taken when the build starts (v10) */
+type Building = { kind: 'add'; row: Row; index: number; at: number } | { kind: 'refresh'; row: Row; index: number; at: number; rest: RecordRef[]; tokens: number };
 
 type State = {
   /** `_internal.collection` (:232) — the Repeater's own list */
@@ -470,7 +473,8 @@ export const Repeater = defineNode({
   // v7 (P109 ISL-049, s32): a Refresh pulsed while a rebuild runs is answered by the rebuild it asked for (row C137)
   // v8 (P109 ISL-049, s32): items that repeat an id are one row at the first item's place, kept there by every copy (row C131)
   // v9 (P109 ISL-049, s32): every row's signal heard in a pass is reported with its own row (row C142)
-  version: 9,
+  // v10 (P109 ISL-049, s32): a row is placed among the Repeater's own rows, never counting one on its way out (row C143)
+  version: 10,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/data/foreach.tsx',
   needs: ['person', 'registry', 'project'],
   worldPool: {
@@ -842,7 +846,7 @@ function start(w: Work, op: Op): void {
     const b = addItem(w, op.rec, op.index);
     if (b === MISSING) w.st.hops = HOPS_ADD_MISSING;
     else if (b === null) w.st.hops = 2;
-    else w.st.building = { kind: 'add', row: b, index: op.index };
+    else w.st.building = { kind: 'add', row: b, index: op.index, at: childIndexFor(w.st.rows, op.index) };
   } else refresh(w);
 }
 
@@ -921,6 +925,22 @@ function addItem(w: Work, rec: RecordRef, _index: number): Row | null | typeof M
   return { rec, template: name, mapped: false, inputs: {}, born: -1 };
 }
 
+/**
+ * v10 `_childIndexFor` (row C143): where the row for the record at `listIndex` goes among the parent's children — before the
+ * Repeater's own row at that place, else after its last own row, else first. A row on its way out is not the Repeater's.
+ */
+function childIndexFor(rows: readonly Row[], listIndex: number): number {
+  let at = 0;
+  let own = 0;
+  for (let i = 0; i < rows.length; i++) {
+    if (rows[i].leaving) continue;
+    if (own === listIndex) return i;
+    own += 1;
+    at = i + 1;
+  }
+  return at;
+}
+
 /** The row lands (:592-656): added at its place among the parent's children (after the Repeater, so its place in the list) */
 function land(w: Work, b: Building): void {
   // v2 (:592-629) — the mapping as it is at the landing decides the row's inputs: none, direct (live); one, mapped now and again at
@@ -933,10 +953,10 @@ function land(w: Work, b: Building): void {
   w.view.watch({ model: row.rec.getId() });
   row = { ...row, born: w.st.made };
   w.st.made += 1;
-  // v2 (:647-651) — a `For Each Actions` in the row says Added; then the row goes in at its place among the parent's children,
-  // counting a row on its way out (an addition lands one place early beside one: row C143)
+  // v2 (:647-651) — a `For Each Actions` in the row says Added; then the row goes in at its place among the parent's children
+  // (v10, row C143: taken by the Repeater's own rows when the build started)
   raise(w, row, forwardOf(row.template, 'added'));
-  w.st.rows.splice(b.index, 0, row);
+  w.st.rows.splice(b.at, 0, row);
   w.st.changed = true;
   if (b.kind === 'add') return;
   // a rebuild goes on: the next record's row
@@ -1108,7 +1128,7 @@ function rebuildFrom(w: Work, records: RecordRef[], k: number, tokens: number): 
     }
     // a build lands only at the yield (eleven microtasks), so the act boundaries the records before it cost are not counted here
     // (v2: a Script can give some records a component and not others — what is built still lands at the yield)
-    w.st.building = { kind: 'refresh', row: b, index: i, rest: records, tokens };
+    w.st.building = { kind: 'refresh', row: b, index: i, at: childIndexFor(w.st.rows, i), rest: records, tokens };
     return;
   }
   // :809 — every Refresh it took is Done (`settleRebuild`): at once after a build or when it looked at no record, else when one of

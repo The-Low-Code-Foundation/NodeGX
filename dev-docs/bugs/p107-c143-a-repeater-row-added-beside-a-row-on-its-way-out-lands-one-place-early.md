@@ -1,7 +1,7 @@
 ---
 id: P107-C143
 title: A row a Repeater adds while another row is on its way out (its Try Remove waiting, or its removal not yet run) lands one place early and stays there; a Refresh moves the leaving row to the end
-status: scheduled
+status: fixed
 phase: P109
 task: ISL-049
 severity: medium
@@ -9,7 +9,7 @@ area: runtime / Repeater (noodl-viewer-react/src/nodes/std-library/data/foreach.
 found: P107 NSP-016 s63, 2026-10-08
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.24; recorded on the runtime target (the s63 probe, cases L3 and L4): rows a, b with a's Try Remove wired; Items [b] then [b, c] — the page reads a (leaving), c, b; after a's Remove Completed, c, b. With a Refresh instead: b, then a (leaving)
 kit: node-spec
-regression: packages/nodegx-node-spec/scenarios/For Each.json "a row added while another is on its way out lands one place early, and stays there (row C143)"
+regression: packages/nodegx-node-spec/scenarios/For Each.json "a row added while another is on its way out lands at its own place, after it, and stays there (row C143)"
 ---
 
 **What a person sees.** A list whose rows play an exit animation before they go (a Repeater Item with Try Remove wired). A person
@@ -27,3 +27,12 @@ Items `[{id:'b'}, {id:'c'}]`; settle — click row 1: it is `c`.
 **Proposed fix.** Place a row after the Repeater's own rows only: count the parent's children that are in `itemNodes` (or skip children
 marked `_forEachRemoveInProgress`, and the ones whose unwired removal is pending) when turning a list index into a child index, in both
 the `add` handler and `refresh`.
+
+**Fixed (P109 ISL-049, s32, 2026-10-09), as proposed — the addition half.** `_childIndexFor` places a row by the Repeater's own rows
+(`itemNodes`) only: before its own row at the record's place, else after its last own row, else right after the Repeater; the `add`
+handler and `refresh` both use it, at the moment they used `baseIndex + index`. For Each spec v10. **The Refresh half does not change:**
+a rebuild has deleted every own row before it places one, so its rows still land right after the Repeater, before a row on its way out
+("a Refresh while a row is on its way out: the rebuild leaves it, and lands its rows before it" traces as before). Keeping a fading row
+in its place through a Refresh means remembering where it stood among rows that no longer exist — a ruling, asked in P109's handoff.
+Runtime 296 / 296 at seeds 13 and 20732; interpreter mutants 299 / 299 at both; control (the C142 commit's `foreach.tsx`) red on
+exactly the 5 scenarios the fix moved.
