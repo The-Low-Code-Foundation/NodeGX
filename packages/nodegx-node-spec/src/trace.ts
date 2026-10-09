@@ -74,6 +74,9 @@ export type TraceEvent =
   | (Base & { t: 'open'; url: unknown; target?: unknown; features?: unknown })
   /** observation (NSP-015 s17): the node pushed a history entry — `history.pushState(state, title, url)`, `url` canonical, as handed. */
   | (Base & { t: 'history'; op: 'push'; url: unknown })
+  /** observation (NSP-016 s70): the node replaced the current history entry — `history.replaceState(state, title, url)` — or stepped back, `history.back()` (world.ts LOCATION). */
+  | (Base & { t: 'history'; op: 'replace'; url: unknown })
+  | (Base & { t: 'history'; op: 'back' })
   /** observation (NSP-015 s17): the node dispatched an event on the window — `window.dispatchEvent(event)`, named by its type. */
   | (Base & { t: 'dispatch'; event: string })
   /**

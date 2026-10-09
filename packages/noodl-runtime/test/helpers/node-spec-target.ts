@@ -603,6 +603,9 @@ function installPage(location?: WorldLocation): () => void {
       return isLocationEvent(event.type) ? location.dispatch(event) : dispatch.call(this, event);
     };
     history.pushState = (_state: unknown, _title: unknown, url?: unknown) => location.push(url);
+    // NSP-016 s70 — THE SESSION HISTORY: a back's traversal lands at the play's next yield (`yieldToEventLoop`)
+    history.replaceState = (_state: unknown, _title: unknown, url?: unknown) => location.replace(url);
+    history.back = () => location.back();
     d.window.open = (url: unknown, target: unknown, features: unknown) => location.open(url, target, features);
   }
   const leave = () => {
@@ -613,6 +616,8 @@ function installPage(location?: WorldLocation): () => void {
       d.window.removeEventListener = remove;
       d.window.dispatchEvent = dispatch;
       delete (history as { pushState?: unknown }).pushState;
+      delete (history as { replaceState?: unknown }).replaceState;
+      delete (history as { back?: unknown }).back;
       d.window.open = open;
     }
   };
@@ -1437,6 +1442,12 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
   const yieldToEventLoop = async () => {
     await Promise.resolve();
     await new Promise((resolve) => realSetTimeout(resolve, 0));
+    // NSP-016 s70 — a `history.back()` is a task (world.ts LOCATION, THE SESSION HISTORY): after what this yield resolved, one at a
+    // time, the page's popstate listeners running at its landing and the promises they made resolving before the next
+    while (world?.location && world.location.land() !== 'none') {
+      await Promise.resolve();
+      await new Promise((resolve) => realSetTimeout(resolve, 0));
+    }
   };
 
   function isSignalInput(s: State, port: string): boolean {

@@ -534,6 +534,16 @@ export interface Patch<S, O> {
   abort?: readonly string[];
   open?: { url: unknown; target?: unknown; features?: unknown };
   push?: { url: unknown };
+  /**
+   * NSP-016 s70 — `history.replaceState(…, url)`: a `history` event, op `replace`; the current entry becomes `url` (world.ts LOCATION,
+   * THE SESSION HISTORY). After a `push`. Only with a window.
+   */
+  replace?: { url: unknown };
+  /**
+   * NSP-016 s70 — `history.back()`, once per count: a `history` event, op `back`, each. The traversal lands at the next yield to the
+   * event loop, where `WorldHandlers.popstate` runs (world.ts LOCATION). After a `replace`. Only with a window.
+   */
+  historyBack?: number;
   dispatch?: string;
   /**
    * NSP-016 s57 — the person's browser moves the location (Back, Forward): the href moves to `url`, resolved against it, and the
@@ -577,7 +587,9 @@ export type AnswerCall =
   | { op: 'push' | 'replace' | 'back' | 'navigate'; value: Outcome; error?: string }
   | { op: 'returned'; action?: unknown; results: unknown }
   | { op: 'page'; params: unknown }
-  | { op: 'history'; url: unknown }
+  | { op: 'history'; url: unknown; how?: 'push' | 'replace' }
+  /** NSP-016 s70 — `history.back()` made between two answers (world.ts LOCATION): its traversal lands at the next yield. */
+  | { op: 'history'; how: 'back' }
   | { op: 'open'; url: unknown; target?: unknown; features?: unknown };
 
 export interface OutcomePatch<S, O> extends Patch<S, O> {
@@ -808,6 +820,13 @@ export interface WorldHandlers<S, I, O> {
   socket?: (state: Readonly<S>, inputs: Inputs<I>, event: SocketEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
   /** NSP-016 s56 — a promise the node awaited resolved (`Patch.resume`): at the next yield to the event loop, with the patch's tag. */
   resume?: (state: Readonly<S>, inputs: Inputs<I>, tag: string, world: WorldView) => AfterInputsPatch<S, I, O>;
+  /**
+   * NSP-016 s70 — a `history.back()` the page made landed (world.ts LOCATION, THE SESSION HISTORY): the href has moved (`WorldView.href`)
+   * and the window fired `popstate` — at the yield after the call, after what that yield resolved. Every node of the play with this
+   * handler hears it, in the order they were placed; whether it is listening is its own state's to say. A back that landed on the
+   * first entry moved nothing and fired nothing: no node hears it. The person's Back (`traverse`) is an act, not this.
+   */
+  popstate?: (state: Readonly<S>, inputs: Inputs<I>, world: WorldView) => AfterInputsPatch<S, I, O>;
   /**
    * NSP-014 s34 — a request's streamed body said something after its head (world.ts NETWORK, A STREAMED BODY): its text, its end,
    * or its failure (an abort while it is read is one, `AbortError`) — landing as a read resolves, like a response. After an end or
@@ -1100,6 +1119,7 @@ export interface AnyNodeSpec {
     realtime?: (state: never, inputs: never, event: RealtimeEvent, world: WorldView) => unknown;
     socket?: (state: never, inputs: never, event: SocketEvent, world: WorldView) => unknown;
     resume?: (state: never, inputs: never, tag: string, world: WorldView) => unknown;
+    popstate?: (state: never, inputs: never, world: WorldView) => unknown;
     stream?: (state: never, inputs: never, event: StreamEvent, world: WorldView) => unknown;
     group?: (state: never, inputs: never, value: unknown, world: WorldView) => unknown;
   };

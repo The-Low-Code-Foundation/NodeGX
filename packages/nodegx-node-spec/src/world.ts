@@ -139,6 +139,24 @@
  *           moved — in the order they subscribed. A visual node's page is the browser's: its window's
  *           `history.pushState`, `open`, `dispatchEvent` and `popstate` / `hashchange` listeners ARE
  *           this location's (a target with a page puts them there).
+ *           (NSP-016 s70) THE SESSION HISTORY. The location keeps the page's history entries and which
+ *           one is current: the start href is the first, and the play knows of none before it. A push
+ *           drops the entries after the current one and adds its own. Two more calls, each recorded as
+ *           a `history` event in the LOCATION group:
+ *             `history.replaceState(state, title, url)` — op `replace`, `url` canonical as handed. The
+ *               current entry becomes `url` resolved, refused as a push is (a `SecurityError`); no
+ *               `popstate`, no `hashchange`.
+ *             `history.back()` — op `back`. The browser does not move at the call: the traversal is a
+ *               TASK, and it lands at the next yield to the event loop — a settle's, after the frame-end
+ *               work and the promises that yield resolves, or an advance's, before the clock moves and
+ *               after each timer (CLOCK). Landing, it makes the entry before the current one current,
+ *               moves the href there and runs the `popstate` listeners, then the `hashchange` ones when
+ *               the hash moved, as the person's Back does. Several calls land one by one, in order, each
+ *               after the promises the one before resolved. On the first entry it lands as nothing: an
+ *               earlier entry would be another document, which the world does not load.
+ *           The person's Back or Forward (`traverse`) goes to the nearest entry holding its url, before
+ *           the current one first; a url no entry holds is an entry the play never saw, and the history
+ *           becomes that one entry.
  *           USER ACTIVATION — whether the press came from a person — is a fact of the play, the
  *           script's `activation`: `true` / `false` is `navigator.userActivation.isActive` for
  *           the whole play; absent, the browser has no `userActivation` (Safari before 16.4,
@@ -1813,6 +1831,8 @@ export interface OpenRecord {
 export type LocationCall =
   | ({ call: 'open' } & OpenRecord)
   | { call: 'push'; url: unknown }
+  | { call: 'replace'; url: unknown }
+  | { call: 'back' }
   | { call: 'dispatch'; event: string };
 
 /** Where a play's location starts when its script names none (LOCATION above). */
@@ -1835,7 +1855,8 @@ export function openReturnsWindow(target: unknown, features: unknown, activation
 
 /** The trace event a location call is recorded as (LOCATION above; trace.ts) — the one translation every target shares. */
 export function locationEvent(c: LocationCall): TraceEvent {
-  if (c.call === 'push') return { t: 'history', op: 'push', url: canonicalise(c.url) };
+  if (c.call === 'push' || c.call === 'replace') return { t: 'history', op: c.call, url: canonicalise(c.url) };
+  if (c.call === 'back') return { t: 'history', op: 'back' };
   if (c.call === 'dispatch') return { t: 'dispatch', event: c.event };
   const e: TraceEvent = { t: 'open', url: canonicalise(c.url) };
   if (c.target !== undefined) e.target = canonicalise(c.target);
@@ -2092,6 +2113,12 @@ export class WorldLocation {
   readonly calls: LocationCall[] = [];
   /** The current href. */
   href: string;
+  /** NSP-016 s70 — the session history (LOCATION above): its entries' hrefs, the start first. */
+  entries: string[];
+  /** Which entry is current. */
+  index = 0;
+  /** `history.back()` calls whose traversal has not landed yet. */
+  private queued = 0;
   private listeners: Array<(c: LocationCall) => void> = [];
   private eventListeners: Array<{ type: string; fn: (e: unknown) => void }> = [];
 
@@ -2100,6 +2127,7 @@ export class WorldLocation {
     start: string = DEFAULT_HREF
   ) {
     this.href = new URL(start).href;
+    this.entries = [this.href];
   }
 
   /** Called with every call as it is made — how a target attributes it to the node that made it. */
@@ -2127,21 +2155,75 @@ export class WorldLocation {
     if (next === null) {
       throw new DOMException(`Failed to execute 'pushState' on 'History': A history state object with URL '${String(url)}' cannot be created in a document with origin '${new URL(this.href).origin}'`, 'SecurityError');
     }
+    this.entries = [...this.entries.slice(0, this.index + 1), next];
+    this.index++;
     this.href = next;
+  }
+
+  /** NSP-016 s70 — `history.replaceState`: records the call as handed; the current entry becomes `url`, refused as a push is. */
+  replace(url: unknown): void {
+    this.record({ call: 'replace', url });
+    const next = pushTarget(url, this.href);
+    if (next === null) {
+      throw new DOMException(`Failed to execute 'replaceState' on 'History': A history state object with URL '${String(url)}' cannot be created in a document with origin '${new URL(this.href).origin}'`, 'SecurityError');
+    }
+    this.entries[this.index] = next;
+    this.href = next;
+  }
+
+  /** NSP-016 s70 — `history.back()`: records the call; the traversal lands later (`land`, LOCATION above). */
+  back(): void {
+    this.record({ call: 'back' });
+    this.queued++;
+  }
+
+  /** How many `history.back()` traversals wait to land. */
+  get waiting(): number {
+    return this.queued;
+  }
+
+  /**
+   * NSP-016 s70 — lands the oldest waiting traversal (a target calls it at each yield to the event loop, then lets the promises its
+   * listeners made resolve before the next): the entry before the current one becomes current and the listeners run, as the
+   * person's Back runs them — nothing on the first entry. `none` when none waited.
+   */
+  land(): 'none' | 'moved' | 'stayed' {
+    if (this.queued === 0) return 'none';
+    this.queued--;
+    if (this.index === 0) return 'stayed';
+    this.index--;
+    this.moveTo(this.entries[this.index]);
+    return 'moved';
+  }
+
+  /** The href moves to `next`; the `popstate` listeners run, then the `hashchange` ones when the hash moved. */
+  private moveTo(next: string): void {
+    const hashMoved = new URL(next).hash !== new URL(this.href).hash;
+    this.href = next;
+    for (const l of this.eventListeners.filter((x) => x.type === 'popstate')) l.fn({ type: 'popstate', state: null });
+    if (hashMoved) for (const l of this.eventListeners.filter((x) => x.type === 'hashchange')) l.fn({ type: 'hashchange' });
   }
 
   /**
    * NSP-016 s57 — the person's Back or Forward (LOCATION above): the href moves to `url` resolved against it (`pushTarget` — another
    * origin's, or none, throws: that is a page load, not a traversal), nothing is recorded, and the `popstate` listeners run, then the
-   * `hashchange` ones when the hash moved.
+   * `hashchange` ones when the hash moved. s70: the current entry becomes the nearest one holding it (LOCATION above).
    */
   traverse(url: unknown): void {
     const next = pushTarget(url, this.href);
     if (next === null) throw new Error(`world: a traversal stays on the page's origin — ${String(url)} from ${this.href} is a page load`);
-    const hashMoved = new URL(next).hash !== new URL(this.href).hash;
-    this.href = next;
-    for (const l of this.eventListeners.filter((x) => x.type === 'popstate')) l.fn({ type: 'popstate', state: null });
-    if (hashMoved) for (const l of this.eventListeners.filter((x) => x.type === 'hashchange')) l.fn({ type: 'hashchange' });
+    // s70 — the nearest entry holding it, before the current one first; none: the history is that one entry (LOCATION above)
+    let at = -1;
+    for (let d = 1; at < 0 && (this.index - d >= 0 || this.index + d < this.entries.length); d++) {
+      if (this.entries[this.index - d] === next) at = this.index - d;
+      else if (this.entries[this.index + d] === next) at = this.index + d;
+    }
+    if (at < 0) {
+      this.entries = [next];
+      at = 0;
+    }
+    this.index = at;
+    this.moveTo(next);
   }
 
   /** `window.dispatchEvent`: records the event's type, then runs that type's listeners in subscription order. */
@@ -2801,7 +2883,11 @@ export function installWorld(world: World): Installed {
         return parts().hash;
       }
     };
-    const history = { pushState: (_state: unknown, _title: unknown, url?: unknown) => location.push(url) };
+    const history = {
+      pushState: (_state: unknown, _title: unknown, url?: unknown) => location.push(url),
+      replaceState: (_state: unknown, _title: unknown, url?: unknown) => location.replace(url),
+      back: () => location.back()
+    };
     const dispatchEvent = (event: { type: string }) => location.dispatch(event);
     const unsubscribe = new Map<string, Map<unknown, () => void>>();
     define('window', {

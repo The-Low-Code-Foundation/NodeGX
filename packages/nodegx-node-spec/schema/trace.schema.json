@@ -113,14 +113,17 @@
           "additionalProperties": false
         },
         {
-          "description": "observation (NSP-015 s17): the node pushed a history entry — `history.pushState(state, title, url)` — `url` canonical, as handed (src/world.ts LOCATION).",
+          "description": "observation (NSP-015 s17): the node pushed a history entry — `history.pushState(state, title, url)` — or (NSP-016 s70) replaced the current one — op `replace`, `history.replaceState(state, title, url)` — `url` canonical, as handed; or stepped back — op `back`, `history.back()`, no `url`: the traversal lands at the next yield to the event loop, where the page's `popstate` listeners run (src/world.ts LOCATION).",
           "properties": {
             "t": { "const": "history" },
-            "op": { "const": "push" },
+            "op": { "enum": ["push", "replace", "back"] },
             "url": { "$ref": "#/definitions/canonical" },
             "subject": { "$ref": "#/definitions/subject" }
           },
-          "required": ["t", "op", "url"],
+          "required": ["t", "op"],
+          "if": { "properties": { "op": { "const": "back" } } },
+          "then": { "not": { "required": ["url"] } },
+          "else": { "required": ["url"] },
           "additionalProperties": false
         },
         {

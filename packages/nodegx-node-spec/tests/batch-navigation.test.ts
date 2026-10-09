@@ -21,7 +21,7 @@
  */
 
 import type { AnyNodeSpec } from '../src';
-import { DEFAULT_WORLD_POOL, EQUIVALENT_MUTANTS, generateSequence, installWorld, interpreterAdapter, runConformance, specs, World } from '../src';
+import { DEFAULT_WORLD_POOL, defineNode, EQUIVALENT_MUTANTS, generateSequence, installWorld, interpreterAdapter, locationEvent, run, runConformance, specs, validateTrace, World } from '../src';
 
 const BATCH = ['net.noodl.externallink', 'PageStackNavigateToPath', 'PageStackNavigate', 'PageStackNavigateBack', 'RouterNavigate', 'PageInputs', 'NavigationShowPopup', 'NavigationClosePopup'];
 
@@ -156,6 +156,127 @@ describe('LOCATION — the world records an open and says whether the press was 
     expect(world.location!.calls.map((c) => c.call)).toEqual(['push', 'dispatch', 'dispatch']);
     expect(g.dispatchEvent).toBeUndefined();
     expect(g.PopStateEvent).toBeUndefined();
+  });
+
+  // NSP-016 s70 — THE SESSION HISTORY (world.ts LOCATION): what a Component Stack's Pop and Replace need (rows C120, C126)
+  test('the session history: a push drops the entries ahead; replaceState rewrites the current one and fires nothing; both refuse another origin', () => {
+    const world = new World({ viewport: { width: 800, height: 600 }, location: 'https://shop.example/#/home' });
+    const loc = world.location!;
+    const heard: string[] = [];
+    loc.listen('popstate', () => heard.push('pop'));
+    loc.listen('hashchange', () => heard.push('hash'));
+    loc.push('#/a');
+    loc.push('#/b');
+    loc.traverse('#/a');
+    expect([loc.entries, loc.index]).toEqual([['https://shop.example/#/home', 'https://shop.example/#/a', 'https://shop.example/#/b'], 1]);
+    loc.push('#/c');
+    expect([loc.entries, loc.index]).toEqual([['https://shop.example/#/home', 'https://shop.example/#/a', 'https://shop.example/#/c'], 2]);
+    heard.length = 0;
+    loc.replace('#/d');
+    expect([loc.href, loc.entries[2], loc.entries.length, heard]).toEqual(['https://shop.example/#/d', 'https://shop.example/#/d', 3, []]);
+    expect(() => loc.replace('https://other.example/')).toThrow(expect.objectContaining({ name: 'SecurityError' }));
+    expect(loc.href).toBe('https://shop.example/#/d');
+    expect(loc.calls.slice(-2)).toEqual([
+      { call: 'replace', url: '#/d' },
+      { call: 'replace', url: 'https://other.example/' }
+    ]);
+  });
+
+  test('history.back() is recorded and moves nothing at the call; it lands one at a time — popstate, then hashchange — and on the first entry it lands as nothing', () => {
+    const world = new World({ viewport: { width: 800, height: 600 }, location: 'https://shop.example/#/home' });
+    const loc = world.location!;
+    const heard: string[] = [];
+    loc.listen('popstate', () => heard.push('pop ' + new URL(loc.href).hash));
+    loc.listen('hashchange', () => heard.push('hash ' + new URL(loc.href).hash));
+    loc.push('#/a');
+    loc.push('#/b');
+    loc.back();
+    loc.back();
+    loc.back();
+    expect([loc.href, loc.waiting, heard]).toEqual(['https://shop.example/#/b', 3, []]);
+    expect(loc.land()).toBe('moved');
+    expect([loc.href, loc.index, heard]).toEqual(['https://shop.example/#/a', 1, ['pop #/a', 'hash #/a']]);
+    expect(loc.land()).toBe('moved');
+    expect(loc.land()).toBe('stayed');
+    expect(loc.land()).toBe('none');
+    expect([loc.href, loc.index, heard]).toEqual(['https://shop.example/#/home', 0, ['pop #/a', 'hash #/a', 'pop #/home', 'hash #/home']]);
+    // the absence beside its firing arm: a Forward from here is still there (the entries ahead are kept)
+    loc.traverse('#/a');
+    expect([loc.index, heard.slice(-2)]).toEqual([1, ['pop #/a', 'hash #/a']]);
+    expect(loc.calls.map((c) => c.call)).toEqual(['push', 'push', 'back', 'back', 'back']);
+  });
+
+  test('the person\'s Back goes to the nearest entry holding its url, before the current one first; a url no entry holds is a history of one', () => {
+    const loc = new World({ viewport: { width: 800, height: 600 }, location: 'https://shop.example/#/x' }).location!;
+    loc.push('#/y');
+    loc.push('#/x');
+    loc.push('#/y');
+    loc.traverse('#/x');
+    expect(loc.index).toBe(2);
+    loc.traverse('#/y');
+    expect(loc.index).toBe(1);
+    loc.traverse('#/elsewhere');
+    expect([loc.entries, loc.index]).toEqual([['https://shop.example/#/elsewhere'], 0]);
+    loc.back();
+    expect(loc.land()).toBe('stayed');
+  });
+
+  test('a page\'s history has replaceState and back; the trace events validate', () => {
+    const world = new World({ viewport: { width: 800, height: 600 }, location: 'https://shop.example/' });
+    const installed = installWorld(world);
+    try {
+      const h = g.history as { pushState(...a: unknown[]): void; replaceState(...a: unknown[]): void; back(): void };
+      h.pushState({}, '', '#/a');
+      h.replaceState({}, '', '#/b');
+      h.back();
+      expect((g.location as { hash: string }).hash).toBe('#/b');
+    } finally {
+      installed.restore();
+    }
+    const events = world.location!.calls.map(locationEvent);
+    expect(events).toEqual([
+      { t: 'history', op: 'push', url: '#/a' },
+      { t: 'history', op: 'replace', url: '#/b' },
+      { t: 'history', op: 'back' }
+    ]);
+    expect(validateTrace(events).ok).toBe(true);
+    expect(validateTrace([{ t: 'history', op: 'back', url: '#/a' }]).ok).toBe(false);
+    expect(validateTrace([{ t: 'history', op: 'replace' }]).ok).toBe(false);
+  });
+
+  test('on the interpreter: a back lands at the settle\'s yield, after the frame-end work, and every node with a popstate handler hears it; the clock does not move it', () => {
+    const Back = defineNode({
+      type: 'zz.back',
+      version: 1,
+      source: 'tests',
+      needs: ['location'],
+      state: { log: '' as string },
+      inputs: { go: { type: 'signal' }, swap: { type: 'signal' } },
+      outputs: { log: { type: 'string', from: (s) => s.log } }
+    }).on(
+      {
+        go: (s) => ({ set: { log: s.log + 'go;' }, historyBack: 1 }),
+        swap: (s) => ({ set: { log: s.log + 'swap;' }, replace: { url: '#/swapped' } })
+      },
+      {
+        afterInputs: (s) => (s.log.endsWith('go;') ? { set: { log: s.log + 'frame;' } } : {}),
+        world: { popstate: (s, _i, view) => ({ set: { log: s.log + 'pop ' + new URL(view.href()!).hash + ';' } }) }
+      }
+    );
+    const world = () => new World({ viewport: { width: 800, height: 600 }, location: 'https://shop.example/#/home' });
+    const w1 = world();
+    w1.location!.push('#/detail');
+    const trace = run(Back as unknown as AnyNodeSpec, {}, [{ signal: 'go' }, 'settle', { signal: 'swap' }, 'settle'], w1);
+    expect(trace.filter((e) => e.t === 'value' || e.t === 'history')).toEqual([
+      { t: 'value', port: 'log', value: 'go;frame;pop #/home;' },
+      { t: 'history', op: 'back' },
+      { t: 'value', port: 'log', value: 'go;frame;pop #/home;swap;' },
+      { t: 'history', op: 'replace', url: '#/swapped' }
+    ]);
+    expect([w1.location!.href, w1.location!.index, w1.location!.entries.length]).toEqual(['https://shop.example/#/swapped', 0, 2]);
+    // beside it: on the first entry the back lands as nothing — no popstate heard
+    const trace2 = run(Back as unknown as AnyNodeSpec, {}, [{ signal: 'go' }, 'settle'], world());
+    expect(trace2.filter((e) => e.t === 'value')).toEqual([{ t: 'value', port: 'log', value: 'go;frame;' }]);
   });
 
   test('the project\'s settings are the script\'s, and {} when it names none; a `project` spec draws them from its pool', () => {

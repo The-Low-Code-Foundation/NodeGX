@@ -44,7 +44,8 @@ export const EVENT_FIELDS: Readonly<Record<(typeof EVENT_KINDS)[number], { requi
   // NSP-015 — the location
   // s17: a target or features not handed is absent
   open: { required: ['url'], optional: ['target', 'features'] },
-  history: { required: ['op', 'url'], optional: [] },
+  // NSP-016 s70 — a push / replace carries url; a back nothing (world.ts LOCATION, THE SESSION HISTORY)
+  history: { required: ['op'], optional: ['url'] },
   dispatch: { required: ['event'], optional: [] },
   // s18 — the Component Stacks (world.ts STACK): a push / replace carries stack?, target?, params, transition; a back action?, results
   stack: { required: ['op'], optional: ['stack', 'target', 'params', 'transition', 'action', 'results'] },
@@ -115,7 +116,12 @@ export function validateTrace(input: unknown): Validation {
         if (nc) return bad(nc, `${f} is not in canonical form`);
       }
     } else if (t === 'history') {
-      if (e.op !== 'push') return bad(`${at}.op`, 'op is push');
+      if (e.op !== 'push' && e.op !== 'replace' && e.op !== 'back') return bad(`${at}.op`, 'op is push, replace or back');
+      if (e.op === 'back') {
+        if ('url' in e) return bad(`${at}.url`, 'a back carries no url');
+        continue;
+      }
+      if (!('url' in e)) return bad(`${at}.url`, `a history ${e.op} requires "url"`);
       const nc = findNonCanonical(e.url, `${at}.url`);
       if (nc) return bad(nc, 'url is not in canonical form');
     } else if (t === 'dispatch') {

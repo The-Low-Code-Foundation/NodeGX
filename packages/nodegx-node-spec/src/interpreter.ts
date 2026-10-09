@@ -108,6 +108,8 @@ type Inbound =
   | { kind: 'timer'; tag: string }
   // NSP-016 s56: a promise the node awaited resolved (spec.ts `Patch.resume`) — at the next yield
   | { kind: 'resume'; tag: string }
+  // NSP-016 s70: a `history.back()` landed and the window fired popstate (world.ts LOCATION, THE SESSION HISTORY)
+  | { kind: 'popstate' }
   | { kind: 'response'; response: WorldResponse }
   // s26: an AUTH call's answer carries the call and the session at the call — its landing runs the adapter's steps (world.ts AUTH)
   | { kind: 'backend'; answer: BackendAnswerEvent; auth?: { op: string; backend: string; args: Readonly<Record<string, unknown>>; atCall: Readonly<Record<string, unknown>> | undefined; delivery: BackendDelivery } }
@@ -685,6 +687,8 @@ interface PatchLike {
   abort?: readonly string[];
   open?: { url: unknown; target?: unknown; features?: unknown };
   push?: { url: unknown };
+  replace?: { url: unknown };
+  historyBack?: number;
   dispatch?: string;
   traverse?: { url: unknown };
   stack?: { op: 'push' | 'replace'; stack: unknown; target: unknown; params: unknown; transition: unknown };
@@ -906,7 +910,7 @@ function effects(inst: Instance, port: string, patch: PatchLike): void {
     for (const e of world.sockets.calls.slice(recordFrom)) inst.pending.requests.push(e);
   }
   // LOCATION (world.ts): only with a window — a spec reads `viewport()` first, as a node checks `typeof window`
-  if ((patch.open || patch.push || patch.dispatch !== undefined || patch.traverse) && !world.location) {
+  if ((patch.open || patch.push || patch.replace || patch.historyBack || patch.dispatch !== undefined || patch.traverse) && !world.location) {
     throw new SpecError(`${spec.type}.${port}: used the location in a play with no window`);
   }
   if (!world.location) return stackEffects(inst, port, patch);
@@ -925,6 +929,22 @@ function effects(inst: Instance, port: string, patch: PatchLike): void {
       /* the spec said what follows a refusal; the world only keeps the href */
     }
     record({ call: 'push', url: patch.push.url });
+  }
+  // NSP-016 s70 — THE SESSION HISTORY (world.ts LOCATION): a replace, refused as a push is; then the backs, each landing later
+  if (patch.replace) {
+    try {
+      location.replace(patch.replace.url);
+    } catch {
+      /* recorded below; the href stays */
+    }
+    record({ call: 'replace', url: patch.replace.url });
+  }
+  if (patch.historyBack !== undefined) {
+    if (!Number.isInteger(patch.historyBack) || patch.historyBack < 1) throw new SpecError(`${spec.type}.${port}: historyBack is how many times history.back() is called — a whole number from 1, not ${String(patch.historyBack)}`);
+    for (let n = 0; n < patch.historyBack; n++) {
+      location.back();
+      record({ call: 'back' });
+    }
   }
   if (patch.dispatch !== undefined) {
     // recorded BEFORE the listeners run: a listener's own calls come after the dispatch, as they are made
@@ -977,13 +997,20 @@ function stackEffects(inst: Instance, port: string, patch: PatchLike): void {
       // NSP-016 s57 — a LOCATION call made between two answers, in its place (spec.ts `AnswerCall`)
       const location = world.location;
       if (!location) throw new SpecError(`${spec.type}.${port}: used the location in a play with no window`);
-      if (a.op === 'history') {
+      if (a.op === 'history' && a.how === 'back') {
+        // NSP-016 s70 — its traversal lands at the next yield (world.ts LOCATION, THE SESSION HISTORY)
+        location.back();
+        inst.pending.location.push(locationEvent({ call: 'back' }));
+      } else if (a.op === 'history') {
+        const how = a.how ?? 'push';
+        if (how !== 'push' && how !== 'replace') throw new SpecError(`${spec.type}.${port}: a history answer's how is push, replace or back, not ${String(how)}`);
         try {
-          location.push(a.url);
+          if (how === 'push') location.push(a.url);
+          else location.replace(a.url);
         } catch {
           /* recorded below; the href stays (world.ts LOCATION) */
         }
-        inst.pending.location.push(locationEvent({ call: 'push', url: a.url }));
+        inst.pending.location.push(locationEvent({ call: how, url: a.url }));
       } else {
         location.open(a.url, a.target, a.features);
         inst.pending.location.push(locationEvent({ call: 'open', url: a.url, target: a.target, features: a.features }));
@@ -1015,10 +1042,23 @@ function stackEffects(inst: Instance, port: string, patch: PatchLike): void {
  */
 function deliver(inst: Instance): void {
   let rounds = 0;
-  while (inst.inbox.length > 0) {
-    if (++rounds > 1000) throw new SpecError(`${inst.spec.type}: the world keeps delivering — a handler answers every delivery with a new request?`);
-    handleInbound(inst, inst.inbox.shift()!);
+  for (;;) {
+    while (inst.inbox.length > 0) {
+      if (++rounds > 1000) throw new SpecError(`${inst.spec.type}: the world keeps delivering — a handler answers every delivery with a new request?`);
+      handleInbound(inst, inst.inbox.shift()!);
+    }
+    // NSP-016 s70 — a `history.back()` is a task: it lands after what this yield resolved, one at a time, and every node with a
+    // popstate handler hears it (world.ts LOCATION, THE SESSION HISTORY) — then what that delivered lands before the next
+    if (!landTraversal(inst.world)) return;
   }
+}
+
+/** Lands the oldest waiting `history.back()` (world.ts LOCATION); `false` when none waited. A move queues popstate to every listener. */
+function landTraversal(world: World): boolean {
+  const landed = world.location?.land() ?? 'none';
+  if (landed === 'none') return false;
+  if (landed === 'moved') for (const i of instancesOf(world).all) if (i.spec.world?.popstate) i.inbox.push({ kind: 'popstate' });
+  return true;
 }
 
 /** One delivery through its handler: the patch applied like any reducer's, its `outcomes` settling `pending` invocations. */
@@ -1030,6 +1070,9 @@ function handleInbound(inst: Instance, item: Inbound): void {
     name = 'world.resume';
     if (!spec.world?.resume) throw new SpecError(`${spec.type}: awaited a promise and the spec has no world.resume handler`);
     patch = asWriter(inst, () => spec.world!.resume!(inst.state as never, inst.inputs as never, item.tag, view));
+  } else if (item.kind === 'popstate') {
+    name = 'world.popstate';
+    patch = asWriter(inst, () => spec.world!.popstate!(inst.state as never, inst.inputs as never, view));
   } else if (item.kind === 'timer') {
     name = 'world.timer';
     if (!spec.world?.timer) throw new SpecError(`${spec.type}: a timer fired and the spec has no world.timer handler`);

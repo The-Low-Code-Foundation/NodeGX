@@ -39,7 +39,12 @@ const table: Array<[string, unknown, boolean]> = [
   ['a field the kind does not carry', [{ t: 'in', port: 'go', value: 1 }], false],
   ['a settle with a port', [{ t: 'settle', port: 'x' }], false],
   ['an empty port name is well-formed — String Format registers `{}` as the port with the empty name (NSP-006 found the schema refusing it)', [{ t: 'in', port: '' }], true],
-  ['a subject that is not a string', [{ t: 'in', port: 'go', subject: 7 }], false]
+  ['a subject that is not a string', [{ t: 'in', port: 'go', subject: 7 }], false],
+  // NSP-016 s70 — the session history (world.ts LOCATION): a push and a replace carry their url, a back none
+  ['a history push, replace and back', [{ t: 'history', op: 'push', url: '#/a' }, { t: 'history', op: 'replace', url: '#/b' }, { t: 'history', op: 'back' }], true],
+  ['a history replace without its url', [{ t: 'history', op: 'replace' }], false],
+  ['a history back carrying a url', [{ t: 'history', op: 'back', url: '#/a' }], false],
+  ['a history op that is not push, replace or back', [{ t: 'history', op: 'forward' }], false]
 ];
 
 describe('one verdict from two validators', () => {
