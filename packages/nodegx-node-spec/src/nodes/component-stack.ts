@@ -59,15 +59,20 @@
  * C123, fixed in P109 ISL-048: a page pushed or started by its LABEL had none, and the URL became `#`). `{name}` parts take the page's
  * parameters (`encodeURIComponent`); every other parameter goes in the query encoded (row C122, fixed in P109 ISL-048: it went
  * unencoded). Hash mode (the project's `navigationPathType` unset or `hash`) writes `?query#/path` — and with no parameters `#/path`, with the address's path in front
- * while the address holds a query, so it goes (row C121, fixed in P109 ISL-048: `#/path` alone kept it); path mode writes `/path?query`. A push and a replace push their URL (`history.pushState`) after naming
- * the page and before the transition; a back pushes the page below's at its transition's end — a new entry, not a step back (row
- * C120). A reset never pushes. A RESET with Use Routes on reads the URL (`matchPageFromUrl` :683-742): the hash's path (or the path)
+ * while the address holds a query, so it goes (row C121, fixed in P109 ISL-048: `#/path` alone kept it); path mode writes `/path?query`. A push pushes its URL (`history.pushState`) after naming the page and
+ * before the transition, and a replace overwrites the current entry (`history.replaceState`); a back steps the history back
+ * (`history.back()`) at its transition's end, over the entry its push made, and its own `popstate` resets nothing — a page whose push
+ * made no entry has the address replaced (row C120, fixed in P109 ISL-048 as ruled, "A Pop steps the browser's history back": it
+ * pushed the page below's URL, a new entry). The mount's reset writes nothing. A RESET with Use Routes on, at the mount or on the
+ * browser's Back or Forward, reads the URL (`matchPageFromUrl` :683-742): the hash's path (or the path)
  * against each page's pattern in Components order, the first whose parts all match from the start wins (a longer URL matches too);
  * its `{name}` parts are decoded with `decodeURIComponent`, and so is the whole query — a malformed escape is kept as written (row
  * C124, fixed in P109 ISL-048: it threw, and the reset ended there with the stack empty). The page found is the start page, with the query and the path's parameters; none
- * found, the Start Page. So a Reset, or a Components edit, shows the page in the URL, not the start page (row C126). THE BROWSER'S
- * BACK AND FORWARD (the act `traverse`): the stack listens for `popstate` from its mount to its unmount (:182-214) and, with Use
- * Routes on, resets at the frame's end (row C119, fixed in P109 ISL-048: a stack with Use Routes off went back to its start page too).
+ * found, the Start Page. A Reset press or a Components edit builds the Start Page and, when the address names another page, pushes its
+ * URL (row C126, fixed in P109 ISL-048 as ruled, "Reset goes to the start page and writes its address": it showed the page in the
+ * URL). THE BROWSER'S BACK AND FORWARD (the act `traverse`): the stack listens for `popstate` from its mount to its unmount
+ * (:182-214) and, with Use Routes on, resets at the frame's end (row C119, fixed in P109 ISL-048: a stack with Use Routes off went
+ * back to its start page too) — unless the address names the page, and parameters, already on top (v18, row C120).
  */
 
 import { defineNode, type AnswerCall, type InputDecl, type ValueInputDecl } from '../spec';
@@ -123,10 +128,10 @@ type Found = { component: string; label: string; id: string; path: string | unde
 /** An entry's transition: `none` ends at once; a timed one runs; `undefined` — an entry no push made (reset, unanimated replace) */
 type Tr = 'none' | { dur: number; delay: number } | undefined;
 /** A stack entry (:70-79): its page container, the one below it (a push's), the page, its parameters, its transition */
-type Entry = { page: number; from: number | null; pageId: unknown; id: string; label: string; path: string | undefined; params: Rec; tr: Tr; pushed: boolean };
+type Entry = { page: number; from: number | null; pageId: unknown; id: string; label: string; path: string | undefined; params: Rec; tr: Tr; pushed: boolean; entry?: boolean };
 /** What a running transition does at its end */
 type End = { kind: 'push'; below: number | null } | { kind: 'replace'; outgoing: number[] } | { kind: 'back'; page: number };
-type Item = { kind: 'reset'; tokens: number } | { kind: 'push' | 'replace'; v: Req };
+type Item = { kind: 'reset'; tokens: number; toStart?: boolean } | { kind: 'push' | 'replace'; v: Req };
 /** The request whose page is being built (awaiting `createNode`), with what its checks found — it lands at the next yield */
 type Busy = { item: Item; pageId: unknown; found: Found; params: Rec; outgoing: number[]; from: number | null; animate: boolean };
 /** The stack's frame-end list (`scheduleAfterInputsHaveUpdated`): its scheduled reset, and the callers' requests, in step order */
@@ -176,6 +181,10 @@ type State = {
   callbacks: Callback[];
   resetScheduled: boolean;
   resetTokens: number;
+  /** v18, row C126 — a Reset press or a Components edit among the frame's reasons: the reset builds the Start Page */
+  resetToStart: boolean;
+  /** v18, row C120 — the `history.back()`s its Pops made that have not landed: their `popstate` is its own */
+  ownBacks: number;
   /** the stack was mounted at this frame's paint: what lands at its yield is counted a frame later (row C114, measured) */
   countLate: boolean;
   // ---- the outputs as last written ----
@@ -210,7 +219,9 @@ export const ComponentStack = defineNode({
   // v15 (P109 ISL-048, s31): a Name written that keeps the stack's key does not reset it (row C113)
   // v16 (P109 ISL-048, s33): a reset counts its pages with Stack Depth — a stack mounted at a frame's paint says Children Count in that frame (row C114)
   // v17 (P109 ISL-048, s33): Keep Pages When Unmounted — a remount keeps the pages unless a mounted stack would have reset meanwhile (row C139)
-  version: 17,
+  // v18 (P109 ISL-048, s36): a Pop steps the history back and a Replace overwrites the entry (row C120); a Reset press or a Components
+  // edit builds the Start Page and writes its address (row C126)
+  version: 18,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx',
   needs: ['person', 'clock', 'location', 'project'],
   worldPool: {
@@ -250,6 +261,8 @@ export const ComponentStack = defineNode({
     callbacks: [],
     resetScheduled: false,
     resetTokens: 0,
+    resetToStart: false,
+    ownBacks: 0,
     countLate: false,
     top: '',
     depth: 0,
@@ -336,7 +349,8 @@ export const ComponentStack = defineNode({
         (w) => {
           // a value that is not a list is none (row C109, fixed in P109 ISL-048)
           w.st.pages = Array.isArray(v) ? v : undefined;
-          if (w.st.isMounted) scheduleReset(w);
+          // v18, row C126 — the Start Page
+          if (w.st.isMounted) (scheduleReset(w), void (w.st.resetToStart = true));
           // v17, row C139 — a mounted stack would have reset: the next mount does
           else w.st.resetOwed = true;
         },
@@ -347,7 +361,8 @@ export const ComponentStack = defineNode({
     // v17, row C139 — stored; read when the stack mounts
     keepPagesWhenUnmounted: (s, v, _i, view) => run(s, (w) => void (w.st.keepPages = !!v), view),
     // :315-326, :463-479 — every Reset of the frame is answered by the one reset at the frame's end
-    reset: (s, _i, view) => ({ ...run(s, (w) => (scheduleReset(w), void (w.st.resetTokens += 1)), view), outcome: 'pending' }),
+    // v18, row C126 — the Start Page, as its description says
+    reset: (s, _i, view) => ({ ...run(s, (w) => (scheduleReset(w), (w.st.resetTokens += 1), void (w.st.resetToStart = true)), view), outcome: 'pending' }),
     // react-component-node.ts :2310-2320
     mounted: (s, v, _i, view) => run(s, (w) => void (w.st.mounted = !!v), view),
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire, nothing the queue reads (an owed hop waits for the next step
@@ -393,6 +408,8 @@ export const ComponentStack = defineNode({
     world: {
       // placed on the page with its params set — the first render mounts it: Did Mount, and it registers (react-component-node.ts)
       place: (s, _i, view) => run(s, (w) => void paint(w), view, 'place'),
+      // v18, row C120 — a `history.back()` landed: the listener (:197-206) while mounted — its own Pop's, or another's
+      popstate: (s, _i, view) => run(s, (w) => void (w.st.isMounted && heard(w)), view, 'yield'),
       // the yield: the page being built lands, and what waited behind it runs
       resume: (s, _i, _tag, view) =>
         run(
@@ -417,9 +434,11 @@ export const ComponentStack = defineNode({
             if (cb.kind === 'reset') {
               // :472-477 — the Resets that arrived before the callback runs
               const tokens = w.st.resetTokens;
+              const toStart = w.st.resetToStart;
               w.st.resetScheduled = false;
               w.st.resetTokens = 0;
-              enqueue(w, { kind: 'reset', tokens });
+              w.st.resetToStart = false;
+              enqueue(w, toStart ? { kind: 'reset', tokens, toStart } : { kind: 'reset', tokens });
             } else if (cb.kind === 'back') {
               if (!w.st.deleted.includes(cb.page)) back(w, cb.v);
             } else request(w, cb.kind, cb.v);
@@ -456,7 +475,8 @@ export const ComponentStack = defineNode({
           (w) => {
             paint(w);
             w.traverse = v;
-            if (w.st.isMounted && w.st.useRoutes) scheduleReset(w);
+            w.href = moved(v, w.href);
+            if (w.st.isMounted) heard(w);
           },
           view,
           'act'
@@ -699,9 +719,9 @@ function matchPageFromUrl(w: Work): FromUrl | undefined | typeof THROWS {
  * `_updateUrlWithTopPage` (:744-765) with `getNavigationAbsoluteURL` and `getRelativeURL` (:580-643), no navigation parent: the URL
  * the top page has, pushed. A URL the browser refuses (another origin) throws there, after the call is recorded.
  */
-function pushUrl(w: Work): void | typeof THROWS {
+function pushUrl(w: Work, how: 'push' | 'replace' = 'push'): boolean | typeof THROWS {
   const s = w.st;
-  if (!s.useRoutes) return;
+  if (!s.useRoutes) return false;
   const url = attempt(() => {
     let rel: { path: string; query: Array<{ name: string; value: unknown }> } | undefined;
     const top = s.stack[s.stack.length - 1];
@@ -742,10 +762,53 @@ function pushUrl(w: Work): void | typeof THROWS {
     return front + (query.length >= 1 ? '?' + query.join('&') : '') + (hash ? '#' + path : '');
   });
   if (url === THROWS) return THROWS;
-  w.answers.push({ op: 'history', url });
+  // v18, row C120 — a replace overwrites the current entry (`history.replaceState`)
+  w.answers.push(how === 'push' ? { op: 'history', url } : { op: 'history', url, how });
   const next = pushTarget(url, w.href as string);
   if (next === null) return THROWS;
   w.href = next;
+  return how === 'push';
+}
+
+/** The href a traversal to `url` leaves (world.ts `traverse`: resolved against it) */
+function moved(url: unknown, href: string | undefined): string | undefined {
+  return attempt(() => pushTarget(url, href as string) ?? href) as string | undefined;
+}
+
+/**
+ * The `popstate` listener (:197-206), on a landed Back or the person's Back or Forward: its own Pop's Back is counted off first (v18,
+ * row C120); then, with Use Routes on, a reset at the frame's end — unless the address names the page, and parameters, on top.
+ */
+function heard(w: Work): void {
+  if (w.st.ownBacks > 0) {
+    w.st.ownBacks -= 1;
+    return;
+  }
+  if (!w.st.useRoutes) return;
+  const shows = addressShowsTop(w);
+  if (shows === THROWS || shows) return;
+  scheduleReset(w);
+}
+
+/** `_addressShowsTop` (v18, row C120): the page a reset from the address would build, with its parameters, is the one on top */
+function addressShowsTop(w: Work): boolean | typeof THROWS {
+  const s = w.st;
+  const top = s.stack[s.stack.length - 1];
+  const pages = s.pages as unknown[] | undefined;
+  if (top === undefined || pages === undefined || pages.length === 0) return false;
+  const fromUrl = matchPageFromUrl(w);
+  if (fromUrl === THROWS) return THROWS;
+  const pageId = fromUrl !== undefined ? fromUrl.pageId : s.startPageId !== undefined ? s.startPageId : firstId(s);
+  if (pageId === THROWS) return THROWS;
+  const found = findPage(s, pageId);
+  if (found === THROWS) return THROWS;
+  if (found === undefined || found.id !== top.id) return false;
+  // the address holds text: a parameter pushed as 7 is "7" there
+  const inUrl: Rec = fromUrl !== undefined ? Object.assign({}, fromUrl.query, fromUrl.params) : {};
+  const onTop = top.params || {};
+  const keys = Object.keys(onTop);
+  if (keys.length !== Object.keys(inUrl).length) return false;
+  return attempt(() => keys.every((k) => Object.prototype.hasOwnProperty.call(inUrl, k) && String(onTop[k]) === String(inUrl[k]))) as boolean | typeof THROWS;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -817,6 +880,8 @@ function paint(w: Work): boolean {
     w.emit.push('willUnmount');
     // v17, row C139 — what the next mount compares against
     w.st.resetOwed = false;
+    // v18, row C120 — a Back of its own that lands after this is heard by no listener of the stack's
+    w.st.ownBacks = 0;
     w.st.addressAtUnmount = w.href;
     deregister(w);
   }
@@ -845,9 +910,14 @@ function endOf(w: Work, end: End): void {
     // the LAST, which after a Reset during the animation was the new start page)
     removeChild(w, end.page);
     deleteNode(w, end.page);
+    const popped = w.st.stack.find((e) => e.page === end.page);
     w.st.stack = w.st.stack.filter((e) => e.page !== end.page);
-    // :1077 — the page below's URL, pushed: a new entry, not a step back (row C120)
-    pushUrl(w);
+    // v18, row C120 (fixed in P109 ISL-048 as ruled, "A Pop steps the browser's history back": the page below's URL was pushed, a new
+    // entry) — over the entry its push made, its `popstate` its own; a page whose push made none has the address replaced
+    if (popped && popped.entry && w.st.useRoutes) {
+      w.st.ownBacks += 1;
+      w.answers.push({ op: 'history', how: 'back' });
+    } else pushUrl(w, 'replace');
   }
 }
 /** `start` (transition.ts :50-61): at once, or until the first frame past start + Duration + Delay */
@@ -918,8 +988,9 @@ function checks(w: Work, item: Item): Busy | null | typeof THROWS {
     const none = noComponents(s);
     if (none === THROWS) return THROWS;
     if (none) return failReset(w, item.tokens, 'component-stack/no-components');
-    // :523-535 — with Use Routes, the page in the URL with the query's and the path's parameters; else the Start Page, else the first
-    const fromUrl = matchPageFromUrl(w);
+    // :523-535 — with Use Routes, the page in the URL with the query's and the path's parameters; else the Start Page, else the first.
+    // A Reset press or a Components edit: the Start Page (v18, row C126, fixed in P109 ISL-048 as ruled: it read the URL too)
+    const fromUrl = item.toStart ? undefined : matchPageFromUrl(w);
     if (fromUrl === THROWS) return THROWS;
     const startPageId = fromUrl !== undefined ? fromUrl.pageId : s.startPageId !== undefined ? s.startPageId : firstId(s);
     if (startPageId === THROWS) return THROWS;
@@ -997,6 +1068,16 @@ function finishBusy(w: Work): void {
     // the stack too, which counted nothing until the next frame
     countChildren(w);
     outputs(w, b.found.label, 1);
+    // v18, row C126 — a Reset press or a Components edit writes its address, a new entry, when the address names another page
+    if (item.toStart) {
+      const shows = addressShowsTop(w);
+      if (shows === THROWS) return;
+      if (!shows) {
+        const wrote = pushUrl(w);
+        if (wrote === THROWS) return;
+        s.stack[0].entry = wrote;
+      }
+    }
     for (let i = 0; i < item.tokens; i++) w.outcomes.push({ port: 'reset', outcome: 'done' });
     return;
   }
@@ -1016,7 +1097,10 @@ function finishBusy(w: Work): void {
     s.stack = [...s.stack, { page, from: top.page, pageId: b.pageId, id: b.found.id, label: b.found.label, path: b.found.path, params, tr, pushed: true }];
     outputs(w, b.found.label, s.stack.length);
     // :1010 — the URL, before the transition; a URL the browser refuses throws: no transition, no page added, nothing answered
-    if (pushUrl(w) === THROWS) return;
+    const wrote = pushUrl(w);
+    if (wrote === THROWS) return;
+    // v18, row C120 — a new history entry: its Pop steps back over it
+    s.stack[s.stack.length - 1].entry = wrote;
     startTransition(w, tr, { kind: 'push', below: top.page });
     addChild(w, page);
     w.answers.push({ op: 'push', value: 'done' });
@@ -1029,8 +1113,9 @@ function finishBusy(w: Work): void {
   const page = newPage(w);
   s.stack = [{ page, from: null, pageId: b.pageId, id: b.found.id, label: b.found.label, path: b.found.path, params, tr, pushed: false }];
   outputs(w, b.found.label, 1);
-  // :889 — the URL, a new entry (row C120); refused, it throws as a push's does
-  if (pushUrl(w) === THROWS) return;
+  // :889 — the URL overwrites the current entry (v18, row C120, fixed in P109 ISL-048 as ruled: a new entry, so the browser's Back
+  // returned to the page the replace removed); refused, it throws as a push's does
+  if (pushUrl(w, 'replace') === THROWS) return;
   if (b.animate) startTransition(w, tr, { kind: 'replace', outgoing: b.outgoing });
   addChild(w, page);
   w.answers.push({ op: 'replace', value: 'done' });

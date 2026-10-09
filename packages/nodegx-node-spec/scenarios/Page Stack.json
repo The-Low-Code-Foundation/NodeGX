@@ -5964,7 +5964,7 @@
     }
   },
   {
-    "name": "row C124 — ROUTES: placed at ?q=%zz#/home — the malformed escape is kept as written: the stack shows Home, and a Reset is Done",
+    "name": "row C124 — ROUTES: placed at ?q=%zz#/home — the malformed escape is kept as written: the stack shows Home; a Reset is Done and writes /#/home, the query gone (row C126)",
     "because": "_getSearchParams :663-680 decodeURIComponent throws; resetAsync has deleted every page first (:507-511)",
     "params": {
       "pages": [
@@ -6183,8 +6183,8 @@
     }
   },
   {
-    "name": "ROUTES: a push of Detail, then Reset — the reset reads #/detail: Detail is rebuilt as the only page, Done (row C126)",
-    "because": "resetAsync reads the URL whatever asked for the reset",
+    "name": "ROUTES: a push of Detail, then Reset — the Start Page, Home, is rebuilt as the only page and #/home is pushed; a push of Home is then Unchanged (row C126)",
+    "because": "v18 (P109 ISL-048, s36): row C126 ruled 'Reset goes to the start page and writes its address' — resetAsync builds the start page on a Reset press and pushes its URL",
     "params": {
       "pages": [
         {
@@ -6240,8 +6240,8 @@
     }
   },
   {
-    "name": "ROUTES: placed at #/detail, then Components edited — the rebuild reads the URL: Detail (row C126)",
-    "because": "pages :308-313 schedules a reset",
+    "name": "ROUTES: placed at #/detail, then Components edited — the rebuild is the Start Page, Home, and #/home is pushed (row C126)",
+    "because": "v18 (P109 ISL-048, s36): row C126 — a Components edit resets to the start page, as a Reset press does",
     "params": {
       "pages": [
         {
@@ -6381,7 +6381,7 @@
     }
   },
   {
-    "name": "row C121 — ROUTES: a push of Detail with id 1, then of Settings — ?id=1#/detail, then /#/settings, which clears ?id=1: after a Reset Settings has no id, so the same push is Unchanged",
+    "name": "row C121 — ROUTES: a push of Detail with id 1, then of Settings — ?id=1#/detail, then /#/settings, which clears ?id=1: after the person's Back and Forward Settings has no id, so the same push is Unchanged",
     "because": "_updateUrlWithTopPage :749-763: hash mode writes ?query#/path, and with no query only #/path",
     "params": {
       "pages": [
@@ -6429,7 +6429,13 @@
       },
       "settle",
       {
-        "signal": "reset"
+        "act": "traverse",
+        "value": "https://app.example/"
+      },
+      "settle",
+      {
+        "act": "traverse",
+        "value": "/#/settings"
       },
       "settle",
       {
@@ -6451,7 +6457,7 @@
     }
   },
   {
-    "name": "row C123 — ROUTES: a push by the page's label, Detail — the URL is #/detail, and a Reset reads Detail back from it",
+    "name": "row C123 — ROUTES: a push by the page's label, Detail — the URL is #/detail, and the person's Back and Forward read Detail back from it",
     "because": "getRelativeURL :585-587 finds the row by `p.id == top.pageId`, and the entry's page id is the label",
     "params": {
       "pages": [
@@ -6486,7 +6492,13 @@
       },
       "settle",
       {
-        "signal": "reset"
+        "act": "traverse",
+        "value": "https://app.example/"
+      },
+      "settle",
+      {
+        "act": "traverse",
+        "value": "#/detail"
       },
       "settle"
     ],
@@ -6570,7 +6582,7 @@
     }
   },
   {
-    "name": "row C122 — ROUTES: path mode — a push with id 'a b&c' writes /detail?id=a%20b%26c; after a Reset the page has 'a b&c' back, so a push with id 'a b' is a new page — Done",
+    "name": "row C122 — ROUTES: path mode — a push with id 'a b&c' writes /detail?id=a%20b%26c; after the person's Back and Forward the page has 'a b&c' back, so a push with id 'a b' is a new page — Done",
     "because": "_updateUrlWithTopPage :755 `q.name + '=' + q.value`",
     "params": {
       "pages": [
@@ -6608,7 +6620,13 @@
       },
       "settle",
       {
-        "signal": "reset"
+        "act": "traverse",
+        "value": "https://app.example/"
+      },
+      "settle",
+      {
+        "act": "traverse",
+        "value": "/detail?id=a%20b%26c"
       },
       "settle",
       {
@@ -6636,7 +6654,7 @@
     }
   },
   {
-    "name": "row C122 — ROUTES: a push with q '50%' writes ?q=50%25#/detail, and a Reset reads it back — Done at Detail",
+    "name": "row C122 — ROUTES: a push with q '50%' writes ?q=50%25#/detail, and the person's Back and Forward read it back: Detail with q '50%', so the same push is Unchanged",
     "because": "the value is written unencoded; _getSearchParams throws on it",
     "params": {
       "pages": [
@@ -6674,9 +6692,27 @@
       },
       "settle",
       {
-        "signal": "reset"
+        "act": "traverse",
+        "value": "https://app.example/"
       },
       "settle",
+      {
+        "act": "traverse",
+        "value": "?q=50%25#/detail"
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          },
+          "params": {
+            "q": "50%"
+          }
+        }
+      },
       "settle"
     ],
     "world": {
@@ -6687,7 +6723,7 @@
     }
   },
   {
-    "name": "ROUTES: a push with q '50', then Reset — the control: Detail rebuilt, Done",
+    "name": "ROUTES: a push with q '50', then the person's Back and Forward — the control: Detail rebuilt with q '50', so the same push is Unchanged",
     "because": "the same URL, decodable",
     "params": {
       "pages": [
@@ -6725,9 +6761,27 @@
       },
       "settle",
       {
-        "signal": "reset"
+        "act": "traverse",
+        "value": "https://app.example/"
       },
       "settle",
+      {
+        "act": "traverse",
+        "value": "?q=50#/detail"
+      },
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          },
+          "params": {
+            "q": "50"
+          }
+        }
+      },
       "settle"
     ],
     "world": {
@@ -6738,8 +6792,8 @@
     }
   },
   {
-    "name": "ROUTES: a replace with Settings — its URL is pushed, a new entry (row C120)",
-    "because": "replaceAsync :889",
+    "name": "ROUTES: a replace with Settings — its URL replaces the current entry (row C120)",
+    "because": "v18 (P109 ISL-048, s36): row C120 ruled — replaceAsync writes its URL with history.replaceState",
     "params": {
       "pages": [
         {
@@ -6781,7 +6835,7 @@
     }
   },
   {
-    "name": "ROUTES: an animated replace (Push) — the URL is pushed at the build, before the transition",
+    "name": "ROUTES: an animated replace (Push) — the URL replaces the entry at the build, before the transition (row C120)",
     "because": "replaceAsync :885-893",
     "params": {
       "pages": [
@@ -6828,8 +6882,8 @@
     }
   },
   {
-    "name": "ROUTES: a push, then its Pop — the page below's URL is pushed at the transition's end: #/home, a new entry (row C120)",
-    "because": "back :1068-1078 _updateUrlWithTopPage in the end callback",
+    "name": "ROUTES: a push, then its Pop — the history steps back at the transition's end, over the entry the push made; its popstate resets nothing (row C120)",
+    "because": "v18 (P109 ISL-048, s36): row C120 ruled 'A Pop steps the browser's history back' — back's end callback calls history.back() and counts it as its own",
     "params": {
       "pages": [
         {
@@ -6876,7 +6930,7 @@
     }
   },
   {
-    "name": "ROUTES: a timed push, then its Pop — #/home is pushed in the first frame past the back's end",
+    "name": "ROUTES: a timed push, then its Pop — the history steps back in the first frame past the back's end (row C120)",
     "because": "transition.ts `frame`; back's end :1068",
     "params": {
       "pages": [
@@ -6929,7 +6983,7 @@
     }
   },
   {
-    "name": "row C123 — ROUTES: Start Page given by its label, Home — after a push and a Pop the URL is #/home",
+    "name": "row C123 — ROUTES: Start Page given by its label, Home — a push, then Reset: the address written for the start page is #/home (row C126)",
     "because": "the reset's entry page id is the label (:564)",
     "params": {
       "pages": [
@@ -6965,8 +7019,7 @@
       },
       "settle",
       {
-        "act": "back",
-        "value": {}
+        "signal": "reset"
       },
       "settle"
     ],
@@ -6978,7 +7031,7 @@
     }
   },
   {
-    "name": "ROUTES: Home's Path '' and Settings' Path 'Settings' — a push and a Pop: #/Settings, then #/",
+    "name": "ROUTES: Home's Path '' and Settings' Path 'Settings' — a push, then Reset: #/Settings, then #/ (row C126)",
     "because": "the Path as written, a leading / removed (:614)",
     "params": {
       "pages": [
@@ -7012,11 +7065,6 @@
             "type": "None"
           }
         }
-      },
-      "settle",
-      {
-        "act": "back",
-        "value": {}
       },
       "settle",
       {
@@ -7297,7 +7345,7 @@
     }
   },
   {
-    "name": "ROUTES: a push and its Pop, then the person's Back to #/detail — Detail alone, Stack Depth 1, and its Pop asks nothing (row C120)",
+    "name": "ROUTES: a push and its Pop, then the person's Forward to #/detail — the Pop stepped back, so the browser goes Forward to Detail: Detail alone, Stack Depth 1, and its Pop asks nothing (row C120)",
     "because": "the Pop pushed #/home; Back lands on #/detail, a reset's page has no back callback",
     "params": {
       "pages": [
@@ -7407,7 +7455,7 @@
     }
   },
   {
-    "name": "row C124 — ROUTES: the person's Back to ?q=%zz#/detail — the malformed escape is kept as written: the stack starts again at Detail",
+    "name": "row C124 — ROUTES: the person's Back to ?q=%zz#/detail — the malformed escape is kept as written: the stack starts again at Detail; a Reset then builds Home and writes /#/home (row C126)",
     "because": "_getSearchParams throws",
     "params": {
       "pages": [
@@ -7672,7 +7720,7 @@
     }
   },
   {
-    "name": "ROUTES: the person's Back, then a push, in one frame — the reset to #/detail runs first, then Settings is pushed on it",
+    "name": "ROUTES: the person's Back, then a push, in one frame — the reset to #/detail runs first, then Settings is pushed on it, and its Pop steps the history back",
     "because": "the frame-end list in step order",
     "params": {
       "pages": [
@@ -7835,7 +7883,7 @@
     }
   },
   {
-    "name": "ROUTES: the person's Back twice and a Reset in one frame — one reset, the Reset answered Done",
+    "name": "ROUTES: the person's Back twice and a Reset in one frame — one reset, to the Start Page because a Reset is among them: Home, #/home pushed, the Reset Done (row C126)",
     "because": "scheduleReset :463-479: one callback per frame",
     "params": {
       "pages": [
@@ -8121,5 +8169,213 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "row C120 — ROUTES: a page pushed with Use Routes off, then Use Routes on and its Pop — no entry of its own to step back over: the address is replaced with #/home",
+    "because": "v18 (P109 ISL-048, s36): back's end callback — a page whose push made no history entry has the address replaced (history.replaceState)",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "useRoutes",
+        "value": true
+      },
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "row C120 — ROUTES: the Pop's own Back is the stack's — Home's Path changes before it lands, so the address #/home names no page, and the stack keeps Home rather than resetting to its first page, Detail",
+    "because": "v18 (P109 ISL-048, s36): onScheduleReset — the popstate a Pop's own history.back() lands as is counted off first (ownBacks)",
+    "params": {
+      "pages": [
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "back",
+        "value": {}
+      },
+      {
+        "set": "pagePath-p1",
+        "value": "start"
+      },
+      "settle",
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p3",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "location": "https://app.example/#/home"
+    }
+  },
+  {
+    "name": "row C120 — ROUTES: the person's Back to the address already on top — a push of Detail, then a Back to #/detail: the address names the page on top, so nothing resets",
+    "because": "v18 (P109 ISL-048, s36): onScheduleReset — an address that names the page, and parameters, on top has nothing to rebuild (_addressShowsTop), as the Page Router keeps a page it already shows",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "push",
+        "value": {
+          "target": "p2",
+          "transition": {
+            "type": "None"
+          }
+        }
+      },
+      "settle",
+      {
+        "act": "traverse",
+        "value": "#/detail"
+      },
+      "settle",
+      "settle",
+      {
+        "act": "back",
+        "value": {}
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    }
+  },
+  {
+    "name": "row C126 — ROUTES: Reset while the address already names the Start Page — Home rebuilt, Done, and nothing written",
+    "because": "v18 (P109 ISL-048, s36): resetAsync — the start page's address is written only when the address names another page",
+    "params": {
+      "pages": [
+        {
+          "id": "p1",
+          "label": "Home"
+        },
+        {
+          "id": "p2",
+          "label": "Detail"
+        },
+        {
+          "id": "p3",
+          "label": "Settings"
+        }
+      ],
+      "pageComp-p1": "Home",
+      "pageComp-p2": "Detail",
+      "pageComp-p3": "Settings",
+      "useRoutes": true
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "reset"
+      },
+      "settle"
+    ],
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "location": "https://app.example/#/home"
+    }
   }
 ]

@@ -85,6 +85,8 @@ interface StackEntry {
   transition?: Transition;
   backCallback?: StackNavigateArgs['backCallback'];
   componentName?: string;
+  /** P107-C120 — the push wrote this entry's URL as a new history entry, so its Pop steps back over it. */
+  historyEntry?: boolean;
 }
 
 /**
@@ -136,6 +138,10 @@ interface PageStackInstance extends ReactNodeInstance {
     hasScheduledReset?: boolean;
     /** ERG-001 §4 — tokens for the `Reset` presses this frame; see `scheduleReset`. */
     pendingResetOutcomes?: OutcomeToken[];
+    /** P107-C126 — a Reset press or a Components edit this frame: the reset builds the start page, not the page in the URL. */
+    pendingResetToStart?: boolean;
+    /** P107-C120 — the `history.back()`s this stack's Pops made that have not landed: their `popstate` is the stack's own. */
+    ownBacks?: number;
     remainingNavigationPath?: string[];
     [extra: string]: unknown;
   };
@@ -148,21 +154,23 @@ interface PageStackInstance extends ReactNodeInstance {
   /** NDA-008 §2 — whether this exact page-and-params is already the top of the stack. */
   _isAlreadyShowing(pageInfo: FoundPage, params: Record<string, unknown> | undefined): boolean;
   setPageOutputs(outputs: Record<string, unknown>): void;
-  scheduleReset(outcome?: OutcomeToken): void;
+  scheduleReset(outcome?: OutcomeToken, toStart?: boolean): void;
   /** ERG-001 §4 — end a `Reset` invocation, or on the mount path end none. */
   _reportReset(outcomes: OutcomeToken[] | undefined, outcome: NodeOutcome, options?: OutcomeFailureOptions): void;
   /** P107-C112 — a failed reset leaves the stack empty, and says so. */
   _resetLeftEmpty(): void;
   createPageContainer(): ReactNodeInstance;
-  reset(outcomes?: OutcomeToken[]): void;
-  resetAsync(outcomes?: OutcomeToken[]): Promise<void>;
+  reset(outcomes?: OutcomeToken[], toStart?: boolean): void;
+  resetAsync(outcomes?: OutcomeToken[], toStart?: boolean): Promise<void>;
+  /** P107-C120 — the address names the page (and parameters) on top: a `popstate` there has nothing to rebuild. */
+  _addressShowsTop(): boolean;
   getRelativeURL(): { path: string; query: { name: string; value: unknown }[] } | undefined;
   getNavigationAbsoluteURL(): { path: string; query: { name: string; value: unknown }[] };
   _getLocationPath(): string;
   _getSearchParams(): Record<string, string>;
   getNavigationRemainingPath(): string[] | undefined;
   matchPageFromUrl(): { pageId: string; params: Record<string, string>; query: Record<string, string> } | undefined;
-  _updateUrlWithTopPage(): void;
+  _updateUrlWithTopPage(how?: 'push' | 'replace'): boolean;
   replace(args: StackNavigateArgs): void;
   replaceAsync(args: StackNavigateArgs): Promise<void>;
   navigate(args: StackNavigateArgs): void;
@@ -195,9 +203,18 @@ const PageStack = {
     this._internal.asyncQueue = new ASyncQueue();
 
     this.onScheduleReset = () => {
+      // P107-C120 (ruled "A Pop steps the browser's history back") — the `popstate` a Pop's own `history.back()` lands as is this
+      // stack's: the page below is already on top, so it must not reset. Counted per stack: every listener of the page hears it
+      if (this._internal.ownBacks) {
+        this._internal.ownBacks -= 1;
+        return;
+      }
       // P107-C119 — the address is the stack's only with Use Routes on: the browser's Back or Forward sent every stack on the page
       // back to its start page, Use Routes or not. Read at the event, so Use Routes turned on or off while mounted holds
       if (!this._internal.useRoutes) return;
+      // P107-C120 — an address that names the page already on top has nothing to rebuild: another stack's Pop (a parent's address
+      // still names its top), as the Page Router keeps a page it already shows
+      if (this._addressShowsTop()) return;
       this.scheduleReset();
     };
 
@@ -240,6 +257,8 @@ const PageStack = {
       this._internal.isMounted = false;
       // P107-C139 — what the next mount compares against
       this._internal.resetOwed = false;
+      // P107-C120 — a Back of its own that lands after this is heard by no listener of this stack's
+      this._internal.ownBacks = 0;
       this._internal.addressAtUnmount = typeof location !== 'undefined' ? location.href : undefined;
 
       if (typeof window !== 'undefined') {
@@ -369,7 +388,8 @@ const PageStack = {
         // `.length` or `[0]` on it, and a reset that threw on it blanked the stack and never answered
         this._internal.pages = Array.isArray(value) ? value : undefined;
         if (this._internal.isMounted) {
-          this.scheduleReset();
+          // P107-C126 (ruled "Reset goes to the start page and writes its address") — a Components edit rebuilds the start page
+          this.scheduleReset(undefined, true);
         } else {
           // P107-C139 — a mounted stack would have reset: the next mount does
           this._internal.resetOwed = true;
@@ -385,7 +405,8 @@ const PageStack = {
         // ERG-001 §4 — the only caller of `scheduleReset` that is an author asking for a reset.
         // `NavigationHandler.registerPageStack` calls `reset()` on mount (`:90`, `:106`) so the
         // start component is created, and that must report nothing.
-        this.scheduleReset(this.beginOutcome());
+        // P107-C126 (ruled "Reset goes to the start page and writes its address") — as its description says, not the URL's page
+        this.scheduleReset(this.beginOutcome(), true);
       }
     }
   },
@@ -527,20 +548,24 @@ const PageStack = {
       }
     },
     /** ERG-001 §4 — the token is optional; see `router.tsx`'s `scheduleReset` for the why. */
-    scheduleReset(this: PageStackInstance, outcome?: OutcomeToken) {
+    scheduleReset(this: PageStackInstance, outcome?: OutcomeToken, toStart?: boolean) {
       const internal = this._internal;
       if (outcome !== undefined) {
         if (internal.pendingResetOutcomes === undefined) internal.pendingResetOutcomes = [];
         internal.pendingResetOutcomes.push(outcome);
       }
+      // P107-C126 — one reset per frame: a Reset press or a Components edit among its reasons makes it the start page's
+      if (toStart) internal.pendingResetToStart = true;
 
       if (!internal.hasScheduledReset) {
         internal.hasScheduledReset = true;
         this.scheduleAfterInputsHaveUpdated(() => {
           internal.hasScheduledReset = false;
           const outcomes = internal.pendingResetOutcomes;
+          const toStart = !!internal.pendingResetToStart;
           internal.pendingResetOutcomes = undefined;
-          this.reset(outcomes);
+          internal.pendingResetToStart = false;
+          this.reset(outcomes, toStart);
         });
       }
     },
@@ -564,12 +589,12 @@ const PageStack = {
       group.setStyle({ flex: '1 0 100%' });
       return group;
     },
-    reset(this: PageStackInstance, outcomes?: OutcomeToken[]) {
+    reset(this: PageStackInstance, outcomes?: OutcomeToken[], toStart?: boolean) {
       // P107-C139 — the handler's mount reset (no outcomes; a Reset press always has them) on a mount that keeps the pages
       if (outcomes === undefined && this._internal.keepAtMount) return;
-      this._internal.asyncQueue.enqueue(this.resetAsync.bind(this, outcomes));
+      this._internal.asyncQueue.enqueue(this.resetAsync.bind(this, outcomes, toStart));
     },
-    async resetAsync(this: PageStackInstance, outcomes?: OutcomeToken[]) {
+    async resetAsync(this: PageStackInstance, outcomes?: OutcomeToken[], toStart?: boolean) {
       // `.slice()` for the same reason as in `replaceAsync`: `getChildren()` is the live array,
       // and removing while iterating it by index skips every other child. Reset is the initial
       // mount and deliberately has no transition — the app's first paint should not animate.
@@ -593,7 +618,8 @@ const PageStack = {
       let startPageId: string;
       let params: Record<string, unknown> = {};
 
-      const pageFromUrl = this.matchPageFromUrl();
+      // P107-C126 — the mount and the browser's Back read the address; a Reset press or a Components edit builds the start page
+      const pageFromUrl = toStart ? undefined : this.matchPageFromUrl();
       if (pageFromUrl !== undefined) {
         // We have an url matching a page, use that page as start page
         startPageId = pageFromUrl.pageId;
@@ -657,6 +683,9 @@ const PageStack = {
         topPageName: pageInfo.label,
         stackDepth: this._internal.stack.length
       });
+
+      // P107-C126 — and writes its address (Use Routes), a new entry, when the address names another page
+      if (toStart && !this._addressShowsTop()) this._internal.stack[0].historyEntry = this._updateUrlWithTopPage('push');
 
       // Last, after the outputs it describes.
       this._reportReset(outcomes, 'done');
@@ -840,7 +869,11 @@ const PageStack = {
         }
       }
     },
-    _updateUrlWithTopPage(this: PageStackInstance) {
+    /**
+     * P107-C120 — `how`: a push makes a new history entry, a replace overwrites the current one (a Replace, and a Pop over an entry no
+     * push of this stack made). Returns whether a new entry was made.
+     */
+    _updateUrlWithTopPage(this: PageStackInstance, how: 'push' | 'replace' = 'push') {
       // Push the state to the browser url. `window.history !== undefined` alone
       // would throw server-side — dereferencing window needs its own guard.
       if (this._internal.useRoutes && typeof window !== 'undefined' && window.history !== undefined) {
@@ -864,8 +897,34 @@ const PageStack = {
 
         this._internal.remainingNavigationPath = undefined; // Reset remaining nav path
         //	console.log(compiledUrl);
-        window.history.pushState({}, '', compiledUrl);
+        if (how === 'replace') window.history.replaceState({}, '', compiledUrl);
+        else window.history.pushState({}, '', compiledUrl);
+        return how === 'push';
       }
+      return false;
+    },
+    _addressShowsTop(this: PageStackInstance) {
+      const top = this._internal.stack[this._internal.stack.length - 1];
+      if (top === undefined || this._internal.pages === undefined || this._internal.pages.length === 0) return false;
+      // `matchPageFromUrl` records the path left for a nested stack; this only reads, so what a reset left stays
+      const remaining = this._internal.remainingNavigationPath;
+      const fromUrl = this.matchPageFromUrl();
+      this._internal.remainingNavigationPath = remaining;
+      // as `resetAsync` picks it
+      const pageId =
+        fromUrl !== undefined
+          ? fromUrl.pageId
+          : this._internal.startPageId !== undefined
+            ? this._internal.startPageId
+            : this._internal.pages[0].id;
+      const found = this._findPage(pageId);
+      if (found === undefined || found.id !== top.pageInfo.id) return false;
+      // the address holds text: a parameter pushed as 7 is "7" there
+      const inUrl: Record<string, unknown> = fromUrl !== undefined ? Object.assign({}, fromUrl.query, fromUrl.params) : {};
+      const onTop = top.params || {};
+      const keys = Object.keys(onTop);
+      if (keys.length !== Object.keys(inUrl).length) return false;
+      return keys.every((k) => Object.prototype.hasOwnProperty.call(inUrl, k) && String(onTop[k]) === String(inUrl[k]));
     },
     replace(this: PageStackInstance, args: StackNavigateArgs) {
       this._internal.asyncQueue.enqueue(this.replaceAsync.bind(this, args));
@@ -1001,7 +1060,8 @@ const PageStack = {
         stackDepth: this._internal.stack.length
       });
 
-      this._updateUrlWithTopPage();
+      // P107-C120 (ruled) — a Replace overwrites the current entry: the browser's Back no longer returns to the page it removed
+      this._updateUrlWithTopPage('replace');
 
       if (transition) {
         transition.forward(0);
@@ -1143,7 +1203,7 @@ const PageStack = {
         topPageName: pageInfo.label,
         stackDepth: this._internal.stack.length
       });
-      this._updateUrlWithTopPage();
+      newTop.historyEntry = this._updateUrlWithTopPage();
 
       newTop.transition.forward(0);
 
@@ -1222,7 +1282,12 @@ const PageStack = {
           const at = this._internal.stack.indexOf(top);
           if (at >= 0) this._internal.stack.splice(at, 1);
 
-          this._updateUrlWithTopPage();
+          // P107-C120 (ruled "A Pop steps the browser's history back") — over the entry its push made, so the app's Back and the
+          // browser's agree; it pushed the page below's URL as a new entry. A page whose push made no entry: the address is replaced
+          if (top.historyEntry && this._internal.useRoutes && typeof window !== 'undefined' && window.history !== undefined) {
+            this._internal.ownBacks = (this._internal.ownBacks ?? 0) + 1;
+            window.history.back();
+          } else this._updateUrlWithTopPage('replace');
         },
         back: true
       });

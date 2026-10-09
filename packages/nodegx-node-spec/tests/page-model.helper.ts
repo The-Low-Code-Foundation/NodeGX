@@ -289,11 +289,13 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
   // end runs its callbacks (a reset, the callers' requests), the transition's tick, and the paint, which registers and so resets
   // v17 (s33, row C139) — Keep Pages When Unmounted, a reset owed while off and the address at the unmount are the node's; the paint
   // (a mount, an unmount) clears or records the last two
+  // v18 (P109 s36, rows C120, C126) — a reset to the start page asked this frame, and the stack's own Backs not yet landed, are the
+  // node's: the frame's end takes the first and a Pop's end counts the second; a landed Back (`popstate`) and an unmount clear it
   'Page Stack': {
-    node: ['mounted', 'isMounted', 'name', 'useRoutes', 'keepPages', 'resetOwed', 'addressAtUnmount', 'regKey', 'waiting', 'pages', 'pageInfo', 'startPageId', 'stack', 'children', 'deleted', 'nextPage', 'running', 'queue', 'busy', 'hops', 'owed', 'callbacks', 'resetScheduled', 'resetTokens', 'countLate', 'top', 'depth', 'count'],
+    node: ['mounted', 'isMounted', 'name', 'useRoutes', 'keepPages', 'resetOwed', 'addressAtUnmount', 'regKey', 'waiting', 'pages', 'pageInfo', 'startPageId', 'stack', 'children', 'deleted', 'nextPage', 'running', 'queue', 'busy', 'hops', 'owed', 'callbacks', 'resetScheduled', 'resetTokens', 'resetToStart', 'ownBacks', 'countLate', 'top', 'depth', 'count'],
     attr: { onPage },
     held: {},
-    frameEnd: ['isMounted', 'resetOwed', 'addressAtUnmount', 'regKey', 'waiting', 'stack', 'children', 'deleted', 'nextPage', 'running', 'queue', 'busy', 'hops', 'owed', 'callbacks', 'resetScheduled', 'resetTokens', 'countLate', 'top', 'depth', 'count']
+    frameEnd: ['isMounted', 'resetOwed', 'addressAtUnmount', 'regKey', 'waiting', 'stack', 'children', 'deleted', 'nextPage', 'running', 'queue', 'busy', 'hops', 'owed', 'callbacks', 'resetScheduled', 'resetTokens', 'resetToStart', 'ownBacks', 'countLate', 'top', 'depth', 'count']
   },
   // s57 — the Page Router (page-router.ts): everything is the node's own — its pages, its queue, the handler's names, the navigates
   // waiting out their millisecond; the frame's end runs its callbacks (a reset, the Navigates' hand-ons) and the paint, which
@@ -344,7 +346,8 @@ function offers(items: unknown, value: unknown): boolean {
 export const isVisual = (spec: AnyNodeSpec) => !!spec.acts || !!spec.world?.place;
 
 /** The format's world kinds (spec.ts `WorldHandlers`), pinned: a new one is sorted (NSP-023 §3) before it lands. */
-export const WORLD_KINDS = ['timer', 'response', 'change', 'resize', 'page', 'popup', 'backend', 'store', 'auth', 'authReturn', 'mount', 'place', 'picker', 'realtime', 'socket', 'resume', 'stream', 'group'] as const;
+// s70 (P107) / P109 s36 — `popstate`: a `history.back()` the page made landed; a browser event, heard by the node's own listener
+export const WORLD_KINDS = ['timer', 'response', 'change', 'resize', 'page', 'popup', 'backend', 'store', 'auth', 'authReturn', 'mount', 'place', 'picker', 'realtime', 'socket', 'resume', 'popstate', 'stream', 'group'] as const;
 
 const LIFECYCLE = new Set(['didMount', 'willUnmount']);
 
