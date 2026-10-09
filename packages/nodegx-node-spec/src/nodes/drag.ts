@@ -36,8 +36,8 @@
  *
  * **Start Drag X / Y** (inputProps, at the paint): a change (`Object.is`: NaN again is none, row C106) moves the element there and sends Drag X / Y and Delta X / Y (the change
  * from the last one painted — from nothing, NaN; Drag.tsx `componentDidUpdate`). At the mount the element starts at Start Drag X / Y,
- * or 0 when it is not truthy (`componentDidMount`), and all four are sent. A value that is not a number is kept as it came (text
- * joins onto the numbers the drag adds).
+ * or 0 when it is not truthy (`componentDidMount`), and all four are sent. Text is read as a number (v3, row C138: v2 kept it as
+ * it came, and it joined onto the numbers the drag adds); any other value that is not a number is kept as it came.
  *
  * **Snap To Position X / Y — Do** (drag.ts :61-79): at the frame's end (`scheduleAfterInputsHaveUpdated`), with the Value and Duration
  * held then, on the component when it exists — else it waits for the component (at most 16; the 17th pushes the oldest out, which
@@ -146,7 +146,8 @@ const LOOK = (displayName: string, group: string, description: string, extra: Re
 export const Drag = defineNode({
   type: 'Drag',
   // v2 (P109 ISL-048, s31): a Start Drag X / Y that is NaN again is no change — `Object.is` (row C106)
-  version: 2,
+  // v3 (P109 ISL-048, s32): a Start Drag X / Y that is text is read as a number (row C138)
+  version: 3,
   source: 'packages/noodl-viewer-react/src/nodes/visual/drag.ts; packages/noodl-viewer-react/src/components/visual/Drag/Drag.tsx; react-draggable 4.5.0',
   needs: ['person', 'clock'],
   worldPool: { advances: [0, 16, 100, 150, 300, 301, 1000] },
@@ -275,8 +276,9 @@ export const Drag = defineNode({
     axis: (_s, v) => ({ set: { axis: v }, send: [] }),
     useParentBounds: (_s, v) => ({ set: { useParentBounds: v }, send: [] }),
     scale: (_s, v) => ({ set: { scale: v }, send: [] }),
-    inputPositionX: (_s, v) => ({ set: { startX: v }, send: [] }),
-    inputPositionY: (_s, v) => ({ set: { startY: v }, send: [] }),
+    // v3 (row C138, ruled "Read it as a number"): text is read as a number (`Number`); a number goes on as it came, NaN too
+    inputPositionX: (_s, v) => ({ set: { startX: typeof v === 'string' ? Number(v) : v }, send: [] }),
+    inputPositionY: (_s, v) => ({ set: { startY: typeof v === 'string' ? Number(v) : v }, send: [] }),
     // react-component-node.ts :2310-2320
     mounted: (_s, v) => ({ set: { mounted: !!v }, send: [] }),
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire

@@ -566,8 +566,8 @@
     ]
   },
   {
-    "name": "a Start Drag X that is text joins with the movement as text; with Constrain to parent on, the library's slack joins on too — off and on",
-    "because": "positionFns.js `createDraggableData` (`x + deltaX / scale`) and Draggable `onDrag` with bounds (`newState.x += slackX`): the start is kept as it came (Drag.tsx `componentDidMount`)",
+    "name": "a Start Drag X that is text is read as a number: a 10 px drag from the text 50 puts the element at 60, with Constrain to parent off and on (row C138)",
+    "because": "positionFns.js `createDraggableData` (`x + deltaX / scale`) and Draggable `onDrag` with bounds (`newState.x += slackX`): the start is kept as it came (Drag.tsx `componentDidMount`) — renamed in P109 s32 (Drag v3: text is read as a number)",
     "params": {
       "inputPositionX": "50",
       "axis": "both",
@@ -605,6 +605,77 @@
       {
         "set": "inputPositionX",
         "value": "7"
+      },
+      "settle",
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "act": "moveTo",
+        "value": {
+          "x": 10,
+          "y": 50
+        }
+      },
+      "settle",
+      {
+        "act": "releaseAt",
+        "value": {
+          "x": 10,
+          "y": 50
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Start Drag X that is neither text nor a number (a list) is kept as it came and joins with the movement; with Constrain to parent on, the library's slack joins on too — off and on",
+    "because": "P109 s32 — Constrain to parent shows only when a position is not a number (the face lays nothing out); since v3 text is read as a number, so a list keeps the slack observable",
+    "params": {
+      "inputPositionX": [
+        5
+      ],
+      "axis": "both",
+      "useParentBounds": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "act": "moveTo",
+        "value": {
+          "x": 10,
+          "y": 50
+        }
+      },
+      "settle",
+      {
+        "act": "releaseAt",
+        "value": {
+          "x": 10,
+          "y": 50
+        }
+      },
+      "settle",
+      {
+        "set": "useParentBounds",
+        "value": true
+      },
+      {
+        "set": "inputPositionX",
+        "value": [
+          7
+        ]
       },
       "settle",
       {

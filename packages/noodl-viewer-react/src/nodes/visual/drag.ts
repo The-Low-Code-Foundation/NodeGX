@@ -193,6 +193,12 @@ const DragNode: ReactNodeDefinition = {
       description: 'Sets the X position the element starts at, before any dragging',
       type: {
         name: 'number'
+      },
+      // P109 ISL-048 (P107-C138), ruled "Read it as a number": text from a wire ("50") was added to the movement as text, so a
+      // 10 px drag put the element at "5010". A number — NaN included (C106) — goes on as it came. `onChange` runs after the
+      // generated setter has written the prop and before it renders.
+      onChange(value) {
+        if (typeof value === 'string') this.props.inputPositionX = Number(value);
       }
     },
     inputPositionY: {
@@ -201,6 +207,12 @@ const DragNode: ReactNodeDefinition = {
       description: 'Sets the Y position the element starts at, before any dragging',
       type: {
         name: 'number'
+      },
+      // P109 ISL-048 (P107-C138), ruled "Read it as a number": text from a wire ("50") was added to the movement as text, so a
+      // 10 px drag put the element at "5010". A number — NaN included (C106) — goes on as it came. `onChange` runs after the
+      // generated setter has written the prop and before it renders.
+      onChange(value) {
+        if (typeof value === 'string') this.props.inputPositionY = Number(value);
       }
     },
     scale: {
