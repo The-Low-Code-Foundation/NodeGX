@@ -40,7 +40,7 @@ Board: **30 of 52 closed** (ISL-052 new and ✅).
 
 ## Gate readings taken s37 (2026-10-09)
 
-- Layout check 8 / 8 at `afac7de50` (206 boxes match; KNOWN: 2 FLOOR, 30 ROOM — the ROOM rows left KNOWN with P107's `fd6385beb`; 8 / 8 there too). Control (HEAD's `layout.ts`, `Group.tsx`,
+- Layout check 8 / 8 at `afac7de50` (206 boxes match; KNOWN: 2 FLOOR, 32 ROOM). Control (HEAD's `layout.ts`, `Group.tsx`,
   `react-component-node.ts`): red on the rule's test and KNOWN. Planted: no min-content, Fixed % of the inner box, no window-high
   inner box, no `safe` — each red.
 - Viewer 1,837 / 1,837 with P116's pending `targetGoes.ts` line applied locally (without it, 5 suites fail to run: TS2802).
@@ -59,8 +59,8 @@ Board: **30 of 52 closed** (ISL-052 new and ✅).
 
 ## Handed over (owed by another phase)
 
-- **P107 (opennoodl-49), told s37:** ISL-052 landed as ruled. They fixed P109-S37-SCROLLROOM the same evening (`fd6385beb`: the
-  model reads a scroll as the window unless the content is longer; the 30 ROOM boxes out of KNOWN).
+- **P107 (opennoodl-49), told s37:** ISL-052 landed as ruled; their model owes P109-S37-SCROLLROOM (32 boxes KNOWN as ROOM;
+  four new fixtures; the measuring records `inner`).
 
 - **P107 (opennoodl-49):** told C120/C126 landed and that `popstate` was sorted into `WORLD_KINDS`. Theirs: the day-seed survivors,
   the Video rows C96–C100, and the frame a landed back is heard in if the two targets ever disagree (they asked to be told).

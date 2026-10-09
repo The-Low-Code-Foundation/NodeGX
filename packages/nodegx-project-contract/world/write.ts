@@ -10,25 +10,12 @@
 import { VERBS_FILE, WORLD_FILES, type WorldFileName, type WorldFiles } from './files';
 import { validateWorld, type WorldProblem } from './validate';
 import { WORLD_VOCABULARY_REF, type VocabularyRef } from './vocabulary';
+import { hash53 } from '../hash';
 
 /** The three files' text as on disk; `null` for a file that does not exist. `verbs` (ONT-006) when the caller read for it. */
 export type WorldTexts = Record<WorldFileName, string | null> & { verbs?: string | null };
 
 const NAMES: readonly WorldFileName[] = ['nouns', 'relations', 'vocabulary'];
-
-/** cyrb53: a 53-bit string hash, pure, the same in a page and in Node. Change detection, not security. */
-function hash53(text: string): string {
-  let h1 = 0xdeadbeef;
-  let h2 = 0x41c6ce57;
-  for (let i = 0; i < text.length; i++) {
-    const c = text.charCodeAt(i);
-    h1 = Math.imul(h1 ^ c, 2654435761);
-    h2 = Math.imul(h2 ^ c, 1597334677);
-  }
-  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16).padStart(14, '0');
-}
 
 /** The revision of the world as read: changes when any of the three files' text does, or one appears or goes. */
 export function worldRevision(texts: WorldTexts): string {

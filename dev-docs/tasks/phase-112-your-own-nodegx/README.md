@@ -4,7 +4,7 @@
 phase 107 makes possible and ended with a working prototype: a NodeGX graph running in a browser page on the node
 specs, drawn as the editor's canvas, lifted into 3D, and editable (add a node, drag a wire, set a property), with
 missions a copy of the graph checks. The prototype is kept in [`prototype/`](prototype/README.md); a second, better one, Under the Lid (2026-10-03), in [`prototype-under-the-lid/`](prototype-under-the-lid/README.md) (reading 12).
-**Status: 🟡 IN PROGRESS — s1 (2026-10-03): OWN-000 built (NEEDS.md, CENSUS.md, the second prototype kept); OWN-002 built (the browser entry, the build, the size); OWN-005 built (`@nodegx/canvas-look`, generated, gated; the prototype reads it); OWN-003 step 1 measured (the runtime loads in a page: 807 KB, 80 types, 65 ms; R1 to ask); OWN-010's ledger half built 2026-10-02. Six rulings to ask (§8).** **Prefix: `OWN`.**
+**Status: 🟡 IN PROGRESS — s2 (2026-10-09): OWN-001 slice 1 built (the format in `@nodegx/project-contract/format`: schemas, validator, types, a store with the MCP's rules over memory or disk; AC2–AC4 met, AC1 waits on slice 2); every task file has a Model line (§0.2). s1 (2026-10-03): OWN-000 built (NEEDS.md, CENSUS.md, the second prototype kept); OWN-002 built (the browser entry, the build, the size); OWN-005 built (`@nodegx/canvas-look`, generated, gated; the prototype reads it); OWN-003 step 1 measured (the runtime loads in a page: 807 KB, 80 types, 65 ms; R1 to ask); OWN-010's ledger half built 2026-10-02. Six rulings to ask (§8).** **Prefix: `OWN`.**
 Task files: [OWN-000](OWN-000-THE-PROTOTYPE-MEASURED.md) … [OWN-011](OWN-011-ONE-INSTALL.md). The board is §6.
 
 > "Would someone who wants to view their NodeGX project as some crazy 3D mapping they've invented … would 107 open up

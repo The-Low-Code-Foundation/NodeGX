@@ -1,7 +1,7 @@
 # ISL-052 — A scrolling Group lays out as it does without the scroll
 
 **Status: ✅ s37 (2026-10-09): 7 of 7 fixed — C152, C153, P109-S37-ISCROLLALIGN `0859bbbde` (§5); C154, P109-S37-FILLCAP,
-ISCROLLPERCENT, CENTRECUT `afac7de50` as ruled (§6). The model's half (P109-S37-SCROLLROOM) fixed by P107 `fd6385beb`.** Scoped s37 at
+ISCROLLPERCENT, CENTRECUT `afac7de50` as ruled (§6). The model's half (P109-S37-SCROLLROOM) is P107's.** Scoped s37 at
 `f1ad13e2e`. **Source:** P107 NSP-016 s70–s71 (C152, C153, C154, handed over under R16) and what this session measured beside
 them. **Side:** noodl-viewer-react (`Group.tsx`, `layout.ts`, `react-component-node.ts`), the layout check
 (`packages/nodegx-node-spec/tests/layout-check.test.ts`, `layout-fixtures/`, `scripts/node-spec/layout-measure.js`).
@@ -36,7 +36,7 @@ did was one realistic screen per case, the working phone beside today's, opened 
 | [P109-S37-FILLCAP](../../bugs/p109-s37-fillcap-a-fill-the-rest-section-in-a-scroll-stops-at-the-window-and-its-content-runs-under-the-next.md) | medium | **fixed** `afac7de50` | ruled | A long "fill the rest" section runs under the next item |
 | [P109-S37-ISCROLLPERCENT](../../bugs/p109-s37-iscrollpercent-with-native-scroll-off-a-percent-is-of-the-children-added-up-not-the-window.md) | medium | **fixed** `afac7de50` | ruled | With it off, 100% slides come out the wrong width |
 | [P109-S37-CENTRECUT](../../bugs/p109-s37-centrecut-a-scrolling-group-set-to-centre-cuts-off-the-start-of-a-list-longer-than-the-window.md) | medium | **fixed** `afac7de50` | ruled | A centred list too long for the window loses its top for good |
-| [P109-S37-SCROLLROOM](../../bugs/p109-s37-scrollroom-the-layout-model-reads-a-scroll-as-endless-the-ruling-says-the-window.md) | low | **fixed** `fd6385beb` (P107) | ruled | The layout model read a scroll as endless (30 boxes were KNOWN as ROOM) |
+| [P109-S37-SCROLLROOM](../../bugs/p109-s37-scrollroom-the-layout-model-reads-a-scroll-as-endless-the-ruling-says-the-window.md) | low | open, **P107's** | ruled | The layout model still reads a scroll as endless (32 boxes KNOWN as ROOM) |
 
 **Reach on the shelf: none.** The templates hold one scrolling Group (landing-pages CaseStudy), native, Justify Content at the
 start, one child that hugs.
@@ -89,8 +89,8 @@ window wide that the scroller could not move past), so the measuring now records
 window-high inner box — red; no `safe` — red. Viewer 1,837 / 1,837 (with P116's pending `targetGoes.ts` line; without it 5
 suites do not run on `cline-dev`), its tsc clean on the three files.
 
-**The model** (P107, R16) still gave a scroller's children endless room: 30 boxes mismatched and were KNOWN as ROOM
-(`P109-S37-SCROLLROOM`) — fixed by P107 in `fd6385beb` the same evening (the old model back reddens exactly those 30). The code export follows the model or the runtime as P18 decides; told.
+**The model** (P107, R16) still gives a scroller's children endless room: 32 boxes mismatch and are KNOWN as ROOM
+(`P109-S37-SCROLLROOM`). The code export follows the model or the runtime as P18 decides; told.
 
 ## 7. What s37 learned
 

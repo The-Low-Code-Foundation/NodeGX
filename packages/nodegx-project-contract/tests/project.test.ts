@@ -165,11 +165,17 @@ describe('AC4 — nothing in the package reaches an adapter', () => {
   const root = path.join(__dirname, '..');
   const sources = walk(root).filter((f) => /\.ts$/.test(f) && !f.includes('node_modules') && !f.includes(`${path.sep}tests${path.sep}`));
 
+  // P112 OWN-001 moved the v2 format into this package (world.ts said it would). Its imports from outside are named
+  // here, not waived: the JSON Schema validator the format moved with, and Node's file system in the Node-only
+  // `format-node` entry. An adapter, a runtime or any other package still fails this gate.
+  const NAMED: Record<string, string[]> = { 'format/validator.ts': ['ajv'], 'format-node.ts': ['fs', 'path'] };
+
   it('every import stays inside the package', () => {
     const outside = sources.flatMap((f) =>
       [...fs.readFileSync(f, 'utf8').matchAll(/(?:^|\n)\s*(?:import|export)[^'";]*from\s+'([^']+)'/g)]
         .map((m) => m[1])
         .filter((spec) => !spec.startsWith('./') && !spec.startsWith('../'))
+        .filter((spec) => !(NAMED[path.relative(root, f).split(path.sep).join('/')] ?? []).includes(spec))
         .map((spec) => `${path.relative(root, f)}: ${spec}`)
     );
     expect(sources.length).toBeGreaterThan(10);

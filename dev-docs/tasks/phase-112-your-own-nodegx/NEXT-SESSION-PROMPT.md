@@ -1,15 +1,27 @@
 # Phase 112 — next session
 
-**Written 2026-10-03 at the end of session 1, HEAD `9b89ba99c`.** Session 1 took the phase from "nothing built" to
-three tasks built and one measured, and found that the scoping session had never committed the phase folder (it
-is committed now: `fedccd7d0` and `751414e71`).
+**Written 2026-10-09 at the end of session 2.** Session 2 built OWN-001's first slice (the format is in
+`@nodegx/project-contract/format`) and gave every task file a **Model** line (README §0.2). Session 1's handoff
+(2026-10-03) is kept below the board, with its findings, because they still hold.
 
-## The board (re-derived from the task files, 2026-10-03)
+## Session 2 in four lines
+
+- **OWN-001 slice 1** (OWN-001 §6.1): schemas, validator and types moved (git mv) into the package; the editor's
+  `schemas/` re-exports them; `V2ProjectStore` carries the MCP's write rules over `memoryFiles` or `diskFiles`;
+  `PROJECT-FORMAT-V2.md` with a tested example. AC2, AC3 and AC4 met; package 219 / 219.
+- **Bugs filed:** P112-S2-NEWLINE (low; both official writers drop a template file's final newline),
+  P112-S2-WORLDTYPECHECK (medium; P116's `world/` is red in the editor's test typecheck, not caused by P112).
+- **P116's import gate** in `tests/project.test.ts` now names the format's three outside imports (`ajv`, and `fs` and
+  `path` in `format-node`). P116 had an open hunk in that file; this session committed only its own hunk.
+- **Not taken:** the editor's `test:ci` (slice 1 touched only re-exports and two test paths; their specs ran under plain
+  jest). It is slice 2's gate.
+
+## The board (re-derived from the task files, 2026-10-09)
 
 | task | built | driven / gated |
 |---|---|---|
 | OWN-000 the prototypes, measured | 🟢 NEEDS.md (40 rows over Orbit AND Under the Lid), `scripts/own/census.js`, CENSUS.md, the NSP-021 editor-knowledge census in P107's folder | census 0.6 s, `--check` green; README §1 reading 6 reproduced to the node |
-| OWN-001 the format leaves the editor | ⬜ never built | — |
+| OWN-001 the format leaves the editor | 🟡 slice 1 (s2): `@nodegx/project-contract/format` + `/format-node`, the store, the page | package 219 / 219; MCP 96 (8 suites); editor 87 + 165; preview 54; editor `test:ci` not taken (slice 2) |
 | OWN-002 the spec in a page | 🟢 `src/browser.ts` + `/node`, SHA-2 of its own, `build.mjs`, size, browser-check | package suite 840 pass; typecheck; browser-check PASS (86 specs); runtime graph + target 102 pass; export node-spec 12 pass; runtime conformance: Hash and Open File Picker CONFORM (full suite: 91 passed, 0 failed, 457 s) |
 | OWN-003 one way to run a graph | 🟡 step 1 measured (807 KB, loads, 80 types, Counter made in 65 ms; driving it is Node-only) | R1 asked in §6; steps 2–4 wait |
 | OWN-004 the real app beside it | ⬜ never built | — |
@@ -64,16 +76,15 @@ is committed now: `fedccd7d0` and `751414e71`).
 should switch** (README §0.2). Say it again if the work changes kind mid-session. Do not wait for an answer.
 
 0. **Tag the backlog** (`node scripts/bugs.js kits --suggest`, OWN-010 §3.2) when a package is touched.
-1. **Ask the six rulings** (README §8), R1 now with OWN-003 §6's numbers. R5 is answered in practice (the package
-   exists, private); R2 decides publishing, and the backend-contract dependency (finding 3) is part of that ask.
-2. **OWN-001**, as the opening move of P107 NSP-021 (same home, `@nodegx/project-contract`; NSP-021 §5). Measure
-   first: `editor-deps.ts` has 92 editor imports; the eight schemas, the structural validator, `loadV2Project`,
-   `ProjectStore`'s write rules. Carry the deployed-shape transform (finding 2). Run the editor's `test:ci` once,
-   alone, when it lands (memory: peer suites, one heavy job).
-3. **OWN-003 steps 2–4** once R1 is ruled: if the engine, port the Node helper's `adopt` / `settle` to a
-   `GraphTarget` in a page (no `async_hooks`, no `buffer`); measure which types fail without a viewer; the frame
-   cost on todo's biggest logic component; re-run the census with "runnable" = "on the chosen runner".
-4. **OWN-004** (preview embeddable, fed from memory) can start in parallel with OWN-001 if a peer is free.
+1. **Ask the rulings** (README §8): R1 with OWN-003 §6's numbers, **R2 with three undeclared dependencies to declare at
+   publish** (node-spec's `@noodl/backend-contract`, project-contract's `ajv` and `ajv-formats`), R3, **R4 re-asked**
+   (NSP-016 finished 2026-10-09: 18 of the 19 visual nodes have specs and conform, 1 is exempt, so "no visual node has a
+   spec" is no longer true), R6.
+2. **OWN-001 slice 2** (OWN-001 §6.2; **Fable** per its Model line): the MCP's `ProjectStore` onto `V2ProjectStore`,
+   `editor-deps.ts` importing the format from the package, the two shapes, then the editor's `test:ci` once, alone.
+   That grades AC1 and closes the task.
+3. **OWN-004** (Opus): the preview embeddable and fed from `memoryFiles`. It can start now; the store is what it reads.
+4. **OWN-003 steps 2–4** once R1 is ruled (Fable).
 
 ## Rulings owed by Richard (README §8, plain words there)
 
