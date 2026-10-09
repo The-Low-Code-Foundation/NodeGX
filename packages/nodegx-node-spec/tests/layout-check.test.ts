@@ -53,13 +53,15 @@ interface Recording {
  */
 const FLOOR = "named limit (layout.ts header): flexbox's automatic minimum — a shrinking fill stops at its min-content, the model's floor is 0";
 const C154 = 'P107-C154: on the native-scroll path a percent along a scroll grows into the visible height (the iScroll path and the model: its content)';
+const CENTRE = 'P109-S37-SCROLLCENTRE: a scroller centres what fits along its scroll axis on the runtime (both paths); the model reads that axis as unbounded, so nothing centres — the question C154 asks';
 const KNOWN: Record<string, string> = {
   'min-content-floor/1280x800/g1': FLOOR,
   'min-content-floor/390x844/g1': FLOOR,
   'scroll-percent-content/1280x800/pct': C154,
   'scroll-percent-content/1280x800/fix': C154,
   'scroll-percent-content/390x844/pct': C154,
-  'scroll-percent-content/390x844/fix': C154
+  'scroll-percent-content/390x844/fix': C154,
+  ...Object.fromEntries(['1280x800', '390x844'].flatMap((vp) => ['nca', 'ncb', 'nra', 'nrb'].map((id) => [`scroll-align/${vp}/${id}`, CENTRE])))
 };
 
 const fixtures: Fixture[] = fs
@@ -185,10 +187,10 @@ describe('hugSize — a group sized to its content against its measured size', (
 
 /**
  * What the measuring found on the path the check does not grade: Native platform scroll is `web-only` (R10), so a scroller with it
- * off is reported, not graded. The two rows still fire while they are open, each beside the native path, where the same reading
- * comes out the other way. A fix changes the recording: re-record `scroll-iscroll`, then close the row and flip its assertion.
+ * off is reported, not graded. So each row is held here against the native path, where the same reading is the product's. A
+ * fixed row reads the same on both paths (P109 ISL-052); an open row still fires (re-record, then flip it when it is fixed).
  */
-describe('the runtime defects the measuring found (open rows, still firing)', () => {
+describe('the runtime defects the measuring found', () => {
   const read = (name: string) => {
     const rec = JSON.parse(fs.readFileSync(path.join(DIR, 'measured', `${name}.json`), 'utf8')) as Recording;
     return new Map(rec.viewports['1280x800'].nodes.map((n) => [n.id, n]));
@@ -196,15 +198,26 @@ describe('the runtime defects the measuring found (open rows, still firing)', ()
   const iscroll = read('scroll-iscroll');
   const native = read('scroll-native');
 
-  test('P107-C152 — with Native platform scroll off, a scrolling Group drops its gap: the children sit 100 px apart, not 110', () => {
+  test('P107-C152 (fixed, ISL-052) — with Native platform scroll off, a scrolling Group keeps its gap: the children sit 110 px apart, as natively', () => {
     const step = (m: Map<string, Measured>) => m.get('s2')!.inParent!.y - m.get('s1')!.inParent!.y;
-    expect([step(native), step(iscroll)]).toEqual([110, 100]);
+    expect([step(native), step(iscroll)]).toEqual([110, 110]);
   });
 
-  test('P107-C153 — with Native platform scroll off, a scrolling Group clips nothing: a child below its box is drawn and takes a press', () => {
-    // s3 lies at 200–300 (220–320 natively), below the 200 px scroller: the native path hides it, this path draws it
+  test('P107-C153 (fixed, ISL-052) — with Native platform scroll off, a scrolling Group clips: a child below its box is hidden and takes no press, as natively', () => {
+    // s3 lies at 220–320, below the 200 px scroller, on both paths
     const outside = (m: Map<string, Measured>) => m.get('s3')!.inParent!.y >= m.get('scroller')!.box!.h;
-    expect([outside(native), native.get('s3')!.hit, outside(iscroll), iscroll.get('s3')!.hit]).toEqual([true, false, true, true]);
+    expect([outside(native), native.get('s3')!.hit, outside(iscroll), iscroll.get('s3')!.hit]).toEqual([true, false, true, false]);
+  });
+
+  test('P109-S37-ISCROLLALIGN (fixed, ISL-052) — with Native platform scroll off, a scrolling Group keeps Align Items and Justify Content: column and row, with and without wrap, every child where its native twin is', () => {
+    // `n<dir>[w]` is native, `i<dir>[w]` the same Group with Native platform scroll off; before the fix the axis the inner box
+    // fills lost its alignment (the cross axis; the main axis when it wraps) and every arrangement lost its 10 px gap
+    const m = read('scroll-align');
+    const at = (id: string) => `${m.get(id)!.inParent!.x},${m.get(id)!.inParent!.y}`;
+    const pairs = ['c', 'cw', 'r', 'rw'].flatMap((k) => ['a', 'b'].map((c) => [`${k}${c}`, at(`n${k}${c}`), at(`i${k}${c}`)]));
+    expect(pairs.filter(([, n, i]) => n !== i)).toEqual([]);
+    // and the arrangement is the centred one, not two equally wrong ones
+    expect([at('nca'), at('ncb'), at('nra'), at('nrb')]).toEqual(['120,35', '120,105', '85,70', '155,70']);
   });
 
   test('P107-C154 — with Native platform scroll on (the default), a percent child of a scrolling column grows into the 200 px it shows: 140 high round 40 px of content', () => {

@@ -1,7 +1,9 @@
 ---
 id: P107-C154
 title: In a scrolling Group (Native platform scroll on, the default) a percent child grows into the visible height — with it off, the same child is its content
-status: open
+status: needs-ruling
+phase: P109
+task: ISL-052
 severity: low
 area: runtime / Group (noodl-viewer-react/src/components/visual/Group/Group.tsx, the native-scroll path) with layout.ts `Layout.size` :84-108
 found: P107 NSP-016 s71, 2026-10-09

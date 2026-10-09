@@ -258,13 +258,20 @@ export class Group extends React.Component<GroupProps> {
   }
 
   renderIScroll() {
-    const { flexDirection, flexWrap } = this.props.style;
+    // P107-C152, P109-S37-ISCROLLALIGN: the children sit in this box, not in the Group, so it lays them out as the Group would —
+    // its gap and its alignment on both axes, not only its direction. Without them a gap was dropped, and the axis this box
+    // fills (the cross axis, or the main axis when it wraps) lost Align Items or Justify Content.
+    const { flexDirection, flexWrap, rowGap, columnGap, alignItems, justifyContent } = this.props.style;
 
     const childStyle: React.CSSProperties = {
       display: 'inline-flex',
       flexShrink: 0,
       flexDirection,
       flexWrap,
+      rowGap,
+      columnGap,
+      alignItems,
+      justifyContent,
       touchAction: 'none'
       // pointerEvents: this.state.isScrolling ? 'none' : undefined
     };
@@ -339,7 +346,9 @@ export class Group extends React.Component<GroupProps> {
     Layout.size(style, props);
     Layout.align(style, props);
 
-    if (props.clip) {
+    // P107-C153: the scroller moves the inner box with a transform and leaves the hiding to its container — what lies outside
+    // the Group is hidden, as on the native path, and takes no press
+    if (props.clip || (props.scrollEnabled && !props.nativeScroll)) {
       style.overflowX = 'hidden';
       style.overflowY = 'hidden';
     }
