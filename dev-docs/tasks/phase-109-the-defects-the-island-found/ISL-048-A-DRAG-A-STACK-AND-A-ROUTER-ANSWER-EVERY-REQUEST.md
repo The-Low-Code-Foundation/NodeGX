@@ -1,6 +1,6 @@
 # ISL-048 — A drag, a stack and a router answer every request
 
-**Status: 🟡 s33 (2026-10-09): 26 of 29 fixed — C114 `4e2d846d5` (§12); RouterNavigate v3 `491e8af72` (§12, C118's debt); left C139, and C120, C126 (P107's world). s32 (2026-10-09): 25 of 29 fixed — C138 `40c9fc310` (§11); left C139, C114, and C120, C126 (P107's world). s31 (2026-10-08): 11 of 27 fixed — the Component Stack's never-answered six (C107–C112, §9); all four asks ruled (C103, C104 as recommended in session; C120, C126 on P107's rulings page). s30 (2026-10-08): 5 of 27 fixed — C101, C115, C116, C117, C118 (§8); C119–C127 joined from P107 s58; 4 to ask (C103, C104, C120, C126).** Scoped s30 at `a6caefdde`. **Source:** 27 bugs P107 NSP-016 filed (18 at scoping, C119–C127 from s58) in s55–s57 after
+**Status: 🟡 s34 (2026-10-09): 27 of 29 fixed — C139 `c22c9aceb` (§12.2: Keep Pages When Unmounted, Page Stack v17); left C120, C126 (P107's world). s33 (2026-10-09): 26 of 29 fixed — C114 `4e2d846d5` (§12); RouterNavigate v3 `491e8af72` (§12, C118's debt); left C139, and C120, C126 (P107's world). s32 (2026-10-09): 25 of 29 fixed — C138 `40c9fc310` (§11); left C139, C114, and C120, C126 (P107's world). s31 (2026-10-08): 11 of 27 fixed — the Component Stack's never-answered six (C107–C112, §9); all four asks ruled (C103, C104 as recommended in session; C120, C126 on P107's rulings page). s30 (2026-10-08): 5 of 27 fixed — C101, C115, C116, C117, C118 (§8); C119–C127 joined from P107 s58; 4 to ask (C103, C104, C120, C126).** Scoped s30 at `a6caefdde`. **Source:** 27 bugs P107 NSP-016 filed (18 at scoping, C119–C127 from s58) in s55–s57 after
 ISL-038 was scoped (the Drag C101–C106, §7.16; the Component Stack C107–C114, §7.17; the Page Router C115–C118, §7.18), handed to
 P109 under R16 ("Hand all to P109"): 1 high · 7 medium · 10 low, **2 to ask** (C103, C104). **Side:** noodl-viewer-react
 (`components/visual/Drag/Drag.tsx`, `nodes/navigation/navigation-stack.tsx`, `router.tsx`, `router-handler.ts`), the Drag,
@@ -57,7 +57,7 @@ the fix has two reasonable answers that a person would see differently: ask in p
 | [P107-C126](../../bugs/p107-c126-a-component-stacks-reset-shows-the-url-page-not-the-start-page.md) | Component Stack | low | scheduled | ruled (as leaned) | With Use Routes, a Component Stack's Reset (and a Components edit) rebuilds the page in the URL, not the start page its Reset port promises |
 | [P107-C127](../../bugs/p107-c127-the-catalog-does-not-know-a-component-stack-page-has-a-path.md) | catalog | low | fixed `df238bd79` | as proposed | The node catalog does not know a Component Stack page has a Path — `pagePath-<pageId>` is missing, so the MCP cannot set one |
 | [P107-C138](../../bugs/p107-c138-a-drag-start-drag-x-that-arrives-as-text-joins-with-the-movement.md) | Drag | low | **fixed** `40c9fc310` | ruled | A Drag's Start Drag X (or Y) that arrives over a wire as text joins with the movement as text — a 10 px drag from "50" puts the element at "5010" |
-| [P107-C139](../../bugs/p107-c139-a-component-stack-turned-off-with-mounted-loses-its-pages.md) | Component Stack | low | scheduled | ruled | A Component Stack turned off with Mounted and back on comes back at its start page — the pages pushed, and anything typed on them, are gone; ruled: keep them when an option is ticked |
+| [P107-C139](../../bugs/p107-c139-a-component-stack-turned-off-with-mounted-loses-its-pages.md) | Component Stack | low | **fixed** `c22c9aceb` | ruled | A Component Stack turned off with Mounted and back on comes back at its start page — the pages pushed, and anything typed on them, are gone; ruled: keep them when an option is ticked |
 
 **Added s30 (P107 s58, `841f0dfe3`):** C119–C127, the Component Stack with Use Routes (NSP-016 §7.19) and one catalog row — 4
 medium, 5 low; C120 (which history a Pop leaves) and C126 (whether a Reset with Use Routes re-reads the address) carry "ruling
@@ -261,3 +261,19 @@ the frame's update. A queued send cannot be pulled forward without sending twice
 the flag. ERG-001's hand-made stack stubs the new count as it stubs `setPageOutputs`.
 
 **Left (3):** C139 (ruled: a new Component Stack option that keeps its pages through Mounted off and on), C120 and C126 (P107's world).
+
+### 12.2 C139 — Keep Pages When Unmounted (s34)
+
+| Commit | What changed | Grade |
+|---|---|---|
+| `c22c9aceb` | A new Component Stack input beside Use Routes, **Keep Pages When Unmounted** (`keepPagesWhenUnmounted`, default off). On a mount with it ticked and pages held, `reset` with no outcomes (the handler's mount reset — a Reset press always carries them) returns, so what waited lands on the kept pages. A reset is owed instead when, while off, the Components are written or the Name moves to another key (C113's same-key write owes nothing); with Use Routes, an address that moved since the unmount starts it again. Page Stack spec **v17**, seven scenarios; page model classifies the three new fields; both catalogs | 158 / 158 on the runtime at 13 and 20732; mutants 0 survivors at both (771 / 772, one declared); controls on the seven: mount reset never skipped → red on exactly the 3 that keep, the owed reset ignored → exactly Components and Name, the address ignored → exactly the Back |
+
+**Use Routes with the option on** (the handoff's question): an address moved while the stack was off means a Back or Forward the stack
+could not hear. A mounted stack with Use Routes resets on that (C119), so the remount does too and builds the page in the address —
+keeping pages that no longer match the URL would show one page and address another. Not asked: only one answer keeps the stack and
+the address agreeing.
+
+**Control note:** HEAD's `navigation-stack.tsx` is red on 6 of 7 for want of the input (`no input "keepPagesWhenUnmounted"`) — that
+grades nothing, so the controls are behavioural mutants of the fixed file.
+
+**Left (2):** C120 and C126 (P107's world: history back, an entry replaced).
