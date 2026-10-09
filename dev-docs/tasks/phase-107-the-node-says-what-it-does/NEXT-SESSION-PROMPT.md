@@ -1,73 +1,73 @@
 # P107 — next session
 
-**Written 2026-10-09 (s69).** Read the [README](README.md) §2–§7 (R18 is the newest ruling) and
-[NSP-016 §8 and §8.1](NSP-016-VISUAL-NODES.md) (AC4's build order, and what s69 built of it).
+**Written 2026-10-09 (s70).** Read the [README](README.md) §2–§7 (R18 is the newest ruling) and
+[NSP-016 §8, §8.1 and §8.2](NSP-016-VISUAL-NODES.md) (AC4's build order, and what s69 and s70 built of it).
 
 ## Board (from the task files)
 
 | task | built | committed |
 |---|---|---|
 | NSP-000 … NSP-015 | as s44 (NSP-013 left: AC2 — the export half, no reach here — and the deep run for s11–s14; NSP-014 / NSP-015 left: AC2's export half, P18) | s1 … s44 |
-| **NSP-016 the visual nodes** | 🟡 AC1–AC3 met: 19 of 19 handled — 18 conform, Component Children exempt. **AC4 (R18, "Build the layout check"): s69 built steps 1 and 2 of §8 — the model and the mapping (§8.1). Left: steps 3–5 (a real browser)** | `aa8abb06f` … s69 |
+| **NSP-016 the visual nodes** | 🟡 AC1–AC3 met: 19 of 19 handled — 18 conform, Component Children exempt. **AC4 (R18): steps 1–2 s69; steps 3–5 s70 on eleven one-rule fixtures — 62 boxes match, 0 mismatch, rows C152, C153 (§8.2). Left: the templates' most-used combinations, content children (Text), a percent in a scroll with real content** | `aa8abb06f` … `071acfc7e` |
 | NSP-009 the ratchet | ✅ s64; s65: a `contract` column with its own floor | `6a1ed0084`, s65 |
-| **NSP-017 the escape hatches** | 🟡 **s68: the Expression v4 — `Variables` / `Objects` / `Arrays` through the world's registry, heard as the runtime hears them; rows C150, C151 (`f4a244785`).** s67: the Visual Function a contract; s66: the Script; s65: the Function, CSS Definition exempt (R17); s64: the Expression. Left: **AC1's export half (P18's)** | s64 … s68 |
+| **NSP-017 the escape hatches** | 🟡 s64–s68 (the Expression, the Function, the Script, the Visual Function; CSS Definition exempt). Left: **AC1's export half (P18's)** | s64 … s68 |
 | NSP-023 the spec without React | ✅ all six ACs (s50) | s45 … s57 |
-| NSP-006 the stranger | ✅ rounds 1–4 (s68: round 4's seed-20735 survivor killed, `af99f545f`) | `649e6864d`, s68 |
+| NSP-006 the stranger | ✅ rounds 1–4 (hashes rewritten s70 for the world's history) | `649e6864d`, s70 |
 | NSP-020 ports without a viewer | rows only | s20 |
 | NSP-022 the cloud-only nodes | 📋 (needs a second runtime target) — the whole of `owed` | s21 |
 
 **`npm run spec-ledger`: 125 of 147 conform on the runtime (85.0%) · 3 as a contract · 2 on the export · 2 exempt · 17 owed (all
-NSP-022)** — unchanged by s68 and s69 (s69 added no node).
+NSP-022)** — unchanged by s68–s70 (no node added).
 
-## What s69 settled
+## What s70 settled
 
-1. **Step 1, the layout model** — `packages/nodegx-node-spec/src/layout.ts` (in the browser entry). The shared subset as
-   types; `layoutChildren(parent, children)` → each child's layout box, drawn box (after its transform), visible part
-   (a clipping or scrolling parent), paint order, extent; `hugSize`. The main axis is flexbox §9.7 (Yoga is flexbox);
-   the runtime's percent on its stacking axis is a `fill` with the percent as basis AND weight; an overlay sits in the
-   parent's padding box; a scrolling parent is unbounded on its axis. `tests/layout.test.ts`: 69 rows by hand.
-2. **Step 2, the mapping** — `src/layout-map.ts`: `PortMeta.layout` (a role per setting) on 392 visual ports, stamped
-   from `LAYOUT_ROLES` (`gen-ports.js` emits it now); `layoutOf(spec, params, { parentAxis, viewport, token })` reads a
-   placed node as `Layout.size` / `align` do, and lists in `outside` what the model cannot say on that node (a set
-   not-shared or web-only input — a wrap, a `cssClassName` —, `em`, a token with no value, `fixed` / `sticky`). The
-   check is `tests/layout-map.test.ts` (CI runs it): every `layout-shared` port has a role, no unshared one does, and the
-   55 classed inputs are each mapped or left out by name. Planted twice, red, restored.
-3. **P107-SIZE** filed (low, P112's): the browser entry is 268.7 KB gzipped against a 240 KB budget; nothing runs the
-   size script. The layout model is 2.8 KB of it.
+1. **The world's session history** (`b7950a3b9`, for P109's C120 / C126). world.ts LOCATION, THE SESSION HISTORY: entries + index;
+   `history.replaceState` (trace `history` op `replace`), `history.back()` (op `back`, no url; lands as a task at the next yield —
+   a settle's after the frame-end work and its promises, an advance's before the clock moves — popstate then hashchange, one at a
+   time, nothing on the first entry). The person's `traverse` goes to the nearest entry holding its url. Spec: `Patch.replace`,
+   `Patch.historyBack`, `AnswerCall { op: 'history', how }`, `WorldHandlers.popstate`. Runtime target: the page's
+   `replaceState` / `back` are the world's; `yieldToEventLoop` lands the waiting traversals. Probed with a real Page Stack (a back
+   after a push lands at the next settle, the stack resets to Home; the control stays). Stranger hashes rewritten, 46/46.
+   P109 acknowledged and is building C120 / C126 on it. **A frame disagreement between the two targets on the landing is P107's.**
+2. **AC4 steps 3–5** (`071acfc7e`, NSP-016 §8.2). `scripts/node-spec/layout-measure.js` reuses `withRenderedPage`. It reaches
+   each node's element through React's fibers (`props.noodlNode`, then `getDOMElement()`), so the viewer needs no change.
+   `--record` writes `layout-fixtures/measured/*.json`, and `tests/layout-check.test.ts` grades the model against them in CI
+   with no browser. 62 match, 0 mismatch, the better-scroll path reported (Native platform scroll is web-only). Two plants each
+   reddened exactly their rows, then were restored.
+3. **Rows C152, C153** (medium, P109's, told): with Native platform scroll off, the Group drops its gap and clips nothing.
+   Each is pinned in the check as firing, beside the native path's opposite reading.
 
-## What s70 does
+## What s71 does
 
-1. **Step 3 — the measurement** (heavy: one browser run at a time, when the box is quiet, torn down after). A geometry
-   reader on a real browser: `scripts/devtools/render-from-disk.js` serves a fixture project; for each placed visual node,
-   `getDOMElement().getBoundingClientRect()` on the runtime's instance (react-component-node.ts :299 — the viewer stamps
-   no node id on its elements), keyed by node id, at each viewport. State which box it measured: a rect is not
-   visibility, a blocker can sit on a surface, an `opacity: 0` element still lays out. Look at
-   `packages/nodegx-render-measure` and `scripts/devtools/render-report.js` first: reuse their browser, not a second one.
-2. **Step 4 — the fixtures**: one rule each (a column with a gap; fill beside fixed; percent of a padded parent; min / max;
-   an overlay; a scroll container — both the iScroll and the native-scroll path), then the templates' most-used
-   combinations. A node whose `layoutOf(...).outside` is not empty is reported and skipped.
-3. **Step 5 — AC4**: `layoutChildren` over `layoutOf` against the measured boxes, with a tolerance. A hug child's content
-   size comes from the measurement (the model does not measure text). A mismatch is a row (R16: the runtime's fix is P109's).
-   Watch for these, already suspected: the native-scroll path (overflow on the Group itself) is not the unbounded axis; a
-   shrinking `fill` meets the browser's min-content floor (the model's `floor` is 0).
-4. **When the box is quiet:** the full node-spec package suite once (`-w 2`), and NSP-013's deep run for s11–s14.
-5. ✅ **s70: the world's HISTORY for C120 / C126 — `b7950a3b9`.** world.ts LOCATION, THE SESSION HISTORY: entries + index;
-   `replaceState` (op `replace`), `back()` (op `back`, lands at the next yield, popstate then hashchange, one at a time, nothing on
-   the first entry); spec `Patch.replace` / `historyBack`, `AnswerCall {op:'history', how}`, `WorldHandlers.popstate`; the runtime
-   target lands waiting traversals in `yieldToEventLoop`. Probed on the runtime with a real Page Stack (back after a push → it hears
-   popstate and resets to Home; control stays). P109 (`opennoodl-1e`) told the same day. Their fix is the first real caller: a
-   frame disagreement between the targets on the landing is P107's.
+1. **AC4, the rest** (heavy: one browser at a time, when the box is quiet; `--record --only <names>` re-records a few):
+   - **the templates' most-used combinations.** Rank by the product surface (shelf templates, the picker's defaults), not
+     by a corpus: count which layout settings the shelf's templates set together, then build a fixture per top shape.
+   - **content children:** a Text in a column and a row (the hug size comes from the browser's text; a long Text that
+     wraps is a named limit — the model's `content` is one pair).
+   - **a percent inside a scroll with real content** (scroll-native `s4` measured 0 high, but its content was 0, so the check
+     could not tell; give the child content of its own).
+   - **the min-content floor** (suspected in s69, not yet met): a shrinking `fill` holding text, where the browser stops at
+     min-content and the model's `floor` is 0.
+   When the rest is in and still matches, AC4 can close: say so in NSP-016 §8 and on the README board.
+2. **When the box is quiet:** the full node-spec package suite once (`-w 2`), and NSP-013's deep run for s11–s14.
+3. **If P109 reports a landing disagreement** on C120 / C126: the interpreter lands in `deliver` (after the inbox), the
+   runtime target in `yieldToEventLoop` (after a microtask and a real `setTimeout(0)`); one of the two moves.
 
-**Human decisions: none open.** **P109 holds:** the Page Stack (C120, C126 — waiting on item 5), the Router (S18). C150 and
-C151 fixed by P109 in `024e2ee55` (Expression spec v5). **P112 holds:** P107-SIZE.
+**Human decisions: none open.** **P109 holds:** the Page Stack (C120, C126 — building on `b7950a3b9`), the Router (S18), the
+Group's C152, C153. **P112 holds:** P107-SIZE.
 
-**The census was not regenerated in s66–s69** (it is out of CI and reads the working tree) — regenerate from a clean
+**The census was not regenerated in s66–s70** (it is out of CI and reads the working tree) — regenerate from a clean
 export when next convenient, as below.
 
 ## Before you start
 
 - **R11 / R12:** keep React out of the spec — and for the layout model, CSS too. Run `tests/page-model.test.ts` for a new state key.
 - **The peer runs conformance BACK TO BACK.** A one-spec run (`NSP_ONLY=<type> … -w 1`) is light: run it when the load allows.
+- **The layout check (s70):** a fixture is `layout-fixtures/<name>.json` (nested nodes on a Page). Record it with
+  `node scripts/node-spec/layout-measure.js --record packages/nodegx-node-spec/layout-fixtures --only <name>`: one headless
+  Chrome per fixture, torn down after; its reaper takes only orphans (parent 1), never a peer's live render. A new mismatch
+  goes into `KNOWN` in `tests/layout-check.test.ts` with its row. A first-run green is not evidence: plant (s70 planted the
+  model's gap and the mapping's margin, each in a copy restored by `cp` from the scratchpad, never `git checkout`).
 - **The layout model and the mapping (s69):** `src/layout.ts` must stay free of CSS and of the runtime's names; units
   and token syntax are read only in `src/layout-map.ts`. A new visual port: run `gen-ports.js`, which stamps its role;
   `tests/layout-map.test.ts` fails a `layout-shared` port without one.
