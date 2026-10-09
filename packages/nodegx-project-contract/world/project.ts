@@ -117,7 +117,11 @@ export type ClaimStep =
   /** the row is no longer there */
   | { gone: string; row: string }
   /** the row is there and the field is empty */
-  | { empty: string; row: string; field: string };
+  | { empty: string; row: string; field: string }
+  /** the row is still there (P116 ONT-006: a verb's `keep` and `end` rows) */
+  | { there: string; row: string }
+  /** the row is there and the field holds exactly `value` (ONT-006: what an `end` or an `update` wrote) */
+  | { holds: string; row: string; field: string; value: ClaimValue };
 
 /** What taking one held rule out of the schema means — the claim's mutant. */
 export type ClaimMutant =

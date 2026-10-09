@@ -58,7 +58,11 @@ export type ClaimStep =
   | { pair: string; row: string; field: string; with: string }
   | { paired: string; row: string; field: string; count: number }
   | { gone: string; row: string }
-  | { empty: string; row: string; field: string };
+  | { empty: string; row: string; field: string }
+  /** P116 ONT-006: the row is still there */
+  | { there: string; row: string }
+  /** P116 ONT-006: the row is there and the field holds exactly `value` */
+  | { holds: string; row: string; field: string; value: ClaimValue };
 
 export interface Claim {
   id: string;
@@ -69,7 +73,7 @@ export interface Claim {
 
 /** Whether a step is one that says the rule, rather than one that makes the rows it needs. */
 export function saysTheRule(step: ClaimStep): boolean {
-  if ('refuse' in step || 'paired' in step || 'gone' in step || 'empty' in step) return true;
+  if ('refuse' in step || 'paired' in step || 'gone' in step || 'empty' in step || 'there' in step || 'holds' in step) return true;
   if ('change' in step || 'remove' in step) return step.refused === true;
   return false;
 }
@@ -91,7 +95,7 @@ function reached(schema: ClaimSchema, claim: Claim): ClaimCollection[] {
   };
   for (const step of claim.steps) {
     const s = step as Record<string, unknown>;
-    for (const key of ['make', 'refuse', 'change', 'remove', 'pair', 'paired', 'gone', 'empty']) if (typeof s[key] === 'string') add(s[key] as string);
+    for (const key of ['make', 'refuse', 'change', 'remove', 'pair', 'paired', 'gone', 'empty', 'there', 'holds']) if (typeof s[key] === 'string') add(s[key] as string);
   }
   return schema.collections.filter((c) => want.has(c.name));
 }
@@ -183,6 +187,22 @@ export async function runClaim(ctx: ConformanceContext, schema: ClaimSchema, cla
       } else if ('gone' in step) {
         const left = await ctx.count(real(step.gone), { objectId: id(step.row) });
         if (left !== 0) throw new ConformanceError(`the ${step.gone} row is still there`);
+      } else if ('there' in step) {
+        const left = await ctx.count(real(step.there), { objectId: id(step.row) });
+        if (left !== 1) throw new ConformanceError(`the ${step.there} row is gone`);
+      } else if ('holds' in step) {
+        const got = await ctx.fetch(real(step.holds), id(step.row));
+        const want = value(step.holds, step.field, step.value);
+        const held = got[step.field];
+        const same =
+          typeof want === 'object' && want !== null && '__type' in (want as Row)
+            ? (want as Row).__type === 'Date'
+              ? held !== null && typeof held === 'object' && 'iso' in (held as Row)
+                ? new Date(String((held as Row).iso)).getTime() === new Date(String((want as Row).iso)).getTime()
+                : new Date(String(held)).getTime() === new Date(String((want as Row).iso)).getTime()
+              : idOf(held) === (want as Row).objectId
+            : held === want;
+        if (!same) throw new ConformanceError(`${step.field} holds ${JSON.stringify(held)}, not ${JSON.stringify(want)}`);
       } else {
         const got = await ctx.fetch(real(step.empty), id(step.row));
         const v = idOf(got[step.field]);

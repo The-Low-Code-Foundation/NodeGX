@@ -114,8 +114,16 @@ describe('the bombshell reaches the screens that name what it changes', () => {
     expect(componentReach(p, readComponents(BEFORE))).toEqual([
       { component: '/#__cloud__/enrol', node: 'Make the member', collection: 'Person', fields: ['account'] },
       { component: '/Pages/Members', node: 'Every member', collection: 'Person', fields: [] },
-      { component: '/Pages/Members', node: 'Add a member', collection: 'Person', fields: ['account'] }
+      { component: '/Pages/Members', node: 'Add a member', collection: 'Person', fields: ['account'] },
+      // s9: a Record node's `prop-<field>` ports are OUTPUTS — the page that SHOWS a member's account is reached too
+      { component: '/Pages/Members', node: 'The member', collection: 'Person', fields: ['account'] }
     ]);
+  });
+
+  it('s9 — the control: without the read side, the node that only shows the account is reached by name alone', () => {
+    const p = plan(readWorld(BEFORE), readWorld(AFTER));
+    const components = readComponents(BEFORE).map((c) => ({ ...c, connections: c.connections?.map(({ toId, toProperty }) => ({ toId, toProperty })) }));
+    expect(componentReach(p, components).find((r) => r.node === 'The member')).toEqual({ component: '/Pages/Members', node: 'The member', collection: 'Person', fields: [] });
   });
 
   it('and the workflow whose step calls the cloud function that writes a person’s account — not the step that calls another', () => {
@@ -302,13 +310,14 @@ describe('AC3 — a noun renamed keeps its records', () => {
   it('reaches the renamed collection by its old name: every screen written before still names Account', () => {
     const p = plan(ONE, SUBSCRIBED);
     expect(p.reach).toEqual([
-      { collection: 'Person', words: 'people', fields: ['account'], how: 'changed' },
+      { collection: 'Person', words: 'people', fields: ['account'], how: 'changed', renamed: { account: 'subscription' } },
       { collection: 'Subscription', words: 'subscriptions', fields: [], how: 'renamed', was: 'Account' }
     ]);
     expect(componentReach(p, readComponents(BEFORE)).map((r) => [r.component, r.collection, r.fields])).toEqual([
       ['/Pages/Accounts', 'Subscription', []],
       ['/#__cloud__/enrol', 'Person', ['account']],
       ['/Pages/Members', 'Person', []],
+      ['/Pages/Members', 'Person', ['account']],
       ['/Pages/Members', 'Person', ['account']]
     ]);
     expect(migrationWords(p)).toContain('Reaches subscriptions (Subscription, was Account): renamed.');
@@ -376,14 +385,60 @@ describe('the permission rules a plan reaches (§3.2)', () => {
     const p = plan(readWorld(BEFORE), renamed(readWorld(BEFORE), 'account', 'subscription', 'Subscription'));
     expect(permissionReach(p, SECURITY)).toEqual([
       { at: 'collections.Account', collection: 'Subscription', reads: 'its rules', fields: [], mustMove: { from: 'Account', to: 'Subscription' } },
-      { at: 'collections.Account.permissions.find', collection: 'Person', reads: 'a path through it', fields: ['account'] },
-      { at: 'collections.Account.permissions.find', collection: 'Subscription', reads: 'a path through it', fields: [] },
+      // s9: the path's hops say `account` and `Account` — names the plan takes away; the row says what they become
+      { at: 'collections.Account.permissions.find', collection: 'Person', reads: 'a path through it', fields: ['account'], mustRewrite: { account: 'subscription', Account: 'Subscription' } },
+      { at: 'collections.Account.permissions.find', collection: 'Subscription', reads: 'a path through it', fields: [], mustRewrite: { account: 'subscription', Account: 'Subscription' } },
       { at: 'collections.Person', collection: 'Person', reads: 'its rules', fields: [] }
     ]);
+  });
+
+  it('s9 — the control: a path rule the bombshell reaches has nothing to rewrite, because nothing is renamed', () => {
+    const rows = permissionReach(plan(readWorld(BEFORE), readWorld(AFTER)), SECURITY);
+    expect(rows.every((r) => r.mustRewrite === undefined)).toBe(true);
   });
 
   it('the control: a plan that reaches only companies reaches only the company rules', () => {
     const rows = permissionReach({ reach: [{ collection: 'Company', words: 'companies', fields: [], how: 'changed' }], before: plan(readWorld(BEFORE), readWorld(AFTER)).before }, SECURITY);
     expect(rows).toEqual([{ at: 'collections.Company', collection: 'Company', reads: 'its rules', fields: [] }]);
+  });
+});
+
+describe('s9 — rules put on records that already break them are read before anything moves (the reach review)', () => {
+  const ONE = readWorld(BEFORE);
+  const TIERED = clone(ONE);
+  TIERED.nouns.nouns[1].properties!.push({ name: 'tier', kind: 'choice', values: ['basic', 'gold'] });
+
+  it('a list narrowed over a field the accounts hold: refused by the rows outside the new list', () => {
+    const narrowed = clone(TIERED);
+    narrowed.nouns.nouns[1].properties!.find((p) => p.name === 'tier')!.values = ['basic'];
+    const p = plan(TIERED, narrowed);
+    expect(shape(p)).toEqual(['backup', 'setChecks:Account']);
+    expect(p.checks).toEqual([{ refuse: 'outside-list', collection: 'Account', field: 'tier', values: ['basic'], says: 'an account whose tier is not one of basic cannot keep it' }]);
+  });
+
+  it('a list put on a text the accounts already hold: the same refusal', () => {
+    const free = clone(ONE);
+    free.nouns.nouns[1].properties!.push({ name: 'tier', kind: 'text' });
+    const p = plan(free, TIERED);
+    expect(shape(p)).toEqual(['backup', 'setChecks:Account']);
+    expect(p.checks.map((c) => ('refuse' in c ? c.refuse : c.loses))).toEqual(['outside-list']);
+  });
+
+  it('a unique rule said over memberships already there: refused by the rows that share a person', () => {
+    const MANY = readWorld(AFTER);
+    const one = clone(MANY);
+    one.relations.relations[0].answers!.several = false;
+    const p = plan(MANY, one);
+    expect(shape(p)).toEqual(['backup', 'setIndexes:Membership']);
+    expect(p.checks).toEqual([{ refuse: 'duplicates', collection: 'Membership', fields: ['person'], says: "two 'membership' records that share person cannot both keep it" }]);
+  });
+
+  it('the controls: a list on a new field, a unique rule on a new field, and a list that only grows are not read', () => {
+    // A new field has no rows outside any list; a list that grows refuses nothing; a rule put back as it was (a rename) is not new.
+    expect(plan(ONE, TIERED).checks).toEqual([]);
+    const wider = clone(TIERED);
+    wider.nouns.nouns[1].properties!.find((p) => p.name === 'tier')!.values = ['basic', 'gold', 'platinum'];
+    expect(plan(TIERED, wider).checks.map((c) => ('refuse' in c ? c.refuse : c.loses))).toEqual(['outside-list']);
+    expect(plan(TIERED, renamed(TIERED, 'account', 'subscription', 'Subscription')).checks).toEqual([]);
   });
 });

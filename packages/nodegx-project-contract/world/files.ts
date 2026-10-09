@@ -103,8 +103,77 @@ export interface VocabularyFile {
   version: number;
 }
 
+/**
+ * P116 ONT-006 — the fourth file, optional: the things the person does over their world, each a
+ * sentence with its steps and its failure arms named. A world without it is a world nobody has
+ * said a verb about yet.
+ */
+export const VERBS_FILE = `${WORLD_DIR}/verbs.json`;
+
+/** What a step does: here (`make`, `update`, `end`, `remove`, `keep`) or in another system (`ask`). */
+export type VerbDoes = 'make' | 'update' | 'end' | 'remove' | 'keep' | 'ask';
+
+/** What happens when a step cannot be done, in the two shapes the corpus has: record it and go on, or stop. */
+export type VerbArmThen = 'record-and-go-on' | 'stop';
+
+export interface VerbArm {
+  id: string;
+  /** When this arm is taken, in the person's words: "they have no account there yet". */
+  when: string;
+  then: VerbArmThen;
+  /** What the person sees when it is taken. */
+  sees: string;
+  /** `record-and-go-on`: the steps not done because of it — the ones right after this step. */
+  skips?: string[];
+  /** The question of a relation's kind this arm answers (the enrolment note answers `exists-elsewhere`'s `hereFirst`). */
+  answers?: { relation: string; question: string };
+}
+
+export interface VerbStep {
+  id: string;
+  /** The step in the person's words: "create or update the person here". */
+  says: string;
+  does: VerbDoes;
+  /** The noun, or the relation that is a record of its own, the step is about. Required but for an `ask`. */
+  on?: string;
+  /** `update`: the properties it writes. */
+  fields?: string[];
+  /** `end`: the date that marks the end, when the kind does not say (an `ends` noun has `endedAt`; an `is-on` with dates has `until`). */
+  by?: string;
+  /** `ask`: the other system, in the words an `exists-elsewhere` relation names it. */
+  system?: string;
+  /** The specced node that does it, when not the one `does` implies. */
+  node?: string;
+  /** The engine step kind it projects to, when not the one `does` implies. */
+  kind?: string;
+  /** Its failure arm: one per step; a second kind of failure is a second step. */
+  fails?: VerbArm[];
+}
+
+export interface Verb {
+  id: string;
+  /** The person's name for it: "Enrol a member". */
+  name: string;
+  /** The whole sentence, failures included. */
+  sentence: string;
+  /** What sets it off, in words. */
+  when?: string;
+  /** Where it runs: in the backend's engine, or in the app. */
+  runs: 'server' | 'app';
+  /** What it touches, by id; the validator checks the names. */
+  about?: { nouns?: string[]; relations?: string[] };
+  steps: VerbStep[];
+}
+
+export interface VerbsFile {
+  $schema?: string;
+  verbs: Verb[];
+}
+
 export interface WorldFiles {
   nouns: NounsFile;
   relations: RelationsFile;
   vocabulary: VocabularyFile;
+  /** ONT-006; absent when nobody has said a verb. */
+  verbs?: VerbsFile;
 }

@@ -581,5 +581,103 @@ for (const engine of [sqlite(), postgres()]) {
         expect(await claimsOnTheMigratedTables(ctx, mirror)).toEqual([]);
       });
     });
+
+    // ------------------------------------------------------------ s9: the reach review (Fable 5.1) --
+    // "What survives is where the error hides": a rule put on records that already break it. Before s9 the
+    // dry run read nothing for it; the route refused the rule (HLT-016, FED-002) at its step — AFTER the backup
+    // and every step before it — and the run came back `partly`. The mutant plan below (the check taken out)
+    // is that measurement, kept.
+
+    describe('s9 — a list narrowed over accounts that hold a value outside it', () => {
+      const NARROW: WorldFiles = (() => {
+        const w: WorldFiles = JSON.parse(JSON.stringify(TIERED));
+        w.nouns.nouns[1].properties!.find((p) => p.name === 'tier')!.values = ['basic'];
+        return w;
+      })();
+      const narrowing = plan(TIERED, NARROW);
+      let ctx: ConformanceContext;
+      let refused: Awaited<ReturnType<typeof runMigration>>;
+      let unread: Awaited<ReturnType<typeof runMigration>>;
+      const order: string[] = [];
+      beforeAll(async () => {
+        const h = await engine.make();
+        ctx = onTheRealTables(h.adapter);
+        applyWorld(ctx, narrowing.before);
+        await ctx.create('Account', { name: 'Northwind', tier: 'gold' });
+        await ctx.create('Account', { name: 'Contoso', tier: 'basic' });
+        refused = await runMigration(ctx, asPlanData(narrowing), { backup: async () => (order.push('backup'), 'taken') });
+        const withoutTheCheck: MigrationPlan = { ...narrowing, checks: narrowing.checks.filter((c) => !('refuse' in c && c.refuse === 'outside-list')) };
+        unread = await runMigration(ctx, asPlanData(withoutTheCheck), { backup: async () => (order.push('backup'), 'taken') });
+      });
+
+      it('is refused at the dry run with the row counted, and no backup is taken', () => {
+        expect(narrowing.checks.map((c) => ('refuse' in c ? c.refuse : c.loses))).toEqual(['outside-list']);
+        expect(refused).toMatchObject({ ran: false, why: 'an account whose tier is not one of basic cannot keep it (1)' });
+        expect(refused.dryRun.refusals).toEqual([{ says: 'an account whose tier is not one of basic cannot keep it', rows: 1 }]);
+      });
+
+      it('the mutant — the plan without that check — takes the backup and then stops part way at the rule step (what s9 measured)', () => {
+        // `steps: 1` — the backup step ran; the rule step is the one that failed. On PostgreSQL this needed the
+        // executor to await the schema manager's barrier (migration.ts): before s9 the mutant came back `ran: true` there.
+        expect(unread).toMatchObject({ ran: 'partly', steps: 1, failed: { step: 1, says: 'accounts keep the lists said now' } });
+        expect(order).toEqual(['backup']);
+        expect(String((unread as { failed: { message: string } }).failed.message)).toMatch(/break|outside|violat|CHECK/i);
+      });
+    });
+
+    describe('s9 — a unique rule said over memberships that share a person', () => {
+      const ONE_AT_A_TIME: WorldFiles = (() => {
+        const w: WorldFiles = JSON.parse(JSON.stringify(MANY));
+        w.relations.relations[0].answers!.several = false;
+        return w;
+      })();
+      const tightening = plan(MANY, ONE_AT_A_TIME);
+      let refused: Awaited<ReturnType<typeof runMigration>>;
+      let unread: Awaited<ReturnType<typeof runMigration>>;
+      beforeAll(async () => {
+        const h = await engine.make();
+        const ctx = onTheRealTables(h.adapter);
+        applyWorld(ctx, tightening.before);
+        const a = String((await ctx.create('Account', { name: 'Northwind' })).objectId);
+        const b = String((await ctx.create('Account', { name: 'Contoso' })).objectId);
+        const ada = String((await ctx.create('Person', { name: 'Ada' })).objectId);
+        const linus = String((await ctx.create('Person', { name: 'Linus' })).objectId);
+        await ctx.create('Membership', { person: pointer('Person', ada), account: pointer('Account', a), role: 'holder' });
+        await ctx.create('Membership', { person: pointer('Person', ada), account: pointer('Account', b), role: 'member' });
+        await ctx.create('Membership', { person: pointer('Person', linus), account: pointer('Account', b), role: 'member' });
+        refused = await runMigration(ctx, asPlanData(tightening), { backup: async () => 'taken' });
+        const withoutTheCheck: MigrationPlan = { ...tightening, checks: tightening.checks.filter((c) => !('refuse' in c && c.refuse === 'duplicates')) };
+        unread = await runMigration(ctx, asPlanData(withoutTheCheck), { backup: async () => 'taken' });
+      });
+
+      it('is refused at the dry run with the rows that share a person counted — Ada\'s two — and nothing moves', () => {
+        expect(tightening.checks.map((c) => ('refuse' in c ? c.refuse : c.loses))).toEqual(['duplicates']);
+        expect(refused).toMatchObject({ ran: false });
+        expect(refused.dryRun.refusals).toEqual([{ says: "two 'membership' records that share person cannot both keep it", rows: 2 }]);
+      });
+
+      it('the mutant stops part way at the rule step, after the backup', () => {
+        expect(unread).toMatchObject({ ran: 'partly', steps: 1, failed: { step: 1 } });
+      });
+    });
+
+    describe('s9 — a changed answer that changes only the words on a collection', () => {
+      // `whenTargetGoes`, `setOnce`, `whatStays`… project into the collection's description (ONT-003: the rules
+      // the store does not keep, in words). The schema route writes a description once, at `createTable`, and has
+      // no action that changes it (byob-admin.ts: "a changed description is ONT-007's migration"). So the plan
+      // has no step for it, the reach no row, and the Schema card keeps the old words. Pinned as failing: this
+      // goes green when a `describeTable` action and its step exist.
+      it.failing('is carried to the collection the backend holds', async () => {
+        const h = await engine.make();
+        const ctx = onTheRealTables(h.adapter);
+        applyWorld(ctx, bombshell.before);
+        await seedOne(ctx);
+        const run = await runMigration(ctx, asPlanData(bombshell), { backup: async () => 'taken' });
+        expect(run).toMatchObject({ ran: true });
+        const want = bombshell.after.collections.find((c) => c.name === 'Person')!.description;
+        expect(want).not.toBe(bombshell.before.collections.find((c) => c.name === 'Person')!.description);
+        expect(ctx.schema.getTableSchema('Person')!.description).toBe(want);
+      });
+    });
   });
 }

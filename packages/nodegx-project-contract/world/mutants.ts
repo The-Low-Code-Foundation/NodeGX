@@ -507,6 +507,8 @@ function missingHome(schema: WorldSchema, claim: WorldClaim): string | undefined
     else if ('pair' in step) miss = need(step.pair, [step.field]);
     else if ('paired' in step) miss = need(step.paired, [step.field]);
     else if ('gone' in step) miss = need(step.gone, []);
+    else if ('there' in step) miss = need(step.there, []);
+    else if ('holds' in step) miss = need(step.holds, [step.field]);
     else miss = need(step.empty, [step.field]);
     if (miss) return miss;
   }

@@ -200,6 +200,10 @@ export type MigrationCheck =
   | { refuse: 'none'; collection: string; record: string; by: string; says: string }
   /** Refused when the collection has any rows: a field they would all need, with nothing to fill it. */
   | { refuse: 'rows'; collection: string; says: string }
+  /** Refused when any `collection` row holds a `field` value outside `values`: the list the rule would put on it (s9). */
+  | { refuse: 'outside-list'; collection: string; field: string; values: string[]; says: string }
+  /** Refused when two `collection` rows share the same `fields`: the unique rule would not build (s9). */
+  | { refuse: 'duplicates'; collection: string; fields: string[]; says: string }
   /** Counts the values a drop would lose; the run asks for them to be accepted. */
   | { loses: 'values'; collection: string; field: string; says: string }
   | { loses: 'rows'; collection: string; says: string };
@@ -214,6 +218,8 @@ export interface ReachRow {
   how: 'made' | 'changed' | 'renamed' | 'removed';
   /** For a renamed collection: the name it had, which every component and rule written before still uses. */
   was?: string;
+  /** Fields renamed, by the name they had → the name they have now (s9: what a rule or a wire that names the old one must say instead). */
+  renamed?: Record<string, string>;
 }
 
 export interface MigrationPlan {
@@ -345,7 +351,14 @@ function renameSteps(old: WorldSchema, renamed: WorldSchema, renames: ReadonlyMa
     for (const [from, to] of fields) columns.push({ schema: { action: 'renameColumn', table: n.name, oldName: from, newName: to }, says: `call ${article(oneOf(n))}'s ${from} its ${to} now` });
     if (checksMove) on.push({ schema: { action: 'setChecks', table: n.name, checks: n.checks }, says: `put the lists ${wordsOf(n)} keep back` });
     if (indexesMove) on.push({ schema: { action: 'setIndexes', table: n.name, indexes: n.indexes }, says: `put the unique rules ${wordsOf(n)} keep back` });
-    reach.push({ collection: n.name, words: wordsOf(n), fields: fields.map(([from]) => from), how: c.name !== n.name ? 'renamed' : 'changed', ...(c.name !== n.name ? { was: c.name } : {}) });
+    reach.push({
+      collection: n.name,
+      words: wordsOf(n),
+      fields: fields.map(([from]) => from),
+      how: c.name !== n.name ? 'renamed' : 'changed',
+      ...(c.name !== n.name ? { was: c.name } : {}),
+      ...(fields.length ? { renamed: Object.fromEntries(fields) } : {})
+    });
   }
   return { steps: [...off, ...tables, ...columns, ...on], reach, refused };
 }
@@ -356,7 +369,14 @@ function mergeReach(rows: ReachRow[]): ReachRow[] {
   for (const r of rows) {
     const had = out.get(r.collection);
     if (!had) out.set(r.collection, { ...r, fields: [...r.fields] });
-    else out.set(r.collection, { ...had, fields: [...new Set([...had.fields, ...r.fields])], how: had.how === 'renamed' || r.how === 'renamed' ? 'renamed' : had.how, ...(had.was || r.was ? { was: had.was || r.was } : {}) });
+    else
+      out.set(r.collection, {
+        ...had,
+        fields: [...new Set([...had.fields, ...r.fields])],
+        how: had.how === 'renamed' || r.how === 'renamed' ? 'renamed' : had.how,
+        ...(had.was || r.was ? { was: had.was || r.was } : {}),
+        ...(had.renamed || r.renamed ? { renamed: { ...had.renamed, ...r.renamed } } : {})
+      });
   }
   return [...out.values()];
 }
@@ -530,10 +550,23 @@ function planBetween(before: WorldFiles, after: WorldFiles, sb: WorldSchema, sa:
     if (sortedText(was.checks) !== sortedText(c.checks)) {
       rules.push({ schema: { action: 'setChecks', table: c.name, checks: c.checks }, says: `${wordsOf(c)} keep the lists said now` });
       for (const k of [...was.checks, ...c.checks]) fields.add(k.field);
+      // A list put on a field the records already hold (s9): the route refuses it when any row is outside the
+      // list, after the backup and every step before it. The dry run reads those rows first.
+      const had = new Set(was.checks.map((k) => JSON.stringify([k.field, [...k.oneOf].sort()])));
+      for (const k of c.checks) {
+        if (had.has(JSON.stringify([k.field, [...k.oneOf].sort()])) || !was.columns.some((x) => x.name === k.field)) continue;
+        checks.push({ refuse: 'outside-list', collection: c.name, field: k.field, values: [...k.oneOf], says: `${article(oneOf(c))} whose ${k.field} is not one of ${k.oneOf.join(', ')} cannot keep it` });
+      }
     }
     if (sortedText(was.indexes) !== sortedText(c.indexes)) {
       rules.push({ schema: { action: 'setIndexes', table: c.name, indexes: c.indexes }, says: `${wordsOf(c)} keep the unique rules said now` });
       for (const i of [...was.indexes, ...c.indexes]) for (const f of i.fields) fields.add(f);
+      // A unique rule put over records that share a value (s9): the same refusal, read first.
+      const had = new Set(was.indexes.filter((i) => i.unique).map((i) => JSON.stringify([i.fields, i.where ?? null])));
+      for (const i of c.indexes) {
+        if (!i.unique || had.has(JSON.stringify([i.fields, i.where ?? null])) || !i.fields.every((f) => was.columns.some((x) => x.name === f))) continue;
+        checks.push({ refuse: 'duplicates', collection: c.name, fields: [...i.fields], says: `two ${wordsOf(c)} that share ${i.fields.join(' and ')} cannot both keep it` });
+      }
     }
     if (fields.size) reach.push({ collection: c.name, words: wordsOf(c), fields: [...fields], how: 'changed' });
   }
@@ -576,7 +609,8 @@ export interface ComponentGraph {
   /** `component.json` `path` (or its name): how the person finds it in the editor. */
   path: string;
   nodes: ReadonlyArray<{ id: string; type: string; label?: string; parameters?: Record<string, unknown> }>;
-  connections?: ReadonlyArray<{ toId: string; toProperty: string }>;
+  /** Both ends: a Record node's `prop-<field>` ports are OUTPUTS as well as inputs (s9 — a form filled from a record reads them). */
+  connections?: ReadonlyArray<{ fromId?: string; fromProperty?: string; toId: string; toProperty: string }>;
 }
 
 export interface ComponentReachRow {
@@ -584,7 +618,7 @@ export interface ComponentReachRow {
   /** The record node, by its label when it has one. */
   node: string;
   collection: string;
-  /** Changed fields the node reads or writes: a `prop-<field>` port wired, or a filter rule on it. Empty when it only names the collection. */
+  /** Changed fields the node reads or writes: a `prop-<field>` port wired (in or out), or a filter rule on it. Empty when it only names the collection. */
   fields: string[];
 }
 
@@ -605,7 +639,11 @@ export function componentReach(plan: Pick<MigrationPlan, 'reach'>, components: r
       const r = reached.get(named.trim().toLowerCase());
       if (!r) continue;
       const touched = new Set<string>();
-      for (const w of c.connections || []) if (w.toId === n.id && w.toProperty.startsWith('prop-')) touched.add(w.toProperty.slice(5));
+      for (const w of c.connections || []) {
+        if (w.toId === n.id && w.toProperty.startsWith('prop-')) touched.add(w.toProperty.slice(5));
+        // The read side (s9): `DbModel2`'s `prop-<field>` are outputs — what a page shows or a form starts from.
+        if (w.fromId === n.id && typeof w.fromProperty === 'string' && w.fromProperty.startsWith('prop-')) touched.add(w.fromProperty.slice(5));
+      }
       const filter = n.parameters?.visualFilter as { rules?: Array<{ property?: string }> } | undefined;
       for (const rule of filter?.rules || []) if (rule?.property) touched.add(rule.property);
       out.push({ component: c.path, node: n.label || n.id, collection: r.collection, fields: r.fields.filter((f) => touched.has(f)) });
@@ -632,6 +670,8 @@ export interface PermissionReachRow {
   fields: string[];
   /** Rules kept under a renamed collection's old name: they protect nothing until they move. */
   mustMove?: { from: string; to: string };
+  /** A path rule whose hops name a collection or a field the plan renames (s9): the old name → the new one, hop by hop, until it is re-said. */
+  mustRewrite?: Record<string, string>;
 }
 
 type Hop = { follow?: string; to?: string; from?: string; by?: string };
@@ -656,12 +696,15 @@ export function permissionReach(plan: Pick<MigrationPlan, 'reach' | 'before'>, s
         const hops = (atom as { path?: { hops?: Hop[] } } | null)?.path?.hops;
         if (!Array.isArray(hops)) continue;
         const through = new Map<string, Set<string>>();
+        const rewrite: Record<string, string> = {};
         const note = (collection: string | undefined, field?: string) => {
           const r = collection ? reached.get(collection) : undefined;
           if (!r) return;
           const fields = through.get(r.collection) || new Set<string>();
           if (field && r.fields.includes(field)) fields.add(field);
           through.set(r.collection, fields);
+          if (r.was && collection === r.was) rewrite[r.was] = r.collection;
+          if (field && r.renamed?.[field]) rewrite[field] = r.renamed[field];
         };
         let at: string | undefined = '_User';
         for (const hop of hops) {
@@ -674,7 +717,8 @@ export function permissionReach(plan: Pick<MigrationPlan, 'reach' | 'before'>, s
           }
           note(at);
         }
-        for (const [collection, fields] of through) out.push({ at: `collections.${name}.permissions.${op}`, collection, reads: 'a path through it', fields: [...fields] });
+        for (const [collection, fields] of through)
+          out.push({ at: `collections.${name}.permissions.${op}`, collection, reads: 'a path through it', fields: [...fields], ...(Object.keys(rewrite).length ? { mustRewrite: rewrite } : {}) });
       }
     }
   }

@@ -2,11 +2,20 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://opennoodl.dev/schemas/world-v1.json",
   "title": "NodeGX world",
-  "description": "What a person said about their world: docs/world/nouns.json, relations.json and vocabulary.json (P116 ONT-001). A property graph in plain JSON: things, typed links between them, details on the links. It names no engine and no graph framework. A file is one of the three definitions; which kinds exist, and what each asks, is the pinned vocabulary's, and the validator in @nodegx/project-contract/world checks it.",
+  "description": "What a person said about their world: docs/world/nouns.json, relations.json and vocabulary.json (P116 ONT-001), and verbs.json when the person has said what they do over it (ONT-006). A property graph in plain JSON: things, typed links between them, details on the links. It names no engine and no graph framework. A file is one of the three definitions; which kinds exist, and what each asks, is the pinned vocabulary's, and the validator in @nodegx/project-contract/world checks it.",
   "oneOf": [
-    { "$ref": "#/definitions/nounsFile" },
-    { "$ref": "#/definitions/relationsFile" },
-    { "$ref": "#/definitions/vocabularyFile" }
+    {
+      "$ref": "#/definitions/nounsFile"
+    },
+    {
+      "$ref": "#/definitions/relationsFile"
+    },
+    {
+      "$ref": "#/definitions/vocabularyFile"
+    },
+    {
+      "$ref": "#/definitions/verbsFile"
+    }
   ],
   "definitions": {
     "id": {
@@ -19,35 +28,105 @@
     },
     "property": {
       "type": "object",
-      "required": ["name", "kind"],
+      "required": [
+        "name",
+        "kind"
+      ],
       "additionalProperties": false,
       "properties": {
-        "name": { "$ref": "#/definitions/words" },
+        "name": {
+          "$ref": "#/definitions/words"
+        },
         "kind": {
           "description": "P104's eleven field kinds less link and links: a link between two things is a relation.",
-          "enum": ["text", "number", "yesno", "date", "choice", "file", "location", "list", "anything"]
+          "enum": [
+            "text",
+            "number",
+            "yesno",
+            "date",
+            "choice",
+            "file",
+            "location",
+            "list",
+            "anything"
+          ]
         },
-        "sentence": { "$ref": "#/definitions/words" },
-        "values": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/words" } },
+        "sentence": {
+          "$ref": "#/definitions/words"
+        },
+        "values": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/words"
+          }
+        },
         "freeWords": {
           "description": "A text the person was asked about and said is free words, not one of a fixed list (ONT-002's kind-picker question, answered).",
           "const": true
         }
       },
-      "if": { "properties": { "kind": { "const": "choice" } } },
-      "then": { "required": ["values"] },
-      "else": { "not": { "required": ["values"] } },
-      "allOf": [{ "if": { "required": ["freeWords"] }, "then": { "properties": { "kind": { "const": "text" } } } }]
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "choice"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "values"
+        ]
+      },
+      "else": {
+        "not": {
+          "required": [
+            "values"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "freeWords"
+            ]
+          },
+          "then": {
+            "properties": {
+              "kind": {
+                "const": "text"
+              }
+            }
+          }
+        }
+      ]
     },
     "noun": {
       "type": "object",
-      "required": ["id", "name", "sentence"],
+      "required": [
+        "id",
+        "name",
+        "sentence"
+      ],
       "additionalProperties": false,
       "properties": {
-        "id": { "$ref": "#/definitions/id" },
-        "name": { "$ref": "#/definitions/words" },
-        "sentence": { "description": "What the person said it is.", "$ref": "#/definitions/words" },
-        "properties": { "type": "array", "items": { "$ref": "#/definitions/property" } },
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "name": {
+          "$ref": "#/definitions/words"
+        },
+        "sentence": {
+          "description": "What the person said it is.",
+          "$ref": "#/definitions/words"
+        },
+        "properties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/property"
+          }
+        },
         "signsIn": {
           "description": "This noun is who signs in; at most one noun says so. Projects to a link to the app's users on its collection.",
           "const": true
@@ -60,54 +139,303 @@
     },
     "relation": {
       "type": "object",
-      "required": ["id", "from", "kind", "sentence"],
+      "required": [
+        "id",
+        "from",
+        "kind",
+        "sentence"
+      ],
       "additionalProperties": false,
       "properties": {
-        "id": { "$ref": "#/definitions/id" },
-        "from": { "$ref": "#/definitions/id" },
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "from": {
+          "$ref": "#/definitions/id"
+        },
         "to": {
-          "description": "A noun id, a list of noun ids, or another system in words — by the kind's target.",
+          "description": "A noun id, a list of noun ids, or another system in words \u2014 by the kind's target.",
           "oneOf": [
-            { "$ref": "#/definitions/words" },
-            { "type": "array", "minItems": 2, "items": { "$ref": "#/definitions/id" } }
+            {
+              "$ref": "#/definitions/words"
+            },
+            {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "$ref": "#/definitions/id"
+              }
+            }
           ]
         },
-        "property": { "$ref": "#/definitions/words" },
-        "kind": { "$ref": "#/definitions/id" },
-        "sentence": { "description": "What the person said.", "$ref": "#/definitions/words" },
+        "property": {
+          "$ref": "#/definitions/words"
+        },
+        "kind": {
+          "$ref": "#/definitions/id"
+        },
+        "sentence": {
+          "description": "What the person said.",
+          "$ref": "#/definitions/words"
+        },
         "answers": {
           "type": "object",
-          "additionalProperties": { "oneOf": [{ "type": "boolean" }, { "$ref": "#/definitions/words" }] }
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "$ref": "#/definitions/words"
+              }
+            ]
+          }
         },
-        "properties": { "type": "array", "items": { "$ref": "#/definitions/property" } }
+        "properties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/property"
+          }
+        }
       }
     },
     "nounsFile": {
       "type": "object",
-      "required": ["nouns"],
+      "required": [
+        "nouns"
+      ],
       "additionalProperties": false,
       "properties": {
-        "$schema": { "type": "string" },
-        "nouns": { "type": "array", "items": { "$ref": "#/definitions/noun" } }
+        "$schema": {
+          "type": "string"
+        },
+        "nouns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/noun"
+          }
+        }
       }
     },
     "relationsFile": {
       "type": "object",
-      "required": ["relations"],
+      "required": [
+        "relations"
+      ],
       "additionalProperties": false,
       "properties": {
-        "$schema": { "type": "string" },
-        "relations": { "type": "array", "items": { "$ref": "#/definitions/relation" } }
+        "$schema": {
+          "type": "string"
+        },
+        "relations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/relation"
+          }
+        }
       }
     },
     "vocabularyFile": {
       "type": "object",
-      "required": ["vocabulary", "version"],
+      "required": [
+        "vocabulary",
+        "version"
+      ],
       "additionalProperties": false,
       "properties": {
-        "$schema": { "type": "string" },
-        "vocabulary": { "type": "string", "minLength": 1 },
-        "version": { "type": "integer", "minimum": 1 }
+        "$schema": {
+          "type": "string"
+        },
+        "vocabulary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "verbArm": {
+      "type": "object",
+      "required": [
+        "id",
+        "when",
+        "then",
+        "sees"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "when": {
+          "$ref": "#/definitions/words"
+        },
+        "then": {
+          "description": "Record it and go on past the steps it skips, or stop the verb there.",
+          "enum": [
+            "record-and-go-on",
+            "stop"
+          ]
+        },
+        "sees": {
+          "$ref": "#/definitions/words"
+        },
+        "skips": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/id"
+          }
+        },
+        "answers": {
+          "type": "object",
+          "required": [
+            "relation",
+            "question"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "relation": {
+              "$ref": "#/definitions/id"
+            },
+            "question": {
+              "$ref": "#/definitions/id"
+            }
+          }
+        }
+      }
+    },
+    "verbStep": {
+      "type": "object",
+      "required": [
+        "id",
+        "says",
+        "does"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "says": {
+          "$ref": "#/definitions/words"
+        },
+        "does": {
+          "description": "Here: make, update, end, remove, keep. In another system: ask.",
+          "enum": [
+            "make",
+            "update",
+            "end",
+            "remove",
+            "keep",
+            "ask"
+          ]
+        },
+        "on": {
+          "$ref": "#/definitions/id"
+        },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/words"
+          }
+        },
+        "by": {
+          "$ref": "#/definitions/words"
+        },
+        "system": {
+          "$ref": "#/definitions/words"
+        },
+        "node": {
+          "$ref": "#/definitions/words"
+        },
+        "kind": {
+          "$ref": "#/definitions/words"
+        },
+        "fails": {
+          "type": "array",
+          "maxItems": 1,
+          "items": {
+            "$ref": "#/definitions/verbArm"
+          }
+        }
+      }
+    },
+    "verb": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "sentence",
+        "runs",
+        "steps"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "name": {
+          "$ref": "#/definitions/words"
+        },
+        "sentence": {
+          "$ref": "#/definitions/words"
+        },
+        "when": {
+          "$ref": "#/definitions/words"
+        },
+        "runs": {
+          "enum": [
+            "server",
+            "app"
+          ]
+        },
+        "about": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "nouns": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/id"
+              }
+            },
+            "relations": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/id"
+              }
+            }
+          }
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/verbStep"
+          }
+        }
+      }
+    },
+    "verbsFile": {
+      "type": "object",
+      "required": [
+        "verbs"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "$schema": {
+          "type": "string"
+        },
+        "verbs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/verb"
+          }
+        }
       }
     }
   }

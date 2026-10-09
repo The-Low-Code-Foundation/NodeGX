@@ -7,12 +7,12 @@
  * the candidate. The plan says what to write; the caller writes it. A file whose content would
  * not change is not written (P109 ISL-019: a rebuild that changes nothing leaves git clean).
  */
-import { WORLD_FILES, type WorldFileName, type WorldFiles } from './files';
+import { VERBS_FILE, WORLD_FILES, type WorldFileName, type WorldFiles } from './files';
 import { validateWorld, type WorldProblem } from './validate';
 import { WORLD_VOCABULARY_REF, type VocabularyRef } from './vocabulary';
 
-/** The three files' text as on disk; `null` for a file that does not exist. */
-export type WorldTexts = Record<WorldFileName, string | null>;
+/** The three files' text as on disk; `null` for a file that does not exist. `verbs` (ONT-006) when the caller read for it. */
+export type WorldTexts = Record<WorldFileName, string | null> & { verbs?: string | null };
 
 const NAMES: readonly WorldFileName[] = ['nouns', 'relations', 'vocabulary'];
 
@@ -32,7 +32,10 @@ function hash53(text: string): string {
 
 /** The revision of the world as read: changes when any of the three files' text does, or one appears or goes. */
 export function worldRevision(texts: WorldTexts): string {
-  return hash53(NAMES.map((n) => (texts[n] === null ? '\u0000' : texts[n])).join('\u0001'));
+  // The verbs file joins the revision only when it is there: a world of three files keeps the revision it had.
+  const parts = NAMES.map((n) => (texts[n] === null ? '\u0000' : texts[n]));
+  if (typeof texts.verbs === 'string') parts.push(texts.verbs);
+  return hash53(parts.join('\u0001'));
 }
 
 /** How the files are written: two-space JSON and a final newline, so a rewrite of the same world is the same bytes. */
@@ -85,5 +88,10 @@ export function planWorldWrite(args: {
     next[n] = content;
     if (content !== args.disk[n]) writes.push({ path: WORLD_FILES[n], content });
   }
+  if (args.candidate.verbs !== undefined) {
+    const content = serializeWorldFile(args.candidate.verbs);
+    next.verbs = content;
+    if (content !== args.disk.verbs) writes.push({ path: VERBS_FILE, content });
+  } else if (typeof args.disk.verbs === 'string') next.verbs = args.disk.verbs;
   return { ok: true, writes, revision: worldRevision(next) };
 }

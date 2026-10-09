@@ -1,0 +1,118 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/world-v1.json#/definitions/verbsFile",
+  "verbs": [
+    {
+      "id": "enrol",
+      "name": "Enrol a member",
+      "sentence": "When a membership is activated, create or update the person here, create or update them in the mailing system, and enrol them in the learning platform; if they have no account there yet, skip the enrolment and record it.",
+      "when": "a membership is activated",
+      "runs": "server",
+      "about": {
+        "nouns": [
+          "person"
+        ],
+        "relations": [
+          "membership",
+          "mailing",
+          "learning"
+        ]
+      },
+      "steps": [
+        {
+          "id": "person-here",
+          "says": "create or update the person here",
+          "does": "make",
+          "on": "person"
+        },
+        {
+          "id": "mailing",
+          "says": "create or update them in the mailing system",
+          "does": "ask",
+          "on": "person",
+          "system": "the mailing system"
+        },
+        {
+          "id": "learning-account",
+          "says": "find their account in the learning platform",
+          "does": "ask",
+          "on": "person",
+          "system": "the learning platform",
+          "fails": [
+            {
+              "id": "no-account-there",
+              "when": "they have no account there yet",
+              "then": "record-and-go-on",
+              "skips": [
+                "enrol"
+              ],
+              "sees": "Enrolled everywhere but the learning platform: they have no account there yet. Recorded; the next run tries again.",
+              "answers": {
+                "relation": "learning",
+                "question": "hereFirst"
+              }
+            }
+          ]
+        },
+        {
+          "id": "enrol",
+          "says": "enrol them in the learning platform",
+          "does": "ask",
+          "on": "person",
+          "system": "the learning platform"
+        }
+      ]
+    },
+    {
+      "id": "archive",
+      "name": "Archive a person",
+      "sentence": "When a person is archived, their record and its history stay, their memberships end, and their access to the learning platform ends.",
+      "when": "a person is archived",
+      "runs": "server",
+      "about": {
+        "nouns": [
+          "person"
+        ],
+        "relations": [
+          "membership",
+          "learning",
+          "leaves"
+        ]
+      },
+      "steps": [
+        {
+          "id": "record-stays",
+          "says": "their record and its history stay",
+          "does": "keep",
+          "on": "person"
+        },
+        {
+          "id": "memberships-end",
+          "says": "their memberships end",
+          "does": "end",
+          "on": "membership"
+        },
+        {
+          "id": "access-ends",
+          "says": "their access to the learning platform ends",
+          "does": "ask",
+          "on": "person",
+          "system": "the learning platform",
+          "fails": [
+            {
+              "id": "no-access-there",
+              "when": "they had no access there",
+              "then": "record-and-go-on",
+              "sees": "Archived. They had no access to the learning platform to end; recorded."
+            }
+          ]
+        },
+        {
+          "id": "person-ends",
+          "says": "the person is marked as having left",
+          "does": "end",
+          "on": "person"
+        }
+      ]
+    }
+  ]
+}

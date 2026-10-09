@@ -51,6 +51,8 @@ export type MigrationCheckData =
   | { refuse: 'more-than-one'; record: string; by: string; says: string }
   | { refuse: 'none'; collection: string; record: string; by: string; says: string }
   | { refuse: 'rows'; collection: string; says: string }
+  | { refuse: 'outside-list'; collection: string; field: string; values: string[]; says: string }
+  | { refuse: 'duplicates'; collection: string; fields: string[]; says: string }
   | { loses: 'values'; collection: string; field: string; says: string }
   | { loses: 'rows'; collection: string; says: string };
 
@@ -114,6 +116,23 @@ export async function dryRunMigration(ctx: MigrationContext, plan: MigrationPlan
       if (c.refuse === 'rows') {
         const n = await ctx.count(c.collection, {});
         if (n > 0) dry.refusals.push({ says: c.says, rows: n });
+      } else if (c.refuse === 'outside-list') {
+        // P116 ONT-007 s9: a list put on a field the rows already hold — the route refuses the rule (HLT-016) when any row is outside it,
+        // which a run would meet AFTER the backup and every step before it. Read first, counted, nothing moved.
+        const outside = (await allRows(ctx, c.collection)).filter((r) => !isEmpty(r[c.field]) && !c.values.includes(String(r[c.field]))).length;
+        if (outside > 0) dry.refusals.push({ says: c.says, rows: outside });
+      } else if (c.refuse === 'duplicates') {
+        // s9: a unique rule over rows that share a value — the same refusal (FED-002), read first. Rows with any of the
+        // fields empty are distinct to a unique index on both engines, so they are not counted.
+        const seen = new Map<string, number>();
+        for (const row of await allRows(ctx, c.collection)) {
+          const key = c.fields.map((f) => (isEmpty(row[f]) ? undefined : idOf(row[f]) ?? String(row[f])));
+          if (key.some((k) => k === undefined)) continue;
+          const k = JSON.stringify(key);
+          seen.set(k, (seen.get(k) || 0) + 1);
+        }
+        const over = [...seen.values()].filter((n) => n > 1).reduce((a, n) => a + n, 0);
+        if (over > 0) dry.refusals.push({ says: c.says, rows: over });
       } else if (c.refuse === 'more-than-one') {
         const seen = new Map<string, number>();
         for (const row of await allRows(ctx, c.record)) {
@@ -242,8 +261,15 @@ export async function runMigration(
   for (let i = 0; i < plan.steps.length; i++) {
     const s = plan.steps[i];
     try {
-      if ('schema' in s) applySchema(ctx, s.schema);
-      else if ('move' in s) await applyMove(ctx, s.move);
+      if ('schema' in s) {
+        applySchema(ctx, s.schema);
+        // P116 ONT-007 s9 (the reach review): an engine may queue its DDL and refuse at its barrier — the
+        // PostgreSQL manager does, for a check the rows break and a unique rule they share. Awaited here, so a
+        // refused step is this step's failure (`partly`), never a run reported done over a rule that was not built.
+        // Measured: without it the narrowed-list mutant came back `ran: true` on PostgreSQL and `partly` on SQLite.
+        const barrier = (ctx.schema as { barrier?: () => Promise<void> }).barrier;
+        if (typeof barrier === 'function') await barrier.call(ctx.schema);
+      } else if ('move' in s) await applyMove(ctx, s.move);
       done += 1;
     } catch (err) {
       return { ran: 'partly', dryRun, backup, steps: done, failed: { step: i, says: s.says, message: err instanceof Error ? err.message : String(err) } };
