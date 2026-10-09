@@ -27,7 +27,9 @@
  *   - **Default** when the Layout String cannot be read (`readColumnLayoutString` :421-433: a string with nothing but spaces, or
  *     anything that is neither a string nor a number) — the children are drawn bare, with no container, so nothing is measured and the
  *     width is forgotten (:487-492); when the container has not been measured yet; and while Column Sizing is Auto Fit.
- *   - else **Small** when Small Below is above 0, Small Layout is truthy and the measured width is below Small Below; else **Medium**
+ *   - else **Small** when Small Below is above 0, Small Layout is truthy and reads as a layout (v2, row C133: as Layout String is — a
+ *     number as its text; v1 took any truthy value, and the runtime threw on one that was not a string) and the measured width is
+ *     below Small Below; else **Medium**
  *     the same way; else **Default**. A breakpoint is read as a number (`toPixels` :60-63: a number as it is, anything else
  *     `parseFloat` of it, and 0 when that is not finite).
  * **Breakpoint** is published, and At Medium or At Small fired for the band entered, by an effect keyed on the band (:598-604): when a
@@ -100,7 +102,8 @@ const NOTHING: Send = { send: [] };
 
 export const Columns = defineNode({
   type: 'net.noodl.visual.columns',
-  version: 1,
+  // v2 (P109 ISL-050, s32): a Medium or Small Layout that is no layout leaves its band to the base layout (row C133)
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/visual/columns.ts',
   needs: ['person'],
 
@@ -247,9 +250,11 @@ function bandOf(s: Readonly<State>): Band {
   if (typeof s.measured !== 'number') return 'Default';
   if (s.sizing === 'autoFit') return 'Default';
   const small = px(s.smallBelow);
-  if (small > 0 && s.smallLayout && s.measured < small) return 'Small';
+  // v2 (row C133, ruled "Read a number as its text, and anything else as no layout"): a band layout must be truthy AND read as a
+  // layout (`readColumnLayoutString`) — a list, an object or a blank string leaves the band to the base layout
+  if (small > 0 && s.smallLayout && readable(s.smallLayout) !== null && s.measured < small) return 'Small';
   const medium = px(s.mediumBelow);
-  if (medium > 0 && s.mediumLayout && s.measured < medium) return 'Medium';
+  if (medium > 0 && s.mediumLayout && readable(s.mediumLayout) !== null && s.measured < medium) return 'Medium';
   return 'Default';
 }
 

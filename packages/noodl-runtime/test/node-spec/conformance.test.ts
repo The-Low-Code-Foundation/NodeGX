@@ -101,16 +101,9 @@ const videoFileTakesNoPointer = (d: Divergence) => {
 const refusedVolume = poolFor(specs['Video'].inputs.volume).filter((v) => typeof v !== 'number' ? !(Number(v) >= 0 && Number(v) <= 1) : !(v >= 0 && v <= 1));
 const refusedSourceObject = poolFor(specs['Video'].inputs.srcObject).filter((v) => v !== null && v !== undefined);
 
-/** C133 (s60) — a Medium or Small Layout that is truthy and not a string: picked for its band, it reaches `parseLayout`'s `split` in render */
-const unsplittableLayout = (port: 'mediumLayout' | 'smallLayout') => poolFor(specs['net.noodl.visual.columns'].inputs[port]).filter((v) => !!v && typeof v !== 'string');
-
 const WITHHELD: Record<string, Readonly<Record<string, Withheld>>> = {
   // C106 (a Start Drag X or Y of NaN looped the Drag's update until React threw) was fixed in P109 ISL-048 — `Object.is`
-  // s60 — C133: the throw takes the page down only once the band applies, so a sequence that holds the value is withheld
-  'net.noodl.visual.columns': {
-    mediumLayout: { values: unsplittableLayout('mediumLayout'), row: 'NSP-016 §6 C133 — a Medium or Small Layout that is not a string throws while React draws the Columns' },
-    smallLayout: { values: unsplittableLayout('smallLayout'), row: 'NSP-016 §6 C133 — a Medium or Small Layout that is not a string throws while React draws the Columns' }
-  },
+  // C133 (a Medium or Small Layout that was not a string threw while React drew the Columns) was fixed in P109 ISL-050
   // C92 (a Shape's Points of 1e9, 2^53 or Infinity ran the heap out) was fixed in P109 ISL-038 — Circle.tsx caps it at 500
   Video: {
     volume: { values: refusedVolume, row: 'NSP-016 §6 C98 — a Volume outside 0 to 1 throws while React draws the Video' },
@@ -119,9 +112,8 @@ const WITHHELD: Record<string, Readonly<Record<string, Withheld>>> = {
 };
 
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
-  // s60 — the Columns' own row: a breakpoint layout that is not a string throws in render (C133)
+  // s60 — the Columns' own row (C133, a breakpoint layout that was not a string, fixed in P109 ISL-050)
   'net.noodl.visual.columns': [
-    { row: 'NSP-016 §6 C133 — a Medium or Small Layout that is not a string throws while React draws the Columns', matches: (d: Divergence) => threwWith(d, 'columnLayout.split is not a function') },
     // s60 deep run (seed 3455271128, shrunk to one step: Auto Fit, Min Column Width 1, Horizontal Gap −1) — C134
     { row: 'NSP-016 §6 C134 — Auto Fit with Min Column Width + Horizontal Gap = 0 divides by zero and throws while React draws the Columns', matches: (d: Divergence) => threwWith(d, 'Invalid array length') }
   ],

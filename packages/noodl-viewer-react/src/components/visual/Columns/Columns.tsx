@@ -279,14 +279,20 @@ export function pickBreakpointLayout(
   props: Pick<ColumnsProps, 'mediumBreakpoint' | 'mediumLayout' | 'smallBreakpoint' | 'smallLayout'>,
   containerWidth: number
 ): { breakpoint: ColumnsBreakpoint; layoutString: string } {
+  // P109 ISL-050 (P107-C133), ruled "Read a number as its text, and anything else as no layout": the band layouts were picked
+  // by truthiness and handed to `parseLayout` as they came, so a number (or `true`, or an object) reached `.split` in render and
+  // blanked the page. Read as Layout String is: a value that is no layout leaves the band to the base layout. The band is still
+  // picked only by a truthy layout, so `0` stays inert, as it always was.
   const small = toPixels(props.smallBreakpoint);
-  if (small > 0 && props.smallLayout && containerWidth < small) {
-    return { breakpoint: 'Small', layoutString: props.smallLayout };
+  const smallLayout = props.smallLayout ? readColumnLayoutString(props.smallLayout) : null;
+  if (small > 0 && smallLayout && containerWidth < small) {
+    return { breakpoint: 'Small', layoutString: smallLayout };
   }
 
   const medium = toPixels(props.mediumBreakpoint);
-  if (medium > 0 && props.mediumLayout && containerWidth < medium) {
-    return { breakpoint: 'Medium', layoutString: props.mediumLayout };
+  const mediumLayout = props.mediumLayout ? readColumnLayoutString(props.mediumLayout) : null;
+  if (medium > 0 && mediumLayout && containerWidth < medium) {
+    return { breakpoint: 'Medium', layoutString: mediumLayout };
   }
 
   return { breakpoint: 'Default', layoutString: base };

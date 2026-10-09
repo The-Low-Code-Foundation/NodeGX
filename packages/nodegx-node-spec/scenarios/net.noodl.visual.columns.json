@@ -357,8 +357,8 @@
   ]
  },
  {
-  "name": "row C133 — a Small Layout of 0 or null is inert; 2 applies: Small (the runtime throws while React draws the Columns, and the page goes blank)",
-  "because": "`props.smallLayout` is read for truthiness (pickBreakpointLayout :277-293); R11 — the band applies. P107-C133: the runtime hands the number to `parseLayout`, whose `split` throws in render",
+  "name": "row C133 — a Small Layout of 0 or null is inert; 2 applies: Small",
+  "because": "`props.smallLayout` is read for truthiness (pickBreakpointLayout :277-293); R11 — the band applies. P107-C133: the runtime hands the number to `parseLayout`, whose `split` throws in render — P109 s32: fixed (ISL-050), the row mark dropped",
   "params": {
    "smallBreakpoint": {
     "value": 2000,
@@ -382,8 +382,45 @@
     "value": 2
    },
    "settle"
-  ],
-  "row": "NSP-016 §6 C133"
+  ]
+ },
+ {
+  "name": "row C133 — a Small Layout that is no layout (a list, an object, spaces) leaves the band to the base layout; \"1\" then applies: Small",
+  "because": "P109 s32 (ISL-050, Columns v2, ruled \"Read a number as its text, and anything else as no layout\") — read as Layout String is; v1 picked the band for any truthy value, and the runtime threw on one that was not a string",
+  "params": {
+   "smallBreakpoint": {
+    "value": 2000,
+    "unit": "px"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "smallLayout",
+    "value": [
+     1,
+     2
+    ]
+   },
+   "settle",
+   {
+    "set": "smallLayout",
+    "value": {
+     "a": 1
+    }
+   },
+   "settle",
+   {
+    "set": "smallLayout",
+    "value": "   "
+   },
+   "settle",
+   {
+    "set": "smallLayout",
+    "value": "1"
+   },
+   "settle"
+  ]
  },
  {
   "name": "a Small Below of 0 or below is inert",
