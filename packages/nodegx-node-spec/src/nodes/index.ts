@@ -108,6 +108,7 @@ import { Variable2 } from './variable2';
 import { Expression } from './expression';
 import { JavaScriptFunction } from './function';
 import { Script } from './script';
+import { LogicBuilder } from './logic-builder';
 
 export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   // NSP-004 — the pilot five
@@ -226,7 +227,9 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   // NSP-017 s65 — the Function: a contract (the person's code is the behaviour), graded with one fixture per rule
   [JavaScriptFunction.type]: JavaScriptFunction,
   // NSP-017 s66 — the Script: a contract, its three ways of writing it, graded with one fixture per rule
-  [Script.type]: Script
+  [Script.type]: Script,
+  // NSP-017 s67 — the Visual Function: a contract — the blocks give the ports, the code they are written out as is the behaviour
+  [LogicBuilder.type]: LogicBuilder
 });
 
 export { EQUIVALENT_MUTANTS } from './equivalent-mutants';
@@ -239,6 +242,8 @@ export { REPEATER_TEMPLATES, type RowTemplate } from './repeater';
 export { FUNCTION_FIXTURES } from './function';
 // NSP-017 s66 — the Script's fixtures
 export { SCRIPT_FIXTURES } from './script';
+// NSP-017 s67 — the Visual Function's fixtures: the blocks and the code written from them
+export { LOGIC_BUILDER_FIXTURES } from './logic-builder';
 
 export function specFor(typeName: string): AnyNodeSpec | undefined {
   return specs[typeName];
@@ -249,6 +254,7 @@ export {
   Expression,
   JavaScriptFunction,
   Script,
+  LogicBuilder,
   Collection2,
   CollectionClear,
   CollectionInsert,

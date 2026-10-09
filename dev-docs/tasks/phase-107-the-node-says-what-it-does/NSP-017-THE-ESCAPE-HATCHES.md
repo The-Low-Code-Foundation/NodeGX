@@ -1,7 +1,7 @@
 # NSP-017 — The escape hatches: the Expression grammar, and the Function/Script contracts
 
 **Opened 2026-09-29.** **Depends on NSP-011.**
-**Status: 🟡 s66 (2026-10-09): the Script (`Javascript2`) specced as a CONTRACT — its three ways of writing it, thirteen fixtures, 16 scenarios, 26 rules planted in copies of the node and its parser and each shown red (AC2), the ledger's contract column at 2 (AC3); row C148 — §6.4. Left: Visual Function (`Logic Builder`), AC1's export half. s65 (2026-10-09): the Function specced as a CONTRACT (AC2 planted and shown, AC3 built — the ledger's own column); rows C146, C147 — §6.2. The CSS Definition exempt — Richard ruled "leave it out" (README R17, `exemptions.json`); C145 ruled "block the three names" (P109's). s64: the Expression conforms on the runtime (1 of 5) — 33 scenarios, at 200 on six seeds and at 10,000, every mutant killed; rows C144, C145. §3's premise measured wrong for the Expression (its text is JavaScript, not a grammar of ours) — §6. Left: Script, Visual Function (their contracts), AC1's export half, AC3.**
+**Status: 🟡 s67 (2026-10-09): the Visual Function (`Logic Builder`) specced as a CONTRACT — the blocks give the ports, the code written from them is the behaviour; eleven fixtures, 15 scenarios, two graph claims (t15), 20 rules planted in a copy of the node and each shown red (AC2), the ledger's contract column at 3 (AC3); row C149 — §6.5. Every T6 node is now handled (Expression conforms; Function, Script, Visual Function contracts; CSS Definition exempt). Left: AC1's export half (P18's). s66 (2026-10-09): the Script (`Javascript2`) specced as a CONTRACT — its three ways of writing it, thirteen fixtures, 16 scenarios, 26 rules planted in copies of the node and its parser and each shown red (AC2), the ledger's contract column at 2 (AC3); row C148 — §6.4. Left: Visual Function (`Logic Builder`), AC1's export half. s65 (2026-10-09): the Function specced as a CONTRACT (AC2 planted and shown, AC3 built — the ledger's own column); rows C146, C147 — §6.2. The CSS Definition exempt — Richard ruled "leave it out" (README R17, `exemptions.json`); C145 ruled "block the three names" (P109's). s64: the Expression conforms on the runtime (1 of 5) — 33 scenarios, at 200 on six seeds and at 10,000, every mutant killed; rows C144, C145. §3's premise measured wrong for the Expression (its text is JavaScript, not a grammar of ours) — §6. Left: Script, Visual Function (their contracts), AC1's export half, AC3.**
 
 ## 1. The person sentence
 
@@ -169,7 +169,9 @@ fixture names (`Outputs[key]`), and the editor's warnings (not on the wire). Scr
 
 | **C148** | A Script whose code **throws `null` or `undefined` never runs that code again** — in a run, or in a signal's function: each catch describes the error with `Object.getPrototypeOf(e)`, which throws, so the frame-end callback stops before its flag is cleared and every later request is refused as already scheduled (javascript.ts :499-500 through C147's logger, :526-530, :548-549, :566-567). Fixing C147's logger alone fixes the run only. Measured beside a `throw 'x'` control | medium | [P107-C148](../../bugs/p107-c148-a-script-whose-code-throws-null-or-undefined-never-runs-it-again.md) |
 
-All five are P109's under R16.
+| **C149** | A Visual Function whose blocks **send a signal named like one of its own** (`done`, `failure`…) pulses Failure, then Success and Done, for the same Run — Error set to the reason and emptied in the same instant. The refusal (:566-573) calls `_fail` without the run's token and the run carries on to the success path (:492-502); the reserved VALUE write fails the run instead (:483-490). Measured beside the `ping` control of the same shape. The spec writes the runtime's behaviour (R3 (a)) | low | [P107-C149](../../bugs/p107-c149-a-visual-function-that-sends-a-signal-named-like-its-own-reports-failure-and-success-for-one-run.md) |
+
+All six are P109's under R16.
 
 ### 6.4 s66 (2026-10-09) — the Script, a contract
 
@@ -220,3 +222,58 @@ every mutant killed (32 to 44 — few, because the rules live in the session's h
 `NSP_ONLY=Javascript2`: 16 / 16, 200 / 200, 0 divergences, 32 / 32 mutants, on seeds 20735, 13, 7, 20734; at 10,000 (`npm run
 spec-ledger -- --deep Javascript2`, seed 20735): 0 divergences, 84 s. AC2: 28 / 28. `spec-ledger --check`: holds at 125 / 147 on the
 runtime, **2 as a contract (Script, Function)**, 2 on the export; 18 owed.
+
+### 6.5 s67 (2026-10-09) — the Visual Function, a contract
+
+**The Visual Function (`Logic Builder`) is a CONTRACT (AC3)** — `packages/nodegx-node-spec/src/nodes/logic-builder.ts`, v1, `contract:`
+set. Read from `noodl-runtime/src/nodes/std-library/logic-builder.ts`, the port reader it shares with the editor and the exporter
+(`@nodegx/project-contract/logic-builder-io`), the block probes (`blockrun.ts`) and the editor's generators (`NoodlGenerators.ts`).
+The runtime never reads the blocks for behaviour: the editor writes them out as JavaScript (Generated Code) and that text is what runs.
+So the spec runs the same text the same way — the same eleven parameters in the same order, no receiver — and writes down what is
+around it:
+
+- **ports come from the blocks, never the code** — the reader is carried as a byte-identical copy (`src/nodes/logic-builder-io.ts`,
+  held by `tests/logic-builder-io-parity.test.ts`, as the Function's `function-ports.ts` is); a name the node owns is never a block's
+  port;
+- **a port's kind is decided once**, at its first touch, from the blocks on the node's MODEL (the placing's, in a play) — so a write to
+  Logic Blocks while the app runs moves no port;
+- **when it runs** — on Run and on each signal input the blocks declare, at once, the WHOLE program (the hat emits no code); a value
+  arriving runs nothing; setting the blocks or the code runs nothing;
+- **what the code sees** — `Inputs` the node's own object (what the code writes there, the next run reads — a throw too), `Outputs` a
+  fresh `{}`, `sendSignalOnOutput`, `__triggerSignal__` (`run` or the signal input's name), `__p` hands its value back, `__s` does nothing;
+- **what comes out** — a signal at once; the values AFTER the code returns, each SENT EVERY RUN, the same value too (the Function's
+  opposite); then Error blank, Success, Done;
+- **a throw** — the values written are DROPPED, the signals sent have fired; Error the message or `String(thrown)`; failure;
+  **code that will not compile** — reported at the run, never at the write; **no code** — Unchanged;
+- **a name the node owns** — written: the others land, the run fails, no Success; SENT: Failure at once and the run goes on to Success
+  and Done (row C149).
+
+**THE FIXTURES** (`LOGIC_BUILDER_FIXTURES`): eleven programs, each the BLOCKS and the CODE the editor writes from them, in the
+generators' shapes with the probe calls — `sum`, `trigger`, `signal`, `throws`, `thrown` (`throw Inputs["a"]`: the generator throws
+strings, `null`, `undefined`, objects with and without a message), `tally` (a throw a signal input started; Inputs written first),
+`broken`, `empty`, `kept`, `reserved`, `reservedSignal`. Names keep one kind across all of them. THE PLAY'S PORTS: every fixture's
+OUTPUTS from the placing (`dynamicports`); the INPUTS are the placing's blocks', any other name a value.
+
+**Every write is sent every run — graded through the graph** (`scenarios/graph/t15-a-visual-function-sends-every-run.json`, two
+scenarios, recorded on the runtime): a Visual Function sending the SAME object twice runs the Function it feeds twice (the opposite of
+t14); a run that throws sends nothing it wrote — the Function it feeds does not run, beside the signal that did fire.
+
+**AC2, planted and shown** (`noodl-runtime/test/node-spec/logic-builder-contract.test.ts`): 20 rules, each ONE textual change to an
+in-memory copy of `logic-builder.ts` — 18 red on the scenario that names the rule, 2 on their graph claim (a value sent only when it
+changed; a value landing as it is written). The unchanged copy conforms on all 15 and bears both graph claims out. 22 / 22.
+
+**How it was built.** Spec first, then the scenarios, then both targets: all 13 first scenarios and 200 generated sequences agreed with
+the runtime on the first run — the traces were READ, not just compared (each rule shows on the wire). Mutants at the day's seed and at
+13 left three branch shapes only a signal input reaches (a run that sends a signal, the reserved send, a compile failure); one scenario
+that ends a signal-input run every way, and the `tally` fixture, killed them. Then C149, read off the reserved-signal scenario beside
+its `ping` control.
+
+**Not in v1:** `Noodl`, `Variables`, `Objects`, `Arrays` (the registry seam — the Expression v2 item), `console` (not on the wire;
+FIX-004's sink), the block probes' recorder (`beginBlockRun` — an editor-attached diagnostic), the editor's warnings and their
+withdrawal, Do It (`_probeFragment`), My Blocks call ports (a `detectIO` input the copy covers; no fixture places one).
+
+**Readings (2026-10-09).** Runtime `NSP_ONLY='Logic Builder'`: 15 / 15, 200 / 200, 0 divergences, every mutant killed (135–152) at
+seeds 20735, 13, 7, 20734 and the day's; at 10,000 (`npm run spec-ledger -- --deep 'Logic Builder'`, seed 20735): 0 divergences, 54 s.
+Interpreter (`tests/batch-escape.test.ts` seed 13, and 20735, 7, 20729, 20732): conforms, every mutant killed. Graph: interpreter
+128 / 128, runtime 96 / 96. AC2: 22 / 22. `spec-ledger --check`: holds at 125 / 147 on the runtime, **3 as a contract (Script,
+Function, Visual Function)**, 2 on the export; 17 owed (all NSP-022).

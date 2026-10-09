@@ -1,0 +1,357 @@
+[
+  {
+    "name": "a Visual Function sends what its blocks wrote at every run, the same value too: the Function it feeds runs again",
+    "clauses": [
+      "N"
+    ],
+    "because": "logic-builder.ts :478-480 — every name written is flagged, and node.ts :870-873 `flagOutputDirty` sends whatever the getter reads; the opposite of the Function (t14, simplejavascript.ts :295-305). The object is the SAME one each run, and a ticked Function input counts every object as changed (run-on-value-change.ts), so the second run downstream is the re-send and nothing else",
+    "nodes": {
+      "a": {
+        "type": "Logic Builder",
+        "params": {
+          "workspace": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_define_signal_output\",\"fields\":{\"NAME\":\"ping\"}},{\"type\":\"noodl_send_signal\",\"fields\":{\"NAME\":\"ping\"}},{\"type\":\"noodl_get_input\",\"fields\":{\"NAME\":\"a\"}},{\"type\":\"noodl_set_output\",\"fields\":{\"NAME\":\"sent\"}}]}}",
+          "generatedCode": "__s(\"s1\");\nsendSignalOnOutput(\"ping\");\n__s(\"s2\");\nOutputs[\"sent\"] = __p(\"v1\", Inputs[\"a\"]);\n",
+          "a": {
+            "k": 1
+          }
+        }
+      },
+      "b": {
+        "type": "JavaScriptFunction",
+        "params": {
+          "functionScript": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n;\nconst seen = Inputs.o"
+        }
+      }
+    },
+    "wires": [
+      {
+        "from": "a.sent",
+        "to": "b.in-o"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "node": "a",
+        "signal": "run"
+      },
+      "settle",
+      {
+        "node": "a",
+        "signal": "run"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "b",
+        "port": "out-count",
+        "value": 1
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "signal": "success",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "b",
+        "signal": "success",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "b",
+        "port": "out-count",
+        "value": 2
+      },
+      {
+        "at": 3,
+        "subject": "a",
+        "signal": "success",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "b",
+        "signal": "success",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "b",
+        "port": "out-count",
+        "value": 3
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "workspace",
+        "value": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_define_signal_output\",\"fields\":{\"NAME\":\"ping\"}},{\"type\":\"noodl_send_signal\",\"fields\":{\"NAME\":\"ping\"}},{\"type\":\"noodl_get_input\",\"fields\":{\"NAME\":\"a\"}},{\"type\":\"noodl_set_output\",\"fields\":{\"NAME\":\"sent\"}}]}}",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "generatedCode",
+        "value": "__s(\"s1\");\nsendSignalOnOutput(\"ping\");\n__s(\"s2\");\nOutputs[\"sent\"] = __p(\"v1\", Inputs[\"a\"]);\n",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "a",
+        "value": {
+          "k": 1
+        },
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "functionScript",
+        "value": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n;\nconst seen = Inputs.o",
+        "subject": "b"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "out-count",
+        "value": 1,
+        "subject": "b"
+      },
+      {
+        "t": "signal",
+        "port": "success",
+        "subject": "b"
+      },
+      {
+        "t": "in",
+        "port": "run",
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "sent",
+        "value": {
+          "k": 1
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "ping",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "success",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "run",
+        "value": "done",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "out-count",
+        "value": 2,
+        "subject": "b"
+      },
+      {
+        "t": "signal",
+        "port": "success",
+        "subject": "b"
+      },
+      {
+        "t": "in",
+        "port": "run",
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "signal",
+        "port": "ping",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "success",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "run",
+        "value": "done",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "out-count",
+        "value": 3,
+        "subject": "b"
+      },
+      {
+        "t": "signal",
+        "port": "success",
+        "subject": "b"
+      }
+    ]
+  },
+  {
+    "name": "a Visual Function whose run throws sends nothing it wrote: the Function it feeds does not run",
+    "clauses": [
+      "N"
+    ],
+    "because": "logic-builder.ts :503-511 — the values were only in the run's own Outputs; the signal sent before the throw has fired (known-firing beside the absence)",
+    "nodes": {
+      "a": {
+        "type": "Logic Builder",
+        "params": {
+          "workspace": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_send_signal\",\"fields\":{\"NAME\":\"ping\"}},{\"type\":\"noodl_set_output\",\"fields\":{\"NAME\":\"sum\"}},{\"type\":\"noodl_get_input\",\"fields\":{\"NAME\":\"a\"}}]}}",
+          "generatedCode": "__s(\"s1\");\nsendSignalOnOutput(\"ping\");\n__s(\"s2\");\nOutputs[\"sum\"] = __p(\"v1\", 1);\n__s(\"s3\");\nthrow new Error(\"boom \" + __p(\"v2\", Inputs[\"a\"]));\n",
+          "a": "q"
+        }
+      },
+      "b": {
+        "type": "JavaScriptFunction",
+        "params": {
+          "functionScript": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n;\nconst seen = Inputs.s"
+        }
+      }
+    },
+    "wires": [
+      {
+        "from": "a.sum",
+        "to": "b.in-s"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "node": "a",
+        "signal": "run"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "b",
+        "port": "out-count",
+        "value": 1
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "signal": "ping",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "outcome": "failure",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "b",
+        "signal": "success",
+        "count": 0
+      },
+      {
+        "at": 2,
+        "subject": "b",
+        "port": "out-count",
+        "absent": true
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "workspace",
+        "value": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_send_signal\",\"fields\":{\"NAME\":\"ping\"}},{\"type\":\"noodl_set_output\",\"fields\":{\"NAME\":\"sum\"}},{\"type\":\"noodl_get_input\",\"fields\":{\"NAME\":\"a\"}}]}}",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "generatedCode",
+        "value": "__s(\"s1\");\nsendSignalOnOutput(\"ping\");\n__s(\"s2\");\nOutputs[\"sum\"] = __p(\"v1\", 1);\n__s(\"s3\");\nthrow new Error(\"boom \" + __p(\"v2\", Inputs[\"a\"]));\n",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "a",
+        "value": "q",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "functionScript",
+        "value": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n;\nconst seen = Inputs.s",
+        "subject": "b"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "out-count",
+        "value": 1,
+        "subject": "b"
+      },
+      {
+        "t": "signal",
+        "port": "success",
+        "subject": "b"
+      },
+      {
+        "t": "in",
+        "port": "run",
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "boom q",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "ping",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "run",
+        "value": "failure",
+        "error": "logic-builder/blocks-threw",
+        "subject": "a"
+      }
+    ]
+  }
+]
