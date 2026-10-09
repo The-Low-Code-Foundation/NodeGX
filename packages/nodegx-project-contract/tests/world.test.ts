@@ -246,7 +246,7 @@ describe('the write rule — refuse when the files changed since read', () => {
   const written = (plan: ReturnType<typeof planWorldWrite>): WorldTexts => {
     if (!plan.ok) throw new Error(plan.message);
     const out = { ...NONE };
-    for (const w of plan.writes) out[(Object.keys(WORLD_FILES) as (keyof WorldFiles)[]).find((n) => WORLD_FILES[n] === w.path)!] = w.content;
+    for (const w of plan.writes) out[(Object.keys(WORLD_FILES) as (keyof typeof WORLD_FILES)[]).find((n) => WORLD_FILES[n] === w.path)!] = w.content;
     return out;
   };
 

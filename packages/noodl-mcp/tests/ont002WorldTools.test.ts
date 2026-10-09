@@ -11,11 +11,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { WORLD_FILES } from '@nodegx/project-contract/world';
+import { VERBS_FILE, WORLD_FILES } from '@nodegx/project-contract/world';
 
 import { call, connect, copyFixture, type TestSession } from './helpers';
 
 const WORLD_FIXTURE = path.resolve(__dirname, '../../nodegx-project-contract/tests/fixtures/world-membership-unasked');
+const VERBS_FIXTURE = path.resolve(__dirname, '../../nodegx-project-contract/tests/fixtures/world-verbs');
 
 interface Question {
   about: Record<string, unknown>;
@@ -40,10 +41,17 @@ interface Failure {
   error: { code: string; message: string; details?: Record<string, unknown> };
 }
 
-const readWorld = () => {
-  const read = (f: string) => JSON.parse(fs.readFileSync(path.join(WORLD_FIXTURE, f), 'utf8'));
+const readWorld = (dir = WORLD_FIXTURE) => {
+  const read = (f: string) => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
   return { nouns: read(WORLD_FILES.nouns), relations: read(WORLD_FILES.relations), vocabulary: read(WORLD_FILES.vocabulary) };
 };
+const readVerbs = () => JSON.parse(fs.readFileSync(path.join(VERBS_FIXTURE, VERBS_FILE), 'utf8'));
+
+interface VerbsReport {
+  file: string;
+  outside: { verb: string; step: string; node: string }[];
+  verbs: { id: string; name: string; words: string[]; functions: { ref: string; step: string; node: string; system?: string }[] }[];
+}
 
 describe('ONT-002 — validate_world and write_world', () => {
   let session: TestSession;
@@ -131,6 +139,75 @@ describe('ONT-002 — validate_world and write_world', () => {
     expect(data.world).toBe('partial');
     expect(data.missing).toEqual([WORLD_FILES.vocabulary]);
     expect(data.brief).toBeUndefined();
+  });
+});
+
+describe('ONT-006 — the world tools read the fourth file, verbs.json', () => {
+  let session: TestSession;
+  beforeAll(async () => {
+    session = await connect(copyFixture(), true);
+    await call(session, 'find_tools', { group: 'backend' });
+  });
+  afterAll(async () => {
+    await session.close();
+  });
+
+  it('a world written without verbs has no verbs report', async () => {
+    const { isError, data } = await call<Written & { verbs?: VerbsReport }>(session, 'write_world', readWorld(VERBS_FIXTURE));
+    expect(isError).toBe(false);
+    expect(data.written).toEqual([WORLD_FILES.nouns, WORLD_FILES.relations, WORLD_FILES.vocabulary]);
+    expect(data.verbs).toBeUndefined();
+  });
+
+  it('writes the verbs with the world, and validate_world says what each verb owes', async () => {
+    const read = await call<Report>(session, 'validate_world');
+    const { isError, data } = await call<Written & { verbs?: VerbsReport }>(session, 'write_world', { ...readWorld(VERBS_FIXTURE), verbs: readVerbs(), ifRevision: read.data.revision });
+    expect(isError).toBe(false);
+    expect(data.written).toEqual([VERBS_FILE]);
+    expect(data.revision).not.toBe(read.data.revision);
+    const again = await call<Report & { verbs?: VerbsReport }>(session, 'validate_world');
+    expect(again.data.revision).toBe(data.revision);
+    const verbs = again.data.verbs!;
+    expect(verbs.file).toBe(VERBS_FILE);
+    expect(verbs.outside).toEqual([]);
+    expect(verbs.verbs.map((v) => v.id)).toEqual(readVerbs().verbs.map((v: { id: string }) => v.id));
+    const enrol = verbs.verbs.find((v) => v.id === 'enrol')!;
+    expect(enrol.functions.map((f) => f.ref)).toEqual(['enrol-person-here', 'enrol-mailing', 'enrol-learning-account', 'enrol-enrol']);
+    expect(enrol.functions.find((f) => f.step === 'learning-account')).toMatchObject({ system: 'the learning platform', node: 'net.noodl.HTTP' });
+    expect(enrol.words[0]).toMatch(/^Enrol a member: “When a membership is activated/);
+  });
+
+  it('a step bound to a cloud-only node is counted as outside, never refused', async () => {
+    const read = await call<Report>(session, 'validate_world');
+    const verbs = readVerbs();
+    const enrol = verbs.verbs.find((v: { id: string }) => v.id === 'enrol');
+    const mailing = enrol.steps.find((st: { id: string }) => st.id === 'mailing');
+    mailing.node = 'noodl.cloud.sendemail';
+    const { isError, data } = await call<Written & { verbs?: VerbsReport }>(session, 'write_world', { ...readWorld(VERBS_FIXTURE), verbs, ifRevision: read.data.revision });
+    expect(isError).toBe(false);
+    expect(data.verbs!.outside).toEqual([{ verb: 'enrol', step: 'mailing', node: 'noodl.cloud.sendemail' }]);
+  });
+
+  it('a write that leaves the verbs out keeps them, and is refused when the world it writes breaks them', async () => {
+    const read = await call<Report>(session, 'validate_world');
+    const world = readWorld(VERBS_FIXTURE);
+    world.relations.relations = world.relations.relations.filter((r: { id: string }) => r.id !== 'mailing');
+    const refused = await call<Failure>(session, 'write_world', { ...world, ifRevision: read.data.revision });
+    expect(refused.isError).toBe(true);
+    expect(refused.data.error.code).toBe('invalid-argument');
+    const problems = (refused.data.error.details as { problems: { file: string }[] }).problems;
+    expect(problems.length).toBeGreaterThan(0);
+    expect(problems.every((p) => p.file === VERBS_FILE)).toBe(true);
+    // Nothing moved: the relation is still on disk.
+    expect(fs.readFileSync(path.join(session.projectDir, WORLD_FILES.relations), 'utf8')).toContain('"mailing"');
+  });
+
+  it('an unreadable verbs file makes the world partial, and says which', async () => {
+    fs.writeFileSync(path.join(session.projectDir, VERBS_FILE), '{ not json');
+    const { data } = await call<Report & { unreadable?: string[] }>(session, 'validate_world');
+    expect(data.world).toBe('partial');
+    expect(data.unreadable).toHaveLength(1);
+    expect(data.unreadable![0]).toMatch(new RegExp(`^${VERBS_FILE}: `));
   });
 });
 

@@ -52,7 +52,7 @@ function expectedAt(verbs: unknown, at: string): string[] {
 const withStep = (verb: Verb, i: number, patch: Record<string, unknown>): { verbs: Verb[] } => {
   const v = clone(verb);
   Object.assign(v.steps[i], patch);
-  for (const k of Object.keys(patch)) if (patch[k] === undefined) delete (v.steps[i] as Record<string, unknown>)[k];
+  for (const k of Object.keys(patch)) if (patch[k] === undefined) delete (v.steps[i] as unknown as Record<string, unknown>)[k];
   return { verbs: [v] };
 };
 
@@ -323,5 +323,31 @@ describe('the write rule knows the fourth file', () => {
     const plan = planWorldWrite({ disk: texts(WORLD), candidate: bad, ifRevision: worldRevision(texts(WORLD)) });
     expect(plan.ok).toBe(false);
     expect(!plan.ok && plan.refusal === 'invalid' && plan.message).toMatch(/no spec knows/);
+  });
+
+  it('a write that leaves the verbs out keeps them, and grades them against the world it writes', () => {
+    const { verbs: _v, ...three } = WORLD;
+    void _v;
+    const disk = texts(WORLD);
+    // The control: the same world, the verbs left out — nothing written, the verbs kept in the revision.
+    const same = planWorldWrite({ disk, candidate: three, ifRevision: worldRevision(disk) });
+    expect(same).toMatchObject({ ok: true, writes: [], revision: worldRevision(disk) });
+    // The mailing relation taken out under the enrolment verb that asks it.
+    const gone = clone(three);
+    gone.relations.relations = gone.relations.relations.filter((r) => r.id !== 'mailing');
+    const plan = planWorldWrite({ disk, candidate: gone, ifRevision: worldRevision(disk) });
+    expect(plan.ok).toBe(false);
+    expect(!plan.ok && plan.refusal === 'invalid' && plan.problems.every((p) => p.file === VERBS_FILE)).toBe(true);
+    expect(!plan.ok && plan.message).toMatch(/mailing/);
+  });
+
+  it('a verbs file on disk that is not JSON stops a write that leaves the verbs out', () => {
+    const { verbs: _v, ...three } = WORLD;
+    void _v;
+    const disk = { ...texts(WORLD), verbs: '{ not json' };
+    const plan = planWorldWrite({ disk, candidate: three, ifRevision: worldRevision(disk) });
+    expect(plan).toMatchObject({ ok: false, refusal: 'invalid', problems: [{ file: VERBS_FILE, expected: 'JSON' }] });
+    // Passing the verbs with the write is the way on.
+    expect(planWorldWrite({ disk, candidate: WORLD, ifRevision: worldRevision(disk) }).ok).toBe(true);
   });
 });

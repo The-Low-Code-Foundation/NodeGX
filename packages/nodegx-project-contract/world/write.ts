@@ -77,7 +77,18 @@ export function planWorldWrite(args: {
       actual
     };
   }
-  const verdict = validateWorld(args.candidate, args.vocabulary ?? WORLD_VOCABULARY_REF);
+  // A write that leaves the verbs out keeps the verbs on disk, so they are graded against the world
+  // it writes: a noun renamed or taken out under a verb that names it is refused here, not found later.
+  let kept: unknown;
+  if (args.candidate.verbs === undefined && typeof args.disk.verbs === 'string') {
+    try {
+      kept = JSON.parse(args.disk.verbs);
+    } catch (e) {
+      const message = `${VERBS_FILE} is on disk but is not JSON (${e instanceof Error ? e.message : String(e)}); pass the verbs with the write, so the world and its verbs are graded together.`;
+      return { ok: false, refusal: 'invalid', message, problems: [{ file: VERBS_FILE, at: '', expected: 'JSON', message }] };
+    }
+  }
+  const verdict = validateWorld(kept === undefined ? args.candidate : { ...args.candidate, verbs: kept }, args.vocabulary ?? WORLD_VOCABULARY_REF);
   if (!verdict.ok) {
     return { ok: false, refusal: 'invalid', message: verdict.problems.map((p) => p.message).join('\n'), problems: verdict.problems };
   }

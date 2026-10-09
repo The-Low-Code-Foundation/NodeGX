@@ -5,7 +5,7 @@
  * generated; the rule it states names the tool and the budget by their real values. The
  * engine-name gate in `world.test.ts` walks `world/` and so covers `brief.ts` too.
  */
-import { BRIEF_EXAMPLE, nextQuestions, projectWorld, QUESTION_BUDGET, validateWorld, WORLD_FILES, WORLD_KINDS, worldBrief } from '../world';
+import { BRIEF_EXAMPLE, nextQuestions, projectWorld, QUESTION_BUDGET, validateWorld, VERBS_FILE, WORLD_FILES, WORLD_KINDS, worldBrief } from '../world';
 
 describe('the brief', () => {
   const text = worldBrief();
@@ -25,6 +25,10 @@ describe('the brief', () => {
       expect(text).toContain(k.tile.label);
     }
     for (const f of Object.values(WORLD_FILES)) expect(text).toContain(f);
+    // The fourth file (ONT-006): where verbs go, that it is optional, and that a write without it keeps it.
+    expect(text).toContain(`\`${VERBS_FILE}\``);
+    expect(text).toContain('This fourth file is optional.');
+    expect(text).toContain('Verbs you leave out are kept');
     expect(text).toContain('`validate_world`');
     expect(text).toContain('`write_world`');
     expect(text).toContain(`at most ${QUESTION_BUDGET} at a time`);

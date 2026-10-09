@@ -9,7 +9,7 @@
  * Served by the MCP's `validate_world` (the backend group) and nowhere resident: a project
  * that never asks for a backend never reads it (R5).
  */
-import { WORLD_DIR, WORLD_FILES, type WorldFiles } from './files';
+import { VERBS_FILE, WORLD_DIR, WORLD_FILES, type WorldFiles } from './files';
 import { WORLD_KINDS } from './kinds';
 import { QUESTION_BUDGET } from './runner';
 import { WORLD_VOCABULARY } from './vocabulary';
@@ -100,8 +100,12 @@ A sentence that fits no kind is not a relation yet. Say so and ask what the pers
 
 \`validate_world\` also returns the schema the world projects to. The schema has a collection per noun and a collection per relation that is a record of its own. It lists the links and the rules the database keeps. The rules it does not keep yet are there too, in words. Show the person the collections in their nouns, never in the database's. Nothing in the files names a database. Nothing you write should either.
 
+## What the person does
+
+The person may also say what happens. "When a membership is activated, enrol them on the course" is one such sentence. Write it as a verb in \`${VERBS_FILE}\`. This fourth file is optional. A verb keeps the person's sentence and lists its steps. A step makes, updates, ends, removes or keeps one of this project's records. It can also ask another system. A step has at most one way to fail. That failure either records what happened and goes on, or it stops the verb. The tool grades the verbs with the rest of the world. It also lists the functions each verb calls. You write those functions.
+
 ## Writing the files
 
-With Claude Code, write the three files with your own tools. From this server, call \`write_world\` with the three files and the revision you read. A write over files that changed since you read them is refused. A world the validator refuses is not written. The refusal names each problem and where it is.
+With Claude Code, write the files with your own tools. From this server, call \`write_world\` with the three files, the verbs if there are any, and the revision you read. Verbs you leave out are kept, and checked against the world you write. A write over files that changed since you read them is refused. A world the validator refuses is not written. The refusal names each problem and where it is.
 `;
 }

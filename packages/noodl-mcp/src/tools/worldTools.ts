@@ -15,6 +15,11 @@
  * never read the files cannot know what it replaces. Claude Code writes the files with its own
  * tools; an agent on this server alone writes them here, through `planWorldWrite`, and gets the
  * next questions back with the write.
+ *
+ * The fourth file, `verbs.json` (ONT-006), is optional and read when it is there: graded with the
+ * three, its steps bound to nodes no spec knows counted as `outside`, and the functions each verb
+ * calls listed for the agent to write. A write that leaves it out keeps it, graded against the
+ * world written.
  */
 import * as fs from 'fs';
 import * as path from 'path';
@@ -25,12 +30,19 @@ import { z } from 'zod';
 import {
   nextQuestions,
   planWorldWrite,
+  projectVerb,
   QUESTION_BUDGET,
+  validateVerbs,
+  VERBS_FILE,
+  verbWords,
   WORLD_DIR,
   WORLD_FILES,
   worldBrief,
   worldRevision,
+  type OutsideStep,
   type RunnerReport,
+  type VerbFunction,
+  type VerbsFile,
   type WorldFiles,
   type WorldTexts
 } from '@nodegx/project-contract/world';
@@ -43,30 +55,57 @@ import { guarded, jsonResult } from './util';
 
 const NAMES = ['nouns', 'relations', 'vocabulary'] as const;
 
-/** The three files as text, `null` where one is missing. */
+const readText = (store: ProjectStore, rel: string): string | null => {
+  const abs = path.join(store.projectDir, rel);
+  return fs.existsSync(abs) ? fs.readFileSync(abs, 'utf8') : null;
+};
+
+/** The three files as text, `null` where one is missing; the verbs file too (it joins the revision only when it is there). */
 function readTexts(store: ProjectStore): WorldTexts {
   const out = {} as WorldTexts;
-  for (const n of NAMES) {
-    const abs = path.join(store.projectDir, WORLD_FILES[n]);
-    out[n] = fs.existsSync(abs) ? fs.readFileSync(abs, 'utf8') : null;
-  }
+  for (const n of NAMES) out[n] = readText(store, WORLD_FILES[n]);
+  out.verbs = readText(store, VERBS_FILE);
   return out;
 }
 
 function parse(texts: WorldTexts): { files?: WorldFiles; missing: string[]; unreadable: string[] } {
   const missing = NAMES.filter((n) => texts[n] === null).map((n) => WORLD_FILES[n]);
   const unreadable: string[] = [];
-  const parsed: Partial<Record<(typeof NAMES)[number], unknown>> = {};
-  for (const n of NAMES) {
-    if (texts[n] === null) continue;
+  const parsed: Partial<Record<(typeof NAMES)[number] | 'verbs', unknown>> = {};
+  const read = (n: (typeof NAMES)[number] | 'verbs', file: string) => {
+    const text = texts[n];
+    if (typeof text !== 'string') return;
     try {
-      parsed[n] = JSON.parse(texts[n] as string);
+      parsed[n] = JSON.parse(text);
     } catch (e) {
-      unreadable.push(`${WORLD_FILES[n]}: ${e instanceof Error ? e.message : String(e)}`);
+      unreadable.push(`${file}: ${e instanceof Error ? e.message : String(e)}`);
     }
-  }
+  };
+  for (const n of NAMES) read(n, WORLD_FILES[n]);
+  read('verbs', VERBS_FILE);
   if (missing.length || unreadable.length) return { missing, unreadable };
   return { files: parsed as unknown as WorldFiles, missing, unreadable };
+}
+
+export interface VerbsReport {
+  file: typeof VERBS_FILE;
+  /** Steps bound to a node no spec knows (a cloud-only node): counted, never refused. */
+  outside: OutsideStep[];
+  /** Each verb in the person's words, and the functions it calls — the ones the agent writes. */
+  verbs: { id: string; name: string; words: string[]; functions: VerbFunction[] }[];
+}
+
+/** The verbs over a world that validated: what is outside, and what each verb owes. */
+function verbsReport(files: WorldFiles & { verbs: VerbsFile }): VerbsReport {
+  const verdict = validateVerbs(files.verbs, files);
+  return {
+    file: VERBS_FILE,
+    outside: verdict.outside,
+    verbs: files.verbs.verbs.map((v) => {
+      const projected = projectVerb(v, files);
+      return { id: v.id, name: v.name, words: verbWords(v, files), functions: projected.ok ? projected.functions : [] };
+    })
+  };
 }
 
 export interface WorldReport {
@@ -80,8 +119,10 @@ export interface WorldReport {
   unreadable?: string[];
   /** The brief, when there is no world yet or it was asked for. */
   brief?: string;
-  /** The grade: the next questions, the record, the schema — or the validator's problems. */
+  /** The grade: the next questions, the record, the schema — or the validator's problems (the verbs' among them). */
   report?: RunnerReport;
+  /** When `docs/world/verbs.json` is there and the world validates. */
+  verbs?: VerbsReport;
   note?: string;
 }
 
@@ -106,7 +147,7 @@ function grade(store: ProjectStore, options: { brief?: boolean; limit?: number }
       ...(missing.length ? { missing } : {}),
       ...(unreadable.length ? { unreadable } : {}),
       ...(options.brief ? { brief: worldBrief() } : {}),
-      note: 'A world is three files; write the missing or unreadable ones and call validate_world again.'
+      note: 'A world is three files, and a fourth for its verbs; write the missing or unreadable ones and call validate_world again.'
     };
   }
   const report = nextQuestions(files, options.limit === undefined ? {} : { limit: options.limit });
@@ -116,6 +157,7 @@ function grade(store: ProjectStore, options: { brief?: boolean; limit?: number }
     revision,
     ...(options.brief ? { brief: worldBrief() } : {}),
     report,
+    ...(report.ok && files.verbs ? { verbs: verbsReport(files as WorldFiles & { verbs: VerbsFile }) } : {}),
     note: !report.ok
       ? 'The world does not validate; each problem says what was expected and where. Fix the files and call validate_world again.'
       : report.enough
@@ -130,11 +172,11 @@ export function registerWorldReadTools(server: McpServer, binding: ProjectBindin
     {
       title: 'Validate the world',
       description:
-        `Grade what the person has said about their world (${WORLD_DIR}/: nouns, relations, answers) and return the next ` +
+        `Grade what the person has said about their world (${WORLD_DIR}/: nouns, relations, answers, and verbs when there are any) and return the next ` +
         `questions to ask — only the ones that kill a classic mistake the answers so far do not rule out, in the person's ` +
         `nouns, at most ${QUESTION_BUDGET} at a time, each with the mistake it stands for and the incident behind it. ` +
         'With no world yet, returns the brief: read it before the first sentence. Also returns the schema the world ' +
-        'projects to, the record of what was asked and answered, and the revision for write_world.',
+        'projects to, the record of what was asked and answered, the functions each verb calls, and the revision for write_world.',
       inputSchema: {
         brief: z.boolean().optional().describe('Return the brief as well, even when a world exists.'),
         limit: z.number().int().min(1).max(50).optional().describe(`How many questions at once (default ${QUESTION_BUDGET}).`)
@@ -150,22 +192,24 @@ export function registerWorldWriteTools(server: McpServer, binding: ProjectBindi
     {
       title: 'Write the world',
       description:
-        `Write the three ${WORLD_DIR}/ files — WHOLE FILES, validated first — and return the next questions. Pass the ` +
+        `Write the three ${WORLD_DIR}/ files, and the verbs when given — WHOLE FILES, validated first — and return the next questions. ` +
+        'Verbs left out are kept, and graded against the world written. Pass the ' +
         'revision validate_world gave you; a write over files that changed since is refused with the current revision. ' +
         'A world the validator refuses is not written; each problem names what was expected and where.',
       inputSchema: {
         nouns: z.record(z.unknown()).describe('The nouns file, as an object.'),
         relations: z.record(z.unknown()).describe('The relations file, as an object.'),
         vocabulary: z.record(z.unknown()).describe('The vocabulary file, as an object.'),
+        verbs: z.record(z.unknown()).optional().describe('The verbs file, as an object: what the person does over the world.'),
         ifRevision: z.string().optional().describe('The revision read from validate_world. Required once any of the files exists.')
       }
     },
-    guarded((args: { nouns: unknown; relations: unknown; vocabulary: unknown; ifRevision?: string }) => {
+    guarded((args: { nouns: unknown; relations: unknown; vocabulary: unknown; verbs?: unknown; ifRevision?: string }) => {
       const store = binding.require();
       const disk = readTexts(store);
       const plan = planWorldWrite({
         disk,
-        candidate: { nouns: args.nouns, relations: args.relations, vocabulary: args.vocabulary } as WorldFiles,
+        candidate: { nouns: args.nouns, relations: args.relations, vocabulary: args.vocabulary, ...(args.verbs === undefined ? {} : { verbs: args.verbs }) } as WorldFiles,
         ifRevision: args.ifRevision
       });
       if (!plan.ok) {
