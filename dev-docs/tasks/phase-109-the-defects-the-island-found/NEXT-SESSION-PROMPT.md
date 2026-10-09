@@ -17,6 +17,12 @@ Board: **28 of 51 closed**.
 
 ## Do, in this order
 
+0. **New from P107 s68 (R16), both with a proposed fix — take them into ISL-051 (the Expression family):**
+   [P107-C150](../../bugs/p107-c150-an-expression-reading-an-array-never-re-runs-when-the-array-changes.md) (medium: an Expression
+   reading `Arrays.x` never re-runs when the array changes — `expression-evaluator.ts` `subscribeToChanges` listens to a Model of
+   that name) and [P107-C151](../../bugs/p107-c151-an-expression-hands-the-noodl-api-to-the-wrong-parameter.md) (low: a stray input
+   hands the Noodl API to the wrong parameter, so Variables reads nothing). Expression spec **v4** pins today's behaviour
+   (`f4a244785`); the fix moves it to **v5** with the named scenario. ISL-051 reopens to 6 of 8 when taken in.
 1. C120, C126 (ISL-048's last two) still wait on P107's world (history back, an entry replaced) — ask P107 if it has moved.
 2. ISL-018 AC5 (an agent round, then the editor's clean-up log), ISL-012 AC3 (a full server render with hydration).
 3. **Track G** waits on Richard's order.
