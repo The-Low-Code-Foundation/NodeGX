@@ -2126,3 +2126,75 @@ viewer stamps no node id on its elements. A node's element is reachable through 
 
 **Not in AC4:** what a stylesheet changes (R17); look (colours, fonts, shadows — they are classed, not laid out); hover / press / focus
 styles (RESEARCH §7: not in `inputs`); animation.
+
+### 8.1 s69, 2026-10-09 — steps 1 and 2: the model and the mapping
+
+**Step 1, the model** (`packages/nodegx-node-spec/src/layout.ts`, exported from the browser entry). The vocabulary is
+§8's list as types: an axis (`column`, `row`, `overlay`); main alignment (start, center, end, space-between, -around,
+-evenly); cross alignment (start, center, end, stretch); a gap; padding and border; a size per axis (`hug`, a `length` of px
+plus a percent of the parent, or `fill` with a weight and a basis); min and max; margins; spacers; an overlay placement;
+z; clip; scroll; a transform (translate, rotate, scale, origin). `layoutChildren(parent, children)` gives each child's
+layout box, what is drawn after its transform, what a clipping parent lets through, the paint order and the extent.
+`hugSize` gives a parent the size of its children. No CSS in it: no property names, no strings, px and percent only.
+
+- **The main axis is flexbox's §9.7 on one line** (Yoga is flexbox): bases; the free space grows the `fill` children by
+  weight, or shrinks them in proportion to weight × basis; a min or max freezes a child and the rest is shared again;
+  weights summing under 1 take that share. Only a `fill` grows or shrinks, the runtime's rule too (`flexShrink: 0` on
+  every node, 1 on a percent it turned into a grow).
+- **The runtime's percent is a `fill` with that percent as both basis and weight** on the parent's stacking axis
+  (`Layout.size` :84-108), so 30% + 30% in a 400 px row are 200 each, and 100% beside a 100 px sibling shrinks to 300.
+  Across the axis it is `calc(p% − margins)`: a `length` of `{ percent: p, px: −m }` — and that is not p% of what the
+  margins leave (a table row says so).
+- **Alignment fallbacks** follow Flexbox §8.2: space-between with one child or no room is start; space-around / -evenly
+  are center. A spacer takes the free space first, and while there is any the parent's alignment does nothing — the
+  runtime's Align X / Y on the stacking axis is an automatic margin, which behaves exactly so.
+- **An overlay is placed in the parent's PADDING box** (an absolute child's containing block): padding does not inset it.
+- **A scrolling parent is unbounded on its axis:** nothing grows, a percent there is the content, the children start at
+  the start. That is the neutral reading (a ScrollView in all four toolkits) and the runtime's iScroll wrapper (a hugging
+  inner box); the native-scroll path (`overflow: auto` on the Group itself) may differ — step 5 will say.
+- **Named limits** (each reported by step 5, not guessed): wrapping; text whose height depends on its width (a hug
+  child's content size is one pair); flexbox's automatic minimum (min-content — here a shrinking `fill` stops at its
+  `floor`, 0 unless given); `fixed` / `sticky`; baseline alignment; a stylesheet (R17).
+
+`tests/layout.test.ts`: 69 rows worked by hand from the rules. One row I worked wrong first (three spacers share 80 px,
+not two); the model was right.
+
+**Step 2, the mapping** (`src/layout-map.ts`). `PortMeta.layout` (spec.ts) is a role naming the model field a setting
+feeds; `LAYOUT_ROLES` is the table by port name the specs were stamped from (the runtime's shared port definitions name a
+setting the same on every visual node), and `gen-ports.js` now emits it. **392 ports carry a role** across the 17 visual
+spec files, every changed line differing from HEAD only by the role. The look ports for the border carry roles too (a
+side's width counts only while its style is not None: the model's border inset). Two roles say a setting moves no box of
+its own: `content` (a label's spacing, an icon's side, text alignment, how a picture fits — shapes the content size the
+model takes as given) and `drawn-only` (Show Scrollbar).
+
+`layoutOf(spec, params, { parentAxis, viewport, token })` reads a placed node through its spec's roles as
+`Layout.size` / `align` and the Group read it: Size Mode decides which of Width / Height is assigned; a percent along the
+stacking axis is a `fill` unless marked fixed (`isFixed`), across it less the margins, with no parent layout a plain
+percent; Align X / Y on the stacking axis is a spacer on the side whose margin is not set (0 counts as not set: the
+runtime's `style.marginRight ? … : 'auto'`), across it the node's own alignment; Position Absolute and Layout None are an
+overlay, top-left by default; the gap is Row Gap in a column and Column Gap in a row; padding, gaps and borders read
+design tokens through `token`. **Its `outside` list** names what it cannot model on that node: a `layout-not-shared` or
+`web-only` input that is set (a wrapping row, a `cssClassName`, `content-box`), a unit it does not have (`em`, `vh`
+without a viewport, a percent margin), a token with no value, `fixed` / `sticky`. Step 5 reports such a node instead of
+grading it — §8 step 4's "a node a stylesheet class reaches is reported as such and skipped" is this list.
+
+**The check is a test, not a `--check` script** (`tests/layout-map.test.ts`, run by `test:packages` in CI): every
+`layout-shared` port has a role (216 rows), no `layout-not-shared` or `web-only` port has one (75), every role is the
+table's, and each of the 55 layout inputs the census classed is mapped or left out by name — the six expressible ones
+left out are Scroll Snap's two (where a scroll comes to rest) and the Columns' four breakpoints (the Columns lays out by
+its own `layoutString`, not shared). A script outside CI goes unrun: this session found the package's size check over
+its budget that way (P107-SIZE, below). **Planted:** a role dropped from the Group's Pad Left and one given to its
+Multi Line Wrap — 7 reds, then restored.
+
+**Mounted:** the research classes it `layout-shared`; the specs carry it as `logic` (it is behaviour, graded). It has the
+role `present`; the check is satisfied either way.
+
+**Found on the way — P107-SIZE** (low, P112's to decide): the browser entry is 268.7 KB gzipped against OWN-002's 240 KB
+budget. `layout.ts` is 2.8 KB of it; the entry was about 266 KB before. `npm run size:node-spec` is in no CI workflow.
+
+**Gates (2026-10-09):** layout 69 / 69, layout-map 739 / 739 (the plants above red first), stranger (hashes rewritten
+for `src/spec.ts` and `src/nodes/dropdown.ts`) + catalog-parity + page-model + types + schema + spec-ledger 443 passed,
+18 skipped (the stranger's seed-0 rows, by design), batch-visual 19 / 19, `tsc --noEmit` clean, `browser-check` PASS.
+
+**Step 3 next** (heavy: a real browser, one run at a time, when the box is quiet).
+

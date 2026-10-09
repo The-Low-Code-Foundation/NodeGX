@@ -276,13 +276,13 @@ export const ComponentStack = defineNode({
     // :315-326
     reset: { type: 'signal', outcome: true, displayName: 'Reset', group: 'Actions', description: 'Empties the stack and rebuilds the start component', portability: 'logic' },
     // react-component-node.ts :2302-2321
-    mounted: { type: 'boolean', default: true, coerce: 'none', displayName: 'Mounted', group: 'General', description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind', portability: 'logic' },
+    mounted: { type: 'boolean', default: true, coerce: 'none', displayName: 'Mounted', group: 'General', description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind', portability: 'logic', layout: 'present' },
     // react-component-node.ts :1380-1395
     scrollIntoView: { type: 'signal', displayName: 'Scroll Into View', group: 'Scroll Into View', description: 'Scrolls the page, or the scrolling Group holding this element, until the element can be seen', portability: 'logic' },
     scrollIntoViewAlign: { type: 'enum', enums: ['nearest', 'start', 'center', 'end'], default: 'nearest', coerce: 'none', displayName: 'Scroll Align', group: 'Scroll Into View', description: 'Where Scroll Into View leaves the element: Nearest edge moves only as far as needed', portability: 'logic' },
 
     // ---- look (R10): reach the element only ----
-    clip: { type: 'boolean', default: true, ...LOOK('Clip Content', 'Layout', 'Clips a pushed component that is bigger than the stack'), portability: 'layout-shared' },
+    clip: { type: 'boolean', default: true, ...LOOK('Clip Content', 'Layout', 'Clips a pushed component that is bigger than the stack'), portability: 'layout-shared', layout: 'clip' },
     backgroundColor: { type: 'color', default: 'transparent', ...LOOK('Background Color', 'Style', 'Fill colour behind whichever component is showing'), portability: 'look-shared' },
     cssClassName: { type: 'string', default: '', ...LOOK('CSS Class', 'Advanced HTML', 'Extra CSS class names to put on this element, for styling from a stylesheet you supply'), portability: 'web-only' },
     styleCss: { type: 'string', default: '/* background-color: red; */', editOnly: true, ...LOOK('CSS Style', 'Advanced HTML', 'Raw CSS declarations applied to this element, overriding the styling ports above'), portability: 'web-only' },

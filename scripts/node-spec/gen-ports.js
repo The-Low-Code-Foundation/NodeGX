@@ -38,6 +38,12 @@ if (!node) {
 const EDIT_ONLY = new Set(['dataAttributes', 'sizeMode', 'styleCss']);
 const OUTCOME_PORTS = new Set(['done', 'unchanged', 'failure', 'completed']);
 
+/** NSP-016 AC4 step 2 — the layout model's role per port name (the table in layout-map.ts; tests/layout-map.test.ts holds the specs to it). */
+const layoutMapSource = fs.readFileSync(path.join(root, 'packages/nodegx-node-spec/src/layout-map.ts'), 'utf8');
+const LAYOUT_ROLES = Object.fromEntries(
+  [...layoutMapSource.split('export const LAYOUT_ROLES')[1].split('};')[0].matchAll(/^  (\w+): '([a-z-]+)',?$/gm)].map((m) => [m[1], m[2]])
+);
+
 const q = (s) => JSON.stringify(s);
 const classOf = (p) => classes.params[p.name] ?? classes.groups[p.group] ?? 'logic';
 const typeOf = (p) => (typeof p.type === 'string' ? p.type : p.type.name);
@@ -50,6 +56,7 @@ function inputLine(p, portability) {
   if (t !== 'signal') parts.push(`coerce: 'none'`);
   if (EDIT_ONLY.has(p.name)) parts.push('editOnly: true');
   parts.push(`displayName: ${q(p.displayName)}`, `group: ${q(p.group)}`, `description: ${q(p.description)}`, `portability: ${q(portability)}`);
+  if (LAYOUT_ROLES[p.name] && portability !== 'layout-not-shared' && portability !== 'web-only') parts.push(`layout: '${LAYOUT_ROLES[p.name]}'`);
   return `  ${/^[A-Za-z_$][\w$]*$/.test(p.name) ? p.name : q(p.name)}: { ${parts.join(', ')} },`;
 }
 

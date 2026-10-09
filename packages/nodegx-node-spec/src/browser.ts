@@ -21,4 +21,6 @@ export * from './graph';
 export * from './interpreter';
 export * from './nodes';
 export * from './runner';
+export * from './layout';
+export * from './layout-map';
 export { sha256, sha384, sha512 } from './sha2';

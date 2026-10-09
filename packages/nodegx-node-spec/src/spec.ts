@@ -30,6 +30,7 @@
  */
 
 import type { Coercion } from './coerce';
+import type { LayoutRole } from './layout-map';
 import type { RecordChange, RegistryScript, RegistryView } from './registry';
 
 // ------------------------------------------------------------------------------------------------
@@ -327,6 +328,12 @@ export interface PortMeta {
    * counterpart. Absent on a non-visual node's port. The editor may show it; no target grades it.
    */
   portability?: Portability;
+  /**
+   * NSP-016 AC4 (R18) — for a layout setting, the field of the layout model it feeds (layout-map.ts `LayoutRole`); read
+   * by `layoutOf`. Every `layout-shared` port of a visual spec has one; a `layout-not-shared` or `web-only` port never
+   * does (tests/layout-map.test.ts).
+   */
+  layout?: LayoutRole;
 }
 
 /** NSP-016 — the portability classes of RESEARCH-LAYOUT-SEMANTICS.md §2, as `visual-params.json` spells them. */
