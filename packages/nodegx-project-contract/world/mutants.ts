@@ -95,11 +95,27 @@ const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v));
 const one = (to: string | string[] | undefined): string => (Array.isArray(to) ? to[0] : to) || '';
 const collectionsText = (s: WorldSchema): string => JSON.stringify(s.collections);
 
-/** The question in the person's nouns. */
+/** "company" → "companies", "slot" → "slots", "person" → "people": the person reads these. */
+export function plural(word: string): string {
+  if (word === 'person') return 'people';
+  if (/[^aeiou]y$/.test(word)) return `${word.slice(0, -1)}ies`;
+  if (/(s|x|z|ch|sh)$/.test(word)) return `${word}es`;
+  return `${word}s`;
+}
+const article = (word: string): string => (/^[aeiou]/i.test(word) ? 'an ' : 'a ') + word;
+
+/** The question in the person's nouns, with the article and the plural their nouns take. */
 export function askWords(q: Question, r: Relation): string {
+  const to = one(r.to);
   return q.ask
+    .replace(/\ba \{from\}s\b/g, plural(r.from))
+    .replace(/\ba \{to\}s\b/g, plural(to))
+    .replace(/\{from\}s\b/g, plural(r.from))
+    .replace(/\{to\}s\b/g, plural(to))
+    .replace(/\ba \{from\}/g, article(r.from))
+    .replace(/\ba \{to\}/g, article(to))
     .replace(/\{from\}/g, r.from)
-    .replace(/\{to\}/g, one(r.to))
+    .replace(/\{to\}/g, to)
     .replace(/\{field\}/g, r.property || '');
 }
 
@@ -235,6 +251,24 @@ function retype(
     return { schema: s, unchanged: 'shape' in rule.holds ? 'unclaimed' : 'unkept' };
   }
   return { cannot: 'not a schema-level shape' };
+}
+
+/**
+ * Whether any answer to `q`, on `relation` with the question unanswered, changes the kind or the
+ * schema: what makes an unanswered question a mutant. The runner (ONT-002) asks it of an
+ * answered question too, to tell an answer it would have asked for from one volunteered.
+ */
+export function answerMatters(files: WorldFiles, relation: string, q: Question): 'the kind' | 'the schema' | false {
+  const bare = withAnswers(files, relation, (a) => delete a[q.id]);
+  const base = project(bare);
+  if (!base.schema) return false;
+  const rightText = collectionsText(base.schema);
+  for (const v of alternatives(q)) {
+    const out = project(withAnswers(bare, relation, (a) => (a[q.id] = v)));
+    if (!out.schema) return 'the kind';
+    if (collectionsText(out.schema) !== rightText) return 'the schema';
+  }
+  return false;
 }
 
 /**

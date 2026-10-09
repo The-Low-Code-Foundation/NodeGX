@@ -85,6 +85,7 @@ export function validateWorld(
 
   // ── nouns.json ─────────────────────────────────────────────────────────────
   const nounIds = new Map<string, Record<string, unknown>>();
+  let signsIn: string | undefined;
   const checkProperties = (name: WorldFileName, at: string, props: unknown) => {
     if (props === undefined) return;
     if (!Array.isArray(props)) return say(name, at, 'a list of properties', props, `${at} must be a list.`);
@@ -92,7 +93,7 @@ export function validateWorld(
     props.forEach((p, i) => {
       const pat = `${at}[${i}]`;
       if (!isObj(p)) return say(name, pat, 'a property: a name and a kind', p, `${pat} is not a property.`);
-      strayKeys(name, pat, p, ['name', 'kind', 'sentence', 'values']);
+      strayKeys(name, pat, p, ['name', 'kind', 'sentence', 'values', 'freeWords']);
       if (!nonEmpty(p.name)) say(name, `${pat}.name`, 'a name', p.name, `${pat} has no name.`);
       else if (seen.has(p.name)) say(name, `${pat}.name`, 'a name used once', p.name, `${pat}: "${p.name}" is named twice.`);
       else seen.add(p.name);
@@ -108,6 +109,11 @@ export function validateWorld(
         say(name, `${pat}.values`, 'no values: only a choice has a list', p.values, `${pat} ("${String(p.name)}") is not a choice but has values.`);
       }
       if (p.sentence !== undefined && !nonEmpty(p.sentence)) say(name, `${pat}.sentence`, 'words, or no sentence at all', p.sentence, `${pat} has an empty sentence.`);
+      if (p.freeWords !== undefined && p.freeWords !== true) {
+        say(name, `${pat}.freeWords`, 'true, or nothing', p.freeWords, `${pat} ("${String(p.name)}"): freeWords is the answer "free words" to whether it is one of a fixed list; it is true or absent.`);
+      } else if (p.freeWords === true && p.kind !== 'text') {
+        say(name, `${pat}.freeWords`, 'nothing: only a text can be free words', p.kind, `${pat} ("${String(p.name)}") is a ${String(p.kind)}, and only a text is asked whether it is free words or one of a fixed list.`);
+      }
     });
   };
 
@@ -119,7 +125,7 @@ export function validateWorld(
     nf.nouns.forEach((n: unknown, i: number) => {
       const at = `nouns[${i}]`;
       if (!isObj(n)) return say('nouns', at, 'a noun', n, `${at} is not a noun.`);
-      strayKeys('nouns', at, n, ['id', 'name', 'sentence', 'properties']);
+      strayKeys('nouns', at, n, ['id', 'name', 'sentence', 'properties', 'signsIn']);
       if (typeof n.id !== 'string' || !ID.test(n.id)) say('nouns', `${at}.id`, 'an id: a letter, then letters, digits, - or _', n.id, `${at} has no usable id.`);
       else if (nounIds.has(n.id)) say('nouns', `${at}.id`, 'an id used once', n.id, `${at}: the id "${n.id}" is used twice.`);
       else nounIds.set(n.id, n);
@@ -128,6 +134,12 @@ export function validateWorld(
         say('nouns', `${at}.sentence`, 'the sentence the person said about it', n.sentence, `${at} ("${String(n.name ?? n.id)}") has no sentence: a noun is saved with what the person said it is.`);
       }
       checkProperties('nouns', `${at}.properties`, n.properties);
+      if (n.signsIn !== undefined && n.signsIn !== true) {
+        say('nouns', `${at}.signsIn`, 'true, or nothing', n.signsIn, `${at} ("${String(n.name ?? n.id)}"): signsIn says this noun is who signs in; it is true or absent.`);
+      } else if (n.signsIn === true) {
+        if (signsIn) say('nouns', `${at}.signsIn`, `nothing: "${signsIn}" already signs in`, n.id, `${at} ("${String(n.name ?? n.id)}") signs in, and so does "${signsIn}": one noun is who signs in. If both can, they are one noun, or one extends the other.`);
+        else signsIn = String(n.id);
+      }
     });
   }
 

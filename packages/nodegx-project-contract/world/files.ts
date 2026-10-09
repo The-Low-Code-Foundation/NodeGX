@@ -35,6 +35,11 @@ export interface WorldProperty {
   sentence?: string;
   /** For a `choice`: the list. */
   values?: string[];
+  /**
+   * For a `text` only: the person was asked whether it is one of a fixed list, and said it is
+   * free words (ONT-002's kind-picker question; the answer's home, so it is asked once).
+   */
+  freeWords?: true;
 }
 
 export interface Noun {
@@ -45,6 +50,12 @@ export interface Noun {
   /** What the person said it is. */
   sentence: string;
   properties?: WorldProperty[];
+  /**
+   * This noun is who signs in: a person with a login. At most one noun says so. It projects to a
+   * link to the app's users on the noun's collection, which a permission rule starts from
+   * (ONT-004 `worldRule`); the runner asks which noun it is when a rule needs it (ONT-002).
+   */
+  signsIn?: true;
 }
 
 export interface Relation {

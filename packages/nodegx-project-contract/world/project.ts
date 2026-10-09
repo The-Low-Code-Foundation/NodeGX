@@ -42,6 +42,20 @@ export const STORAGE_TYPE: Readonly<Record<FieldKind, string>> = Object.freeze({
 
 /** The collection a `link` with no `points` names: whoever was signed in. */
 export const USERS_COLLECTION = '_User';
+/** The link to the users collection on the noun that `signsIn` (ONT-002): where a permission rule starts. */
+export const LOGIN_FIELD = 'login';
+
+/**
+ * The hop a permission rule starts from, read off the schema: the collection of the noun that
+ * signs in and its `login` link. Undefined when no noun signs in — the runner's question.
+ */
+export function loginHop(schema: WorldSchema): { collection: string; by: string } | undefined {
+  for (const c of schema.collections) {
+    const col = c.columns.find((x) => x.name === LOGIN_FIELD && x.kind === 'link' && x.targetClass === USERS_COLLECTION && !x.relation);
+    if (col) return { collection: c.name, by: col.name };
+  }
+  return undefined;
+}
 
 /** The backend manager's name rule (`format.ts` `NAME_RULE`): a letter, then letters, digits or `_`. */
 const STORAGE_NAME = /^[a-zA-Z][a-zA-Z0-9_]*$/;
@@ -263,10 +277,13 @@ export function projectWorld(files: WorldFiles): WorldProjection {
     addColumn(d, by, col, p.kind === 'choice' ? p.values || [] : undefined);
   };
 
-  // 1. A collection per noun, its properties as fields, in file order.
+  // 1. A collection per noun, its properties as fields, in file order. The noun that signs in
+  //    gets a link to the app's users (`login`): the hop a permission rule starts from.
   for (const n of nouns) {
     const d = open(n.id, collectionName(n.id), { noun: n.id }, n.sentence);
-    if (d) for (const p of n.properties || []) propertyColumn(d, `the noun "${n.id}"`, p);
+    if (!d) continue;
+    for (const p of n.properties || []) propertyColumn(d, `the noun "${n.id}"`, p);
+    if (n.signsIn) addColumn(d, `the noun "${n.id}"`, { name: LOGIN_FIELD, kind: 'link', type: STORAGE_TYPE.link, targetClass: USERS_COLLECTION, description: `${a(n.id)} is who signs in` });
   }
 
   // 2. A collection per relation that is a record of its own, with the details on the link.

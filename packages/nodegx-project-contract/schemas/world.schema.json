@@ -28,11 +28,16 @@
           "enum": ["text", "number", "yesno", "date", "choice", "file", "location", "list", "anything"]
         },
         "sentence": { "$ref": "#/definitions/words" },
-        "values": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/words" } }
+        "values": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/words" } },
+        "freeWords": {
+          "description": "A text the person was asked about and said is free words, not one of a fixed list (ONT-002's kind-picker question, answered).",
+          "const": true
+        }
       },
       "if": { "properties": { "kind": { "const": "choice" } } },
       "then": { "required": ["values"] },
-      "else": { "not": { "required": ["values"] } }
+      "else": { "not": { "required": ["values"] } },
+      "allOf": [{ "if": { "required": ["freeWords"] }, "then": { "properties": { "kind": { "const": "text" } } } }]
     },
     "noun": {
       "type": "object",
@@ -42,7 +47,11 @@
         "id": { "$ref": "#/definitions/id" },
         "name": { "$ref": "#/definitions/words" },
         "sentence": { "description": "What the person said it is.", "$ref": "#/definitions/words" },
-        "properties": { "type": "array", "items": { "$ref": "#/definitions/property" } }
+        "properties": { "type": "array", "items": { "$ref": "#/definitions/property" } },
+        "signsIn": {
+          "description": "This noun is who signs in; at most one noun says so. Projects to a link to the app's users on its collection.",
+          "const": true
+        }
       }
     },
     "relation": {

@@ -269,7 +269,8 @@ export function registerDocsWriteTools(server: McpServer, binding: ProjectBindin
 }
 
 /** Temp file + rename, the same discipline as ProjectStore's JSON writes. */
-function writeTextAtomic(file: string, content: string): void {
+/** One write path for a text file: temp beside it, then rename. `worldTools.ts` writes `docs/world/` through it too. */
+export function writeTextAtomic(file: string, content: string): void {
   const tmp = `${file}.tmp-${process.pid}-${Math.random().toString(36).slice(2, 8)}`;
   fs.writeFileSync(tmp, content, 'utf8');
   fs.renameSync(tmp, file);

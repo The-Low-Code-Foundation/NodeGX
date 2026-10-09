@@ -24,6 +24,7 @@ import { RenderLedger } from './renderVerdict';
 import { registerAuthorTools } from './tools/author';
 import { createPlanRegistry, registerPlanTools } from './tools/planTools';
 import { registerBackendReadTools, registerBackendWriteTools } from './tools/backendTools';
+import { registerWorldReadTools, registerWorldWriteTools } from './tools/worldTools';
 import { registerCatalogTools } from './tools/catalogTools';
 import { registerDocsReadTools, registerDocsWriteTools } from './tools/docsTools';
 import { registerScriptReadTools, registerScriptWriteTools } from './tools/scriptTools';
@@ -186,6 +187,7 @@ export function createServer(options: ServerOptions): CreatedServer {
   // P109 ISL-005 — the project's script files. Deferred (the `project` group): 0 resident tokens.
   registerScriptReadTools(rec, binding);
   registerBackendReadTools(rec);
+  registerWorldReadTools(rec, binding);
   // AIX-010 — read-only: assembles the docs-retrofit context. The caller drafts
   // and writes back through write_project_doc.
   registerReviewTools(rec, binding);
@@ -246,6 +248,7 @@ export function createServer(options: ServerOptions): CreatedServer {
     registerDocsWriteTools(rec, binding);
     registerScriptWriteTools(rec, binding);
     registerBackendWriteTools(rec);
+    registerWorldWriteTools(rec, binding);
     // AAQ-011/F13. Write-gated, and it is the strongest write in the server: it
     // starts a process and creates a database. Read-only callers get the
     // diagnosis (checkBackendRequirements says a graph needs a backend) without

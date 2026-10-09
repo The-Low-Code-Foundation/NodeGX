@@ -180,6 +180,11 @@ const CORE_WRITE_TOOLS = [
 ] as const;
 
 const BACKEND_TOOLS = [
+  // worldTools.ts — P116 ONT-002. Before any collection exists: the brief, the questions, the
+  // write. In this group because a project that never asks for a backend must never read the
+  // brief (R5), and here it costs the resident surface nothing (measured on both arms).
+  'validate_world',
+  'write_world',
   // provisionTools.ts — the entry point and its lifecycle pair. Grouped with the
   // admin set deliberately: an agent that needs one needs the others in the same
   // breath, and splitting them would cost a second discovery round trip at the
@@ -594,6 +599,7 @@ export const WRITE_ONLY_TOOLS: ReadonlySet<string> = new Set<string>([
   'remove_backend_auth_provider',
   'configure_backend_auth_policy',
   'write_project_doc',
+  'write_world',
   'seed_project_docs',
   'create_project',
   // FIX-008 D. Binding is not a write, and this is still honest rather than
