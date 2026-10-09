@@ -141,7 +141,7 @@ engines, every mutant**:
 | `account-company/required-unanswered` | — | `account/company-is-required`, at the rule's step |
 | `attended/outlives-unanswered` | — | `attended/at-is-required`, at a **row-making** step: the mutant demands a person the right schema said an attendance can outlive — the only kill of the forty not at a rule's step, and the control row is the rule |
 | `person-profile/piled-in` | piled-in | no home: *"a profile cannot exist without its person"* |
-| `on-the-course-platform/id-nowhere` | id-nowhere | no home: `idElsewhere` is unique, and gone |
+| `on-the-course-platform/id-nowhere` | id-nowhere | no home: `onTheCoursePlatformId` (`idElsewhere` until s13) is unique, and gone |
 | `note-about/id-without-kind` | id-without-kind | no home: `pointsAtKind` is required, and gone (attributed to this relation's claim, not the owner's) |
 | `account-company/one-that-was-several`, `plan-size/category-as-text`, `plan-size/open-list-as-choice`, `session-speakers/dozens-on-the-parent` | the four `changesKind` seeds | the question: *"then it is a is-on, not a belongs-to"* — the validator's sentence |
 

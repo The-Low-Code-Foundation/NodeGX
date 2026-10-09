@@ -258,6 +258,19 @@ rename's new id forgotten; a step on nothing after reported as still bound. Back
 **Not claimed:** the `end` arm of `fields` has no spec — neither fixture world has a dated end the plan reaches.
 `rebindVerbs()` (re-saying the ids for the person) is not built; the rows say what to re-say.
 
+**s13 (2026-10-09, Opus 5.5): the `end` arm is claimed.** `migrate.test.ts` 50 → **52 / 52**, two cases on
+`world-verbs` (a world with dated ends, so no fixture file was added):
+
+- the membership said again as not starting and ending (`startsEnds: false`): the plan drops `since` and `until`;
+  "their memberships end" is reached by **`until` alone**. The row has no `rebind` (it is still on a membership),
+  yet the verbs are refused against the world after, at `verbs[1].steps[1].by` — an end needs a date to mark. So a
+  row without `rebind` does not mean the step still binds: `validateWorld` with the verbs is what says that;
+- an end said `by` a date the person named ("closed on") is reached by `closedOn`, not by `openedOn`, which changes
+  beside it.
+
+Three mutants, each red on its own case only: the end writes nothing (both); the end field read off the world after
+(the first; after it, the membership has none); `by` ignored (the second).
+
 ### 6.11 s11, 2026-10-09 — the route, and the words said again (Opus 5.5)
 
 Richard ruled the three owed questions in plain words, each the recommendation (README §9 R8–R10): keep a person's word

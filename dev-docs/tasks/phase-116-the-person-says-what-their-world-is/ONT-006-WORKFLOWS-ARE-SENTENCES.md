@@ -96,7 +96,7 @@ Readings 2026-10-09 ~18:25 CEST on the working tree over HEAD `6b4e37b13`, in ba
 
 ### 6.6 Found
 
-- **Bug `P116-ONT-003-two-systems`** (medium): two `exists-elsewhere` relations from one noun both make `idElsewhere`, and the projection refuses the world — a person in two other systems, the corpus's common case, cannot be said.
+- **Bug `P116-ONT-003-two-systems`** (medium): two `exists-elsewhere` relations from one noun both make `idElsewhere`, and the projection refuses the world — a person in two other systems, the corpus's common case, cannot be said. **Fixed s13** (ONT-003 §6.8): the field is named after the relation (`mailingId`). The `world-verbs` fixture still has the mailing relation on the account; it was not moved back.
 - **The engine records steps in its own order**: a skipped arm can be recorded before the steps that ran (topological, not the verb's). A view that lists a run's steps in the verb's order sorts by the verb (ONT-008).
 
 ### 6.7 s10, 2026-10-09 — the fourth file on the MCP, the write rule, the runner (Opus 5.5)

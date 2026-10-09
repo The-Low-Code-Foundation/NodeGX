@@ -212,5 +212,60 @@ Ruled R10 (README §9): not a foreign key; the backend keeps it inside the delet
   recorded there (left in the `admin` budget). Re-run: the six gate and conformance specs **60 / 60**.
 
 **Found.** A Links field's pairs stay after either end is deleted, both engines — bug
-[`P116-ONT-003-pairs`](../../bugs/p116-ont-003-pairs-a-deleted-records-links-pairs-stay-behind.md) (open, small; no
-ruling needed: a pair with a gone end means nothing).
+[`P116-ONT-003-pairs`](../../bugs/p116-ont-003-pairs-a-deleted-records-links-pairs-stay-behind.md) (fixed s13, §6.7).
+
+### 6.7 A Links field's pairs go with either end (s13, 2026-10-09, Opus 5.5)
+
+Bug [`P116-ONT-003-pairs`](../../bugs/p116-ont-003-pairs-a-deleted-records-links-pairs-stay-behind.md) → `fixed`. No
+ruling: a pair means nothing once either end is gone, so nothing in the schema says it and the person is never asked.
+
+- **Where.** In the plan `deleteKeepingLinks` already reads (`targetGoes.ts`), not beside it. `DeletePlan.unpaired`:
+  every pair with a record that goes, at either end, for the caller's record **and every record that goes with it**
+  (`goes-too`). The record's own pairs come from every Relation its collection declares (`getRelatedIds`). The pairs
+  naming it come from every Relation whose `targetClass` is its collection (`getRelationOwners`). A pair found from
+  both ends is taken out once. They go **last**, after every delete, as the master key (the same reason as §6.6 #1),
+  through the data plane's `removeRelation`, which on PostgreSQL waits for the schema manager's write queue.
+- **No new schema member.** `DeleteContext.schema` now picks `getRelatedIds` and `getRelationOwners` too, both already
+  on `IStorageSchema` and graded by BRG-003. The context gains `unpair`. So the BRG-003 ratchet and the route tally
+  do not move.
+- **What it still does not do.** A delete of a record that is not there takes no pairs that name its id: the plan's
+  existence check, as for links. Both engines' master-key delete succeeds on a missing record, so "the delete went
+  through" proves nothing. A Relation that does not say which collection it points at cannot be found from the far
+  end, so only its owner's own pairs go. It is not one transaction (§6.6).
+- **Graded.** `nodegx-backend-contract` `targetGoes.test.ts` 5 → 9 (a tag goes; a post goes, a self-Relation found
+  from both ends taken out once; a post going with its account; a record that is not there). `nodegx-backend`
+  `ont-003-target-goes` 20 → **22 / 22** on SQLite and PostgreSQL, through the real `AdapterFacade`: a tag goes, a
+  post goes, a post goes with its account, the pairs read before as the control, and the far end stays. Control: with
+  the unpair loop emptied, the engine case is red on both engines, and 3 of the 4 unit cases are red. The fourth
+  checks an absence; the first case is its known-firing partner.
+- **The viewer builds it.** `@noodl/backend-contract` is compiled by the viewer's ES5 build, where spreading a Map's
+  iterator is TS2802 and a webpack with errors writes no bundle. s12's `[...counts.values()]` had made
+  `ci:build:viewer` red; P109 found it (as it found the same in `migration.ts`, `06ec2d4e7`, bug
+  `P116-ONT-007-viewerbuild`). Both spreads are now `Array.from`. Measured with `tsc --target ES5` on the file: clean,
+  and HEAD's copy red at `:226` as the control.
+- **Whole backend suite** (2026-10-09 22:42–23:12 CEST, `-w 2`, 30 min): 227 files, 2,777 tests, **2,730 passed,
+  29 failed, 18 pending**. The 29 are two files, neither P116's: `rel002b-fail-closed` (1, filed as
+  `P116-S13-REL002B`: the spec never deletes and its failing visit has no backend) and `ac2-page-editor-drag-drive`
+  (28, one `beforeAll` timeout, filed as `P116-S13-AC2STALL`: it stalls alone too, in its own write-storm mutant arm, and a tracer on `deleteKeepingLinks` logged 0 calls in the stalled run). Then on the final tree (HEAD `1b5774b23`),
+  in band: every `ont-00*` spec, the four `brg-003-*` and `ops-rate-limit`, **208 / 208**.
+
+### 6.8 A noun known in two other systems (s13, 2026-10-09, Opus 5.5)
+
+Bug [`P116-ONT-003-two-systems`](../../bugs/p116-ont-003-two-systems-a-noun-that-exists-in-two-other-systems-cannot-be-projected.md)
+→ `fixed`. `exists-elsewhere`'s field was always `idElsewhere`, so a second system from the same noun was refused.
+The kind's own `projectsTo` already said "a Text field per system". It is now named after the **relation's id**
+(`on-the-course-platform` → `onTheCoursePlatformId`, `mailing` → `mailingId`), not after the system's words.
+
+- **Why the id, not the words (my decision).** A reworded system ("the course platform" → "the learning platform")
+  changes no id, so it renames nothing that is stored. Named after the words, the same reword would rename the field
+  with **no change in the world's diff**: `diffWorld` compares worlds, not projections, so the migration would never
+  see it. The cost is a longer name when the person's id is long.
+- **Why now.** Measured before the change: nothing outside the package's own fixtures names `idElsewhere` (the
+  repo, the test projects folder and `~/Documents` hold no `docs/world/`). So no backend holds the old name. After
+  ONT-008 makes worlds common, the same rename would owe a migration. The vocabulary's version stays 1: bumping it
+  would refuse every world already written, for a name no world holds.
+- **Graded.** `project.test.ts` +2: one person in two systems projects two unique fields, each with its claim; the
+  same system said in other words keeps its field name. Controls: the fixed name back → both red, with the bug's own
+  refusal ("the relation "mailing" makes a field called "idElsewhere" on Person, which already has one"); named after
+  the words → both red. The two goldens were rewritten with `ONT003_WRITE_GOLDEN=1`, and the field name is the only
+  change (16 lines each way). `mutants.test.ts`'s `id-nowhere` words updated. `nodegx-project-contract` **202 / 202**.
