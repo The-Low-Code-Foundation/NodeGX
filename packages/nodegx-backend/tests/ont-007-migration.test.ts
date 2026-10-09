@@ -494,6 +494,44 @@ for (const engine of [sqlite(), postgres()]) {
         expect(again.schema.getTableSchema('Room')!.columns!.find((c) => c.name === 'shelf')).toMatchObject({ targetClass: 'Bookcase' });
       });
 
+      it('the adapter follows a renamed link at once — the collection and the field — after a read before the rename', async () => {
+        // s11, found by the route's spec: the adapter's declared types are memoised against the schema object, and
+        // PostgreSQL renamed the column (and retargeted the links) IN that object — a `$path` through the renamed
+        // link was refused as "not a declared link (it is String)" until a restart. `getTableSchema` read fine.
+        const h = await engine.make();
+        const ctx = onTheRealTables(h.adapter);
+        ctx.schema.createTable({ name: 'Account', columns: [{ name: 'name', type: 'String' }] });
+        ctx.schema.createTable({ name: 'Person', columns: [{ name: 'name', type: 'String' }, { name: 'account', type: 'Pointer', targetClass: 'Account' }] });
+        const north = String((await ctx.create('Account', { name: 'Northwind' })).objectId);
+        const ada = String((await ctx.create('Person', { name: 'Ada', account: pointer('Account', north) })).objectId);
+        const accountOf = (collection: string, field: string) =>
+          ctx.query(collection, { where: { $path: { from: { collection: 'Person', where: { objectId: ada } }, hops: [{ follow: field }], maxDepth: 1 } } });
+        expect((await accountOf('Account', 'account')).results.map((r) => r.name)).toEqual(['Northwind']);
+        ctx.schema.renameTable!('Account', 'Subscription');
+        await (ctx.schema as { barrier?: () => Promise<void> }).barrier?.call(ctx.schema);
+        // A read between the two renames: the field rename must not leave the memo of THIS read answering.
+        expect((await accountOf('Subscription', 'account')).results.map((r) => r.name)).toEqual(['Northwind']);
+        ctx.schema.renameColumn('Person', 'account', 'subscription');
+        await (ctx.schema as { barrier?: () => Promise<void> }).barrier?.call(ctx.schema);
+        expect((await accountOf('Subscription', 'subscription')).results.map((r) => r.name)).toEqual(['Northwind']);
+      });
+
+      it('a collection that links to itself is renamed with its link: a topic’s parent is a subject’s parent', async () => {
+        const h = await engine.make();
+        const ctx = onTheRealTables(h.adapter);
+        ctx.schema.createTable({ name: 'Topic', columns: [{ name: 'title', type: 'String' }, { name: 'parent', type: 'Pointer', targetClass: 'Topic' }] });
+        const root = String((await ctx.create('Topic', { title: 'root' })).objectId);
+        await ctx.create('Topic', { title: 'leaf', parent: pointer('Topic', root) });
+        await rows(ctx, 'Topic');
+        ctx.schema.renameTable!('Topic', 'Subject');
+        await (ctx.schema as { barrier?: () => Promise<void> }).barrier?.call(ctx.schema);
+        expect(ctx.schema.getTableSchema('Subject')!.columns!.find((c) => c.name === 'parent')).toMatchObject({ targetClass: 'Subject' });
+        expect(ctx.schema.getTableSchema('Topic')).toBeFalsy();
+        const again = onTheRealTables((await engine.reopen(h)).adapter);
+        expect(again.schema.getTableSchema('Subject')!.columns!.find((c) => c.name === 'parent')).toMatchObject({ targetClass: 'Subject' });
+        expect(again.schema.getTableSchema('Topic')).toBeFalsy();
+      });
+
       it('refuses a name taken, a name unknown, and the backend’s own collections — in words', async () => {
         const h = await engine.make();
         const ctx = onTheRealTables(h.adapter);

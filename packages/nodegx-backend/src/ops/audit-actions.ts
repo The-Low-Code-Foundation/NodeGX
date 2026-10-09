@@ -62,6 +62,8 @@ const ACTIONS: Record<string, string> = {
   'POST admin/schema': 'schema.mutate',
   'POST admin/schema/apply': 'schema.apply',
   'POST admin/schema/diff': 'schema.diff',
+  // P116 ONT-007: a world migration — schema and records in one run, after a backup.
+  'POST admin/world/migrate': 'world.migrate',
 
   // Backups / export / import (BAK-007) — restore is the single most
   // consequential thing this service can be told to do.

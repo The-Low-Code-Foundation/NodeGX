@@ -440,6 +440,10 @@ class SchemaManager {
 
     const schema = this.getTableSchema(oldName);
     const relations = (schema?.columns || []).filter((c) => c.type === 'Relation' && c.targetClass);
+    // P116 ONT-007 s11: a link the collection has to ITSELF (a topic's parent) is renamed with it.
+    // `{ ...schema, name }` kept `targetClass: oldName` on it — a link to a collection that no longer exists.
+    const renamed = schema ? freshSchema({ ...schema, name: newName }) : null;
+    for (const c of renamed?.columns || []) if (c.targetClass === oldName) c.targetClass = newName;
     this.ensureSchemaTable();
     const others = (this.db.prepare('SELECT "name", "schema" FROM "_Schema"').all() as Array<{ name: string; schema: string }>)
       .filter((r) => r.name !== oldName)
@@ -467,7 +471,7 @@ class SchemaManager {
         this.db.prepare('DELETE FROM "_Schema" WHERE "name" = ?').run(oldName);
         this.db
           .prepare('INSERT OR REPLACE INTO "_Schema" ("name", "schema", "updatedAt") VALUES (?, ?, CURRENT_TIMESTAMP)')
-          .run(newName, JSON.stringify({ ...schema, name: newName }));
+          .run(newName, JSON.stringify(renamed));
       }
       for (const o of others) {
         for (const c of o.schema.columns || []) if (c.targetClass === oldName) c.targetClass = newName;
@@ -482,7 +486,7 @@ class SchemaManager {
     }
 
     this._schemaCache.delete(oldName);
-    if (schema) this._schemaCache.set(newName, freshSchema({ ...schema, name: newName }));
+    if (renamed) this._schemaCache.set(newName, renamed);
     for (const o of others) this._schemaCache.set(o.name, freshSchema(o.schema));
     return true;
   }

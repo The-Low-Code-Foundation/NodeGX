@@ -652,7 +652,10 @@ export class PgSchemaManager {
     });
 
     const schema = st.schemas.get(oldName);
-    const renamed = schema ? { ...schema, name: newName } : undefined;
+    // s11: a fresh copy, with a link the collection has to ITSELF (a topic's parent) renamed with it —
+    // `{ ...schema, name }` kept `targetClass: oldName` on it, a link to a collection that no longer exists.
+    const renamed = schema ? freshSchema({ ...schema, name: newName }) : undefined;
+    for (const c of renamed?.columns || []) if (c.targetClass === oldName) c.targetClass = newName;
     const junctions = (schema?.columns || [])
       .filter((c) => c.type === 'Relation' && c.targetClass)
       .map((c) => ({ from: junctionTableName(oldName, c.name), to: junctionTableName(newName, c.name) }))
@@ -660,7 +663,13 @@ export class PgSchemaManager {
     const others = [...st.schemas.values()].filter(
       (o) => o.name !== oldName && (o.columns || []).some((c) => c.targetClass === oldName)
     );
-    const retargeted = others.flatMap((o) => (o.columns || []).filter((c) => c.targetClass === oldName));
+    // s11: each retargeted schema is a fresh copy, never edited in place — `declaredProperties`
+    // memoises against the object, and an in-place `targetClass` kept answering with the old name.
+    const retargeted = others.map((o) => {
+      const fresh = freshSchema(o);
+      for (const c of fresh.columns || []) if (c.targetClass === oldName) c.targetClass = newName;
+      return { was: o, now: fresh };
+    });
 
     const move = <T>(m: Map<string, T>, from: string, to: string): void => {
       if (!m.has(from)) return;
@@ -684,8 +693,8 @@ export class PgSchemaManager {
     apply(oldName, newName, junctions);
     st.schemas.delete(oldName);
     if (renamed) st.schemas.set(newName, renamed);
-    for (const c of retargeted) c.targetClass = newName;
-    const snapshots = others.map((o) => [o.name, JSON.stringify(o)] as const);
+    for (const r of retargeted) st.schemas.set(r.now.name, r.now);
+    const snapshots = retargeted.map((r) => [r.now.name, JSON.stringify(r.now)] as const);
     const [oldCreated, oldUpdated] = builtInIndexNames(oldName);
     const [newCreated, newUpdated] = builtInIndexNames(newName);
 
@@ -714,7 +723,7 @@ export class PgSchemaManager {
         );
         st.schemas.delete(newName);
         if (schema) st.schemas.set(oldName, schema);
-        for (const c of retargeted) c.targetClass = oldName;
+        for (const r of retargeted) st.schemas.set(r.was.name, r.was);
       }
     );
     return true;
@@ -734,10 +743,17 @@ export class PgSchemaManager {
 
     cols.delete(oldName);
     cols.add(newName);
+    // P116 ONT-007 s11: a FRESH object, as `addColumn` (BMG-003). `declaredProperties` memoises against
+    // the schema object, and renaming the column in place left it answering with the old name: a path
+    // rule following the renamed link was refused as "not a declared link (it is String)" on the next
+    // request, on PostgreSQL only (SQLite's manager already caches a fresh copy).
     const schema = st.schemas.get(tableName);
-    const col = schema && schema.columns ? schema.columns.find((c) => c.name === oldName) : undefined;
-    if (col) col.name = newName;
-    const snapshot = schema && col ? JSON.stringify(schema) : null;
+    const renamed = schema && schema.columns && schema.columns.some((c) => c.name === oldName) ? freshSchema(schema) : undefined;
+    if (renamed) {
+      renamed.columns!.find((c) => c.name === oldName)!.name = newName;
+      st.schemas.set(tableName, renamed);
+    }
+    const snapshot = renamed ? JSON.stringify(renamed) : null;
 
     this.enqueue(
       `renameColumn("${tableName}", "${oldName}" → "${newName}")`,
@@ -752,7 +768,7 @@ export class PgSchemaManager {
       () => {
         cols.delete(newName);
         cols.add(oldName);
-        if (col) col.name = oldName;
+        if (renamed && schema) st.schemas.set(tableName, schema);
       }
     );
     return true;

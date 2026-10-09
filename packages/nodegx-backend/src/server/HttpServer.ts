@@ -73,6 +73,7 @@ import { AdminWorkflowRoutes } from './admin-workflows';
 import { AdminEmailRoutes } from './admin-email';
 import { AdminBackupRoutes } from './admin-backups';
 import type { PersistenceControl } from './admin-backups';
+import { AdminWorldRoutes } from './admin-world';
 import { AdminFileRoutes } from './admin-files';
 import { AdminSearchRoutes } from './admin-search';
 import { ByobAdminRoutes } from './byob-admin';
@@ -425,6 +426,8 @@ export class HttpServer {
   private readonly adminTriggers: AdminTriggerRoutes;
   private readonly adminWorkflows: AdminWorkflowRoutes;
   private readonly adminBackups: AdminBackupRoutes;
+  /** P116 ONT-007 — `POST /admin/world/migrate`. */
+  private readonly adminWorld: AdminWorldRoutes;
   private readonly adminSearch: AdminSearchRoutes;
   private readonly adminFiles: AdminFileRoutes;
   private readonly email: EmailRoutes;
@@ -545,6 +548,7 @@ export class HttpServer {
       dataDir: deps.options.dataDir,
       persistence: deps.persistenceControl
     });
+    this.adminWorld = new AdminWorldRoutes({ facade: deps.facade, security: deps.security, backups: deps.backups });
     this.adminEmail = new AdminEmailRoutes(deps.emailConfig, deps.mailer, () => ({ magicLinkTtlMinutes: deps.auth ? deps.auth.config.magicLink.ttlMinutes : undefined }));
     this.adminSearch = new AdminSearchRoutes(deps.search, deps.facade);
     this.dashboard = deps.options.adminDashboard
@@ -636,6 +640,7 @@ export class HttpServer {
     const adminTriggers = this.adminTriggers;
     const adminWorkflows = this.adminWorkflows;
     const adminBackups = this.adminBackups;
+    const adminWorld = this.adminWorld;
     const adminFiles = this.adminFiles;
     const email = this.email;
     const adminEmail = this.adminEmail;
@@ -1294,6 +1299,13 @@ export class HttpServer {
         pattern: 'admin/schema/apply',
         access: { kind: 'admin' },
         handler: (ctx) => adminBackups.schemaApply(ctx)
+      },
+      // P116 ONT-007: a changed world run on the records — dry run, backup, steps, rules moved.
+      {
+        method: 'POST',
+        pattern: 'admin/world/migrate',
+        access: { kind: 'admin' },
+        handler: (ctx) => adminWorld.migrate(ctx)
       },
 
       // ---- Admin: file storage config (BAK-006) ----------------------------

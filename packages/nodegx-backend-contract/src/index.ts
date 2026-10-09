@@ -6,6 +6,10 @@
  * Adapters arrive in BCN-002 onwards; this package is what they register
  * against, and what the editor gates ports on.
  *
+ * One executor, by ruling (P116 README §9 R9): `migration.ts` runs a world
+ * migration plan for the backend's `POST /admin/world/migrate`. It does no I/O
+ * of its own — every read and write goes through the context it is handed.
+ *
  * @module backend-contract
  */
 
@@ -23,3 +27,4 @@ export * from './nodeCapabilities';
 export * from './probes';
 export * from './storage';
 export * from './operational';
+export * from './migration';

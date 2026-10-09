@@ -394,8 +394,8 @@ export interface IStorageSchema {
   /**
    * P116 ONT-007: rename a collection, keeping its records — a noun the person calls something
    * else now. Carries what is keyed by the name and nothing more: the `_Schema` declaration,
-   * the two built-in indexes, the junction tables the collection owns, and every other
-   * collection's link (`targetClass`) that points at it. Throws `code: 'TABLE_IN_USE'` while a
+   * the two built-in indexes, the junction tables the collection owns, and every link
+   * (`targetClass`) that points at it — another collection's, and its own to itself (s11). Throws `code: 'TABLE_IN_USE'` while a
    * declared index, a check or a search index is built under the old name — those are taken
    * off first and put back after, on purpose, the way `dropColumn` refuses (`COLUMN_IN_USE`).
    * Throws when the new name is taken, the old one is unknown, or either is the backend's own
