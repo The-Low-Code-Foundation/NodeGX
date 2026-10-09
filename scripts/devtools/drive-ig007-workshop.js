@@ -416,7 +416,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     await wait(500);
     const back3d = await stored();
     const line3d = await evaluate(`(() => { const e = document.querySelector('.bg-renderer-line'); return e ? e.innerText : null; })()`);
-    check('AC4: the switch writes { 3d, grown-up } and the line says 3D', back3d && back3d.mode === '3d' && back3d.why === 'grown-up' && line3d === w('guRend3dLine'), { back3d, line3d });
+    check('AC4: the switch writes { 3d, grown-up } and the line says it stays 3D', back3d && back3d.mode === '3d' && back3d.why === 'grown-up' && line3d === w('guRend3dKept'), { back3d, line3d });
     await tab(0);
     await until('location.pathname', (p) => p === '/island');
     await wait(600);
