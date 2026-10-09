@@ -41,8 +41,9 @@
  * whatever it is handed. Column Sizing, Medium Layout and Small Layout are plain props: the value, or nothing for `undefined`.
  * Horizontal Gap, Medium Below and Small Below are SIZE ports (:698-745): a number (or a string `isNaN` reads as one, and `null`) is
  * first merged into the `{ value, unit }` the port holds, if it holds one (node.ts :430-437) — Horizontal Gap holds `16px` from its
- * default; Medium Below and Small Below hold nothing until a size is set (`initializeDefaultValues` skips a port with no default, row
- * C132). Then a `var(…)` string is kept as it is; a `{ value, unit }` whose value is a finite number (or a numeric string, or has no
+ * default; Medium Below and Small Below hold nothing until a size is set (`initializeDefaultValues` skips a port with no default).
+ * On a port that holds no size — nothing yet, a `var(…)`, a value it refused — a finite number, or text that reads as one, is read
+ * in pixels, the ports' default unit (v3, row C132: v1 and v2 kept it bare, and the setter refused it). Then a `var(…)` string is kept as it is; a `{ value, unit }` whose value is a finite number (or a numeric string, or has no
  * unit) becomes `value + unit`; `undefined`, `null`, `NaN` and an empty size clear the prop; anything else is refused (reported as a
  * runtime error, off the wire) and the prop is kept. The port remembers what it was handed either way, which is what the next number
  * merges into.
@@ -103,7 +104,8 @@ const NOTHING: Send = { send: [] };
 export const Columns = defineNode({
   type: 'net.noodl.visual.columns',
   // v2 (P109 ISL-050, s32): a Medium or Small Layout that is no layout leaves its band to the base layout (row C133)
-  version: 2,
+  // v3 (P109 ISL-050, s33): a number on a size port that holds no size is read in pixels (row C132)
+  version: 3,
   source: 'packages/noodl-viewer-react/src/nodes/visual/columns.ts',
   needs: ['person'],
 
@@ -265,11 +267,12 @@ function published(b: Band): Act {
 
 /**
  * A size port (WHAT REACHES THE PROPS): node.ts :430-437 merges a number into the size the port holds, then react-component-node.ts
- * :698-745 decides the prop. `isNaN` as the runtime reads it — `null`, `true`, `''` and a numeric string are numbers to it.
+ * :698-745 decides the prop. `isNaN` as the runtime reads it — `null`, `true`, `''` and a numeric string are numbers to it. On a port
+ * that holds no size, node.ts `isBareMagnitude` is narrower: a finite number, or text that is not blank and reads as one (row C132).
  */
 function sized(held: unknown, prop: unknown, value: unknown): { held: unknown; prop: unknown } {
   const unit = held !== null && typeof held === 'object' ? (held as { unit?: unknown }).unit : undefined;
-  const v = isNaN(value as number) === false && unit ? { ...(held as object), value } : value;
+  const v = isNaN(value as number) === false && unit ? { ...(held as object), value } : bare(value) ? { value, unit: 'px' } : value;
   if (typeof v === 'string' && v.startsWith('var(')) return { held: v, prop: v };
   const magnitude = v !== null && typeof v === 'object' ? (v as { value?: unknown }).value : undefined;
   if (v && magnitude !== undefined && usable(v as { value?: unknown; unit?: unknown })) {
@@ -277,6 +280,12 @@ function sized(held: unknown, prop: unknown, value: unknown): { held: unknown; p
   }
   if (v === undefined || v === null || empty(v)) return { held: v, prop: undefined };
   return { held: v, prop };
+}
+
+/** node.ts `isBareMagnitude` (P107-C132) */
+function bare(value: unknown): boolean {
+  if (typeof value === 'number') return Number.isFinite(value);
+  return typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value));
 }
 
 /** react-component-node.ts `dimensionIsUsable` :637-643 */

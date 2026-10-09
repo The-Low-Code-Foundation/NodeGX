@@ -413,6 +413,22 @@ function portHasUnits(input: { type?: unknown; hasUnits?: boolean } | undefined)
   return !!type && typeof type === 'object' && Array.isArray((type as { units?: unknown }).units);
 }
 
+/**
+ * The unit a size port reads a bare number in when it holds no size (P107-C132): the mark `nodedefinition.ts` sets on a library
+ * port, else the type's own (`registerInput` above reads it the same way).
+ */
+function defaultUnitOf(input: { type?: unknown; defaultUnit?: string }): string | undefined {
+  if (input.defaultUnit) return input.defaultUnit;
+  const type = input.type as { units?: string[]; defaultUnit?: string } | undefined;
+  return type && typeof type === 'object' && Array.isArray(type.units) ? type.defaultUnit || type.units[0] : undefined;
+}
+
+/** A number, or text that reads as one — what a Number node, an Expression or a Text Input hands a size port. */
+function isBareMagnitude(value: unknown): boolean {
+  if (typeof value === 'number') return Number.isFinite(value);
+  return typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value));
+}
+
 Node.prototype.setInputValue = function (name, value) {
   const input = this.getInput(name);
   if (!input) {
@@ -434,6 +450,12 @@ Node.prototype.setInputValue = function (name, value) {
     const newValue = Object.assign({}, currentInputValue); //copy it, so we don't modify the original object (e.g. it might come from a variant)
     (newValue as { value?: unknown }).value = value;
     value = newValue;
+  } else if (portHasUnits(input) && isBareMagnitude(value) && defaultUnitOf(input)) {
+    // P109 ISL-050 / P107-C132 (ruled "Read the number as pixels"): a size port that holds no size — one with no default that
+    // nothing has set yet, or one that last held a var(--token) or a value it refused — reads a bare number in its default unit.
+    // It used to be stored bare and refused by the size setter, so a Number wired into a Columns' Medium Below did nothing
+    // until a size had been typed there first.
+    value = { value, unit: defaultUnitOf(input) };
   }
 
   //Save the current input value. Save it before resolving color styles so delta updates on color styles work correctly

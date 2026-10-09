@@ -457,8 +457,8 @@
   ]
  },
  {
-  "name": "a bare number on Medium Below that has never held a size is refused: no Medium (row C132)",
-  "because": "P107-C132 — react-component-node.ts :698-745; node.ts :430-437: nothing to merge into, and a bare number is not a size",
+  "name": "a bare number on Medium Below that has never held a size is read in pixels: Medium applies (v3, row C132)",
+  "because": "P107-C132 (ruled \"Read the number as pixels\") — node.ts `isBareMagnitude`: a size port with nothing to merge into reads a number in its default unit, px; v2 kept it bare and the setter refused it",
   "steps": [
    "settle",
    {
@@ -478,8 +478,8 @@
   ]
  },
  {
-  "name": "a numeric string on Small Below that has never held a size is refused too (row C132)",
-  "because": "P107-C132 — react-component-node.ts :698-745; node.ts :430-437",
+  "name": "a numeric string on Small Below that has never held a size is read in pixels too (v3, row C132)",
+  "because": "P107-C132 — node.ts `isBareMagnitude`: text that is not blank and reads as a number",
   "steps": [
    "settle",
    {
@@ -489,6 +489,36 @@
    {
     "set": "smallLayout",
     "value": "1"
+   },
+   "settle"
+  ]
+ },
+ {
+  "name": "a size port that refused a value reads the next number in pixels; text that is not a number is still refused (v3, row C132)",
+  "because": "P107-C132 — a refused value is no size to merge into; node.ts `isBareMagnitude` leaves blank and non-numeric text to the setter, which refuses it and keeps the prop",
+  "params": {
+   "mediumLayout": "1"
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "mediumBreakpoint",
+    "value": "wide"
+   },
+   "settle",
+   {
+    "set": "mediumBreakpoint",
+    "value": 2000
+   },
+   "settle",
+   {
+    "set": "mediumBreakpoint",
+    "value": " "
+   },
+   "settle",
+   {
+    "set": "mediumBreakpoint",
+    "value": "500"
    },
    "settle"
   ]
@@ -528,7 +558,7 @@
   ]
  },
  {
-  "name": "null on a size port that holds one clears it: Medium Below off, and the next number is refused (row C132)",
+  "name": "null on a size port that holds one clears it: Medium Below off, and the next number merges into its unit and applies",
   "because": "null merges as `{ value: null }` — an empty size, the prop cleared; the port then holds that object, whose unit the next number merges into",
   "params": {
    "mediumBreakpoint": {
@@ -552,8 +582,8 @@
   ]
  },
  {
-  "name": "a var(--token) Medium Below is kept as written and reads as 0: inert; a number after it is refused",
-  "because": "isTokenReference :614-616; `toPixels` — parseFloat of `var(` is NaN, so 0",
+  "name": "a var(--token) Medium Below is kept as written and reads as 0: inert; a number after it is read in pixels (v3, row C132)",
+  "because": "isTokenReference :614-616; `toPixels` — parseFloat of `var(` is NaN, so 0; a token is no size, so the number is read in px (P107-C132)",
   "params": {
    "mediumBreakpoint": {
     "value": 2000,
@@ -901,7 +931,7 @@
   ]
  },
  {
-  "name": "a var(--gap) Horizontal Gap reads as 0, and a number after it is refused",
+  "name": "a var(--gap) Horizontal Gap reads as 0, and a number after it is read in pixels (v3, row C132)",
   "because": "isTokenReference; the port holds the token, which has no unit to merge into",
   "params": {
    "mediumBreakpoint": {

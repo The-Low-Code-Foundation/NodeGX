@@ -71,6 +71,9 @@ function registerInput(object: SharedInputs, metadata: NodeMetadata, name: strin
   // is merged into the unit the port holds. Every other port receives exactly what was sent.
   if (object[name] && input.type && Array.isArray((input.type as PortType).units)) {
     (object[name] as InputPortDefinition & { hasUnits?: true }).hasUnits = true;
+    // P109 ISL-050 / P107-C132: and the unit a bare number is read in when the port holds no size to merge into.
+    const type = input.type as PortType;
+    (object[name] as InputPortDefinition & { defaultUnit?: string }).defaultUnit = type.defaultUnit || type.units[0];
   }
 
   metadata.inputs[name] = {

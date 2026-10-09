@@ -734,8 +734,8 @@ function defineRegularInputProp(input: ReactInputPropDefinition, name: string) {
         this.raiseRuntimeError(
           'dimensions/not-a-dimension',
           `"${input.displayName || name}" was sent ${JSON.stringify(value)}, which is not a size. A size is a ` +
-            '{value, unit} object — "400" alone is only a size on a port that already holds one, because a bare ' +
-            'number is merged into the unit the port is currently using. The previous value is kept.'
+            'number (read in the unit the port is using, or its default unit when it holds none), or a {value, unit} ' +
+            'object. The previous value is kept.'
         );
       }
       if (input.onChange) {

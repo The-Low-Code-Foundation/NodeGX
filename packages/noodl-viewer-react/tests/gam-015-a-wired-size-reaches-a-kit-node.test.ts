@@ -189,12 +189,15 @@ describe('GAM-015 AC1: what a units inputProps port hands the component', () => 
     });
   });
 
-  test('a port with no default: a wired bare number is not merged into a unit and is refused (FLD-004)', async () => {
+  // P109 ISL-050 (P107-C132, ruled 2026-10-08 "Read the number as pixels"): this row used to pin the refusal — a bare number
+  // on a port that held no size had nothing to merge into. It is read in the port's default unit now; AC4 below keeps the
+  // refusal for a value that is not a number at all.
+  test('a port with no default: a wired bare number is read in its default unit, "40px", and nothing is refused (P107-C132)', async () => {
     const r = await drive(readWithNumber);
-    expect(r.edge).toBeUndefined();
-    expect(r.graph.editorConnection.warnings.map((w) => w.key)).toEqual(
-      expect.arrayContaining([expect.stringContaining('dimensions/not-a-dimension')])
-    );
+    expect(r.edge).toBe('40px');
+    expect(
+      r.graph.editorConnection.warnings.filter((w) => w.nodeId === 'edgeWired').map((w) => w.key)
+    ).toEqual([]);
   });
 });
 
