@@ -42,6 +42,14 @@ the export · 2 exempt · 17 owed (all NSP-022)**, unchanged since s68. **`in wo
 
 ## What s74 does
 
+0. **First, if it has landed: P109-S37-SCROLLROOM (P107's, NSP-016).** Richard ruled C154 on 2026-10-09: *"inside a
+   scrolling Group the room is the visible window, unless the content is longer"*. A share fills what the window leaves
+   and is never shorter than its content, a Fixed % is of the window, and a list centres only when it fits. P109 made the
+   runtime do it (`0859bbbde` on `cline-dev`; **`df7b11100` on branch `p109-isl052`, not on `cline-dev` when s73 ended**).
+   That commit lists 32 boxes KNOWN as ROOM in `tests/layout-check.test.ts`, adds fixtures `scroll-align`, `-fill`, `-slides`
+   and `-centre-long`, and `layout-measure.js` records a Group's inner box as `inner`. Check `git branch --contains df7b11100`
+   first. Then `src/layout.ts` learns the rule for a scroller's axis (today: unbounded room) and the ROOM rows leave KNOWN.
+   A first green proves nothing: plant the old reading back. Details: P109 ISL-052 §2, §6 and the bug file.
 1. **NSP-018 AC2, the next batch by template use: Group (22), Text (16), Button (6), For Each (5), Text Input (18).**
    First decide the computed-patch question (NSP-018 §5.1, last paragraph). Group's `NOTHING` constant and Focus's
    `emit: [...listing.emit]` can become literals. For Each's `run(s, view, cb)` builds its patch from a draft and its
@@ -53,8 +61,8 @@ the export · 2 exempt · 17 owed (all NSP-022)**, unchanged since s68. **`in wo
 3. **Or NSP-019** (the inspector shows a node's rules). Now 24 specs have rules to show.
 4. **When the box is quiet:** NSP-013's deep run for s11–s14.
 
-**Human decisions: none open for P107.** D38 is P109's to put to Richard. **P109 holds:** C152, C153, C154, D38, the
-Page Stack, the Router (S18). **P112 holds:** P107-SIZE.
+**Human decisions: none open for P107.** D38 is P109's to put to Richard. **P109 holds:** D38, the Page Stack, the Router (S18). C152 and C153 are fixed (`0859bbbde`); C154 is fixed on `p109-isl052`
+(`df7b11100`) and hands P107 SCROLLROOM (item 0). **P112 holds:** P107-SIZE.
 
 **Gates (s73):** batch 1 (`e8955b1dd`): `tsc --noEmit` (node-spec) clean; node-spec rules-reader, stranger (hashes rewritten), spec-ledger,
 pilot, batch, catalog-parity, counter: **7 / 7 suites, 457 passed, 18 skipped, exit 0** (stranger 421 s). Runtime `NSP_ONLY=Switch`
