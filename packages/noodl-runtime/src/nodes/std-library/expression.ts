@@ -411,7 +411,12 @@ const ExpressionNode: NodeDefinitionOptions = {
         // An evaluation that worked re-arms the report, so a problem that comes back is heard
         // again rather than being suppressed for the life of the session.
         internal.lastReportedError = undefined;
-        internal.lastError = undefined;
+        // P109 ISL-051 (P107-C144), as ruled for its twin D25 ("Clear it to blank text"): it emptied the error without sending
+        // it, so a wire on Error kept the last failure beside a good Result. A message is cleared to blank text and sent, once.
+        if (internal.lastError) {
+          internal.lastError = '';
+          this.flagOutputDirty('error');
+        }
         return value;
       } catch (e) {
         // Was `console.error` and nothing else. The `0` returned below is unchanged — altering

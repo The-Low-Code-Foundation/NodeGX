@@ -230,8 +230,8 @@
     ]
   },
   {
-    "name": "a throw answers 0, writes Error and pulses Failure; a later evaluation that works does not send Error again (row C144)",
-    "because": "expression.ts :416-423, :411-414 (lastError emptied, never flagged) — NSP-017 §6 C144",
+    "name": "a throw answers 0, writes Error and pulses Failure; a later evaluation that works sends Error as blank text, once (row C144)",
+    "because": "expression.ts :416-423, :411-414 (lastError emptied, never flagged) — NSP-017 §6 C144 — renamed in P109 s32 (Expression v2: Error cleared to blank text, as ruled for D25)",
     "params": {
       "expression": "a.b.c"
     },
@@ -277,8 +277,8 @@
     ]
   },
   {
-    "name": "a new message is reported again; fixing the text sends a result but leaves Error on the wire (row C144)",
-    "because": "expression.ts :357-361 (dedup by message), :411-414 — NSP-017 §6 C144",
+    "name": "a new message is reported again; fixing the text sends a result and clears Error on the wire (row C144)",
+    "because": "expression.ts :357-361 (dedup by message), :411-414 — NSP-017 §6 C144 — renamed in P109 s32 (Expression v2: Error cleared to blank text, as ruled for D25)",
     "params": {
       "expression": "a.b.c"
     },

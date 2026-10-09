@@ -36,9 +36,9 @@
  *     the engine's message) or that throws (`expression/threw`, "The expression threw: " + the message) answers `0`, writes
  *     Error, and — per distinct message until an evaluation works — pulses Failure, unless Run asked: then every waiting Run is
  *     answered `failure` with the code and Failure is not pulsed separately. Done answers every other Run, after On True / On False.
- *   - ERROR IS NEVER CLEARED ON THE WIRE (row C144): a working evaluation empties the node's error (:413-414) without sending it,
- *     so a wire on Error keeps the last failure. Modelled as the runtime does it: `error` reads the node's error, and only a
- *     failure names it in `send`.
+ *   - ERROR IS CLEARED ON THE WIRE (v2, row C144, as ruled for D25 "Clear it to blank text"): a working evaluation after a failure
+ *     writes Error as blank text and sends it, once; a later one finds it blank and sends nothing (v1 emptied it without sending it,
+ *     so a wire on Error kept the last failure).
  *
  * Not in v1: an expression reading `Variables`, `Objects` or `Arrays` re-runs when the global moves (:537-563 — the world's
  * REGISTRY seam carries it, v2), and Run wired at load (:587 — a graph rule; the lone node's Run is never wired).
@@ -176,7 +176,8 @@ const schedule = { scheduled: true } as const;
 
 export const Expression = defineNode({
   type: 'Expression',
-  version: 1,
+  // v2 (P109 ISL-051, s32): a working evaluation after a failure sends Error as blank text, once (row C144)
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/expression.ts',
 
   state: {
@@ -261,7 +262,7 @@ export const Expression = defineNode({
     isFalse: { type: 'boolean', from: (s) => (s.evaluated ? !s.cached : null), displayName: 'Is False', group: 'Result', description: 'Whether Result is falsy; null until the expression has been evaluated at least once' },
     isTrueEv: { type: 'signal', displayName: 'On True', group: 'Events', description: 'Fires after an evaluation whose Result is truthy' },
     isFalseEv: { type: 'signal', displayName: 'On False', group: 'Events', description: 'Fires after an evaluation whose Result is falsy' },
-    // :711-719 — the getter; sent only by a failure (row C144)
+    // :711-719 — the getter; sent by a failure, and by the evaluation that works after one (v2, row C144)
     error: { type: 'string', from: (s) => s.lastError, displayName: 'Error', group: 'Error', description: "The compile or evaluation error, in JavaScript's own words" },
     // :721-749 — the cached value, read before the first answer too
     asString: { type: 'string', from: (s) => (s.cached !== undefined && s.cached !== null ? String(s.cached) : ''), displayName: 'As String', group: 'Typed Results', description: 'Result rendered as text, and blank when it is null or undefined' },
@@ -332,10 +333,10 @@ export const Expression = defineNode({
           outcomes: Array.from({ length: n }, () => ({ port: 'run' as const, outcome: 'failure' as const, error: failure.code }))
         };
       }
-      // :411-415 — a working evaluation re-arms the report and empties the error, without sending it (row C144)
+      // :411-420 — a working evaluation re-arms the report; an error it finds is cleared to blank text and sent, once (v2, row C144)
       return {
-        set: { scheduled: false, pendingLoad: false, compiledWith: r.compiledWith, cached: r.value, evaluated: true, tokens: 0, lastError: undefined, lastReported: undefined },
-        send,
+        set: { scheduled: false, pendingLoad: false, compiledWith: r.compiledWith, cached: r.value, evaluated: true, tokens: 0, lastError: s.lastError ? '' : s.lastError, lastReported: undefined },
+        send: s.lastError ? [...send, 'error'] : send,
         emit: [r.value ? 'isTrueEv' : 'isFalseEv'],
         outcomes: Array.from({ length: n }, () => ({ port: 'run' as const, outcome: 'done' as const }))
       };
