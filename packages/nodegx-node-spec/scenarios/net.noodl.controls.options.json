@@ -23382,5 +23382,52 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "the keyboard on the dropdown with no pointer over it (a Tab put it there), then Mounted off and a Tab away in the same frame: the blur's paint takes the element — Will Unmount and Blurred at the act — so a Blur action after it blurs nothing (Done, no second Blurred) and a Focus action focuses nothing (Unchanged); Mounted on: Did Mount",
+    "because": "the paint inside the act unmounts (P109 ISL-031, D30: controls/utils.ts `_leftPage`); the hovered twin is the scenario before, and a Focus alone cannot tell this one apart (a blur that skipped its paint leaves the element holding the keyboard, so the Focus is Unchanged too, and the frame's end repaints the same). Seed 20735 left the unhovered blur ungraded in the stranger's round 4; the Blur action reads it — on the element still there it fires Blurred before Will Unmount",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
   }
 ]

@@ -11,7 +11,7 @@
   "scenarios/Timer.json": "b0b897a7add564d561eff747f7287e4973250b81b3286fa3c9df10f4b7c766f3",
   "scenarios/net.noodl.UUID.json": "f5aaa5d63702f97d8ce3de12517d3eb77708276e2dae69da5dcde3faf0fc0f40",
   "scenarios/net.noodl.animatetovalue.json": "08882c97382f9ccd1d3316af8d97371cc2e1c261e5111c36748dee013ade304c",
-  "scenarios/net.noodl.controls.options.json": "f827632fc8a8ee0876e7d48e1bfae0a85c5b6bb1a3e335a96d73c68e981f9e0a",
+  "scenarios/net.noodl.controls.options.json": "485489870d96bc19d85249b3a5cd831d5e4922914e86b1c533a28100512ac4fd",
   "schema/trace.schema.json": "95c333ca5d933639180fa0021695af606965ec1cf05fbeb6232183c9becb2acc",
   "src/adapter.ts": "5f5a95e038911151e6cb2bb7a788524d6fdb5990475c4f186cb1bd5087bb9457",
   "src/canonical.ts": "03fd83120750ef53e7c0f422a2588d4e1cfbf5af141e02eca77897bbc24ffa7c",
@@ -33,6 +33,6 @@
   "src/nodes/uuid.ts": "d5e2f60d7f81ca7ebee8083955d58b7534b5d4d2589bfc1716c0d0bdca03aadf",
   "src/spec.ts": "64d7c4adb74b111f3da3174d371cfffcc6825d4eb73471e6eb4bfa1b4d42d970",
   "src/trace.ts": "10ebfed327109f9c0a87adaf968be39ab6529f4fffc995a024d245e9acad87bb",
-  "src/world.ts": "6dee832f6dcb167804aec3e5a131817e4904f483c863bdbef9bca39d08bbc806",
+  "src/world.ts": "cd123908e8d36ad5e4c8e10b9ed8fdd5398aad7b3a7785820e1dd4f69b67c659",
   "tests/stranger-page.js": "b81ec9de4633acd8b3960e15fe9b461e64ca23bb520fafd6e38d2dcb25a15e35"
 }
