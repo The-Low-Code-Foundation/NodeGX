@@ -1,6 +1,6 @@
 # ISL-048 — A drag, a stack and a router answer every request
 
-**Status: 🟡 s33 (2026-10-09): RouterNavigate v3 `491e8af72` (§12, C118's debt). s32 (2026-10-09): 25 of 29 fixed — C138 `40c9fc310` (§11); left C139, C114, and C120, C126 (P107's world). s31 (2026-10-08): 11 of 27 fixed — the Component Stack's never-answered six (C107–C112, §9); all four asks ruled (C103, C104 as recommended in session; C120, C126 on P107's rulings page). s30 (2026-10-08): 5 of 27 fixed — C101, C115, C116, C117, C118 (§8); C119–C127 joined from P107 s58; 4 to ask (C103, C104, C120, C126).** Scoped s30 at `a6caefdde`. **Source:** 27 bugs P107 NSP-016 filed (18 at scoping, C119–C127 from s58) in s55–s57 after
+**Status: 🟡 s33 (2026-10-09): 26 of 29 fixed — C114 `4e2d846d5` (§12); RouterNavigate v3 `491e8af72` (§12, C118's debt); left C139, and C120, C126 (P107's world). s32 (2026-10-09): 25 of 29 fixed — C138 `40c9fc310` (§11); left C139, C114, and C120, C126 (P107's world). s31 (2026-10-08): 11 of 27 fixed — the Component Stack's never-answered six (C107–C112, §9); all four asks ruled (C103, C104 as recommended in session; C120, C126 on P107's rulings page). s30 (2026-10-08): 5 of 27 fixed — C101, C115, C116, C117, C118 (§8); C119–C127 joined from P107 s58; 4 to ask (C103, C104, C120, C126).** Scoped s30 at `a6caefdde`. **Source:** 27 bugs P107 NSP-016 filed (18 at scoping, C119–C127 from s58) in s55–s57 after
 ISL-038 was scoped (the Drag C101–C106, §7.16; the Component Stack C107–C114, §7.17; the Page Router C115–C118, §7.18), handed to
 P109 under R16 ("Hand all to P109"): 1 high · 7 medium · 10 low, **2 to ask** (C103, C104). **Side:** noodl-viewer-react
 (`components/visual/Drag/Drag.tsx`, `nodes/navigation/navigation-stack.tsx`, `router.tsx`, `router-handler.ts`), the Drag,
@@ -44,7 +44,7 @@ the fix has two reasonable answers that a person would see differently: ask in p
 | [P107-C111](../../bugs/p107-c111-a-back-whose-page-below-left-components-never-pops.md) | Component Stack | low | fixed `62b89308b` | as proposed | A Pop whose page below is no longer in the Components list throws: the pusher hears the results and the page below comes back, but the stack never pops |
 | [P107-C112](../../bugs/p107-c112-a-reset-that-finds-no-components-keeps-naming-the-old-page.md) | Component Stack | low | fixed `cd5f66a1a` | as proposed | A reset that finds no components (or no start page) deletes every page but leaves Top Component Name and Stack Depth naming what was there |
 | [P107-C113](../../bugs/p107-c113-writing-a-stacks-name-rebuilds-it.md) | Component Stack | low | fixed `2cc6d1dd7` | as proposed | Writing a Component Stack's Name — even the name it already has — rebuilds it at its start page, losing every page pushed |
-| [P107-C114](../../bugs/p107-c114-children-count-lags-a-frame-after-a-remount.md) | Component Stack | low | scheduled | as proposed | A Component Stack mounted again at a frame sends no Children Count in that frame — the page it builds is counted a frame late |
+| [P107-C114](../../bugs/p107-c114-children-count-lags-a-frame-after-a-remount.md) | Component Stack | low | **fixed** `4e2d846d5` | as proposed | A Component Stack mounted again at a frame sends no Children Count in that frame — the page it builds is counted a frame late |
 | [P107-C116](../../bugs/p107-c116-a-url-path-of-null-blanks-the-page-router.md) | Page Router | low | fixed `34218468a` | as proposed | A Page Router whose Url path is null shows nothing and never answers a Reset; a Navigate to it shows the page but never pushes its URL or answers |
 | [P107-C118](../../bugs/p107-c118-a-navigate-with-no-router-name-made-before-the-router-is-on-the-page-is-never-answered.md) | Page Router | low | fixed `d85e4e6d9` | as proposed | A Navigate with no Router name, pressed while no Page Router is on the page, waits for good — a router registering as Main never takes it |
 | [P107-C119](../../bugs/p107-c119-the-browsers-back-resets-a-component-stack-without-use-routes.md) | Component Stack | medium | fixed `b5b06bcb6` | as proposed | The browser's Back or Forward sends every Component Stack on the page back to its start page, Use Routes or not |
@@ -247,3 +247,17 @@ name as handed. Control: `router-handler.ts` from before `d85e4e6d9` conforms 23
 
 The s32 lesson again, one phase-step wider: **a fix to a shared handler moves every spec that plays it, not only the spec of the node
 it was filed on** — C118 re-graded the Router and never RouterNavigate, which reaches the same handler through the world.
+
+### 12.1 C114 — Children Count in the frame the stack mounts
+
+| Commit | What changed | Grade |
+|---|---|---|
+| `4e2d846d5` | `react-component-node.ts` `updateChildCountAndIndiciesNow` (the queued count runs only when a child changed since); the stack's reset counts its pages beside Stack Depth on success and on every failing exit. Page Stack spec **v16**; three scenarios renamed, one added | 151 / 151 + 200 / 200 at 13 and 20732; mutants 0 survivors at both; control red on exactly the 4 C114 scenarios; Group, Circle, Drag, For Each, Columns, Radio Button Group, Repeat conform at 13; viewer 1,837 / 1,837 |
+
+**Why it waited** (the row said "read why first"): the runtime target's settle is frame → yield → drain inside React's `act`, and
+React runs the stack's mount effects as `act` exits — after the drain. The reset then lands outside any update; what it sends at once
+(Stack Depth) is in the frame, what it queues (the count) is in the next. In a browser the same: the reset completes in a microtask after
+the frame's update. A queued send cannot be pulled forward without sending twice (`OutputProperty.sendValue` does not dedupe), hence
+the flag. ERG-001's hand-made stack stubs the new count as it stubs `setPageOutputs`.
+
+**Left (3):** C139 (ruled: a new Component Stack option that keeps its pages through Mounted off and on), C120 and C126 (P107's world).
