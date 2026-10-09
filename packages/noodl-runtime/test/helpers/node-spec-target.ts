@@ -1217,7 +1217,7 @@ function resetRegistry(world: World): void {
  * (ts-jest compiles them under this package's config), so a spec of a viewer node is graded
  * against the code the app runs, and no copy is kept. A viewer node specced later is added here.
  */
-export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions', 'repeat', 'animate-to-value', 'screenresolution', 'states', 'componentutils/parentcomponentobject', 'componentutils/setparentcomponentobjectproperties', 'externallink', 'user/login', 'user/signup', 'user/logout', 'user/requestmagiclink', 'user/signinwith', 'uploadfile', 'openfilepicker', 'data/cloudfunction2'] as const;
+export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions', 'repeat', 'animate-to-value', 'screenresolution', 'states', 'componentutils/parentcomponentobject', 'componentutils/setparentcomponentobjectproperties', 'externallink', 'user/login', 'user/signup', 'user/logout', 'user/requestmagiclink', 'user/signinwith', 'uploadfile', 'openfilepicker', 'data/cloudfunction2', 'javascript'] as const;
 
 /** NSP-015 s17 — the viewer's navigation nodes this phase has specced, from `src/nodes/navigation/` (s17 Navigate To Path … s20 Show / Close Popup). */
 export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back', 'router-navigate', 'page-inputs', 'page', 'showpopup', 'closepopup'] as const;
@@ -1820,7 +1820,10 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     const spec = specFor(type);
     const outputPorts: Record<string, { name: string; type: string }> = {};
     for (const [name, decl] of Object.entries(spec?.derived?.outputs?.(params) ?? {})) outputPorts[name] = { name, type: decl.type as string };
-    (node as unknown as { model?: unknown }).model = { type, parameters: { ...params }, outputPorts, removeListenersWithRef: () => undefined };
+    // NSP-017 s66 — `inputPorts` the same way: the Script tells a signal input from a value by its type there (javascript.ts :640)
+    const inputPorts: Record<string, { name: string; type: string }> = {};
+    for (const [name, decl] of Object.entries(spec?.derived?.inputs?.(params) ?? {})) inputPorts[name] = { name, type: decl.type as string };
+    (node as unknown as { model?: unknown }).model = { type, parameters: { ...params }, outputPorts, inputPorts, removeListenersWithRef: () => undefined };
     // the derived outputs the spec declares for these params — registered as a wire would make the runtime do
     if (spec?.derived?.outputs) {
       for (const name of Object.keys(spec.derived.outputs(params))) (node as unknown as NodeInstance).registerOutputIfNeeded(name);

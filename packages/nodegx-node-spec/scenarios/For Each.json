@@ -15827,6 +15827,50 @@
   ]
  },
  {
+  "name": "a Refresh with no Items, then a removal queued behind it: the queue runs on one act boundary later — the removal takes row 0 at the second click",
+  "because": "refresh's no-Items branch (foreach.tsx :792-795 on 2026-10-09) answers Failure and returns; the runner that awaited it (:909) goes on one act boundary later (P107 s64 found the count unpinned — ±1 passed every scenario; s66 pinned it). The Refresh is asked before the new Items, so the frame-end work starts the rebuild first and the copy's removals wait behind it; clicks with no settle between count the boundaries (a count one off is red here)",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    }
+   ]
+  },
+  "steps": [
+   "settle",
+   {
+    "signal": "refresh"
+   },
+   {
+    "set": "items",
+    "value": null
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
+ },
+ {
   "name": "a rebuild of a record whose component the project does not have, beside rows on their way out: Refresh is Done and Items Rendered fires after the clicks its record costs (row C128)",
   "because": "P109 s32 (ISL-049, row C128) — the act boundaries the queue runs on after the caught failure, counted by clicks with no settle between (a count one off is red here)",
   "params": {

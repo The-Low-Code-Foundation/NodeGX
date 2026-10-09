@@ -841,6 +841,8 @@ function start(w: Work, op: Op): void {
   } else if (op.kind === 'copy') {
     // v2 (:261-268) — Items as it is NOW copied into the list; what the diff adds and removes is queued behind what waits
     copy(w, w.st.items);
+    // UNOBSERVABLE (s66, measured: 0 and 2 conform on every scenario and 400 sequences): a copy is queued only by the world's
+    // hand-off, which never takes a hop, and an `advance` lands the yield after it — the queue runs to its end before any act
     w.st.hops = 1;
   } else if (op.kind === 'add') {
     const b = addItem(w, op.rec, op.index);
@@ -1098,6 +1100,7 @@ function refresh(w: Work): void {
   }
   if (!st.items) {
     settle('failure', 'repeater/no-items');
+    // pinned (s66): "a Refresh with no Items, then a removal queued behind it" is red at 0 and at 2
     st.hops = 1;
     return;
   }

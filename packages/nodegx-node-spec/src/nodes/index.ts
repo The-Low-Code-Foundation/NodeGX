@@ -107,6 +107,7 @@ import { ValueChanged } from './value-changed';
 import { Variable2 } from './variable2';
 import { Expression } from './expression';
 import { JavaScriptFunction } from './function';
+import { Script } from './script';
 
 export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   // NSP-004 — the pilot five
@@ -223,7 +224,9 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   // NSP-017 s64 — the escape hatches: the Expression, whose text is JavaScript the spec runs as the runtime does
   [Expression.type]: Expression,
   // NSP-017 s65 — the Function: a contract (the person's code is the behaviour), graded with one fixture per rule
-  [JavaScriptFunction.type]: JavaScriptFunction
+  [JavaScriptFunction.type]: JavaScriptFunction,
+  // NSP-017 s66 — the Script: a contract, its three ways of writing it, graded with one fixture per rule
+  [Script.type]: Script
 });
 
 export { EQUIVALENT_MUTANTS } from './equivalent-mutants';
@@ -234,6 +237,8 @@ export { ROUTER_PAGES } from './page-router';
 export { REPEATER_TEMPLATES, type RowTemplate } from './repeater';
 // NSP-017 s65 — the Function's fixtures: one script per rule of its contract
 export { FUNCTION_FIXTURES } from './function';
+// NSP-017 s66 — the Script's fixtures
+export { SCRIPT_FIXTURES } from './script';
 
 export function specFor(typeName: string): AnyNodeSpec | undefined {
   return specs[typeName];
@@ -243,6 +248,7 @@ export {
   And,
   Expression,
   JavaScriptFunction,
+  Script,
   Collection2,
   CollectionClear,
   CollectionInsert,

@@ -1,73 +1,67 @@
 # P107 — next session
 
-**Written 2026-10-09 (s65).** Read the [README](README.md) §2–§7 (R17 is the newest ruling). s65's record is
-[NSP-017 §6.2](NSP-017-THE-ESCAPE-HATCHES.md) (the Function, a contract; the CSS Definition exempt).
+**Written 2026-10-09 (s66).** Read the [README](README.md) §2–§7 (R17 is the newest ruling). s66's record is
+[NSP-017 §6.4](NSP-017-THE-ESCAPE-HATCHES.md) (the Script, a contract) and [NSP-016 §7.25](NSP-016-VISUAL-NODES.md) (the For Each's
+two hop counts).
 
 ## Board (from the task files)
 
 | task | built | committed |
 |---|---|---|
 | NSP-000 … NSP-015 | as s44 (NSP-013 left: AC2 — the export half, no reach here — and the deep run for s11–s14; NSP-014 / NSP-015 left: AC2's export half, P18) | s1 … s44 |
-| NSP-016 the visual nodes | 🟡 AC1–AC3 met: 19 of 19 handled — 18 conform, Component Children exempt. Left: AC4 (geometry), after NSP-017 (R10) | `aa8abb06f` … s63 |
-| NSP-009 the ratchet | ✅ s64; **s65: a `contract` column with its own floor (NSP-017 AC3)** | `6a1ed0084`, s65 |
-| **NSP-017 the escape hatches** | 🟡 **s65: the Function specced as a CONTRACT — 27 scenarios + 3 graph scenarios, AC2 planted and shown (13 rules), AC3 built; the CSS Definition exempt (R17); rows C146, C147.** Left: Script (`Javascript2`), Visual Function (`Logic Builder`) — their contracts; AC1's export half | s64, s65 |
+| NSP-016 the visual nodes | 🟡 AC1–AC3 met: 19 of 19 handled — 18 conform, Component Children exempt. **s66: the For Each's hop counts settled (§7.25).** Left: AC4 (geometry), after NSP-017 (R10) | `aa8abb06f` … s66 |
+| NSP-009 the ratchet | ✅ s64; s65: a `contract` column with its own floor | `6a1ed0084`, s65 |
+| **NSP-017 the escape hatches** | 🟡 **s66: the Script (`Javascript2`) specced as a CONTRACT — 13 fixtures, 16 scenarios, AC2 planted and shown (26 rules), `floor.contract` 2; row C148.** s65: the Function, a contract; the CSS Definition exempt (R17). s64: the Expression. Left: **Visual Function (`Logic Builder`)** — its contract; AC1's export half | s64, s65, s66 |
 | NSP-023 the spec without React | ✅ all six ACs (s50) | s45 … s57 |
 | NSP-006 the stranger | ✅ rounds 1–4 | `649e6864d` |
 | NSP-020 ports without a viewer | rows only | s20 |
 | NSP-022 the cloud-only nodes | 📋 (needs a second runtime target) | s21 |
 
-**`npm run spec-ledger`: 125 of 147 conform on the runtime (85.0%) · 1 specced as a contract (Function) · 2 on the export · 2 exempt
-· 19 owed** — T1 46/46 · T2 11/11 · T3 22/39 · T4 27/27 · T5 18/19 (+1 exempt) · T6 1/5 (+1 contract) (+1 exempt).
+**`npm run spec-ledger`: 125 of 147 conform on the runtime (85.0%) · 2 specced as a contract (Script, Function) · 2 on the export ·
+2 exempt · 18 owed** — T1 46/46 · T2 11/11 · T3 22/39 · T4 27/27 · T5 18/19 (+1 exempt) · T6 1/5 (+2 contract) (+1 exempt).
 
-## What s65 settled
+## What s66 settled
 
-1. **Two rulings (R17), asked in plain words:** the CSS Definition — **"Leave it out"** (exempt as web-only; the recommendation was to
-   spec its stylesheet as a page effect); C145 — **"Block the three names"** (P109's, told). Commit `3b68aa4f6`.
-2. **A CONTRACT is a spec that runs the author's code the same way and states the rules around it** (`NodeDecl.contract`). The Function
-   spec compiles with the same `AsyncFunction` (so a compile failure carries the engine's words) and RUNS the body as a plain function
-   with its `await`s removed — sound because a fixture awaits only a settled value, which resumes inside the settle's own yield.
-   **The play's ports:** every fixture's outputs are on the node from the placing (a project's saved `dynamicports`); the runtime face
-   now builds a lone node's `model.outputPorts` from the spec's derived outputs and reads a derived SIGNAL output as a signal.
-3. **Publish-on-change is invisible on a lone node** (the trace never repeats an unchanged value): graded by
-   `scenarios/graph/t14-a-function-publishes-on-change.json` — a Function feeding a Function that counts its runs.
-4. **AC2 = plants in an in-memory COPY of the runtime file**, the named fixture red each time, an unchanged copy as the control
-   (`noodl-runtime/test/node-spec/function-contract.test.ts`). **Never plant "drop the `await`"**: the unheard rejection fails the whole
-   jest test before any scenario is read.
-5. **AC3:** `spec-ledger.js` counts a contract in its own column and floor (`floor.contract`), never in `runtime` — a graph claim about
-   a contract node does not move it into `runtime` either. A new contract's commit: remove it from `owed`, raise `floor.contract`.
-6. **Rows C146** (Error kept after a run that works; a new Script empties it unsent — C144's twin, D25's ruling covers it) **and C147**
-   (`throw null` / `undefined` reports nothing: the logger throws inside the catch — medium; measured beside a `throw 'x'` control). Both
-   P109's under R16. C147 is not played: an unhandled rejection fails the jest suite, so the spec says the intent and no fixture throws null.
+1. **The For Each's two hop counts (§7.25).** Planted at 0 and 2 in an in-memory copy of the SPEC (`repeater.ts`), graded on the
+   runtime. The no-Items Refresh's count: **pinned** by a new scenario (297 now) — red at 0 and 2, green at 1. The queued copy's count:
+   **unobservable** (a copy is queued only by the world's hand-off, which takes no hop, and an `advance` lands the yield after it) —
+   a comment in the spec, not a scenario.
+2. **The Script is a contract (NSP-017 §6.4)** — `src/nodes/script.ts`, `SCRIPT_FIXTURES`, `scenarios/Javascript2.json`. Its three
+   generations (`define`, `script`, the `Node`/`Script` object) are a copy of the parser's steps; the code is SOURCED once per read and
+   its closures kept live in a **session held by a function in the state** (`deepFreeze` does not walk into a function — the way to keep
+   live objects in a spec's state when a registry entry is not the right shape). It has no Error/Success/Run: a throw is graded by what
+   the code stops doing.
+3. **The face gives a lone node's model `inputPorts`** (from the spec's derived inputs) beside `outputPorts`, and registers the viewer's
+   `javascript` node. The Function still conforms; its AC2 holds.
+4. **AC2 for the Script** (`noodl-runtime/test/node-spec/script-contract.test.ts`): plants in copies of BOTH `javascript.ts` and
+   `javascriptnodeparser.js` — the node's copy is handed the parser's copy through its `require` of
+   `@noodl/runtime/src/javascriptnodeparser`. 26 / 26 red, control green.
+5. **Row C148** (medium, P109's under R16 — told): a Script whose code throws `null` / `undefined` — in a run or a signal's function —
+   never runs it again (every catch's `Object.getPrototypeOf(e)` throws, the scheduled flag is never cleared). C147's logger fix alone
+   fixes the run only. When fixed: add `throw null` scenarios for a run and a signal's function to `Javascript2.json`.
 
-**Readings (2026-10-09).** Function on the runtime: 27 / 27, 200 / 200, 0 divergences, 177 / 180 + 3 declared equivalent (STUCK_FLAG) on
-seeds 20735, 13, 20734, 7; at 10,000 (20735): 0 divergences, 60 s. Interpreter: 180 / 180 on 13, 20735, 7, 20729. AC2 15 / 15. Graph
-126 / 126. `spec-ledger --check` holds. The rest: see the commit message.
+**Readings (2026-10-09).** Script on the runtime: 16 / 16, 200 / 200, 0 divergences, 32 / 32 mutants on seeds 20735, 13, 7, 20734; at
+10,000: 0 divergences, 84 s. Interpreter: every mutant killed on 13, 20735, 7, 20729. AC2 28 / 28. Function and For Each on the runtime
+conform after the face change. `spec-ledger --check` holds. Package suite: 999 / 1019 pass, the one red not P107's — below.
 
-## What s66 does
+## What s67 does
 
-1. **Pin the two For Each hop counts (P109 found them unpinned — carried from s64):** in `src/nodes/repeater.ts` `start()` the queued
-   copy's `w.st.hops = 1` (`op.kind === 'copy'` — a COPY is queued when the bound array is written elsewhere while the queue is busy:
-   :604 the heard collection change, :681 the frame's callbacks), and `refresh()`'s no-Items `st.hops = 1`. ±1 passes all 296
-   scenarios. A spec plant is graded against the RUNTIME (the interpreter against itself grades nothing): load a planted copy of
-   repeater.ts in memory as `function-contract.test.ts` loads simplejavascript.ts, run `runConformance(planted, runtime, { sequences:
-   0 })`, write the scenario that goes red at N±1 and green at N — clicks with no settle between, a removal queued behind (the C128
-   scenario's shape). **A hypothesis to measure first (s65, from reading only):** a `copy` op is enqueued ONLY by a world hand-off
-   (:604 — `frameWork` calls `copy()` directly, never enqueues one), and the face's `advance` yields after the clock moves, which runs the
-   queue to its end — so the copy's count may be UNOBSERVABLE (then it is an equivalent, declared with that reason, not a scenario).
-   The no-Items refresh is reachable from a click's drain (a Refresh with Items falsy), so a removal or a no-component addition queued
-   behind it, counted by clicks, should pin it.
-2. **NSP-017 — Script (`Javascript2`, `noodl-viewer-react/src/nodes/std-library/javascript.ts`, 861 lines)**: a bigger contract than the
-   Function — the `define({…})` / `script({…})` APIs (inputs, outputs, signals the CODE declares as input ports, `changed`, `setup`,
-   `destroy`, `methods`), `this.flagOutputDirty`, `runNextFrame`, `createComponent`. Same method: probe pair, fixtures one per rule,
-   plants in a copy, `contract:` set. Then Visual Function (`Logic Builder`).
-3. **Or the Expression v2**: `Variables` / `Objects` / `Arrays` read by the text (the REGISTRY seam).
-4. **When the box is quiet:** NSP-013's deep run for s11–s14 (`NSP_DEEP=10000 NSP_ONLY=…`, one spec at a time).
+1. **NSP-017 — Visual Function (`Logic Builder`)**: the Blockly node; the person's blocks compile to JavaScript. Same method as the
+   Function and the Script: read the node and what its blocks generate, probe pair, fixtures one per rule, plants in a copy, `contract:`
+   set, remove it from `owed`, raise `floor.contract` to 3. Then NSP-017 is down to AC1's export half (P18's).
+2. **Text Input v6 at seed 20732** (P109 reported, s66): the mutant `person.release swap-branch` survives (5844 / 5854), on the base
+   too — pin it with a scenario read off its SHAPE, or declare it equivalent with the reason.
+3. **The stranger round 4's Options survivor** at 20735 (`person.blur` swap-branch) — still red in the package suite: kill it by its
+   shape in the Dropdown's scenarios (a blur that unmounts beside one that does nothing).
+4. **Or the Expression v2**: `Variables` / `Objects` / `Arrays` read by the text (the REGISTRY seam). **When the box is quiet:**
+   NSP-013's deep run for s11–s14.
 
-**Human decisions: none open.** **P109 holds:** C145 (ruled), C146, C147 (new), Columns v2 (C132–C134), the Page Stack v8 (C120, C126,
-C139), the Router (S18). When P109 fixes C146, the Function moves to v2 (two scenarios renamed); C147's fix adds a `throw null` scenario.
+**Human decisions: none open.** **P109 holds:** C145 (ruled), C146, C147, C148, Columns v2 (C132–C134), the Page Stack v8 (C120, C126,
+C139), the Router (S18; RouterNavigate v3 landing, s33). When P109 fixes C146, the Function moves to v2; C147's fix adds a `throw null`
+scenario to the Function; C148's to the Script.
 
-**Known red at the 2026-10-09 seed (20735), not P107's:** `tests/stranger.test.ts` round 4's Options keeps a mutant (`person.blur`
-swap-branch) — kill it by its shape in the Dropdown's scenarios (a blur that unmounts beside one that does nothing).
+**The census was not regenerated in s66** (it is out of CI and reads the working tree) — regenerate from a clean export when next
+convenient, as below.
 
 ## Before you start
 
@@ -94,3 +88,7 @@ swap-branch) — kill it by its shape in the Dropdown's scenarios (a blur that u
   `PROBE_LOG=1` it wraps `Node.prototype.sendSignalOnOutput` / `sendValue` and `NodeContext.prototype.scheduleAfterUpdate` /
   `updateDirtyNodes` in memory and prints the runtime's drains — no source edit. `packages/nodegx-node-spec/tests/zz-mutants.test.ts`
   runs `runConformance` with the interpreter as the target (`ZZ_TYPE`, `ZZ_SEEDS`, `ZZ_N`) and prints survivors.
+  s66's contract probe (`zz-script.test.ts`, deleted too) took scenario-shaped cases with `"$fx:<name>"` standing for a fixture's
+  text, printed SAME / DIFF and — with `PROBE_SHOW` — the interpreter's trace for a SAME (read them: two empty traces agree), and with
+  `PROBE_WRITE=<file>` wrote the expanded cases out as the scenario file. A spec PLANT (a count in the spec) is graded on the runtime:
+  load a copy of the spec file in memory as `script-contract.test.ts` loads the node, `runConformance(copy, runtime, { sequences })`.
