@@ -2,6 +2,7 @@
 id: P116-ONT-007-viewerbuild
 title: The viewer build is red — the migration executor iterates a Map, which the viewer's ES5 build refuses, and where it emits anyway the loop runs zero times
 status: fixed
+commit: 06ec2d4e7
 severity: high
 area: backend contract / the migration executor (`nodegx-backend-contract/src/migration.ts` :170, :178 `[...seen.values()]`, :462 `for (const [key, now] of columns)`), compiled into the viewer through `noodl-runtime/src/api/cloudstore.js`
 found: P109 s37, 2026-10-09, building the viewer at `f1ad13e2e` for ISL-052

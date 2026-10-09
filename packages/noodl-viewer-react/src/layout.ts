@@ -9,12 +9,34 @@ export interface LayoutProps {
   sizeMode?: 'explicit' | 'contentHeight' | 'contentWidth' | (string & {});
   width?: string | number;
   height?: string | number;
+  /**
+   * Set when the parent scrolls along the axis it stacks its children on (react-component-node.ts sets it beside
+   * `parentLayout`): `'native'` when the parent is the browser's scroll box, `'iscroll'` when Native platform scroll is off
+   * and the children sit in the scroller's inner box, which the visible window's size reaches as `--ndl-scroll-width` /
+   * `--ndl-scroll-height` (Group.tsx). Undefined otherwise.
+   */
+  parentScroll?: 'native' | 'iscroll';
   /** Set when the width is pinned, which suppresses percentage → flex-grow. */
   fixedWidth?: boolean;
   fixedHeight?: boolean;
   alignX?: 'left' | 'center' | 'right';
   alignY?: 'top' | 'center' | 'bottom';
   [prop: string]: any;
+}
+
+/**
+ * How a node scrolls along the axis it stacks its children on, as its children's `parentScroll`: `'native'` (the browser's
+ * scroll box), `'iscroll'` (Native platform scroll off — Group.tsx `renderIScroll`), or undefined when it does not scroll, has
+ * no stacking axis, or wraps (a wrapping Group's children are not laid out along the scrolled axis alone, so they keep the
+ * plain rule). Native platform scroll is read as truthy, as Group.tsx reads it (P107-C89).
+ */
+export function scrollAlongLayout(nodeProps: object, style?: { flexWrap?: unknown }): 'native' | 'iscroll' | undefined {
+  const props = nodeProps as { scrollEnabled?: unknown; nativeScroll?: unknown; layout?: unknown };
+  if (!props.scrollEnabled) return undefined;
+  if (props.layout !== 'row' && props.layout !== 'column') return undefined;
+  const wrap = style?.flexWrap;
+  if (wrap === 'wrap' || wrap === 'wrap-reverse') return undefined;
+  return props.nativeScroll ? 'native' : 'iscroll';
 }
 
 function isPercentage(size: unknown): boolean {
@@ -40,6 +62,41 @@ function getSizeWithMargins(size: string, startMargin?: string, endMargin?: stri
   css += ')';
 
   return css;
+}
+
+/**
+ * A percentage along the axis a scrolling parent scrolls (ruled 2026-10-09, P109 ISL-052: inside a scrolling Group the room
+ * is the visible window, unless the content is longer, and then the content wins).
+ *
+ * - The percentage is of the visible window. On the native path the parent IS the scroll box, so `%` already means that. With
+ *   Native platform scroll off the child sits in an inner box that hugs the children, so `%` there was a percentage of the
+ *   children added up (P109-S37-ISCROLLPERCENT): it becomes the same fraction of the window's size, which Group.tsx measures.
+ *   Before the first measurement the variable is unset, the `calc` is invalid and the size is the content's, for one frame.
+ * - A share (not Fixed) still fills what the window leaves, but never ends up shorter than its content: the browser's
+ *   automatic minimum is the smaller of the stated size and the content, so a 100% share holding more than the window
+ *   stopped at the window's size and its content ran under the next sibling (P109-S37-FILLCAP). A min the author set wins.
+ *
+ * The caller's grow/shrink conversion runs after this on the rewritten value, and `isPercentage` reads `calc(...)` as not a
+ * percentage, so on the iScroll path the share is set here.
+ */
+function scrollAxisPercent(style: StyleObject, props: LayoutProps, dim: 'width' | 'height', fixed?: boolean): void {
+  if (!props.parentScroll) return;
+  const percent = getPercentage(style[dim]);
+  if (props.parentScroll === 'iscroll') {
+    if (fixed) {
+      style[dim] = `calc(var(--ndl-scroll-${dim}) * ${percent / 100})`;
+    } else {
+      // The inner box has no size of its own to shrink a share into: it grows to whatever its children start at, and a row
+      // reads that from each child's stated width. So a share states no size, starts at nothing and grows into what the
+      // window leaves (the box is never shorter than the window), in the proportions the native path's percentages give.
+      delete style[dim];
+      style.flexBasis = 0;
+      style.flexGrow = percent;
+      style.flexShrink = 1;
+    }
+  }
+  const min = dim === 'width' ? 'minWidth' : 'minHeight';
+  if (!fixed && style[min] === undefined) style[min] = 'min-content';
 }
 
 /**
@@ -82,6 +139,7 @@ const Layout = {
     style.flexShrink = 0;
 
     if (props.parentLayout === 'row' && style.position === 'relative') {
+      if (isPercentage(style.width)) scrollAxisPercent(style, props, 'width', props.fixedWidth);
       if (isPercentage(style.width) && !props.fixedWidth) {
         style.flexGrow = getPercentage(style.width);
         style.flexShrink = 1;
@@ -95,6 +153,7 @@ const Layout = {
         style.width = getSizeWithMargins(style.width, style.marginLeft, style.marginRight);
       }
 
+      if (isPercentage(style.height)) scrollAxisPercent(style, props, 'height', props.fixedHeight);
       if (isPercentage(style.height) && !props.fixedHeight) {
         style.flexGrow = getPercentage(style.height);
         style.flexShrink = 1;

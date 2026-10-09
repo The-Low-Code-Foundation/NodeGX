@@ -2,6 +2,7 @@
 id: P107-C152
 title: A Group with Enable Scroll on and Native platform scroll off ignores its gap — the children touch
 status: fixed
+commit: 0859bbbde
 phase: P109
 task: ISL-052
 severity: medium

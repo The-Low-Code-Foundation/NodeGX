@@ -2,6 +2,7 @@
 id: P109-S37-ISCROLLALIGN
 title: A Group with Enable Scroll on and Native platform scroll off loses Align Items (and, when it wraps, Justify Content) — a centred list sits at the edge
 status: fixed
+commit: 0859bbbde
 phase: P109
 task: ISL-052
 severity: medium

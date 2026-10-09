@@ -42,6 +42,8 @@ interface Measured {
   inParent?: { x: number; y: number };
   transformed?: boolean;
   hit?: boolean;
+  /** A Group with Native platform scroll off: its inner box, which is as far as the scroller scrolls. */
+  inner?: { w: number; h: number };
 }
 interface Recording {
   viewports: Record<string, { viewport: { width: number; height: number }; nodes: Measured[]; missing?: string[]; consoleErrors: string[] }>;
@@ -52,16 +54,29 @@ interface Recording {
  * named limit of the model; this list is what step 5 found.
  */
 const FLOOR = "named limit (layout.ts header): flexbox's automatic minimum — a shrinking fill stops at its min-content, the model's floor is 0";
-const C154 = 'P107-C154: on the native-scroll path a percent along a scroll grows into the visible height (the iScroll path and the model: its content)';
-const CENTRE = 'P109-S37-SCROLLCENTRE: a scroller centres what fits along its scroll axis on the runtime (both paths); the model reads that axis as unbounded, so nothing centres — the question C154 asks';
+const ROOM =
+  'P109-S37-SCROLLROOM (ruled 2026-10-09, ISL-052): inside a scrolling Group the room is the visible window, unless the content is longer — the runtime does it on both paths; the model still reads a scroll as endless (a percentage is its content, nothing centres), for P107 to follow';
 const KNOWN: Record<string, string> = {
   'min-content-floor/1280x800/g1': FLOOR,
   'min-content-floor/390x844/g1': FLOOR,
-  'scroll-percent-content/1280x800/pct': C154,
-  'scroll-percent-content/1280x800/fix': C154,
-  'scroll-percent-content/390x844/pct': C154,
-  'scroll-percent-content/390x844/fix': C154,
-  ...Object.fromEntries(['1280x800', '390x844'].flatMap((vp) => ['nca', 'ncb', 'nra', 'nrb'].map((id) => [`scroll-align/${vp}/${id}`, CENTRE])))
+  ...Object.fromEntries(
+    ['1280x800', '390x844'].flatMap((vp) =>
+      [
+        'scroll-percent-content/pct',
+        'scroll-percent-content/fix',
+        'scroll-align/nca',
+        'scroll-align/ncb',
+        'scroll-align/nra',
+        'scroll-align/nrb',
+        'scroll-fill/nsb',
+        'scroll-fill/nsf',
+        ...['nf0', 'nf1', 'nf2', 'ns0', 'ns1', 'ns2', 'nh0'].map((id) => `scroll-slides/${id}`)
+      ].map((key) => {
+        const [fixture, id] = key.split('/');
+        return [`${fixture}/${vp}/${id}`, ROOM];
+      })
+    )
+  )
 };
 
 const fixtures: Fixture[] = fs
@@ -220,9 +235,42 @@ describe('the runtime defects the measuring found', () => {
     expect([at('nca'), at('ncb'), at('nra'), at('nrb')]).toEqual(['120,35', '120,105', '85,70', '155,70']);
   });
 
-  test('P107-C154 — with Native platform scroll on (the default), a percent child of a scrolling column grows into the 200 px it shows: 140 high round 40 px of content', () => {
-    const native = read('scroll-percent-content');
-    // the model's reading (unbounded: a percent there is its content) is the iScroll path's, measured s71 by hand: 40 high, the next child at 40
-    expect([native.get('pct')!.box!.h, native.get('pin')!.box!.h, native.get('fix')!.inParent!.y]).toEqual([140, 40, 150]);
+  test('P109-S37-SCROLLROOM (ruled, ISL-052) — the room inside a scroll is the window unless the content is longer: a share fills what is left and is never shorter than its content, a Fixed percentage is of the window, a long list starts at the top — and the two paths agree', () => {
+    const at = (name: string) => {
+      const m = read(name);
+      return (id: string) => {
+        const n = m.get(id)!;
+        return `${n.inParent!.x},${n.inParent!.y} ${n.size!.w}x${n.size!.h}`;
+      };
+    };
+    const fill = at('scroll-fill');
+    const slides = at('scroll-slides');
+    const centre = at('scroll-centre-long');
+    const percent = at('scroll-percent-content');
+    // P107-C154: the share fills what the window leaves (the native path's reading, now the rule)
+    expect(percent('pct')).toBe('0,0 100x140');
+    for (const p of ['n', 'i']) {
+      // a share with little content fills to the footer (130); with 300 px it is 300, the footer after it (P109-S37-FILLCAP)
+      expect([fill(`${p}sb`), fill(`${p}sf`), fill(`${p}lb`), fill(`${p}lf`)]).toEqual(['0,40 100x130', '0,170 100x30', '0,40 100x300', '0,340 100x30']);
+      // Fixed 100% is one window each; not Fixed they share it; Fixed 50% is half (P109-S37-ISCROLLPERCENT on the i… path)
+      expect([slides(`${p}f0`), slides(`${p}f2`), slides(`${p}s0`), slides(`${p}s2`), slides(`${p}h0`)]).toEqual([
+        '0,0 300x100',
+        '600,0 300x100',
+        '0,0 100x100',
+        '200,0 100x100',
+        '0,0 150x100'
+      ]);
+      // centred, 300 px in 200: the first item starts at the top, not 50 px above it (P109-S37-CENTRECUT)
+      expect(centre(`${p}0`)).toBe('100,0 100x100');
+    }
+    // with Native platform scroll off a person scrolls as far as the inner box reaches: all three Fixed slides (900), and
+    // a short page's whole window (200) — a box one window wide would hold the slides in place and never reach them
+    const box = (name: string, id: string) => read(name).get(id)!.inner;
+    expect([box('scroll-slides', 'if'), box('scroll-slides', 'is'), box('scroll-fill', 'is'), box('scroll-fill', 'il')]).toEqual([
+      { w: 900, h: 200 },
+      { w: 300, h: 200 },
+      { w: 300, h: 200 },
+      { w: 300, h: 370 }
+    ]);
   });
 });

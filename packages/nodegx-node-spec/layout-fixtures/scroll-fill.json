@@ -1,0 +1,334 @@
+{
+  "name": "scroll-fill",
+  "rule": "a 200 px scrolling column: a 40 px header, a body at Height 100% (a share), a 30 px footer — the body fills what the window leaves, and is never shorter than its content (40 px: fills to 130; 300 px: 300). n… native, i… Native platform scroll off; s… short, l… long (ruled 2026-10-09, P109 ISL-052)",
+  "nodes": [
+    {
+      "id": "ns",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "scrollEnabled": true,
+        "nativeScroll": true
+      },
+      "children": [
+        {
+          "id": "nsh",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 40,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "nsb",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 100,
+              "unit": "%"
+            }
+          },
+          "children": [
+            {
+              "id": "nsbc",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 40,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 40,
+                  "unit": "px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "nsf",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 30,
+              "unit": "px"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "is",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "scrollEnabled": true,
+        "nativeScroll": false
+      },
+      "children": [
+        {
+          "id": "ish",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 40,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "isb",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 100,
+              "unit": "%"
+            }
+          },
+          "children": [
+            {
+              "id": "isbc",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 40,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 40,
+                  "unit": "px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "isf",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 30,
+              "unit": "px"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "nl",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "scrollEnabled": true,
+        "nativeScroll": true
+      },
+      "children": [
+        {
+          "id": "nlh",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 40,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "nlb",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 100,
+              "unit": "%"
+            }
+          },
+          "children": [
+            {
+              "id": "nlbc",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 40,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 300,
+                  "unit": "px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "nlf",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 30,
+              "unit": "px"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "il",
+      "type": "Group",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 300,
+          "unit": "px"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "scrollEnabled": true,
+        "nativeScroll": false
+      },
+      "children": [
+        {
+          "id": "ilh",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 40,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "ilb",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 100,
+              "unit": "%"
+            }
+          },
+          "children": [
+            {
+              "id": "ilbc",
+              "type": "Group",
+              "parameters": {
+                "sizeMode": "explicit",
+                "width": {
+                  "value": 40,
+                  "unit": "px"
+                },
+                "height": {
+                  "value": 300,
+                  "unit": "px"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "ilf",
+          "type": "Group",
+          "parameters": {
+            "sizeMode": "explicit",
+            "width": {
+              "value": 100,
+              "unit": "px"
+            },
+            "height": {
+              "value": 30,
+              "unit": "px"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

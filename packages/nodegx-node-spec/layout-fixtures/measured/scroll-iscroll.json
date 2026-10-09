@@ -12,7 +12,7 @@
         {
           "id": "page",
           "type": "Page",
-          "parent": "0ccff901-f974-9c63-9a9a-fa0ecc3fb650",
+          "parent": "1e212a12-aa1b-b588-a2c8-6c73640ba19e",
           "box": {
             "x": 0,
             "y": 0,
@@ -90,6 +90,10 @@
             "sh": 330,
             "cw": 300,
             "ch": 200
+          },
+          "inner": {
+            "w": 300,
+            "h": 330
           },
           "opacity": 1,
           "transformed": false,
@@ -291,7 +295,7 @@
         {
           "id": "page",
           "type": "Page",
-          "parent": "0ccff901-f974-9c63-9a9a-fa0ecc3fb650",
+          "parent": "1e212a12-aa1b-b588-a2c8-6c73640ba19e",
           "box": {
             "x": 0,
             "y": 0,
@@ -369,6 +373,10 @@
             "sh": 330,
             "cw": 300,
             "ch": 200
+          },
+          "inner": {
+            "w": 300,
+            "h": 330
           },
           "opacity": 1,
           "transformed": false,

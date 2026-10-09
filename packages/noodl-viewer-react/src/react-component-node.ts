@@ -35,7 +35,7 @@ import {
   type DefaultLayerInfo,
   type LayerableStyle
 } from './default-style-layer';
-import Layout, { type ParentLayout } from './layout';
+import Layout, { scrollAlongLayout, type ParentLayout } from './layout';
 import { explainStyleSources, type StyleSourceFinding } from './style-sources';
 import mergeDeep from './mergedeep';
 import NodeSharedPortDefinitions from './node-shared-port-definitions';
@@ -241,6 +241,8 @@ export interface ReactNodeInstance extends NodeInstance {
   childrenCount: number;
   /** Memoised result of {@link renderChildren}; cleared whenever children change. */
   cachedChildren: React.ReactNode;
+  /** How this node scrolled when `cachedChildren` was built (`renderChildren`). */
+  _childrenScrollKey?: string;
   updateChildIndiciesScheduled: boolean;
 
   addChild(child: ReactNodeInstance, index?: number): void;
@@ -1107,6 +1109,9 @@ export class NoodlReactComponent extends React.Component<NoodlReactComponentProp
       if (parent && parent.props.layout) {
         props.parentLayout = parent.props.layout;
       }
+      // P109 ISL-052: a percentage along the axis a parent scrolls is of the visible window (layout.ts `scrollAxisPercent`)
+      const parentScroll = parent ? scrollAlongLayout(parent.props, parent.style) : undefined;
+      if (parentScroll) props.parentScroll = parentScroll;
     }
 
     //optimization. This is used by forceUpdate() to only render this node once per frame.
@@ -1832,6 +1837,13 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
         });
       },
       renderChildren() {
+        // The children read how this node scrolls as `parentScroll` (above), so a change to it drops the memo as `setLayout`
+        // does for the layout — Enable Scroll, Native platform scroll and Wrap arrive as plain props, with no setter to do it.
+        const scrollKey = scrollAlongLayout(this.props, this.style);
+        if (scrollKey !== this._childrenScrollKey) {
+          this._childrenScrollKey = scrollKey;
+          this.cachedChildren = undefined;
+        }
         if (!this.cachedChildren) {
           let c = this.children.map((child) => child.render());
 

@@ -12,7 +12,7 @@
         {
           "id": "page",
           "type": "Page",
-          "parent": "3a5c40b3-498e-3b11-8ffa-5c0b4dcc6b51",
+          "parent": "2682ecc2-fd3c-136b-bc39-4ee5b3684e31",
           "box": {
             "x": 0,
             "y": 0,
@@ -226,6 +226,10 @@
             "cw": 300,
             "ch": 200
           },
+          "inner": {
+            "w": 300,
+            "h": 200
+          },
           "opacity": 1,
           "transformed": false,
           "hit": true,
@@ -495,6 +499,10 @@
             "sh": 200,
             "cw": 300,
             "ch": 200
+          },
+          "inner": {
+            "w": 300,
+            "h": 200
           },
           "opacity": 1,
           "transformed": false,
@@ -766,6 +774,10 @@
             "cw": 300,
             "ch": 200
           },
+          "inner": {
+            "w": 300,
+            "h": 200
+          },
           "opacity": 1,
           "transformed": false,
           "hit": false,
@@ -1036,6 +1048,10 @@
             "cw": 300,
             "ch": 200
           },
+          "inner": {
+            "w": 300,
+            "h": 200
+          },
           "opacity": 1,
           "transformed": false,
           "hit": false,
@@ -1146,7 +1162,7 @@
         {
           "id": "page",
           "type": "Page",
-          "parent": "3a5c40b3-498e-3b11-8ffa-5c0b4dcc6b51",
+          "parent": "2682ecc2-fd3c-136b-bc39-4ee5b3684e31",
           "box": {
             "x": 0,
             "y": 0,
@@ -1360,6 +1376,10 @@
             "cw": 300,
             "ch": 200
           },
+          "inner": {
+            "w": 300,
+            "h": 200
+          },
           "opacity": 1,
           "transformed": false,
           "hit": true,
@@ -1629,6 +1649,10 @@
             "sh": 200,
             "cw": 300,
             "ch": 200
+          },
+          "inner": {
+            "w": 300,
+            "h": 200
           },
           "opacity": 1,
           "transformed": false,
@@ -1900,6 +1924,10 @@
             "cw": 300,
             "ch": 200
           },
+          "inner": {
+            "w": 300,
+            "h": 200
+          },
           "opacity": 1,
           "transformed": false,
           "hit": false,
@@ -2169,6 +2197,10 @@
             "sh": 200,
             "cw": 300,
             "ch": 200
+          },
+          "inner": {
+            "w": 300,
+            "h": 200
           },
           "opacity": 1,
           "transformed": false,

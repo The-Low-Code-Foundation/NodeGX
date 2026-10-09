@@ -1,7 +1,7 @@
 ---
 id: P107-C154
 title: In a scrolling Group (Native platform scroll on, the default) a percent child grows into the visible height — with it off, the same child is its content
-status: needs-ruling
+status: fixed
 phase: P109
 task: ISL-052
 severity: low
@@ -9,7 +9,7 @@ area: runtime / Group (noodl-viewer-react/src/components/visual/Group/Group.tsx,
 found: P107 NSP-016 s71, 2026-10-09
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §8.3; measured on headless Chrome (packages/nodegx-node-spec/layout-fixtures/measured/scroll-percent-content.json)
 kit: node-spec
-regression: packages/nodegx-node-spec/tests/layout-check.test.ts "P107-C154 — with Native platform scroll on (the default), a percent child of a scrolling column grows into the 200 px it shows: 140 high round 40 px of content"
+regression: packages/nodegx-node-spec/tests/layout-check.test.ts "P109-S37-SCROLLROOM (ruled, ISL-052) — the room inside a scroll is the window unless the content is longer: a share fills what is left and is never shorter than its content, a Fixed percentage is of the window, a long list starts at the top — and the two paths agree"
 ---
 
 **What a person sees.** A 200 px scrolling column holds a Group at 50% height with 40 px of content, then a 50 px card. With
@@ -35,3 +35,9 @@ measures `pct` 100×40 and `fix` at y 40 (40, not 50: the gap is P107-C152).
 say: on the native path, put the children in a wrapper that hugs them, or give a percent child of a scrolling Group no grow
 and no shrink, so it is its content. Then re-record `scroll-percent-content`, drop its rows from `KNOWN`, and flip the
 regression test. If the native path's reading is wanted, the model and the iScroll path move instead.
+
+**Ruled 2026-10-09 and fixed (P109 ISL-052, s37).** Richard, from three worked screens: inside a scrolling Group the room is the
+visible window, unless the content is longer, and then the content wins. So the native path's reading here (the share fills
+what the window leaves: 140) is the product's, and the Native-platform-scroll-off path and the model move. The off path now
+gives 140 too (a share starts at 0 and grows into an inner box never shorter than the window). The model is P107's:
+P109-S37-SCROLLROOM.

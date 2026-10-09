@@ -2,6 +2,7 @@
 id: P107-C153
 title: A Group with Enable Scroll on and Native platform scroll off does not clip — the children past its bottom are drawn over the page below and take presses
 status: fixed
+commit: 0859bbbde
 phase: P109
 task: ISL-052
 severity: medium

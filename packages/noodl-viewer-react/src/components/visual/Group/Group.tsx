@@ -41,10 +41,28 @@ export interface GroupProps extends Noodl.ReactProps {
 
 type ScrollRef = HTMLDivElement & { noodlNode?: Noodl.ReactProps['noodlNode'] };
 
-export class Group extends React.Component<GroupProps> {
+let safeAlignment: boolean | undefined;
+/**
+ * P109-S37-CENTRECUT (ruled 2026-10-09: inside a scrolling Group the content wins once it is longer than the window): a
+ * scroller centres or end-aligns only what fits. Plain `center` on a scroll box pushes the overflow past the start as well,
+ * where no scrolling reaches it — the first item's top was cut off for good. `safe` keeps the start in reach. A browser
+ * without `safe` would drop the whole declaration, so it is asked first and keeps the plain value.
+ */
+function safely<T>(value: T): T {
+  if (value !== 'center' && value !== 'flex-end' && value !== 'end') return value;
+  if (safeAlignment === undefined) {
+    safeAlignment = typeof CSS !== 'undefined' && typeof CSS.supports === 'function' && CSS.supports('justify-content', 'safe center');
+  }
+  return (safeAlignment ? `safe ${value}` : value) as T;
+}
+
+export class Group extends React.Component<GroupProps, { view?: { width: number; height: number } }> {
   scrollNeedsToInit: boolean;
   scrollRef: React.RefObject<ScrollRef>;
   iScroll?: BScroll;
+  state: { view?: { width: number; height: number } } = {};
+  viewObserver?: ResizeObserver;
+  viewObserved?: Element;
 
   constructor(props: GroupProps) {
     super(props);
@@ -66,9 +84,47 @@ export class Group extends React.Component<GroupProps> {
     if (this.props.scrollEnabled && !this.props.nativeScroll) {
       this.setupIScroll();
     }
+    this.syncViewObserver();
+  }
+
+  /**
+   * P109-S37-ISCROLLPERCENT (ruled 2026-10-09): with Native platform scroll off the children sit in an inner box that hugs
+   * them, so a percentage there was of the children added up — slides at 100% came out as wide as all their pictures. The
+   * visible window's size (the Group's content box) is measured here and handed to the inner box as `--ndl-scroll-width` /
+   * `--ndl-scroll-height`, which a child's percentage along the scroll is written against (layout.ts `scrollAxisPercent`).
+   * Measured at the mount (before the first paint) and again whenever the Group's box changes size.
+   */
+  syncViewObserver() {
+    const el = this.scrollRef.current;
+    const wanted = this.props.scrollEnabled && !this.props.nativeScroll && el && typeof ResizeObserver !== 'undefined';
+    if (!wanted) {
+      this.viewObserver?.disconnect();
+      this.viewObserver = undefined;
+      this.viewObserved = undefined;
+      return;
+    }
+    if (this.viewObserver && this.viewObserved === el) return;
+    this.viewObserver?.disconnect();
+    this.viewObserved = el;
+    this.viewObserver = new ResizeObserver(() => this.measureView());
+    this.viewObserver.observe(el);
+    this.measureView();
+  }
+
+  measureView() {
+    const el = this.scrollRef.current;
+    if (!el) return;
+    const cs = getComputedStyle(el);
+    const width = el.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
+    const height = el.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
+    const view = this.state.view;
+    if (view && view.width === width && view.height === height) return;
+    this.setState({ view: { width, height } });
   }
 
   componentWillUnmount() {
+    this.viewObserver?.disconnect();
+    this.viewObserver = undefined;
     if (this.iScroll) {
       this.iScroll.destroy();
       this.iScroll = undefined;
@@ -255,6 +311,8 @@ export class Group extends React.Component<GroupProps> {
         this.iScroll && this.iScroll.refresh();
       }, 0);
     }
+
+    this.syncViewObserver();
   }
 
   renderIScroll() {
@@ -270,8 +328,8 @@ export class Group extends React.Component<GroupProps> {
       flexWrap,
       rowGap,
       columnGap,
-      alignItems,
-      justifyContent,
+      alignItems: safely(alignItems),
+      justifyContent: safely(justifyContent),
       touchAction: 'none'
       // pointerEvents: this.state.isScrolling ? 'none' : undefined
     };
@@ -288,6 +346,16 @@ export class Group extends React.Component<GroupProps> {
       } else {
         childStyle.width = '100%';
       }
+    }
+
+    // P107-C154, P109-S37-SCROLLCENTRE (ruled 2026-10-09: inside a scrolling Group the room is the visible window, unless the
+    // content is longer): this box is never shorter than the window along the scroll, so a share fills what the window
+    // leaves and a short list centres in it, as on the native path; longer content makes it longer
+    if (this.getScrollDirection() === 'x') childStyle.minWidth = '100%';
+    else childStyle.minHeight = '100%';
+    const view = this.state.view;
+    if (view) {
+      Object.assign(childStyle, { '--ndl-scroll-width': `${view.width}px`, '--ndl-scroll-height': `${view.height}px` });
     }
 
     return (
@@ -351,6 +419,13 @@ export class Group extends React.Component<GroupProps> {
     if (props.clip || (props.scrollEnabled && !props.nativeScroll)) {
       style.overflowX = 'hidden';
       style.overflowY = 'hidden';
+    }
+
+    if (props.scrollEnabled) {
+      // P109-S37-CENTRECUT: centre or end only what fits (`safely`) — on the native path the children, with Native platform
+      // scroll off the inner box, which is longer than the window once the content is
+      style.justifyContent = safely(style.justifyContent);
+      style.alignItems = safely(style.alignItems);
     }
 
     if (props.scrollEnabled && props.nativeScroll) {

@@ -33,6 +33,7 @@
  *   `transformed` whether the element or an ancestor carries a transform (then `box` is not the layout box).
  *   and the computed `display`, `visibility`, `position`, `overflow`, padding and border widths, `className` (a node a
  *   stylesheet class reaches is reported by step 5, not graded — R17), and the scroll extent (`scrollWidth` / `clientWidth`…).
+ *   `inner`   a Group with Native platform scroll off: its inner box's size — how far the scroller lets a person scroll.
  *
  * The Page and the App Group are measured too (`page`, `app-root`): the parents of the fixture's top level.
  */
@@ -138,6 +139,10 @@ const READ = `(() => {
     row.display = cs.display; row.visibility = cs.visibility; row.position = cs.position; row.overflow = cs.overflowX + ' ' + cs.overflowY;
     row.className = typeof el.className === 'string' ? el.className : '';
     row.scroll = { sw: el.scrollWidth, sh: el.scrollHeight, cw: el.clientWidth, ch: el.clientHeight };
+    // With Native platform scroll off the scroller moves an inner box and scrolls as far as that box reaches, not as far as
+    // the children overflow it — so its size is what a person can scroll through (P109 ISL-052)
+    const inner = el.firstElementChild;
+    if (inner && inner.classList && inner.classList.contains('scroll-wrapper-internal')) row.inner = { w: inner.offsetWidth, h: inner.offsetHeight };
     let opacity = 1, transformed = false;
     for (let a = el; a && a.nodeType === 1; a = a.parentElement) { const s = getComputedStyle(a); opacity *= parseFloat(s.opacity); if (s.transform && s.transform !== 'none') transformed = true; }
     row.opacity = opacity; row.transformed = transformed;
