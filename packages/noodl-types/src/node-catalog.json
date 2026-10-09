@@ -8595,7 +8595,7 @@
             "codenotation": "expression"
           },
           "isSignal": false,
-          "description": "JavaScript expression whose value becomes Result. Every name it reads becomes an input port, except JavaScript's own (String, Number, JSON, Date, parseInt, Math and the rest), the Math shortcuts (round, min, pi…) and keywords such as typeof; a port can never be called one of those"
+          "description": "JavaScript expression whose value becomes Result. Every name it reads becomes an input port, except JavaScript's own (String, Number, JSON, Date, parseInt, Math and the rest), the Math shortcuts (round, min, pi…) and keywords such as typeof; a port can never be called one of those, nor run, expression or evaluateAtLoad, which are this node's own inputs"
         },
         {
           "name": "run",

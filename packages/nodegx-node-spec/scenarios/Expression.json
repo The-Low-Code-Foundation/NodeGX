@@ -481,8 +481,8 @@
     ]
   },
   {
-    "name": "a text naming a declared port (run) gets no port for it and always throws (row C145)",
-    "because": "expression.ts :521 (`hasInput` is true for Run) — NSP-017 §6 C145",
+    "name": "a text reading run gets no port for it and fails as a reserved name, at load and on Run (v3, row C145)",
+    "because": "P107-C145, ruled \"Block the three names\" — expression-ports.ts reserves the node's own inputs; `_calculateExpression` fails `expression/reserved-name` before compiling",
     "params": {
       "expression": "run + 1"
     },
@@ -490,6 +490,44 @@
       "settle",
       {
         "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a reserved name beside a port: the load waits for the port, then the evaluation fails as a reserved name (v3, row C145)",
+    "because": "`_scheduleLoadEvaluation` — `a` is the only referenced port; the load over it unset throws and is silent; `a` arriving runs `_calculateExpression`",
+    "params": {
+      "expression": "a + evaluateAtLoad"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 1
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two reserved names are named together, and renaming the variable clears Error (v3, rows C145, C144)",
+    "because": "`reservedNameMessage` lists every name read; a working evaluation after a failure sends Error as blank text",
+    "params": {
+      "expression": "expression + run"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "expression",
+        "value": "runCount + 1"
+      },
+      {
+        "set": "runCount",
+        "value": 2
       },
       "settle"
     ]

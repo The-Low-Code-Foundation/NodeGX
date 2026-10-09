@@ -36,6 +36,9 @@
  *     the engine's message) or that throws (`expression/threw`, "The expression threw: " + the message) answers `0`, writes
  *     Error, and — per distinct message until an evaluation works — pulses Failure, unless Run asked: then every waiting Run is
  *     answered `failure` with the code and Failure is not pulsed separately. Done answers every other Run, after On True / On False.
+ *   - A RESERVED NAME (v3, row C145, ruled "Block the three names"): a text that reads `run`, `expression` or `evaluateAtLoad` — the
+ *     node's own inputs — gets no port for it (expression-ports.ts reserves them) and fails every evaluation with
+ *     `expression/reserved-name`, before anything is compiled; a load evaluation over unset ports stays silent, as for any failure.
  *   - ERROR IS CLEARED ON THE WIRE (v2, row C144, as ruled for D25 "Clear it to blank text"): a working evaluation after a failure
  *     writes Error as blank text and sends it, once; a later one finds it blank and sends nothing (v1 emptied it without sending it,
  *     so a wire on Error kept the last failure).
@@ -46,7 +49,7 @@
 
 import { defineNode, type InputDecl } from '../spec';
 import { valueDidChange } from './condition';
-import { expressionPorts, isReservedExpressionName } from './expression-ports';
+import { expressionNodeInputsRead, expressionPorts, isReservedExpressionName } from './expression-ports';
 
 /** :753-778 — declared in front of every expression. */
 const PREAMBLE = [
@@ -76,8 +79,6 @@ const PREAMBLE = [
 ].join('');
 
 const RUN_ON_CHANGE = 'runOnChange-';
-/** The node's declared inputs — `hasInput` is true for them, so the text naming one mints no port (:521, row C145). */
-const DECLARED: ReadonlySet<string> = new Set(['expression', 'run', 'evaluateAtLoad']);
 
 /**
  * :432-435 — the Noodl API handed as the last argument. v1's examples read no Noodl global, so the handle is an empty stand-in; v2
@@ -85,13 +86,15 @@ const DECLARED: ReadonlySet<string> = new Set(['expression', 'run', 'evaluateAtL
  */
 const NOODL_API = Object.freeze({});
 
-type Failure = { code: 'expression/compile-failed' | 'expression/threw'; message: string };
+type Failure = { code: 'expression/compile-failed' | 'expression/threw' | 'expression/reserved-name'; message: string };
 
 export type ExpressionState = {
   /** :504 — the function body: the preamble and `return (<text>);`. `''` until the text is set (:163), which compiles to a function returning `undefined`. */
   body: string;
   /** :508 `referencedPorts` — the names the CURRENT text reads. */
   referenced: readonly string[];
+  /** `reservedReads` (v3, row C145) — the node's own input names the CURRENT text reads as variables. */
+  reserved: readonly string[];
   /** :46 `scope` — every input's value by name, in registration order: the text's ports, then strays. */
   scope: Readonly<Record<string, unknown>>;
   /** :565 `inputNames` — `Object.keys(scope)` as it stood when the text was last set: the order values are handed in. */
@@ -153,8 +156,18 @@ function overUnset(s: Readonly<ExpressionState>): { value: unknown; compiledWith
   return { value: value !== value ? NOT_EVALUATED : value, compiledWith: c.compiledWith };
 }
 
+/** `reservedNameMessage` (v3, row C145) — what the node says about a text that reads one of its own input names. */
+function reservedNameMessage(names: readonly string[]): string {
+  const list = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names.join('');
+  return names.length === 1
+    ? `${list} is the name of one of this Expression's own inputs (Expression, Run, Evaluate At Load), so the expression cannot read a variable called that — rename it, for example to ${list}Value`
+    : `${list} are names of this Expression's own inputs (Expression, Run, Evaluate At Load), so the expression cannot read variables called those — rename them`;
+}
+
 /** :379-424 `_calculateExpression` — the answer (`0` on a failure) and the failure. */
 function calculate(s: Readonly<ExpressionState>): { value: unknown; failure?: Failure; compiledWith: readonly string[] | undefined } {
+  // v3, row C145: a text that reads the node's own input names fails before anything is compiled
+  if (s.reserved.length > 0) return { value: 0, failure: { code: 'expression/reserved-name', message: reservedNameMessage(s.reserved) }, compiledWith: s.compiledWith };
   const c = compiled(s);
   if (!c.fn) return { value: 0, failure: { code: 'expression/compile-failed', message: 'The expression could not be compiled: ' + (c.error || 'syntax error') }, compiledWith: undefined };
   try {
@@ -176,13 +189,16 @@ const schedule = { scheduled: true } as const;
 
 export const Expression = defineNode({
   type: 'Expression',
+  // v3 (P109 ISL-051, s33): a text that reads run, expression or evaluateAtLoad gets no port for it and fails, every evaluation, with
+  // `expression/reserved-name` (row C145, ruled "Block the three names"); in v2 the editor drew the port and the text threw "run is not defined"
   // v2 (P109 ISL-051, s32): a working evaluation after a failure sends Error as blank text, once (row C144)
-  version: 2,
+  version: 3,
   source: 'packages/noodl-runtime/src/nodes/std-library/expression.ts',
 
   state: {
     body: '',
     referenced: [],
+    reserved: [],
     scope: {},
     names: [],
     compiledWith: undefined,
@@ -211,7 +227,7 @@ export const Expression = defineNode({
       displayName: 'Expression',
       group: 'General',
       description:
-        "JavaScript expression whose value becomes Result. Every name it reads becomes an input port, except JavaScript's own (String, Number, JSON, Date, parseInt, Math and the rest), the Math shortcuts (round, min, pi…) and keywords such as typeof; a port can never be called one of those",
+        "JavaScript expression whose value becomes Result. Every name it reads becomes an input port, except JavaScript's own (String, Number, JSON, Date, parseInt, Math and the rest), the Math shortcuts (round, min, pi…) and keywords such as typeof; a port can never be called one of those, nor run, expression or evaluateAtLoad, which are this node's own inputs",
       examples: [
         'a + b',
         'a * 2',
@@ -227,7 +243,7 @@ export const Expression = defineNode({
         'a ? b : null',
         '({ v: a })',
         'b',
-        // a name that is a declared port: not in the scope, so the compiled function reads the global (row C145)
+        // the node's own input name: no port, and every evaluation fails as a reserved name (v3, row C145)
         'run'
       ]
     },
@@ -283,13 +299,13 @@ export const Expression = defineNode({
         delete scope[name];
         delete unticked[name];
       }
-      // :520-535 — a new port, unless one by that name is already there (a stray, or a declared input: row C145)
-      for (const name of ports) if (!(name in scope) && !DECLARED.has(name)) scope[name] = undefined;
+      // :520-535 — a new port, unless one by that name is already there (a stray; the declared inputs' names are reserved, row C145)
+      for (const name of ports) if (!(name in scope)) scope[name] = undefined;
       const referenced = ports;
       // :234-244 `_scheduleLoadEvaluation`
       const pendingLoad = referenced.length > 0 && !s.arrived ? true : s.pendingLoad;
       return {
-        set: { body: PREAMBLE + 'return (' + text + ');', referenced, scope, names: Object.keys(scope), compiledWith: undefined, unticked, pendingLoad, ...schedule },
+        set: { body: PREAMBLE + 'return (' + text + ');', referenced, reserved: expressionNodeInputsRead(text), scope, names: Object.keys(scope), compiledWith: undefined, unticked, pendingLoad, ...schedule },
         send: []
       };
     },
@@ -348,9 +364,6 @@ export const Expression = defineNode({
         const ports: Record<string, InputDecl> = {};
         if (typeof params.expression !== 'string') return ports;
         for (const name of expressionPorts(params.expression)) {
-          // row C145 — the editor draws a port for a declared input's name too, but the runtime's port by that name is the declared
-          // one (a value never reaches the text), and a derived port may not shadow a declared input (spec.ts DerivedPorts)
-          if (DECLARED.has(name)) continue;
           ports[name] = valuePort();
           ports[RUN_ON_CHANGE + name] = checkboxPort();
         }

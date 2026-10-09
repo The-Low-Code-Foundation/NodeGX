@@ -26,7 +26,7 @@ Small computations and predicates inline in a graph: arithmetic, comparisons, st
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `evaluateAtLoad` | Boolean | `true` | Whether the expression runs when the page loads even though an input it reads has not arrived yet. Those inputs read as undefined, so `m !== false` is true and `m === true` is false. An expression that throws or gives NaN over them waits for its inputs instead. Untick to wait for an input to arrive |
-| `expression` | String | — | JavaScript expression whose value becomes Result. Every name it reads becomes an input port, except JavaScript's own (String, Number, JSON, Date, parseInt, Math and the rest), the Math shortcuts (round, min, pi…) and keywords such as typeof; a port can never be called one of those |
+| `expression` | String | — | JavaScript expression whose value becomes Result. Every name it reads becomes an input port, except JavaScript's own (String, Number, JSON, Date, parseInt, Math and the rest), the Math shortcuts (round, min, pi…) and keywords such as typeof; a port can never be called one of those, nor run, expression or evaluateAtLoad, which are this node's own inputs |
 
 ### Signals
 

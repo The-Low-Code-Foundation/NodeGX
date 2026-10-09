@@ -12,7 +12,7 @@ import type {
   OutcomeToken
 } from '@noodl/types';
 
-import { expressionPorts, isReservedExpressionName } from './expression-ports';
+import { expressionNodeInputsRead, expressionPorts, isReservedExpressionName } from './expression-ports';
 import { ARITHMETIC_SEARCH_TAGS } from './logic-search-tags';
 
 import Node = require('../../node');
@@ -80,6 +80,8 @@ interface ExpressionNodeInstance extends NodeInstance {
      * not have read. Gate on what the expression asked for.
      */
     referencedPorts: string[];
+    /** P107-C145 — the node's own input names the text reads as variables: it cannot run, and says so (`reservedNameMessage`). */
+    reservedReads: string[];
     /** The full function body, preamble included — not the raw text the author typed. */
     currentExpression: string;
     compiledFunction?: (...args: unknown[]) => unknown;
@@ -158,6 +160,7 @@ const ExpressionNode: NodeDefinitionOptions = {
     internal.hasEvaluated = false;
     internal.anyInputArrived = false;
     internal.referencedPorts = [];
+    internal.reservedReads = [];
     internal.evaluateAtLoad = true;
     internal.pendingLoadEvaluation = false;
     internal.currentExpression = '';
@@ -379,6 +382,15 @@ const ExpressionNode: NodeDefinitionOptions = {
     _calculateExpression: function (this: ExpressionNodeInstance, tokens?: OutcomeToken[]) {
       const internal = this._internal;
 
+      // P109 ISL-051 (P107-C145, ruled "Block the three names"): a text that reads `run`, `expression` or `evaluateAtLoad` as a
+      // variable can never get a value for it — the port by that name is the node's own. It used to throw "run is not defined"
+      // at every run; it says the name is reserved instead, before anything is compiled.
+      if (internal.reservedReads.length > 0) {
+        const names = internal.reservedReads.slice();
+        this._reportFailure('expression/reserved-name', reservedNameMessage(names), { names }, tokens);
+        return 0;
+      }
+
       if (!internal.compiledFunction) {
         internal.compiledFunction = this._compileFunction();
       }
@@ -503,7 +515,7 @@ const ExpressionNode: NodeDefinitionOptions = {
       },
       displayName: 'Expression',
       description:
-        "JavaScript expression whose value becomes Result. Every name it reads becomes an input port, except JavaScript's own (String, Number, JSON, Date, parseInt, Math and the rest), the Math shortcuts (round, min, pi…) and keywords such as typeof; a port can never be called one of those",
+        "JavaScript expression whose value becomes Result. Every name it reads becomes an input port, except JavaScript's own (String, Number, JSON, Date, parseInt, Math and the rest), the Math shortcuts (round, min, pi…) and keywords such as typeof; a port can never be called one of those, nor run, expression or evaluateAtLoad, which are this node's own inputs",
       set: function (this: ExpressionNodeInstance, value: string) {
         const internal = this._internal;
         internal.currentExpression = functionPreamble + 'return (' + value + ');';
@@ -511,6 +523,7 @@ const ExpressionNode: NodeDefinitionOptions = {
 
         const newInputs = expressionPorts(value);
         internal.referencedPorts = newInputs;
+        internal.reservedReads = expressionNodeInputsRead(value);
 
         const inputsToAdd: string[] = difference(newInputs, internal.inputNames);
         const inputsToRemove: string[] = difference(internal.inputNames, newInputs);
@@ -797,6 +810,14 @@ function construct(constructor: FunctionConstructor, args: string[]) {
 
 const compiledFunctionsCache: Record<string, (...args: unknown[]) => unknown> = {};
 
+/** P107-C145 — what the node says about a text that reads one of its own input names. */
+function reservedNameMessage(names: readonly string[]): string {
+  const list = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names.join('');
+  return names.length === 1
+    ? `${list} is the name of one of this Expression's own inputs (Expression, Run, Evaluate At Load), so the expression cannot read a variable called that — rename it, for example to ${list}Value`
+    : `${list} are names of this Expression's own inputs (Expression, Run, Evaluate At Load), so the expression cannot read variables called those — rename them`;
+}
+
 function updatePorts(nodeId: string, expression: string, editorConnection: EditorConnectionLike) {
   // The same function the `expression` setter uses, so the editor's ports are the runtime's.
   const portNames = expressionPorts(expression);
@@ -832,6 +853,11 @@ function evalCompileWarnings(editorConnection: EditorConnectionLike, node: Graph
   if (!validation.valid) {
     editorConnection.sendWarning(node.component.name, node.id, 'expression-compile-error', {
       message: 'Syntax error: ' + validation.error
+    });
+  } else if (expressionNodeInputsRead(expression).length > 0) {
+    // P107-C145 — said where the text is typed, not only when it runs
+    editorConnection.sendWarning(node.component.name, node.id, 'expression-compile-error', {
+      message: reservedNameMessage(expressionNodeInputsRead(expression))
     });
   } else {
     editorConnection.clearWarning(node.component.name, node.id, 'expression-compile-error');
