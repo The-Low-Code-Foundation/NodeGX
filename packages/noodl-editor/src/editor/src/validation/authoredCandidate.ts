@@ -650,8 +650,9 @@ export function authoredPreconditionDiagnostics(options: AuthoredPreconditionOpt
     ...checkResponsiveArrangement(nodes, { component, catalog, views, connectedInputs: connections }),
     // DEF-018/DEF-020 — the two layout combinations in which a declared
     // parameter is silently inert: a contentSize child of a Columns, and a
-    // distributing justifyContent on a row whose children all grow.
-    ...checkLayoutInertCombination(nodes, { component, catalog, connectedInputs: connections }),
+    // distributing justifyContent on a row whose children all grow. P109-S40-ROWWRAPINSTANCE: the views let
+    // `row-cannot-wrap` read the root of a component placed in a row.
+    ...checkLayoutInertCombination(nodes, { component, catalog, views, connectedInputs: connections }),
     // DEF-024 — a mounted/visible gate whose every writer is a constant-true
     // Condition: it can only ever turn on, so sibling answers accumulate.
     ...checkOneWayGate(nodes, { component, catalog, wires }),

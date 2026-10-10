@@ -303,3 +303,126 @@ describe('ISL-022 — row-cannot-wrap names the row that cannot wrap', () => {
     expect(citationFor(d)?.examples).toEqual(['layout-wrap-a-row-of-content-width-items']);
   });
 });
+
+// ── row-cannot-wrap across a component boundary (P109-S40-ROWWRAPINSTANCE) ────────────────────────────
+
+/**
+ * ISL-022 AC6's first round (§8 s4): the agent built the cluster as a component of its own, `Tab Bar`, whose ROOT is the
+ * row of five tabs, and placed it in `Top Bar`'s wrapping row. Had it set `flexWrap` on that root, it would be `brTabs`'
+ * shape exactly, split across two components, and the rule above reads one component, so it could not see it.
+ */
+const TOP_BAR = { flexDirection: 'row', flexWrap: 'wrap', sizeMode: 'contentHeight', width: pct(100) };
+
+function tabBarView(root: Record<string, unknown> = TABS, items = 5) {
+  const ids = [...Array(items).keys()].map((i) => `tb${i}`);
+  return {
+    name: '/Tab Bar',
+    nodes: [
+      { id: 'tbRoot', type: 'Group', label: 'Tabs', children: ids, parameters: root },
+      ...ids.map((id) => ({ id, type: '/Tab Button', parent: 'tbRoot', parameters: {} }))
+    ]
+  };
+}
+
+function placed(
+  parent: Record<string, unknown> = TOP_BAR,
+  views: readonly { name: string; nodes: readonly LayoutNode[] }[] | 'none' = [tabBarView()],
+  connected?: Set<string>
+): Diagnostic[] {
+  return checkLayoutInertCombination(
+    [
+      { id: 'tpBar', type: 'Group', label: 'Top bar', children: ['tpName', 'tpTabs'], parameters: parent },
+      { id: 'tpName', type: 'Text', parameters: { text: 'Olive' } },
+      { id: 'tpTabs', type: '/Tab Bar', parameters: {} }
+    ],
+    { component: '/Top Bar', catalog, views: views === 'none' ? undefined : views, connectedInputs: connected }
+  ).filter((d) => d.code === DiagnosticCode.RowCannotWrap);
+}
+
+describe('ISL-022 — row-cannot-wrap sees a wrapping row that is another component’s root', () => {
+  it('fires on the placement, names the component and its root, and gives the exit in the same sentence', () => {
+    const found = placed();
+    expect(found.map((d) => ({ node: d.location.nodeId, type: d.location.nodeType, severity: d.severity }))).toEqual([
+      { node: 'tpTabs', type: '/Tab Bar', severity: 'warning' }
+    ]);
+    expect(found[0].message).toMatch(/"\/Tab Bar"/);
+    expect(found[0].message).toMatch(/"Tabs"/);
+    expect(found[0].message).toMatch(/sizeMode "contentSize"/);
+    expect(found[0].message).toMatch(/"Top bar"/);
+    expect(found[0].message).toMatch(/maxWidth 100%/);
+    expect(found[0].suggestion).toBe('maxWidth: 100%');
+  });
+
+  it('contentWidth on the root is the same defect', () => {
+    expect(placed(TOP_BAR, [tabBarView({ ...TABS, sizeMode: 'contentWidth' })]).map((d) => d.location.nodeId)).toEqual([
+      'tpTabs'
+    ]);
+  });
+
+  it('omitted views means "do not check": the caller could not read the placed component', () => {
+    expect(placed(TOP_BAR, 'none')).toEqual([]);
+  });
+
+  it('a component the views do not hold abstains', () => {
+    expect(placed(TOP_BAR, [{ ...tabBarView(), name: '/Something Else' }])).toEqual([]);
+  });
+
+  it('both measured exits on the root are silent', () => {
+    expect(placed(TOP_BAR, [tabBarView({ ...TABS, maxWidth: pct(100) })])).toEqual([]);
+    expect(placed(TOP_BAR, [tabBarView({ ...TABS, sizeMode: 'contentHeight', width: pct(100) })])).toEqual([]);
+  });
+
+  it('inline styleCss that sizes the root abstains, as on one component', () => {
+    expect(placed(TOP_BAR, [tabBarView({ ...TABS, styleCss: 'max-width: 100%;' })])).toEqual([]);
+  });
+
+  it('🔴 placed in a COLUMN the same root can wrap, and is silent', () => {
+    expect(placed({ flexDirection: 'column' })).toEqual([]);
+    expect(placed({})).toEqual([]);
+  });
+
+  it('a wired flexDirection on the placing parent abstains', () => {
+    expect(placed(TOP_BAR, [tabBarView()], new Set(['tpBar::flexDirection']))).toEqual([]);
+  });
+
+  it('a root that does not wrap, a root out of flow, and a pair are each silent', () => {
+    const { flexWrap: _, ...unwrapped } = TABS;
+    expect(placed(TOP_BAR, [tabBarView(unwrapped)])).toEqual([]);
+    expect(placed(TOP_BAR, [tabBarView({ ...TABS, position: 'absolute' })])).toEqual([]);
+    expect(placed(TOP_BAR, [tabBarView(TABS, 2)])).toEqual([]);
+    expect(placed(TOP_BAR, [tabBarView(TABS, 3)]).map((d) => d.location.nodeId)).toEqual(['tpTabs']);
+  });
+
+  it('a component with no single visual root abstains: two roots, a Component Children root, an instance root', () => {
+    const two = tabBarView();
+    expect(placed(TOP_BAR, [{ ...two, nodes: [...two.nodes, { id: 'extra', type: 'Group', parameters: {} }] }])).toEqual([]);
+    expect(
+      placed(TOP_BAR, [{ name: '/Tab Bar', nodes: [{ id: 'cc', type: 'net.noodl.ParentComponentObject', parameters: {} }] }])
+    ).toEqual([]);
+    expect(placed(TOP_BAR, [{ name: '/Tab Bar', nodes: [{ id: 'inner', type: '/Other', parameters: {} }] }])).toEqual([]);
+  });
+
+  it('cardinality: the placed component, validated on its own, still says nothing (its root has no parent)', () => {
+    const view = tabBarView();
+    const found = checkLayoutInertCombination(view.nodes, { component: '/Tab Bar', catalog, views: [view] }).filter(
+      (d) => d.code === DiagnosticCode.RowCannotWrap
+    );
+    expect(found).toEqual([]);
+  });
+
+  it('cardinality: one diagnostic per placement in a row', () => {
+    const found = checkLayoutInertCombination(
+      [
+        { id: 'tpBar', type: 'Group', children: ['a', 'b'], parameters: TOP_BAR },
+        { id: 'a', type: '/Tab Bar', parameters: {} },
+        { id: 'b', type: '/Tab Bar', parameters: {} }
+      ],
+      { component: '/Top Bar', catalog, views: [tabBarView()] }
+    ).filter((d) => d.code === DiagnosticCode.RowCannotWrap);
+    expect(found.map((d) => d.location.nodeId)).toEqual(['a', 'b']);
+  });
+
+  it('a stored v2 view that names the component without its leading slash still resolves', () => {
+    expect(placed(TOP_BAR, [{ ...tabBarView(), name: 'Tab Bar' }]).map((d) => d.location.nodeId)).toEqual(['tpTabs']);
+  });
+});

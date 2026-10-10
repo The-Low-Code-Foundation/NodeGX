@@ -96,7 +96,7 @@
 
 import type { CatalogIndex } from './CatalogIndex';
 import { DiagnosticCode, type Diagnostic, type Severity } from './diagnostics';
-import { isComponentRef } from './model';
+import { isComponentRef, refToPath } from './model';
 import type { ParameterizedNode } from './parameterValues';
 import { REPEATER_TYPE } from './repeaterTemplate';
 
@@ -249,17 +249,10 @@ function repeatedItemWidth(
   if (connectedInputs?.has(`${repeater.id}::template`)) return 'unknown';
   const template = repeater.parameters?.['template'];
   if (typeof template !== 'string' || template === '') return 'unknown';
-  const legacyName = template.startsWith('/') ? template : `/${template}`;
-  const view = views.find((v) => v.name === template || v.name === legacyName);
-  if (!view) return 'unknown';
+  const found = componentVisualRoot(template, views, catalog);
+  if (!found) return 'unknown';
 
-  const childIds = new Set(view.nodes.flatMap((n) => n.children ?? []));
-  const roots = view.nodes.filter((n) => !n.parent && !(n.id !== undefined && childIds.has(n.id)));
-  if (roots.some((n) => n.type === COMPONENT_CHILDREN_TYPE)) return 'unknown';
-  const visualRoots = roots.filter((n) => isVisualType(n.type, catalog));
-  if (visualRoots.length !== 1 || isComponentRef(visualRoots[0].type)) return 'unknown';
-
-  const [root] = visualRoots;
+  const { root } = found;
   const defaults = catalog.inputDefaults(root.type);
   // Unset reads as the catalog default: a Group is `explicit`, a Button is `contentSize`.
   const sizeMode = root.parameters?.['sizeMode'] ?? defaults['sizeMode'];
@@ -270,6 +263,29 @@ function repeatedItemWidth(
   const px = pixelLength(width);
   if (px === undefined) return 'unknown';
   return px > phoneContentBox(row) ? 'frozen' : 'fixed-fits';
+}
+
+/**
+ * The one visual node a component draws at its root, and the view it came from, or `undefined` when that is not
+ * knowable from the graph: no view by that name (with or without its leading `/` or `#`), a Component Children root
+ * (what it draws is decided by whoever places the component), a root that is itself a component instance, or not
+ * exactly one visual root. GAM-022's item read, shared with ISL-022's `row-cannot-wrap` across a component boundary.
+ */
+export function componentVisualRoot<V extends ItemComponentView>(
+  name: string,
+  views: readonly V[],
+  catalog: CatalogIndex
+): { view: V; root: V['nodes'][number] } | undefined {
+  const path = refToPath(name);
+  const view = views.find((v) => v.name === name || refToPath(v.name) === path);
+  if (!view) return undefined;
+
+  const childIds = new Set(view.nodes.flatMap((n) => n.children ?? []));
+  const roots = view.nodes.filter((n) => !n.parent && !(n.id !== undefined && childIds.has(n.id)));
+  if (roots.some((n) => n.type === COMPONENT_CHILDREN_TYPE)) return undefined;
+  const visualRoots = roots.filter((n) => isVisualType(n.type, catalog));
+  if (visualRoots.length !== 1 || isComponentRef(visualRoots[0].type)) return undefined;
+  return { view, root: visualRoots[0] };
 }
 
 /** Total nodes in a subtree, counting the root. Cycle-safe: a corrupt graph is not a crash. */

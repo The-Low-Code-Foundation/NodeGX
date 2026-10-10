@@ -1,6 +1,6 @@
 # ISL-022 — The wrapped-row warning means a row will overflow
 
-**Status: 🟢 s4 (2026-10-02): built on the ruling ("Yes, both") — AC2, AC3, AC4, AC5, AC7 met (§8 s4); arm B silent on items a phone holds, arm A silent on a wrapped row of clusters, and a new code `row-cannot-wrap` names `brTabs`. Census 22 → 14 + 7 new, every one read; landing-pages fixed at its source. AC6 run once and inconclusive (the agent never wrote the shape; it exposed a cross-component blind spot, §8 s4). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F29](AUDIT-2026-10-01.md) · P78
+**Status: 🟢 s40 (2026-10-10): s4's cross-component blind spot built (`P109-S40-ROWWRAPINSTANCE`: a wrapping, content-sized root placed in a row is named on the placement; 0 fires on the 13 templates); AC6 waits on a rebuilt `dist/noodl-mcp.cjs` (STALEMCPDIST). Was: 🟢 s4 (2026-10-02): built on the ruling ("Yes, both") — AC2, AC3, AC4, AC5, AC7 met (§8 s4); arm B silent on items a phone holds, arm A silent on a wrapped row of clusters, and a new code `row-cannot-wrap` names `brTabs`. Census 22 → 14 + 7 new, every one read; landing-pages fixed at its source. AC6 run once and inconclusive (the agent never wrote the shape; it exposed a cross-component blind spot, §8 s4). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F29](AUDIT-2026-10-01.md) · P78
 [D50](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) (✅ for pills, by GAM-022) · CG-003 AC1 and §7.2 ·
 **Side:** product (validator, `uncollapsible-multi-column` and the layout-inert family)
 
@@ -281,3 +281,31 @@ phone."* It hit the turn cap (≈ $2.15) after building and checking:
    parent is arm A's territory only when its tracks are ≥ 3 nodes; five instance tracks are one node each.
 
 AC6 stays open: its sentence ("if it writes the brTabs shape, the write's diagnostics name that row") was not exercised.
+
+### Session 40 — 2026-10-10, P109 s40: s4's finding 1 built (`P109-S40-ROWWRAPINSTANCE`)
+
+s4's finding 1 had been recorded here and never filed; s39's handoff listed AC6 as blocked without saying on what. Read
+at HEAD: the rule still returned `[]` for a component root (`if (!parent) return []`), and the agent's own split (`Tab Bar`
+whose root is the cluster, placed in `Top Bar`'s row) went unreported. Filed as `P109-S40-ROWWRAPINSTANCE` and built.
+
+- **The arm.** `row-cannot-wrap` now also fires on a component INSTANCE in a row parent when that component's single
+  visual root is the wrapping, content-sized row (`checkPlacedRowCannotWrap`, `layoutInertCombination.ts`). It reports on
+  the placement, because the placement is the defect (the same root in a column wraps) and because in leaves-first
+  authoring the placing write is the only one that holds both halves. The message names the component and its root,
+  where the repair goes. The row's own conditions are one function shared by both arms (`rowSizedToItsContent`), and
+  "the one visual root of a component" is one helper shared with GAM-022's arm B (`componentVisualRoot`,
+  `responsiveArrangement.ts`; name lookup now via `refToPath`, a widening). `checkLayoutInertCombination` takes the
+  same `views` the authored-candidate pipeline already hands arm B; omitted means the arm does not run.
+- **Honest limit:** views carry nodes, not wires, so a root whose `sizeMode`/`flexWrap` is wired inside its own
+  component reads as its authored value.
+- **Graded.** Editor spec: 15 new cases (45 / 45), red before the arm (5 firing cases ✕). Two mutants: no parent-axis
+  check → the column and wired-parent cases ✕; no pair floor → both pair cases ✕. Door spec
+  `noodl-mcp/tests/isl022RowWrapAcrossComponents.test.ts`: the leaf write says nothing, the `Top Bar` write names
+  `tpTabs:/Tab Bar`, the column placement says nothing; red with `views` un-wired at the call site.
+- **Census, all 13 templates through `validate_component`:** the new arm fires **0** times. The known-firing beside it,
+  in the same run, is the one-component arm: the garden's `brTabs`, nightbook's three `tn*` rows, planning's and
+  planning-demo's `abRight` (all `P109-S4-ROWWRAP`'s, ISL-037's).
+
+**AC6 still open, and now waits on the people's door:** `dist/noodl-mcp.cjs` (Oct 9) carries `row-cannot-wrap` but not
+this arm, so an agent that writes the split shape would again go unnamed. Rebuild the dist (STALEMCPDIST, Richard's call)
+before spending another agent round on it.
