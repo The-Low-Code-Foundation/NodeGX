@@ -980,9 +980,23 @@ function resolvePageRequest(routes, requested) {
     if (start) return { ok: true, page: start };
   }
 
-  const match =
+  // P109-S15: the authoring tools take a component's path without its leading slash ("Pages/Garden"), and an agent
+  // names a page by its title ("Garden"); both are accepted. A title two pages share names both rather than guess.
+  let match =
     routes.pages.find((p) => p.urlPath === normalised) ||
-    routes.pages.find((p) => p.component === raw || p.component === normalised);
+    routes.pages.find((p) => p.component === raw || p.component.replace(/^\//, '') === normalised);
+  if (!match) {
+    const titled = routes.pages.filter((p) => p.title !== undefined && p.title === raw);
+    if (titled.length > 1) {
+      return {
+        ok: false,
+        message:
+          `Cannot render the page "${raw}": ${titled.length} pages have that title (${titled.map((p) => p.component).join(', ')}). ` +
+          'Ask for one by its path.'
+      };
+    }
+    match = titled[0];
+  }
 
   if (!match) {
     return {
