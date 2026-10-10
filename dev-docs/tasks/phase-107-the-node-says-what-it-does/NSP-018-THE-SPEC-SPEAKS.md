@@ -9,7 +9,7 @@
 > and a merge prefers the spec — one catalog, two sources, the spec winning where it exists.
 
 **Opened 2026-09-29.** **Depends on NSP-011.**
-**Status: 🟡 s74 (2026-10-10): AC1, AC3, AC4, AC5 met; AC2 counting — 186 of 507 input reducers have their words (37 specs fully: the pilot five, NSP-011's 13, the most-used logic nodes, and the most-placed visual and record nodes), the typecheck gate waits for the rest.**
+**Status: 🟡 s75 (2026-10-10): AC1, AC3, AC4, AC5 met; AC2 counting — 247 of 507 input reducers have their words (52 specs fully: the pilot five, NSP-011's 13, the most-used logic nodes, and the most-placed visual, record, user and popup nodes), the typecheck gate waits for the rest.**
 
 ## 1. The person sentence
 
@@ -203,9 +203,35 @@ lines are `always: read at …` / `always: … at the next paint` — the reader
 The tails that do carry something are the actions (Focus, Blur, the scrolls, Set / Insert / Backspace / Clear) and the
 switches that end a gesture (Accept Drops off over a drag, Accept File Drops off over a file).
 
+## 5.3 s75, 2026-10-10 — Options, Timer and the next fourteen in words; the Group's click-away hole closed
+
+**247 of 507, 52 specs fully** (+61 reducers, 15 specs). Re-ranked by template use: Options 9, Timer 3, User 2, Log Out 1,
+Record 4, Animate To Value 6, Log In 3, Filter Collection 8, Sign Up 4, Request Magic Link 3 (and Sign In With's press, which
+shares its helper), Repeat 3, External Link 3, Show Popup 6, Close Popup 4, UUID 1. Five spec files are stranger-guarded
+(Options, Timer, Animate To Value, Repeat, UUID; their scenario files are unchanged), so they share one commit, one hashes
+rewrite and one stranger run. The catalog diff is sixteen `rules` blocks and nothing else.
+
+**Behaviour-neutral splits.** Where a branch's wire was computed, it is split into literal arms that return the same patches:
+Timer's Stop (its outcome was a ternary); Repeat's Start (`send: count changed ? ['count'] : []`); Animate To Value's Jump To
+(a `set` built by mutation); the shared `press` helpers in user-actions.ts and user-handovers.ts (first press of the frame /
+another press); Record's Id Source and Repeater Component (split on whether they bind); User's Run On Value Change. Record's
+Id goes through `said`, because its patch comes from a draft (`changes(s, st, …)`) and its pulses are the reaction's.
+
+**P107-S74-CLICKAWAY fixed.** A mouse click beside the Group while a finger's gesture is under way takes the branch that leaves the
+gesture alone (`pointerUp` ends only the gesture of the pointer that started it). No scenario held a finger, clicked beside the Group, and then waited
+for the hold. One new Group scenario does (trace read: Picked Up at 500 ms, Cancelled at the lift). Seed 20736: interpreter
+mutants 3,659 → 3,660 / 3,668 (8 listed equivalents); runtime CONFORMS, 1,435 / 1,435 scenarios, 200 / 200 generated.
+
+**Gates.** `tsc --noEmit` (node-spec) clean. The suites that play every touched spec, with the reader,
+ledger, parity and pilot (batch-visual, -time, -records, -data, -navigation, batch, world, rules-reader, spec-ledger,
+catalog-parity, pilot): 11 / 11, 630 passed, exit 0. Stranger, hashes rewritten for the five guarded specs: 46 passed,
+18 skipped, exit 0 (563 s). noodl-mcp `nsp018RulesOnTheWire` + `toolDisclosure` 23 / 23 (`[surface] 8261 / 8280`,
+unchanged). `catalog:check`, `catalog:merge:check`, `docs:nodes:check`, `spec-ledger --check` exit 0. Not run: the full
+node-spec suite, the editor's `tsc`, `test:main`.
+
 ## 6. Left
 
-1. **AC2's words for the other 321 reducers** (s74), batch by batch (done: the pilot five, NSP-011's 13, the top logic nodes, the top visual and record nodes; next by template use — re-rank first: Options and Timer, which are stranger-guarded, so do them in one commit with one hashes rewrite and one stranger run). Then
+1. **AC2's words for the other 260 reducers** (s75), batch by batch (done: the pilot five, NSP-011's 13, the top logic nodes, the top visual and record nodes, and s75's fifteen; next by template use — re-rank first; what is left is mostly unplaced in the templates, so rank by the editor's picker use or by CMP-006 traffic). Then
    flip `says?` to `says` in `Patch`, which is the typecheck gate. Every patch-returning function then owes one, so decide
    first whether `afterInputs` / `world` / `person` patches get read as rules too.
 2. **The record-relation pair:** the rules reader can't see reducers written inside `relationNode`. Teach it the factory,

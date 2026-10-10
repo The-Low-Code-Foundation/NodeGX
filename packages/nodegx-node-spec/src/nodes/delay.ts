@@ -107,15 +107,21 @@ export const Delay = defineNode({
   {
     // :54-65 — `_isRunning === false` → start() (:43-50: not running, so straight to scheduleTimer,
     // which queues it once, :86-93) and `done`; otherwise `unchanged`, nothing else.
-    start: (s) => (s.running ? { outcome: 'unchanged' } : { set: { queued: true }, outcome: 'done' }),
+    start: (s) =>
+      s.running
+        ? { says: 'a countdown running: nothing — Restart begins one again', outcome: 'unchanged' }
+        : { says: 'otherwise (a Start earlier this frame included): the countdown is queued, and begins at the frame\'s end, Start Delay later — Started fires then', set: { queued: true }, outcome: 'done' },
 
     // :71-77 — start() whatever the state: a running timer is stopped first (:44-46 → :52-57:
     // leaves the running set, `_hasCalledOnStart` false), then queued; always `done`.
-    restart: () => ({ set: { queued: true, running: false, started: false }, outcome: 'done' }),
+    restart: () => ({ says: 'always: a running countdown is dropped without Finished, and a new one is queued from zero for the frame\'s end', set: { queued: true, running: false, started: false }, outcome: 'done' }),
 
     // `done` if it was running or queued (v2, D10), `unchanged` otherwise; stop() removes it from
     // whichever set holds it (:96-114).
-    stop: (s) => ({ set: { queued: false, running: false, started: false }, outcome: s.running || s.queued ? 'done' : 'unchanged' })
+    stop: (s) => {
+      if (s.running || s.queued) return { says: 'a countdown running or queued: it is dropped, and Finished never fires for it', set: { queued: false, running: false, started: false }, outcome: 'done' };
+      return { says: 'no countdown: nothing', set: { queued: false, running: false, started: false }, outcome: 'unchanged' };
+    }
   },
   {
     // The frame's timer pass — timerscheduler.ts `runTimers(currentTime)` (:116-198), run once per

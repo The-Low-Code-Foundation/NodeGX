@@ -50,7 +50,7 @@
  */
 
 import type { ChangeEvent, OutputDecl, ValueInputDecl, WorldView } from '../spec';
-import { defineNode } from '../spec';
+import { defineNode, said } from '../spec';
 import type { BackendScript, WorldScript } from '../world';
 import { valueDidChange } from './condition';
 import { emptyId, runOnChange } from './data-base';
@@ -266,9 +266,15 @@ export const RecordNode = defineNode({
 }).on(
   {
     // :223-226
-    idSource: (s, v) => ({ set: { idSource: v, jobs: v === 'foreach' ? [...s.jobs, 'bind' as const] : s.jobs }, send: [] }),
+    idSource: (s, v) =>
+      v === 'foreach'
+        ? { says: "From repeater: at the frame's end it binds to the record of the row it sits in", set: { idSource: v, jobs: [...s.jobs, 'bind' as const] }, send: [] }
+        : { says: 'otherwise: kept; the record stays bound until the next Id', set: { idSource: v, jobs: s.jobs }, send: [] },
     // :240-245
-    repeaterComponent: (s, v) => ({ set: { repeaterComponent: v || undefined, jobs: s.idSource === 'foreach' ? [...s.jobs, 'bind' as const] : s.jobs }, send: [] }),
+    repeaterComponent: (s, v) =>
+      s.idSource === 'foreach'
+        ? { says: "under From repeater: at the frame's end it binds to the record of that repeater's row (blank: the nearest)", set: { repeaterComponent: v || undefined, jobs: [...s.jobs, 'bind' as const] }, send: [] }
+        : { says: 'otherwise: kept, and read only under From repeater', set: { repeaterComponent: v || undefined, jobs: s.jobs }, send: [] },
     // :250-275
     modelId: (s, value, i, w) => {
       const r: Reaction = { pulses: [] };
@@ -291,12 +297,12 @@ export const RecordNode = defineNode({
         // :271 setModelID
         const st: RecordState = { ...s, modelId: v };
         setModelID(st, w, v, r);
-        return { set: changes(s, st, ['modelId', 'bound']), send: [], pulses: r.pulses };
+        return said('a new Id, ticked under Run On Value Change: bound to that record now; Id and its properties follow, and an object handed writes its keys onto the record first', { set: changes(s, st, ['modelId', 'bound']), send: [], pulses: r.pulses });
       }
-      return { set: Object.is(previous, v) ? {} : { modelId: v }, send: ['id'], pulses: r.pulses }; // :273
+      return said('otherwise (the same Id, or unticked): Id is sent and the binding stays; an object handed still writes its keys onto the record it names', { set: Object.is(previous, v) ? {} : { modelId: v }, send: ['id'], pulses: r.pulses }); // :273
     },
     // :282-284 → :394-406 — a token per press, one read per frame
-    fetch: (s) => ({ set: { presses: s.presses + 1, fetchScheduled: true, jobs: s.fetchScheduled ? s.jobs : [...s.jobs, 'fetch' as const] }, send: [], outcome: 'pending' })
+    fetch: (s) => ({ says: "always: the record is re-read from the backend at the frame's end, one read for the frame's presses; each answered when it returns", set: { presses: s.presses + 1, fetchScheduled: true, jobs: s.fetchScheduled ? s.jobs : [...s.jobs, 'fetch' as const] }, send: [], outcome: 'pending' })
   },
   {
     derived: {

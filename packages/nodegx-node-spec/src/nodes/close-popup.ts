@@ -114,11 +114,11 @@ export const ClosePopup = defineNode({
   }
 }).on(
   {
-    targetComponent: (_s, v) => ({ set: { targetComponent: v || undefined }, send: [] }),
-    results: (_s, v) => ({ set: { results: v }, send: [] }),
-    closeActions: (_s, v) => ({ set: { closeActions: v }, send: [] }),
+    targetComponent: (_s, v) => ({ says: 'always: kept (blank: the nearest popup it sits in); read by the next close', set: { targetComponent: v || undefined }, send: [] }),
+    results: (_s, v) => ({ says: 'always: kept; names the Results ports', set: { results: v }, send: [] }),
+    closeActions: (_s, v) => ({ says: 'always: kept; names the close-action signals', set: { closeActions: v }, send: [] }),
     // :127-131, :171-188 — answered at the frame's end
-    close: (s) => ({ set: { pending: [...s.pending, 'close'] }, send: [], outcome: 'deferred' })
+    close: (s) => ({ says: "always: at the frame's end the popup it sits in closes, handing back the Results — Failure with Error when it sits in no such popup", set: { pending: [...s.pending, 'close'] }, send: [], outcome: 'deferred' })
   },
   {
     // :260-293 — one close for the frame's presses

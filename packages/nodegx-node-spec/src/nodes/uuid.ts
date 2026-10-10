@@ -55,5 +55,5 @@ export const Uuid = defineNode({
   }
 }).on({
   // :96-110 _generate: a fresh draw, `error` cleared, both flagged, `done`
-  generate: (_s, _i, w) => ({ set: { uuid: w.uuid(), error: undefined }, outcome: 'done' })
+  generate: (_s, _i, w) => ({ says: 'always: a fresh UUID goes on Id, and Error is cleared', set: { uuid: w.uuid(), error: undefined }, outcome: 'done' })
 });

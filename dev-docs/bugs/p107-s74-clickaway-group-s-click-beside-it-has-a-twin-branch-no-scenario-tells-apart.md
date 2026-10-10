@@ -1,11 +1,14 @@
 ---
 id: P107-S74-CLICKAWAY
 title: Group's conformance is red at seed 20736 — a click beside it has a twin branch that no scenario tells apart (a swap-branch mutant survives)
-status: open
+status: fixed
+phase: P107
+task: NSP-018
 severity: medium
 area: node-spec / Group (`packages/nodegx-node-spec/src/nodes/group.ts`, `scenarios/Group.json`)
 found: P107 NSP-018 s74, 2026-10-10 — the runtime conformance spot-check after wording Group's reducers
 kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/Group.json "a click beside it while its own finger is held: …" (kills the swap at seed 20736)
 evidence: `NSP_ONLY=Group npx jest test/node-spec/conformance.test.ts -w 1` in packages/noodl-runtime at the UTC day's seed 20736 — "Group v7 on runtime: DOES NOT CONFORM … mutants: 3659 / 3668 killed", one SURVIVED
 ---
 
@@ -31,3 +34,14 @@ branch only at some seeds (NEXT-SESSION-PROMPT, "a seed-dependent swap-branch su
 covers its twin, and add the sibling that makes `input` / `phase` observable afterwards (a later act whose result
 depends on them). Then check that the reader tells the two arms apart (s68's Focus did not). Re-run with
 `NSP_SEED=20736`. Each Group run takes about 4 minutes.
+
+**Fixed (s75, 2026-10-10).** The first shape is a mouse click beside the Group that leaves the gesture alone. That
+happens when no gesture is under way, and also when a FINGER's gesture is under way: `pointerUp` ends only the gesture of
+the pointer that started it (`s.input !== input`). The second shape is the same click ending the Group's own mouse press.
+The swap gave the first branch the second's patch, so a click beside the Group ended a finger's hold. No scenario held a
+finger, clicked beside the Group and then waited for the hold. Added that scenario: touch, click beside it, wait 500 ms, then
+lift. The original lifts it (Picked Up) and the lift cancels it (Cancelled). The mutant had already ended it, so nothing fires.
+I read the interpreter's trace before relying on the scenario. Results at seed 20736: on the interpreter, mutants went from
+3,659 to 3,660 of 3,668 (the 8 left are listed equivalents). On the runtime, Group conforms: 1,435 / 1,435 scenarios,
+200 / 200 generated runs, the same mutant count.
+

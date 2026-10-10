@@ -189,13 +189,13 @@ export const ShowPopup = defineNode({
   }
 }).on(
   {
-    target: (_s, v) => ({ set: { target: v }, send: [] }),
-    stackPolicy: (_s, v) => ({ set: { stackPolicy: v === 'stack' ? 'stack' : 'replace' }, send: [] }),
-    closeOnEscape: (_s, v) => ({ set: { closeOnEscape: v !== false }, send: [] }),
-    modal: (_s, v) => ({ set: { modal: v !== false }, send: [] }),
-    accessibleName: (_s, v) => ({ set: { accessibleName: typeof v === 'string' ? v : undefined }, send: [] }),
+    target: (_s, v) => ({ says: 'always: kept; the component the next Show opens', set: { target: v }, send: [] }),
+    stackPolicy: (_s, v) => ({ says: 'always: kept (anything but Show On Top is Replace It); read by the next Show', set: { stackPolicy: v === 'stack' ? 'stack' : 'replace' }, send: [] }),
+    closeOnEscape: (_s, v) => ({ says: 'always: kept (only false turns it off); read by the next Show', set: { closeOnEscape: v !== false }, send: [] }),
+    modal: (_s, v) => ({ says: 'always: kept (only false turns it off); read by the next Show', set: { modal: v !== false }, send: [] }),
+    accessibleName: (_s, v) => ({ says: 'always: kept when it is text (anything else is none); read by the next Show', set: { accessibleName: typeof v === 'string' ? v : undefined }, send: [] }),
     // :127-130, :202-219 — every press is answered at the frame's end
-    show: (s) => ({ set: { scheduled: true, presses: s.presses + 1 }, send: [], outcome: 'deferred' })
+    show: (s) => ({ says: "always: Target opens as a popup at the frame's end; each press is answered there, Failure with Error when it cannot open", set: { scheduled: true, presses: s.presses + 1 }, send: [], outcome: 'deferred' })
   },
   {
     afterInputs: (s, _inputs, world) => {

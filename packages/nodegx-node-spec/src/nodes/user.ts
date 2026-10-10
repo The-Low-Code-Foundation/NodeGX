@@ -288,9 +288,12 @@ export const UserNode = defineNode({
 }).on(
   {
     // :310-312 → :396-402 — a token per press, one call per frame
-    fetch: (s) => ({ set: { presses: s.presses + 1, fetchScheduled: true }, send: [], outcome: 'pending' }),
+    fetch: (s) => ({ says: "always: the user is re-read from the backend at the frame's end, one call for the frame's presses; each answered when it returns", set: { presses: s.presses + 1, fetchScheduled: true }, send: [], outcome: 'pending' }),
     // run-on-value-change.ts :137 — stored; read by the watcher (:105)
-    'runOnChange-user': (s, v) => ({ set: s.live === v ? {} : { live: v }, send: [] })
+    'runOnChange-user': (s, v) =>
+      s.live === v
+        ? { says: 'the value it already holds: nothing', set: {}, send: [] }
+        : { says: 'a change: ticked, a property of the signed-in user that moves is sent with its Changed; unticked, it moves silently', set: { live: v }, send: [] }
   },
   {
     derived: {

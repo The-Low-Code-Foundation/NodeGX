@@ -91,23 +91,27 @@ export const Repeat = defineNode({
   }
 }).on(
   {
-    interval: (_s, v) => ({ set: { interval: v }, send: [] }), // :98-100
+    interval: (_s, v) => ({ says: 'always: kept as handed; read at the next Start and at each Tick, so the beat under way keeps its time', set: { interval: v }, send: [] }), // :98-100
 
     // :106-129
     start: (s) => {
-      if (s.running) return { outcome: 'unchanged' }; // :107-110
+      if (s.running) return { says: 'already running: nothing', outcome: 'unchanged' }; // :107-110
       if (!isUsableInterval(s.interval)) {
-        return { outcome: 'failure', error: 'repeat/interval-not-positive' }; // :111-117
+        return { says: 'Interval is not a number above zero (a text \'100\' included): nothing starts', outcome: 'failure', error: 'repeat/interval-not-positive' }; // :111-117
       }
       const beat = s.interval;
       const nextAt = s.frameTime + beat; // :120-122
       const count = s.count !== 0 ? 0 : s.count; // :123-126
       // :127-128 — `timer.duration = beat; timer.start()`: not running, so queued (timerscheduler.ts :44-50, :86-93)
-      return { set: { running: true, beat, nextAt, count, tDuration: beat, tQueued: true }, send: count !== s.count ? ['count'] : [], outcome: 'done' };
+      if (count !== s.count) return { says: 'otherwise: Count goes back to 0, and the first Tick is due one Interval after the last frame', set: { running: true, beat, nextAt, count, tDuration: beat, tQueued: true }, send: ['count'], outcome: 'done' };
+      return { says: 'otherwise, Count already 0: the first Tick is due one Interval after the last frame', set: { running: true, beat, nextAt, count, tDuration: beat, tQueued: true }, send: [], outcome: 'done' };
     },
 
     // :133-141 — `timer.stop()` removes it from the running set or the queue (timerscheduler.ts :96-114)
-    stop: (s) => (s.running ? { set: { running: false, tQueued: false, tRunning: false }, outcome: 'done' } : { outcome: 'unchanged' })
+    stop: (s) =>
+      s.running
+        ? { says: 'running: it stops, and no Tick follows; Count keeps its value until the next Start', set: { running: false, tQueued: false, tRunning: false }, outcome: 'done' }
+        : { says: 'not running: nothing', outcome: 'unchanged' }
   },
   {
     // The frame's timer pass — timerscheduler.ts `runTimers(currentTime)` (:116-198), run once per

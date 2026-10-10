@@ -305,17 +305,17 @@ export const FilterCollection = defineNode({
     items: (s, v, i, w) => {
       if (w.registry.isCollection(s.source)) w.unwatch({ collection: s.source.getId() }); // :360
       if (w.registry.isCollection(v)) w.watch({ collection: v.getId() }); // :362
-      return { set: { source: v, scheduled: s.scheduled || i['runOnChange-items'] }, send: [] }; // :229
+      return { says: "always: kept, and watched when it is a shared array; ticked under Run On Value Change, the filter runs at the frame's end", set: { source: v, scheduled: s.scheduled || i['runOnChange-items'] }, send: [] }; // :229
     },
     // :238-243
-    enabled: (s, v, i) => ({ set: { enabled: v, scheduled: s.scheduled || (valueDidChange(s.enabled, v) && i['runOnChange-enabled']) }, send: [] }),
+    enabled: (s, v, i) => ({ says: "always: kept; a change, ticked under Run On Value Change, runs the filter at the frame's end — off, the array passes through unfiltered, unsorted and unlimited", set: { enabled: v, scheduled: s.scheduled || (valueDidChange(s.enabled, v) && i['runOnChange-enabled']) }, send: [] }),
     // :251-253, :264-266 → requestFilter :430-438
-    filter: (s) => ({ set: { tokens: [...s.tokens, 'filter'], scheduled: true }, outcome: 'deferred', send: [] }),
-    refresh: (s) => ({ set: { tokens: [...s.tokens, 'refresh'], scheduled: true }, outcome: 'deferred', send: [] }),
-    'runOnChange-items': () => ({ send: [] }),
-    'runOnChange-enabled': () => ({ send: [] }),
-    'runOnChange-array': () => ({ send: [] }),
-    'runOnChange-filterSettings': (_s, v) => ({ set: { runOnSettings: v }, send: [] })
+    filter: (s) => ({ says: "always: the filter runs at the frame's end, one run for the frame's presses — Items, First Item Id and Count are sent, Filtered fires, then each press's Done or Failure", set: { tokens: [...s.tokens, 'filter'], scheduled: true }, outcome: 'deferred', send: [] }),
+    refresh: (s) => ({ says: 'always: the same as Filter', set: { tokens: [...s.tokens, 'refresh'], scheduled: true }, outcome: 'deferred', send: [] }),
+    'runOnChange-items': () => ({ says: 'always: read when the next Items arrives', send: [] }),
+    'runOnChange-enabled': () => ({ says: 'always: read when Enabled next changes', send: [] }),
+    'runOnChange-array': () => ({ says: "always: read when the bound array's contents next change", send: [] }),
+    'runOnChange-filterSettings': (_s, v) => ({ says: 'always: kept; read when a filter setting next changes', set: { runOnSettings: v }, send: [] })
   },
   {
     derived: {

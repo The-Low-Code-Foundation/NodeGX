@@ -8422,6 +8422,23 @@
           }
         ]
       },
+      "rules": {
+        "idSource": [
+          "From repeater: at the frame's end it binds to the record of the row it sits in",
+          "otherwise: kept; the record stays bound until the next Id"
+        ],
+        "repeaterComponent": [
+          "under From repeater: at the frame's end it binds to the record of that repeater's row (blank: the nearest)",
+          "otherwise: kept, and read only under From repeater"
+        ],
+        "modelId": [
+          "a new Id, ticked under Run On Value Change: bound to that record now; Id and its properties follow, and an object handed writes its keys onto the record first",
+          "otherwise (the same Id, or unticked): Id is sent and the binding stays; an object handed still writes its keys onto the record it names"
+        ],
+        "fetch": [
+          "always: the record is re-read from the backend at the frame's end, one read for the frame's presses; each answered when it returns"
+        ]
+      },
       "enrichment": {
         "typeName": "DbModel2",
         "summary": "Record: binds to one cloud database record by id and exposes each of its properties as an output that follows the record.",
@@ -10971,6 +10988,32 @@
       "parameterEncoding": {
         "known": false,
         "reason": "Ports follow the filter script in the node parameters."
+      },
+      "rules": {
+        "items": [
+          "always: kept, and watched when it is a shared array; ticked under Run On Value Change, the filter runs at the frame's end"
+        ],
+        "enabled": [
+          "always: kept; a change, ticked under Run On Value Change, runs the filter at the frame's end — off, the array passes through unfiltered, unsorted and unlimited"
+        ],
+        "filter": [
+          "always: the filter runs at the frame's end, one run for the frame's presses — Items, First Item Id and Count are sent, Filtered fires, then each press's Done or Failure"
+        ],
+        "refresh": [
+          "always: the same as Filter"
+        ],
+        "runOnChange-items": [
+          "always: read when the next Items arrives"
+        ],
+        "runOnChange-enabled": [
+          "always: read when Enabled next changes"
+        ],
+        "runOnChange-array": [
+          "always: read when the bound array's contents next change"
+        ],
+        "runOnChange-filterSettings": [
+          "always: kept; read when a filter setting next changes"
+        ]
       },
       "enrichment": {
         "typeName": "Filter Collection",
@@ -20911,6 +20954,20 @@
         ],
         "notes": "Names are interpolated verbatim, including spaces — a value called `bg color` produces a port called `value-true-bg color`, not `value-true-bgColor`."
       },
+      "rules": {
+        "targetComponent": [
+          "always: kept (blank: the nearest popup it sits in); read by the next close"
+        ],
+        "results": [
+          "always: kept; names the Results ports"
+        ],
+        "closeActions": [
+          "always: kept; names the close-action signals"
+        ],
+        "close": [
+          "always: at the frame's end the popup it sits in closes, handing back the Results — Failure with Error when it sits in no such popup"
+        ]
+      },
       "enrichment": {
         "typeName": "NavigationClosePopup",
         "summary": "Close Popup: dismisses the popup this node lives in, sending named results and a close action back to the opener.",
@@ -21116,6 +21173,26 @@
       "parameterEncoding": {
         "known": false,
         "reason": "Ports mirror the input ports of the target popup component, and the results and close actions its `Close Popup` nodes declare."
+      },
+      "rules": {
+        "target": [
+          "always: kept; the component the next Show opens"
+        ],
+        "stackPolicy": [
+          "always: kept (anything but Show On Top is Replace It); read by the next Show"
+        ],
+        "closeOnEscape": [
+          "always: kept (only false turns it off); read by the next Show"
+        ],
+        "modal": [
+          "always: kept (only false turns it off); read by the next Show"
+        ],
+        "accessibleName": [
+          "always: kept when it is text (anything else is none); read by the next Show"
+        ],
+        "show": [
+          "always: Target opens as a popup at the frame's end; each press is answered there, Failure with Error when it cannot open"
+        ]
       },
       "enrichment": {
         "typeName": "NavigationShowPopup",
@@ -29438,6 +29515,21 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "interval": [
+          "always: kept as handed; read at the next Start and at each Tick, so the beat under way keeps its time"
+        ],
+        "start": [
+          "already running: nothing → Unchanged",
+          "Interval is not a number above zero (a text '100' included): nothing starts → Failure",
+          "otherwise: Count goes back to 0, and the first Tick is due one Interval after the last frame → Done",
+          "otherwise, Count already 0: the first Tick is due one Interval after the last frame → Done"
+        ],
+        "stop": [
+          "running: it stops, and no Tick follows; Count keeps its value until the next Start → Done",
+          "not running: nothing → Unchanged"
+        ]
+      },
       "enrichment": {
         "typeName": "Repeat",
         "summary": "Repeat: fires a Tick signal every Interval milliseconds between Start and Stop, and counts the ticks.",
@@ -36469,6 +36561,19 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "start": [
+          "a countdown running: nothing — Restart begins one again → Unchanged",
+          "otherwise (a Start earlier this frame included): the countdown is queued, and begins at the frame's end, Start Delay later — Started fires then → Done"
+        ],
+        "restart": [
+          "always: a running countdown is dropped without Finished, and a new one is queued from zero for the frame's end → Done"
+        ],
+        "stop": [
+          "a countdown running or queued: it is dropped, and Finished never fires for it → Done",
+          "no countdown: nothing → Unchanged"
+        ]
+      },
       "enrichment": {
         "typeName": "Timer",
         "summary": "Delay: fires a Finished signal a set number of milliseconds after being started; restartable for debouncing.",
@@ -46932,6 +47037,11 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "generate": [
+          "always: a fresh UUID goes on Id, and Error is cleared → Done"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.UUID",
         "summary": "A random version-4 UUID from the platform's cryptographic random source. Not the same thing as Unique Id.",
@@ -47667,6 +47777,31 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "targetValue": [
+          "not a number: ignored",
+          "the first number it is handed: Current Value goes there at once, with no move",
+          "the target it already has: nothing",
+          "a new target: a move under way is dropped without At Target Value, and a new one starts from where the value is, at the frame's end and Delay later"
+        ],
+        "jumpValue": [
+          "always: kept for the next Jump To; nothing moves"
+        ],
+        "jumpTo": [
+          "Jump Value is not a number: nothing",
+          "no number yet: Current Value goes to Jump Value, which becomes the target too",
+          "otherwise: any move stops, Current Value goes to Jump Value, and at the frame's end it moves back to Target Value if they differ"
+        ],
+        "duration": [
+          "always: kept; read at every frame of a move, the move under way included"
+        ],
+        "delay": [
+          "always: kept as a number (what is not one is 0); read when the next move starts"
+        ],
+        "easingCurve": [
+          "always: kept; read at every frame of a move, the move under way included"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.animatetovalue",
         "summary": "Animate To Value: tweens its output toward whatever targetValue currently is, with duration, delay and easing.",
@@ -54782,6 +54917,42 @@
           "dataAttributes"
         ],
         "notes": "This node mints no port names. Its `value` input is declared `string` above and is republished per instance as an `enum` whose choices are this node's own `items` — labels from each option's `Label`, values from its `Value` — so the port list above is complete and only the `type` field moves. A value that matches no option is offered back as a choice of its own rather than being dropped."
+      },
+      "rules": {
+        "enabled": [
+          "the value it already holds: nothing",
+          "a change: Enabled follows; disabled, the list takes no pick, no click and no focus"
+        ],
+        "items": [
+          "nothing handed (undefined): the list it has stays",
+          "otherwise: the list is kept as handed and drawn at the next paint; the value stays, so a list handed again keeps the pick"
+        ],
+        "value": [
+          "null: ignored",
+          "the value it already holds, as text: nothing",
+          "a change: kept as text, Value follows, and the list selects it at the next paint if it names an option — Changed does not fire (only a person's pick fires it)"
+        ],
+        "mounted": [
+          "always: the list is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint"
+        ],
+        "useLabel": [
+          "always: a label is drawn beside the list, or not; the list, its keyboard and its pick stay"
+        ],
+        "focus": [
+          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
+          "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
+        ],
+        "blur": [
+          "it does not hold the keyboard (or is disabled, and gives it up to nobody): nothing changes → Done; Blurred stays silent",
+          "it holds the keyboard: it is taken off it, and the Focused state goes false → Blurred, Done"
+        ],
+        "scrollIntoView": [
+          "always: the page, or the scrolling Group holding it, scrolls until the list can be seen"
+        ],
+        "visible": [
+          "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
+        ]
       },
       "enrichment": {
         "typeName": "net.noodl.controls.options",
@@ -62352,6 +62523,20 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "link": [
+          "always: kept; read by the next Do"
+        ],
+        "openInNewTab": [
+          "always: kept; read by the next Do"
+        ],
+        "do": [
+          "no browser window (a server render): nothing opens → Unchanged",
+          "no Link: Error says so, and nothing opens → Failure",
+          "a new tab asked for outside a person's click or key: the browser blocks it, and Error says so → Failure",
+          "otherwise: Link opens, in a new tab unless Open In New Tab is off → Done"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.externallink",
         "summary": "External Link: opens a URL outside the app — same tab or new tab — when its signal fires.",
@@ -62474,6 +62659,18 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "login": [
+          "the first press this frame: the call goes to the backend at the frame's end, with the values held then",
+          "another press this frame: it joins that call, and is answered with it"
+        ],
+        "username": [
+          "always: held as handed; read when the next sign-in goes"
+        ],
+        "password": [
+          "always: held as handed; read when the next sign-in goes"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.user.LogIn",
         "summary": "Logs a user into the cloud backend with username and password, establishing the session the User node reflects.",
@@ -62579,6 +62776,12 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "login": [
+          "the first press this frame: the call goes to the backend at the frame's end, with the values held then",
+          "another press this frame: it joins that call, and is answered with it"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.user.LogOut",
         "summary": "Ends the current user session on the cloud backend and clears it from the browser.",
@@ -62700,6 +62903,18 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "send": [
+          "the first press this frame: the call goes to the backend at the frame's end, with the values held then",
+          "another press this frame: it joins that call, and is answered with it"
+        ],
+        "email": [
+          "always: held as handed; read when the next request goes"
+        ],
+        "redirect": [
+          "always: held as handed; read when the next request goes"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.user.RequestMagicLink",
         "summary": "Asks the backend to email a one-click sign-in link. Succeeds identically whether or not the address has an account.",
@@ -63259,6 +63474,12 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "signIn": [
+          "the first press this frame: the call goes to the backend at the frame's end, with the values held then",
+          "another press this frame: it joins that call, and is answered with it"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.user.SignInWith",
         "summary": "Signs a user in via an identity provider (Google, GitHub, any OpenID Connect issuer) configured on the backend. Redirects away.",
@@ -63412,6 +63633,21 @@
       "parameterEncoding": {
         "known": false,
         "reason": "No parameter on this node carries the list its ports are generated from, so the port set could not be observed headlessly."
+      },
+      "rules": {
+        "signup": [
+          "the first press this frame: the call goes to the backend at the frame's end, with the values held then",
+          "another press this frame: it joins that call, and is answered with it"
+        ],
+        "username": [
+          "always: held as handed; read when the next sign-up goes"
+        ],
+        "password": [
+          "always: held as handed; read when the next sign-up goes"
+        ],
+        "email": [
+          "always: held as handed; read when the next sign-up goes"
+        ]
       },
       "enrichment": {
         "typeName": "net.noodl.user.SignUp",
@@ -63618,6 +63854,15 @@
       "parameterEncoding": {
         "known": false,
         "reason": "No parameter on this node carries the list its ports are generated from, so the port set could not be observed headlessly."
+      },
+      "rules": {
+        "fetch": [
+          "always: the user is re-read from the backend at the frame's end, one call for the frame's presses; each answered when it returns"
+        ],
+        "runOnChange-user": [
+          "the value it already holds: nothing",
+          "a change: ticked, a property of the signed-in user that moves is sent with its Changed; unticked, it moves silently"
+        ]
       },
       "enrichment": {
         "typeName": "net.noodl.user.User",

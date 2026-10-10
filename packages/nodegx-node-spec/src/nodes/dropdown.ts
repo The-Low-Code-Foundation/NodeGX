@@ -306,41 +306,44 @@ export const Dropdown = defineNode({
     // utils.ts :82-89
     enabled: (s, v) => {
       const enabled = !!v;
-      if (enabled === s.enabled) return NOTHING;
-      return { set: { enabled }, send: ['enabled'] };
+      if (enabled === s.enabled) return { says: 'the value it already holds: nothing', send: [] };
+      return { says: 'a change: Enabled follows; disabled, the list takes no pick, no click and no focus', set: { enabled }, send: ['enabled'] };
     },
     // options.ts :158-171 — `undefined` is no opinion; anything else is kept as handed, drawn at the next paint (`painted`); the
     // node's value stays (R14: a list handed again keeps the pick — the runtime's effect took the author's Value back until P109 ISL-031, row D34)
-    items: (s, v) => (v === undefined ? NOTHING : { set: { items: v }, send: [] }),
+    items: (s, v) =>
+      v === undefined
+        ? { says: 'nothing handed (undefined): the list it has stays', send: [] }
+        : { says: 'otherwise: the list is kept as handed and drawn at the next paint; the value stays, so a list handed again keeps the pick', set: { items: v }, send: [] },
     // options.ts :181-200 — `null` has no `toString` and is ignored (:182-184); what is not text is made text; a change sends
     // Value and never Changed, and the selection follows it at the next paint (R14: the last word wins — the runtime's effect
     // keyed on the author's Value React last rendered, so a write back to it after a pick left the pick on the screen, row C71,
     // fixed in P109 ISL-031)
     value: (s, v) => {
-      if (v === null) return NOTHING;
+      if (v === null) return { says: 'null: ignored', send: [] };
       const value = v === undefined ? undefined : String(v);
-      if (value === s.value) return NOTHING;
-      return { set: { value }, send: ['value'] };
+      if (value === s.value) return { says: 'the value it already holds, as text: nothing', send: [] };
+      return { says: 'a change: kept as text, Value follows, and the list selects it at the next paint if it names an option — Changed does not fire (only a person\'s pick fires it)', set: { value }, send: ['value'] };
     },
     // react-component-node.ts :2310-2320
-    mounted: (_s, v) => ({ set: { mounted: !!v }, send: [] }),
+    mounted: (_s, v) => ({ says: 'always: the list is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint', set: { mounted: !!v }, send: [] }),
     // node-shared-port-definitions.ts `addLabelInputs` — a label beside the `<select>`; the element, its keyboard and its selection stay (v2, row C80)
-    useLabel: () => NOTHING,
+    useLabel: () => ({ says: 'always: a label is drawn beside the list, or not; the list, its keyboard and its pick stay', send: [] }),
     // utils.ts :370-384 — on the `<select>` (utils.ts :419-423 `_focusTarget`), as the Checkbox's
     focus: (s) => {
-      if (!s.onPage) return { send: [], outcome: 'unchanged' };
-      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { send: [], outcome: 'done' };
-      return { set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
+      if (!s.onPage) return { says: 'not on the page: nothing to focus, and the Focus is not kept', send: [], outcome: 'unchanged' };
+      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { says: 'it holds the keyboard already, or is disabled or hidden: nothing changes', send: [], outcome: 'done' };
+      return { says: 'otherwise the keyboard is put on it, and the Focused state goes true', set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
     },
     // utils.ts :385-395 — a disabled element gives the keyboard up to nobody: `blur()` on one does nothing (the focusing steps), Done regardless
     blur: (s) => {
-      if (!s.onPage || !s.elementFocused || !s.pageEnabled) return { send: [], outcome: 'done' };
-      return { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'], outcome: 'done' };
+      if (!s.onPage || !s.elementFocused || !s.pageEnabled) return { says: 'it does not hold the keyboard (or is disabled, and gives it up to nobody): nothing changes', send: [], outcome: 'done' };
+      return { says: 'it holds the keyboard: it is taken off it, and the Focused state goes false', set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'], outcome: 'done' };
     },
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire
-    scrollIntoView: () => NOTHING,
+    scrollIntoView: () => ({ says: 'always: the page, or the scrolling Group holding it, scrolls until the list can be seen', send: [] }),
     // node-shared-port-definitions.ts :366-375 — the page follows at the next paint
-    visible: (_s, v) => ({ set: { visible: !!v }, send: [] })
+    visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it', set: { visible: !!v }, send: [] })
   },
   {
     // react-component-node.ts :785-830 `DATA_ATTRIBUTES_RULE` — one string input per name the Data Attributes list names, written

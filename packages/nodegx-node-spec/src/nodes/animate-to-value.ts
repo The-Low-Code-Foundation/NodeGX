@@ -142,30 +142,29 @@ export const AnimateToValue = defineNode({
     // :145-169
     targetValue: (s, v) => {
       const numeric = numericOf(v);
-      if (isNaN(numeric)) return { set: {}, send: [] }; // :148-151
+      if (isNaN(numeric)) return { says: 'not a number: ignored', set: {}, send: [] }; // :148-151
       if (s.numberInitialized === false) {
-        return { set: { currentNumber: numeric, numberInitialized: true, endValue: numeric }, send: ['currentValue'] }; // :155-160
+        return { says: 'the first number it is handed: Current Value goes there at once, with no move', set: { currentNumber: numeric, numberInitialized: true, endValue: numeric }, send: ['currentValue'] }; // :155-160
       }
-      if (numeric === s.endValue) return { set: {}, send: [] }; // :161-164
+      if (numeric === s.endValue) return { says: 'the target it already has: nothing', set: {}, send: [] }; // :161-164
       // :166-168 — `start()`: a running timer is stopped and queued; a queued one stays queued
-      return { set: { startValue: s.currentNumber, endValue: numeric, tRunning: false, tQueued: true }, send: [] };
+      return { says: 'a new target: a move under way is dropped without At Target Value, and a new one starts from where the value is, at the frame\'s end and Delay later', set: { startValue: s.currentNumber, endValue: numeric, tRunning: false, tQueued: true }, send: [] };
     },
-    jumpValue: (_s, v) => ({ set: { jumpValue: v }, send: [] }), // :178-180
+    jumpValue: (_s, v) => ({ says: 'always: kept for the next Jump To; nothing moves', set: { jumpValue: v }, send: [] }), // :178-180
     // :187-189 → :54-76
     jumpTo: (s) => {
       const numeric = numericOf(s.jumpValue);
-      if (isNaN(numeric)) return { set: {}, send: [] }; // :56
-      // :61 `stop()` — out of the running set or the queue (timerscheduler.ts :52-57, :96-114)
-      const set: Partial<State> = { tRunning: false, tQueued: false, currentNumber: numeric, jumpPending: true }; // :67, :70
+      if (isNaN(numeric)) return { says: 'Jump Value is not a number: nothing', set: {}, send: [] }; // :56
+      // :61 `stop()` — out of the running set or the queue (timerscheduler.ts :52-57, :96-114); :67, :70; :68 sends
       if (s.numberInitialized === false) {
-        set.numberInitialized = true; // :62-66
-        set.endValue = numeric;
+        // :62-66 — the first value it holds is its target too
+        return { says: 'no number yet: Current Value goes to Jump Value, which becomes the target too', set: { tRunning: false, tQueued: false, currentNumber: numeric, jumpPending: true, numberInitialized: true, endValue: numeric }, send: ['currentValue'] };
       }
-      return { set, send: ['currentValue'] }; // :68
+      return { says: 'otherwise: any move stops, Current Value goes to Jump Value, and at the frame\'s end it moves back to Target Value if they differ', set: { tRunning: false, tQueued: false, currentNumber: numeric, jumpPending: true }, send: ['currentValue'] };
     },
-    duration: (_s, v) => ({ set: { duration: v }, send: [] }), // :198
-    delay: (_s, v) => ({ set: { delay: Number(v) || 0 }, send: [] }), // :208 — v3, C20
-    easingCurve: (_s, v) => ({ set: { ease: v }, send: [] }) // :226
+    duration: (_s, v) => ({ says: 'always: kept; read at every frame of a move, the move under way included', set: { duration: v }, send: [] }), // :198
+    delay: (_s, v) => ({ says: 'always: kept as a number (what is not one is 0); read when the next move starts', set: { delay: Number(v) || 0 }, send: [] }), // :208 — v3, C20
+    easingCurve: (_s, v) => ({ says: 'always: kept; read at every frame of a move, the move under way included', set: { ease: v }, send: [] }) // :226
   },
   {
     // the frame: the inputs' frame-end work (jumpTo's callback, :70-75), then the scheduler's timer pass (timerscheduler.ts :116-198)

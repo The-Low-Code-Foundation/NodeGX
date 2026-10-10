@@ -755,6 +755,32 @@
     ]
   },
   {
+    "name": "a click beside it while its own finger is held: the mouse's press, release and click are another pointer's, so the finger's gesture goes on — Hold Time still lifts it: Picked Up, then Cancelled at the lift",
+    "because": "drag-drop.ts :308-323 (a pointer up ends only the gesture of the pointer that started it), :263-270 (touch holds)",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "touch"
+      },
+      "settle",
+      {
+        "act": "clickAway"
+      },
+      "settle",
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle"
+    ]
+  },
+  {
     "name": "C87 — a Tag written empty draws a div, as no Tag does",
     "because": "Group.tsx render `const { as = 'div', ...props }` — the default covers only undefined; the Text's `props.as || 'div'` is the intent",
     "steps": [

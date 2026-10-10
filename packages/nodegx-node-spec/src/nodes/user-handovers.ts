@@ -81,7 +81,10 @@ type Batch = {
 };
 
 /** a token per press, minted before the guard; one call per frame (requestmagiclink.ts :142-146, signinwith.ts :243-247) */
-const press = (s: Batch) => ({ set: s.scheduled ? { presses: s.presses + 1 } : { presses: s.presses + 1, scheduled: true }, send: [] as never[], outcome: 'pending' as const });
+const press = (s: Batch) =>
+  !s.scheduled
+    ? { says: 'the first press this frame: the call goes to the backend at the frame\'s end, with the values held then', set: { presses: s.presses + 1, scheduled: true }, send: [] as never[], outcome: 'pending' as const }
+    : { says: 'another press this frame: it joins that call, and is answered with it', set: { presses: s.presses + 1 }, send: [] as never[], outcome: 'pending' as const };
 
 /** the frame's batch: one call, to the active backend, with the held values as they are now */
 function call(s: Batch, w: WorldView, op: 'requestMagicLink' | 'signInWithProvider', args: Record<string, unknown>) {
@@ -121,8 +124,8 @@ export const RequestMagicLink = defineNode({
 }).on(
   {
     send: press,
-    email: (_s, v) => ({ set: { email: v }, send: [] }),
-    redirect: (_s, v) => ({ set: { redirect: v }, send: [] })
+    email: (_s, v) => ({ says: 'always: held as handed; read when the next request goes', set: { email: v }, send: [] }),
+    redirect: (_s, v) => ({ says: 'always: held as handed; read when the next request goes', set: { redirect: v }, send: [] })
   },
   {
     // :148-165

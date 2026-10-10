@@ -73,20 +73,20 @@ export const ExternalLink = defineNode({
     error: { type: 'string', from: (s) => s.error, displayName: 'Error', group: 'Error', description: 'Why the link could not be opened, set just before Failure fires' }
   }
 }).on({
-  link: (_s, v) => ({ set: { link: v }, send: [] }),
-  openInNewTab: (_s, v) => ({ set: { openInNewTab: v }, send: [] }),
+  link: (_s, v) => ({ says: 'always: kept; read by the next Do', set: { link: v }, send: [] }),
+  openInNewTab: (_s, v) => ({ says: 'always: kept; read by the next Do', set: { openInNewTab: v }, send: [] }),
   do: (s, _i, world) => {
-    if (!world.viewport()) return { send: [], outcome: 'unchanged' }; // :46-49
+    if (!world.viewport()) return { says: 'no browser window (a server render): nothing opens', send: [], outcome: 'unchanged' }; // :46-49
     const features = s.openInNewTab ? 'noopener,noreferrer' : ''; // :52
     const target = s.openInNewTab === true || s.openInNewTab === undefined ? '_blank' : '_self'; // :53
     const link = s.link;
     if (link === undefined || link === null || link === '') {
-      return { set: { error: NO_LINK }, send: ['error'], outcome: 'failure', error: 'external-link/no-link' }; // :60-64
+      return { says: 'no Link: Error says so, and nothing opens', set: { error: NO_LINK }, send: ['error'], outcome: 'failure', error: 'external-link/no-link' }; // :60-64
     }
     const activation = world.userActivation(); // :97
     const blocked = target === '_blank' && typeof activation === 'boolean' && !activation; // :98
     const open = { url: link, target, features }; // :100
-    if (blocked) return { set: { error: BLOCKED }, send: ['error'], open, outcome: 'failure', error: 'external-link/blocked' }; // :102-111
-    return { send: [], open, outcome: 'done' }; // :114
+    if (blocked) return { says: "a new tab asked for outside a person's click or key: the browser blocks it, and Error says so", set: { error: BLOCKED }, send: ['error'], open, outcome: 'failure', error: 'external-link/blocked' }; // :102-111
+    return { says: 'otherwise: Link opens, in a new tab unless Open In New Tab is off', send: [], open, outcome: 'done' }; // :114
   }
 });

@@ -89,7 +89,10 @@ export const failures = <P extends string>(port: P, code: string, n: number) => 
 export const dones = <P extends string>(port: P, n: number) => Array.from({ length: n }, () => ({ port, outcome: 'done' as const }));
 
 /** :78-80 → :126-133 — a token per press, minted before the guard; one call per frame */
-const press = (s: ActionState) => ({ set: s.scheduled ? { presses: s.presses + 1 } : { presses: s.presses + 1, scheduled: true }, send: [] as never[], outcome: 'pending' as const });
+const press = (s: ActionState) =>
+  !s.scheduled
+    ? { says: 'the first press this frame: the call goes to the backend at the frame\'s end, with the values held then', set: { presses: s.presses + 1, scheduled: true }, send: [] as never[], outcome: 'pending' as const }
+    : { says: 'another press this frame: it joins that call, and is answered with it', set: { presses: s.presses + 1 }, send: [] as never[], outcome: 'pending' as const };
 
 /** :135-160 — the frame's batch: one call, to the active backend, with the held values as they are now */
 function batch(s: ActionState, w: WorldView, op: 'logIn' | 'signUp' | 'logOut', args: Record<string, unknown>) {
@@ -132,8 +135,8 @@ export const LogIn = defineNode({
 }).on(
   {
     login: press,
-    username: (_s, v) => ({ set: { username: v }, send: [] }),
-    password: (_s, v) => ({ set: { password: v }, send: [] })
+    username: (_s, v) => ({ says: 'always: held as handed; read when the next sign-in goes', set: { username: v }, send: [] }),
+    password: (_s, v) => ({ says: 'always: held as handed; read when the next sign-in goes', set: { password: v }, send: [] })
   },
   {
     afterInputs: (s, _i, w) => batch(s, w, 'logIn', { username: s.username, password: s.password }), // :143-146
@@ -160,9 +163,9 @@ export const SignUp = defineNode({
 }).on(
   {
     signup: press,
-    username: (_s, v) => ({ set: { username: v }, send: [] }),
-    password: (_s, v) => ({ set: { password: v }, send: [] }),
-    email: (_s, v) => ({ set: { email: v }, send: [] })
+    username: (_s, v) => ({ says: 'always: held as handed; read when the next sign-up goes', set: { username: v }, send: [] }),
+    password: (_s, v) => ({ says: 'always: held as handed; read when the next sign-up goes', set: { password: v }, send: [] }),
+    email: (_s, v) => ({ says: 'always: held as handed; read when the next sign-up goes', set: { email: v }, send: [] })
   },
   {
     derived: {
