@@ -111,6 +111,13 @@ function walkFiles(dir, pred, out = []) {
 
 const warnings = [];
 const errors = [];
+/** Every (collection, field) and every collection the sources declare, for ONT-011's detectors. */
+const FIELDS = [];
+const COLLS = [];
+/** Permissions that name the fields they cover (acme's CMS): { source, from, role, action, fields, evidence }. */
+const FIELD_PERMS = [];
+/** A collection's declared display template (acme's CMS): { source, from, template, evidence }. */
+const DISPLAY_TEMPLATES = [];
 
 /** Rows are merged by id; a relation found twice keeps the first evidence and counts the sightings. */
 class Rows {
@@ -160,6 +167,8 @@ function harvestTemplates(rows) {
       const cfg = sec.collections[c] || {};
       const owns = cfg.creatorOwns !== undefined ? cfg.creatorOwns : !!(sec.defaults && sec.defaults.creatorOwns);
       if (owns) rows.add({ source, from: c, field: 'creatorOwns', to: '_User', how: 'security-creatorOwns', evidence: `${rel(secPath)}:${lineOf(secText, '"' + c + '"')}` });
+      const get = (cfg.permissions || {}).get ?? ((sec.defaults || {}).permissions || {}).get;
+      COLLS.push({ source, name: c, evidence: `${rel(secPath)}:${lineOf(secText, '"' + c + '"')}`, readers: owns ? 'its creator' : JSON.stringify(get ?? 'nobody') });
     }
     const compDir = path.join(templatesDir, name, 'components');
     for (const nodesPath of walkFiles(compDir, (p) => path.basename(p) === 'nodes.json')) {
@@ -185,6 +194,7 @@ function harvestTemplates(rows) {
         }
         for (const [field, how] of fields) {
           fieldsSeen += 1;
+          FIELDS.push({ source, from: coll, field, evidence });
           if (!/Ids?$/.test(field) || field === 'objectId') continue; // objectId is the record's own id
           rows.add({ source, from: coll, field, to: resolve(field), how, evidence });
         }
@@ -236,6 +246,7 @@ function harvestLessons(rows) {
   let columns = 0;
   for (const t of tables) {
     const tLine = lineOf(text, `"name": "${t.name}"`);
+    COLLS.push({ source, name: t.name, evidence: `${rel(lessonsSchema)}:${tLine}` });
     const own = new Set((t.indexes || []).filter((ix) => ix.unique && ix.fields.length === 1 && isOwnKey(t.name, ix.fields[0])).map((ix) => ix.fields[0]));
     const onePer = new Set((t.indexes || []).filter((ix) => ix.unique && ix.fields.length === 1 && !isOwnKey(t.name, ix.fields[0])).map((ix) => ix.fields[0]));
     const junctions = (t.indexes || []).filter((ix) => ix.unique && ix.fields.length >= 2 && ix.fields.every((f) => /Id$/.test(f)));
@@ -245,6 +256,7 @@ function harvestLessons(rows) {
       const line = lineOf(text, `"name": "${c.name}"`, text.indexOf(`"name": "${t.name}"`)) || tLine;
       const evidence = `${rel(lessonsSchema)}:${line}`;
       if (own.has(c.name)) continue;
+      FIELDS.push({ source, from: t.name, field: c.name, evidence, type: c.type });
       if (LIFECYCLE.test(c.name)) {
         rows.add({ source, from: t.name, field: c.name, to: '(lifecycle)', how: 'timestamp-column', evidence });
         continue;
@@ -460,6 +472,260 @@ function acmeDepth(rows, paths) {
   return { hops: deepest.hops, path: deepest.path, chain: deepest.chain, evidence: deepest.evidence, how: 'dotted path, every hop a harvested relation field', paths: resolved.length, distinct: counts.size, unresolved, table: [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([p, n]) => ({ path: p, uses: n, hops: resolved.find((r) => r.path === p).hops })) };
 }
 
+// -------------------------------------------------- borrows (ONT-011) --
+//
+// Four things Frappe's DocType says about a kind of record that the relation kinds above do not ask (ONT-011 §2).
+// They are facts about a noun or a property, not relations, so they are harvested beside the relation rows, not
+// as rows of a kind: a detector proposes a FAMILY, and a hand classification says by meaning whether the row
+// is one ("yes"), is not ("no: why"), or sits next door ("neighbour: why"). A word is not a meaning
+// (`PathStep.status = 'locked'` is "not yet", not "frozen"), so no detector's hit counts until it is classified.
+// The gate is the relations' gate: an unclassified candidate fails, and so does a classification that names no
+// candidate. A borrow with no "yes" row is not a failure: ONT-011 AC1 records it with zero rows.
+
+const FAMILIES = { secret: 'secret', settled: 'settled', 'only-one': 'facts', 'read-aloud': 'facts', 'called-by': 'facts', 'who-changed': 'facts', sometimes: 'sometimes' };
+
+const SECRET_RE = /^(token|secret|password|salt|pin)$|[a-z](Token|Secret|Hash|Salt|Verifier|Password|ApiKey|V)$|_(token|secret|hash|salt|password|api_key|verifier)$/;
+const STATUS_RE = /^(status|state|docstatus|stage)$|[a-z]Status$|_status$/;
+const DRAFT_WORDS = new Set(['draft', 'pending', 'proposed', 'open', 'new', 'unsent', 'unsubmitted']);
+const AGREED_WORDS = new Set(['issued', 'submitted', 'published', 'agreed', 'signed', 'sent', 'approved', 'confirmed', 'final', 'finalised', 'finalized', 'locked', 'accepted', 'sealed', 'posted']);
+const SETTLED_FIELD_RE = /^(published|sent|sealed|submitted|signed|approved|locked|finali[sz]ed|issued|agreed|posted)(At|On|Version|_at|_on|_version)?$/;
+const AMEND_RE = /^(attempt|revision|amends|amendedFrom|amended_from|amendment_of|supersedes|supersededBy|superseded_by|replaces|replacedBy|replaced_by)$/;
+const SINGLE_RE = /(Settings|Config|Configuration|Preferences|Singleton)$|_(settings|config|configuration|preferences)$|^(settings|config|configuration|preferences)$/i;
+const DEFAULT_FLAG_RE = /^(isDefault|is_default)$/;
+const NUMBER_RE = /^(number|no|ref|reference|seq|sequence|slug|attempt)$|[a-z](Number|No|Ref|Reference|Seq|Slug)$|_(number|no|ref|reference|seq|slug)$/;
+const NOT_A_NUMBER_RE = /phone|zip|postal|vat|iban|tax|fax|mobile/i;
+const TITLE_RE = /^(title|name|label|displayName|display_name|subject|resourceLabel|full_name|fullName)$/;
+const EDITOR_RE = /^(updatedBy|editedBy|modifiedBy|lastEditedBy|changedBy)\w*$|^(updated_by|modified_by|edited_by|changed_by|last_edited_by)\w*$|^(editedAt|edited_at)$/;
+const VERSION_RE = /^version$|[a-z]Version$|_version$/;
+const HISTORY_RE = /(History|Audit|AuditLog|Revision|Revisions|Changelog)$|_(history|audit|audit_log|audits|revisions?|changelog)$/i;
+const DETAIL_NOTE_RE = /[a-z](Note|Reason)$|_(note|notes|reason)$/;
+const ENDING_RE = /^(cancelled|canceled|closed|stopped|rejected|withdrawn|lost|removed|archived|ended|suspended|terminated)(At|On|_at|_on)$/;
+const DATE_RE = /[a-z](At|On|Date)$|_(at|on|date)$/;
+const URL_RE = /^(\w+?)(Url|_url)$/;
+/** A column's values from its trailing comment (`-- a / b / c`, `# 'a', 'b'`, `-- 'a' | 'b'`), or undefined. */
+function commentValues(line, mark) {
+  const at = line.indexOf(mark);
+  if (at < 0) return undefined;
+  const vs = line.slice(at + mark.length).replace(/['"]/g, '').split(/\s*[|/,]\s*/).map((v) => v.trim()).filter(Boolean);
+  return vs.length >= 2 && vs.every((v) => /^[a-z][a-z_]*$/.test(v)) ? vs : undefined;
+}
+const isWord = (set) => (v) => [...set].some((w) => v.toLowerCase() === w || v.toLowerCase().startsWith(w + '_'));
+const stem4 = (f) => f.replace(/(Note|Reason|At|On|Date|_at|_on|_date|_note|_notes|_reason)$/, '').toLowerCase().slice(0, 4);
+
+function fieldsAcme(dir) {
+  const prel = (p) => 'acme/' + path.relative(dir, p).split(path.sep).join('/');
+  for (const f of walkFiles(path.join(dir, 'scripts'), (p) => p.endsWith('.js'))) {
+    const text = read(f);
+    const re = /field:\s*'(\w+)',?\s*\n\s*type:\s*'(\w+)'/g; // a definition: the field, then its type
+    let m;
+    while ((m = re.exec(text))) {
+      const line = text.slice(0, m.index).split('\n').length;
+      const from = acmeCollBefore(text, m.index);
+      const next = text.indexOf("field: '", m.index + m[0].length);
+      const body = text.slice(m.index, next < 0 ? undefined : next);
+      const ch = /choices:\s*\[([\s\S]*?)\]/.exec(body);
+      const values = ch ? [...ch[1].matchAll(/value:\s*'([^']+)'/g)].map((v) => v[1]) : undefined;
+      FIELDS.push({ source: 'acme', from, field: m[1], evidence: `${prel(f)}:${line}`, type: m[2], values });
+    }
+  }
+  // permissions that list fields: `const <ROLE>_PERMISSIONS = [ { collection, action, permissions, fields: [...] } ]`
+  for (const f of walkFiles(path.join(dir, 'scripts'), (p) => p.endsWith('.js'))) {
+    const text = read(f);
+    const re = /collection:\s*'(\w+)',\s*\n\s*action:\s*'(read|update)',/g;
+    let m;
+    while ((m = re.exec(text))) {
+      const rest = text.slice(m.index + m[0].length);
+      const end = rest.search(/\bcollection:\s*'/); // the next permission starts where this one's fields have been said
+      const fm = /\bfields:\s*\[([^\]]*)\]/.exec(end < 0 ? rest : rest.slice(0, end));
+      if (!fm) continue;
+      const fields = [...fm[1].matchAll(/'([^']+)'/g)].map((v) => v[1]);
+      const role = [...text.slice(0, m.index).matchAll(/const\s+(\w+?)_PERMISSIONS\s*=/g)].pop();
+      FIELD_PERMS.push({ source: 'acme', from: m[1], role: role ? role[1].toLowerCase() : '?', action: m[2], fields, evidence: `${prel(f)}:${text.slice(0, m.index).split('\n').length}` });
+    }
+  }
+  // a collection's own answer to "what do you call one?": the CMS's display template
+  for (const f of walkFiles(path.join(dir, 'scripts'), (p) => p.endsWith('.js'))) {
+    const text = read(f);
+    for (const m of text.matchAll(/collection:\s*'(\w+)',\s*\n(?:[^\n]*\n){0,6}?\s*display_template:\s*'([^']*)'/g)) {
+      DISPLAY_TEMPLATES.push({ source: 'acme', from: m[1], template: m[2], evidence: `${prel(f)}:${text.slice(0, m.index + m[0].indexOf('display_template')).split('\n').length}` });
+    }
+  }
+  const seen = new Set(FIELDS.filter((x) => x.source === 'acme').map((x) => x.from));
+  for (const c of seen) COLLS.push({ source: 'acme', name: c, evidence: '(scripts)' });
+}
+
+function acmeCollBefore(text, at) {
+  const head = text.slice(0, at);
+  const pats = [/collection:\s*'(\w+)'/g, /createField(?:IfMissing)?\((?:token,\s*)?'(\w+)'/g, /const\s+([A-Z_]+)_FIELDS/g, /Creating (\w+) collection/g, /fields to (\w+)/g, /\/fields\/(\w+)[`'/]/g];
+  let best = null;
+  for (const re of pats) {
+    let m;
+    while ((m = re.exec(head))) if (!best || m.index > best.index) best = { index: m.index, name: m[1] };
+  }
+  return best ? best.name.toLowerCase() : '?';
+}
+
+const SQL_TYPES = 'UUID|TEXT|INT|INTEGER|BIGINT|SMALLINT|BOOLEAN|BOOL|TIMESTAMPTZ|TIMESTAMP|DATE|JSONB|JSON|NUMERIC|DECIMAL|SERIAL|BIGSERIAL|VARCHAR|CHAR|REAL|DOUBLE|BYTEA|INET|CITEXT|FLOAT';
+function fieldsTirion(dir) {
+  const prel = (p) => 'tirion/' + path.relative(dir, p).split(path.sep).join('/');
+  const colRe = new RegExp(`^\\s*(?:ADD COLUMN(?: IF NOT EXISTS)?\\s+)?(\\w+)\\s+(?:${SQL_TYPES})\\b`, 'i');
+  for (const f of walkFiles(path.join(dir, 'db'), (p) => p.endsWith('.sql'))) {
+    const text = read(f);
+    let table = null;
+    let inCreate = false;
+    text.split('\n').forEach((line, i) => {
+      let m;
+      if ((m = /(CREATE|ALTER) TABLE(?: IF(?: NOT)? EXISTS)?\s+([\w.]+)/i.exec(line))) {
+        table = m[2].split('.').pop();
+        inCreate = /CREATE/i.test(m[1]);
+        if (!COLLS.some((c) => c.source === 'tirion' && c.name === table)) COLLS.push({ source: 'tirion', name: table, evidence: `${prel(f)}:${i + 1}` });
+      }
+      if (!table) return;
+      if ((inCreate || /ADD COLUMN/i.test(line)) && (m = colRe.exec(line)) && !/^(CONSTRAINT|PRIMARY|UNIQUE|FOREIGN|CHECK|CREATE|ALTER|TABLE)$/i.test(m[1])) {
+        FIELDS.push({ source: 'tirion', from: table, field: m[1], evidence: `${prel(f)}:${i + 1}`, values: commentValues(line, '--') });
+      }
+      if ((m = /CHECK\s*\(\s*(\w+)\s+IN\s*\(([^)]*)\)/i.exec(line))) {
+        const values = [...m[2].matchAll(/'([^']+)'/g)].map((v) => v[1]);
+        const own = FIELDS.filter((x) => x.source === 'tirion' && x.from === table && x.field === m[1]).pop();
+        if (own) own.values = values;
+      }
+      if (/^\s*\);/.test(line)) inCreate = false;
+    });
+  }
+}
+
+function fieldsSentinel(dir) {
+  const prel = (p) => 'sentinel/' + path.relative(dir, p).split(path.sep).join('/');
+  const models = path.join(dir, 'backend', 'models.py');
+  if (!exists(models)) return;
+  const text = read(models);
+  let table = '?';
+  text.split('\n').forEach((line, i) => {
+    const ev = `${prel(models)}:${i + 1}`;
+    let m;
+    if ((m = /__tablename__\s*=\s*'(\w+)'/.exec(line))) {
+      table = m[1];
+      COLLS.push({ source: 'sentinel', name: table, evidence: ev });
+    }
+    if ((m = /^(\w+)\s*=\s*Table\(\s*'(\w+)'/.exec(line))) {
+      table = m[2];
+      COLLS.push({ source: 'sentinel', name: table, evidence: ev });
+    }
+    if ((m = /^\s+(\w+)\s*=\s*Column\(/.exec(line))) FIELDS.push({ source: 'sentinel', from: table, field: m[1], evidence: ev, values: commentValues(line, '#') });
+    else if ((m = /^\s+Column\('(\w+)'/.exec(line))) FIELDS.push({ source: 'sentinel', from: table, field: m[1], evidence: ev });
+  });
+}
+
+class Candidates {
+  constructor() {
+    this.byId = new Map();
+  }
+  add(c) {
+    const id = `${c.source}|${c.from}.${c.field}@${c.family}`;
+    const have = this.byId.get(id);
+    if (have) {
+      if (!have.how.includes(c.how)) have.how.push(c.how);
+      return have;
+    }
+    const row = { id, source: c.source, from: c.from, field: c.field, family: c.family, how: [c.how], evidence: c.evidence, note: c.note || '' };
+    this.byId.set(id, row);
+    return row;
+  }
+  all() {
+    return [...this.byId.values()];
+  }
+}
+
+/** Sources in the order the kinds table prints them: templates, lessons, then the private ones. */
+const srcOrder = (names) => [...names.filter((n) => n.startsWith('template:')).sort(), ...names.filter((n) => n === 'lessons'), ...PRIVATE_NAMES.filter((n) => names.includes(n))];
+
+function detectBorrows(cands, handRows) {
+  const byColl = new Map();
+  for (const f of FIELDS) {
+    const k = `${f.source}|${f.from}`;
+    if (!byColl.has(k)) byColl.set(k, new Map());
+    const m = byColl.get(k);
+    if (!m.has(f.field)) m.set(f.field, f);
+    else if (f.values && !m.get(f.field).values) m.get(f.field).values = f.values;
+  }
+  const readersOf = new Map(COLLS.filter((c) => c.readers).map((c) => [`${c.source}|${c.name}`, c.readers]));
+  for (const [k, fields] of byColl) {
+    const names = [...fields.keys()];
+    let titled = false;
+    for (const f of fields.values()) {
+      const at = { source: f.source, from: f.from, field: f.field, evidence: f.evidence };
+      const readers = readersOf.get(k);
+      if (SECRET_RE.test(f.field)) cands.add({ ...at, family: 'secret', how: 'secret-name', note: readers ? `read by ${readers}` : 'readers not read in this source' });
+      if (STATUS_RE.test(f.field)) {
+        if (!f.values) cands.add({ ...at, family: 'settled', how: 'status-values-not-read' });
+        else if (f.values.some(isWord(DRAFT_WORDS)) && f.values.some(isWord(AGREED_WORDS))) cands.add({ ...at, family: 'settled', how: 'status-draft-and-agreed', note: f.values.join(' / ') });
+      }
+      if (SETTLED_FIELD_RE.test(f.field)) cands.add({ ...at, family: 'settled', how: 'settled-field' });
+      if (AMEND_RE.test(f.field)) cands.add({ ...at, family: 'settled', how: 'new-record-amends' });
+      if (DEFAULT_FLAG_RE.test(f.field)) cands.add({ ...at, family: 'only-one', how: 'default-flag' });
+      if (NUMBER_RE.test(f.field) && !NOT_A_NUMBER_RE.test(f.field)) cands.add({ ...at, family: 'read-aloud', how: 'number-name' });
+      if (!titled && TITLE_RE.test(f.field)) {
+        titled = true;
+        cands.add({ ...at, family: 'called-by', how: 'title-field' });
+      }
+      if (EDITOR_RE.test(f.field)) cands.add({ ...at, family: 'who-changed', how: 'last-editor' });
+      if (VERSION_RE.test(f.field)) cands.add({ ...at, family: 'who-changed', how: 'version-field' });
+      if (DETAIL_NOTE_RE.test(f.field)) {
+        const beside = names.filter((n) => n !== f.field && DATE_RE.test(n) && stem4(n) === stem4(f.field));
+        if (beside.length) cands.add({ ...at, family: 'sometimes', how: 'note-beside-lifecycle', note: `beside ${beside.join(', ')}` });
+      }
+      if (ENDING_RE.test(f.field) && !names.some((n) => DETAIL_NOTE_RE.test(n) && stem4(n) === stem4(f.field))) cands.add({ ...at, family: 'sometimes', how: 'ending-without-a-reason' });
+      const u = URL_RE.exec(f.field);
+      if (u) {
+        const other = names.filter((n) => n !== f.field && n.startsWith(u[1]) && /(StorageKey|Key|FileId|File|_key|_file_id|_file)$/.test(n));
+        if (other.length) cands.add({ ...at, family: 'sometimes', how: 'one-or-the-other', note: `or ${other.join(', ')}` });
+      }
+      if (/^[a-z]{3,}$/.test(f.field)) {
+        const group = names.filter((n) => n.length > f.field.length && n.startsWith(f.field) && /[A-Z_]/.test(n[f.field.length]));
+        if (group.length >= 2) cands.add({ ...at, family: 'sometimes', how: 'detail-group', note: `with ${group.join(', ')}` });
+      }
+    }
+  }
+  for (const d of DISPLAY_TEMPLATES) cands.add({ source: d.source, from: d.from, field: '(display template)', family: 'called-by', how: 'display-template', evidence: d.evidence });
+  for (const p of FIELD_PERMS) {
+    if (p.fields.includes('*')) continue;
+    cands.add({ source: p.source, from: p.from, field: `(${p.action} by ${p.role})`, family: 'secret', how: `field-limited-${p.action}`, evidence: p.evidence, note: `${p.fields.length} fields named` });
+  }
+  for (const c of COLLS) {
+    if (SINGLE_RE.test(c.name)) cands.add({ source: c.source, from: c.name, field: '(collection)', family: 'only-one', how: 'single-name', evidence: c.evidence });
+    if (HISTORY_RE.test(c.name)) cands.add({ source: c.source, from: c.name, field: '(collection)', family: 'who-changed', how: 'history-collection', evidence: c.evidence });
+  }
+  for (const h of handRows) {
+    if (!FAMILIES[h.family]) errors.push(`borrows.hand: ${h.from}.${h.field} names family "${h.family}", which is not one of ${Object.keys(FAMILIES).join(', ')}`);
+    const [file, line] = String(h.evidence).split(':');
+    if (!exists(path.join(root, file)) || !(Number(line) >= 1 && Number(line) <= read(path.join(root, file)).split('\n').length)) errors.push(`borrows.hand: ${h.from}.${h.field} cites ${h.evidence}, which is not a line of a file in this repository`);
+    cands.add({ ...h, how: 'hand' });
+  }
+}
+
+/** `yes[: why]` | `no: why` | `neighbour: why` — the verdict on one candidate, by meaning. */
+const VERDICT_RE = /^(yes(: .+)?|no: .+|neighbour: .+)$/;
+function classifyBorrows(cands, table, label, present) {
+  const lookup = (c) => table[c.id] || table[`${c.source}|*.${c.field}@${c.family}`] || null;
+  for (const c of cands.all()) {
+    if (!present.has(c.source)) continue;
+    const v = lookup(c);
+    if (!v) {
+      errors.push(`unclassified ONT-011 candidate ${c.id} (${c.how.join(',')}; ${c.evidence})`);
+      continue;
+    }
+    if (!VERDICT_RE.test(v)) errors.push(`${label}: "${c.id}" has verdict "${v}"; a verdict is "yes[: <why>]", "no: <why>" or "neighbour: <why>"`);
+    c.verdict = v.split(':')[0];
+    c.why = v.includes(':') ? v.slice(v.indexOf(':') + 1).trim() : '';
+  }
+  for (const key of Object.keys(table)) {
+    if (key.startsWith('_')) continue;
+    if (!present.has(key.split('|')[0])) continue;
+    const hit = key.includes('|*.') ? cands.all().some((c) => key === `${c.source}|*.${c.field}@${c.family}`) : cands.byId.has(key);
+    if (!hit) errors.push(`${label}: "${key}" names no ONT-011 candidate`);
+  }
+}
+
 // ------------------------------------------------------------ classify --
 
 function classify(rows, hand, privateClass) {
@@ -535,6 +801,19 @@ function main() {
 
   classify(rows, hand, privateClass);
 
+  // ONT-011: the borrows, harvested over the same sources
+  if (PRIVATE_SOURCES.acme) fieldsAcme(PRIVATE_SOURCES.acme);
+  if (PRIVATE_SOURCES.tirion) fieldsTirion(PRIVATE_SOURCES.tirion);
+  if (PRIVATE_SOURCES.sentinel) fieldsSentinel(PRIVATE_SOURCES.sentinel);
+  const handBorrows = hand.borrows || { list: {}, classification: {}, hand: [] };
+  const privateBorrows = PRIVATE_DIR && exists(path.join(PRIVATE_DIR, 'borrows.json')) ? readJson(path.join(PRIVATE_DIR, 'borrows.json')) : {};
+  const cands = new Candidates();
+  detectBorrows(cands, handBorrows.hand || []);
+  const inRepo = new Set(['lessons', ...fs.readdirSync(templatesDir).map((n) => 'template:' + n)]);
+  classifyBorrows(cands, handBorrows.classification || {}, 'kinds.hand.json borrows', inRepo);
+  classifyBorrows(cands, privateBorrows, 'private borrows.json', new Set(PRIVATE_NAMES.filter((n) => PRIVATE_SOURCES[n])));
+  for (const b of new Set(Object.values(FAMILIES))) if (!(handBorrows.list || {})[b]) errors.push(`kinds.hand.json borrows.list has no entry for "${b}"`);
+
   // counts per kind per source
   const kinds = hand.kinds || {};
   const kindIds = Object.keys(kinds);
@@ -591,6 +870,43 @@ function main() {
     if (was) out.sources.push(was);
   }
   if (privateAbsent.length && committed) out.privateVerified = committed.privateVerified;
+
+  // ONT-011's borrows: counts[family][source] = { yes, no, neighbour }; an absent private source keeps its
+  // committed counts, as the kinds do. Only in-repo candidates carry names and evidence.
+  const wasBorrows = committed && committed.borrows ? Object.fromEntries(committed.borrows.list.map((b) => [b.id, b])) : {};
+  const fieldsRead = {};
+  for (const f of FIELDS) fieldsRead[f.source] = (fieldsRead[f.source] || 0) + 1;
+  for (const n of privateAbsent) if (committed && committed.borrows && committed.borrows.fieldsRead && committed.borrows.fieldsRead[n] !== undefined) fieldsRead[n] = committed.borrows.fieldsRead[n];
+  out.borrows = { $comment: 'ONT-011 step 1: candidates found by the detectors in census.js, each classified by meaning (yes / no / neighbour) in kinds.hand.json or the private borrows.json. Not kinds: step 2 decides the vocabulary.', fieldsRead: Object.fromEntries(srcOrder(Object.keys(fieldsRead)).map((n) => [n, fieldsRead[n]])), list: [] };
+  for (const [id, b] of Object.entries(handBorrows.list || {})) {
+    const fams = Object.keys(FAMILIES).filter((f) => FAMILIES[f] === id);
+    const counts = {};
+    for (const fam of fams) {
+      counts[fam] = {};
+      for (const c of cands.all()) {
+        if (c.family !== fam || !c.verdict) continue;
+        const s = (counts[fam][c.source] = counts[fam][c.source] || { yes: 0, no: 0, neighbour: 0 });
+        s[c.verdict] += 1;
+      }
+      for (const n of privateAbsent) {
+        const was = wasBorrows[id] && wasBorrows[id].counts[fam] && wasBorrows[id].counts[fam][n];
+        if (was) counts[fam][n] = was;
+      }
+      counts[fam] = Object.fromEntries(srcOrder(Object.keys(counts[fam])).map((n) => [n, counts[fam][n]])); // one order, whichever sources were present
+    }
+    const bySource = {};
+    for (const fam of fams) for (const [src, c] of Object.entries(counts[fam])) if (c.yes) bySource[src] = (bySource[src] || 0) + c.yes;
+    out.borrows.list.push({
+      id,
+      sentence: b.sentence,
+      question: b.question,
+      facts: b.facts,
+      kept: Object.values(bySource).reduce((x, y) => x + y, 0),
+      bySource,
+      counts,
+      evidence: cands.all().filter((c) => fams.includes(c.family) && inRepo.has(c.source)).sort((x, y) => x.id.localeCompare(y.id)).map((c) => ({ id: c.id, how: c.how.join(','), evidence: c.evidence, verdict: c.verdict, why: c.why || undefined, note: c.note || undefined }))
+    });
+  }
 
   if (errors.length) {
     console.error(`ontology census: ${errors.length} error(s)\n  ` + errors.join('\n  '));
@@ -687,6 +1003,39 @@ function main() {
     for (const r of out.oral.rows) md.push(`| ${r.mistake} | **${r.kind}** | ${r.why || ''} |`);
   }
   md.push('');
+  md.push('## What Frappe asks (ONT-011 step 1)');
+  md.push('');
+  md.push(`Not kinds. Four things a Frappe DocType says about a kind of record, looked for in the same sources by the detectors in \`census.js\` and each candidate classified by meaning: **yes**, **no** (a word that matched with another meaning) or **neighbour** (next door, and step 2 decides where it goes). Step 2 makes a borrow part of the vocabulary only if it keeps rows here. ${out.privateVerified ? '' : 'Private counts are carried from the committed file.'}`);
+  md.push('');
+  md.push(`**The detectors' reach, in (collection, field) pairs read:** ${Object.entries(out.borrows.fieldsRead).map(([n, c]) => `\`${n.replace('template:', '')}\` ${c}`).join(', ')}. A template's fields are the ones its record nodes write or filter on; acme's are the field definitions in its schema scripts (the CMS's own UI-made fields are not read); tirion's the columns of its \`CREATE TABLE\` and \`ADD COLUMN\` statements; sentinel's the \`Column(\` lines of its models.`);
+  md.push('');
+  md.push(`| borrow | a person's sentence | rows kept | ${srcNames.map((s) => '`' + s.replace('template:', '') + '`').join(' | ')} |`);
+  md.push(`|---|---|---|${srcNames.map(() => '---').join('|')}|`);
+  for (const b of out.borrows.list) md.push(`| **${b.id}**${b.kept ? '' : ' (none)'} | ${b.sentence} | ${b.kept} | ${srcNames.map((s) => b.bySource[s] || '·').join(' | ')} |`);
+  md.push('');
+  for (const b of out.borrows.list) {
+    md.push(`### ${b.id}`);
+    md.push('');
+    md.push(`*${b.sentence}*`);
+    md.push('');
+    md.push(`- **The question it asks:** ${b.question}`);
+    md.push('');
+    md.push('  | family | yes | no | neighbour | yes per source |');
+    md.push('  |---|---|---|---|---|');
+    for (const [fam, bySrc] of Object.entries(b.counts)) {
+      const sum = (k) => Object.values(bySrc).reduce((x, c) => x + c[k], 0);
+      md.push(`  | ${fam}${b.facts && b.facts[fam] ? ' — ' + b.facts[fam] : ''} | ${sum('yes')} | ${sum('no')} | ${sum('neighbour')} | ${Object.entries(bySrc).filter(([, c]) => c.yes).map(([s, c]) => `${s.replace('template:', '')} ${c.yes}`).join(', ') || '·'} |`);
+    }
+    if (b.evidence.length) {
+      md.push('');
+      md.push('  In this repo:');
+      md.push('');
+      md.push('  | candidate | found by | verdict | evidence |');
+      md.push('  |---|---|---|---|');
+      for (const e of b.evidence) md.push(`  | \`${e.id}\` | ${e.how}${e.note ? ' — ' + e.note : ''} | **${e.verdict}**${e.why ? ': ' + e.why : ''} | \`${e.evidence}\` |`);
+    }
+    md.push('');
+  }
   if (warnings.length) {
     md.push('## Warnings');
     md.push('');

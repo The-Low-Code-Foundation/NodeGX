@@ -46,6 +46,10 @@ reach, which is NSP-005's word.
 
 ## 5. Watch for
 
+- **ONT-011 hands this view two hints (opened 2026-10-10):** what a person calls one record in a list, and a detail
+  shown only when its case holds. If ONT-011's step 5 has landed, the suite reads both from the files. If it has
+  not, say in the brief that a home-made manager guesses them, and how.
+
 - **ONT-001 AC4 lands here (moved 2026-10-08).** The backend manager's `KindPicker` renders its tiles inline from its own
   `KINDS` constant, with three text slots and no long text, so no relation kind shows there without an edit. `describe()`
   (`@nodegx/project-contract/world`) returns the tile's fields under the same names (`label`, `line`, `icon`) plus the long

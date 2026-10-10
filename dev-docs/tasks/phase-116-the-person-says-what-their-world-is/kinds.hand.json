@@ -241,5 +241,122 @@
         "why": "a derived field copied onto the parent and maintained by hand; the sort key belongs on the thing sorted, or the query goes through the path operation (ONT-004)"
       }
     ]
+  },
+  "borrows": {
+    "_about": "ONT-011 step 1. Not kinds: the four things Frappe's DocType says about a kind of record, looked for by the detectors in census.js. `list` is each borrow's person sentence (ONT-011 §1) and its question; `classification` is the verdict on each in-repo candidate, by meaning — \"yes\", \"no: why\" (the word matched, the meaning does not) or \"neighbour: why\" (next door; step 2 decides). A key may use `*` for the collection. `hand` holds a row no detector can see, with its file:line. The private candidates' verdicts live in the private folder's borrows.json.",
+    "list": {
+      "secret": {
+        "sentence": "Some details on a record are not for everyone who can see the record, and the system asked me which ones before anyone could read them.",
+        "question": "Is any detail on it not for everyone who can see it? Who may read that detail?"
+      },
+      "settled": {
+        "sentence": "Once something is agreed, it stays as it was agreed. To change it I withdraw it or make a new one that says which one it replaces, and the old one is still there.",
+        "question": "Does it get agreed, signed, sent or published at some point? After that, may it still change, and how is a mistake in it put right?"
+      },
+      "facts": {
+        "sentence": "The system asked whether there is only one of something, whether people read its number aloud, what I call one in a list, and whether I need to know who changed what.",
+        "question": "Is there only one of it? Do people read its number aloud? What do you call one in a list? Do you need to know who changed what?",
+        "facts": {
+          "only-one": "there is only one",
+          "read-aloud": "people read its number aloud",
+          "called-by": "what you call one in a list",
+          "who-changed": "who changed what"
+        }
+      },
+      "sometimes": {
+        "sentence": "A detail that only matters in some cases is asked for in those cases, and never left empty when it mattered.",
+        "question": "Is any detail needed only in some cases? Which cases, and must it be filled then?"
+      }
+    },
+    "classification": {
+      "template:members-area|Member.unsubscribeToken@secret": "yes: every admin who can list members reads every member's unsubscribe token, and the rest of the member is theirs to read",
+      "template:members-area|Member.token@secret": "no: the unsubscribe query's parameter name (its filter's input), not a field on Member",
+      "template:nightbook|Profile.codeV@secret": "yes: a salted verifier on a profile anyone may read; known and deliberate until V1-8 (TPL-011)",
+      "template:nightbook|Profile.answerV@secret": "yes: a salted verifier on a profile anyone may read; known and deliberate until V1-8 (TPL-011)",
+      "template:nightbook|Profile.rescueV@secret": "yes: a salted verifier on a profile anyone may read; known and deliberate until V1-8 (TPL-011)",
+      "lessons|CoachNote.visibility@secret": "neighbour: the whole note is hidden from the learner by a value on it, enforced by the read functions; a rule on a value, not a secret field",
+      "template:members-area|Announcement.postedAt@settled": "no: when it was posted; an admin may still edit it, and nothing says otherwise",
+      "template:nightbook|Envelope.sealed@settled": "yes: sealed until a day; sealEnvelope refuses a day that is not still to come",
+      "template:planning|MoneyMark.sentOn@settled": "yes: a bill that is sent, then paid or lost; whether its amount may change after it is sent is the unasked question",
+      "template:planning|Task.status@settled": "no: the todo list's open / done, written from the planning app: finished, not agreed",
+      "template:planning|Task.openStatus@settled": "no: a query parameter that asks for open tasks, not a field",
+      "template:todo-list|Task.status@settled": "no: open / done: finished, not agreed",
+      "template:todo-list|Routine.status@settled": "no: running / stopped: an end (`ends`), not an agreement",
+      "lessons|Assignment.status@settled": "yes: draft / issued / withdrawn, Frappe's draft / submitted / cancelled under other words",
+      "lessons|ArtifactSubmission.attempt@settled": "yes: a new attempt is a new record and the old one stays (unique with learner, concept and section): amend by a new record",
+      "lessons|AssignmentSubmission.attempt@settled": "yes: a new attempt is a new record and the old one stays: amend by a new record",
+      "lessons|ArtifactSubmission.submittedAt@settled": "neighbour: when it was handed in; the record is counted on `attempt`, and the coach's `evaluation` is written onto it afterwards, which answers 'may anything still change?'",
+      "lessons|AssignmentSubmission.submittedAt@settled": "neighbour: when it was handed in; counted on `attempt`; `evaluation` is written onto it afterwards",
+      "lessons|LearnerInvite.status@settled": "no: an invite that is claimed is used up (`ends`), not agreed",
+      "lessons|PathStep.status@settled": "no: locked / available / complete; 'locked' means not yet available, not frozen",
+      "lessons|Programme.status@settled": "no: active / closed: an end, not an agreement",
+      "lessons|LessonDraft.publishedVersion@settled": "yes: a draft kept beside the version that was published",
+      "lessons|Cohort.isDefault@only-one": "neighbour: one of many cohorts marked as the default, not a collection of one",
+      "template:planning|Settings.(collection)@only-one": "yes: a collection meant to hold one record per person (creatorOwns)",
+      "template:members-area|Association.(collection)@only-one": "yes: one association per app; claimAssociation makes it only while none exists",
+      "lessons|ArtifactSubmission.attempt@read-aloud": "neighbour: counted per learner and concept ('attempt 2'), not a number that names the record",
+      "lessons|AssignmentSubmission.attempt@read-aloud": "neighbour: counted per learner and assignment, not a number that names the record",
+      "lessons|LearnerDeliverable.slug@read-aloud": "neighbour: a name people type, not a number",
+      "template:members-area|*.title@called-by": "yes: what one is called in a list",
+      "template:members-area|*.name@called-by": "yes: what one is called in a list",
+      "template:nightbook|*.name@called-by": "yes: what one is called in a list",
+      "template:planning|*.label@called-by": "yes: what one is called in a list",
+      "template:planning|*.name@called-by": "yes: what one is called in a list",
+      "template:planning|*.title@called-by": "yes: what one is called in a list",
+      "template:todo-list|*.title@called-by": "yes: what one is called in a list",
+      "lessons|*.title@called-by": "yes: what one is called in a list",
+      "lessons|*.name@called-by": "yes: what one is called in a list",
+      "lessons|*.displayName@called-by": "yes: what one is called in a list",
+      "lessons|*.subject@called-by": "yes: what one is called in a list",
+      "lessons|*.label@called-by": "yes: what one is called in a list",
+      "lessons|*.resourceLabel@called-by": "yes: what one is called in a list",
+      "lessons|CoachNote.editedAt@who-changed": "yes: keeps that it was edited, not what changed or who changed it",
+      "lessons|LessonDraft.updatedByEmail@who-changed": "yes: the last person to touch the draft, not what they changed",
+      "lessons|LessonDraft.version@who-changed": "neighbour: a counter of the draft's saves, not who changed what",
+      "lessons|LessonDraft.publishedVersion@who-changed": "no: the version that was published, counted under settled",
+      "lessons|Lesson.conceptVersion@who-changed": "neighbour: which version of another thing the lesson was built from: provenance, not a history of changes",
+      "lessons|Lesson.projectContextVersion@who-changed": "neighbour: which version of another thing the lesson was built from: provenance, not a history of changes",
+      "lessons|Lesson.generationVersion@who-changed": "neighbour: which version of another thing the lesson was built from: provenance, not a history of changes",
+      "lessons|ProjectContext.version@who-changed": "neighbour: a counter that Lesson.projectContextVersion reads: provenance",
+      "template:planning|Project.move@sometimes": "yes: moveWorth, moveWhen, moveDue and moveStop matter only when the project has a next move",
+      "template:planning|Task.closingNote@sometimes": "yes: a note that matters only once the task is closed",
+      "template:todo-list|Task.closingNote@sometimes": "yes: a note that matters only once the task is closed",
+      "template:todo-list|Routine.stopNote@sometimes": "yes: a note that matters only once the routine stops",
+      "template:planning|MoneyMark.lostOn@sometimes": "neighbour: a lost bill with no reason field of its own; the mark's general `note` may hold one",
+      "lessons|CoachingSession.cancelledAt@sometimes": "yes: a cancelled session is still shown to the learner, with no field for why: the unasked question",
+      "lessons|CohortMember.removedAt@sometimes": "neighbour: an end with no reason field and no reader of a reason found; the `ends` kind's question",
+      "lessons|LearnerDeliverable.archivedAt@sometimes": "neighbour: an end with no reason field and no reader of a reason found; the `ends` kind's question",
+      "lessons|Programme.archivedAt@sometimes": "neighbour: an end with no reason field and no reader of a reason found; the `ends` kind's question",
+      "lessons|ProgrammeDimension.archivedAt@sometimes": "neighbour: an end with no reason field and no reader of a reason found; the `ends` kind's question",
+      "lessons|PathStep.removedAt@sometimes": "no: a removed step leaves the path (the read filters it out) and is not shown again; nobody is owed a reason",
+      "lessons|SessionPrep.resourceUrl@sometimes": "yes: one or the other with resourceStorageKey, never both",
+      "lessons|AssignmentSubmission.linkUrl@sometimes": "yes: allowed only when the assignment's submissionModes includes link, a case decided on another record"
+    },
+    "hand": [
+      {
+        "source": "template:members-area",
+        "from": "Association",
+        "field": "(collection)",
+        "family": "only-one",
+        "evidence": "templates/members-area/components/__cloud__/claimAssociation/nodes.json:70",
+        "note": "claimAssociation refuses unless the association is still unclaimed"
+      },
+      {
+        "source": "lessons",
+        "from": "AssignmentSubmission",
+        "field": "linkUrl",
+        "family": "sometimes",
+        "evidence": "templates/digital-bricks-training/backend/schema.json:159",
+        "note": "submissionModes is Assignment's (schema.json:100); the lessons app refuses a link the brief does not ask for (its assignments service)"
+      },
+      {
+        "source": "lessons",
+        "from": "CoachNote",
+        "field": "visibility",
+        "family": "secret",
+        "evidence": "templates/digital-bricks-training/backend/schema.json:225",
+        "note": "'internal' hides the note from the learner (tools/check-read-functions.mjs)"
+      }
+    ]
   }
 }

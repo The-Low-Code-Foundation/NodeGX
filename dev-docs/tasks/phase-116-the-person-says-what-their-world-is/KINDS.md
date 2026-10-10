@@ -1,6 +1,6 @@
 # The relation kinds, read off the apps on this machine
 
-**Counts are about these 8 sources and no others** (ONT-000 §5): `template:members-area`, `template:nightbook`, `template:planning`, `template:todo-list`, `lessons`, `acme`, `tirion`, `sentinel`. Generated 2026-10-08 by `scripts/ontology/census.js` — do not edit by hand; edit `kinds.hand.json` and regenerate. Every source was present.
+**Counts are about these 8 sources and no others** (ONT-000 §5): `template:members-area`, `template:nightbook`, `template:planning`, `template:todo-list`, `lessons`, `acme`, `tirion`, `sentinel`. Generated 2026-10-10 by `scripts/ontology/census.js` — do not edit by hand; edit `kinds.hand.json` and regenerate. Every source was present.
 
 A kind enters this list only with an evidence row that names a file and a line, or a document and a heading; a kind with one row is marked **(1)**; a kind with none makes the script fail. A row is one (collection, field) pair, so a junction contributes one row per end and a relation seen in several places is one row with its sightings counted. The private sources' rows (the membership business and the two prototypes) are held outside the repository (README R6); only their counts are here. The sentence is written per kind and read per row with the row's names in it.
 
@@ -336,4 +336,154 @@ Richard: "a lot of the mistakes were about query efficacy … that mistake gets 
 | putting a field inside the profile table that is later used very often to filter users and should have been in the user table from the start; too late once users have profile relations, so a nested relation query, and it sucks | **extends** | the field you filter or sort the main thing by was split off into the extension |
 | making a one-to-many thinking 'this user only belongs to one company', then realising they can belong to several — but the field exists and real data is in it | **belongs-to** | a 'belongs-to' that was an 'is-on'; the question 'could it ever be several at once' was not asked before data existed |
 | wanting to order users by the profile's last-updated date and having to choose between a nested query and a copied 'profile_updated' field on user kept in sync by hand — repeated until the DB is patchwork and duplicate data | **extends** | a derived field copied onto the parent and maintained by hand; the sort key belongs on the thing sorted, or the query goes through the path operation (ONT-004) |
+
+## What Frappe asks (ONT-011 step 1)
+
+Not kinds. Four things a Frappe DocType says about a kind of record, looked for in the same sources by the detectors in `census.js` and each candidate classified by meaning: **yes**, **no** (a word that matched with another meaning) or **neighbour** (next door, and step 2 decides where it goes). Step 2 makes a borrow part of the vocabulary only if it keeps rows here. 
+
+**The detectors' reach, in (collection, field) pairs read:** `members-area` 37, `nightbook` 60, `planning` 265, `todo-list` 61, `lessons` 153, `acme` 133, `tirion` 414, `sentinel` 199. A template's fields are the ones its record nodes write or filter on; acme's are the field definitions in its schema scripts (the CMS's own UI-made fields are not read); tirion's the columns of its `CREATE TABLE` and `ADD COLUMN` statements; sentinel's the `Column(` lines of its models.
+
+| borrow | a person's sentence | rows kept | `members-area` | `nightbook` | `planning` | `todo-list` | `lessons` | `acme` | `tirion` | `sentinel` |
+|---|---|---|---|---|---|---|---|---|---|---|
+| **secret** | Some details on a record are not for everyone who can see the record, and the system asked me which ones before anyone could read them. | 16 | 1 | 3 | · | · | · | 8 | 4 | · |
+| **settled** | Once something is agreed, it stays as it was agreed. To change it I withdraw it or make a new one that says which one it replaces, and the old one is still there. | 8 | · | 1 | 1 | · | 4 | · | 2 | · |
+| **facts** | The system asked whether there is only one of something, whether people read its number aloud, what I call one in a list, and whether I need to know who changed what. | 55 | 6 | 1 | 4 | 3 | 15 | 9 | 8 | 9 |
+| **sometimes** | A detail that only matters in some cases is asked for in those cases, and never left empty when it mattered. | 9 | · | · | 2 | 2 | 3 | 2 | · | · |
+
+### secret
+
+*Some details on a record are not for everyone who can see the record, and the system asked me which ones before anyone could read them.*
+
+- **The question it asks:** Is any detail on it not for everyone who can see it? Who may read that detail?
+
+  | family | yes | no | neighbour | yes per source |
+  |---|---|---|---|---|
+  | secret | 16 | 3 | 7 | members-area 1, nightbook 3, acme 8, tirion 4 |
+
+  In this repo:
+
+  | candidate | found by | verdict | evidence |
+  |---|---|---|---|
+  | `lessons|CoachNote.visibility@secret` | hand — 'internal' hides the note from the learner (tools/check-read-functions.mjs) | **neighbour**: the whole note is hidden from the learner by a value on it, enforced by the read functions; a rule on a value, not a secret field | `templates/digital-bricks-training/backend/schema.json:225` |
+  | `template:members-area|Member.token@secret` | secret-name — read by "role:admin" | **no**: the unsubscribe query's parameter name (its filter's input), not a field on Member | `templates/members-area/components/__cloud__/unsubscribe/nodes.json:57` |
+  | `template:members-area|Member.unsubscribeToken@secret` | secret-name — read by "role:admin" | **yes**: every admin who can list members reads every member's unsubscribe token, and the rest of the member is theirs to read | `templates/members-area/components/__cloud__/claimAssociation/nodes.json:352` |
+  | `template:nightbook|Profile.answerV@secret` | secret-name — read by "public" | **yes**: a salted verifier on a profile anyone may read; known and deliberate until V1-8 (TPL-011) | `templates/nightbook/components/__cloud__/saveProfile/nodes.json:235` |
+  | `template:nightbook|Profile.codeV@secret` | secret-name — read by "public" | **yes**: a salted verifier on a profile anyone may read; known and deliberate until V1-8 (TPL-011) | `templates/nightbook/components/__cloud__/saveProfile/nodes.json:235` |
+  | `template:nightbook|Profile.rescueV@secret` | secret-name — read by "public" | **yes**: a salted verifier on a profile anyone may read; known and deliberate until V1-8 (TPL-011) | `templates/nightbook/components/__cloud__/saveProfile/nodes.json:235` |
+
+### settled
+
+*Once something is agreed, it stays as it was agreed. To change it I withdraw it or make a new one that says which one it replaces, and the old one is still there.*
+
+- **The question it asks:** Does it get agreed, signed, sent or published at some point? After that, may it still change, and how is a mistake in it put right?
+
+  | family | yes | no | neighbour | yes per source |
+  |---|---|---|---|---|
+  | settled | 8 | 12 | 4 | nightbook 1, planning 1, lessons 4, tirion 2 |
+
+  In this repo:
+
+  | candidate | found by | verdict | evidence |
+  |---|---|---|---|
+  | `lessons|ArtifactSubmission.attempt@settled` | new-record-amends | **yes**: a new attempt is a new record and the old one stays (unique with learner, concept and section): amend by a new record | `templates/digital-bricks-training/backend/schema.json:22` |
+  | `lessons|ArtifactSubmission.submittedAt@settled` | settled-field | **neighbour**: when it was handed in; the record is counted on `attempt`, and the coach's `evaluation` is written onto it afterwards, which answers 'may anything still change?' | `templates/digital-bricks-training/backend/schema.json:26` |
+  | `lessons|Assignment.status@settled` | status-values-not-read | **yes**: draft / issued / withdrawn, Frappe's draft / submitted / cancelled under other words | `templates/digital-bricks-training/backend/schema.json:112` |
+  | `lessons|AssignmentSubmission.attempt@settled` | new-record-amends | **yes**: a new attempt is a new record and the old one stays: amend by a new record | `templates/digital-bricks-training/backend/schema.json:147` |
+  | `lessons|AssignmentSubmission.submittedAt@settled` | settled-field | **neighbour**: when it was handed in; counted on `attempt`; `evaluation` is written onto it afterwards | `templates/digital-bricks-training/backend/schema.json:151` |
+  | `lessons|LearnerInvite.status@settled` | status-values-not-read | **no**: an invite that is claimed is used up (`ends`), not agreed | `templates/digital-bricks-training/backend/schema.json:606` |
+  | `lessons|LessonDraft.publishedVersion@settled` | settled-field | **yes**: a draft kept beside the version that was published | `templates/digital-bricks-training/backend/schema.json:789` |
+  | `lessons|PathStep.status@settled` | status-values-not-read | **no**: locked / available / complete; 'locked' means not yet available, not frozen | `templates/digital-bricks-training/backend/schema.json:832` |
+  | `lessons|Programme.status@settled` | status-values-not-read | **no**: active / closed: an end, not an agreement | `templates/digital-bricks-training/backend/schema.json:870` |
+  | `template:members-area|Announcement.postedAt@settled` | settled-field | **no**: when it was posted; an admin may still edit it, and nothing says otherwise | `templates/members-area/components/Pages/Post/nodes.json:779` |
+  | `template:nightbook|Envelope.sealed@settled` | settled-field | **yes**: sealed until a day; sealEnvelope refuses a day that is not still to come | `templates/nightbook/components/__cloud__/sealEnvelope/nodes.json:177` |
+  | `template:planning|MoneyMark.sentOn@settled` | settled-field | **yes**: a bill that is sent, then paid or lost; whether its amount may change after it is sent is the unasked question | `templates/planning/components/Commands/Add mark/nodes.json:274` |
+  | `template:planning|Task.openStatus@settled` | status-values-not-read | **no**: a query parameter that asks for open tasks, not a field | `templates/planning/components/Logic/Planning data/nodes.json:555` |
+  | `template:planning|Task.status@settled` | status-values-not-read | **no**: the todo list's open / done, written from the planning app: finished, not agreed | `templates/planning/components/Commands/Send to todo/nodes.json:168` |
+  | `template:todo-list|Routine.status@settled` | status-values-not-read | **no**: running / stopped: an end (`ends`), not an agreement | `templates/todo-list/components/Commands/Add routine/nodes.json:121` |
+  | `template:todo-list|Task.status@settled` | status-values-not-read | **no**: open / done: finished, not agreed | `templates/todo-list/components/Commands/Add task/nodes.json:128` |
+
+### facts
+
+*The system asked whether there is only one of something, whether people read its number aloud, what I call one in a list, and whether I need to know who changed what.*
+
+- **The question it asks:** Is there only one of it? Do people read its number aloud? What do you call one in a list? Do you need to know who changed what?
+
+  | family | yes | no | neighbour | yes per source |
+  |---|---|---|---|---|
+  | only-one — there is only one | 2 | 1 | 1 | members-area 1, planning 1 |
+  | read-aloud — people read its number aloud | 1 | 1 | 3 | sentinel 1 |
+  | called-by — what you call one in a list | 47 | 1 | 1 | members-area 5, nightbook 1, planning 3, todo-list 3, lessons 13, acme 8, tirion 6, sentinel 8 |
+  | who-changed — who changed what | 5 | 2 | 10 | lessons 2, acme 1, tirion 2 |
+
+  In this repo:
+
+  | candidate | found by | verdict | evidence |
+  |---|---|---|---|
+  | `lessons|ArtifactSubmission.attempt@read-aloud` | number-name | **neighbour**: counted per learner and concept ('attempt 2'), not a number that names the record | `templates/digital-bricks-training/backend/schema.json:22` |
+  | `lessons|Assignment.title@called-by` | title-field | **yes**: what one is called in a list | `templates/digital-bricks-training/backend/schema.json:88` |
+  | `lessons|AssignmentSubmission.attempt@read-aloud` | number-name | **neighbour**: counted per learner and assignment, not a number that names the record | `templates/digital-bricks-training/backend/schema.json:147` |
+  | `lessons|CoachingSession.title@called-by` | title-field | **yes**: what one is called in a list | `templates/digital-bricks-training/backend/schema.json:267` |
+  | `lessons|CoachNote.editedAt@who-changed` | last-editor | **yes**: keeps that it was edited, not what changed or who changed it | `templates/digital-bricks-training/backend/schema.json:229` |
+  | `lessons|Cohort.isDefault@only-one` | default-flag | **neighbour**: one of many cohorts marked as the default, not a collection of one | `templates/digital-bricks-training/backend/schema.json:326` |
+  | `lessons|Cohort.name@called-by` | title-field | **yes**: what one is called in a list | `templates/digital-bricks-training/backend/schema.json:322` |
+  | `lessons|CohortMember.displayName@called-by` | title-field | **yes**: what one is called in a list | `templates/digital-bricks-training/backend/schema.json:351` |
+  | `lessons|Concept.title@called-by` | title-field | **yes**: what one is called in a list | `templates/digital-bricks-training/backend/schema.json:382` |
+  | `lessons|Conversation.subject@called-by` | title-field | **yes**: what one is called in a list | `templates/digital-bricks-training/backend/schema.json:415` |
+  | `lessons|LearnerDeliverable.slug@read-aloud` | number-name | **neighbour**: a name people type, not a number | `templates/digital-bricks-training/backend/schema.json:546` |
+  | `lessons|LearnerDeliverable.title@called-by` | title-field | **yes**: what one is called in a list | `templates/digital-bricks-training/backend/schema.json:550` |
+  | `lessons|LearnerInvite.label@called-by` | title-field | **yes**: what one is called in a list | `templates/digital-bricks-training/backend/schema.json:594` |
+  | `lessons|Lesson.conceptVersion@who-changed` | version-field | **neighbour**: which version of another thing the lesson was built from: provenance, not a history of changes | `templates/digital-bricks-training/backend/schema.json:717` |
+  | `lessons|Lesson.generationVersion@who-changed` | version-field | **neighbour**: which version of another thing the lesson was built from: provenance, not a history of changes | `templates/digital-bricks-training/backend/schema.json:725` |
+  | `lessons|Lesson.projectContextVersion@who-changed` | version-field | **neighbour**: which version of another thing the lesson was built from: provenance, not a history of changes | `templates/digital-bricks-training/backend/schema.json:721` |
+  | `lessons|Lesson.title@called-by` | title-field | **yes**: what one is called in a list | `templates/digital-bricks-training/backend/schema.json:705` |
+  | `lessons|LessonDraft.publishedVersion@who-changed` | version-field | **no**: the version that was published, counted under settled | `templates/digital-bricks-training/backend/schema.json:789` |
+  | `lessons|LessonDraft.title@called-by` | title-field | **yes**: what one is called in a list | `templates/digital-bricks-training/backend/schema.json:765` |
+  | `lessons|LessonDraft.updatedByEmail@who-changed` | last-editor | **yes**: the last person to touch the draft, not what they changed | `templates/digital-bricks-training/backend/schema.json:797` |
+  | `lessons|LessonDraft.version@who-changed` | version-field | **neighbour**: a counter of the draft's saves, not who changed what | `templates/digital-bricks-training/backend/schema.json:785` |
+  | `lessons|Programme.title@called-by` | title-field | **yes**: what one is called in a list | `templates/digital-bricks-training/backend/schema.json:866` |
+  | `lessons|ProgrammeDimension.label@called-by` | title-field | **yes**: what one is called in a list | `templates/digital-bricks-training/backend/schema.json:916` |
+  | `lessons|ProjectContext.version@who-changed` | version-field | **neighbour**: a counter that Lesson.projectContextVersion reads: provenance | `templates/digital-bricks-training/backend/schema.json:1054` |
+  | `lessons|SessionPrep.resourceLabel@called-by` | title-field | **yes**: what one is called in a list | `templates/digital-bricks-training/backend/schema.json:1091` |
+  | `template:members-area|Announcement.title@called-by` | title-field | **yes**: what one is called in a list | `templates/members-area/components/Pages/Post/nodes.json:779` |
+  | `template:members-area|Association.(collection)@only-one` | hand — claimAssociation refuses unless the association is still unclaimed | **yes**: one association per app; claimAssociation makes it only while none exists | `templates/members-area/components/__cloud__/claimAssociation/nodes.json:70` |
+  | `template:members-area|Association.name@called-by` | title-field | **yes**: what one is called in a list | `templates/members-area/components/__cloud__/claimAssociation/nodes.json:235` |
+  | `template:members-area|Meeting.title@called-by` | title-field | **yes**: what one is called in a list | `templates/members-area/components/Pages/Post/nodes.json:807` |
+  | `template:members-area|Member.name@called-by` | title-field | **yes**: what one is called in a list | `templates/members-area/components/__cloud__/claimAssociation/nodes.json:352` |
+  | `template:members-area|MemberRequest.name@called-by` | title-field | **yes**: what one is called in a list | `templates/members-area/components/__cloud__/requestAccess/nodes.json:207` |
+  | `template:nightbook|Profile.name@called-by` | title-field | **yes**: what one is called in a list | `templates/nightbook/components/__cloud__/saveProfile/nodes.json:235` |
+  | `template:planning|MoneyItem.label@called-by` | title-field | **yes**: what one is called in a list | `templates/planning/components/Commands/Add money item/nodes.json:314` |
+  | `template:planning|Project.name@called-by` | title-field | **yes**: what one is called in a list | `templates/planning/components/Commands/Add project/nodes.json:527` |
+  | `template:planning|Settings.(collection)@only-one` | single-name | **yes**: a collection meant to hold one record per person (creatorOwns) | `templates/planning/nodegx.security.json:75` |
+  | `template:planning|Task.title@called-by` | title-field | **yes**: what one is called in a list | `templates/planning/components/Commands/Send to todo/nodes.json:168` |
+  | `template:todo-list|Action.title@called-by` | title-field | **yes**: what one is called in a list | `templates/todo-list/components/Commands/Add action/nodes.json:135` |
+  | `template:todo-list|Routine.title@called-by` | title-field | **yes**: what one is called in a list | `templates/todo-list/components/Commands/Add routine/nodes.json:121` |
+  | `template:todo-list|Task.title@called-by` | title-field | **yes**: what one is called in a list | `templates/todo-list/components/Commands/Add task/nodes.json:128` |
+
+### sometimes
+
+*A detail that only matters in some cases is asked for in those cases, and never left empty when it mattered.*
+
+- **The question it asks:** Is any detail needed only in some cases? Which cases, and must it be filled then?
+
+  | family | yes | no | neighbour | yes per source |
+  |---|---|---|---|---|
+  | sometimes | 9 | 2 | 5 | planning 2, todo-list 2, lessons 3, acme 2 |
+
+  In this repo:
+
+  | candidate | found by | verdict | evidence |
+  |---|---|---|---|
+  | `lessons|AssignmentSubmission.linkUrl@sometimes` | hand — submissionModes is Assignment's (schema.json:100); the lessons app refuses a link the brief does not ask for (its assignments service) | **yes**: allowed only when the assignment's submissionModes includes link, a case decided on another record | `templates/digital-bricks-training/backend/schema.json:159` |
+  | `lessons|CoachingSession.cancelledAt@sometimes` | ending-without-a-reason | **yes**: a cancelled session is still shown to the learner, with no field for why: the unasked question | `templates/digital-bricks-training/backend/schema.json:287` |
+  | `lessons|CohortMember.removedAt@sometimes` | ending-without-a-reason | **neighbour**: an end with no reason field and no reader of a reason found; the `ends` kind's question | `templates/digital-bricks-training/backend/schema.json:355` |
+  | `lessons|LearnerDeliverable.archivedAt@sometimes` | ending-without-a-reason | **neighbour**: an end with no reason field and no reader of a reason found; the `ends` kind's question | `templates/digital-bricks-training/backend/schema.json:566` |
+  | `lessons|PathStep.removedAt@sometimes` | ending-without-a-reason | **no**: a removed step leaves the path (the read filters it out) and is not shown again; nobody is owed a reason | `templates/digital-bricks-training/backend/schema.json:840` |
+  | `lessons|Programme.archivedAt@sometimes` | ending-without-a-reason | **neighbour**: an end with no reason field and no reader of a reason found; the `ends` kind's question | `templates/digital-bricks-training/backend/schema.json:882` |
+  | `lessons|ProgrammeDimension.archivedAt@sometimes` | ending-without-a-reason | **neighbour**: an end with no reason field and no reader of a reason found; the `ends` kind's question | `templates/digital-bricks-training/backend/schema.json:932` |
+  | `lessons|SessionPrep.resourceUrl@sometimes` | one-or-the-other — or resourceStorageKey | **yes**: one or the other with resourceStorageKey, never both | `templates/digital-bricks-training/backend/schema.json:1095` |
+  | `template:planning|MoneyMark.lostOn@sometimes` | ending-without-a-reason | **neighbour**: a lost bill with no reason field of its own; the mark's general `note` may hold one | `templates/planning/components/Commands/Add mark/nodes.json:274` |
+  | `template:planning|Project.move@sometimes` | detail-group — with moveWorth, moveWhen, moveDue, moveStop | **yes**: moveWorth, moveWhen, moveDue and moveStop matter only when the project has a next move | `templates/planning/components/Commands/Add project/nodes.json:527` |
+  | `template:planning|Task.closingNote@sometimes` | note-beside-lifecycle — beside closedAt | **yes**: a note that matters only once the task is closed | `templates/planning/components/Commands/Send to todo/nodes.json:168` |
+  | `template:todo-list|Routine.stopNote@sometimes` | note-beside-lifecycle — beside stoppedAt | **yes**: a note that matters only once the routine stops | `templates/todo-list/components/Commands/Add routine/nodes.json:121` |
+  | `template:todo-list|Task.closingNote@sometimes` | note-beside-lifecycle — beside closedAt | **yes**: a note that matters only once the task is closed | `templates/todo-list/components/Commands/Add task/nodes.json:128` |
 

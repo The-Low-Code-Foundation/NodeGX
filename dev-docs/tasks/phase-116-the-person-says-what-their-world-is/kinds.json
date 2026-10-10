@@ -1049,5 +1049,824 @@
         "why": "a derived field copied onto the parent and maintained by hand; the sort key belongs on the thing sorted, or the query goes through the path operation (ONT-004)"
       }
     ]
+  },
+  "borrows": {
+    "$comment": "ONT-011 step 1: candidates found by the detectors in census.js, each classified by meaning (yes / no / neighbour) in kinds.hand.json or the private borrows.json. Not kinds: step 2 decides the vocabulary.",
+    "fieldsRead": {
+      "template:members-area": 37,
+      "template:nightbook": 60,
+      "template:planning": 265,
+      "template:todo-list": 61,
+      "lessons": 153,
+      "acme": 133,
+      "tirion": 414,
+      "sentinel": 199
+    },
+    "list": [
+      {
+        "id": "secret",
+        "sentence": "Some details on a record are not for everyone who can see the record, and the system asked me which ones before anyone could read them.",
+        "question": "Is any detail on it not for everyone who can see it? Who may read that detail?",
+        "kept": 16,
+        "bySource": {
+          "template:members-area": 1,
+          "template:nightbook": 3,
+          "acme": 8,
+          "tirion": 4
+        },
+        "counts": {
+          "secret": {
+            "template:members-area": {
+              "yes": 1,
+              "no": 1,
+              "neighbour": 0
+            },
+            "template:nightbook": {
+              "yes": 3,
+              "no": 0,
+              "neighbour": 0
+            },
+            "lessons": {
+              "yes": 0,
+              "no": 0,
+              "neighbour": 1
+            },
+            "acme": {
+              "yes": 8,
+              "no": 0,
+              "neighbour": 4
+            },
+            "tirion": {
+              "yes": 4,
+              "no": 2,
+              "neighbour": 1
+            },
+            "sentinel": {
+              "yes": 0,
+              "no": 0,
+              "neighbour": 1
+            }
+          }
+        },
+        "evidence": [
+          {
+            "id": "lessons|CoachNote.visibility@secret",
+            "how": "hand",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:225",
+            "verdict": "neighbour",
+            "why": "the whole note is hidden from the learner by a value on it, enforced by the read functions; a rule on a value, not a secret field",
+            "note": "'internal' hides the note from the learner (tools/check-read-functions.mjs)"
+          },
+          {
+            "id": "template:members-area|Member.token@secret",
+            "how": "secret-name",
+            "evidence": "templates/members-area/components/__cloud__/unsubscribe/nodes.json:57",
+            "verdict": "no",
+            "why": "the unsubscribe query's parameter name (its filter's input), not a field on Member",
+            "note": "read by \"role:admin\""
+          },
+          {
+            "id": "template:members-area|Member.unsubscribeToken@secret",
+            "how": "secret-name",
+            "evidence": "templates/members-area/components/__cloud__/claimAssociation/nodes.json:352",
+            "verdict": "yes",
+            "why": "every admin who can list members reads every member's unsubscribe token, and the rest of the member is theirs to read",
+            "note": "read by \"role:admin\""
+          },
+          {
+            "id": "template:nightbook|Profile.answerV@secret",
+            "how": "secret-name",
+            "evidence": "templates/nightbook/components/__cloud__/saveProfile/nodes.json:235",
+            "verdict": "yes",
+            "why": "a salted verifier on a profile anyone may read; known and deliberate until V1-8 (TPL-011)",
+            "note": "read by \"public\""
+          },
+          {
+            "id": "template:nightbook|Profile.codeV@secret",
+            "how": "secret-name",
+            "evidence": "templates/nightbook/components/__cloud__/saveProfile/nodes.json:235",
+            "verdict": "yes",
+            "why": "a salted verifier on a profile anyone may read; known and deliberate until V1-8 (TPL-011)",
+            "note": "read by \"public\""
+          },
+          {
+            "id": "template:nightbook|Profile.rescueV@secret",
+            "how": "secret-name",
+            "evidence": "templates/nightbook/components/__cloud__/saveProfile/nodes.json:235",
+            "verdict": "yes",
+            "why": "a salted verifier on a profile anyone may read; known and deliberate until V1-8 (TPL-011)",
+            "note": "read by \"public\""
+          }
+        ]
+      },
+      {
+        "id": "settled",
+        "sentence": "Once something is agreed, it stays as it was agreed. To change it I withdraw it or make a new one that says which one it replaces, and the old one is still there.",
+        "question": "Does it get agreed, signed, sent or published at some point? After that, may it still change, and how is a mistake in it put right?",
+        "kept": 8,
+        "bySource": {
+          "template:nightbook": 1,
+          "template:planning": 1,
+          "lessons": 4,
+          "tirion": 2
+        },
+        "counts": {
+          "settled": {
+            "template:members-area": {
+              "yes": 0,
+              "no": 1,
+              "neighbour": 0
+            },
+            "template:nightbook": {
+              "yes": 1,
+              "no": 0,
+              "neighbour": 0
+            },
+            "template:planning": {
+              "yes": 1,
+              "no": 2,
+              "neighbour": 0
+            },
+            "template:todo-list": {
+              "yes": 0,
+              "no": 2,
+              "neighbour": 0
+            },
+            "lessons": {
+              "yes": 4,
+              "no": 3,
+              "neighbour": 2
+            },
+            "acme": {
+              "yes": 0,
+              "no": 1,
+              "neighbour": 0
+            },
+            "tirion": {
+              "yes": 2,
+              "no": 1,
+              "neighbour": 1
+            },
+            "sentinel": {
+              "yes": 0,
+              "no": 2,
+              "neighbour": 1
+            }
+          }
+        },
+        "evidence": [
+          {
+            "id": "lessons|ArtifactSubmission.attempt@settled",
+            "how": "new-record-amends",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:22",
+            "verdict": "yes",
+            "why": "a new attempt is a new record and the old one stays (unique with learner, concept and section): amend by a new record"
+          },
+          {
+            "id": "lessons|ArtifactSubmission.submittedAt@settled",
+            "how": "settled-field",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:26",
+            "verdict": "neighbour",
+            "why": "when it was handed in; the record is counted on `attempt`, and the coach's `evaluation` is written onto it afterwards, which answers 'may anything still change?'"
+          },
+          {
+            "id": "lessons|Assignment.status@settled",
+            "how": "status-values-not-read",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:112",
+            "verdict": "yes",
+            "why": "draft / issued / withdrawn, Frappe's draft / submitted / cancelled under other words"
+          },
+          {
+            "id": "lessons|AssignmentSubmission.attempt@settled",
+            "how": "new-record-amends",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:147",
+            "verdict": "yes",
+            "why": "a new attempt is a new record and the old one stays: amend by a new record"
+          },
+          {
+            "id": "lessons|AssignmentSubmission.submittedAt@settled",
+            "how": "settled-field",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:151",
+            "verdict": "neighbour",
+            "why": "when it was handed in; counted on `attempt`; `evaluation` is written onto it afterwards"
+          },
+          {
+            "id": "lessons|LearnerInvite.status@settled",
+            "how": "status-values-not-read",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:606",
+            "verdict": "no",
+            "why": "an invite that is claimed is used up (`ends`), not agreed"
+          },
+          {
+            "id": "lessons|LessonDraft.publishedVersion@settled",
+            "how": "settled-field",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:789",
+            "verdict": "yes",
+            "why": "a draft kept beside the version that was published"
+          },
+          {
+            "id": "lessons|PathStep.status@settled",
+            "how": "status-values-not-read",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:832",
+            "verdict": "no",
+            "why": "locked / available / complete; 'locked' means not yet available, not frozen"
+          },
+          {
+            "id": "lessons|Programme.status@settled",
+            "how": "status-values-not-read",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:870",
+            "verdict": "no",
+            "why": "active / closed: an end, not an agreement"
+          },
+          {
+            "id": "template:members-area|Announcement.postedAt@settled",
+            "how": "settled-field",
+            "evidence": "templates/members-area/components/Pages/Post/nodes.json:779",
+            "verdict": "no",
+            "why": "when it was posted; an admin may still edit it, and nothing says otherwise"
+          },
+          {
+            "id": "template:nightbook|Envelope.sealed@settled",
+            "how": "settled-field",
+            "evidence": "templates/nightbook/components/__cloud__/sealEnvelope/nodes.json:177",
+            "verdict": "yes",
+            "why": "sealed until a day; sealEnvelope refuses a day that is not still to come"
+          },
+          {
+            "id": "template:planning|MoneyMark.sentOn@settled",
+            "how": "settled-field",
+            "evidence": "templates/planning/components/Commands/Add mark/nodes.json:274",
+            "verdict": "yes",
+            "why": "a bill that is sent, then paid or lost; whether its amount may change after it is sent is the unasked question"
+          },
+          {
+            "id": "template:planning|Task.openStatus@settled",
+            "how": "status-values-not-read",
+            "evidence": "templates/planning/components/Logic/Planning data/nodes.json:555",
+            "verdict": "no",
+            "why": "a query parameter that asks for open tasks, not a field"
+          },
+          {
+            "id": "template:planning|Task.status@settled",
+            "how": "status-values-not-read",
+            "evidence": "templates/planning/components/Commands/Send to todo/nodes.json:168",
+            "verdict": "no",
+            "why": "the todo list's open / done, written from the planning app: finished, not agreed"
+          },
+          {
+            "id": "template:todo-list|Routine.status@settled",
+            "how": "status-values-not-read",
+            "evidence": "templates/todo-list/components/Commands/Add routine/nodes.json:121",
+            "verdict": "no",
+            "why": "running / stopped: an end (`ends`), not an agreement"
+          },
+          {
+            "id": "template:todo-list|Task.status@settled",
+            "how": "status-values-not-read",
+            "evidence": "templates/todo-list/components/Commands/Add task/nodes.json:128",
+            "verdict": "no",
+            "why": "open / done: finished, not agreed"
+          }
+        ]
+      },
+      {
+        "id": "facts",
+        "sentence": "The system asked whether there is only one of something, whether people read its number aloud, what I call one in a list, and whether I need to know who changed what.",
+        "question": "Is there only one of it? Do people read its number aloud? What do you call one in a list? Do you need to know who changed what?",
+        "facts": {
+          "only-one": "there is only one",
+          "read-aloud": "people read its number aloud",
+          "called-by": "what you call one in a list",
+          "who-changed": "who changed what"
+        },
+        "kept": 55,
+        "bySource": {
+          "template:members-area": 6,
+          "template:planning": 4,
+          "sentinel": 9,
+          "template:nightbook": 1,
+          "template:todo-list": 3,
+          "lessons": 15,
+          "acme": 9,
+          "tirion": 8
+        },
+        "counts": {
+          "only-one": {
+            "template:members-area": {
+              "yes": 1,
+              "no": 0,
+              "neighbour": 0
+            },
+            "template:planning": {
+              "yes": 1,
+              "no": 0,
+              "neighbour": 0
+            },
+            "lessons": {
+              "yes": 0,
+              "no": 0,
+              "neighbour": 1
+            },
+            "acme": {
+              "yes": 0,
+              "no": 1,
+              "neighbour": 0
+            }
+          },
+          "read-aloud": {
+            "lessons": {
+              "yes": 0,
+              "no": 0,
+              "neighbour": 3
+            },
+            "tirion": {
+              "yes": 0,
+              "no": 1,
+              "neighbour": 0
+            },
+            "sentinel": {
+              "yes": 1,
+              "no": 0,
+              "neighbour": 0
+            }
+          },
+          "called-by": {
+            "template:members-area": {
+              "yes": 5,
+              "no": 0,
+              "neighbour": 0
+            },
+            "template:nightbook": {
+              "yes": 1,
+              "no": 0,
+              "neighbour": 0
+            },
+            "template:planning": {
+              "yes": 3,
+              "no": 0,
+              "neighbour": 0
+            },
+            "template:todo-list": {
+              "yes": 3,
+              "no": 0,
+              "neighbour": 0
+            },
+            "lessons": {
+              "yes": 13,
+              "no": 0,
+              "neighbour": 0
+            },
+            "acme": {
+              "yes": 8,
+              "no": 0,
+              "neighbour": 1
+            },
+            "tirion": {
+              "yes": 6,
+              "no": 1,
+              "neighbour": 0
+            },
+            "sentinel": {
+              "yes": 8,
+              "no": 0,
+              "neighbour": 0
+            }
+          },
+          "who-changed": {
+            "lessons": {
+              "yes": 2,
+              "no": 1,
+              "neighbour": 5
+            },
+            "acme": {
+              "yes": 1,
+              "no": 0,
+              "neighbour": 0
+            },
+            "tirion": {
+              "yes": 2,
+              "no": 1,
+              "neighbour": 5
+            }
+          }
+        },
+        "evidence": [
+          {
+            "id": "lessons|ArtifactSubmission.attempt@read-aloud",
+            "how": "number-name",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:22",
+            "verdict": "neighbour",
+            "why": "counted per learner and concept ('attempt 2'), not a number that names the record"
+          },
+          {
+            "id": "lessons|Assignment.title@called-by",
+            "how": "title-field",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:88",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          },
+          {
+            "id": "lessons|AssignmentSubmission.attempt@read-aloud",
+            "how": "number-name",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:147",
+            "verdict": "neighbour",
+            "why": "counted per learner and assignment, not a number that names the record"
+          },
+          {
+            "id": "lessons|CoachingSession.title@called-by",
+            "how": "title-field",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:267",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          },
+          {
+            "id": "lessons|CoachNote.editedAt@who-changed",
+            "how": "last-editor",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:229",
+            "verdict": "yes",
+            "why": "keeps that it was edited, not what changed or who changed it"
+          },
+          {
+            "id": "lessons|Cohort.isDefault@only-one",
+            "how": "default-flag",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:326",
+            "verdict": "neighbour",
+            "why": "one of many cohorts marked as the default, not a collection of one"
+          },
+          {
+            "id": "lessons|Cohort.name@called-by",
+            "how": "title-field",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:322",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          },
+          {
+            "id": "lessons|CohortMember.displayName@called-by",
+            "how": "title-field",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:351",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          },
+          {
+            "id": "lessons|Concept.title@called-by",
+            "how": "title-field",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:382",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          },
+          {
+            "id": "lessons|Conversation.subject@called-by",
+            "how": "title-field",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:415",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          },
+          {
+            "id": "lessons|LearnerDeliverable.slug@read-aloud",
+            "how": "number-name",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:546",
+            "verdict": "neighbour",
+            "why": "a name people type, not a number"
+          },
+          {
+            "id": "lessons|LearnerDeliverable.title@called-by",
+            "how": "title-field",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:550",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          },
+          {
+            "id": "lessons|LearnerInvite.label@called-by",
+            "how": "title-field",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:594",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          },
+          {
+            "id": "lessons|Lesson.conceptVersion@who-changed",
+            "how": "version-field",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:717",
+            "verdict": "neighbour",
+            "why": "which version of another thing the lesson was built from: provenance, not a history of changes"
+          },
+          {
+            "id": "lessons|Lesson.generationVersion@who-changed",
+            "how": "version-field",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:725",
+            "verdict": "neighbour",
+            "why": "which version of another thing the lesson was built from: provenance, not a history of changes"
+          },
+          {
+            "id": "lessons|Lesson.projectContextVersion@who-changed",
+            "how": "version-field",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:721",
+            "verdict": "neighbour",
+            "why": "which version of another thing the lesson was built from: provenance, not a history of changes"
+          },
+          {
+            "id": "lessons|Lesson.title@called-by",
+            "how": "title-field",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:705",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          },
+          {
+            "id": "lessons|LessonDraft.publishedVersion@who-changed",
+            "how": "version-field",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:789",
+            "verdict": "no",
+            "why": "the version that was published, counted under settled"
+          },
+          {
+            "id": "lessons|LessonDraft.title@called-by",
+            "how": "title-field",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:765",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          },
+          {
+            "id": "lessons|LessonDraft.updatedByEmail@who-changed",
+            "how": "last-editor",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:797",
+            "verdict": "yes",
+            "why": "the last person to touch the draft, not what they changed"
+          },
+          {
+            "id": "lessons|LessonDraft.version@who-changed",
+            "how": "version-field",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:785",
+            "verdict": "neighbour",
+            "why": "a counter of the draft's saves, not who changed what"
+          },
+          {
+            "id": "lessons|Programme.title@called-by",
+            "how": "title-field",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:866",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          },
+          {
+            "id": "lessons|ProgrammeDimension.label@called-by",
+            "how": "title-field",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:916",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          },
+          {
+            "id": "lessons|ProjectContext.version@who-changed",
+            "how": "version-field",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:1054",
+            "verdict": "neighbour",
+            "why": "a counter that Lesson.projectContextVersion reads: provenance"
+          },
+          {
+            "id": "lessons|SessionPrep.resourceLabel@called-by",
+            "how": "title-field",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:1091",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          },
+          {
+            "id": "template:members-area|Announcement.title@called-by",
+            "how": "title-field",
+            "evidence": "templates/members-area/components/Pages/Post/nodes.json:779",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          },
+          {
+            "id": "template:members-area|Association.(collection)@only-one",
+            "how": "hand",
+            "evidence": "templates/members-area/components/__cloud__/claimAssociation/nodes.json:70",
+            "verdict": "yes",
+            "why": "one association per app; claimAssociation makes it only while none exists",
+            "note": "claimAssociation refuses unless the association is still unclaimed"
+          },
+          {
+            "id": "template:members-area|Association.name@called-by",
+            "how": "title-field",
+            "evidence": "templates/members-area/components/__cloud__/claimAssociation/nodes.json:235",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          },
+          {
+            "id": "template:members-area|Meeting.title@called-by",
+            "how": "title-field",
+            "evidence": "templates/members-area/components/Pages/Post/nodes.json:807",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          },
+          {
+            "id": "template:members-area|Member.name@called-by",
+            "how": "title-field",
+            "evidence": "templates/members-area/components/__cloud__/claimAssociation/nodes.json:352",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          },
+          {
+            "id": "template:members-area|MemberRequest.name@called-by",
+            "how": "title-field",
+            "evidence": "templates/members-area/components/__cloud__/requestAccess/nodes.json:207",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          },
+          {
+            "id": "template:nightbook|Profile.name@called-by",
+            "how": "title-field",
+            "evidence": "templates/nightbook/components/__cloud__/saveProfile/nodes.json:235",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          },
+          {
+            "id": "template:planning|MoneyItem.label@called-by",
+            "how": "title-field",
+            "evidence": "templates/planning/components/Commands/Add money item/nodes.json:314",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          },
+          {
+            "id": "template:planning|Project.name@called-by",
+            "how": "title-field",
+            "evidence": "templates/planning/components/Commands/Add project/nodes.json:527",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          },
+          {
+            "id": "template:planning|Settings.(collection)@only-one",
+            "how": "single-name",
+            "evidence": "templates/planning/nodegx.security.json:75",
+            "verdict": "yes",
+            "why": "a collection meant to hold one record per person (creatorOwns)"
+          },
+          {
+            "id": "template:planning|Task.title@called-by",
+            "how": "title-field",
+            "evidence": "templates/planning/components/Commands/Send to todo/nodes.json:168",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          },
+          {
+            "id": "template:todo-list|Action.title@called-by",
+            "how": "title-field",
+            "evidence": "templates/todo-list/components/Commands/Add action/nodes.json:135",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          },
+          {
+            "id": "template:todo-list|Routine.title@called-by",
+            "how": "title-field",
+            "evidence": "templates/todo-list/components/Commands/Add routine/nodes.json:121",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          },
+          {
+            "id": "template:todo-list|Task.title@called-by",
+            "how": "title-field",
+            "evidence": "templates/todo-list/components/Commands/Add task/nodes.json:128",
+            "verdict": "yes",
+            "why": "what one is called in a list"
+          }
+        ]
+      },
+      {
+        "id": "sometimes",
+        "sentence": "A detail that only matters in some cases is asked for in those cases, and never left empty when it mattered.",
+        "question": "Is any detail needed only in some cases? Which cases, and must it be filled then?",
+        "kept": 9,
+        "bySource": {
+          "template:planning": 2,
+          "template:todo-list": 2,
+          "lessons": 3,
+          "acme": 2
+        },
+        "counts": {
+          "sometimes": {
+            "template:planning": {
+              "yes": 2,
+              "no": 0,
+              "neighbour": 1
+            },
+            "template:todo-list": {
+              "yes": 2,
+              "no": 0,
+              "neighbour": 0
+            },
+            "lessons": {
+              "yes": 3,
+              "no": 1,
+              "neighbour": 4
+            },
+            "acme": {
+              "yes": 2,
+              "no": 0,
+              "neighbour": 0
+            },
+            "tirion": {
+              "yes": 0,
+              "no": 1,
+              "neighbour": 0
+            }
+          }
+        },
+        "evidence": [
+          {
+            "id": "lessons|AssignmentSubmission.linkUrl@sometimes",
+            "how": "hand",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:159",
+            "verdict": "yes",
+            "why": "allowed only when the assignment's submissionModes includes link, a case decided on another record",
+            "note": "submissionModes is Assignment's (schema.json:100); the lessons app refuses a link the brief does not ask for (its assignments service)"
+          },
+          {
+            "id": "lessons|CoachingSession.cancelledAt@sometimes",
+            "how": "ending-without-a-reason",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:287",
+            "verdict": "yes",
+            "why": "a cancelled session is still shown to the learner, with no field for why: the unasked question"
+          },
+          {
+            "id": "lessons|CohortMember.removedAt@sometimes",
+            "how": "ending-without-a-reason",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:355",
+            "verdict": "neighbour",
+            "why": "an end with no reason field and no reader of a reason found; the `ends` kind's question"
+          },
+          {
+            "id": "lessons|LearnerDeliverable.archivedAt@sometimes",
+            "how": "ending-without-a-reason",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:566",
+            "verdict": "neighbour",
+            "why": "an end with no reason field and no reader of a reason found; the `ends` kind's question"
+          },
+          {
+            "id": "lessons|PathStep.removedAt@sometimes",
+            "how": "ending-without-a-reason",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:840",
+            "verdict": "no",
+            "why": "a removed step leaves the path (the read filters it out) and is not shown again; nobody is owed a reason"
+          },
+          {
+            "id": "lessons|Programme.archivedAt@sometimes",
+            "how": "ending-without-a-reason",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:882",
+            "verdict": "neighbour",
+            "why": "an end with no reason field and no reader of a reason found; the `ends` kind's question"
+          },
+          {
+            "id": "lessons|ProgrammeDimension.archivedAt@sometimes",
+            "how": "ending-without-a-reason",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:932",
+            "verdict": "neighbour",
+            "why": "an end with no reason field and no reader of a reason found; the `ends` kind's question"
+          },
+          {
+            "id": "lessons|SessionPrep.resourceUrl@sometimes",
+            "how": "one-or-the-other",
+            "evidence": "templates/digital-bricks-training/backend/schema.json:1095",
+            "verdict": "yes",
+            "why": "one or the other with resourceStorageKey, never both",
+            "note": "or resourceStorageKey"
+          },
+          {
+            "id": "template:planning|MoneyMark.lostOn@sometimes",
+            "how": "ending-without-a-reason",
+            "evidence": "templates/planning/components/Commands/Add mark/nodes.json:274",
+            "verdict": "neighbour",
+            "why": "a lost bill with no reason field of its own; the mark's general `note` may hold one"
+          },
+          {
+            "id": "template:planning|Project.move@sometimes",
+            "how": "detail-group",
+            "evidence": "templates/planning/components/Commands/Add project/nodes.json:527",
+            "verdict": "yes",
+            "why": "moveWorth, moveWhen, moveDue and moveStop matter only when the project has a next move",
+            "note": "with moveWorth, moveWhen, moveDue, moveStop"
+          },
+          {
+            "id": "template:planning|Task.closingNote@sometimes",
+            "how": "note-beside-lifecycle",
+            "evidence": "templates/planning/components/Commands/Send to todo/nodes.json:168",
+            "verdict": "yes",
+            "why": "a note that matters only once the task is closed",
+            "note": "beside closedAt"
+          },
+          {
+            "id": "template:todo-list|Routine.stopNote@sometimes",
+            "how": "note-beside-lifecycle",
+            "evidence": "templates/todo-list/components/Commands/Add routine/nodes.json:121",
+            "verdict": "yes",
+            "why": "a note that matters only once the routine stops",
+            "note": "beside stoppedAt"
+          },
+          {
+            "id": "template:todo-list|Task.closingNote@sometimes",
+            "how": "note-beside-lifecycle",
+            "evidence": "templates/todo-list/components/Commands/Add task/nodes.json:128",
+            "verdict": "yes",
+            "why": "a note that matters only once the task is closed",
+            "note": "beside closedAt"
+          }
+        ]
+      }
+    ]
   }
 }
