@@ -31,7 +31,7 @@ import type {
   StorageSupabaseExportOptions
 } from '@noodl/backend-contract';
 import { validateAclShape } from '../security/model';
-import { isVisibleAccountColumn } from '../users/accountColumns';
+import { isVisibleAccountColumn, accountWriteRefusal } from '../users/accountColumns';
 
 /** The four columns every record carries; never a person's to drop. */
 const SYSTEM_FIELDS: readonly string[] = ['objectId', 'createdAt', 'updatedAt', 'ACL'];
@@ -128,14 +128,9 @@ function forWire<T>(table: string, record: T): T {
 function assertAccountWrite(table: string, data: Record<string, unknown> | undefined | null): void {
   if (table !== '_User' || !data) return;
   for (const key of Object.keys(data)) {
-    if (!isVisibleAccountColumn(key)) {
-      throw new HttpError(
-        400,
-        key === 'password'
-          ? 'A password is not written through /api/_User — it would be stored as text. Use PUT /admin/users/:id { password }, which hashes it.'
-          : `"${key}" is the backend's own column and cannot be written.`
-      );
-    }
+    // P109 ISL-040: the admin-only flags too (`adminAccess`, `disabled`, `emailVerified`), not only `_` columns and the password.
+    const refusal = accountWriteRefusal(key, '/api/_User');
+    if (refusal) throw new HttpError(400, refusal);
   }
 }
 

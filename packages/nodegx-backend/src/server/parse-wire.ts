@@ -44,6 +44,7 @@ import {
   notWhileToHttp,
   uniqueViolationToHttp
 } from './http-util';
+import { accountWriteRefusal } from '../users/accountColumns';
 
 /**
  * FED-002 — the upsert header: `X-NodeGX-Upsert: <field>` on a create.
@@ -134,6 +135,15 @@ export function toQueryOptions(src: Record<string, unknown>): QueryOptions {
     options.count = true;
   }
   return options;
+}
+
+/** P109 ISL-040 (P78-DBT-USERCOLS): an account's admin-only columns are not written through `/classes`, by anyone. */
+function assertAccountWrite(collection: string, body: Record<string, unknown>): void {
+  if (collection !== '_User') return;
+  for (const key of Object.keys(body)) {
+    const refusal = accountWriteRefusal(key, '/classes/_User');
+    if (refusal) throw new HttpError(400, refusal);
+  }
 }
 
 /** The `__op`s `extractOps` turns into their own writes on an update. */
@@ -322,6 +332,7 @@ export class ParseWireRoutes {
     // is stamped, because the update half must not have a create's ACL applied
     // over the owner the row already has.
     const upsertOn = headerValue(ctx, UPSERT_HEADER);
+    assertAccountWrite(collection, body);
     normaliseParseOps(body, upsertOn ? 'upsert' : 'create');
     if (upsertOn) {
       await this.classesUpsert(ctx, collection, body, upsertOn);
@@ -567,6 +578,7 @@ export class ParseWireRoutes {
     if (body.ACL === undefined || body.ACL === null) delete body.ACL;
 
     const acl = ctx.acl('write');
+    assertAccountWrite(collection, body);
     normaliseParseOps(body, 'update');
     const { increments, addRelations, removeRelations, plain } = extractOps(body);
 

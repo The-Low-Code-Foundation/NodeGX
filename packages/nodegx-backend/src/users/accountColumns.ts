@@ -102,3 +102,22 @@ export function isAccountDisabled(user: Record<string, unknown> | null | undefin
 export function isVisibleAccountColumn(name: string): boolean {
   return name.charAt(0) !== '_' && name !== 'password';
 }
+
+/**
+ * P109 ISL-040 (P78-DBT-USERCOLS) — why a GENERIC data door (`/classes/_User`, BYOB `/api/_User`, their
+ * batches) refuses to write `key` on an account, or null when it may. For every principal: the
+ * master key a cloud function holds is the admin principal, and before this a function could write
+ * `adminAccess: "full"` on anybody's row, its caller's included. The doors that own these columns
+ * (the Users page's routes, `/users` for a person's own row, the Create/Update User nodes) never
+ * pass through here. `username` and `email` stay writable: changing them grants nothing.
+ */
+export function accountWriteRefusal(key: string, door: string): string | null {
+  if (ADMIN_ONLY_USER_FIELDS.includes(key)) {
+    return `"${key}" is not written through ${door}: ${ACCOUNT_COLUMNS[key]} Nothing was saved.`;
+  }
+  if (key === 'password') {
+    return `A password is not written through ${door} — it would be stored as text. Use the Users page (PUT /admin/users/:id { password }), or the Update User node, which hash it. Nothing was saved.`;
+  }
+  if (!isVisibleAccountColumn(key)) return `"${key}" is the backend's own column and cannot be written. Nothing was saved.`;
+  return null;
+}

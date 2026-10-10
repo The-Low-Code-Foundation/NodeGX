@@ -85,8 +85,9 @@ describe('BAK-004 account linking and magic links', () => {
 
   async function markVerified(objectId: string) {
     // The verification flow itself is BAK-002's; what this rule cares about is
-    // the resulting flag, so set it through the admin data surface.
-    const res = await req('PUT', `/api/_User/${objectId}`, { emailVerified: true }, admin);
+    // the resulting flag, so set it through the door that owns it: the Users page's
+    // Verified switch. (P109 ISL-040: the generic data doors refuse `emailVerified`.)
+    const res = await req('PUT', `/admin/users/${objectId}`, { emailVerified: true }, admin);
     expect(res.status).toBe(200);
   }
 
