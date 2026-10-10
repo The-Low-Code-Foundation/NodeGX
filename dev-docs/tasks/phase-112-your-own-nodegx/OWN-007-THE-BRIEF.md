@@ -1,7 +1,7 @@
 # OWN-007 — The brief
 
 **Opened 2026-10-02.** **Depends on OWN-001 to OWN-006** (it describes them) **and R3** (where it lives).
-**Status: 📋 not started.**
+**Status: 📋 not started.** **R3 ruled 2026-10-10 (s6), Richard's words: *"A skill in a public repo, recommended for Claude but can be used with any AI coder."*** So §3.2's "served where R3 rules" is a skill in a public repository, written so any coding agent can follow it (Claude named as the one it is made for), not the MCP server.
 **Model:** **Opus.** The brief is written from traps already recorded in the task files; it needs care, not new reasoning. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
 ## 1. The person sentence

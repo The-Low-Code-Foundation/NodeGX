@@ -1,7 +1,7 @@
 # OWN-003 — One way to run a graph
 
 **Opened 2026-10-02.** **Depends on OWN-002 and on R1** (README §8).
-**Status: 🟡 step 1 measured, s1 (2026-10-03); R1 to ask with §6. Steps 2–4 wait for the ruling.**
+**Status: 🟡 step 1 measured, s1 (2026-10-03). R1 ruled 2026-10-10 (s6): the real engine, opened up (a way in to set an input, send a signal and read a port), so steps 2–4 are next.**
 **Model:** **Fable.** Porting the test helper to a page and naming each divergence from the 76 scenarios is hard reasoning over two runtimes; a wrong reading here becomes every editor's wrong answer. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
 ## 1. The person sentence
@@ -100,5 +100,5 @@ scenario written into the copy as parameters, presses made on the copy's own but
 screen. All three fail on the graph as it starts and pass after Show me (OWN-004 §6.4). So for a *mission*, "run the
 real app" already works with no way in but the files and the screen; what it cannot do is what a graph scenario
 needs — set one input, send one signal, settle, read one port — which is still step 2. AC3's `#selftest` / `#demo`
-now have a real-engine form (`real/check.mjs`'s mission arm; `?demo`); `page.html` is superseded (its removal is
-Richard's call).
+now have a real-engine form (`real/check.mjs`'s mission arm; `?demo`); `page.html` was removed on Richard's ruling
+(s6), so step 3 means `real/orbit.html`.

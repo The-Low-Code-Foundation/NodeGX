@@ -2,7 +2,7 @@
 
 **Opened 2026-10-06** from [DIRECTION.md](../../DIRECTION.md) D1 (ruled by Richard: the install command lives in this
 phase). **Depends on R2 (publish at 0.x), OWN-001, OWN-002, OWN-004.**
-**Status: 📋 not started.**
+**Status: 📋 not started.** **R2 ruled 2026-10-10 (s6): publish at 0.x**, after each package declares what it uses (node-spec → `@noodl/backend-contract`; project-contract → `ajv`, `ajv-formats`; the preview's page build → `buffer`, `@nodegx/project-contract`, `@nodegx/module-inject`). **R5 (s6): `@nodegx/canvas-look` ships with the kit, optional. R6 (s6): a package cannot publish while one of its `kit:` bugs is an open blocker; lesser ones are listed as known issues.**
 **Model:** **Opus.** Packaging and one install command with a stranger's run as the test; Fable only if the publish order turns into a design question. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
 ## 1. The person sentence

@@ -1,5 +1,7 @@
 # NEEDS — what two prototypes needed that no package could give them
 
+> **s6 (2026-10-10):** the original page and its build (`page.html`, `src/`, `tools/genpicker.ts`) were removed on Richard's ruling; every `page.html:N`, `src/…:N` and `tools/genpicker.ts:N` below is a line at `d4f6fb637` (`git show d4f6fb637:dev-docs/tasks/phase-112-your-own-nodegx/prototype/<path>`). The prototype now is `prototype/real/orbit.html`, on the real app (OWN-004 §6.4).
+
 **OWN-000 §3.1. Written 2026-10-03 from the working tree at `c25fb8ee5`**, reading [`prototype/`](prototype/README.md)
 (Orbit, 2026-10-02) and [`prototype-under-the-lid/`](prototype-under-the-lid/README.md) (Under the Lid, 2026-10-03) line
 by line. One row per question a prototype answered. Columns: where it got the answer (file and line), whether that place

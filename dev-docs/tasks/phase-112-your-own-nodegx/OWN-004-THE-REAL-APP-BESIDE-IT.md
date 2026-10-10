@@ -1,7 +1,7 @@
 # OWN-004 — The real app beside it
 
 **Opened 2026-10-02.** **Depends on OWN-001** (the in-memory project) **and R4** (README §8).
-**Status: 🟢 slices 1–3 built (s3, s4, s6, 2026-10-10): AC1 met (todo template; 13 / 13 templates render, parity exact); AC2 met (Orbit as v2 files, every one of its 37 wires seen live, in both poses Richard ruled); AC3 met in the page (s6: `real/orbit.html` is the whole prototype — three stages, editing, missions — on the real app, every edit through the store, every mission checked in a second real app; §6.4). The old `page.html` and its build are superseded and still in the folder: removing them waits on Richard (§6.4).**
+**Status: 🟢 slices 1–3 built (s3, s4, s6, 2026-10-10): AC1 met (todo template; 13 / 13 templates render, parity exact); AC2 met (Orbit as v2 files, every one of its 37 wires seen live, in both poses Richard ruled); AC3 met in the page (s6: `real/orbit.html` is the whole prototype — three stages, editing, missions — on the real app, every edit through the store, every mission checked in a second real app; §6.4). The old `page.html` and its build were removed on Richard's ruling (s6, §6.4).**
 **Model:** **Opus.** Embedding the preview and feeding it from memory is wiring with a clear finish line. Switch to Fable only if the preview's internals resist and the task turns into design. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
 ## 1. The person sentence
@@ -185,7 +185,7 @@ trace is not measured (§6.3).
 
 ### 6.3 Next
 
-1. ~~**AC3: one prototype page.**~~ Built in s6 (§6.4). Left: removing `page.html` and its build, which is Richard's call.
+1. ~~**AC3: one prototype page.**~~ Built in s6 (§6.4); `page.html` and its build removed on Richard's ruling.
 2. **Keep the app's state across an edit**, or say why not: every update is a fresh frame, so the clock returns to
    25:00 on each change. The editor's own preview patches the running app over its socket instead.
 3. **Diagnostics to the page:** whether the runtime's diagnostics (FLD-004's "a wired dimension became a share")
@@ -246,6 +246,6 @@ laid out from the tree, never written. The page passes the editor suite on small
 it above the phase label; renamed; put back), 2 / 2 PASS.
 
 **`page.html` and its build** (`page.html`, `build.sh`, `src/app.ts`, `src/entry.ts`, `src/graphrun.ts`,
-`src/picker.json`, `tools/genpicker.ts`, and the gitignored `dist/`) are superseded and **still in the folder**: the
-session's attempt to remove them was stopped for Richard's say-so. They are unchanged; NEEDS.md and OWN-000 cite them by
-line, which stays true while they stay (and through `git show 087e78cdd:<path>` once they go).
+`src/picker.json`, `tools/genpicker.ts`, and the gitignored `dist/`) were removed on Richard's ruling (asked with the
+new page open: *"Delete them"*). The session's first attempt had been stopped for his say-so. NEEDS.md and OWN-000 cite
+them by line at `d4f6fb637`.
