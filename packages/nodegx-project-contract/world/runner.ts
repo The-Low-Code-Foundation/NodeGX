@@ -6,10 +6,12 @@
  * engine, and returns the questions that kill them — in the person's nouns, each with the
  * mistake it stands for and the incident behind it. Nothing else is asked.
  *
- * Three questions no relation carries are asked here too, each with a home for its answer, so
+ * Three questions no kind carries are asked here too, each with a home for its answer, so
  * it is asked once: which noun is who signs in (`nouns[].signsIn`, needed before a permission
- * rule can start — ONT-004), and whether a noun's text fields are free words or one of a fixed
- * list (`properties[].freeWords`, the kind-picker ONT-005 AC3 showed the vocabulary silent on).
+ * rule can start — ONT-004), through what an owned-by's owner is reached from the login
+ * (`relations[].through`, a chain — s14), and whether a noun's text fields are free words or one
+ * of a fixed list (`properties[].freeWords`, the kind-picker ONT-005 AC3 showed the vocabulary
+ * silent on).
  *
  * The budget (§3.3): questions are ranked by the incident behind them — one somebody wrote
  * down after it happened (a note), one Richard lived (his rows), or none yet (read off a
@@ -17,9 +19,10 @@
  * The top few are returned; the rest wait, counted. A question with no incident behind it is
  * asked only while a mutant stands, and after every question that has one.
  */
-import type { Noun, Relation, WorldFiles } from './files';
+import { WORLD_FILES, type Noun, type Relation, type ThroughStep, type WorldFiles } from './files';
 import type { Question } from './kind';
 import { answerMatters, askWords, gradeStatically, worldMutants, type WorldMutant } from './mutants';
+import { ownerRule } from './paths';
 import { LOGIN_FIELD, loginHop, type WorldSchema } from './project';
 import { validateWorld, type WorldProblem } from './validate';
 import { kindById } from './vocabulary';
@@ -46,7 +49,7 @@ export type QuestionAbout =
 
 export interface NextQuestion {
   about: QuestionAbout;
-  /** The answer's key: a question id of the kind, `freeWords`, or `signsIn`. */
+  /** The answer's key: a question id of the kind, `through`, `freeWords`, or `signsIn`. */
   question: string;
   /** The question in the person's nouns. */
   ask: string;
@@ -213,6 +216,38 @@ export function nextQuestions(files: WorldFiles, options: { limit?: number } = {
     });
   }
 
+  // Through what (s14): an owned-by that belongs to someone through a chain, once a noun signs in —
+  // the chain starts there, so before that the signsIn question is the one asked. A chain that is
+  // said and does not compile is refused, like any answer the world cannot hold.
+  const signs = nouns.find((n) => n.signsIn);
+  for (const [ri, r] of relations.entries()) {
+    if (r.kind !== 'owned-by' || r.answers?.path !== true || !signs || !loginHop(right)) continue;
+    const ownedBy = kindById('owned-by')!;
+    const path = ownedBy.questions.find((q) => q.id === 'path')!;
+    const ask = `"${r.sentence}" — through what is the ${r.to} ${a(r.from)} belongs to reached from the ${signs.id} who signs in? Name the relations from the ${signs.id} to the ${r.to}, in order.`;
+    if (r.through) {
+      const compiled = ownerRule(right, files, r.id);
+      if (!compiled.ok) return { ok: false, problems: [{ file: WORLD_FILES.relations, at: `relations[${ri}].through`, expected: 'a chain the schema can follow', message: compiled.problem }] };
+      record.push({ relation: r.id, kind: ownedBy.id, question: 'through', ask, said: chainWords(r.through), how: 'asked' });
+      continue;
+    }
+    const standing = mutants.filter((m) => 'relation' in m.of && m.of.relation === r.id && m.seeds.includes('visible-to-all') && stands(right, m));
+    ranked.push({
+      q: {
+        about: { relation: r.id, kind: ownedBy.id },
+        question: 'through',
+        ask,
+        answer: `a list of steps, each { "relation": <id> }, with "where" to say which records it lands on (as holder: { "role": "holder" }), from the ${signs.id} to the ${r.to}`,
+        home: `relations[${r.id}].through`,
+        mutants: standing.length ? standing.map((m) => m.id) : [`owned-by/visible-to-all`],
+        mistake: `a rule about who may see ${a(r.from)} that says "through a chain" and names none, so nothing enforces it`,
+        incident: { from: path.from, prevents: path.prevents },
+        changes: 'the schema'
+      },
+      key: [RANK[path.from], -ownedBy.evidence.rows, ownedBy.questions.indexOf(path), ri]
+    });
+  }
+
   // The kind-picker: every text field nobody has said is free words, nor made a one-of. One
   // question for the whole world, after every relation question, or it is asked once per noun
   // and outranks the questions about what the person said (measured on the every-kind world:
@@ -269,3 +304,11 @@ export { LOGIN_FIELD };
 
 const a = (word: string): string => (/^[aeiou]/i.test(word) ? 'an ' : 'a ') + word;
 const cap = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
+
+/** A chain in words, for the record: "membership where role is holder, then …". */
+function chainWords(steps: readonly ThroughStep[]): string {
+  if (!steps.length) return 'directly: the owner is whoever signs in';
+  return steps
+    .map((st) => `${st.relation}${st.back ? ' (read back)' : ''}${st.where ? ` where ${Object.entries(st.where).map(([k, v]) => `${k} is ${String(v)}`).join(' and ')}` : ''}`)
+    .join(', then ');
+}

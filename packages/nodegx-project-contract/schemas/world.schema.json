@@ -196,6 +196,39 @@
           "items": {
             "$ref": "#/definitions/property"
           }
+        },
+        "through": {
+          "description": "The answer to \"through what?\" (ONT-002) on an owned-by answered path: true \u2014 the relations from the noun that signs in to the owner, in order. The validator walks it over the nouns.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/throughStep"
+          }
+        }
+      }
+    },
+    "throughStep": {
+      "type": "object",
+      "required": [
+        "relation"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "relation": {
+          "$ref": "#/definitions/id"
+        },
+        "back": {
+          "type": "boolean"
+        },
+        "where": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number",
+              "boolean"
+            ]
+          }
         }
       }
     },

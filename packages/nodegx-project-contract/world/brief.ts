@@ -84,7 +84,7 @@ ${json(BRIEF_EXAMPLE.nouns)}
 ${json(BRIEF_EXAMPLE.relations)}
 \`\`\`
 
-A noun or a field can carry one more answer. The tool asks for each of these once, because the answer has a home. \`"signsIn": true\` on one noun says that noun is who signs in. A rule about who may see what starts from that noun. \`"freeWords": true\` on a text field records the person's answer to one question: the field is free words, not one of a fixed list. A text that is one of a fixed list is a \`choice\` with its \`values\`. A \`one-of\` relation then says who adds to the list.
+A noun or a field can carry one more answer. The tool asks for each of these once, because the answer has a home. \`"signsIn": true\` on one noun says that noun is who signs in. A rule about who may see what starts from that noun. When an \`owned-by\` answers \`"path": true\`, its \`"through"\` lists the relations from the noun that signs in to the owner, in order, each \`{ "relation": <id> }\`, with \`"where"\` for which records a step lands on (as holder: \`{ "role": "holder" }\`); the hop from the owner back to what it owns is the relation itself and is not listed. \`"freeWords": true\` on a text field records the person's answer to one question: the field is free words, not one of a fixed list. A text that is one of a fixed list is a \`choice\` with its \`values\`. A \`one-of\` relation then says who adds to the list.
 
 ## The kinds
 

@@ -1,6 +1,6 @@
 # ONT-002 — The conversation is a runner
 
-**Opened 2026-10-08.** **Depends on ONT-001, ONT-005 and R5.** **Status: 🟡 built s6, 2026-10-09 (Fable 5.1) — AC1–AC4 met (§6.5); the "through what?" question owed (§6.6).**
+**Opened 2026-10-08.** **Depends on ONT-001, ONT-005 and R5.** **Status: ✅ s14, 2026-10-10 — AC1–AC4 met s6 (Fable 5.1, §6.5); "through what?" built s14 (Opus 5.5, §6.7). Writing the rule into `security.json` is ONT-008's (no writer of permissions exists yet).**
 
 > **Model check, before anything (Richard, 2026-10-08):** this task wants **Fable 5.1 for the brief; Opus 5.5 for the runner** — the brief decides whether the questions arrive before the schema — the thesis itself; the runner is mechanical. Your system prompt says which model you are. If it is not the one named here, stop before any work and say so in one line ("this task is marked for Fable 5.1; you are on <model> — switch with /model, or say go"), and wait for Richard's word. Do not start on the wrong model because the check felt like a formality.
 
@@ -83,7 +83,7 @@ Three questions no relation carries are asked here, each with a **home for its a
 |---|---|---|---|
 | **Who signs in?** (ONT-004's first owed question) | an `owned-by` relation exists and no noun says so | `nouns[].signsIn: true` (one noun at most; the validator refuses two) | the noun's collection gets a `login` Link to the users collection — the hop `worldRule()` starts from; `loginHop(schema)` reads it back |
 | **The kind-picker** (ONT-005 §6.6: "is `category` one of a fixed list?") | a noun has a text field nobody has placed: not `freeWords`, no `one-of` about it | `properties[].freeWords: true`, or a `choice` with a `one-of` relation | one question **per world**, naming every such field, ranked **last** — per noun it outranked everything the person had said (eight of ten on the every-kind world) |
-| **Through what?** (ONT-004's second) | — | — | **not built**, §6.6 |
+| **Through what?** (ONT-004's second) | an `owned-by` answered `path: true`, once a noun `signsIn` (before that, who signs in is the question) | `relations[].through`: the steps from the noun that signs in to the owner | `ownerRule()` compiles it with the login into the path rule (§6.7) |
 
 The two additions to the format are optional keys (no version bump): `schemas/world.schema.json` and the validator
 agree on both (ajv in the tests), and `freeWords` is refused on anything but a text.
@@ -174,3 +174,36 @@ failure arm `answers`, is not asked: it is on the record with the arm's `sees` a
 only a question answered in words. `validate_world`/`write_world` read and write `verbs.json`; the surface is unchanged at
 8,261 tokens.
 
+### 6.7 s14, 2026-10-10 — through what (Opus 5.5)
+
+**Built.** The answer is a **key on the relation**, `through`, a list of steps (`{ relation, back?, where? }`), not a
+value in `answers`: an answer is one word or yes/no, and widening `answers` to lists would have changed every
+answer's shape for one question (§6.4's "a format change … with the first rule that needs it"; `ownerRule()` is that
+rule). Optional, no version bump, as `signsIn` was. Not a kind question either, so `kinds.hand.json` did not move
+(ONT-011 is changing it). The steps start at the noun that signs in and end on the owner. The last hop, from the owner
+back to what it owns, is the relation itself and is not said.
+
+- **The validator walks it over the nouns** (`validate.ts`, pure, runs in a page): it refuses a chain on any kind but
+  `owned-by`, without `path: true`, with nobody signing in, through a relation that is unknown, is itself or does not
+  join two nouns, read the wrong way, on the wrong noun, a self relation with no direction, or ending anywhere but
+  the owner. `schemas/world.schema.json` takes the same shape; ajv and the validator agree on the four shape refusals.
+- **`ownerRule(schema, files, relation)`** (`paths.ts`) compiles the whole rule from the files: `loginHop` → the
+  chain → back along the owner link. `worldRule()` took the login and the chain from its caller. A chain the nouns
+  allow and the schema cannot follow (a list read the other way round) is refused there, and **the runner refuses it
+  too** (`ok: false` at `relations[i].through`), rather than asking questions over it.
+- **The runner** asks "through what?" once a noun signs in (before that, who signs in is the question). The question
+  has its home, the `visible-to-all` mutants and the path question's incident. A chain said goes on the record in
+  words ("membership where role is holder"). `diffWorld` names a changed chain (`relation-through`). The brief has
+  one sentence about it.
+- **Graded.** `tests/through.test.ts` 26 (fixture `world-owned-through`: the membership world, the person signs in, a
+  note that is its account's, through membership as holder), with three mutants each red on its own cases (the
+  validator's end check gone, 2; the chain dropped from `ownerRule`, 3; asked although answered, 2).
+  `nodegx-backend/tests/ont-002-through.test.ts` runs the compiled rule as the `$path` on SQLite and PostgreSQL. A
+  holder of two accounts sees both notes, the other holder theirs, a member none. With the engine ignoring hop
+  filters (`path-ignores-hop-filters`), the member sees `["n1","n2"]`: caught on both engines.
+- Measured (13:20–13:30 CEST): `nodegx-project-contract` **245 / 245**, `tsc` clean (both configs);
+  `ont-002-through` **4 / 4**; `noodl-mcp` `ont002WorldTools` + `toolDisclosure` **30 / 30**, surface **8,261**
+  (unchanged: the brief is read only through `validate_world`).
+- **Not built:** `all` (a tree step) in a chain, which needs a depth the format has no word for yet; checking a
+  step's `where` names a field the record it lands on has (the engine reads an unknown field as no match). Nothing
+  writes the rule into `security.json`: who may see what is BMG-006's, and ONT-008's page is the first writer.

@@ -140,7 +140,8 @@ record that carries `doneBy`, six. `MAX_PATH_DEPTH` is 8, so the deepest real ru
 
 - **ONT-008:** AC2's path row (§6.4). The manager's rule words and the dry run's `narrow` are ready for it.
 - **ONT-002:** the conversation owes two questions: "which link is the person who signs in?" (for `worldRule`), and,
-  when `owned-by` answers `path: true`, "through what?" (the chain as a sentence).
+  when `owned-by` answers `path: true`, "through what?" (the chain as a sentence). **Both built:** `signsIn` (s6) and
+  `relations[].through` with `ownerRule()` (s14, ONT-002 §6.7).
 - **ONT-005:** `path-ignores-hop-filters` is the mutant of "as holder": a rule written without its narrowing step
   grants a member what a holder should have. It is executable now.
 - **Not measured, worth measuring:** an `include`d record is read with the caller's row ACL and never its collection's

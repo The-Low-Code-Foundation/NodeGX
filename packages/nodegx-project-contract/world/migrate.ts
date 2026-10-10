@@ -49,7 +49,9 @@ export type ChangeWhat =
   | 'relation-rekinded'
   /** It joins other things: `from` or `to` changed. */
   | 'relation-reattached'
-  | 'relation-answered';
+  | 'relation-answered'
+  /** An owned-by is reached through another chain: who may see its records changes, the schema does not (s14). */
+  | 'relation-through';
 
 export interface WorldChange {
   what: ChangeWhat;
@@ -131,6 +133,14 @@ export function diffWorld(before: WorldFiles, after: WorldFiles): WorldChange[] 
       if (wa[q] === na[q]) continue;
       out.push({ what: 'relation-answered', about, detail: q, says: `'${r.id}': ${q} was ${shownAnswer(wa[q])}, is ${shownAnswer(na[q])} now` });
     }
+    if (!same(was.through, r.through))
+      out.push({
+        what: 'relation-through',
+        about,
+        says: r.through
+          ? `'${r.id}': whoever signs in reaches the ${r.to} through ${r.through.map((st) => st.relation).join(', then ') || 'nothing: they are it'} now`
+          : `'${r.id}': nobody says through what any more`
+      });
     out.push(...propertyChanges(about, `being on '${r.id}'`, was.properties, r.properties));
   }
   for (const r of before.relations.relations) if (!ar.has(r.id)) out.push({ what: 'relation-removed', about: { relation: r.id }, says: `no longer said: ${quoteWords(r.sentence)}` });

@@ -167,7 +167,7 @@ export function validateWorld(
     rf.relations.forEach((r: unknown, i: number) => {
       const at = `relations[${i}]`;
       if (!isObj(r)) return say('relations', at, 'a relation', r, `${at} is not a relation.`);
-      strayKeys('relations', at, r, ['id', 'from', 'to', 'property', 'kind', 'sentence', 'answers', 'properties']);
+      strayKeys('relations', at, r, ['id', 'from', 'to', 'property', 'kind', 'sentence', 'answers', 'properties', 'through']);
       if (typeof r.id !== 'string' || !ID.test(r.id)) say('relations', `${at}.id`, 'an id: a letter, then letters, digits, - or _', r.id, `${at} has no usable id.`);
       else if (relIds.has(r.id)) say('relations', `${at}.id`, 'an id used once', r.id, `${at}: the id "${r.id}" is used twice.`);
       else relIds.add(r.id);
@@ -248,6 +248,49 @@ export function validateWorld(
       } else {
         checkProperties('relations', `${at}.properties`, r.properties);
       }
+    });
+
+    // "Through what?" (ONT-002): a walk over the nouns, from whoever signs in to the owner.
+    const relById = new Map<string, Record<string, unknown>>();
+    for (const r of rf.relations as unknown[]) if (isObj(r) && typeof r.id === 'string' && !relById.has(r.id)) relById.set(r.id, r);
+    const ends = (r: Record<string, unknown>): { from: string; to: string } | undefined => {
+      const kind = vocabulary.kinds.find((k) => k.id === r.kind);
+      if (!kind || typeof r.from !== 'string') return undefined;
+      if (kind.target === 'self') return { from: r.from, to: r.from };
+      if ((kind.target === 'noun' || kind.target === 'noun-or-none') && typeof r.to === 'string' && nounIds.has(r.to)) return { from: r.from, to: r.to };
+      return undefined;
+    };
+    (rf.relations as unknown[]).forEach((r: unknown, i: number) => {
+      if (!isObj(r) || r.through === undefined) return;
+      const at = `relations[${i}].through`;
+      const named = `relations[${i}] ("${String(r.id)}")`;
+      if (r.kind !== 'owned-by') return say('relations', at, 'nothing: only an owned-by is asked through what', r.kind, `${named} is a ${String(r.kind)}; "through" answers "through what?", which only an owned-by is asked.`);
+      if (!isObj(r.answers) || r.answers.path !== true) return say('relations', at, 'nothing, or answers.path: true', isObj(r.answers) ? r.answers.path : undefined, `${named} has a chain, and does not say it belongs to someone through one (answers.path is not true).`);
+      if (!Array.isArray(r.through)) return say('relations', at, 'a list of steps', r.through, `${named}: "through" is a list of steps, each { "relation": … }.`);
+      if (!signsIn) return say('relations', at, 'a noun that signsIn first', undefined, `${named}: a chain starts from whoever signs in, and no noun says signsIn.`);
+      let noun = signsIn;
+      for (let j = 0; j < r.through.length; j++) {
+        const step: unknown = r.through[j];
+        const sat = `${at}[${j}]`;
+        if (!isObj(step)) return say('relations', sat, 'a step { "relation": … }', step, `${named}, step ${j + 1} is not a step.`);
+        strayKeys('relations', sat, step, ['relation', 'back', 'where']);
+        if (step.back !== undefined && typeof step.back !== 'boolean') return say('relations', `${sat}.back`, 'true, false or nothing', step.back, `${named}, step ${j + 1}: "back" is true or false.`);
+        if (step.where !== undefined && (!isObj(step.where) || !Object.keys(step.where).length || !Object.values(step.where).every((v) => ['string', 'number', 'boolean'].includes(typeof v))))
+          return say('relations', `${sat}.where`, 'an object of field to a word, number or yes/no', step.where, `${named}, step ${j + 1}: "where" names fields and the value each must have, as { "role": "holder" }.`);
+        const via = typeof step.relation === 'string' ? relById.get(step.relation) : undefined;
+        if (!via) return say('relations', `${sat}.relation`, 'a relation of this world', step.relation, `${named}, step ${j + 1}: ${show(step.relation)} is not a relation of this world.`);
+        if (via === r) return say('relations', `${sat}.relation`, 'another relation', step.relation, `${named}, step ${j + 1}: the chain ends on the ${String(r.to)}, and the last hop, back to the ${String(r.from)}, is this relation itself; it is not said.`);
+        const e = ends(via);
+        if (!e) return say('relations', `${sat}.relation`, 'a relation between two nouns', step.relation, `${named}, step ${j + 1}: "${String(via.id)}" (${String(via.kind)}) does not join two nouns, so a chain cannot go along it.`);
+        if (e.from === e.to) {
+          if (noun !== e.from) return say('relations', `${sat}.relation`, `a relation about the ${noun}`, step.relation, `${named}, step ${j + 1}: "${String(via.id)}" joins ${e.from}s to ${e.from}s, and the chain is on the ${noun}.`);
+          if (step.back === undefined) return say('relations', `${sat}.back`, 'true or false', undefined, `${named}, step ${j + 1}: "${String(via.id)}" joins ${e.from}s to ${e.from}s; say "back": false (along it) or true (against it).`);
+        } else if (noun === e.from && step.back !== true) noun = e.to;
+        else if (noun === e.to && step.back !== false) noun = e.from;
+        else return say('relations', `${sat}.relation`, `a relation the ${noun} is on, read ${step.back === true ? 'back' : step.back === false ? 'forwards' : 'either way'}`, step.relation, `${named}, step ${j + 1}: "${String(via.id)}" joins the ${e.from} to the ${e.to}, and the chain is on the ${noun}.`);
+      }
+      if (noun !== r.to)
+        say('relations', at, `a chain that ends on the ${String(r.to)}`, noun, `${named}: the chain from the ${signsIn} ends on the ${noun}, and a ${String(r.from)} belongs to the ${String(r.to)} — it must end there.`);
     });
   }
 

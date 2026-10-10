@@ -85,6 +85,26 @@ export interface Relation {
   answers?: Record<string, string | boolean>;
   /** Details on the link itself; only a kind that `carriesDetails` may have them. */
   properties?: WorldProperty[];
+  /**
+   * The answer to "through what?" (ONT-002, ONT-004's second question), asked of an `owned-by`
+   * answered `path: true` once a noun `signsIn`: the relations from the noun that signs in to the
+   * owner (`to`), in order. The last hop, from the owner back to `from`, is this relation, so it is
+   * not said. Validated as a walk over the nouns (it must start at whoever signs in and end on the
+   * owner); `ownerRule()` compiles it with the login into the permission rule, so the chain is a
+   * guard, not a sentence a developer reads. A list of steps where `answers` holds one value, so
+   * it has its own key, as `signsIn` has.
+   */
+  through?: ThroughStep[];
+}
+
+/** One step of a `through` chain: along a relation, forwards (from → to) unless `back`. */
+export interface ThroughStep {
+  /** A relation id of this world. */
+  relation: string;
+  /** Read it from its `to` end to its `from` end. Inferred when the two ends differ; required when they are the same noun. */
+  back?: boolean;
+  /** Which of the records it lands on, in the storage wire's spelling — for a record of its own, the record: "as holder" is `{ "role": "holder" }`. */
+  where?: Record<string, string | number | boolean>;
 }
 
 export interface NounsFile {

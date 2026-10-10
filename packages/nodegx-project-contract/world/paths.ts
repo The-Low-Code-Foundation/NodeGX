@@ -19,7 +19,7 @@
  *   it does not have.
  */
 import type { Relation, WorldFiles } from './files';
-import { collectionName, USERS_COLLECTION, type WorldCollection, type WorldColumn, type WorldSchema } from './project';
+import { collectionName, loginHop, USERS_COLLECTION, type WorldCollection, type WorldColumn, type WorldSchema } from './project';
 import { kindById } from './vocabulary';
 
 /** The contract's `PathHop`, restated. Every `where` is in the storage wire's spelling. */
@@ -275,6 +275,36 @@ export function worldRule(
     collection: compiled.compiled.collection,
     says: `whoever is signed in sees ${compiled.compiled.says}`
   };
+}
+
+/**
+ * The permission rule an `owned-by` says, from the world alone (ONT-002 "through what?"): the
+ * login the noun that `signsIn` projected, its `through` chain to the owner, then back along this
+ * relation's link to the records owned. `worldRule()` took the login and the chain from its caller;
+ * this reads both from the files, so a rule a person answered is the rule that is written, and a
+ * chain that does not compile is refused here in words. Not written into `security.json` by
+ * anything yet (who may see what is BMG-006's; ONT-008's page is the first writer).
+ */
+export function ownerRule(
+  schema: WorldSchema,
+  files: WorldFiles,
+  relation: string
+): { ok: true; rule: PathRuleAtom; collection: string; says: string } | { ok: false; problem: string } {
+  const r = files.relations.relations.find((x) => x.id === relation);
+  if (!r) return { ok: false, problem: `"${relation}" is not a relation of this world.` };
+  if (r.kind !== 'owned-by') return { ok: false, problem: `"${relation}" is ${a(r.kind)}; only an owned-by says who may see what.` };
+  if (r.answers?.path !== true)
+    return { ok: false, problem: `"${relation}" does not say it belongs to someone through a chain (answers.path); its rule is its owner link alone.` };
+  if (!r.through) return { ok: false, problem: `"${relation}" belongs to someone through a chain, and nobody has said through what.` };
+  const signs = files.nouns.nouns.find((n) => n.signsIn);
+  const login = loginHop(schema);
+  if (!signs || !login) return { ok: false, problem: 'Nobody signs in: a rule starts from whoever is signed in, and no noun says signsIn.' };
+  const rule = worldRule(schema, files, login, {
+    from: signs.id,
+    steps: [...r.through.map((s) => ({ ...s })), { relation: r.id, back: true }]
+  });
+  if (!rule.ok) return { ok: false, problem: `"${relation}", through what it belongs: ${rule.problem}` };
+  return rule;
 }
 
 /** The collection a noun became, for callers that only have the id. */
