@@ -291,6 +291,17 @@ function isTaggedValue(condition: unknown): boolean {
   );
 }
 
+/**
+ * P109 ISL-039 (P78-DBT-NUL): a string holding `\u0000` is a value no PostgreSQL row can hold —
+ * its `text` and `jsonb` refuse the character, so binding it is an error (a 400 on the wire). On
+ * SQLite it binds and simply equals nothing stored. On PostgreSQL the comparison is compiled to
+ * that same answer instead of being sent: equal is FALSE, not-equal is "has a value", and the
+ * value drops out of an `$in`/`$nin` list.
+ */
+function unholdable(value: unknown, dialect: SqlDialect): boolean {
+  return dialect === 'postgres' && typeof value === 'string' && value.includes('\u0000');
+}
+
 /** ISL-039: the columns a table's schema declares `Array`, for {@link ColumnScope.arrays}. */
 export function arrayColumns(schema: { columns?: Array<{ name: string; type?: string }> } | null | undefined): Set<string> {
   return new Set((schema?.columns || []).filter((c) => c.type === 'Array').map((c) => c.name));
@@ -542,6 +553,10 @@ export function buildWhereClause(
     if (typeof condition !== 'object' || condition === null || isTaggedValue(condition)) {
       // Direct equality
       const value = convertQueryValue(condition);
+      if (unholdable(value, dialect)) {
+        conditions.push('FALSE');
+        continue;
+      }
       if (isArray && value !== null) {
         conditions.push(arrayHolds(col, value, params, dialect));
         continue;
@@ -613,6 +628,7 @@ function translateOperator(
       if (convertedValue === null) {
         return `${col} IS NULL`;
       }
+      if (unholdable(convertedValue, dialect)) return 'FALSE';
       // P109 ISL-039: on an Array column, an element is "holds this element" (see `arrayHolds`), and
       // an array is the whole array, compared as JSON (the admin's "is empty" asks `$eq: []`).
       if (arrayColumn && !Array.isArray(convertedValue)) return arrayHolds(col, convertedValue, params, dialect);
@@ -624,7 +640,7 @@ function translateOperator(
       return `${col} = ?`;
 
     case '$ne':
-      if (convertedValue === null) {
+      if (convertedValue === null || unholdable(convertedValue, dialect)) {
         return `${col} IS NOT NULL`;
       }
       params.push(convertedValue);
@@ -654,7 +670,8 @@ function translateOperator(
         // matching nothing. Found by BRG-005's conformance run.
         return dialect === 'postgres' ? 'FALSE' : '0';
       }
-      const inValues = value.map((v) => convertQueryValue(v));
+      const inValues = value.map((v) => convertQueryValue(v)).filter((v) => !unholdable(v, dialect));
+      if (inValues.length === 0) return 'FALSE'; // only PostgreSQL reaches this: every value held a NUL
       const placeholders = inValues.map(() => '?').join(', ');
       params.push(...inValues);
       return `${col} IN (${placeholders})`;
@@ -664,7 +681,8 @@ function translateOperator(
       if (!Array.isArray(value) || value.length === 0) {
         return dialect === 'postgres' ? 'TRUE' : '1'; // Always true (not in empty set)
       }
-      const ninValues = value.map((v) => convertQueryValue(v));
+      const ninValues = value.map((v) => convertQueryValue(v)).filter((v) => !unholdable(v, dialect));
+      if (ninValues.length === 0) return `${col} IS NOT NULL`; // as SQLite's NOT IN answers for a NUL list
       const ninPlaceholders = ninValues.map(() => '?').join(', ');
       params.push(...ninValues);
       return `${col} NOT IN (${ninPlaceholders})`;

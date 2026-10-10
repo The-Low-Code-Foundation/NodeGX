@@ -202,6 +202,23 @@ export const filterCases: readonly ConformanceCase[] = Object.freeze([
   },
 
   {
+    id: 'filters/a-nul-in-a-value-matches-nothing-on-every-engine',
+    area: 'filters',
+    pins: 'a string holding \\u0000 compares like any value no row holds — never an error on one engine',
+    async run(ctx) {
+      // P109 ISL-039 (P78-DBT-NUL): DBT used '\u0000none' as an impossible value for an empty
+      // `containedIn`. SQLite answered [] and PostgreSQL, whose text cannot hold a NUL, a 400.
+      const c = await seed(ctx, 'Nul');
+      deepEq(await names(ctx, c, { name: 'a\u0000b' }), [], 'equality with a NUL matched a row');
+      deepEq(await names(ctx, c, { name: { $eq: '\u0000none' } }), [], '$eq with a NUL matched a row');
+      deepEq(await names(ctx, c, { name: { $in: ['\u0000none', 'ada'] } }), ['ada'], '$in with a NUL lost its other value');
+      deepEq(await names(ctx, c, { name: { $in: ['\u0000none'] } }), [], '$in of only a NUL matched a row');
+      deepEq(await names(ctx, c, { name: { $nin: ['\u0000none', 'ada'] } }), ['bo', 'cy', 'di', 'eve', 'fay'], '$nin with a NUL is wrong');
+      deepEq(await names(ctx, c, { tag: { $ne: '\u0000x' } }), ['ada', 'bo', 'cy', 'di', 'eve', 'fay'], '$ne with a NUL is wrong');
+    }
+  },
+
+  {
     id: 'filters/a-pointer-written-as-a-parse-pointer-is-a-value',
     area: 'filters',
     pins: 'a condition `{__type: "Pointer", objectId}` matches like the bare id, rather than being read as operators',
