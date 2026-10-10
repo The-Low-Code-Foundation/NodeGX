@@ -1,78 +1,68 @@
 # Phase 116 — next session
 
-**Written 2026-10-09, end of s13 (Opus 5.5).** ONT-000 ✅, ONT-003 ✅ (+ R10 §6.6, **+ §6.7 and §6.8, s13**), ONT-007 ✅.
-ONT-001 🟡 (AC4 → ONT-008), ONT-004 🟡 (AC2 → ONT-008), ONT-005 🟡 (16 of 38 pinned, unchanged), ONT-002 🟡 ("through
-what?" owed), ONT-006 🟡 (the view is ONT-008's). R1–R10 all ruled (README §9). Nothing is waiting on Richard.
+**Written 2026-10-10, end of s14 (Opus 5.5).** ONT-000 ✅, ONT-002 ✅ (s14), ONT-003 ✅, ONT-007 ✅. ONT-001 🟡 (AC4 →
+ONT-008), ONT-004 🟡 (AC2 → ONT-008), ONT-005 🟡 (16 of 38 pinned, unchanged), ONT-006 🟡 (the view is ONT-008's).
+R1–R10 all ruled (README §9). Nothing is waiting on Richard from s14.
 
-## What s13 did (Opus 5.5). P112 OWN-007 was still 📋 (checked at start), so ONT-008 stayed blocked
+## What s14 did (Opus 5.5). P112 OWN-007 was still 📋 (P112 is on OWN-004), so ONT-008 stayed blocked
 
-1. **Bug `P116-ONT-003-pairs` fixed** (ONT-003 §6.7). A Links field's pairs now go with either end. They are part of
-   the plan `deleteKeepingLinks` already reads: `DeletePlan.unpaired` holds every pair, at either end, of every record
-   that goes (`goes-too` included). They are taken out last, as master, through the data plane's `removeRelation`.
-   `DeleteContext.schema` now also picks `getRelatedIds` and `getRelationOwners`, which were already on
-   `IStorageSchema`, so no new schema member was needed and the BRG-003 ratchet does not move. `DeleteContext` gains
-   `unpair`. A delete of a record that is not there takes no pairs: both engines' master-key delete SUCCEEDS on a
-   missing id, so the plan's existence check is the only guard.
-2. **The viewer build, P109's catch.** `@noodl/backend-contract` `src/` is compiled by the viewer's ES5 webpack, where
-   a Map spread is TS2802 and no bundle gets written. s12's `[...counts.values()]` in `targetGoes.ts` had turned
-   `ci:build:viewer` red. Both spreads are now `Array.from`. Check: `npx tsc --noEmit --target ES5 --lib es2019,dom
-   --skipLibCheck --moduleResolution node <file>`.
-3. **`verbReach`'s `end` arm specced** (ONT-007 §6.10, `migrate.test.ts` +2, three mutants each red on its own case).
-   Found: a row with no `rebind` does NOT mean the step still binds. Un-dating a relation leaves the end step with no
-   date to mark, and only `validateWorld` with the verbs says so.
-4. **Bug `P116-ONT-003-two-systems` fixed** (ONT-003 §6.8). The `exists-elsewhere` field is named after the
-   **relation's id** (`onTheCoursePlatformId`, `mailingId`), not the system's words. A reword of the system's words
-   must not rename what is stored, and `diffWorld` would not see such a rename (my decision; say so if Richard asks).
-   Measured first: no world outside the package fixtures held `idElsewhere`, so no migration is owed. The vocabulary
-   stays v1. Goldens regenerated; the field name is their only change.
-5. **Left unbuilt on purpose:** `rebindVerbs()`. It has no caller and no acceptance criterion; ONT-008's page is its
-   first caller, so build it there.
-6. **Filed:** `P116-S13-REL002B`. With no backend bound, the members' area now says "Nobody has set this up yet"
-   (`rel002b-fail-closed` red). Not P116's: that spec never deletes and has no backend bound. Owner: P82/TPL-001.
-   Also `P116-S13-AC2STALL`, the page editor drive hanging in its own write-storm mutant arm (owner: P77/SBR-007).
+1. **Bug `-renamecolumn` fixed** (`78ec0ed69`, ONT-007 §6.12): a rename is refused like a drop, on both engines and
+   at the route (409 in words). Found under it, **bug `-partialdrop`**: an index's `where` was not counted as reading
+   a field, so PostgreSQL dropped such an index silently with the field. Fixed in the same helper.
+2. **The viewer build's ES5 trap is a spec** (`e11f559c5`): `nodegx-backend-contract/tests/viewer-es5.test.ts`
+   compiles `src/index.ts` at the viewer's target. s12's Map spread fails it at `targetGoes.ts:226`.
+3. **ONT-002 ✅, "through what?" built** (`e105bb3d1`, ONT-002 §6.7): `relations[].through` (the chain from whoever
+   signs in to the owner), walked over the nouns by the validator and the JSON schema; `ownerRule()` compiles the
+   permission rule from the files alone; the runner asks once someone signs in and records the chain in words;
+   `diffWorld` names a change. Graded on rows on both engines (`ont-002-through`), the hop-filter mutant caught.
+4. **The blocker `-junctions` fixed** (`f1b60a4d9`, ONT-007 §6.13). The s13 handoff did not list it, and the ledger
+   did. Re-measured red on both engines first. Found under it, **bug `-pgloadrace`** (high): a PostgreSQL backend
+   starting while another dropped a table refused to start. `load()` now reads again. Regression
+   `tests/p116-pg-load-race`, deterministic.
 
-**Committed:** the code as `a54294a1d` (over `140bdeb41`); these docs right after it.
+**Where this handoff was wrong.** s13 said "nothing is waiting" and listed two small items. P116's own blocker was
+open in the ledger, and `node scripts/bugs.js --from P116` shows it in one line. **Run it first, every session.**
 
-## What s13 measured (2026-10-09, ~22:30–23:30 CEST, over HEAD `0859bbbde` + this session's edits)
+## What s14 measured (2026-10-10, 13:15–13:45 CEST, final tree over `f1b60a4d9`, load 5–10 from P107/P109 peers)
 
-- `nodegx-project-contract` **202 / 202** (198 → 202: two `end`-arm cases, two two-systems cases). `tsc --noEmit` clean
-  on `tsconfig.json` and `tsconfig.tests.json`.
-- `nodegx-backend-contract` **228 / 228** (224 → 228: four pairs cases in `targetGoes.test.ts`). `tsc --noEmit` clean.
-  `targetGoes.ts` is clean at ES5; HEAD's copy is TS2802 at `:226` (the control).
-- `nodegx-backend` `ont-003-target-goes` **22 / 22** on SQLite and PostgreSQL (20 → 22). The control: with the unpair
-  loop emptied, both engine cases and 3 of the 4 unit cases are red.
-- **The whole `nodegx-backend` suite** (22:42–23:12 CEST, `-w 2`): 227 files, 2,777 tests, **2,730 passed, 29 failed,
-  18 pending**. Two files are red, neither P116's, both filed: `rel002b-fail-closed` 1 (`P116-S13-REL002B`) and
-  `ac2-page-editor-drag-drive` 28 (`P116-S13-AC2STALL`: it hangs alone too; a tracer on `deleteKeepingLinks` saw 0
-  calls in the stalled run and 84 on R10's spec, the known-firing control). That run began before the two-systems
-  edit, so on the final tree (HEAD `1b5774b23`) I ran, in band, every `ont-00*` spec plus `brg-003-*` and
-  `ops-rate-limit`: **208 / 208**.
-- Not run: the backend's own `tsc` (`tsconfig.tests.json` was red only on ISL-010's four lines at s12) and
-  `ci:build:viewer` (the ES5 check above stands in for it).
+- `nodegx-backend` 21 specs (BRG-003 ×4, BRG-005 ×3, BMG-003, every `ont-00*`, `service-http`, `admin-dashboard`,
+  `p116-pg-load-race`) **350 / 350, exit 0**. The uncovered ratchet reads **20 of 68**, under its ceiling of 22.
+- `nodegx-project-contract` **245 / 245**; `nodegx-backend-contract` **230 / 230**; `noodl-runtime` `test/adapters`
+  **328 / 328**; `noodl-mcp` `ont002WorldTools` + `toolDisclosure` **30 / 30**, surface **8,261** (unchanged).
+- `tsc --noEmit` clean: runtime, backend (both configs), backend contract, project contract (both configs). The
+  backend's `tsconfig.tests.json` is clean now.
+- Not run: the whole `nodegx-backend` suite (peers held the box), `ci:build:viewer` (the ES5 spec stands in for the
+  contract's part of it), `npm run ontology-census:check` (the kinds did not change).
 
 ## Before anything
 
-0. **Model check.** ONT-008 wants **Opus 5.5**. On the wrong model, stop and say so in one line.
-1. **One heavy job on this box.** Run `pgrep -fl bin/jest` first. P109 and P107 peers run suites often.
-2. Green check: run `npx jest` in `packages/nodegx-project-contract` (202) and `packages/nodegx-backend-contract`
-   (228). In `packages/nodegx-backend`, run `npx jest --runInBand tests/ont-003-target-goes tests/ont-003-claims
-   tests/ont-007-migration`.
-3. After editing any contract `src/` file, run the ES5 tsc line above on it.
+0. **Model check.** ONT-008 wants **Opus 5.5**.
+1. **`node scripts/bugs.js --from P116`** — open P116 bugs first, worst first.
+2. **One heavy job on this box.** `pgrep -fl bin/jest`. P107 and P109 peers run suites often.
+3. Green check: `npx jest` in `packages/nodegx-project-contract` (245) and `packages/nodegx-backend-contract` (230);
+   in `packages/nodegx-backend`, `npx jest --runInBand tests/ont-00 tests/brg-005-conformance-postgres`.
 
 ## The next tasks, in order
 
-1. **ONT-008** (Opus). It depends on P112 **OWN-007**, which was 📋 not started at s13's start; re-check. Its §5 lists
-   every input. Added s11–s13: the route's dry run (`says`, `dryRun`, `rules.moved/rewritten`); the link row shows
-   and changes "when it goes" (`setWhenTargetGoes`); a `blocks` refusal is a 409 with `linked`, and the delete button
-   must say so, not "not found"; `verbReach` rows with `rebind`, plus `rebindVerbs()` to build there.
-2. If OWN-007 still blocks, take what is smaller and unowned: bug `P116-ONT-007-renamecolumn` (a rule naming a
-   renamed field); ONT-002's "through what?". **Ask before** giving the MCP a migrate tool (the surface budget).
+1. **ONT-008** (Opus) when P112 **OWN-007** has started (it was 📋 on 2026-10-10; P112 was on OWN-004 slice 1).
+   Its §5 lists every input. Added s14: `ownerRule()` is the rule a "who may see" row writes (nothing writes
+   permissions yet; this page is the first writer), and the record's `through` entry is the chain in words.
+2. If OWN-007 still blocks:
+   - **Bug `P116-ONT-007-required`** (medium, needs a route): no schema action makes a field required over existing
+     records. It needs a new `IStorageSchema` member (`setRequired`), so it moves the BRG-003 ratchet. Read
+     `SCHEMA_COVERAGE` first.
+   - **ONT-002 §6.7's two "not built" items**: `all` (a tree step) in a chain, and checking that a step's `where`
+     names a field the landing record has.
+   - **Ask before** giving the MCP a migrate tool (the surface budget).
 
 ## Owned elsewhere
 
-- `rel002b-fail-closed` red: bug `P116-S13-REL002B` (P82/TPL-001's template). `ac2-page-editor-drag-drive` hangs:
-  bug `P116-S13-AC2STALL` (P77/SBR-007's drive).
-- `noodl-mcp` `tsc --noEmit` red in the cg001/cg002/cg003/ig007/iw007/p108s8 specs (not P116's).
+- `rel002b-fail-closed` red: bug `P116-S13-REL002B` (P82/TPL-001). `ac2-page-editor-drag-drive` hangs: bug
+  `P116-S13-AC2STALL` (P77/SBR-007).
+- **ONT-011 and the uncommitted edits to this folder's README §7, the README's prefix line and ONT-008 §5** were
+  written at 13:14 on 2026-10-10 by a session that is not s14 and not P109's `opennoodl-ee` (asked). s14 committed
+  around them and never over them. They are uncommitted in the working tree, with an item in this file's list
+  below.
 - `a()` in `world/project.ts` and `article` in `world/mutants.ts` say "an user". The untracked `.d.ts` emits in
   `packages/nodegx-backend-contract/src/` are not P116's.
 
@@ -83,5 +73,4 @@ live schema without its admin token. The brief is read only through `validate_wo
 
 ## Memory
 
-`ontology-is-the-spec.md` (an s13 paragraph); `a-for-of-over-a-map-runs-zero-times-in-viewer-react.md` (the backend
-contract, and a spread breaks the PR gate). Size-check the index (17,510 UTF-16 units; it is AT the budget).
+`ontology-is-the-spec.md` (an s14 paragraph). Size-check the index (17,510 UTF-16 units; it is AT the budget).

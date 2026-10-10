@@ -361,3 +361,27 @@ plan and costs a hand rename one step.
   `noodl-runtime` `SchemaManager.dropColumn` **6 / 6**; `tsc --noEmit` clean on the runtime, the backend (both
   configs) and the contract. The backend's `tsconfig.tests.json` is clean now (ISL-010's four lines are gone).
 - Not driven: the admin page's rename (`schema.tsx:389`) shows a refusal through its existing `.catch(fail)` toast.
+
+### 6.13 s14, 2026-10-10 — the junctions blocker, and a load race under it (Opus 5.5)
+
+The s13 handoff did not list bug **`P116-ONT-007-junctions`** (a blocker, open since s8). The ledger did. Re-measured
+before anything, as a new conformance case, `schema/delete-table-takes-only-its-own-relations`: red at HEAD on both
+engines, exactly as filed (PostgreSQL took `My_<name>`'s links, SQLite `My<name>`'s).
+
+- **Fixed** (`f1b60a4d9`): `ownedJunctions()` in `schemaCommon.ts`, shared. The junctions a collection's Relation
+  fields name are its own. Another's declaration is never its. An undeclared junction (made by `addRelation` alone,
+  which SQLite does) is its own only when no longer-named existing collection ends it too. The case also checks that
+  nothing of the deleted collection comes back when one of the same name is made again. `deleteTable` leaves the
+  uncovered list (**20 of 68**).
+- **Found under it, bug `P116-S14-pgloadrace`** (high, fixed in the same commit): PostgreSQL's `load()` reads the
+  catalog in several statements, and a table another backend drops between them failed the start. The schema
+  manager drops on its queue, so `brg-005-conformance-postgres` hit it as soon as the new case ended a run with a
+  drop still queued. A catch around the junction read was not enough: the next attempt failed one statement
+  earlier, on `could not open relation with OID` (an index definition). So `load()` reads again from an empty
+  model, up to five times, on those two errors only. `tests/p116-pg-load-race` holds the drop uncommitted under a
+  starting backend: red (the OID error), then green.
+- Measured (13:35–13:42 CEST, over `e105bb3d1` + these edits, load 5–10 from peers): `nodegx-backend` 21 specs
+  (BRG-003 ×4, BRG-005 ×3, BMG-003, every `ont-00*`, `service-http`, `admin-dashboard`, the race) **350 / 350,
+  exit 0**; `noodl-runtime` `test/adapters` **328 / 328**; runtime `tsc` clean. BRG-005's conformance file took
+  82 s against 19 s earlier the same hour, with ONT-005's doubling beside it: the box, not the retry (the race
+  spec's own retry costs 1.6 s).
