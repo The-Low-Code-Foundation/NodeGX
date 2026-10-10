@@ -142,7 +142,8 @@ export const PopComponentStack = defineNode({
       // :211-250 `_updatePorts` — one `result-` per Results name, one `backAction-` signal per Back Actions name
       inputs: (params) => {
         const ports: Record<string, InputDecl> = {};
-        if (params.results) for (const p of String(params.results).split(',')) ports['result-' + p] = resultPort();
+        // :227-228 — each Results port is labelled with its name (NSP-020 s80, oracle (a): the label was missing)
+        if (params.results) for (const p of String(params.results).split(',')) ports['result-' + p] = { ...resultPort(), displayName: p };
         if (params.backActions) for (const p of String(params.backActions).split(',')) ports['backAction-' + p] = backActionPort(p);
         return ports;
       },

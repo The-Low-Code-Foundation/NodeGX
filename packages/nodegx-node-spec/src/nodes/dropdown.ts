@@ -155,7 +155,25 @@ export const Dropdown = defineNode({
       ]
     },
     // options.ts :173-201
-    value: { type: 'string', default: 'Option 1', coerce: 'none', displayName: 'Value', group: 'General', description: 'Selects the option with this Value; a value matching no option deselects everything. Setting it from the graph does not fire Changed', portability: 'logic', examples: ['Option 2', 's', 'l', 'a', 'c'] },
+    value: {
+      type: 'string', default: 'Option 1', coerce: 'none', displayName: 'Value', group: 'General', description: 'Selects the option with this Value; a value matching no option deselects everything. Setting it from the graph does not fire Changed', portability: 'logic', examples: ['Option 2', 's', 'l', 'a', 'c'],
+      // NSP-020 (s80) — the catalog's `runtime-narrowed`: with an editor connected, options.ts :417-447 `updateValuePort`
+      // republishes this port to the EDITOR as an enum over this node's own Items — their Values (the Labels are the picker's
+      // words; the format's enums are values), the first one the default (:441), plus a Value that matches no option
+      // (:428-432) — and publishes nothing when Items cannot be read (:420-425: the static `string` port stays). The wire's
+      // type is `string` either way. `p` has the declared defaults filled in, so an unset Items is DEFAULT_ITEMS as the
+      // runtime reads it (:418); an unset Value reads as 'Option 1', which the runtime never sees (it reads `parameters.value` as
+      // stored), so the declared default is not offered back — a Value SET to 'Option 1' outside the list is the one
+      // case this cannot tell apart (NSP-020 §6.3, a format gap).
+      narrow: (p) => {
+        const items = editorItems(p.items);
+        if (items.length === 0) return {};
+        const enums = items.map((item) => item.Value);
+        const value = p.value;
+        if (typeof value === 'string' && value !== '' && value !== editorItems(DEFAULT_ITEMS)[0].Value && !enums.includes(value)) enums.push(value);
+        return { type: 'enum', enums, default: items[0].Value };
+      }
+    },
     // options.ts :225-230 — drawn in the span while nothing is selected (Select.tsx :181-183); nothing on the wire
     placeholder: { type: 'string', coerce: 'none', displayName: 'Placeholder', group: 'Placeholder', description: 'Text shown while nothing is selected', portability: 'logic' },
     // react-component-node.ts :2302-2321
@@ -348,8 +366,8 @@ export const Dropdown = defineNode({
   {
     // react-component-node.ts :785-830 `DATA_ATTRIBUTES_RULE` — one string input per name the Data Attributes list names, written
     // on the element as that attribute: nothing on the wire. The catalog also marks this node `runtime-narrowed` (options.ts
-    // :393-421 republishes `value` to the EDITOR as an enum over this instance's Items): the port list is complete above and the
-    // wire's type is `string` either way — the narrowing is a sentence here, not a port.
+    // :417-447 republishes `value` to the EDITOR as an enum over this instance's Items): the port list is complete above and the
+    // wire's type is `string` either way — the narrowing is `value.narrow` (NSP-020 s80), not a port.
     derived: {
       inputs: (params) => Object.fromEntries(dataAttributeNames(params.dataAttributes).map((name) => [name, dataAttributeInput(name)])),
       on: () => NOTHING
@@ -405,6 +423,15 @@ function readStoredItems(stored: string): { Label: string; Value: string }[] {
   } catch {
     return [];
   }
+  return itemRows(source);
+}
+
+/** options.ts :356-386 `readItems` — the options the EDITOR reads off Items: the stored text form, or the list itself (`value.narrow`). */
+function editorItems(items: unknown): { Label: string; Value: string }[] {
+  return typeof items === 'string' ? readStoredItems(items) : itemRows(items);
+}
+
+function itemRows(source: unknown): { Label: string; Value: string }[] {
   if (!Array.isArray(source)) return [];
   const out: { Label: string; Value: string }[] = [];
   for (const item of source) {

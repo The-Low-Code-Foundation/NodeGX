@@ -27,9 +27,9 @@ const inputPort = (i: number): ValueInputDecl => ({ type: 'string', coerce: 'non
 const mappingPort = (i: number): ValueInputDecl => ({ type: 'string', coerce: 'none', displayName: 'Mapping ' + i, group: 'Mappings' });
 
 /** nodedefinition.ts `collectPorts`: the highest index mentioned plus one spare, or `<family> 0` alone. */
-function drawn(params: Readonly<Record<string, unknown>>, family: string, port: (i: number) => ValueInputDecl): Record<string, ValueInputDecl> {
+function drawn(params: Readonly<Record<string, unknown>>, wired: readonly string[], family: string, port: (i: number) => ValueInputDecl): Record<string, ValueInputDecl> {
   const re = new RegExp('^' + family + ' \\d+$');
-  const indices = Object.keys(params)
+  const indices = [...Object.keys(params), ...wired]
     .filter((k) => re.test(k))
     .map((k) => Number(k.slice(family.length + 1)));
   const count = indices.length ? Math.max(...indices) + 2 : 1;
@@ -113,7 +113,9 @@ export const StringMapper = defineNode({
   },
   {
     derived: {
-      inputs: (params) => ({ ...drawn(params, 'input', inputPort), ...drawn(params, 'output', mappingPort) }),
+      // nodedefinition.ts `collectPorts` per family — mentioned by a param OR by a wire into the node (:624, NSP-020 s80: `context.wired`)
+      inputs: (params, context) => ({ ...drawn(params, context.wired ?? [], 'input', inputPort), ...drawn(params, context.wired ?? [], 'output', mappingPort) }),
+      needs: ['wired'],
       // :40-45, :52-57 — undefined and null are '' (v2, row C4), anything else `toString()`
       on: (s, portName, value) => {
         const text = value === undefined || value === null ? '' : String(value);

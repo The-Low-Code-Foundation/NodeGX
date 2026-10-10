@@ -314,7 +314,14 @@ export const TextInput = defineNode({
     // text-input.ts :74-91 — read by the component and by every write to the text
     type: { type: 'enum', enums: ['text', 'textArea', 'email', 'number', 'password', 'url'], default: 'text', coerce: 'none', displayName: 'Type', group: 'Text', description: 'What kind of value the field accepts, which also changes the on-screen keyboard on touch devices', portability: 'logic' },
     // text-input.ts :199-241
-    startValue: { type: '*', coerce: 'none', displayName: 'Value', group: 'Text', description: 'The value to put in the field. Applied as it arrives, unless you untick it under Run On Value Change, in which case it waits for a Set pulse', portability: 'logic' },
+    startValue: {
+      type: '*', coerce: 'none', displayName: 'Value', group: 'Text', description: 'The value to put in the field. Applied as it arrives, unless you untick it under Run On Value Change, in which case it waits for a Set pulse', portability: 'logic',
+      // NSP-020 (s80) — the catalog's `runtime-narrowed`: with an editor connected, text-input.ts :616-637 `updatePorts`
+      // republishes this port (and the Value OUTPUT, which the format cannot narrow — NSP-020 §6.3) typed by Type:
+      // `number` for a Number field, `string` for every other (textInputValue.ts :27-29 `portTypeForFieldType`). It reads
+      // `parameters.type` as stored; an unset Type is the declared default `text` here, and `string` there either way.
+      narrow: (p) => ({ type: p.type === 'number' ? 'number' : 'string' })
+    },
     // run-on-value-change.ts :126-140
     'runOnChange-startValue': { type: 'boolean', default: true, coerce: 'none', displayName: 'Value', group: 'Run On Value Change', description: 'Whether a new value on Value re-runs this node. On by default; untick to make this input passive so only the control signal runs it', portability: 'logic' },
     // text-input.ts :179-197

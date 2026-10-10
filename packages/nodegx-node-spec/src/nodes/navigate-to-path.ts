@@ -189,8 +189,9 @@ export const NavigateToPath = defineNode({
       // :270-310 `_updatePorts` — one `p-` per unique placeholder in Path, one `q-` per Query name
       inputs: (params) => {
         const ports: Record<string, ValueInputDecl> = {};
-        if (typeof params.path === 'string') for (const name of placeholders(params.path)) ports['p-' + name] = parameterPort();
-        if (typeof params.queryNames === 'string') for (const q of params.queryNames.split(',')) ports['q-' + q] = queryPort();
+        // :297-312 — each labelled with its name (NSP-020 s80, oracle (a): the labels were missing)
+        if (typeof params.path === 'string') for (const name of placeholders(params.path)) ports['p-' + name] = { ...parameterPort(), displayName: name };
+        if (typeof params.queryNames === 'string') for (const q of params.queryNames.split(',')) ports['q-' + q] = { ...queryPort(), displayName: q };
         return ports;
       },
       // :224-229 — stored raw under the name after the prefix

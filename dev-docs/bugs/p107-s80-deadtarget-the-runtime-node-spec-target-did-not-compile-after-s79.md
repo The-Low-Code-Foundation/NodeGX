@@ -7,6 +7,7 @@ area: node-spec / runtime target (`packages/noodl-runtime/test/helpers/node-spec
 found: P107 NSP-020 s80, 2026-10-11 — the first runtime conformance run after s79's format change
 evidence: `NSP_ONLY=And npx jest test/node-spec/conformance.test.ts` at HEAD 00be10df0 — "Test suite failed to run", TS2554 at node-spec-target.ts :1488
 kit: node-spec
+commit: f5fcd704a
 regression: packages/noodl-runtime/test/node-spec/conformance.test.ts
 ---
 
@@ -23,6 +24,9 @@ and the graph scenarios' claims (`scripts/node-spec/spec-ledger.js` header), nev
 **Why no gate saw it:** s79's runtime gate was `nsp-020-ports-parity.test.ts`, which imports the spec package and two
 runtime modules but not the target. s79's handoff listed the runtime conformance batch under "Not run". "Tests: 0" with
 a failed suite is easy to miss in a long log; the jest output says "Test suite failed to run" and nothing else red.
+
+**Found twice:** the L4 lane agent measured the same line in its worktree and filed it as P107-S80-TARGETCTX; that file
+was folded into this one at the merge.
 
 **Fix (s80):** the call passes the instance's port context (`portContexts.get(s.h.id) ?? {}`), the same context the
 target now hands every other derived call (L1's plumbing). The whole runtime batch was re-run after it (NSP-020 §6.3).

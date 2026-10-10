@@ -304,3 +304,64 @@ that moves: its traces byte-identical (`spec-golden:check`), conformance at 200 
 oracle (a)'s row for it (L4's table marks these `owedBy: 'L1'`) turning green. Show Popup's announcement reads the
 target component's Close Popups (`showpopup.ts` :341-416), which `ComponentInterface` cannot carry — a further
 `PortContext` field, to be measured with it.
+
+### 6.4 s80 (2026-10-11, Opus, a lane agent in a worktree) — L4: the module table (oracle (a) over every hook)
+
+**Built.** `noodl-runtime/test/node-spec/nsp-020-oracle-a.ts` (the drive's machinery, out of the test) and
+`nsp-020-module-table.ts` (the table); `nsp-020-ports-parity.test.ts` runs both. The comparison now lays the LAST
+announcement over `drawnPorts` the way the editor lays it over the registration: an announced port under a DECLARED name
+replaces that port (`runtime-narrowed` — compared with the declared port after `when` and `narrow`, enum VALUES included);
+a declared port the spec narrows for these params must be announced; `plug: 'input/output'` (the Object family's
+`prop-<p>`) is both; an output named by the spec's `outcomes` is the registration's outcome port (type only — `drawnPorts`
+draws none, below); a `dataAttributes` port is the editor's `namedports/derived` rule, not a hook's, and is skipped.
+Every row runs at the catalog defaults (`{}`), at the catalog's `parameterEncoding` probe (each pattern's `example` read
+back into the parameter its variable names), and at its own cases (the p82, fb-026, nda-012 and http-outcome fixtures'
+parameter sets among them). A disagreement measured and not fixable here is PINNED by its exact line to a bug row or a
+format gap; a pin no case produces any more is red.
+
+**The census** walks `noodl-runtime/src/nodes`, `noodl-viewer-react/src/nodes` and `nodes-deprecated`, requires every
+file whose text names a hook, a CRUD mixin, `numberedInputs` or `sendDynamicPorts`, and lists every exported
+registration with a `setup` or `numberedInputs`: **70 hooks** in 69 modules, plus 9 libraries (files that build ports for
+others). Every one is in the table (40), excluded with a reason (30), or a named library; a dropped row is red, named
+(planted). **Graded and passing: 21** — And, Or, String Mapper, Color Blend; String Format, Expression, Set Variable,
+Object, New Object, Set Object Properties, Array Filter, HTTP, Close Popup, Pop Component Stack, Navigate To Path, Page
+Inputs, Component Stack, Sign File URL, Upload File; Dropdown and Text Input (`runtime-narrowed`) — 106 cases. **Owed by
+L1: 15** (the Record family ×9 incl. Subscribe To Changes, User / Set User Properties / Sign Up, Push Component To Stack,
+Show Popup, For Each — what each hook reads is in its row's `reads`, and its disagreements are printed per case). **Owed
+by L3: 4** (States, Function, Script, Logic Builder: the padding, plus field disagreements printed — `intype-`/`outtype-`
+typed `enum`, `in-<x>` typed `string`, labels and groups — for whoever lands after L3). **Excluded: 30** (10 no spec —
+NSP-022's, incl. Event Receiver and the old Cloud Function, both on L1's list; 13 deprecated; 7 setups that announce
+nothing — Map Collection, CloudFunction2 and For Each Actions "handled in editor adapter", the four user-mail nodes).
+
+**Spec changes (the runtime wins; each cites its lines):** **Or, String Mapper, Color Blend** count the wires into the
+node (`collectPorts` :624 — s79's And finding, on the other three numbered nodes), `needs: ['wired']`; **Expression**'s
+ports in group Parameters, their checkboxes labelled and grouped (expression.ts :827-847, run-on-value-change.ts :160-178);
+**Close Popup / Pop Component Stack** `result-<n>` labelled (closepopup.ts :374-375, navigate-back.ts :227-228);
+**Navigate To Path** `p-`/`q-` labelled (:297-312); **Array Filter** the value port typed by the filter's Type, and Limit /
+Skip drawn with 10 / 0 (filtercollectionnode.ts :616-633, :704-713); **Dropdown** `value.narrow` (options.ts :417-447 —
+enum over Items' values, default the first, a stray Value offered back, nothing when Items cannot be read); **Text Input**
+`startValue.narrow` (text-input.ts :616-637, textInputValue.ts :27-29). No trace moved (`spec-golden:check` 0); planted
+mutants red for each mechanism (numbered with a wire, a dropped derived port, a lost group, wrong enums, no narrow, a
+narrow never announced, a narrow ignoring Type, a stale pin, a dropped table row).
+
+**Rows filed:** P107-S80-HTTPANNOUNCE (the announcement drops URL's default `''` and moves Error into Events — the
+registration says otherwise); P107-S80-BACKENDPICKER (two or more backends announce a `backendId` picker from
+`backendServices`, which no `PortContext` field carries — "a new field is a row"; it touches the Record family, so L1
+should see it before settling `needs`). And one found on the way, not the table's (filed as P107-S80-TARGETCTX, folded at the merge into P107-S80-DEADTARGET, which the primary had already fixed in `f5fcd704a`) — since s79 the runtime
+target's `derivedSignalOutput` calls `outputs(params)` with one argument, so every suite importing `node-spec-target.ts`
+(conformance, runtime-target, the contracts) fails to compile with `Tests: 0`; measured with type diagnostics off, the
+nodes L4 changed conform at 200 except one Close Popup mutant survivor that the HEAD spec has too (closed by a hand scenario in `f5fcd704a`).
+
+**Format gaps found (pinned, not fixed — the format is NSP-020's call, not a lane's):** (1) `drawnPorts` draws no outcome
+port (`done`/`completed`/`unchanged`/`failure`) — AC3's per-instance ports would miss them; (2) no `narrow` on an
+OUTPUT — Text Input's runtime narrows `onTextChanged` too; (3) `narrow` reads params with the declared defaults filled
+in, so it cannot tell a Dropdown Value SET to `'Option 1'` from one never set (the runtime reads it as stored); (4) an
+editor-only default on a derived port (Component Stack's `startPage` and `pagePath-<id>`) has nowhere to go — a spec
+`default` is the value at mount; (5) the `dataAttributes` ports are an editor rule no oracle grades yet (oracle (b) reads
+`declaredPortGroups` conditions, this one the hooks). HTTP's Conditional and Output Fields stay as http.ts :47-50 names
+them, pinned.
+
+**Where the handoff was wrong:** "~43 / ~50 `setup` callers" — 70 hooks on disk, 40 with a spec; two of L1's named
+nodes (Event Receiver, Cloud Function) have no spec under the runtime's type name (the spec is CloudFunction2's, whose
+setup is empty). HTTP and Component Stack subscribe to `nodeAdded` only inside `editorImportComplete` — the drive's
+`getNodesWithType` sweep is what reaches them.
