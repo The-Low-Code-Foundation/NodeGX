@@ -107,8 +107,10 @@ async function visit(label: string, baseUrl: string | undefined, settled: (shown
   fs.mkdirSync(path.join(dataDir, 'workflows'), { recursive: true });
 
   const bundle = bundleAuthoredComponents(projectDir, ['__cloud__/askOlive']);
-  const model = bundle.components[0].nodes.find((n) => n.type === 'noodl.cloud.modelrequest')!;
-  model.parameters = { ...(model.parameters as Record<string, unknown>), model: MODEL };
+  // A bundle's nodes are untyped (`WorkflowBundle`); this is the one shape the spec reads and writes.
+  type BundleNode = { type: string; parameters: Record<string, unknown> };
+  const model = (bundle.components[0].nodes as BundleNode[]).find((n) => n.type === 'noodl.cloud.modelrequest')!;
+  model.parameters = { ...model.parameters, model: MODEL };
   if (baseUrl) model.parameters.baseUrl = baseUrl;
   fs.writeFileSync(path.join(dataDir, 'workflows', 'owl.workflow.json'), JSON.stringify(bundle));
 

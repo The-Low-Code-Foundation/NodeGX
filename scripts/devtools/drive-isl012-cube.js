@@ -12,7 +12,12 @@
  * OrbitControls exist, frames drawn); the cube's pixels, read off a CDP screenshot of the 320 px host (sharp), before and
  * after a drag across it: how many are not the white clear colour, and how many changed. Chrome runs software WebGL.
  *
- * Usage: drive-isl012-cube.js <deploy-dir> [--json out.json] [--png prefix]
+ * s38, AC3's server-render leg: pass a served origin (`http://…`, the SSR folder's `npm start`) in place of the folder.
+ * The reading `ssr` says whether the root came stamped `data-ssr="1"` and whether the cube's host the server sent is
+ * the one the canvas ended up in — marked only while the HTML parses, so a client render that threw the server's DOM
+ * away and built its own reads `adopted: false`, as does a page with no server markup.
+ *
+ * Usage: drive-isl012-cube.js <deploy-dir | http-origin> [--json out.json] [--png prefix]
  * Exits 0 after printing; 1 when the drive could not run; 2 on a usage error.
  */
 const fs = require('fs');
@@ -35,7 +40,9 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 // Software WebGL, as IG-007's 3D mode: the reading is about the page, not this Mac's GPU.
 const CHROME = { gpu: true, chromeArgs: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] };
 
-withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
+const SITE = /^https?:\/\//.test(DIR) ? { origin: DIR } : { dir: DIR };
+
+withDeployedSite({ ...SITE, ...CHROME }, async (page) => {
   const { client } = page;
   const messages = [];
   client.on((msg) => {
@@ -47,6 +54,18 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     }
   });
   await page.setViewport({ width: 800, height: 700 });
+  // Runs before any page script: tag the root and the cube host the moment the parser makes them.
+  await client.send('Page.addScriptToEvaluateOnNewDocument', {
+    // Only while the parser runs: a cube a client render makes later must not read as the server's.
+    source: `var o = new MutationObserver(function () {
+      var root = document.getElementById('root');
+      var c = document.querySelector('[data-testid="cube"]');
+      if (root && !window.__ssrSeen) window.__ssrSeen = { stamped: root.getAttribute('data-ssr'), parsedCube: false };
+      if (c && window.__ssrSeen) { c.__fromServer = true; window.__ssrSeen.parsedCube = true; o.disconnect(); }
+    });
+    o.observe(document, { childList: true, subtree: true });
+    document.addEventListener('DOMContentLoaded', function () { o.disconnect(); });`
+  });
   await client.send('Page.reload', {});
   await wait(4000);
 
@@ -55,6 +74,9 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
   );
   const cube = await page.evaluate('window.__cube || null');
   const marker = await page.evaluate(`document.body.innerText.includes('isl012 page drew')`);
+  const ssr = await page.evaluate(
+    `(() => { const all = document.querySelectorAll('[data-testid="cube"]'); return Object.assign({}, window.__ssrSeen || null, { cubes: all.length, adopted: !!(all[0] && all[0].__fromServer && all[0].querySelector('canvas')) }); })()`
+  );
 
   const shot = async () => {
     if (!box) return null;
@@ -98,6 +120,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
 
   const report = {
     marker,
+    ssr,
     box,
     cube,
     inkedBefore: before ? inked(before) : null,
