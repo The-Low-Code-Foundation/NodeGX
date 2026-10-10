@@ -1,0 +1,22 @@
+<!doctype html><meta charset="utf-8"><title>pending</title>
+<!-- What the runtime says a node type is: /library.html?types=Number,Switch → window.picked (ports per type). -->
+<div id="app" style="position:relative;width:300px;height:300px"></div>
+<script src="/preview.js"></script>
+<script>
+(async () => {
+  const empty = { 'nodegx.project.json': JSON.stringify({ name: 'empty', version: '4', settings: {}, structure: { componentsDir: 'components' }, rootNodeId: 'r' }),
+    'components/_registry.json': JSON.stringify({ version: 1, components: { App: { path: 'App', type: 'visual' } } }),
+    'components/App/component.json': JSON.stringify({ id: 'a', name: 'App', path: '/App', type: 'visual' }),
+    'components/App/nodes.json': JSON.stringify({ componentId: 'a', version: 1, nodes: [{ id: 'r', type: 'Group', parameters: {} }], visualRoots: ['r'] }),
+    'components/App/connections.json': JSON.stringify({ componentId: 'a', version: 1, connections: [] }) };
+  try {
+    const p = await NodegxPreview.mountPreview(document.getElementById('app'), { runtimeBase: '/runtime/' });
+    const s = await p.update(empty);
+    const lib = p.nodeLibrary;
+    window.lib = lib;
+    const want = new URLSearchParams(location.search).get('types')?.split(',') ?? [];
+    window.picked = Object.fromEntries(want.map((t) => [t, (lib.nodetypes || []).find((n) => n.name === t || n.displayNodeName === t || n.displayName === t)]).map(([t, n]) => [t, n ? { name: n.name, display: n.displayNodeName || n.displayName, ports: (n.ports || []).map((x) => (x.plug === 'input' ? 'in ' : 'out ') + x.name + ':' + (typeof x.type === 'object' ? x.type.name : x.type)) } : null]));
+    document.title = s.status;
+  } catch (e) { document.title = 'FAIL ' + e; }
+})();
+</script>

@@ -28,6 +28,7 @@
 import { injectIntoTemplate } from '@nodegx/module-inject';
 
 import { pageFromFiles, type DeployTemplate, type InPagePage } from './exportInPage';
+import { armed, TRACE_OWNER } from './armTrace';
 import { kitTags } from './kits';
 
 export { exportInPage, importInputFromFiles, pageFromFiles } from './exportInPage';
@@ -87,11 +88,16 @@ export interface Preview {
    * reads it; a home-made editor's node picker can too.
    */
   readonly nodeLibrary: unknown;
+  /**
+   * The elements a visual node draws in the app on screen, by its id in the project's files (the trace's
+   * `fromNode` / `toNode`). More than one when the node is inside a component placed several times or a
+   * repeated row; none for a node that draws nothing (logic) or is not mounted. What lets a home-made editor
+   * point from a card to the part of the screen it makes.
+   */
+  elementsOf(nodeId: string): HTMLElement[];
   dispose(): void;
 }
 
-/** The trace owner name (HUD-004): this preview's recording is its own, and stops with its frame. */
-const TRACE_OWNER = 'noodl-preview-in-page';
 
 /**
  * The smallest project the runtime will render: one Group. It is rendered hidden, with the project's kits, on
@@ -256,7 +262,7 @@ export async function mountPreview(container: HTMLElement, options: PreviewOptio
     if (page.status !== 'ok') return page;
 
     const t1 = performance.now();
-    const next = makeFrame(container, page.html, true);
+    const next = makeFrame(container, armed(page.html), true);
     let runtime: TSFixme;
     try {
       runtime = await waitFor(() => runtimeOf(next), frameTimeoutMs, 'the app to start');
@@ -300,6 +306,13 @@ export async function mountPreview(container: HTMLElement, options: PreviewOptio
     },
     get nodeLibrary() {
       return nodeLibrary;
+    },
+    elementsOf(nodeId) {
+      const root = current ? runtimeOf(current)?.context?.rootComponent : undefined;
+      if (!root) return [];
+      return (root.nodeScope.getNodesWithIdRecursive(nodeId) as TSFixme[])
+        .map((node) => (typeof node.getDOMElement === 'function' ? node.getDOMElement() : null))
+        .filter((el): el is HTMLElement => !!el);
     },
     dispose() {
       if (pump) clearInterval(pump);

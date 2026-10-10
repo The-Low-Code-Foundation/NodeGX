@@ -1,0 +1,17 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/project-v2.json",
+  "name": "Orbit",
+  "version": "4",
+  "nodegxVersion": "1.1.0",
+  "settings": {
+    "htmlTitle": "Orbit",
+    "navigationPathType": "path",
+    "bodyScroll": false
+  },
+  "structure": {
+    "componentsDir": "components",
+    "assetsDir": "assets"
+  },
+  "modified": "2026-10-10T00:00:00.000Z",
+  "rootNodeId": "screen"
+}

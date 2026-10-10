@@ -1,0 +1,229 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0b7e1f2a-0000-4000-8000-0000000000a1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "focusLen",
+      "fromProperty": "savedValue",
+      "toId": "phase",
+      "toProperty": "value-Focus-length"
+    },
+    {
+      "fromId": "breakLen",
+      "fromProperty": "savedValue",
+      "toId": "phase",
+      "toProperty": "value-Break-length"
+    },
+    {
+      "fromId": "running",
+      "fromProperty": "switchedToOn",
+      "toId": "ticker",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "running",
+      "fromProperty": "switchedToOff",
+      "toId": "ticker",
+      "toProperty": "stop"
+    },
+    {
+      "fromId": "running",
+      "fromProperty": "state",
+      "toId": "btnLabel",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "ticker",
+      "fromProperty": "tick",
+      "toId": "elapsed",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "phase",
+      "fromProperty": "length",
+      "toId": "remaining",
+      "toProperty": "maxInputValue"
+    },
+    {
+      "fromId": "phase",
+      "fromProperty": "length",
+      "toId": "remaining",
+      "toProperty": "minOutputValue"
+    },
+    {
+      "fromId": "phase",
+      "fromProperty": "length",
+      "toId": "progress",
+      "toProperty": "maxInputValue"
+    },
+    {
+      "fromId": "elapsed",
+      "fromProperty": "currentCount",
+      "toId": "remaining",
+      "toProperty": "inputValue"
+    },
+    {
+      "fromId": "elapsed",
+      "fromProperty": "currentCount",
+      "toId": "progress",
+      "toProperty": "inputValue"
+    },
+    {
+      "fromId": "remaining",
+      "fromProperty": "remappedValue",
+      "toId": "zero",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "zero",
+      "fromProperty": "result",
+      "toId": "finished",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "ticker",
+      "fromProperty": "tick",
+      "toId": "finished",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "finished",
+      "fromProperty": "ontrue",
+      "toId": "elapsed",
+      "toProperty": "reset"
+    },
+    {
+      "fromId": "finished",
+      "fromProperty": "ontrue",
+      "toId": "phase",
+      "toProperty": "toggle"
+    },
+    {
+      "fromId": "phase",
+      "fromProperty": "reached-Break",
+      "toId": "rounds",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "remaining",
+      "fromProperty": "remappedValue",
+      "toId": "toMs",
+      "toProperty": "inputValue"
+    },
+    {
+      "fromId": "toMs",
+      "fromProperty": "remappedValue",
+      "toId": "clockface",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "progress",
+      "fromProperty": "remappedValue",
+      "toId": "skyIdx",
+      "toProperty": "inputValue"
+    },
+    {
+      "fromId": "skyIdx",
+      "fromProperty": "remappedValue",
+      "toId": "sky",
+      "toProperty": "blendValue"
+    },
+    {
+      "fromId": "progress",
+      "fromProperty": "remappedValue",
+      "toId": "smooth",
+      "toProperty": "targetValue"
+    },
+    {
+      "fromId": "phase",
+      "fromProperty": "currentState",
+      "toId": "hud",
+      "toProperty": "phase"
+    },
+    {
+      "fromId": "clockface",
+      "fromProperty": "currentValue",
+      "toId": "hud",
+      "toProperty": "time"
+    },
+    {
+      "fromId": "rounds",
+      "fromProperty": "currentCount",
+      "toId": "hud",
+      "toProperty": "round"
+    },
+    {
+      "fromId": "sky",
+      "fromProperty": "result",
+      "toId": "screen",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "phase",
+      "fromProperty": "currentState",
+      "toId": "phaseTxt",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "phase",
+      "fromProperty": "glow",
+      "toId": "phaseTxt",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "clockface",
+      "fromProperty": "currentValue",
+      "toId": "timeTxt",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "smooth",
+      "fromProperty": "currentValue",
+      "toId": "barPct",
+      "toProperty": "inputValue"
+    },
+    {
+      "fromId": "barPct",
+      "fromProperty": "remappedValue",
+      "toId": "bar",
+      "toProperty": "width"
+    },
+    {
+      "fromId": "phase",
+      "fromProperty": "glow",
+      "toId": "bar",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "hud",
+      "fromProperty": "formatted",
+      "toId": "footTxt",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "btnLabel",
+      "fromProperty": "currentValue",
+      "toId": "pauseBtn",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "pauseBtn",
+      "fromProperty": "onClick",
+      "toId": "running",
+      "toProperty": "flip"
+    },
+    {
+      "fromId": "skipBtn",
+      "fromProperty": "onClick",
+      "toId": "elapsed",
+      "toProperty": "reset"
+    },
+    {
+      "fromId": "skipBtn",
+      "fromProperty": "onClick",
+      "toId": "phase",
+      "toProperty": "toggle"
+    }
+  ]
+}

@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pending</title>
+<!--
+  P112 OWN-004 slice 2 — Orbit's graph in 3D beside (or around) the REAL app.
+
+  The project is v2 files held in memory (`orbit/`, served as one map by serve.mjs). The app is
+  `@noodl/preview`'s in-page build running those files on NodeGX's own runtime; nothing here draws the
+  screen. The cards are the files' nodes, their port names from the runtime's own node library; the
+  values on them and the pulses on the wires are the running app's trace.
+
+  One switch: the app as a flat window beside the graph, or as an object inside the scene. Both are the
+  same element (a CSS3DObject sharing the WebGL camera); only its pose changes, so the app keeps running
+  through the move.
+
+    node serve.mjs   →   /orbit.html   (#window or ?pose=window starts flat; ?speed=1 for a real-time clock; ?set=node.param=value writes a parameter first)
+-->
+<style>
+  :root { --ui: system-ui, -apple-system, "Segoe UI", sans-serif; --mono: ui-monospace, "SF Mono", Menlo, monospace; --ground: #141318; --text: #eef2f6; --muted: #9aa3ad; --line: #2a2933; --accent: #a78bfa; --visual: #5ca9ff; }
+  html, body { margin: 0; height: 100%; background: var(--ground); color: var(--text); font: 14px/1.4 var(--ui); overflow: hidden; }
+  #css { position: fixed; inset: 0; cursor: grab; }
+  #css.dragging { cursor: grabbing; }
+  #gl { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  #app { width: 380px; height: 680px; border-radius: 36px; overflow: hidden; background: #0b1026; box-shadow: 0 0 0 8px #0d0e12, 0 30px 80px rgba(0,0,0,.55); }
+  header { position: fixed; top: 0; left: 0; right: 0; display: flex; gap: 16px; align-items: center; padding: 14px 18px; background: linear-gradient(var(--ground) 60%, transparent); z-index: 2; flex-wrap: wrap; }
+  header h1 { font-size: 15px; font-weight: 650; margin: 0; letter-spacing: .01em; }
+  header h1 small { font-weight: 400; color: var(--muted); margin-left: 8px; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .seg button { font: 600 13px var(--ui); color: var(--muted); background: transparent; border: 0; padding: 8px 14px; cursor: pointer; }
+  .seg button + button { border-left: 1px solid var(--line); }
+  .seg button[aria-pressed="true"] { color: var(--text); background: #2a2440; box-shadow: inset 0 0 0 1px var(--accent); }
+  .spacer { flex: 1; }
+  label.fmt { display: inline-flex; gap: 8px; align-items: center; color: var(--muted); font-size: 12px; }
+  label.fmt input { font: 12px var(--mono); color: var(--text); background: #1d1c24; border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; width: 290px; }
+  #caption { position: fixed; left: 18px; bottom: 16px; max-width: 520px; z-index: 2; background: rgba(20,19,24,.86); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+  #caption b { display: block; font-size: 14px; margin-bottom: 4px; }
+  #caption p { margin: 0; color: #c4ccd4; font-size: 13px; }
+  #caption .k { margin-top: 8px; display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+  #caption .k span::before { content: ""; display: inline-block; width: 18px; height: 3px; border-radius: 2px; background: var(--c); vertical-align: middle; margin-right: 6px; }
+  #toast { position: fixed; right: 18px; bottom: 16px; z-index: 2; font-size: 12px; color: var(--muted); }
+  @media (max-width: 720px) { label.fmt input { width: 180px; } #caption { right: 16px; } }
+</style>
+<div id="css"></div>
+<canvas id="gl"></canvas>
+<header>
+  <h1>Orbit<small>the graph, and the real app it makes</small></h1>
+  <div class="seg" role="group" aria-label="Where the app sits">
+    <button type="button" data-mode="window" aria-pressed="false">App in a window</button>
+    <button type="button" data-mode="scene" aria-pressed="true">App in the scene</button>
+  </div>
+  <div class="spacer"></div>
+  <label class="fmt">Round line <input id="fmt" type="text" spellcheck="false"></label>
+  <div class="seg" role="group" aria-label="Clock speed">
+    <button type="button" data-speed="1" aria-pressed="false">1×</button>
+    <button type="button" data-speed="60" aria-pressed="true">60×</button>
+  </div>
+</header>
+<div id="caption"><b id="capH"></b><p id="capS"></p>
+  <div class="k"><span style="--c:#5ca9ff">draws on screen</span><span style="--c:var(--wd)" id="kData">a value</span><span style="--c:var(--ws)" id="kSig">a signal</span></div>
+</div>
+<div id="toast" role="status"></div>
+<div id="app"></div>
+
+<script src="/preview.js"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.170.0/three.module.min.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { CSS3DRenderer, CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js';
+import { Line2 } from 'three/addons/lines/Line2.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
+import { look, nodeScheme, wireColors } from './look.js';
+
+const $ = (id) => document.getElementById(id);
+const say = (t) => { document.title = t; };
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+try {
+
+/* ================= the project, held in memory ================= */
+const files = NodegxPreview.memoryFiles(await (await fetch('/project/orbit.json')).json());
+const store = new NodegxPreview.V2ProjectStore(files);
+const KEY = 'App';
+function writeParam(node, param, value) {
+  const c = store.readComponent(KEY);
+  c.files.nodes.nodes.find((n) => n.id === node).parameters[param] = value;
+  store.writeComponent(KEY, c.files, { ifRevision: c.revision });
+}
+const query = new URLSearchParams(location.search);
+let speed = Number(query.get('speed') || 60);
+writeParam('ticker', 'interval', Math.round(1000 / speed));
+// ?set=node.param=value (repeatable): any parameter, written through the store before the first render (the gate shortens Focus with it)
+for (const s of query.getAll('set')) {
+  const [, node, param, raw] = s.match(/^([^.]+)\.([^=]+)=(.*)$/);
+  writeParam(node, param, isNaN(Number(raw)) ? raw : Number(raw));
+}
+
+/* ================= three: one camera for the WebGL graph and the app's DOM ================= */
+const canvas = $('gl');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setClearColor(0x000000, 0);
+const cssRenderer = new CSS3DRenderer();
+$('css').appendChild(cssRenderer.domElement);
+const scene = new THREE.Scene();
+const GROUND = new THREE.Color(look.colors.dark.ground);
+scene.fog = new THREE.Fog(GROUND, 34, 70);
+const camera = new THREE.PerspectiveCamera(38, 1, 0.5, 400);
+scene.add(camera);
+
+const PHONE = { w: 380, h: 680, y: 3.7, s: 0.01 };
+const appObj = new CSS3DObject($('app'));
+appObj.position.set(0, PHONE.y, 0);
+appObj.scale.setScalar(PHONE.s);
+scene.add(appObj);
+// The hole: transparent pixels with depth, where the app is, so a card behind the app is hidden and one in front is not.
+{
+  const r = 36, w = PHONE.w / 2, h = PHONE.h / 2, s = new THREE.Shape();
+  s.moveTo(-w + r, -h); s.lineTo(w - r, -h); s.quadraticCurveTo(w, -h, w, -h + r); s.lineTo(w, h - r); s.quadraticCurveTo(w, h, w - r, h);
+  s.lineTo(-w + r, h); s.quadraticCurveTo(-w, h, -w, h - r); s.lineTo(-w, -h + r); s.quadraticCurveTo(-w, -h, -w + r, -h);
+  const hole = new THREE.Mesh(new THREE.ShapeGeometry(s, 8), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0, blending: THREE.NoBlending, side: THREE.DoubleSide }));
+  hole.renderOrder = 10;
+  appObj.add(hole);
+}
+function resize() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false);
+  cssRenderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  for (const m of lineMats) m.resolution.set(w, h);
+}
+const lineMats = [];
+addEventListener('resize', resize);
+resize();
+cssRenderer.render(scene, camera);   // the app's element is in the CSS layer BEFORE the preview writes into it (moving an iframe reloads it)
+
+/* ================= the real app ================= */
+const preview = await NodegxPreview.mountPreview($('app'), { runtimeBase: '/runtime/' });
+const first = await preview.update(files.entries());
+if (first.status !== 'ok') throw new Error('the app did not start: ' + JSON.stringify(first).slice(0, 300));
+
+/* ================= the graph, from the files ================= */
+const comp = store.readComponent(KEY).files;
+const nodes = comp.nodes.nodes;
+const conns = comp.connections.connections;
+const byId = Object.fromEntries(nodes.map((n) => [n.id, n]));
+const library = preview.nodeLibrary;
+const typeDef = (type) => (library.nodetypes || []).find((t) => t.name === type);
+const typeName = (type) => typeDef(type)?.displayNodeName || typeDef(type)?.displayName || type;
+const portLabel = (type, port) => {
+  const p = (typeDef(type)?.ports || []).find((x) => x.name === port);
+  if (p?.displayName) return p.displayName;
+  // dynamic ports the library cannot list: States' per-state values, String Format's {placeholders}
+  const m = port.match(/^value-(.+)-(.+)$/) || port.match(/^reached-(.+)$/);
+  if (m) return m.length === 3 ? `${m[2]} in ${m[1]}` : `Reached ${m[1]}`;
+  return port;
+};
+const visual = new Set();
+{
+  const walk = (id) => { if (!byId[id] || visual.has(id)) return; visual.add(id); for (const c of byId[id].children || []) walk(c); };
+  for (const r of comp.nodes.visualRoots || []) walk(r);
+}
+const rows = {};
+for (const n of nodes) {
+  const ins = [...new Set(conns.filter((c) => c.toId === n.id).map((c) => c.toProperty))];
+  const outs = [...new Set(conns.filter((c) => c.fromId === n.id).map((c) => c.fromProperty))];
+  rows[n.id] = [...ins.map((p) => ({ dir: 'in', name: p })), ...outs.map((p) => ({ dir: 'out', name: p }))];
+}
+const isSignalOut = (id, port) => {
+  const p = (typeDef(byId[id].type)?.ports || []).find((x) => x.name === port && x.plug === 'output');
+  return p ? (typeof p.type === 'object' ? p.type.name : p.type) === 'signal' : /^reached-/.test(port);
+};
+for (const id in rows) for (const r of rows[id]) r.signal = r.dir === 'out' ? isSignalOut(id, r.name) : conns.some((c) => c.toId === id && c.toProperty === r.name && isSignalOut(c.fromId, c.fromProperty));
+
+/* ================= the look (@nodegx/canvas-look, generated from the editor's theme) ================= */
+const SCHEME = { logic: nodeScheme('default'), visual: { ...nodeScheme('visual'), outline: nodeScheme('visual').outlineHighlighted } };
+const WIRE = { data: wireColors('number').normal, signal: wireColors('signal').normal };
+document.documentElement.style.setProperty('--wd', WIRE.data);
+document.documentElement.style.setProperty('--ws', WIRE.signal);
+const RING = (k) => 6.6 + (k - 1) * 1.9;
+const PX = 0.01, CW = 150, HEAD = 44, ROW = 20, FOOT = 10, SCALE = 3;
+const cardH = (id) => HEAD + rows[id].length * ROW + FOOT;
+
+/* ================= live values: the app's own trace ================= */
+const last = {};   // `${id}.${dir}.${port}` → value preview
+const heat = {};   // id → 0..1, cools each frame
+const flash = {};  // `${id}.${dir}.${port}` → 0..1 for signals
+const wireKey = (c) => `${c.fromId}.${c.fromProperty}>${c.toId}.${c.toProperty}`;
+const wireIndex = new Map(conns.map((c, i) => [wireKey(c), i]));
+const pulses = [];
+const wireHeat = {};
+let eventCount = 0;
+preview.onTrace(({ events }) => {
+  for (const e of events) {
+    eventCount++;
+    const shown = e.kind === 'signal' ? '' : e.value;
+    last[`${e.fromNode}.out.${e.fromPort}`] = shown;
+    last[`${e.toNode}.in.${e.toPort}`] = shown;
+    heat[e.fromNode] = 1; heat[e.toNode] = 1;
+    if (e.kind === 'signal') { flash[`${e.fromNode}.out.${e.fromPort}`] = 1; flash[`${e.toNode}.in.${e.toPort}`] = 1; }
+    const i = wireIndex.get(`${e.fromNode}.${e.fromPort}>${e.toNode}.${e.toPort}`);
+    if (i !== undefined) wireHeat[i] = 1;
+    if (i !== undefined && pulses.length < 400) pulses.push({ i, t0: performance.now() + Math.random() * 60, sig: e.kind === 'signal' });
+  }
+});
+const fmt = (v) => {
+  if (v === undefined || v === '') return '';
+  let s = String(v);
+  if (/^".*"$/.test(s)) s = s.slice(1, -1);
+  else if (/^-?\d+\.\d{4,}$/.test(s)) s = Number(s).toFixed(3);
+  return s.length > 17 ? s.slice(0, 16) + '…' : s;
+};
+
+/* ================= cards ================= */
+const rr = (x, X, Y, W, H, r) => { x.beginPath(); x.roundRect(X, Y, W, H, r); };
+let hoverId = null;
+function drawCard(id) {
+  const cd = cards[id], ctx = cd.ctx, n = byId[id], vis = visual.has(id), S = vis ? SCHEME.visual : SCHEME.logic;
+  const H = cardH(id), h = cd.heat, hi = hoverId === id;
+  ctx.setTransform(SCALE, 0, 0, SCALE, 0, 0);
+  ctx.clearRect(0, 0, CW, H);
+  rr(ctx, 0.5, 0.5, CW - 1, H - 1, 9); ctx.fillStyle = S.base; ctx.fill();
+  ctx.save(); rr(ctx, 0.5, 0.5, CW - 1, H - 1, 9); ctx.clip(); ctx.fillStyle = S.header; ctx.fillRect(0, 0, CW, HEAD); ctx.restore();
+  rr(ctx, 7, 11, 22, 22, 6); ctx.fillStyle = 'rgba(255,255,255,0.07)'; ctx.fill();
+  ctx.strokeStyle = 'rgba(238,242,246,0.8)'; ctx.lineWidth = 1.4;
+  if (vis) { rr(ctx, 12.5, 16.5, 11, 11, 2); ctx.stroke(); rr(ctx, 15.5, 19.5, 5, 5, 1); ctx.stroke(); }
+  else { ctx.beginPath(); ctx.arc(18, 22, 4.5, 0, Math.PI * 2); ctx.stroke(); }
+  ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = S.text; ctx.font = `600 12.5px ${getComputedStyle(document.body).fontFamily}`; ctx.fillText(n.label || typeName(n.type), 37, 20, CW - 46);
+  ctx.fillStyle = vis ? '#8fc2ff' : '#9aa3ad'; ctx.font = '10.5px system-ui, sans-serif';
+  ctx.fillText(typeName(n.type), 37, 34, CW - 46);
+  ctx.font = '10.5px ui-monospace, Menlo, monospace';
+  rows[id].forEach((r, i) => {
+    const y = HEAD + i * ROW + 14, k = `${id}.${r.dir}.${r.name}`, label = portLabel(n.type, r.name);
+    const f = flash[k] || 0;
+    if (f > 0.02) { ctx.fillStyle = `rgba(53,195,232,${0.28 * f})`; ctx.fillRect(1, HEAD + i * ROW + 1, CW - 2, ROW - 2); }
+    const val = r.signal ? '' : fmt(last[k]);
+    if (r.dir === 'in' || val) {
+      ctx.textAlign = 'left'; ctx.fillStyle = '#c4ccd4'; ctx.fillText(label, 10, y, val ? CW - 88 : CW - 20);
+      if (val) {
+        ctx.textAlign = 'right';
+        if (/^#[0-9a-f]{6}$/i.test(val)) { ctx.fillStyle = val; rr(ctx, CW - 22, y - 9, 12, 12, 3); ctx.fill(); ctx.fillStyle = vis ? '#a9d0ff' : WIRE.data; ctx.fillText(val, CW - 26, y, 60); }
+        else { ctx.fillStyle = vis ? '#a9d0ff' : WIRE.data; ctx.fillText(val, CW - 10, y, 72); }
+      }
+    } else { ctx.textAlign = 'right'; ctx.fillStyle = '#c4ccd4'; ctx.fillText(label, CW - 10, y, CW - 20); }
+  });
+  rr(ctx, 0.5, 0.5, CW - 1, H - 1, 9);
+  ctx.setLineDash(vis && !hi ? [4, 3] : []);
+  ctx.lineWidth = hi ? 2 : 1;
+  ctx.strokeStyle = hi ? (vis ? '#5ca9ff' : '#a78bfa') : h > 0.15 ? (vis ? '#9fcbff' : `rgba(170,182,196,${0.35 + h * 0.65})`) : S.outline;
+  ctx.stroke(); ctx.setLineDash([]);
+  cd.tex.needsUpdate = true;
+}
+const cards = {};
+for (const n of nodes) {
+  const c = document.createElement('canvas'); c.width = CW * SCALE; c.height = cardH(n.id) * SCALE;
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(CW * PX, cardH(n.id) * PX), new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide }));
+  mesh.userData.id = n.id;
+  scene.add(mesh);
+  cards[n.id] = { mesh, tex, ctx: c.getContext('2d'), heat: 0, home: new THREE.Vector3() };
+}
+
+/* ================= layout: visual nodes beside the app, the rest in rings by how many wires from the screen ================= */
+{
+  // the screen's tree in order, top half of it on the left, the rest on the right (as the editor's structure lane reads, split in two)
+  const vis = [...visual];
+  const half = vis.reduce((t, id) => t + cardH(id), 0) / 2;
+  const side = {};
+  vis.reduce((t, id) => { side[id] = t < half ? -1 : 1; return t + cardH(id); }, 0);
+  for (const s of [-1, 1]) {
+    const col = vis.filter((id) => side[id] === s);
+    const total = col.reduce((t, id) => t + cardH(id), 0) * PX + 0.22 * (col.length - 1);
+    let y = PHONE.y + total / 2;
+    for (const id of col) {
+      const h = cardH(id) * PX;
+      cards[id].home.set(s * (PHONE.w * PHONE.s / 2 + 0.55 + CW * PX / 2), y - h / 2, 0.15);
+      cards[id].side = s;
+      y -= h + 0.22;
+    }
+  }
+  const hops = Object.fromEntries(vis.map((v) => [v, 0]));
+  let frontier = vis, d = 0;
+  while (frontier.length) {
+    d++;
+    const next = [];
+    for (const c of conns) for (const [a, b] of [[c.fromId, c.toId], [c.toId, c.fromId]]) if (frontier.includes(b) && !(a in hops)) { hops[a] = d; next.push(a); }
+    frontier = next;
+  }
+  const maxHop = Math.max(1, ...Object.values(hops));
+  for (let k = 1; k <= maxHop; k++) {
+    const ring = nodes.filter((n) => hops[n.id] === k).map((n) => n.id);
+    const R = RING(k);
+    ring.forEach((id, j) => {
+      const a = -Math.PI / 2 + k * 0.7 + ((j + 0.5) / ring.length) * Math.PI * 2;
+      cards[id].home.set(Math.cos(a) * R, 0.75 + (cardH(id) * PX) / 2, Math.sin(a) * R);
+    });
+  }
+  for (const n of nodes) if (!(n.id in hops)) cards[n.id].home.set(0, 0.8, -16);
+  for (const id in cards) cards[id].mesh.position.copy(cards[id].home);
+}
+
+/* ================= wires, pulses, and the lines from a visual node to what it draws ================= */
+const tmp = new THREE.Vector3(), right = new THREE.Vector3();
+function anchor(id, dir, port, out) {
+  const i = rows[id].findIndex((r) => r.dir === dir && r.name === port);
+  const m = cards[id].mesh;
+  out.set((dir === 'out' ? 1 : -1) * (CW * PX) / 2, (cardH(id) / 2 - HEAD - Math.max(0, i) * ROW - ROW / 2) * PX, 0.002);
+  return m.localToWorld(out);
+}
+const wires = conns.map((c) => {
+  const sig = isSignalOut(c.fromId, c.fromProperty);
+  const mat = new LineMaterial({ color: sig ? WIRE.signal : WIRE.data, linewidth: 1.5, transparent: true, opacity: 0.3 });
+  lineMats.push(mat);
+  const line = new Line2(new LineGeometry(), mat);
+  line.frustumCulled = false;
+  scene.add(line);
+  return { c, sig, mat, line, heat: 0, curve: new THREE.CubicBezierCurve3(new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()) };
+});
+const leaders = [...visual].map((id) => {
+  const mat = new LineMaterial({ color: 0x5ca9ff, linewidth: 1.4, transparent: true, opacity: 0.5, dashed: true, dashSize: 0.12, gapSize: 0.08 });
+  lineMats.push(mat);
+  const line = new Line2(new LineGeometry(), mat);
+  line.frustumCulled = false;
+  scene.add(line);
+  return { id, mat, line };
+});
+resize();
+const soft = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.35, 'rgba(255,255,255,0.55)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  x.fillStyle = gr; x.fillRect(0, 0, 64, 64);
+  return new THREE.CanvasTexture(c);
+})();
+const MAXP = 400, pPos = new Float32Array(MAXP * 3), pCol = new Float32Array(MAXP * 3);
+const pGeo = new THREE.BufferGeometry();
+pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+pGeo.setAttribute('color', new THREE.BufferAttribute(pCol, 3));
+const pts = new THREE.Points(pGeo, new THREE.PointsMaterial({ size: 0.28, map: soft, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+pts.frustumCulled = false;
+scene.add(pts);
+// the floor: the editor's dot grid, and the rings the cards stand on
+{
+  const c = document.createElement('canvas'); c.width = c.height = 32;
+  const x = c.getContext('2d'); x.fillStyle = 'rgba(255,255,255,0.13)'; x.beginPath(); x.arc(16, 16, 1.6, 0, Math.PI * 2); x.fill();
+  const tex = new THREE.CanvasTexture(c); tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(160, 160); tex.anisotropy = 8;
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }));
+  floor.rotation.x = -Math.PI / 2;
+  scene.add(floor);
+  for (let k = 1; k <= 6; k++) {
+    const t = new THREE.Mesh(new THREE.TorusGeometry(RING(k), 0.006, 4, 200), new THREE.MeshBasicMaterial({ color: 0x8f86d9, transparent: true, opacity: 0.22, depthWrite: false }));
+    t.rotation.x = Math.PI / 2; t.position.y = 0.01;
+    scene.add(t);
+  }
+}
+
+/* ================= the switch: the app's pose, in the scene or in a window ================= */
+const MODES = {
+  scene: ['Your app inside the graph', 'The app is an object in the 3D scene: it turns with the graph, cards in front of it pass in front of it, and you can still press its buttons. Drag the background to turn it.'],
+  window: ['Your app in a window, beside the graph', 'The app stays flat and still in its own window while the graph turns behind it. The dashed blue lines join each screen node to the part of the app it draws.']
+};
+let mode = (query.get('pose') || location.hash.slice(1)) === 'window' ? 'window' : 'scene';
+let mix = mode === 'window' ? 1 : 0;   // 0 = in the scene, 1 = in a window
+function setMode(m) {
+  mode = m;
+  history.replaceState(null, '', '#' + m);
+  for (const b of document.querySelectorAll('[data-mode]')) b.setAttribute('aria-pressed', String(b.dataset.mode === m));
+  $('capH').textContent = MODES[m][0];
+  $('capS').textContent = MODES[m][1] + ' It is the real app, made from the project\'s files by NodeGX\'s own runtime.';
+}
+for (const b of document.querySelectorAll('[data-mode]')) b.addEventListener('click', () => setMode(b.dataset.mode));
+setMode(mode);
+
+/* ================= edits: written through the store, shown by the preview ================= */
+const toast = (t) => { $('toast').textContent = t; };
+async function show(what) {
+  const s = await preview.update(files.entries());
+  toast(s.status === 'ok' ? `${what}: the app was rebuilt from the files in ${Math.round(s.exportMs + s.frameMs)} ms (it starts again from the top).` : `Not shown: ${s.message || s.status}`);
+  hookFrame();
+}
+$('fmt').value = store.readComponent(KEY).files.nodes.nodes.find((n) => n.id === 'hud').parameters.format;
+let fmtTimer;
+$('fmt').addEventListener('input', () => { clearTimeout(fmtTimer); fmtTimer = setTimeout(() => { writeParam('hud', 'format', $('fmt').value); show('Round line changed'); }, 450); });
+for (const b of document.querySelectorAll('[data-speed]')) b.addEventListener('click', () => {
+  speed = Number(b.dataset.speed);
+  for (const o of document.querySelectorAll('[data-speed]')) o.setAttribute('aria-pressed', String(o === b));
+  writeParam('ticker', 'interval', Math.round(1000 / speed));
+  show(`Clock at ${speed}×`);
+});
+
+/* ================= hover: a card lights what it draws, and what you point at in the app lights its card ================= */
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
+let lit = [];
+function light(id) {
+  if (hoverId === id) return;
+  hoverId = id;
+  for (const el of lit) el.style.outline = '';
+  lit = id && visual.has(id) ? preview.elementsOf(id) : [];
+  for (const el of lit) { el.style.outline = '2px dashed #5ca9ff'; el.style.outlineOffset = '3px'; }
+}
+addEventListener('pointermove', (e) => {
+  if (drag) return;
+  mouse.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
+  ray.setFromCamera(mouse, camera);
+  const hit = ray.intersectObjects(Object.values(cards).map((c) => c.mesh))[0];
+  light(hit ? hit.object.userData.id : null);
+});
+function hookFrame() {
+  const doc = preview.frame?.contentDocument;
+  if (!doc) return;
+  doc.addEventListener('mouseover', (e) => {
+    let best = null;
+    for (const id of visual) for (const el of preview.elementsOf(id)) if (el.contains(e.target) && (!best || best.el.contains(el))) best = { id, el };
+    light(best ? best.id : null);
+  });
+}
+hookFrame();
+
+/* ================= camera: drag the background to turn ================= */
+let drag = null, yaw = 0, pitch = 0;
+$('css').addEventListener('pointerdown', (e) => { drag = { x: e.clientX, y: e.clientY, yaw, pitch }; $('css').classList.add('dragging'); $('css').setPointerCapture(e.pointerId); });
+$('css').addEventListener('pointermove', (e) => { if (!drag) return; yaw = drag.yaw - (e.clientX - drag.x) * 0.006; pitch = Math.max(-0.35, Math.min(0.5, drag.pitch + (e.clientY - drag.y) * 0.004)); });
+$('css').addEventListener('pointerup', () => { drag = null; $('css').classList.remove('dragging'); });
+
+/* ================= frame ================= */
+const target = new THREE.Vector3(), camRight = new THREE.Vector3();
+const poseScene = { p: new THREE.Vector3(0, PHONE.y, 0), q: new THREE.Quaternion(), s: PHONE.s };
+const poseWin = { p: new THREE.Vector3(), q: new THREE.Quaternion(), s: PHONE.s };
+const eased = (t) => t * t * (3 - 2 * t);
+let lastT = performance.now(), redraw = 0;
+const t0 = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
+  mix += ((mode === 'window' ? 1 : 0) - mix) * Math.min(1, dt * 3.2);
+  const m = eased(Math.max(0, Math.min(1, mix)));
+  // the camera: a slow sway around the graph, plus your drag; in window mode the view slides so the rings sit left of the window
+  const t = reduce ? 0 : (now - t0) / 1000;
+  const az = Math.sin(t * 0.09) * 0.55 + yaw, pol = 1.1 + pitch - m * 0.12, dist = 24 + m * 3;
+  target.set(0, 2.5 - m * 0.4, 0);
+  camera.position.set(Math.sin(az) * Math.sin(pol) * dist, Math.cos(pol) * dist + target.y, Math.cos(az) * Math.sin(pol) * dist);
+  camera.lookAt(target);
+  camRight.set(1, 0, 0).applyQuaternion(camera.quaternion);
+  const visH = 2 * 10 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)), visW = visH * camera.aspect;
+  const sWin = (visH / innerHeight) * Math.min(1, (0.86 * innerHeight) / PHONE.h);
+  const pan = visW * 0.17 * (camera.aspect > 1.1 ? 1 : 0);
+  camera.position.addScaledVector(camRight, pan * m * 2.4);
+  camera.updateMatrixWorld();
+  // the window pose: 10 units in front of the camera, right of centre, facing it, one CSS pixel per screen pixel where it fits
+  poseWin.p.set(Math.max(0, visW / 2 - (PHONE.w * sWin) / 2 - visH * 0.035), -visH * 0.03, -10).applyMatrix4(camera.matrixWorld);
+  poseWin.q.copy(camera.quaternion);
+  poseWin.s = sWin;
+  appObj.position.lerpVectors(poseScene.p, poseWin.p, m);
+  appObj.quaternion.slerpQuaternions(poseScene.q, poseWin.q, m);
+  appObj.scale.setScalar(poseScene.s + (poseWin.s - poseScene.s) * m);
+  appObj.updateMatrixWorld(true);
+  // cards face the camera
+  for (const id in cards) {
+    const cd = cards[id];
+    cd.mesh.quaternion.copy(camera.quaternion);
+    cd.heat = Math.max((heat[id] || 0), cd.heat * Math.pow(0.12, dt));
+    heat[id] = 0;
+    cd.mesh.updateMatrixWorld();
+  }
+  for (const k in flash) flash[k] *= Math.pow(0.05, dt);
+  if (now - redraw > 90) { redraw = now; for (const id in cards) drawCard(id); }
+  // wires
+  for (const w of wires) {
+    const c = w.curve;
+    anchor(w.c.fromId, 'out', w.c.fromProperty, c.v0);
+    anchor(w.c.toId, 'in', w.c.toProperty, c.v3);
+    right.set(1, 0, 0).applyQuaternion(camera.quaternion);
+    const dx = Math.max(0.6, c.v0.distanceTo(c.v3) * 0.35);
+    c.v1.copy(c.v0).addScaledVector(right, dx);
+    c.v2.copy(c.v3).addScaledVector(right, -dx);
+    const p = c.getPoints(28), arr = [];
+    for (const q of p) arr.push(q.x, q.y, q.z);
+    w.line.geometry.setPositions(arr);
+    w.heat = Math.max(wireHeat[wires.indexOf(w)] || 0, w.heat * Math.pow(0.08, dt));
+    wireHeat[wires.indexOf(w)] = 0;
+    w.mat.opacity = 0.22 + w.heat * 0.6;
+  }
+  // leaders: from each screen node's card to the part of the app it draws
+  for (const L of leaders) {
+    const el = preview.elementsOf(L.id)[0];
+    const cd = cards[L.id];
+    if (!el || !cd) { L.line.visible = false; continue; }
+    const r = el.getBoundingClientRect(), s = cd.side ?? -1;
+    const px = s < 0 ? r.left : r.right, py = r.top + Math.min(r.height / 2, 26);
+    const a = new THREE.Vector3(s * (CW * PX) / 2 * -1, (cardH(L.id) / 2 - 22) * PX, 0.003);
+    cd.mesh.localToWorld(a);
+    const b = new THREE.Vector3(px - PHONE.w / 2, PHONE.h / 2 - py, 2).applyMatrix4(appObj.matrixWorld);
+    L.line.geometry.setPositions([a.x, a.y, a.z, b.x, b.y, b.z]);
+    L.line.computeLineDistances();
+    L.line.visible = true;
+    L.mat.opacity = hoverId === L.id ? 1 : 0.28 + cd.heat * 0.4;
+  }
+  // pulses
+  let n = 0;
+  for (let i = pulses.length - 1; i >= 0; i--) {
+    const P = pulses[i], u = (now - P.t0) / 520;
+    if (u > 1) { pulses.splice(i, 1); continue; }
+    if (u < 0 || n >= MAXP) continue;
+    wires[P.i].curve.getPoint(u, tmp);
+    pPos.set([tmp.x, tmp.y, tmp.z], n * 3);
+    const col = new THREE.Color(P.sig ? WIRE.signal : WIRE.data).lerp(new THREE.Color(1, 1, 1), 0.35);
+    pCol.set([col.r, col.g, col.b], n * 3);
+    n++;
+  }
+  pGeo.setDrawRange(0, n);
+  pGeo.attributes.position.needsUpdate = true; pGeo.attributes.color.needsUpdate = true;
+  renderer.render(scene, camera);
+  cssRenderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/** Where a point of the app (its own CSS pixels) is on this page's screen, wherever the app is posed. */
+function project(px, py) {
+  const v = new THREE.Vector3(px - PHONE.w / 2, PHONE.h / 2 - py, 0).applyMatrix4(appObj.matrixWorld).project(camera);
+  return { x: Math.round((v.x + 1) / 2 * innerWidth), y: Math.round((1 - v.y) / 2 * innerHeight) };
+}
+const wiresSeen = new Set();
+const recent = [];
+preview.onTrace(({ events }) => { for (const e of events) { wiresSeen.add(`${e.fromNode}.${e.fromPort}>${e.toNode}.${e.toPort}`); recent.push(e); } if (recent.length > 400) recent.splice(0, recent.length - 400); });
+window.__orbit = { recent, wiresSeen, conns, project, preview, store, cards, rows, last, get mode() { return mode; }, get mix() { return mix; }, setMode, get events() { return eventCount; }, visual: [...visual] };
+say(`ready nodes=${nodes.length} wires=${conns.length} visual=${visual.size} export=${Math.round(first.exportMs)}ms frame=${Math.round(first.frameMs)}ms`);
+} catch (e) { say('FAIL ' + (e && e.stack || e)); console.error(e); }
+</script>
+</html>
