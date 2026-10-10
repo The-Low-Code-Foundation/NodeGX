@@ -1,116 +1,137 @@
-# Next session — P109 session 39
+# Next session — P109 session 40
 
 **Phase:** [README](README.md) · **Audit:** [AUDIT-2026-10-01.md](AUDIT-2026-10-01.md) · scoped at `27d891bf3`.
-**Session 38 (2026-10-10, on `cline-dev`, primary tree):** board **31 of 52 closed** (ISL-012 ✅).
+**Session 39 (2026-10-10, on `cline-dev`, primary tree):** board **33 of 52 closed** (ISL-034 ✅, ISL-036 ✅), plus
+`P109-S38-SSRNOPAGES` fixed and `P109-S39-STALECLIBUNDLE` found and fixed. 15 commits, `86d00461a` … this docs commit.
 
-- **ISL-012 ✅** ([task](ISL-012-A-KIT-CAN-SHIP-A-MODERN-LIBRARY.md) §8 s38) — AC3's server render with hydration, driven: the docs'
-  recipe rebuilt today (three 0.186.1 + OrbitControls, 762,803 B), deployed in the server-rendered layout, served by the
-  folder's own `npm start`; the browser hydrated the server's own cube host (`adopted`), drew r186, a drag turned it (10,232 of
-  102,400 px), no warning; screenshots looked at. Controls: the stamp changed to `0` → `adopted: false`; `public/` alone → no
-  server DOM. **Found:** `P109-S38-SSRNOPAGES` (medium, open, P109's): a hydrated page logs *"This Router has no Pages
-  configured"* as an error twice (the server too); neither control does; the page draws.
-- **`deploy-from-disk --ssr`** (`4e0aa53db`): the editor's two passes (server at the root, browser app in `public/`). The devtool
-  did not run at HEAD from the repo root (bootstrap import below editor imports; runtime folder found under the cwd) — fixed;
-  `--external <dir>` names the runtime folder. The bundle (`scripts/devtools/deploy-from-disk.cjs`) is gitignored, rebuilt in the
-  primary. A project with no `rootNodeId` is still refused by the devtool (the product's `nodegx deploy` guesses one).
-- **P116-ONT-003-tsc fixed** (`4e0aa53db`): the ISL-010 drive spec typechecks; `typecheck:backend-tests` 4 errors → 0.
-- **P112's `140bdeb41` had put back s37's last docs commit** (the four SCROLLROOM files, 10 s after `3b643c675`); restored
-  `c4e7f965d`. SCROLLROOM's ledger row given its `commit:` and a `regression:` the check can read.
+## What s39 did (each row re-measured at HEAD first; each fix with a control)
 
-## Where s37's handoff was wrong
+- **ISL-034 ✅** ([task](ISL-034-THE-DOOR-AND-THE-DEPLOY-SAY-WHAT-WENT-WRONG.md) §8). All six rows still fired, and all
+  six are fixed:
+  - S18 `86d00461a`: an unnamed Router is `Main` in the index and in its own lookup; Page Router spec v6; deployed drive
+    `scripts/devtools/isl034-unnamed-router.ts`.
+  - S4 `1d7bbf1bf`: `unroutedPages` on create/update/apply when no Router can list a page.
+  - S12 `aefa23791`: an unknown argument is refused by name, through one `validateToolInput` override for all 123 tools.
+  - S15 `bf82671af`: `render_report` takes the authoring path and a unique title.
+  - S5 `d88ae73d6`: the deploy engine rebuilds itself when older than its esbuild input list, and the deploy warns when
+    the viewer runtime is older than its webpack list.
+  - S1-CN004 `c6abe20c3`: the spec's fixture wire.
+  - Found beside them, S39-STALECLIBUNDLE `1411841fd`: the `nodegx` bin (dated Oct 5) warns when older than its source.
+- **ISL-036 ✅** ([task](ISL-036-THE-GATES-ARE-GREEN-FOR-THE-RIGHT-REASON.md) §8). All six still fired, and all six are
+  fixed:
+  - S10 `fa1dc081c`: `typecheck:mcp` exit 0. Ten errors, not eight, and one was a cast that made an assertion vacuous.
+  - S19 `cd9d52e28`: HLS-006 skips the node-spec World's `.listen(` by receiver name.
+  - S15-FLD011 `4e4e04447`: the orphan race, made deterministic first with a foreign reaper.
+  - S9 `5e5b19408`: `CORPUS_PUBLISH_RATE` / `SHELF_PUBLISH_RATE` constants.
+  - S6-D54 `d21517793`: bisected to GAM-011 `85c640b6c`, which made the old mutant correct; the mutant is now the
+    still-broken split shape.
+  - S6-TPL007 `7ad544278`: four stale kit-types copies; the GAM-015 gate now grades every committed copy via
+    `git ls-files`.
+- **P109-S38-SSRNOPAGES** `30b0b276d`: a tokenless reset with no Pages yet waits once for the inputs. Re-measured on a
+  server-rendered deploy: since S18 it fired only at start-page URLs (`/`). After the fix: server 0, browser 0, hydrated.
 
-- *"Track G waits on Richard; the rest is his"* — **no.** ISL-034 (the door and the deploy say what went wrong, 6 bugs) and
-  ISL-036 (the gates are green for the right reason, 6 low) are Track F, need no ruling, and have been ⬜ not started since
-  2026-10-05; no handoff listed them. ISL-035 and ISL-037 hand over to P18 / P108, both live.
-- Item 1 had already landed (`a54294a1d`, P116's `targetGoes.ts`).
+## Where s38's handoff was wrong, or had moved
+
+- S1-CN004 was never a product defect (s6 had said so). The fix was the spec's fixture.
+- SSRNOPAGES's "twice, on every load" had already narrowed by the time it was built: S18 made an unnamed Router match its
+  URLs, so only `/` (a start-page fallback) still fired.
+- D54's "mutant row red, not attributed" was the product improving (GAM-011), not a regression.
+- S10 was 10 errors, not 8.
 
 ## Do, in this order
 
-1. **ISL-034** ([task](ISL-034-THE-DOOR-AND-THE-DEPLOY-SAY-WHAT-WENT-WRONG.md)) — its AC1 re-measures each of the 6 rows first
-   (filed 2026-10-05, not re-measured since; some may be fixed by ISL-014/ISL-018 work — a none-owned row is the one most
-   likely already fixed). Then build.
-2. **ISL-036** ([task](ISL-036-THE-GATES-ARE-GREEN-FOR-THE-RIGHT-REASON.md)), the same way.
-3. `P109-S38-SSRNOPAGES` once a task's AC needs it, or when 1–2 are done: the reading so far is in the bug file
-   (`triggerDidMount` → Router `didMount` → `registerRouter` → `reset()` before `pages` is set). Its drive is
-   `drive-isl012-cube.js <origin>`'s `messages` on the hydrated arm, with the two controls.
-4. P109-S36-STALEMCPDIST's lasting fix, if Richard wants it now (about ISL-014's size).
-5. **Track G** (ISL-039 … ISL-047) waits on Richard's order.
-
-## What s38 learned
-
-- **A devtool's bundle can be fine and its source broken.** The gitignored `deploy-from-disk.cjs` (2026-09-17) ran — from
-  `packages/noodl-editor` only — while a fresh build of its entry threw at load. A bundle on disk says nothing about its source.
-- **"It hydrated" needs a reading that can say no.** A page that draws after a server render may have been re-rendered from
-  scratch (the client's fallback is silent but for one console line). Mark the server's element while the HTML parses and ask
-  whether the live canvas is in it; the control that changes the stamp reads `false`.
-- **A temp-index commit from an older base reverts whatever landed in between** — `140bdeb41` took back four files committed
-  10 s before it. After a peer's commit lands beside yours, `git diff <yours> HEAD -- <your paths>`.
-
-## Gate readings taken s38 (2026-10-10)
-
-- Viewer prod build at `d97d9d5c8`+: `webpack.viewer.prod.js` compiled, 0 errors, exit 0, bundle written 09:12:43; deploy and SSR
-  prod builds the same (09:15:53, 09:16:09).
-- Viewer jest on `cline-dev` with no local patch: **150 / 150 suites, 1,837 / 1,837** (`-w 2`).
-- `typecheck:backend-tests`: exit 2, 4 errors before; exit 0, 0 after (`4e0aa53db`). ISL-010 drive spec 2 passed, 2 skipped (no
-  local model), the same at HEAD's version.
-- `bugs.js check`: none of P109's s37/s38 rows (two older P109 rows still flagged: S17-EXPORTKITDEPS and S19-SCRIPTSUNBOUND's
-  `regression:` lines are prose, not a path — cosmetic).
+1. **Nothing buildable is left on P109's own board without a decision or another phase.** Read the board's open rows
+   (README table) before believing that. They are:
+   - ISL-008 (AC7's export half, P18's pile).
+   - ISL-010 (AC4, Richard's call on llama.cpp).
+   - ISL-018 (AC7 on the DBT demo, its owner's).
+   - ISL-022 (AC6).
+   - ISL-024 (waits for a gap with no P108 lane open).
+   - ISL-025 (W4–W22 wait on their tasks).
+   - ISL-035 and ISL-037 (handed to P18 and P108).
+   - Track G, ISL-039 … ISL-047 (waits on Richard's order).
+2. If Richard rules STALEMCPDIST (below): build its lasting fix with the S5/S39 mechanism (an esbuild input list beside
+   `noodl-mcp/dist/noodl-mcp.cjs`; the people's door rebuilds or warns). Until then **S4 and S12 do not reach agents
+   using the dist door**.
+3. Otherwise ask Richard for Track G's order. The board has 51 live rows there; ISL-039 and ISL-040 hold the blockers.
 
 ## Decisions for Richard (not yours)
 
-- Carried from s35: an Expression reading `Arrays.cart.get(0).qty` does not re-run when that item's `qty` changes (recommended: yes,
-  as a Repeater row hears its own record).
-- Carried: the garden library entries at 1.0.0; C143's Refresh half; Track G's order; the layout of an unlabelled control in a real
-  browser; `P109-S24-SIGNINWITHERRORKEPT`, `P109-S22-BUILTINBOUNDARY`, `P109-S20-LISTDEFAULTTYPE`, `P109-S18-REFRESHROWSTATE`,
-  ISL-010 AC4 and the Effort port, pushing `cline-dev`, publishing the Garden kits at the origin.
-- New, recorded not asked: a person's Back or Forward to an entry whose address names the page on top now keeps the stack (ISL-048
-  §13). A browser reaches it only through two entries with one address.
+- **New, s39:** `P109-S36-STALEMCPDIST` (high). Rebuild the people's MCP door now, and give it the S5 staleness check?
+  Today `noodl-mcp/dist` carries none of S4/S12 (nor ISL-018's `ticked`). A rebuild bakes in whatever is uncommitted in
+  `noodl-mcp/src` at that moment; today that is P78's `cloud/bundleEntry.js` D84 lines.
+- **New, s39:** rebuild the `nodegx` bin (`nodegx-export/dist/cli.mjs`, Oct 5). It would carry P18's uncommitted
+  exporter pile; P18's call or Richard's.
+- Carried from s38: the Expression reading `Arrays.cart.get(0).qty`; the garden library entries at 1.0.0; C143's Refresh
+  half; Track G's order; the layout of an unlabelled control in a real browser; `P109-S24-SIGNINWITHERRORKEPT`,
+  `P109-S22-BUILTINBOUNDARY`, `P109-S20-LISTDEFAULTTYPE`, `P109-S18-REFRESHROWSTATE`, ISL-010 AC4 and the Effort port,
+  pushing `cline-dev`, publishing the Garden kits at the origin; ISL-048 §13's Back/Forward note.
 
 ## Handed over (owed by another phase)
 
-- **P107 (opennoodl-49), told s37:** ISL-052 landed as ruled. They fixed P109-S37-SCROLLROOM the same evening (`fd6385beb`: the
-  model reads a scroll as the window unless the content is longer; the 30 ROOM boxes out of KNOWN).
+- **P18:** HLS-006's every-listener gate (theirs) now skips the node-spec model's `.listen(` by receiver
+  name (`cd9d52e28`). Not told by message; it is in the commit and here. Also carried: Arrays in the export's
+  Expression, the kit bootstraps, the Visual Function's reserved signal, the scroll rule (ISL-052 §2), s33's list.
+- **P107:** the Page Router spec moved to v6 (`86d00461a`: an unnamed Router is Main; a new scenario for a mutant the fix
+  unpinned). Their open NSP-018 edits have `stranger.test.ts`'s hash gate red on five spec files (animate-to-value,
+  delay, dropdown, repeat, uuid), which is theirs.
+- **P78 / TPL-011:** `noodl-mcp/src/cloud/bundleEntry.js`'s D84 lines are still uncommitted (since 2026-09-26).
+- **Release notes, add (s39):**
+  - A Router left with no name now opens the page each address names.
+  - An agent is told when it writes a page no Router can open, and when it misspells an argument.
+  - In a checkout, `nodegx deploy` rebuilds its own engine when it is out of date, and says when the runtime it copies
+    is.
+  - A server-rendered site no longer logs a false "no Pages" error.
+  - s36–s38's items still owed.
 
-- **P107 (opennoodl-49):** told C120/C126 landed and that `popstate` was sorted into `WORLD_KINDS`. Theirs: the day-seed survivors,
-  the Video rows C96–C100, and the frame a landed back is heard in if the two targets ever disagree (they asked to be told).
-- **P78 / TPL-011:** `packages/noodl-mcp/src/cloud/bundleEntry.js`'s D84 lines are still uncommitted (since 2026-09-26) and the
-  shipped `cloud-bundle.cjs` depends on them.
-- **P18 (export):** carried from s35 (Arrays in the export's Expression; the kit bootstraps; the Visual Function's reserved signal;
-  s33's list).
-- **P18 (export):** the scroll rule (ISL-052 §2) — an exported scrolling Group lays out as the runtime now does, or as the
-  model does; theirs to decide when P107's model moves.
-- **Release notes, add (s37):** a scrolling Group with Native platform scroll off keeps its gap and alignment and hides what lies
-  outside it; inside any scrolling Group a "fill the rest" section grows with its content, a Fixed % is of the visible window
-  (one slide per screen works), and a centred list too long to fit starts at the top.
-- **Release notes, add (s36):** a Component Stack's Pop steps the browser's history back, and a Replace no longer adds an entry; a
-  Reset goes to the start page; the agent's door says when it ticked a "run on value change" box. (s34's four and s35's three still
-  owed.)
+## Gate readings taken s39 (2026-10-10)
+
+- noodl-mcp, full run (`-w 3`, S12's check on): 3,824 / 3,845. 16 red suites, each attributed: TPL-011's untracked
+  Nightbook; Group's doc at 17,292 tokens over AWP-005's 16,350; P116's contract types in ISL-023's reach; node-id
+  allocation (red with HEAD's server and S4 reverted); CMP-004 ×2, D54, TPL-007, CMP-001, cn004, def018/020, def038,
+  FLD-013, provision ×2, SBR-009. Since then CMP-001, D54, TPL-007 and cn004 are fixed (above). The rest are not
+  P109's: read each one's ledger row before inheriting it.
+- `npm run typecheck:mcp`: exit 0, 0 errors (`fa1dc081c`).
+- Viewer: 151 / 151 suites, 1,841 / 1,841 (`-w 2`, `30b0b276d` in the tree).
+- Page Router on the runtime: 139 / 139 at seeds 13 and 20732 (v6). Interpreter mutants: 0 survivors at both.
+- node-spec package (`--testPathIgnorePatterns zz-`): 1,853 passed, 1 failed (stranger hash gate, P107's open edits).
+- `bugs.js --from P109`: none of ISL-034's or ISL-036's rows; the open P109 rows are STALEMCPDIST (high) and four
+  needs-ruling.
+
+## Shared artefacts rebuilt in the primary this session (all from committed source, unless noted)
+
+- `noodl-preview/dist/nodegx-deploy.cjs` + its new `nodegx-deploy.inputs.json` (auto-rebuilt by the S5 check).
+- `noodl-editor/src/external/deploy/noodl.deploy.js` + `noodl.deploy.inputs.json` and the SSR runtime
+  (`webpack.deploy.prod.js`, `webpack.ssr.prod.js`; the last rebuild carried `router.tsx` minutes before `30b0b276d`).
+- `scripts/devtools/deploy-from-disk.cjs` (`build-deploy-from-disk.mjs`).
+- Not rebuilt, on purpose: `noodl-mcp/dist`, `nodegx-export/dist` (see the decisions above).
+
+## What s39 learned
+
+- **The shared gitignored bundles get rebuilt by other sessions with uncommitted source in them.** The deploy engine was
+  rebuilt at 13:19 with this session's open exporter edit inside. To grade the OLD behaviour, patch a copy and put it
+  where the original sits (`noodl-preview/dist/`, so it finds the runtime beside it), named by `NODEGX_DEPLOY_CLI`.
+- **A mutant arm can go stale because the product got better.** Bisect it with a one-file probe (`git bisect run`, exit
+  125 when the test cannot run) in a `make-worktree.sh` worktree before deciding which side moved.
+- **A fix can unpin a neighbour's mutant.** S18 left one alive at seed 20732 that only generated sequence #153 reached.
+  Find the sequence with a scratch probe (`generateSequence` + `discoverBranches`, match the branch key), then write the
+  scenario. In the spec's plays, acts and signals do not end a frame; only a settle does.
+- **A count of reports depends on which URL is loaded.** SSRNOPAGES fired at every URL in s38 and only at `/` in s39.
+  Re-measure on the URL the row names, and on the start URL.
 
 ## Worktrees
 
-`p109-isl049` (branch `p109-isl052`) is at the s37 docs commit, nothing unlanded; its viewer folder is a real copy now (not the
-symlink), so a build there stays there; its untracked probes (`zz-s31-*`, `zz-s32-*`, `zz-s33-c114`)
-— never commit them. 🔴 Its `packages/noodl-mcp/dist/` files are symlinks into the primary: do not `npm run build` there without
-meaning to replace the primary's. The older worktrees are spent; remove with `git worktree remove` when convenient.
+`p109-isl049` (branch `p109-isl052`) is unchanged from s38. Its `noodl-mcp/dist` is symlinks into the primary. The bisect
+worktree `p109-s39-d54` was removed. The older ones are spent: `git worktree remove` when convenient.
 
 ## Recipes
 
-- **A server render, driven:** `node scripts/devtools/deploy-from-disk.cjs <project> --out <dir> --ssr` (the project needs
-  `rootNodeId`; rebuild the devtool with `node scripts/devtools/build-deploy-from-disk.mjs` after a pull, and the deploy/SSR
-  runtimes with `webpack.deploy.prod.js` / `webpack.ssr.prod.js` in noodl-viewer-react); in `<dir>`: `npm install && npm run build
-  && PORT=<p> node server.js` (backgrounded); `node scripts/devtools/drive-isl012-cube.js http://127.0.0.1:<p>`. Stop the server
-  by its LISTEN pid (`lsof -t -iTCP:<p> -sTCP:LISTEN`).
-
-- **Land:** commit in the worktree; `git rebase cline-dev` there if it moved; in the primary tree, in ONE command:
-  `merge-base --is-ancestor`, `git status --porcelain` each path the diff lists (abort on any), `git update-ref refs/heads/cline-dev
-  <new> <old>`, `git checkout HEAD -- <each path>`. In zsh put the paths in an ARRAY (`P=(a b)`; `$P`) — a string does not split.
-- **Grade one spec on the runtime:** `NSP_ONLY="<type>" NSP_SEED=<n> npx jest test/node-spec/conformance.test.ts` (noodl-runtime),
-  then read the log's `scenarios: n / n` line — the test itself reports in 3 ms. Interpreter mutants: `TYPES="<type>" SEED=13,20732
-  npx jest tests/zz-s31-mut.test.ts`. Every scenario's trace: `TYPES=… OUT=<file> npx jest tests/zz-s31-alltrace.test.ts`.
-- **A control:** copy the fixed file aside, `git show HEAD:<file> > <file>`, run, copy back, `cmp`.
-- **An agent over the stdio door:** `claude -p "<request>" --model claude-sonnet-5-5 --mcp-config <json> --strict-mcp-config
-  --allowedTools "mcp__door" --output-format stream-json --verbose`, run from the project folder (the s36 scripts are in that
-  session's scratchpad only). Build the door to a scratch name beside `dist/` if `dist/` is stale.
-- **Editor drive without touching Richard's profile:** `NOODL_USER_DATA_DIR=<scratch>` with `firstRunLegal.json` copied in and a
-  one-entry `recently_opened_project.json`; `cdp click "[data-test=launcher-project-card]"`; to open another, rewrite the entry and
-  `cdp reload`; the preview is `--target=viewer`; `npm run dev:stop` after.
+- **A server render, driven:** `node scripts/devtools/deploy-from-disk.cjs <project> --out <dir> --ssr` (the project
+  needs `rootNodeId`; rebuild the devtool with `node scripts/devtools/build-deploy-from-disk.mjs`, the runtimes with
+  `webpack.deploy.prod.js` and `webpack.ssr.prod.js` in noodl-viewer-react). In `<dir>`: `npm install && npm run build &&
+  PORT=<p> node server.js`. Then `node scripts/devtools/drive-isl012-cube.js http://127.0.0.1:<p><path>` reads the
+  console (`messages`) and `ssr.stamped`. Stop the server by its LISTEN pid.
+- **The CLI from source** (when the bin is stale): `npx tsx packages/nodegx-export/src/cli/main.ts deploy <proj> <out>
+  --allow-development-engine`.
+- **Land / grade / control / agent / editor:** as in s38 (unchanged). Commit through a temporary index (`GIT_INDEX_FILE`,
+  `read-tree HEAD`, `add -- <paths>`, commit, then `git reset -q -- <paths>` on the real index at once).
