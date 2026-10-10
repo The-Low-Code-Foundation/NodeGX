@@ -238,9 +238,12 @@ wires, delete), Try it, three missions with Check and Show me, `?demo` — and n
 | the three missions by Show me | about 45 s for all three (each step a write and a rebuild, paced for a person to watch) |
 | an edit | export 3–12 ms; the new frame 100–600 ms headless |
 
-**Not built, and what OWN-006 AC2 needs from this page:** structure edits (add a screen node into the tree at an
-index, move one under another parent, remove a screen node and its subtree), rename (a node's label), and any
-component but `App`. The suite's small fixture uses all of them, so the page cannot pass it until it has them.
+**Then, the same session (`1a5561b79`): what OWN-006 AC2 needed.** Any project and any component (a switcher in the
+crumb; `?open=wait` takes files handed in), a screen node added inside the selected one, reparent and reorder from the
+Node panel (Inside, Place in it), rename, delete a screen node with its subtree, unset a parameter; the screen's stack
+laid out from the tree, never written. The page passes the editor suite on small, todo-list and planning
+(OWN-006 §6.2). `check.mjs` drives the structure controls with real input too (the footer put first: the real app draws
+it above the phase label; renamed; put back), 2 / 2 PASS.
 
 **`page.html` and its build** (`page.html`, `build.sh`, `src/app.ts`, `src/entry.ts`, `src/graphrun.ts`,
 `src/picker.json`, `tools/genpicker.ts`, and the gitignored `dist/`) are superseded and **still in the folder**: the

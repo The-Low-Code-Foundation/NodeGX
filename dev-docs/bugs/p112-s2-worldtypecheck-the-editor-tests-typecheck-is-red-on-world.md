@@ -9,6 +9,7 @@ evidence: `npm run typecheck:editor-tests` → exit 2, 6 × TS2339/TS2322 in wor
 kit: project-contract
 regression: `npm run typecheck:editor-tests` (0 errors) and the editor's `test:ci` webpack, which compiles the same program and died with the same eight errors before any spec ran (2026-10-10, 67 s, no Jasmine line)
 fixed: P112 OWN-001 s5, 2026-10-10 — the eight narrowings (`!x.ok`, `x.ok ? :`) written as `x.ok === false` / `x.ok === true`, which narrow a boolean-literal discriminant with or without strictNullChecks; paths.ts:260,306, mutants.ts:131, runner.ts:230, migrate.ts:309,311,315, verb-project.ts:196 (P116 had added two since s2's six). No behaviour change; the package's 197 world tests pass
+commit: 6e88589d0
 ---
 
 `world/` is checked by its own package with `"strict": true`, where `if (!pb.ok) return … pb.problems` narrows the

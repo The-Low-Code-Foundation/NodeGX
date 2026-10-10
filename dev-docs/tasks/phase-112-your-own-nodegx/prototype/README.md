@@ -65,6 +65,10 @@ through `@noodl/preview` in the page, with everything `page.html` did, on the re
 - **Three missions, checked in the real app.** Check plays the graph as it stands on a **copy** of the files in a
   second real app (shown small while it plays) and reads the screen by the part each node draws. Each fails on the
   graph as it starts, for its own reason; Show me builds the answer step by step through the store; then it passes.
+- **Any project, any component, the structure too** (s6, OWN-006 AC2): a component switcher; a screen node added
+  inside the selected one; Inside / Place in it to reparent and reorder; rename; delete a screen node with what is in it.
+  `real/suite-adapter.mjs` runs the page through the editor suite (`@nodegx/project-contract/editor-suite`): it passes
+  the small fixture, todo-list and planning.
 - **Live values** on the cards and pulses on the wires come from the running app's trace; hover a screen node's card
   and its part of the app is outlined, point at the app and its card lights.
 

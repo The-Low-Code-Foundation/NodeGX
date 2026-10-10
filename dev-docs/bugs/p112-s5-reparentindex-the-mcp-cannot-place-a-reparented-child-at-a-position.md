@@ -4,11 +4,11 @@ title: "An agent reparenting a node through update_node could not say where amon
 status: fixed
 severity: low
 area: mcp / update_component operations (`packages/noodl-mcp/src/graph.ts` update_node, `tools/author.ts` the set schema)
-kit: mcp
 found: P112 OWN-006 s5, 2026-10-10 — the editor suite's first run with the MCP as an adapter
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/OWN-006-THE-EDITOR-SUITE.md §6.1; the small fixture's edit "add_child home-title → home-box at 0" produced `"children" is ["home-count","home-title"]; the official editor saves ["home-title","home-count"]`
 regression: packages/noodl-mcp/tests/editorSuite.test.ts "small: the MCP saves what the reference saves" (red with the index ignored)
 fixed: P112 OWN-006 s5, 2026-10-10 — `update_node.set.index` (0 = first; appended when absent), read with `parent`
+commit: 6e88589d0
 ---
 
 `add_node` could place a new node at an `index` among its parent's children; `update_node.set.parent` could only

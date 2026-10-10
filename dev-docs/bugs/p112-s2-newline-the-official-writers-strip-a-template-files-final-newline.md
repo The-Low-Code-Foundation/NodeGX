@@ -9,6 +9,7 @@ evidence: all 243 JSON files of templates/todo-list are two-space JSON ending in
 kit: project-contract
 regression: packages/nodegx-project-contract/tests/format.test.ts "serializing a parsed file gives back its text, final newline included, for every JSON file"; packages/noodl-mcp/tests/store.test.ts "P112-S2-NEWLINE — rewriting a file that ends with a newline keeps the newline"; packages/noodl-editor/tests/services/ProjectStructure/ComponentSaver.test.ts "P112-S2-NEWLINE — keeps the final newline of a file it replaces, and adds none to a file that had none" (red without the fix, measured 2026-10-10)
 fixed: P112 OWN-001 s5, 2026-10-10 — the MCP's ProjectStore writes through V2ProjectStore (serializeV2File keeps the replaced file's newline); the editor's ComponentSaver serializes through the same serializeV2File, reading the file it replaces when its filesystem can read text
+commit: 6e88589d0
 ---
 
 Every template file ends with a newline. Both official writers serialize with `JSON.stringify(value, null, 2)` and

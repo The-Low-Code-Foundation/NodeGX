@@ -2,7 +2,7 @@
 
 **Opened 2026-10-02.** **Depends on OWN-001** (the reference reader and writer) **and OWN-003** (the graph runner and
 its scenarios).
-**Status: 🟡 first half built, s5 (2026-10-10): the adapter, the eight edits, the reference, the comparison, the runner, the command and the fixtures, in `@nodegx/project-contract/editor-suite`; AC1 and AC4 met; the MCP is the first adapter (AC3's first half). The graph half (`graphTarget()`, the 76 scenarios) waits for OWN-003 / R1; the Electron adapter and the prototype's run (AC2) are next. §6.**
+**Status: 🟡 first half built, s5 (2026-10-10): the adapter, the eight edits, the reference, the comparison, the runner, the command and the fixtures, in `@nodegx/project-contract/editor-suite`; AC1 and AC4 met; the MCP is the first adapter (AC3's first half). s6 (2026-10-10): **AC2 met** — the prototype page (`prototype/real/orbit.html`) is the second adapter and passes small, todo-list and planning; its first run found P112-S6-SUITEIDS (fixed). The graph half (`graphTarget()`, the 76 scenarios) waits for OWN-003 / R1; the Electron adapter (AC3's second half) is next. §6.**
 **Model:** **Fable.** The adapter, the edit vocabulary and the comparison rule are the design every later task and every stranger depends on. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
 ## 1. The person sentence
@@ -124,6 +124,46 @@ appliers (the MCP's `applyOperations`, the kit's `applyEdit`) now agree on every
   second half decides whether the reference pins.
 
 **Not built (next):** the Electron adapter (an editor `tests/` spec driving `NodeGraphModel` through the suite: AC3's second
-half, NSP-021's round trip); the prototype on the suite (AC2, after OWN-004 slice 3 makes it read and write v2); the graph
+half, NSP-021's round trip); ~~the prototype on the suite (AC2)~~ built s6 (§6.2); the graph
 half (`graphTarget()` and the 76 scenarios, after OWN-003); the semantic validator and the loader as checks in a published
 suite (they are the editor's; the `checks` seam is where they plug in).
+
+### 6.2 AC2 — the prototype passes, s6 (2026-10-10, Opus)
+
+**The prototype is the suite's second adapter, and the first that is a person's editor.** `prototype/real/suite-adapter.mjs`
+opens `orbit.html?open=wait` in headless Chrome, hands it the fixture's files, applies each edit with
+`__orbit.apply(edit)` and saves what the page's store holds. `__orbit.apply` is a switch over the page's **own** editing
+functions — `addNode`, `removeNode`, `connect`, `disconnect`, `setParam`, `moveNode`, `rename`, `reparent` — the ones its
+picker, connect popup and Node panel call, each a write through `V2ProjectStore` followed by a rebuild of the real app.
+The page mints its own ids (`group1`, `counter2`), as a person's editor does.
+
+To get there the page gained what the small fixture asks for (OWN-004 §6.4 listed them as missing): any project and any
+component (a switcher in the crumb), a screen node added inside the selected one at a place, reparent and reorder
+(Inside, Place in it), rename, delete a screen node with everything inside it, unset a parameter. The screen's stack
+is laid out from the tree on every change and never written, so the only positions in the files are the ones a
+person (or a script) set — which is also what the comparison assumes.
+
+```sh
+npx ts-node packages/nodegx-project-contract/editor-suite-node.ts \
+  dev-docs/tasks/phase-112-your-own-nodegx/prototype/real/suite-adapter.mjs \
+  packages/nodegx-project-contract/tests/fixtures/editor-suite/small \
+  packages/nodegx-project-contract/tests/fixtures/editor-suite/small.edits.json
+```
+
+**Readings** (2026-10-10, `1a5561b79`):
+
+| | |
+|---|---|
+| the prototype on `small` | **PASS** (7.5–8.0 s, most of it the real app rebuilt after each of the twelve edits) |
+| the prototype on `todo-list` / `planning` (`templates/<name>`, the same scripts the MCP runs) | **PASS** / **PASS** (10.6 s / 11.6 s) |
+| control: the page's reparent made to ignore the index | **FAIL**, one sentence: *node "home-box" … "children" is ["home-count","home-title"]; the official editor saves ["home-title","home-count"]* |
+| `editor-suite.test.ts` | **15 / 15** (14 + the SUITEIDS regression, red without the fix); the package's whole jest **263 / 263**, 13 suites; `tsc` and `tsc -p tsconfig.tests.json` clean |
+| MCP `editorSuite.test.ts` | **3 / 3** (unchanged by the fix: the MCP keeps a named id) |
+| `prototype/real/check.mjs` (now with the structure from the Node panel, real input) | **PASS**, 2 / 2 |
+
+**Found and fixed — P112-S6-SUITEIDS** (medium, `kit: editor-suite`): the suite matched minted ids for the comparison but
+handed the editor the script's ids in later edits, so an editor that mints every id (the official one does) could not
+find `home-box` and failed before any file was compared. The existing "mints its own ids" test passed because its
+wrapped reference keeps a named id: a hole shaped like the defect. `inEditorIds` translates `id`, `parent`, `from.node`,
+`to.node` through the reverse map; a test whose editor always mints is red without it. **It would have stopped the
+Electron adapter the same way.**
