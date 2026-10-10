@@ -73,6 +73,14 @@ export interface StorageAclOption {
    * collection like `only`.
    */
   onlyWhile?: { collection: string; update?: OnlyWhileRule; delete?: OnlyWhileRule };
+  /**
+   * P116 ONT-012 (R-a) — the fields this caller may not read, per collection (every collection
+   * with a field rule, not only the one being read: an `include` and a `$path` hop reach others).
+   * Read by the backend's facade, never by an adapter: the facade strips them from every record
+   * it returns and refuses a request that names one. `shownWhere` = shown only on the rows it
+   * reaches; absent = hidden on every row.
+   */
+  hidden?: Record<string, Array<{ field: string; shownWhere?: Record<string, unknown> }>>;
 }
 
 /** P116 ONT-012 — one `onlyWhile` entry: the condition, the fields free of it, the refusal's words. */

@@ -4,7 +4,7 @@
 *"let's borrow 1 to 4"*. **Depends on ONT-001** (the kinds), **ONT-003** (the projection), **ONT-005** (the mutants);
 **feeds ONT-008** (the view hints). **Status: 🟡 step 1 ✅ (P116 s15, 2026-10-10, Opus 5.5): the detectors are in
 `census.js`, every candidate in all 8 sources is classified by meaning, and all four borrows keep rows (§3.5). AC1 ✅.
-Steps 2 and 4 are Fable's; R-a and R-c re-asked with the numbers (§6).** §3.1–§3.4 were read by hand before the
+Steps 2 and 4 are Fable's. R-a, R-b and R-c ruled s16 (§6); step 4's two targets are built in ONT-012 (`fields.<f>.read`, `onlyWhile`).** §3.1–§3.4 were read by hand before the
 census; §3.5 is what the census counted.
 
 > **Model check, before anything (Richard, 2026-10-08 rule):** steps 2 and 4 want **Fable 5.1**. They change the
@@ -165,8 +165,9 @@ ask it as one of the noun's questions, but nothing here says it needs a mutant o
    - a last-editor field where a history was wanted;
    - a secret on a record whose readers should see the rest;
    - a detail that is always optional, so it is empty when it mattered.
-4. **The projection** (Fable, ONT-003). Secret details project to an `extends` noun with its own stricter rules,
-   which needs no change to the contract. *Editable only while a draft* needs a rule that depends on a value on the
+4. **The projection** (Fable, ONT-003). ~~Secret details project to an `extends` noun with its own stricter rules,
+   which needs no change to the contract.~~ **R-a ruled s16:** secret details project to `security.json`
+   `collections.<c>.fields.<f>.read` (ONT-012 §6.2), and *settled* to `collections.<c>.onlyWhile` (§6.1). *Editable only while a draft* needs a rule that depends on a value on the
    record. That is not in the rule vocabulary as read today (`SchemaManager.ts:132-133`, plus ONT-004's path rule),
    so step 4 either projects it to a gated function or asks for the rule (R-b).
 5. **The view hints** (Opus, into ONT-008's suite): what you call one in a list, and a detail shown only when its

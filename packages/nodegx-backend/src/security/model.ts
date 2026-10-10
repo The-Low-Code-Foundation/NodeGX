@@ -328,6 +328,74 @@ export interface CollectionRules {
    * into the write itself (`AdapterFacade.heldWhile`), and a write it stops is a 409 in `says`.
    */
   onlyWhile?: { update?: OnlyWhileRule; delete?: OnlyWhileRule };
+  /**
+   * P116 ONT-012 (R-a) — *"their company's representative reads my account, but not my two health
+   * details"*. Per field, who may READ it: an ordinary rule value (path atoms included), ANDed with
+   * the collection's `find`/`get`. A field nobody is granted is not on any row a caller receives,
+   * and a request that names it (where, sort, keys, distinct, aggregate, precondition, a path hop,
+   * a live filter, a search) is refused by name. See {@link fieldMask}.
+   */
+  fields?: Record<string, { read: RuleValue }>;
+}
+
+/**
+ * P116 ONT-012 — one field a caller may not read on every row: hidden everywhere, or shown only on
+ * the rows `shownWhere` reaches (the caller's path atoms, compiled from their own `_User` row).
+ */
+export interface HiddenField {
+  field: string;
+  shownWhere?: Record<string, unknown>;
+}
+
+/**
+ * P116 ONT-012 — what this caller may not read, per collection. Empty for a caller every rule
+ * grants. Bypasses (admin, dev-open, an unbound scoped key) are decided by the caller of this,
+ * exactly as for the row ACL: `SecurityState.hiddenFor`.
+ */
+export function fieldMask(config: SecurityConfig, principal: Principal): Record<string, HiddenField[]> {
+  const subject = rulePrincipal(principal);
+  const out: Record<string, HiddenField[]> = {};
+  for (const [collection, entry] of Object.entries(config.collections)) {
+    if (!entry.fields) continue;
+    const hidden: HiddenField[] = [];
+    for (const [field, rule] of Object.entries(entry.fields)) {
+      if (ruleAtoms(rule.read).some((a) => atomGrants(a, subject))) continue;
+      const shownWhere = ruleNarrowing(rule.read, subject);
+      hidden.push(shownWhere ? { field, shownWhere } : { field });
+    }
+    if (hidden.length) out[collection] = hidden;
+  }
+  return out;
+}
+
+/** The fields no collection rule may name: the record's own bookkeeping. */
+const UNHIDEABLE_FIELDS = new Set(['objectId', 'createdAt', 'updatedAt', 'ACL']);
+
+function validateFieldRules(value: unknown): string[] {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return ['must be an object { <field>: { read } }'];
+  const errors: string[] = [];
+  const entries = Object.entries(value as Record<string, unknown>);
+  if (entries.length === 0) errors.push('is empty: name a field, or leave "fields" out');
+  for (const [field, rule] of entries) {
+    if (UNHIDEABLE_FIELDS.has(field)) {
+      errors.push(`"${field}" is the record's own bookkeeping and is read by every reader; it cannot be hidden`);
+      continue;
+    }
+    if (!rule || typeof rule !== 'object' || Array.isArray(rule)) {
+      errors.push(`${field} must be an object { read }`);
+      continue;
+    }
+    const r = rule as Record<string, unknown>;
+    for (const k of Object.keys(r)) {
+      if (k !== 'read') errors.push(`${field}: unknown key "${k}" (only "read" is ruled; who may change a field is not)`);
+    }
+    if (r.read === undefined) errors.push(`${field}.read is required`);
+    else {
+      const err = validateRuleValue(r.read, true);
+      if (err) errors.push(`${field}.read: ${err}`);
+    }
+  }
+  return errors;
 }
 
 /**
@@ -592,12 +660,15 @@ export function validateSecurityConfig(raw: unknown): string[] {
       }
       const e = entry as Record<string, unknown>;
       for (const key of Object.keys(e)) {
-        if (key !== 'permissions' && key !== 'creatorOwns' && key !== 'onlyWhile') {
+        if (key !== 'permissions' && key !== 'creatorOwns' && key !== 'onlyWhile' && key !== 'fields') {
           errors.push(`unknown key "${key}" in collections.${name}`);
         }
       }
       if (e.onlyWhile !== undefined) {
         for (const err of validateOnlyWhile(e.onlyWhile)) errors.push(`collections.${name}.onlyWhile: ${err}`);
+      }
+      if (e.fields !== undefined) {
+        for (const err of validateFieldRules(e.fields)) errors.push(`collections.${name}.fields: ${err}`);
       }
       if (e.permissions !== undefined) {
         if (!e.permissions || typeof e.permissions !== 'object') {

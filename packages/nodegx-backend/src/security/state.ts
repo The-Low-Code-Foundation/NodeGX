@@ -44,6 +44,8 @@ import {
   checkClp,
   effectiveCreatorOwns,
   onlyWhileFor,
+  fieldMask,
+  HiddenField,
   AccessDecision,
   DeployedFunction,
   UnresolvedFunction,
@@ -520,7 +522,22 @@ export class SecurityState {
     // rides beside it for the facade to compile into the one write it holds.
     const onlyWhile = acl && access === 'write' && collection ? onlyWhileFor(this.config, collection) : undefined;
     if (acl && onlyWhile && collection) acl = { ...acl, onlyWhile: { collection, ...onlyWhile } };
+    // P116 ONT-012 (R-a): the fields this caller may not read, for every collection, on read and
+    // write alike (a write answers with the record). The same callers the row ACL binds.
+    if (acl) {
+      const hidden = fieldMask(this.config, principal);
+      if (Object.keys(hidden).length) acl = { ...acl, hidden };
+    }
     return acl;
+  }
+
+  /**
+   * P116 ONT-012 — the fields this caller may not read, per collection, for a reader that holds no
+   * ACL option (live updates). `{}` for every caller the row ACL does not bind.
+   */
+  hiddenFor(principal: Principal): Record<string, HiddenField[]> {
+    if (!this.aclKeysFor(principal, 'read')) return {};
+    return fieldMask(this.config, principal);
   }
 
   private aclKeysFor(principal: Principal, access: 'read' | 'write'): AclOption | undefined {

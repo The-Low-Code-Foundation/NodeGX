@@ -90,6 +90,12 @@ export function configEtag(config: SecurityConfig): string {
   return '"' + createHash('sha1').update(JSON.stringify(config)).digest('hex').slice(0, 20) + '"';
 }
 
+/**
+ * P116 ONT-012 — the collection keys the permissions page does not draw, so a save or a revert from
+ * it keeps them (see `putCollection`).
+ */
+const UNDRAWN_KEYS = ['onlyWhile', 'fields'] as const;
+
 export class AdminSecurityRoutes {
   private readonly security: SecurityState;
   private readonly facade: IStorageFacade;
@@ -186,39 +192,40 @@ export class AdminSecurityRoutes {
     const name = ctx.params.name;
     const body = await readJSONBody(ctx.req);
 
-    const KNOWN = ['permissions', 'creatorOwns', 'onlyWhile'];
+    const KNOWN = ['permissions', 'creatorOwns', ...UNDRAWN_KEYS];
     const unknown = Object.keys(body).filter((k) => !KNOWN.includes(k));
     if (unknown.length > 0) {
       throw new HttpError(
         400,
         `Unknown field(s) ${unknown.map((k) => `"${k}"`).join(', ')} for collection "${name}". ` +
-          `Expected { "permissions": { find, get, create, update, delete, count }, "creatorOwns": boolean, "onlyWhile": { update?, delete? } }. ` +
+          `Expected { "permissions": { find, get, create, update, delete, count }, "creatorOwns": boolean, "onlyWhile": { update?, delete? }, "fields": { <field>: { read } } }. ` +
           `Per-operation rules go INSIDE "permissions".`
       );
     }
-    if (body.permissions === undefined && body.creatorOwns === undefined && body.onlyWhile === undefined) {
+    if (body.permissions === undefined && body.creatorOwns === undefined && UNDRAWN_KEYS.every((k) => body[k] === undefined)) {
       throw new HttpError(
         400,
-        `Nothing to set for collection "${name}". Send "permissions", "creatorOwns" and/or "onlyWhile"; ` +
+        `Nothing to set for collection "${name}". Send "permissions", "creatorOwns", "onlyWhile" and/or "fields"; ` +
           `to remove this collection's rules use DELETE.`
       );
     }
 
-    // P116 ONT-012: `onlyWhile` says WHEN, the rest WHO, and the permissions page draws only the
-    // WHO. So a body without `onlyWhile` KEEPS the collection's (measured: the page's own save
-    // dropped it, and a sent bill became editable), `null` takes it away, and a value replaces it.
-    // `permissions` and `creatorOwns` keep their old meaning: the body says all of them.
-    const kept = this.security.config.collections[name]?.onlyWhile;
+    // P116 ONT-012: `onlyWhile` (WHEN) and `fields` (who reads one detail) are not drawn by the
+    // permissions page, which sends only the collection's WHO. So a body without one of them KEEPS
+    // the collection's (measured: the page's own save dropped `onlyWhile`, and a sent bill became
+    // editable), `null` takes it away, and a value replaces it. A body with only those keys keeps
+    // the WHO it had. `permissions` and `creatorOwns` keep their old meaning: the body says both.
+    const prior = this.security.config.collections[name];
     const entry: Record<string, unknown> = {};
     if (body.permissions !== undefined) entry.permissions = body.permissions;
     if (body.creatorOwns !== undefined) entry.creatorOwns = body.creatorOwns;
-    if (body.onlyWhile !== undefined && body.onlyWhile !== null) entry.onlyWhile = body.onlyWhile;
-    else if (body.onlyWhile === undefined && kept) entry.onlyWhile = kept;
-    if (body.onlyWhile !== undefined && body.permissions === undefined && body.creatorOwns === undefined) {
-      // Only the WHEN was sent: the WHO the collection had stays as it was.
-      const prior = this.security.config.collections[name];
+    if (body.permissions === undefined && body.creatorOwns === undefined) {
       if (prior?.permissions) entry.permissions = prior.permissions;
       if (prior?.creatorOwns !== undefined) entry.creatorOwns = prior.creatorOwns;
+    }
+    for (const key of UNDRAWN_KEYS) {
+      if (body[key] !== undefined && body[key] !== null) entry[key] = body[key];
+      else if (body[key] === undefined && prior?.[key]) entry[key] = prior[key];
     }
     ctx.audit({ collection: name, rules: entry });
 
@@ -238,11 +245,13 @@ export class AdminSecurityRoutes {
   async deleteCollection(ctx: RequestContext): Promise<void> {
     const name = ctx.params.name;
     const existed = this.security.config.collections[name] !== undefined;
-    // P116 ONT-012: "revert to defaults" is about WHO; a collection's `onlyWhile` (WHEN) has no
-    // default to revert to, so it stays — taken away only by saying `onlyWhile: null`.
-    const kept = this.security.config.collections[name]?.onlyWhile;
+    // P116 ONT-012: "revert to defaults" is about the collection's WHO; `onlyWhile` and `fields`
+    // have no default to revert to, so they stay — taken away only by sending them as `null`.
+    const prior = this.security.config.collections[name];
     delete this.security.config.collections[name];
-    if (kept) this.security.config.collections[name] = { onlyWhile: kept };
+    const kept: Record<string, unknown> = {};
+    for (const key of UNDRAWN_KEYS) if (prior?.[key]) kept[key] = prior[key];
+    if (Object.keys(kept).length) this.security.config.collections[name] = kept as SecurityConfig['collections'][string];
     this.security.save();
     sendJSON(ctx.res, 200, { success: true, collection: name, removed: existed });
   }

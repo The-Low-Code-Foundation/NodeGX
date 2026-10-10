@@ -3,7 +3,7 @@
 **Opened 2026-10-10 (s16)**, from Richard's rulings R-a and R-b (README §9), both *against* the recommendation: the
 backend itself learns **per-field read rules** and **a rule on a value of the record** ("editable only while a
 draft"). **Depends on** ONT-004 (the rule atoms and the `only` seam), R10 (the facade as the one door). **Feeds**
-ONT-011 step 4 (secret details and *settled* project to these two rules). **Status: 🟡 s16 — the draft-only rule (R-b) ✅ built and graded on both engines (§6.1, AC1, AC4's half, AC5's half); per-field reads (R-a) next.**
+ONT-011 step 4 (secret details and *settled* project to these two rules). **Status: 🟡 s16 — both rules built and graded on SQLite and PostgreSQL: the draft-only rule (R-b, §6.1) and per-field reads (R-a, §6.2). AC1–AC5 met as worded. Owed: the Fable reach review, and the two limits in §7 (search over an index that does not hold the field; who may change a field).**
 
 > **Model check (Richard, 2026-10-08 rule):** the build wants **Opus 5.5**. It is fixed-shape enforcement on seams that
 > exist (ONT-004's `only`, R10's `AdapterFacade`), graded on both engines. **A reach review on Fable 5.1** follows the
@@ -151,9 +151,47 @@ Found while counting, and filed as their own bugs, not built here: `include` rea
   specs 166/166 (security model, path rule, target-goes, preconditions, FED-002/005, service-http), and the 9 specs
   on the permissions routes 183/183. `tsc` (src, tests, admin app) clean.
 
+### 6.2 Per-field reads (s16, 2026-10-10, Opus 5.5)
+
+- `security.json` `collections.<c>.fields.<f>.read` (`security/model.ts`: type, validator with 6 refusals,
+  `fieldMask(config, principal)` → per collection, `{ field }` hidden everywhere or `{ field, shownWhere }` shown on
+  the rows the caller's path atoms reach). It rides in every ACL option the row ACL binds (`StorageAclOption.hidden`,
+  read and write, every collection with a field rule), via `SecurityState.aclFor`. `hiddenFor(principal)` serves
+  live updates. The admin, dev-open and an unbound scoped key get no mask, as with the row ACL.
+- `persistence/fieldRules.ts`: `refuseHiddenNamed()` walks where (`$and`/`$or`/`$nor`, `$relatedTo`'s key, operator
+  sub-queries, `$path` hops resolved through the schema's link targets, including the hop's own `follow`/`by`
+  field), sort, keys, distinct, aggregate accessors, preconditions, and a search over a collection with any hidden
+  field. It throws `HiddenFieldNamed`, an `HttpError` **403** with `reason: 'hidden-field'` that names the field.
+  `stripHidden()` takes the fields off, with one id query per distinct reach for "shown on some rows". The query
+  runs under the caller's row ACL and **not** the collection's `only`: the narrowing decides which rows come back,
+  not which details show.
+- Wired into every facade method that takes the caller's ACL: `rawQuery`, `rawQueryAll`, `rawSearch`, `rawFetch` (so
+  `include` strips by the **target's** rules), `rawCount`, `rawAggregate`, `rawDistinct`, `rawSave` (preconditions,
+  the BYOB PUT body), `rawIncrement` (the Parse echo). Realtime: a frame is stripped per subscriber, and a
+  subscription is refused when a field is shown only on some rows or when its filter names a hidden field.
+- **Two catch-alls would have swallowed the 403** (the s12 lesson again): search turned every error into a 400, and
+  `classPut` turned a precondition's refusal into a 404 (measured red, line 232 of the spec). Both now pass an
+  `HttpError` through.
+- `PUT`/`DELETE /admin/permissions/collections/:name` keep `fields` as they keep `onlyWhile` (`UNDRAWN_KEYS`).
+- **Graded:** `tests/ont-012-field-reads.test.ts` **26/26**: 8 validator cases, then 9 per engine on SQLite and
+  PostgreSQL, over HTTP on a locked backend. The representative / the person / `care` / the admin are checked at
+  find, get, include, BYOB reads, the increment echo, BYOB PUT and 11 named refusals. "Shown on some rows" refuses
+  the person's own filter. AC5 round trip. **Two mutants**, each caught: the strip skipped (rep reads bob's details),
+  and the naming check skipped (a where answers who has asthma). `tests/realtime-hub.test.ts` +4 (12/12): stripped
+  frame, refused filter, refused partial, and the mutant of a hub with no mask. Neighbours in band (2026-10-11
+  00:06): 32 specs on security, the facade, search, realtime, aggregates, exports and the MCP, **490/490**; `tsc` for
+  src, tests, the admin app and the contract is clean.
+- **Filed:** bug `P116-S16-INCLUDECLP` (high). `include` embeds a record from a collection whose own `get` rule
+  refuses the caller. Measured: `GET /classes/Salary/:id` → 403, `GET /classes/Contract/:id?include=salary` → 200
+  with `amount: 91000`. Regression `tests/p116-s16-include-clp.test.ts` (`it.failing`). Pre-existing, not this
+  task's: the field rules already strip an include by the target's `fields`, and the collection-level half is owed.
+
 ## 7. Not this task
 
 - **Who may change a field** (a per-field `update` rule). Not ruled.
+- **Search is refused outright** on a collection where the caller has any hidden field, because the facade does not
+  know which fields the index covers. Refining it to "refused only when the index holds a hidden field" needs the
+  index's field list at the facade.
 - **The unique 409 echo** tells a creator that another row holds a value. A hidden field that is also unique is a
   combination no corpus row has. Recorded here, not built.
 - **The projection** (ONT-011 step 4) and the vocabulary (step 2) are Fable's. This task only gives them a target.

@@ -248,6 +248,8 @@ export class ParseWireRoutes {
         try {
           result = await this.facade.wireSearch(collection, { ...options, search: searchTerm });
         } catch (e) {
+          // P116 ONT-012: a search over a hidden detail is the facade's own 403; it stays one.
+          if (e instanceof HttpError) throw e;
           // "Search is not enabled for ..." (LocalSQLAdapter) is a caller
           // mistake, not a server fault — a clear 400 beats a generic 500.
           throw new HttpError(400, e instanceof Error ? e.message : String(e));
@@ -559,6 +561,8 @@ export class ParseWireRoutes {
         updated = await this.facade.rawIncrement(collection, objectId, increments, acl);
       }
     } catch (e) {
+      // P116 ONT-012: a precondition naming a hidden detail is the facade's own 403; it stays one.
+      if (e instanceof HttpError) throw e;
       // P116 ONT-012: "only while a draft" refusing is a 409 in its own words, not a 404.
       const settled = notWhileToHttp(e);
       if (settled) throw settled;

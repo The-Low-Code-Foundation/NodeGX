@@ -51,6 +51,7 @@ export type SearchOptions = StorageSearchOptions;
 export type WireQueryResult = StorageQueryResult;
 export type ImportColumn = StorageImportColumn;
 
+import { refuseHiddenNamed, stripHidden, type NamedFields } from './fieldRules';
 import { heldWhile, whyRefused } from './onlyWhile';
 
 // QueryBuilder is the adapter's own SQL/serialization helper — reused here so
@@ -209,6 +210,7 @@ export class AdapterFacade implements IStorageFacade {
   }
 
   async rawQuery(collection: string, options: QueryOptions = {}): Promise<WireQueryResult> {
+    this.refuseHidden(collection, options, options.acl);
     const { limit, capApplied } = this.resolveLimit(options.limit);
     const result = await this.call<WireQueryResult>(
       'query',
@@ -218,7 +220,38 @@ export class AdapterFacade implements IStorageFacade {
         count: count as number | undefined
       })
     );
+    result.results = await this.stripped(collection, result.results, options.acl);
     return this.markCapped(result, limit, capApplied);
+  }
+
+  // --------------------------------------------------------------------------
+  // P116 ONT-012 (R-a) — per-field read rules (`fieldRules.ts`). Every method below that takes the
+  // caller's ACL refuses a request naming a field it hides, and strips it from what it returns.
+  // --------------------------------------------------------------------------
+
+  private refuseHidden(collection: string, request: NamedFields, acl: AclOption | undefined): void {
+    refuseHiddenNamed(collection, request, acl, (c, field) => this.columnTypes(c).get(field)?.targetClass);
+  }
+
+  private stripped(collection: string, records: Record<string, unknown>[], acl: AclOption | undefined): Promise<Record<string, unknown>[]> {
+    if (!acl?.hidden?.[collection]) return Promise.resolve(records);
+    return stripHidden(collection, records, acl, async (shownWhere, ids) => {
+      // The rows the field's own rule reaches, under the caller's row ACL and nothing else: the
+      // collection's narrowing (`only`) decided which rows came back, not which details show.
+      const reachAcl: AclOption = { access: 'read', keys: acl.keys };
+      const found = await this.call<Record<string, unknown>[]>('query', {
+        collection,
+        where: { $and: [{ objectId: { $in: ids } }, shownWhere] },
+        limit: ids.length,
+        acl: reachAcl
+      });
+      return new Set(found.map((r) => String(r.objectId)));
+    });
+  }
+
+  private async strippedOne(collection: string, record: Record<string, unknown>, acl: AclOption | undefined): Promise<Record<string, unknown>> {
+    if (!record || typeof record !== 'object') return record;
+    return (await this.stripped(collection, [record], acl))[0];
   }
 
   /**
@@ -237,11 +270,14 @@ export class AdapterFacade implements IStorageFacade {
    * pages at 1,000 through here, and its page size is its own decision rather
    * than a number that silently becomes whatever `queries.maxLimit` is today.
    */
-  rawQueryAll(collection: string, options: QueryOptions = {}): Promise<WireQueryResult> {
-    return this.call<WireQueryResult>('query', { collection, ...options }, (results, count) => ({
+  async rawQueryAll(collection: string, options: QueryOptions = {}): Promise<WireQueryResult> {
+    this.refuseHidden(collection, options, options.acl);
+    const result = await this.call<WireQueryResult>('query', { collection, ...options }, (results, count) => ({
       results: results as Record<string, unknown>[],
       count: count as number | undefined
     }));
+    result.results = await this.stripped(collection, result.results, options.acl);
+    return result;
   }
 
   /**
@@ -252,6 +288,7 @@ export class AdapterFacade implements IStorageFacade {
    * surfaces as a rejected promise with LocalSQLAdapter's clear message.
    */
   async rawSearch(collection: string, options: SearchOptions): Promise<WireQueryResult> {
+    this.refuseHidden(collection, { ...options, search: true }, options.acl);
     const { limit, capApplied } = this.resolveLimit(options.limit);
     const result = await this.call<WireQueryResult>(
       'search',
@@ -264,15 +301,16 @@ export class AdapterFacade implements IStorageFacade {
     return this.markCapped(result, limit, capApplied);
   }
 
-  rawFetch(collection: string, objectId: string, acl?: AclOption): Promise<Record<string, unknown>> {
-    return this.call('fetch', { collection, objectId, acl });
+  async rawFetch(collection: string, objectId: string, acl?: AclOption): Promise<Record<string, unknown>> {
+    const record = await this.call<Record<string, unknown>>('fetch', { collection, objectId, acl });
+    return this.strippedOne(collection, record, acl);
   }
 
   rawCreate(collection: string, data: Record<string, unknown>): Promise<Record<string, unknown>> {
     return this.call('create', { collection, data });
   }
 
-  rawSave(
+  async rawSave(
     collection: string,
     objectId: string,
     data: Record<string, unknown>,
@@ -281,11 +319,12 @@ export class AdapterFacade implements IStorageFacade {
   ): Promise<Record<string, unknown>> {
     // HLT-016: `expect` is only sent when there is one, so a save without a precondition
     // reaches the adapter with exactly the options it always did.
+    if (expect) this.refuseHidden(collection, { expect }, acl);
     const held = heldWhile(collection, acl, 'update', Object.keys(data));
     const save = (a: AclOption | undefined) =>
       this.call<Record<string, unknown>>('save', expect ? { collection, objectId, data, acl: a, expect } : { collection, objectId, data, acl: a });
-    if (!held.rule) return save(acl);
-    return save(held.acl).catch((e) => this.whyRefused(e, collection, objectId, 'update', acl, held));
+    const saved = held.rule ? save(held.acl).catch((e) => this.whyRefused(e, collection, objectId, 'update', acl, held)) : save(acl);
+    return saved.then((record) => this.strippedOne(collection, record, acl));
   }
 
   /** P116 ONT-012 — see `onlyWhile.ts` `whyRefused`. */
@@ -335,6 +374,7 @@ export class AdapterFacade implements IStorageFacade {
   }
 
   rawCount(collection: string, where?: Record<string, unknown>, acl?: AclOption): Promise<number> {
+    this.refuseHidden(collection, { where }, acl);
     return this.call('count', { collection, where, acl });
   }
 
@@ -345,10 +385,13 @@ export class AdapterFacade implements IStorageFacade {
     acl?: AclOption
   ): Promise<Record<string, unknown>> {
     const held = heldWhile(collection, acl, 'update', Object.keys(properties));
-    if (!held.rule) return this.call('increment', { collection, objectId, properties, acl });
-    return this.call<Record<string, unknown>>('increment', { collection, objectId, properties, acl: held.acl }).catch((e) =>
-      this.whyRefused(e, collection, objectId, 'update', acl, held)
-    );
+    const done = held.rule
+      ? this.call<Record<string, unknown>>('increment', { collection, objectId, properties, acl: held.acl }).catch((e) =>
+          this.whyRefused(e, collection, objectId, 'update', acl, held)
+        )
+      : this.call<Record<string, unknown>>('increment', { collection, objectId, properties, acl });
+    // Parse echoes an incremented counter; a hidden one is not echoed (an Increment by 0 would read it).
+    return done.then((record) => this.strippedOne(collection, record, acl));
   }
 
   /**
@@ -374,6 +417,7 @@ export class AdapterFacade implements IStorageFacade {
     where?: Record<string, unknown>,
     acl?: AclOption
   ): Promise<StorageAggregateResult> {
+    this.refuseHidden(collection, { where, group }, acl);
     const result = await this.call<Record<string, unknown>>('aggregate', {
       collection,
       group,
@@ -423,6 +467,7 @@ export class AdapterFacade implements IStorageFacade {
     where?: Record<string, unknown>,
     acl?: AclOption
   ): Promise<StorageDistinctResult> {
+    this.refuseHidden(collection, { where, distinct: property }, acl);
     const values = await this.call<unknown[]>('distinct', { collection, property, where, acl });
     const { maxLimit } = this.getPageCap();
     if (!Array.isArray(values)) return { values };
