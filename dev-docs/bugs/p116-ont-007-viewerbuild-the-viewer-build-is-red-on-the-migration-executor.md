@@ -8,6 +8,7 @@ area: backend contract / the migration executor (`nodegx-backend-contract/src/mi
 found: P109 s37, 2026-10-09, building the viewer at `f1ad13e2e` for ISL-052
 evidence: `cd packages/noodl-viewer-react && npx webpack --config webpack-configs/webpack.viewer.prod.js` → "compiled with 3 errors", exit 1 — three TS2802 ("can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher"), all in migration.ts; the PR workflow runs this build (`.github/workflows/pr.yml:251`, `npm run ci:build:viewer`)
 kit: core
+regression: packages/nodegx-backend-contract/tests/viewer-es5.test.ts "src/ has no iteration the viewer refuses"
 ---
 
 **What a person sees.** Nothing in the app yet: the PR checks fail at "build viewer", on every pull request from `cline-dev`
@@ -28,3 +29,7 @@ viewer-react).
 **Fixed (P109 s37, 2026-10-09, because it blocked ISL-052: a production webpack build with errors writes no bundle, so no
 viewer fix could be measured).** As proposed: `Array.from` at the three places. The viewer build: exit 1 with 3 errors at
 `f1ad13e2e`, exit 0 after. `nodegx-backend-contract` `tests/migration.test.ts` 20 / 20, its `tsc --noEmit` clean.
+
+**Regression added (P116 s14, 2026-10-10).** `tests/viewer-es5.test.ts` compiles `src/index.ts` at the viewer's target
+(ES5, its libs, no `downlevelIteration`) and refuses TS2802/TS2569, beside a known-firing control (a Map spread). Measured
+on a copy of `src/` with s12's `targetGoes.ts` (`1668b99c6`): 1 error, `targetGoes.ts:226` — the line s13 fixed.

@@ -327,9 +327,37 @@ delete time (bug `P116-ONT-003-links`, now `open`, not built here).
 
 - **The route's read-only twin.** The dry run is a POST on the same pattern, so `admin:readonly` cannot call it
   (`READONLY_SAFE_ROUTES` is by route, not body). ONT-008's page may want a `POST /admin/world/migrate/dry-run`.
-- **`-renamecolumn`** (a check or index on a renamed field) is still open — the planner takes such rules off first, so a
-  plan never meets it; a hand rename still does.
+- ~~**`-renamecolumn`**~~ fixed s14 (§6.12).
 - **Rules on a deleted collection or a dropped field** are left as they are (the person's); `permissionReach` names them
   for the page.
 - **The MCP** has no tool for the route (`write_world` does not grow a `migrate` arm here): the surface budget is the
   reason to ask before adding one.
+
+### 6.12 s14, 2026-10-10 — a rename is refused like a drop (Opus 5.5)
+
+Bug `P116-ONT-007-renamecolumn` fixed (`78ec0ed69`), by the refusal its file recommended, not by carrying the
+declaration across: BMG-003 already refuses a drop or a type change of a field something declared reads, and the
+planner already takes such a rule off first (`migrate.ts` `checksMove`/`indexesMove`), so the refusal never meets a
+plan and costs a hand rename one step.
+
+- `refuseColumnInUse` (`schemaCommon.ts`) takes the verb; each manager has one `refuseIfRead` that `dropColumn` and
+  `renameColumn` both call before any DDL. The route refuses first in the page's words (409) and maps an adapter's
+  `COLUMN_IN_USE` to 409. The words: `Cannot rename "tier" in "T": the rule "tier is one of basic, gold" reads it.
+  Remove that rule first.`
+- **Found while grading it, bug `P116-S14-partialdrop`:** an index reads the fields its `where` names too, and nothing
+  counted them. A drop of a field only a partial index's condition read **went through on PostgreSQL and took the index
+  with it**, and failed on SQLite in the engine's own words. The planner had always counted `where` fields; the
+  refusal had not. Fixed in the same helper, for drop and rename, and in the route's `refuseIfInUse`.
+- Graded: conformance case `schema/rename-column-keeps-its-values-and-refuses-one-in-use` (so `renameColumn` leaves
+  the uncovered list: **21 of 68**, ceiling still 22), the drop case's where-only reader, and `bmg-003-schema`'s route
+  case, all on SQLite and PostgreSQL. **Red before the fix on both engines** (the rename went through; the where-only
+  drop: PostgreSQL succeeded, SQLite `ERR_SQLITE_ERROR`), green after.
+- **And a guard for the viewer build** (bug `-viewerbuild` had no regression, and the build went red twice from this
+  package): `nodegx-backend-contract/tests/viewer-es5.test.ts` compiles `src/index.ts` at the viewer's target and
+  refuses TS2802/TS2569, beside a Map-spread control. Measured on a copy of `src/` with s12's `targetGoes.ts`: one
+  error, at `:226`.
+- Measured (13:15–13:35 CEST, over HEAD `d3fc44f7b` + these edits): `nodegx-backend` the eight conformance / BMG-003 /
+  ONT-007 specs **155 / 155**, every `ont-00*` spec **189 / 189**; `nodegx-backend-contract` **230 / 230**;
+  `noodl-runtime` `SchemaManager.dropColumn` **6 / 6**; `tsc --noEmit` clean on the runtime, the backend (both
+  configs) and the contract. The backend's `tsconfig.tests.json` is clean now (ISL-010's four lines are gone).
+- Not driven: the admin page's rename (`schema.tsx:389`) shows a refusal through its existing `.catch(fail)` toast.
