@@ -46,6 +46,7 @@ import { registerProjectSettingsTools } from './tools/projectSettingsTools';
 import { registerLibraryTools } from './tools/libraryTools';
 import { registerLessonTools } from './tools/lessonTools';
 import { ToolDisclosure, recordTools, registerFindTools } from './tools/disclosure';
+import { refuseUnknownArguments } from './tools/unknownArguments';
 import type { ReproducibleOutput } from './project/writeClock';
 
 /**
@@ -153,6 +154,9 @@ export function createServer(options: ServerOptions): CreatedServer {
           : projectInstructions({ projectDir: store.projectDir, allowWrites: options.allowWrites, deferTools })
     }
   );
+
+  // P109-S12 — a key no tool declares is refused by name before any handler runs (zod would strip it without a word).
+  refuseUnknownArguments(server);
 
   // AWP-006 — every registration below goes through the recorder, which keeps
   // the SDK's handle so a group can be hidden at startup and revealed later.
