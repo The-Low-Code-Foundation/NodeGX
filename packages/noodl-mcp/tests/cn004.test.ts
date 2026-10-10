@@ -161,7 +161,9 @@ describe('acceptance criterion 3 — a type no kit declares is unchanged', () =>
 
     const connPath = path.join(dir, 'components', 'App', 'connections.json');
     const conns = JSON.parse(fs.readFileSync(connPath, 'utf8'));
-    conns.connections.push({ fromId: 'dyn_panel', fromProperty: 'title', toId: 'stray', toProperty: 'anything' });
+    // P109-S1-CN004: into Panel's `title`, which is an INPUT. The wire used to run out of it, and Panel has no output of
+    // that name, so strict read a second, true error (`nonexistent-port`) and `summary.errors` was 2 for this arm's 1.
+    conns.connections.push({ fromId: 'stray', fromProperty: 'anything', toId: 'dyn_panel', toProperty: 'title' });
     fs.writeFileSync(connPath, JSON.stringify(conns, null, 2));
     return dir;
   }
