@@ -469,13 +469,15 @@ export const Expression = defineNode({
     },
 
     derived: {
-      // updatePorts :795-815 — what the editor draws: each port the text reads, and its checkbox
+      // updatePorts :827-847 — what the editor draws: each port the text reads, in group Parameters (:831-840), and its
+      // checkbox, labelled with the port's name in group Run On Value Change (run-on-value-change.ts `runOnChangeDynamicPorts`
+      // :160-178). NSP-020 (s80, oracle (a)): the group and the label were missing.
       inputs: (params) => {
         const ports: Record<string, InputDecl> = {};
         if (typeof params.expression !== 'string') return ports;
         for (const name of expressionPorts(params.expression)) {
-          ports[name] = valuePort();
-          ports[RUN_ON_CHANGE + name] = checkboxPort();
+          ports[name] = { ...valuePort(), group: 'Parameters' };
+          ports[RUN_ON_CHANGE + name] = { ...checkboxPort(), displayName: name, group: 'Run On Value Change' };
         }
         return ports;
       },

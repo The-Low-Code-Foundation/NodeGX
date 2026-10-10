@@ -332,10 +332,17 @@ export const FilterCollection = defineNode({
         }
         if (params.filterSort) for (const s of String(params.filterSort).split(',')) names.push('filterSort-' + s);
         for (const n of names) out[n] = settingPort(n);
-        // :704-713 — `Is one of` / `Is not one of` take a list, so the value port is `Values`
+        // :704-713 — `Is one of` / `Is not one of` take a list, so the value port is `Values`, typed `*`; any other Op's value port
+        // is typed by the filter's Type, `string` when unset (NSP-020 s80, oracle (a): it was `*` for every Op)
         if (params.filterFilter)
           for (const f of String(params.filterFilter).split(','))
             if (params['filterFilterOp-' + f] === 'in' || params['filterFilterOp-' + f] === 'nin') out['filterFilterValue-' + f] = { ...out['filterFilterValue-' + f], displayName: 'Values' };
+            else out['filterFilterValue-' + f] = { ...out['filterFilterValue-' + f], type: ((params['filterFilterType-' + f] as string) || 'string') as ValueInputDecl['type'] };
+        // :616-633 — Limit and Skip are drawn with the defaults `getLimit` / `getSkip` (:401-412) read for an unset one
+        if (params.filterEnableLimit) {
+          out.filterLimit = { ...out.filterLimit, default: 10 };
+          out.filterSkip = { ...out.filterSkip, default: 0 };
+        }
         return out;
       },
       // :563-571 — any name at all, on first write

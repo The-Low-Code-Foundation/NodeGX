@@ -56,9 +56,10 @@ export const Or = defineNode({
   {
     derived: {
       // nodedefinition.ts `collectPorts`: the highest `input <n>` mentioned plus one spare, or a
-      // single `input 0` when nothing is mentioned (same rule as And).
-      inputs: (params) => {
-        const indices = Object.keys(params)
+      // single `input 0` when nothing is mentioned (same rule as And). NSP-020 (s80): mentioned by a param OR by a wire
+      // into the node (`collectPorts` :624 reads `getConnectionsTo(node.id)`'s target ports) — `context.wired`.
+      inputs: (params, context) => {
+        const indices = [...Object.keys(params), ...(context.wired ?? [])]
           .filter((k) => NUMBERED.test(k))
           .map((k) => Number(k.slice('input '.length)));
         const count = indices.length ? Math.max(...indices) + 2 : 1;
@@ -66,6 +67,7 @@ export const Or = defineNode({
         for (let i = 0; i < count; i++) ports['input ' + i] = port(i);
         return ports;
       },
+      needs: ['wired'],
       // :35-42 — store under the index; the :36-38 same-value guard skips a flag and nothing else
       // a wire can see (the wire dedups), so it is not carried.
       on: (s, portName, value) => ({ set: { inputs: { ...s.inputs, [portName]: value as boolean } } }),

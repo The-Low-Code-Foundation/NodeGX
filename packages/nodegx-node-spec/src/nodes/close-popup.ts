@@ -147,7 +147,8 @@ export const ClosePopup = defineNode({
       // setup :327-367 — one `result-` per Results name, one `closeAction-` signal per Close Actions name
       inputs: (params) => {
         const ports: Record<string, InputDecl> = {};
-        if (params.results) for (const p of String(params.results).split(',')) ports['result-' + p] = resultPort();
+        // :374-375 — each Results port is labelled with its name (NSP-020 s80, oracle (a): the label was missing)
+        if (params.results) for (const p of String(params.results).split(',')) ports['result-' + p] = { ...resultPort(), displayName: p };
         if (params.closeActions) for (const p of String(params.closeActions).split(',')) ports['closeAction-' + p] = closeActionPort(p);
         return ports;
       },
