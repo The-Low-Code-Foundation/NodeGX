@@ -8,7 +8,7 @@ kit: preview
 found: P112 OWN-004 s3, 2026-10-10
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/OWN-004-THE-REAL-APP-BESIDE-IT.md §6.1
 regression: packages/noodl-preview/scripts/in-page-check.mjs
-commit: (this session's OWN-004 commit)
+commit: 0aa8954f1
 ---
 
 A deployed app made with `nodegx deploy` (or shown by `noodl-preview`) carried two settings in its `window.projectData`

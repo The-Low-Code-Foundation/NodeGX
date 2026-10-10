@@ -18,7 +18,7 @@
     "catalogFormatVersion": "1.1.0",
     "catalogNodes": 180,
     "population": 147,
-    "specCount": 86,
+    "specCount": 108,
     "pageTypes": 37,
     "unmountableSpecs": [
       "Open File Picker"
@@ -438,32 +438,33 @@
     },
     {
       "template": "rocket-school",
-      "components": 88,
-      "total": 917,
+      "components": 102,
+      "total": 1146,
       "counts": {
-        "page": 77,
-        "world": 112,
-        "visual": 231,
-        "script": 167,
-        "component": 153,
-        "notInPicker": 25,
-        "unspecced": 152
+        "page": 91,
+        "world": 144,
+        "visual": 322,
+        "script": 191,
+        "component": 192,
+        "notInPicker": 30,
+        "unspecced": 176
       },
       "worldNeeds": {
-        "registry": 91,
-        "router": 21
+        "registry": 114,
+        "router": 30
       },
       "unspecced": {
-        "Component Inputs": 75,
-        "Component Outputs": 74,
+        "Component Inputs": 87,
+        "Component Outputs": 86,
         "net.noodl.GlobalStore": 1,
         "net.noodl.GlobalStore.Set": 1,
         "net.noodl.GlobalStore.Subscribe": 1
       },
       "notInPicker": {
+        "Page": 9,
         "game-kit.Sound": 7,
-        "Page": 7,
         "keyboard-shortcuts.KeyboardShortcut": 4,
+        "game-kit.Alien": 3,
         "game-kit.RaceTrack": 3,
         "game-kit.AnswerPad": 1,
         "game-kit.Avatar": 1,
@@ -471,14 +472,14 @@
         "game-kit.KeyboardMap": 1
       },
       "world": {
-        "Set Variable": 54,
-        "Variable2": 28,
-        "RouterNavigate": 21,
+        "Set Variable": 68,
+        "Variable2": 37,
+        "RouterNavigate": 30,
         "Static Data": 9
       },
       "page": {
-        "States": 34,
-        "Condition": 33,
+        "States": 43,
+        "Condition": 38,
         "Counter": 4,
         "net.noodl.animatetovalue": 3,
         "Timer": 3
@@ -523,34 +524,34 @@
     },
     {
       "template": "todo-list",
-      "components": 54,
-      "total": 531,
+      "components": 80,
+      "total": 883,
       "counts": {
-        "page": 19,
-        "world": 92,
-        "visual": 199,
-        "script": 53,
-        "component": 71,
+        "page": 29,
+        "world": 116,
+        "visual": 398,
+        "script": 92,
+        "component": 100,
         "notInPicker": 2,
-        "unspecced": 95
+        "unspecced": 146
       },
       "worldNeeds": {
-        "registry": 89,
+        "registry": 113,
         "backend": 33,
         "router": 2,
         "viewport": 1
       },
       "unspecced": {
-        "Component Inputs": 48,
-        "Component Outputs": 47
+        "Component Inputs": 74,
+        "Component Outputs": 72
       },
       "notInPicker": {
         "Page": 2
       },
       "world": {
-        "Set Variable": 46,
+        "Set Variable": 67,
         "SetDbModelProperties": 17,
-        "Variable2": 10,
+        "Variable2": 13,
         "DbCollection2": 6,
         "NewDbModelProperties": 5,
         "net.noodl.user.User": 2,
@@ -562,58 +563,58 @@
       },
       "page": {
         "Condition": 15,
-        "States": 4
+        "States": 14
       }
     },
     {
       "template": "todo-list-demo",
-      "components": 53,
-      "total": 504,
+      "components": 79,
+      "total": 852,
       "counts": {
-        "page": 14,
-        "world": 58,
-        "visual": 189,
-        "script": 77,
-        "component": 70,
+        "page": 24,
+        "world": 81,
+        "visual": 388,
+        "script": 113,
+        "component": 99,
         "notInPicker": 1,
-        "unspecced": 95
+        "unspecced": 146
       },
       "worldNeeds": {
-        "registry": 57,
+        "registry": 80,
         "viewport": 1
       },
       "unspecced": {
-        "Component Inputs": 48,
-        "Component Outputs": 47
+        "Component Inputs": 74,
+        "Component Outputs": 72
       },
       "notInPicker": {
         "Page": 1
       },
       "world": {
-        "Set Variable": 47,
-        "Variable2": 10,
+        "Set Variable": 67,
+        "Variable2": 13,
         "Screen Resolution": 1
       },
       "page": {
-        "Condition": 10,
-        "States": 4
+        "States": 14,
+        "Condition": 10
       }
     }
   ],
   "all": {
-    "total": 9164,
+    "total": 10093,
     "counts": {
-      "page": 313,
-      "world": 1133,
-      "visual": 3560,
-      "script": 1299,
-      "component": 1270,
-      "notInPicker": 360,
-      "unspecced": 1229
+      "page": 347,
+      "world": 1212,
+      "visual": 4049,
+      "script": 1398,
+      "component": 1367,
+      "notInPicker": 365,
+      "unspecced": 1355
     },
     "unspecced": {
-      "Component Inputs": 578,
-      "Component Outputs": 493,
+      "Component Inputs": 642,
+      "Component Outputs": 555,
       "noodl.cloud.response": 91,
       "noodl.cloud.request": 41,
       "net.noodl.GlobalStore.Set": 5,
@@ -628,9 +629,9 @@
       "noodl.cloud.sendemail": 1
     },
     "worldNeeds": {
-      "registry": 950,
+      "registry": 1020,
       "backend": 147,
-      "router": 135,
+      "router": 144,
       "network": 42,
       "project": 42,
       "viewport": 3,
@@ -639,7 +640,7 @@
     },
     "notInPicker": {
       "Translation": 196,
-      "Page": 66,
+      "Page": 68,
       "Language Bundle": 18,
       "Variable": 16,
       "keyboard-shortcuts.KeyboardShortcut": 8,
@@ -648,6 +649,7 @@
       "garden-kit.Garden": 5,
       "dbt-lesson.PaceTracker": 4,
       "game-kit.Avatar": 4,
+      "game-kit.Alien": 3,
       "game-kit.KeyboardMap": 3,
       "game-kit.RaceTrack": 3,
       "nightbook-kit.Page": 3,
