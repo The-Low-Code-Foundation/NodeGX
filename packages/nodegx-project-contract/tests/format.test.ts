@@ -182,3 +182,84 @@ describe('AC3 — a write after a change the writer did not read is refused', ()
     expect(store.readRegistry().stats!.totalComponents).toBe(79);
   });
 });
+
+describe('OWN-001 slice 2 — what a caller on top of the store can see and do', () => {
+  const tree = readTree(path.join(TEMPLATES, 'todo-list'));
+  const reasonOf = (fn: () => unknown): string => {
+    try {
+      fn();
+      return 'written';
+    } catch (err) {
+      return err instanceof FormatRefusal ? `${err.code}/${err.reason}` : String(err);
+    }
+  };
+
+  test('every refusal says which rule refused, beside the tool-error code', () => {
+    const files = memoryFiles(tree);
+    const a = new V2ProjectStore(files);
+    const key = a.componentKeys()[0];
+    const c = a.readComponent(key);
+    expect(reasonOf(() => a.writeComponent(key, c.files, { expectNew: true }))).toBe('already-exists/exists');
+    expect(reasonOf(() => a.writeComponent('Nope/Missing', c.files))).toBe('not-found/missing');
+    expect(reasonOf(() => a.readComponent('Nope/Missing'))).toBe('not-found/unknown-component');
+    expect(reasonOf(() => a.writeComponent(key, withNode(c.files, 'x'), { ifRevision: 'stale' }))).toBe(
+      'conflict/stale-revision'
+    );
+    new V2ProjectStore(files).writeComponent(key, withNode(c.files, 'b'));
+    expect(reasonOf(() => a.writeComponent(key, withNode(c.files, 'a')))).toBe('conflict/drift');
+    files.write('components/Orphan/nodes.json', '{}');
+    expect(reasonOf(() => a.writeComponent('Orphan', c.files, { expectNew: true }))).toBe('conflict/unregistered-files');
+    expect(reasonOf(() => new V2ProjectStore(memoryFiles({ 'project.json': '{}' })))).toBe('not-a-v2-project/legacy-project');
+    expect(reasonOf(() => new V2ProjectStore(memoryFiles({})))).toBe('not-a-v2-project/not-a-project');
+  });
+
+  test('prepare runs after the write is admitted and before the unchanged check, and never on a refused write', () => {
+    const files = memoryFiles(tree);
+    const store = new V2ProjectStore(files);
+    const key = store.componentKeys()[0];
+    const c = store.readComponent(key);
+    const calls: Array<ComponentFiles | undefined> = [];
+    // A prepare that edits the candidate back to what is stored: the write is a no-op, as the MCP's pins need.
+    const candidate = withNode(c.files, 'pinned');
+    const prepare = (stored: ComponentFiles | undefined) => {
+      calls.push(stored);
+      candidate.nodes.nodes = JSON.parse(JSON.stringify(c.files.nodes.nodes));
+    };
+    expect(store.writeComponent(key, candidate, { ifRevision: c.revision, prepare })).toEqual({
+      revision: c.revision,
+      unchanged: true
+    });
+    expect(calls).toHaveLength(1);
+    expect(calls[0]).toEqual(c.files);
+    expect(files.entries()).toEqual(tree);
+
+    // Refused writes never reach it.
+    const before = calls.length;
+    expect(reasonOf(() => store.writeComponent(key, withNode(c.files, 'x'), { ifRevision: 'stale', prepare }))).toBe(
+      'conflict/stale-revision'
+    );
+    expect(reasonOf(() => store.writeComponent(key, c.files, { expectNew: true, prepare }))).toBe('already-exists/exists');
+    expect(calls.length).toBe(before);
+
+    // A create sees no stored files.
+    const fresh = JSON.parse(JSON.stringify(c.files)) as ComponentFiles;
+    fresh.component = { ...fresh.component, id: 'own001-new', path: '/Own001New' };
+    store.writeComponent('Own001New', fresh, { expectNew: true, prepare });
+    expect(calls[calls.length - 1]).toBeUndefined();
+  });
+
+  test('filesOf and storedFiles read a component without taking a snapshot', () => {
+    const files = memoryFiles(tree);
+    const store = new V2ProjectStore(files);
+    const key = store.componentKeys()[0];
+    const { entry } = store.resolve(key)!;
+    const c = store.readComponent(key);
+    expect(store.filesOf(key, entry)).toEqual(c.files);
+    expect(store.storedFiles(entry)).toEqual(c.files);
+    // A read through filesOf after another writer's change does not refresh the snapshot taken by readComponent.
+    new V2ProjectStore(files).writeComponent(key, withNode(c.files, 'b'));
+    expect(store.filesOf(key, entry).nodes.nodes).toHaveLength(c.files.nodes.nodes.length + 1);
+    expect(reasonOf(() => store.writeComponent(key, withNode(c.files, 'a')))).toBe('conflict/drift');
+    expect(store.storedFiles({ ...entry, path: 'Nope/Missing' })).toBeUndefined();
+  });
+});

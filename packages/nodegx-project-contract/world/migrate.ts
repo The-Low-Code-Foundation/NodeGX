@@ -306,13 +306,13 @@ function recordOf(schema: WorldSchema, relation: string): WorldCollection | unde
  */
 export function planMigration(before: WorldFiles, after: WorldFiles): MigrationPlanResult {
   const pb = projectWorld(before);
-  if (!pb.ok) return { ok: false, problems: pb.problems.map((p) => `the world before: ${p}`) };
+  if (pb.ok === false) return { ok: false, problems: pb.problems.map((p) => `the world before: ${p}`) };
   const pa = projectWorld(after);
-  if (!pa.ok) return { ok: false, problems: pa.problems.map((p) => `the world after: ${p}`) };
+  if (pa.ok === false) return { ok: false, problems: pa.problems.map((p) => `the world after: ${p}`) };
   const renames = nounRenames(before, after);
   const renamed = renameNouns(before, renames);
   const pr = renames.size ? projectWorld(renamed) : pb;
-  if (!pr.ok) return { ok: false, problems: pr.problems.map((p) => `the world before, renamed: ${p}`) };
+  if (pr.ok === false) return { ok: false, problems: pr.problems.map((p) => `the world before, renamed: ${p}`) };
 
   // The renames first, on the old schema: the rest of the plan reads the world before as if it
   // had always used the new ids.

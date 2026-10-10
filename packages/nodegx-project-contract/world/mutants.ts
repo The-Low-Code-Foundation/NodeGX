@@ -128,7 +128,7 @@ function alternatives(q: Question): Array<string | boolean> {
 
 function project(files: WorldFiles): { schema?: WorldSchema; problems?: string[] } {
   const out = projectWorld(files);
-  return out.ok ? { schema: out.schema } : { problems: out.problems };
+  return out.ok === true ? { schema: out.schema } : { problems: out.problems };
 }
 
 function withAnswers(

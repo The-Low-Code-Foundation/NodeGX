@@ -1,0 +1,13 @@
+[
+  { "edit": "add_node", "component": "App", "type": "Text", "parent": "app_root", "index": 0, "label": "Banner", "parameters": { "text": "Suite was here" } },
+  { "edit": "add_node", "component": "App", "id": "suite-counter", "type": "Counter", "parameters": { "startValue": 1 }, "x": 900, "y": 40 },
+  { "edit": "add_node", "component": "App", "id": "suite-limit", "type": "Number", "parameters": { "value": 3 }, "x": 900, "y": 200 },
+  { "edit": "connect", "component": "App", "from": { "node": "suite-limit", "port": "value" }, "to": { "node": "suite-counter", "port": "limit" } },
+  { "edit": "disconnect", "component": "App", "from": { "node": "suite-limit", "port": "value" }, "to": { "node": "suite-counter", "port": "limit" } },
+  { "edit": "set_parameter", "component": "App", "id": "app_root", "name": "paddingTop", "value": 8 },
+  { "edit": "rename", "component": "App", "id": "app_router", "label": "The router" },
+  { "edit": "move", "component": "App", "id": "app_css", "x": 10, "y": 900 },
+  { "edit": "add_node", "component": "App", "id": "suite-box", "type": "Group", "parent": "app_root" },
+  { "edit": "add_child", "component": "App", "id": "app_router", "parent": "suite-box" },
+  { "edit": "remove_node", "component": "App", "id": "suite-limit" }
+]

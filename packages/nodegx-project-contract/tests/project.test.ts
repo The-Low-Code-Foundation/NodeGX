@@ -189,7 +189,12 @@ describe('AC4 — nothing in the package reaches an adapter', () => {
   // P112 OWN-001 moved the v2 format into this package (world.ts said it would). Its imports from outside are named
   // here, not waived: the JSON Schema validator the format moved with, and Node's file system in the Node-only
   // `format-node` entry. An adapter, a runtime or any other package still fails this gate.
-  const NAMED: Record<string, string[]> = { 'format/validator.ts': ['ajv'], 'format-node.ts': ['fs', 'path'] };
+  const NAMED: Record<string, string[]> = {
+    'format/validator.ts': ['ajv'],
+    'format-node.ts': ['fs', 'path'],
+    // P112 OWN-006 — the suite's command over a folder on disk; the suite itself (`editor-suite.ts`) is in memory.
+    'editor-suite-node.ts': ['fs', 'path']
+  };
 
   it('every import stays inside the package', () => {
     const outside = sources.flatMap((f) =>

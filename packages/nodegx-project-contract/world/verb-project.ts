@@ -193,7 +193,7 @@ export function verbClaims(verb: Verb, world: WorldFiles): VerbClaimsResult {
   const verdict = validateVerbs({ verbs: [verb] }, world);
   if (!verdict.ok) return { ok: false, problems: verdict.problems.map((p) => p.message) };
   const projected = projectWorld(world);
-  if (!projected.ok) return { ok: false, problems: projected.problems };
+  if (projected.ok === false) return { ok: false, problems: projected.problems };
   const subjects = verbSubjects(world);
   const claims: WorldClaim[] = [];
   for (const s of verb.steps) {

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections.json",
+  "componentId": "comp-home",
+  "connections": [
+    {
+      "fromId": "home-title",
+      "fromProperty": "text",
+      "toId": "home-count",
+      "toProperty": "text"
+    }
+  ]
+}

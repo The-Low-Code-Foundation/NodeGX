@@ -1,0 +1,12 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections.json",
+  "componentId": "comp-counter",
+  "connections": [
+    {
+      "fromId": "limit",
+      "fromProperty": "value",
+      "toId": "counter",
+      "toProperty": "limit"
+    }
+  ]
+}

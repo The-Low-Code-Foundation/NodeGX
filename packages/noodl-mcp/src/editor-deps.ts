@@ -227,7 +227,9 @@ export type {
 } from '../../noodl-editor/src/editor/src/models/AiAssistant/authoring/layout';
 
 // ─── Schemas + structural validator (STRUCT-001) ──────────────────────────────
-export { SchemaValidator, SCHEMA_IDS, formatValidationErrors } from '../../noodl-editor/src/editor/src/schemas';
+// P112 OWN-001 — the format lives in `@nodegx/project-contract/format` now (slice 1 moved it, slice 2
+// imports it from there); the editor's `schemas/` re-exports the same names for one release.
+export { SchemaValidator, SCHEMA_IDS, formatValidationErrors } from '@nodegx/project-contract/format';
 export type {
   ProjectV2File,
   ComponentV2File,
@@ -242,7 +244,7 @@ export type {
   StylesV2File,
   PortDefinition,
   ValidationError
-} from '../../noodl-editor/src/editor/src/schemas';
+} from '@nodegx/project-contract/format';
 
 // ─── Creation defaults (DEF-025) ──────────────────────────────────────────────
 // Richard's ruling of 2026-08-30 is "flip at creation, in BOTH doors", and this

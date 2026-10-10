@@ -227,7 +227,7 @@ export function nextQuestions(files: WorldFiles, options: { limit?: number } = {
     const ask = `"${r.sentence}" — through what is the ${r.to} ${a(r.from)} belongs to reached from the ${signs.id} who signs in? Name the relations from the ${signs.id} to the ${r.to}, in order.`;
     if (r.through) {
       const compiled = ownerRule(right, files, r.id);
-      if (!compiled.ok) return { ok: false, problems: [{ file: WORLD_FILES.relations, at: `relations[${ri}].through`, expected: 'a chain the schema can follow', message: compiled.problem }] };
+      if (compiled.ok === false) return { ok: false, problems: [{ file: WORLD_FILES.relations, at: `relations[${ri}].through`, expected: 'a chain the schema can follow', message: compiled.problem }] };
       record.push({ relation: r.id, kind: ownedBy.id, question: 'through', ask, said: chainWords(r.through), how: 'asked' });
       continue;
     }

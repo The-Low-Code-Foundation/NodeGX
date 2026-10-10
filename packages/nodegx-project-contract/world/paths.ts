@@ -257,7 +257,7 @@ export function worldRule(
     };
   }
   const compiled = worldPath(schema, files, sentence);
-  if (!compiled.ok) return compiled;
+  if (compiled.ok === false) return compiled;
   const hops: PathHop[] = [
     { from: login.collection, by: login.by },
     ...(login.then || []),
@@ -303,7 +303,7 @@ export function ownerRule(
     from: signs.id,
     steps: [...r.through.map((s) => ({ ...s })), { relation: r.id, back: true }]
   });
-  if (!rule.ok) return { ok: false, problem: `"${relation}", through what it belongs: ${rule.problem}` };
+  if (rule.ok === false) return { ok: false, problem: `"${relation}", through what it belongs: ${rule.problem}` };
   return rule;
 }
 

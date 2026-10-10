@@ -90,7 +90,10 @@ const operationSchema = z.discriminatedUnion('op', [
         x: z.number().optional(),
         y: z.number().optional(),
         variant: z.string().optional(),
-        parent: z.string().nullable().optional().describe('Reparent; null detaches from the visual tree')
+        parent: z.string().nullable().optional().describe('Reparent; null detaches from the visual tree'),
+        // P112 OWN-006 — the editor suite's first finding: a reparent could not place the child. Said in
+        // add_node's words: the resident surface is 19 tokens under its budget (AWP-006).
+        index: z.number().optional().describe("Index among parent's children")
       })
       // AWP-002 A19 — strict, so an unnamed key is a refusal and not a silent
       // strip. The comment above says a field zod does not name is a field zod

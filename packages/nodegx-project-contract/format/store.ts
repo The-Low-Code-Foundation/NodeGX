@@ -12,9 +12,11 @@
  * - **Keep the registry true**: every write or delete updates the component's entry, its counts and
  *   the totals.
  *
- * What stays in the MCP for now: the component-id clock (`writeClock.ts`), the run-on-value-change
- * pins for projects older than format 5, the project-level files (settings, tokens, cloud) and the
- * tool errors. OWN-001 slice 2 moves the MCP onto this store.
+ * What stays in the MCP, on top of this store (OWN-001 slice 2): the component-id clock
+ * (`writeClock.ts`, passed in as `now`), the run-on-value-change pins for projects older than format 5
+ * (run in `writeComponent`'s `prepare` hook), the project-level files (settings, tokens, cloud), the
+ * normalized model for the semantic validator, and the tool errors (`FormatRefusal.code` is the
+ * `ToolError` code; `reason` says which rule refused, so the MCP can say it in its own door's words).
  */
 import type { ProjectFiles } from './files';
 import { hash53 } from '../hash';
@@ -55,14 +57,37 @@ export interface StoredComponent {
 
 export type FormatRefusalCode = 'conflict' | 'not-found' | 'already-exists' | 'not-a-v2-project' | 'io-error';
 
-/** A write or read the rules refuse. `code` is the MCP's `ToolError` code for the same refusal. */
+/**
+ * Which rule refused. One per sentence a caller might want to say differently (the MCP names its
+ * tools in its wording; a page names its buttons): `drift` a file changed since this store read it,
+ * `stale-revision` the caller's `ifRevision` is not the files' revision, `exists` a create over a
+ * registered component, `missing` an update of an unregistered one, `unregistered-files` a create
+ * over files the registry does not list, `unknown-component` a read of a name the registry does not
+ * have, `legacy-project` / `not-a-project` the constructor's two, `read-failed` a file that is not JSON,
+ * `missing-registry` no `components/_registry.json`.
+ */
+export type FormatRefusalReason =
+  | 'drift'
+  | 'stale-revision'
+  | 'exists'
+  | 'missing'
+  | 'unregistered-files'
+  | 'unknown-component'
+  | 'legacy-project'
+  | 'not-a-project'
+  | 'read-failed'
+  | 'missing-registry';
+
+/** A write or read the rules refuse. `code` is the MCP's `ToolError` code for the same refusal; `reason` the rule. */
 export class FormatRefusal extends Error {
   readonly code: FormatRefusalCode;
+  readonly reason: FormatRefusalReason;
   readonly details?: Record<string, unknown>;
-  constructor(code: FormatRefusalCode, message: string, details?: Record<string, unknown>) {
+  constructor(code: FormatRefusalCode, reason: FormatRefusalReason, message: string, details?: Record<string, unknown>) {
     super(message);
     this.name = 'FormatRefusal';
     this.code = code;
+    this.reason = reason;
     this.details = details;
   }
 }
@@ -130,9 +155,11 @@ export class V2ProjectStore {
     this.files = files;
     this.now = options.now ?? (() => new Date().toISOString());
     if (!isV2Project(files)) {
+      const legacy = files.read('project.json') !== null;
       throw new FormatRefusal(
         'not-a-v2-project',
-        files.read('project.json') !== null
+        legacy ? 'legacy-project' : 'not-a-project',
+        legacy
           ? 'These files hold a legacy monolithic project.json. Migrate it to the v2 format (NodeGX editor: project settings → migrate) first.'
           : 'These files are not a NodeGX v2 project (no nodegx.project.json or components/_registry.json).'
       );
@@ -145,7 +172,7 @@ export class V2ProjectStore {
     try {
       return JSON.parse(text) as T;
     } catch (err) {
-      throw new FormatRefusal('io-error', `Failed to read ${path}: ${(err as Error).message}`);
+      throw new FormatRefusal('io-error', 'read-failed', `Failed to read ${path}: ${(err as Error).message}`, { path });
     }
   }
 
@@ -165,7 +192,7 @@ export class V2ProjectStore {
 
   readRegistry(): RegistryV2File {
     const registry = this.readJson<RegistryV2File>(REGISTRY_FILE);
-    if (!registry) throw new FormatRefusal('io-error', 'Missing components/_registry.json.');
+    if (!registry) throw new FormatRefusal('io-error', 'missing-registry', 'Missing components/_registry.json.');
     return registry;
   }
 
@@ -185,7 +212,9 @@ export class V2ProjectStore {
     const hit = this.resolve(input);
     if (!hit) {
       const known = Object.keys(this.readRegistry().components).sort();
-      throw new FormatRefusal('not-found', `No component "${input}" in this project.`, { knownComponents: known });
+      throw new FormatRefusal('not-found', 'unknown-component', `No component "${input}" in this project.`, {
+        knownComponents: known
+      });
     }
     return hit;
   }
@@ -228,6 +257,20 @@ export class V2ProjectStore {
     return { key, entry, legacyName: files.component.path ?? '/' + key, files, revision };
   }
 
+  /**
+   * A registered component's three files with no snapshot taken: for a walk over the registry
+   * (usages, a validation model, a listing) that is not a read-before-write. A missing file gets the
+   * same default `readComponent` gives it.
+   */
+  filesOf(key: string, entry: RegistryComponentEntry): ComponentFiles {
+    return this.readComponentFiles(entry.path, key);
+  }
+
+  /** The three files exactly as stored, or `undefined` when any is missing. No snapshot, no defaults. */
+  storedFiles(entry: RegistryComponentEntry): ComponentFiles | undefined {
+    return this.readFilesIfPresent(entry.path);
+  }
+
   /** Every component's registry key, in registry order. */
   componentKeys(): string[] {
     return Object.keys(this.readRegistry().components);
@@ -242,8 +285,9 @@ export class V2ProjectStore {
         if (this.files.stamp(p) !== stamp) {
           throw new FormatRefusal(
             'conflict',
+            'drift',
             `${p} changed since this store last read it (open editor? another process?). Re-read the component and retry.`,
-            { component: key }
+            { component: key, path: p }
           );
         }
       }
@@ -253,6 +297,7 @@ export class V2ProjectStore {
       if (current !== ifRevision) {
         throw new FormatRefusal(
           'conflict',
+          'stale-revision',
           `Revision mismatch for "${key}": expected ${ifRevision}, the files have ${current}. Re-read the component and retry with the fresh revision.`,
           { component: key, expected: ifRevision, actual: current }
         );
@@ -267,20 +312,29 @@ export class V2ProjectStore {
   /**
    * Writes a component (create or update) and keeps the registry true. Validation is the caller's,
    * before this: a refused write leaves every file as it was.
+   *
+   * `prepare` runs once the write is admitted (the component exists or not as `expectNew` says, no
+   * drift, no stale revision) and before the unchanged check, with the files as stored (`undefined`
+   * for a create). A rule a caller keeps on top of the format, such as the MCP's run-on-value-change
+   * pins, edits `files` there, so a rewrite it pins is still a no-op and a refused write never runs it.
    */
   writeComponent(
     key: string,
     files: ComponentFiles,
-    options: { expectNew?: boolean; ifRevision?: string } = {}
+    options: { expectNew?: boolean; ifRevision?: string; prepare?: (stored: ComponentFiles | undefined) => void } = {}
   ): { revision: string; unchanged?: true } {
     const registry = this.readRegistry();
     const existing = registry.components[key];
 
     if (options.expectNew && existing) {
-      throw new FormatRefusal('already-exists', `Component "${key}" already exists. Update it instead.`);
+      throw new FormatRefusal('already-exists', 'exists', `Component "${key}" already exists. Update it instead.`, {
+        component: key
+      });
     }
     if (!options.expectNew && !existing) {
-      throw new FormatRefusal('not-found', `Component "${key}" does not exist. Create it instead.`);
+      throw new FormatRefusal('not-found', 'missing', `Component "${key}" does not exist. Create it instead.`, {
+        component: key
+      });
     }
 
     const entryPath = existing?.path ?? key;
@@ -289,14 +343,19 @@ export class V2ProjectStore {
     if (existing) {
       this.assertNoDrift(key, entryPath, options.ifRevision);
       const stored = this.readFilesIfPresent(entryPath);
+      options.prepare?.(stored);
       if (stored && sameComponentContent(stored, files)) {
         return { revision: this.takeSnapshot(key, entryPath, stored), unchanged: true };
       }
     } else if (paths.some((p) => this.files.read(p) !== null)) {
       throw new FormatRefusal(
         'conflict',
-        `components/${entryPath} already holds component files but is not in the registry. Refusing to overwrite.`
+        'unregistered-files',
+        `components/${entryPath} already holds component files but is not in the registry. Refusing to overwrite.`,
+        { component: key, path: `${COMPONENTS_DIR}/${entryPath}` }
       );
+    } else {
+      options.prepare?.(undefined);
     }
 
     this.writeJson(paths[0], files.component);

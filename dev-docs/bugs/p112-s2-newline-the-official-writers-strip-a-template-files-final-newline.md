@@ -1,13 +1,14 @@
 ---
 id: P112-S2-NEWLINE
 title: The editor and the MCP rewrite a component file without its final newline, so every template file they touch shows a whitespace change in git
-status: open
+status: fixed
 severity: low
 area: mcp / ProjectStore.writeJsonAtomic · editor / ComponentSaver
 found: P112 OWN-001 s2, 2026-10-09 — measuring how the template files are serialized before moving the write rule
 evidence: all 243 JSON files of templates/todo-list are two-space JSON ending in "\n"; JSON.stringify(JSON.parse(t), null, 2) on `templates/planning/components/Week/Spark bar/nodes.json` equals the file only with "\n" appended. Writers: packages/noodl-mcp/src/project/ProjectStore.ts:93, packages/noodl-editor/src/editor/src/services/ProjectStructure/ComponentSaver.ts:248 and :359
 kit: project-contract
-regression: packages/nodegx-project-contract/tests/format.test.ts "serializing a parsed file gives back its text, final newline included, for every JSON file"
+regression: packages/nodegx-project-contract/tests/format.test.ts "serializing a parsed file gives back its text, final newline included, for every JSON file"; packages/noodl-mcp/tests/store.test.ts "P112-S2-NEWLINE — rewriting a file that ends with a newline keeps the newline"; packages/noodl-editor/tests/services/ProjectStructure/ComponentSaver.test.ts "P112-S2-NEWLINE — keeps the final newline of a file it replaces, and adds none to a file that had none" (red without the fix, measured 2026-10-10)
+fixed: P112 OWN-001 s5, 2026-10-10 — the MCP's ProjectStore writes through V2ProjectStore (serializeV2File keeps the replaced file's newline); the editor's ComponentSaver serializes through the same serializeV2File, reading the file it replaces when its filesystem can read text
 ---
 
 Every template file ends with a newline. Both official writers serialize with `JSON.stringify(value, null, 2)` and

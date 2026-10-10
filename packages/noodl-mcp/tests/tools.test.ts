@@ -121,7 +121,7 @@ describe('noodl-mcp tools (end to end)', () => {
     expect(data.legacyName).toBe('/Pages/Home');
     expect(data.nodes).toHaveLength(6);
     expect(data.connections).toHaveLength(1);
-    expect(data.revision).toMatch(/^[0-9a-f]{12}$/);
+    expect(data.revision).toMatch(/^[0-9a-f]{14}$/);
     expect(data.usages).toEqual([]);
   });
 

@@ -118,6 +118,32 @@ describe('ComponentSaver.saveComponent', () => {
     expect(fs.paths().some((p) => p.endsWith('.tmp'))).toBe(false);
   });
 
+  it('P112-S2-NEWLINE — keeps the final newline of a file it replaces, and adds none to a file that had none', async () => {
+    const fs = new MemFs();
+    seedV2Project(fs, DIR, makeProject());
+    const nodesPath = `${DIR}/components/Header/nodes.json`;
+    const componentPath = `${DIR}/components/Header/component.json`;
+    // A template's file ends with a newline; a file the editor wrote before this fix does not.
+    fs.files.set(nodesPath, fs.files.get(nodesPath)!.replace(/\n?$/, '\n'));
+    fs.files.set(componentPath, fs.files.get(componentPath)!.replace(/\n$/, ''));
+    const registryPath = `${DIR}/components/_registry.json`;
+    fs.files.set(registryPath, fs.files.get(registryPath)! + '\n');
+
+    const saver = new ComponentSaver(fs);
+    const edited = { name: '/Header', id: 'comp__Header', graph: { roots: [makeNode('new', 'Text')], connections: [] } };
+    await saver.saveComponent(DIR, 'Header', edited);
+
+    const nodes = fs.files.get(nodesPath)!;
+    expect(nodes.endsWith('}\n')).toBe(true);
+    expect(JSON.parse(nodes).nodes[0].id).toBe('new');
+    expect(nodes).toBe(JSON.stringify(JSON.parse(nodes), null, 2) + '\n');
+    expect(fs.files.get(componentPath)!.endsWith('\n')).toBe(false);
+    // The registry is rewritten through the same rule.
+    const registry = fs.files.get(registryPath)!;
+    expect(registry.endsWith('}\n')).toBe(true);
+    expect(JSON.parse(registry).components.Header.nodeCount).toBe(1);
+  });
+
   it('leaves the previous files intact when a write is interrupted', async () => {
     const fs = new MemFs();
     seedV2Project(fs, DIR, makeProject());
