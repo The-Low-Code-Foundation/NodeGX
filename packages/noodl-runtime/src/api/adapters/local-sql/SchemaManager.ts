@@ -687,11 +687,19 @@ class SchemaManager {
     // rebuild would emit `ADD COLUMN "x" undefined`, which is not SQL.
     if (typeof oldSql === 'string' && oldSql !== newSql) {
       // Affinity changes, so the stored values do too. Add-copy-drop-rename
-      // rather than the twelve-step table rebuild: user columns carry no
-      // constraints and no indexes (only `createdAt`/`updatedAt` are indexed,
-      // and they are system columns this method refuses), which is what makes
-      // the short form safe here and would not make it safe in general.
+      // rather than the twelve-step table rebuild. 🔴 P109 ISL-041
+      // (P99-HLT016-TYPECHANGE): a user column CAN carry an index (FED-002) or a
+      // check trigger (HLT-016), and SQLite will not DROP a column either reads,
+      // so the change failed and rolled back. They are set aside and re-created
+      // from their own stored SQL inside the same transaction — a unique index
+      // the converted values now break is refused there, and everything rolls back.
       const temp = `__nodegx_convert_${columnName}`;
+      const quoted = escapeColumn(columnName);
+      const readers = (
+        this.db
+          .prepare("SELECT type, name, sql FROM sqlite_master WHERE tbl_name = ? AND type IN ('index', 'trigger') AND sql IS NOT NULL")
+          .all(tableName) as Array<{ type: string; name: string; sql: string }>
+      ).filter((r) => r.sql.includes(quoted));
       const nonNull = this.db
         .prepare(`SELECT COUNT(*) AS n FROM ${escapeTable(tableName)} WHERE ${escapeColumn(columnName)} IS NOT NULL`)
         .get() as { n: number } | undefined;
@@ -699,6 +707,7 @@ class SchemaManager {
 
       this.db.exec('BEGIN');
       try {
+        for (const r of readers) this.db.exec(`DROP ${r.type === 'index' ? 'INDEX' : 'TRIGGER'} ${escapeColumn(r.name)}`);
         this.db.exec(`ALTER TABLE ${escapeTable(tableName)} ADD COLUMN ${escapeColumn(temp)} ${newSql}`);
         this.db.exec(
           `UPDATE ${escapeTable(tableName)} SET ${escapeColumn(temp)} = ` +
@@ -706,6 +715,7 @@ class SchemaManager {
         );
         this.db.exec(`ALTER TABLE ${escapeTable(tableName)} DROP COLUMN ${escapeColumn(columnName)}`);
         this.db.exec(`ALTER TABLE ${escapeTable(tableName)} RENAME COLUMN ${escapeColumn(temp)} TO ${escapeColumn(columnName)}`);
+        for (const r of readers) this.db.exec(r.sql);
         this.db.exec('COMMIT');
       } catch (e) {
         this.db.exec('ROLLBACK');

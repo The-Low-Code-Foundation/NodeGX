@@ -161,4 +161,59 @@ describe('SchemaManager.changeColumnType', () => {
     expect(() => sm.changeColumnType('Puppy', 'litter', 'String')).toThrow(/junction table/);
     expect(() => sm.changeColumnType('Puppy', 'name', 'Relation')).toThrow(/junction table/);
   });
+
+  // P109 ISL-039/ISL-041 (P99-HLT016-TYPECHANGE): a type change on a field an index or a rule reads
+  // failed and rolled back on SQLite — DROP COLUMN refuses a column an index or a trigger reads.
+  describe('a field an index or a rule reads', () => {
+    /** The indexes that read `code` (createTable also indexes createdAt/updatedAt). */
+    const indexNames = (db, table) =>
+      db
+        .prepare("SELECT name, sql FROM sqlite_master WHERE type = 'index' AND tbl_name = ? AND sql IS NOT NULL ORDER BY name")
+        .all(table)
+        .filter((r) => r.sql.includes('"code"'))
+        .map((r) => r.name);
+
+    it('keeps its unique index, which still refuses a duplicate', () => {
+      const { sm, db } = ctx;
+      sm.createTable({ name: 'Code', columns: [{ name: 'code', type: 'String' }] });
+      sm.reconcileIndexes('Code', [{ fields: ['code'], unique: true }]);
+      db.prepare('INSERT INTO "Code" ("objectId", "code") VALUES (?, ?)').run('a', '7');
+      const before = indexNames(db, 'Code');
+      expect(before.length).toBe(1);
+
+      expect(sm.changeColumnType('Code', 'code', 'Number')).toMatchObject({ changed: true, rebuilt: true });
+      expect(indexNames(db, 'Code')).toEqual(before);
+      expect(db.prepare('SELECT typeof("code") AS t FROM "Code"').get().t).toBe('real');
+      expect(() => db.prepare('INSERT INTO "Code" ("objectId", "code") VALUES (?, ?)').run('b', 7)).toThrow(/UNIQUE/);
+    });
+
+    it('keeps its rule, which still refuses a row that breaks it', () => {
+      const { sm, db } = ctx;
+      sm.createTable({
+        name: 'Anchor',
+        columns: [
+          { name: 'kind', type: 'String' },
+          { name: 'ref', type: 'String' }
+        ],
+        checks: [{ allOrNone: ['kind', 'ref'] }]
+      });
+      db.prepare('INSERT INTO "Anchor" ("objectId", "kind", "ref") VALUES (?, ?, ?)').run('a', 'page', '5');
+
+      expect(sm.changeColumnType('Anchor', 'ref', 'Number')).toMatchObject({ changed: true, rebuilt: true });
+      expect(rowsOf(db, 'Anchor').map((r) => r.ref)).toEqual([5]);
+      expect(() => db.prepare('INSERT INTO "Anchor" ("objectId", "kind") VALUES (?, ?)').run('b', 'page')).toThrow(/CHECK constraint failed/);
+    });
+
+    it('a conversion that would break the unique index is refused, and nothing changes', () => {
+      const { sm, db } = ctx;
+      sm.createTable({ name: 'Dup', columns: [{ name: 'code', type: 'String' }] });
+      sm.reconcileIndexes('Dup', [{ fields: ['code'], unique: true }]);
+      db.prepare('INSERT INTO "Dup" ("objectId", "code") VALUES (?, ?)').run('a', '01');
+      db.prepare('INSERT INTO "Dup" ("objectId", "code") VALUES (?, ?)').run('b', '1');
+      expect(() => sm.changeColumnType('Dup', 'code', 'Number')).toThrow(/UNIQUE/);
+      expect(rowsOf(db, 'Dup').map((r) => r.code)).toEqual(['01', '1']);
+      expect(sm.getTableSchema('Dup').columns.find((c) => c.name === 'code').type).toBe('String');
+      expect(indexNames(db, 'Dup').length).toBe(1);
+    });
+  });
 });
