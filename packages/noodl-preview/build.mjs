@@ -26,6 +26,7 @@
  * the bundle fails loudly at build time (which is the good failure mode).
  */
 import path from 'path';
+import { renameSync, writeFileSync } from 'fs';
 import { readFile, writeFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 
@@ -110,12 +111,35 @@ const shared = {
   logLevel: 'warning'
 };
 
-for (const { entry, out } of ENTRIES) {
-  await esbuild.build({
+/**
+ * P109-S5 — each CLI bundle is written with the list of files it was built from beside it
+ * (`dist/nodegx-deploy.inputs.json`), the ISL-014 rule for the MCP's kit reader: a bundle older than any
+ * file on its list is out of date. `nodegx deploy` reads the list (`nodegx-export/src/cli/deployEngine.ts`),
+ * and in a checkout rebuilds a stale engine with `node build.mjs --deploy-only` before it runs it — a
+ * gitignored engine bundled weeks before the node library refused valid projects, blaming them.
+ *
+ * Both files go to a temporary name and are renamed, the list first, so a deploy that starts while
+ * another rebuilds reads a whole engine, and never one newer than the list that describes it.
+ */
+const DEPLOY_ONLY = process.argv.includes('--deploy-only');
+for (const { entry, out } of DEPLOY_ONLY ? ENTRIES.filter((e) => e.out === 'dist/nodegx-deploy.cjs') : ENTRIES) {
+  const outfile = path.join(HERE, out);
+  const suffix = `.${process.pid}.tmp`;
+  const result = await esbuild.build({
     ...shared,
     entryPoints: [path.join(HERE, entry)],
-    outfile: path.join(HERE, out)
+    outfile: outfile + suffix,
+    absWorkingDir: HERE,
+    metafile: true
   });
+  // A plugin's own namespace (`preview-stub:…`) is not a file; everything else is, relative to this package.
+  const inputs = Object.keys(result.metafile.inputs)
+    .filter((p) => !/^[a-z-]+:/.test(p))
+    .sort();
+  const listFile = outfile.replace(/\.cjs$/, '.inputs.json');
+  writeFileSync(listFile + suffix, JSON.stringify({ inputs }, null, 1) + '\n');
+  renameSync(listFile + suffix, listFile);
+  renameSync(outfile + suffix, outfile);
 }
 
 /**
@@ -148,7 +172,7 @@ const inPagePlugin = {
   }
 };
 
-await esbuild.build({
+if (!DEPLOY_ONLY) await esbuild.build({
   ...shared,
   platform: 'browser',
   target: 'es2020',
