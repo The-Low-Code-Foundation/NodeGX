@@ -297,6 +297,33 @@ describe('ISL-039 ARRAYEQ and PTREQ — a Parse client on /classes', () => {
     expect(await names({ tags: { $eq: 'crime' } })).toEqual(['bo']);
   });
 
+  it('ADDUNIQUE: an array operator is applied on a create, refused by name on an update, and never stored as the object', async () => {
+    const made = await req<{ objectId: string }>('POST', '/classes/Book', {
+      name: 'ops',
+      tags: { __op: 'AddUnique', objects: ['x', 'x', 'y'] },
+      n: { __op: 'Increment', amount: 2 },
+      gone: { __op: 'Delete' }
+    });
+    expect(made.status).toBe(201);
+    const url = `/classes/Book/${made.json.objectId}`;
+    const read = async () => (await req<Record<string, unknown>>('GET', url)).json;
+    expect(await read()).toEqual(expect.objectContaining({ tags: ['x', 'y'], n: 2 }));
+
+    for (const op of ['AddUnique', 'Add', 'Remove']) {
+      const res = await req<{ error: string }>('PUT', url, { tags: { __op: op, objects: ['z'] } });
+      expect([op, res.status, res.json.error]).toEqual([op, 400, expect.stringContaining(op)]);
+    }
+    const unknown = await req<{ error: string }>('PUT', url, { tags: { __op: 'Shuffle' } });
+    expect([unknown.status, unknown.json.error]).toEqual([400, expect.stringContaining('"Shuffle"')]);
+    expect((await read()).tags).toEqual(['x', 'y']); // nothing written by a refusal
+
+    // Control: the operators the wire always knew still work beside it.
+    expect((await req('PUT', url, { n: { __op: 'Increment', amount: 3 } })).status).toBe(200);
+    expect((await read()).n).toBe(5);
+    expect((await req('PUT', url, { tags: { __op: 'Delete' } })).status).toBe(200);
+    expect((await read()).tags ?? null).toBeNull();
+  });
+
   it('a pointer written as a Parse pointer matches like its id', async () => {
     expect(await names({ author: 'u2' })).toEqual(['bo', 'cy']); // control: the bare id
     expect(await names({ author: { __type: 'Pointer', className: '_User', objectId: 'u2' } })).toEqual(['bo', 'cy']);

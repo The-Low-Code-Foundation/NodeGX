@@ -136,6 +136,57 @@ export function toQueryOptions(src: Record<string, unknown>): QueryOptions {
   return options;
 }
 
+/** The `__op`s `extractOps` turns into their own writes on an update. */
+const UPDATE_OPS = new Set(['Increment', 'AddRelation', 'RemoveRelation']);
+
+/**
+ * P109 ISL-039 (P100-UPG001-ADDUNIQUE): a Parse client's array and delete operators, which used to
+ * be saved as the literal object — `{"__op":"AddUnique",…}` over the array that was there.
+ *
+ * - On a CREATE there is nothing to merge with, so each is exact: `Add`/`AddUnique` are the array,
+ *   `Remove` is an empty one, `Increment` is its amount, `Delete` leaves the field out.
+ * - On an UPDATE, `Delete` clears the field (Parse's `unset`). `Add`, `AddUnique` and `Remove`
+ *   would need the stored array read and written back, which two clients can race, so they are
+ *   refused by name, with nothing written.
+ * - Any other `__op` is refused by name everywhere; the three `extractOps` knows stay with it.
+ *
+ * Mutates `body`; throws an HttpError(400) before anything is written.
+ */
+function normaliseParseOps(body: Record<string, unknown>, mode: 'create' | 'update' | 'upsert'): void {
+  for (const [key, value] of Object.entries(body)) {
+    const op = value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>).__op : undefined;
+    if (op === undefined) continue;
+    const v = value as Record<string, unknown>;
+    const objects = Array.isArray(v.objects) ? (v.objects as unknown[]) : [];
+    if (mode === 'upsert') {
+      throw new HttpError(400, `X-NodeGX-Upsert takes plain values; "${key}" is a ${String(op)} operation. Nothing was saved.`);
+    }
+    if (op === 'Delete') {
+      if (mode === 'create') delete body[key];
+      else body[key] = null;
+      continue;
+    }
+    if (mode === 'create') {
+      if (op === 'Add') body[key] = objects;
+      else if (op === 'AddUnique') body[key] = objects.filter((o, i) => objects.findIndex((p) => JSON.stringify(p) === JSON.stringify(o)) === i);
+      else if (op === 'Remove') body[key] = [];
+      else if (op === 'Increment') body[key] = Number(v.amount) || 0;
+      else if (op === 'AddRelation' || op === 'RemoveRelation') continue;
+      else throw new HttpError(400, `"${key}" holds the operation "${String(op)}", which this backend does not know. Nothing was saved.`);
+      continue;
+    }
+    if (UPDATE_OPS.has(String(op))) continue;
+    if (op === 'Add' || op === 'AddUnique' || op === 'Remove') {
+      throw new HttpError(
+        400,
+        `"${key}": ${String(op)} is not supported on an update yet — it would have to read the list and write it back, ` +
+          'which two clients can race. Send the whole list instead. Nothing was saved.'
+      );
+    }
+    throw new HttpError(400, `"${key}" holds the operation "${String(op)}", which this backend does not know. Nothing was saved.`);
+  }
+}
+
 /** True when a PUT body is an operator update (`__op` values). */
 function extractOps(body: Record<string, unknown>): {
   increments: Record<string, number>;
@@ -271,6 +322,7 @@ export class ParseWireRoutes {
     // is stamped, because the update half must not have a create's ACL applied
     // over the owner the row already has.
     const upsertOn = headerValue(ctx, UPSERT_HEADER);
+    normaliseParseOps(body, upsertOn ? 'upsert' : 'create');
     if (upsertOn) {
       await this.classesUpsert(ctx, collection, body, upsertOn);
       return;
@@ -515,6 +567,7 @@ export class ParseWireRoutes {
     if (body.ACL === undefined || body.ACL === null) delete body.ACL;
 
     const acl = ctx.acl('write');
+    normaliseParseOps(body, 'update');
     const { increments, addRelations, removeRelations, plain } = extractOps(body);
 
     // HLT-016: parse and refuse a precondition up front, before anything is written.
