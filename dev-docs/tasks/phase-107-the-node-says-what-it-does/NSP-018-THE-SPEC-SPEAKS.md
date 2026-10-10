@@ -352,7 +352,7 @@ field, which rides a result and is free.
 twice for one failed stream after a Disconnect; a replayed older SSE event id moves the resume point back; a WebSocket
 Send before the first frame-end rebuild blocks Auto Connect for good, and Auto Connect turned on over a closed connection
 reopens nothing; blanking Heartbeat Reply mid-beat leaves a stale pending ping; Drag's Enabled disables on exactly
-`false` only (0 or "false" from a wire leave dragging on); Video's Restart and Reset seek to second 0, not Start Time.
+`false` only (0 or "false" from a wire leave dragging on); Video's Restart and Reset seek to second 0, not Start Time. Parse XML's and Parse Feed's Max Bytes count characters (C162, needs a ruling). The streams lane also caught the reader naming an outcome port pulsed on a value path in lowercase in the "stays silent" half (`failure` beside `Failure`): fixed, the same fallback as the wire half, three catalog lines changed.
 Words the source corrected as they were written are in each lane's spec header comments and the rule lines themselves
 (Restart "second 0, not Start Time"; Max Retries n = n retries; Message Type Text behaves as Auto; Snap Duration 0 lands
 at the next frame; a Navigate on a stack not mounted waits and a push first resets it; Hash's one digest per frame).

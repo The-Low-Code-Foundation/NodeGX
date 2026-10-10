@@ -47600,9 +47600,9 @@
       "parameterEncoding": null,
       "rules": {
         "chunk": [
-          "text (a number, boolean or bigint as its text; nothing as empty) while an Error stands: kept for the next Add, and the Error is cleared → failure stays silent",
-          "text (a number, boolean or bigint as its text; nothing as empty): kept for the next Add, and retained after it → failure stays silent",
-          "an object, array or Date again, the same refusal already on Error: the chunk is emptied and nothing more is said → failure stays silent",
+          "text (a number, boolean or bigint as its text; nothing as empty) while an Error stands: kept for the next Add, and the Error is cleared → Failure stays silent",
+          "text (a number, boolean or bigint as its text; nothing as empty): kept for the next Add, and retained after it → Failure stays silent",
+          "an object, array or Date again, the same refusal already on Error: the chunk is emptied and nothing more is said → Failure stays silent",
           "an object, array or Date: refused before any Add — the chunk is emptied and Error names what arrived → Failure"
         ],
         "delimiter": [

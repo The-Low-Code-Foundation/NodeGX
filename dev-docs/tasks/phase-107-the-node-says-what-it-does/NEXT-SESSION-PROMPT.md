@@ -61,12 +61,13 @@ export · 2 exempt · 17 owed (all NSP-022)**, unchanged since s68. **`in words:
 1. **Richard drives NSP-019 (AC3)** and rules on the three choices in §5.1: the Try fold gated on "has rules" (the catalog
    has no other spec marker), the rules fold open and Try closed by default, and whether `spec-disagreements.js` moves
    under `catalog:generate`. It was driven once in s77 (§5.2); the drive recipe is there.
-2. **Rulings owed:** C160 (coerce Drag's Enabled or say "exactly false"), C161 (seek to Start Time or say "second 0").
+2. **Rulings owed:** C160 (coerce Drag's Enabled or say "exactly false"), C161 (seek to Start Time or say "second 0"),
+   C162 (Parse XML / Feed: count bytes, or rename Max Bytes).
    D38 is still P109's to put to Richard.
 3. **Then:** NSP-013's deep run for s11–s14 when the box is quiet; or NSP-010 (a change is a version), which is next on
    the board and depends on nothing open.
 
-**Human decisions:** AC3 and the three NSP-019 choices; C160; C161. The two Frappe notes in NSP-010 §4 and NSP-017
+**Human decisions:** AC3 and the three NSP-019 choices; C160; C161; C162. The two Frappe notes in NSP-010 §4 and NSP-017
 (uncommitted, 13:15 on 10 Oct, not from a P107 session) each end in "ask Richard" — left uncommitted for whoever wrote them.
 **P109 holds:** D38, the Page Stack, the Router, LIBRARYDOCS, CHR007SNAPSHOT. **P112 holds:** P107-SIZE.
 
