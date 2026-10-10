@@ -1,7 +1,7 @@
 # P107 — next session
 
-**Written 2026-10-10 (s74).** Read the [README](README.md) §2–§7 (R18 is the newest ruling) and
-[NSP-018 §5.2 and §6](NSP-018-THE-SPEC-SPEAKS.md). That is what s74 built and what is left.
+**Written 2026-10-10 (s75).** Read the [README](README.md) §2–§7 (R18 is the newest ruling) and
+[NSP-018 §5.3 and §6](NSP-018-THE-SPEC-SPEAKS.md). That is what s75 built and what is left.
 
 ## Board (from the task files)
 
@@ -9,47 +9,55 @@
 |---|---|---|
 | NSP-000 … NSP-015 | as s44 (NSP-013 left: AC2, the export half with no reach here, and the deep run for s11–s14; NSP-014 / NSP-015 left: AC2's export half, P18's) | s1 … s44 |
 | NSP-016 the visual nodes | ✅ s71 (all four ACs); s73 SCROLLROOM | `aa8abb06f` … `fd6385beb` |
-| **NSP-018 the spec speaks** | 🟡 **s74: AC1, AC3, AC4, AC5 met; AC2 counting — 186 of 507 input reducers in words, 37 specs fully** | s72 … s74 |
+| **NSP-018 the spec speaks** | 🟡 **s75: AC1, AC3, AC4, AC5 met; AC2 counting — 247 of 507 input reducers in words, 52 specs fully** | s72 … s75 |
 | NSP-009 the ratchet | ✅ s64; s65: a `contract` column | `6a1ed0084`, s65 |
 | NSP-017 the escape hatches | 🟡 s64–s68. Left: AC1's export half (P18's) | s64 … s68 |
 | NSP-023 the spec without React | ✅ (s50) | s45 … s57 |
-| NSP-006 the stranger | ✅ rounds 1–4 (hashes rewritten s70, s72, s73, s74) | `649e6864d`, s70 … s74 |
+| NSP-006 the stranger | ✅ rounds 1–4 (hashes rewritten s70, s72, s73, s74, s75) | `649e6864d`, s70 … s75 |
 | NSP-020 ports without a viewer | 📋 rows only (s20) | s20 |
 | NSP-010, NSP-019, NSP-021 | 📋 not started (NSP-019 depends on NSP-018 only; NSP-021 carries a P112 note, not ours) | — |
 | NSP-022 the cloud-only nodes | 📋 (needs a second runtime target) | s21 |
 
-**`node scripts/node-spec/spec-ledger.js --check` (s74): holds at 125 of 147 on the runtime · 3 as a contract · 2 on
-the export · 2 exempt · 17 owed (all NSP-022)**, unchanged since s68. **`in words: 186 of 507`** (was 59), `idioms: 18 of 108`.
+**`node scripts/node-spec/spec-ledger.js --check` (s75): holds at 125 of 147 on the runtime · 3 as a contract · 2 on
+the export · 2 exempt · 17 owed (all NSP-022)**, unchanged since s68. **`in words: 247 of 507`** (was 186), 52 specs fully.
 
-## What s74 settled
+## What s75 did (`6e78598db`)
 
-1. **The computed-patch question (§5.1), decided both ways.** A constant or a spread of a computed listing is written out
-   as literals (`NOTHING` → `{ says, send: [] }`; Group's Focus is six literal cases; ternaries split). A patch built
-   from a draft (For Each's and Router's `run`, Text Input's Value / Backspace / Clear) is said with **`said('words',
-   patch)`** (spec.ts): the reader reads it as `computed` — the words alone, no wire after the arrow, and no sibling's
-   pulse named silent. Plants: the `said` arm off, the computed guard off — each red on exactly its cases.
-2. **Words for 13 more specs** (+127 reducers): Group, Text, Text Input, Button, For Each, Image, Checkbox, Columns,
-   Update / Create / Delete Record, Router, Icon. A visual node's inputs mostly say what the next paint, act or drop
-   reads (`always: read at …`); the tails that carry something are the actions and the switches that end a gesture.
-3. **Behaviour-neutral, measured:** the interpreter's visual batch (19 / 19) after batch 1; see the gates below for batch 2.
+1. **[P107-S74-CLICKAWAY](../../bugs/p107-s74-clickaway-group-s-click-beside-it-has-a-twin-branch-no-scenario-tells-apart.md) fixed.**
+   A mouse click beside the Group while a FINGER's gesture is under way takes the "leave the gesture alone" branch (`pointerUp`
+   ends only its own pointer's gesture). No scenario held a finger, clicked beside the Group, and then waited for the hold. One
+   new Group scenario does. At seed 20736 the interpreter kills 3,660 / 3,668 mutants (the 8 left are listed equivalents), and the
+   runtime CONFORMS: 1,435 / 1,435 scenarios, 200 / 200 generated.
+   Reproduce a mutant survivor on the INTERPRETER first (`zz-mutants`, about 2 min), not the runtime (about 6.5 min under load).
+2. **Words for 15 more specs** (+61 reducers): Options, Timer, User, Log In / Sign Up / Log Out, Request Magic Link (and Sign
+   In With's press, through the shared helper), Record, Filter Collection, Animate To Value, Repeat, UUID, External Link,
+   Show / Close Popup. The five stranger-guarded spec files went in one commit, with one hashes rewrite and one stranger run.
+   A computed wire was split into literal arms that return the same patches. Record's Id goes through `said`.
+3. **The template ranking is used up.** All 51 specs still without words have ZERO placings in `templates/`. The
+   most reducers: Video 26, WebSocket 18, SSE 17, Circle 15, Drag 14, Slider 10, Radio Button 8, Upload File 8, Page Stack 7,
+   FilterDBModels 7.
 
-## What s75 does
+## What s76 does
 
-0. **[P107-S74-CLICKAWAY](../../bugs/p107-s74-clickaway-group-s-click-beside-it-has-a-twin-branch-no-scenario-tells-apart.md) (ours, small):**
-   Group's runtime conformance is red at seed 20736 — a `clickAway` twin branch no scenario tells apart. Add the sibling
-   scenario, re-run `NSP_SEED=20736 NSP_ONLY=Group … -w 1` (~4 min). It predates s74 (control on the HEAD spec).
-1. **NSP-018 AC2, the next batch.** Re-rank first (unworded specs by `"type"` count in `templates/`):
-   `node -e "const fs=require('fs'),p=require('path');const {loadSpecs}=require('./scripts/node-spec/load-specs');const {readReducers}=require('./scripts/node-spec/rules');const S=loadSpecs(),R=readReducers(),c={};(function w(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const f=p.join(d,e.name);if(e.isDirectory()){if(e.name!=='node_modules')w(f)}else if(f.endsWith('.json'))for(const m of fs.readFileSync(f,'utf8').matchAll(/\"type\":\s*\"([^\"]+)\"/g))c[m[1]]=(c[m[1]]||0)+1}})('templates');console.log(Object.entries(S).map(([t,s])=>[t,Object.keys(s.on||{}),R[t]||{}]).filter(([,k,r])=>k.some(q=>!(r[q]||[]).length)).map(([t,k])=>[t,k.length,c[t]||0]).sort((a,b)=>b[2]-a[2]).slice(0,15).map(x=>x.join(' ')).join('\n'))"`
-   **Options (9) and Timer (3) are stranger-guarded**: word them together in one commit, one hashes rewrite, one stranger run.
-2. **Or the default summary (§6 item 3):** 37 specs now have words — price `rules` on `get_node_type`'s default summary by
-   CMP-006's traffic weights, then keep or overturn the negative assertion in `nsp018RulesOnTheWire.test.ts`.
-3. **Or C155 (ours):** a wired-port notion in the format. **Or NSP-019** (the inspector shows a node's rules).
+1. **The default summary (§6 item 3): this is now the next step.** Every spec placed in the templates has its words, and 52 specs are
+   fully worded. Price `rules` on `get_node_type`'s default summary by CMP-006's traffic weights (count the reach first). Then
+   keep or overturn the negative assertion in `nsp018RulesOnTheWire.test.ts`. The `[surface]` budget is 8261 / 8280. It
+   counts tool descriptions, not results, but measure it anyway.
+2. **Or NSP-018 AC2, the next batch.** Pick a new ranking before you word anything: CMP-006 call traffic by type, or the
+   editor's picker use. Don't word by reducer count alone ([[rank-by-the-product-surface-not-by-a-corpus]]). No guarded spec is
+   left to word (Screen Resolution has no input reducers), so a batch no longer owes a stranger run.
+3. **Or C155 (ours):** give the format a way to say a port is wired. **Or NSP-019** (the inspector shows a node's rules).
 4. **When the box is quiet:** NSP-013's deep run for s11–s14.
 
-**Human decisions: none open for P107.** D38 is P109's to put to Richard. **P109 holds:** D38, the Page Stack, the Router (S18).
-**P112 holds:** P107-SIZE.
+**Human decisions: none open for P107.** D38 is P109's to put to Richard. **P109 holds:** D38, the Page Stack, the Router (S18;
+P109 had uncommitted Router spec edits in `page-router.ts` / `Router.json` on 10 Oct — leave them alone). **P112 holds:** P107-SIZE.
 
-**Gates (s74):** `tsc --noEmit` (node-spec) clean. node-spec: batch-visual after batch 1 — 19 / 19, exit 0; after batch 2, batch-visual, -records, -navigation, rules-reader, spec-ledger, catalog-parity — **6 / 6 suites, 465 passed, exit 0**; stranger (hashes rewritten for spec.ts) — **46 passed, 18 skipped, exit 0** (456 s). noodl-mcp `nsp018RulesOnTheWire` + `toolDisclosure` 23 / 23 (`[surface] 8261 / 8280`, unchanged). `catalog:check`, `catalog:merge:check`, `docs:nodes:check`, `spec-ledger --check` exit 0. Plants: two on the reader (the `said` arm, the computed guard), each red on exactly its cases, restored by `cp`, `cmp`-checked. **Runtime `NSP_ONLY=Group` at seed 20736: DOES NOT CONFORM — one `person.clickAway` swap-branch survivor, identical on the HEAD spec (control run), so not s74's: [P107-S74-CLICKAWAY](../../bugs/p107-s74-clickaway-group-s-click-beside-it-has-a-twin-branch-no-scenario-tells-apart.md).** Not run: the full node-spec suite, the editor's `tsc`, the full `noodl-mcp` suite, `test:main`.
+**Gates (s75):** `tsc --noEmit` (node-spec) clean. node-spec: batch-visual, -time, -records, -data, -navigation, batch,
+world, rules-reader, spec-ledger, catalog-parity and pilot all passed (**11 / 11 suites, 630 tests, exit 0**). Stranger (hashes
+rewritten for five guarded specs): **46 passed, 18 skipped, exit 0** (563 s). noodl-mcp `nsp018RulesOnTheWire` +
+`toolDisclosure`: 23 / 23 (`[surface] 8261 / 8280`). `catalog:check`, `catalog:merge:check`, `docs:nodes:check` and
+`spec-ledger --check` exit 0. The catalog diff is sixteen `rules` blocks and nothing else. Runtime `NSP_ONLY=Group` at seed
+20736: CONFORMS. Not run: the full node-spec suite, the editor's `tsc`, the full `noodl-mcp` suite, `test:main`.
 
 ## Before you start
 

@@ -4,6 +4,7 @@ title: Group's conformance is red at seed 20736 — a click beside it has a twin
 status: fixed
 phase: P107
 task: NSP-018
+commit: 6e78598db
 severity: medium
 area: node-spec / Group (`packages/nodegx-node-spec/src/nodes/group.ts`, `scenarios/Group.json`)
 found: P107 NSP-018 s74, 2026-10-10 — the runtime conformance spot-check after wording Group's reducers
