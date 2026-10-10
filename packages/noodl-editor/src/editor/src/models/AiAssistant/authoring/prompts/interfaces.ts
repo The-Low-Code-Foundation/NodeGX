@@ -7,11 +7,12 @@
  * AAQ-008. Nothing anywhere said what to put ON one. Phase 85 measured the
  * consequence across three populations with a single instrument
  * (`measure-interfaces.py`, beside the phase-85 task): of the components in the
- * examples an agent learns from, **33%** publish any `Component Outputs` — 10%
- * until CMP-001 AC3 added four that do and repaired two rows that could not, then
- * 26% until P86's COM-001 added seventeen examples and gave four of them the
- * outputs their own subjects already computed; of the components the original
- * Noodl team shipped in `library/prefabs`, **84%** do.
+ * examples an agent learns from, `CORPUS_PUBLISH_RATE` publish any `Component Outputs`
+ * (10% until CMP-001 AC3 added four that do and repaired two rows that could not,
+ * then 26% until P86's COM-001 added seventeen examples and gave four of them the
+ * outputs their own subjects already computed, then 33%, then 39% by 2026-10-10);
+ * of the components the original Noodl team shipped in `library/prefabs`,
+ * `SHELF_PUBLISH_RATE` do.
  * The corpus teaches a component that receives text and draws it. The library
  * teaches a two-way part. A model copying the corpus builds display sinks, and
  * the landing-page template (TPL-003) is what that looks like at scale: 233
@@ -59,14 +60,23 @@
  * Ten patterns, each one a wire rather than a preference, and each one taken
  * from a component that ships in `library/prefabs` unless it says otherwise.
  */
+/**
+ * The two figures the doctrine argues from, each the share of components with an interface that publish any
+ * `Component Outputs`. The corpus moves whenever examples are added, so the figure lives here once and
+ * `noodl-mcp/tests/cmp001InterfaceDoctrine.test.ts` counts the artefacts and says when this has gone stale (P109-S9:
+ * the doctrine said 33 for months while the corpus read 37, then 39). Count the artefact; move this; never a copy.
+ */
+export const CORPUS_PUBLISH_RATE = 39;
+export const SHELF_PUBLISH_RATE = 84;
+
 export const INTERFACE_DOCTRINE_MD = `## What goes on a component's interface
 
 You know what becomes a component. This is the other half — what its interface carries — and it is
 the half that decides whether the next person can use the thing you built.
 
-**Why this is written down.** Across the examples an agent learns from, **33%** of components publish
+**Why this is written down.** Across the examples an agent learns from, **${CORPUS_PUBLISH_RATE}%** of components publish
 any \`Component Outputs\`. Across the components the original Noodl team shipped in the prefab
-library, **84%** do. That gap is the whole difference between a part and a display sink: a sink takes
+library, **${SHELF_PUBLISH_RATE}%** do. That gap is the whole difference between a part and a display sink: a sink takes
 text, draws it in one fixed place, and tells nobody anything, so every wire it should have owned ends
 up back on the page around it — including a wrapper \`Group\` whose only job is to push it into
 position.
