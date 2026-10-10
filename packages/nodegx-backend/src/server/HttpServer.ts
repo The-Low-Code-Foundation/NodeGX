@@ -34,6 +34,7 @@ import type { IStorageFacade } from '@noodl/backend-contract';
 import type { AclOption } from '../persistence/AdapterFacade';
 import type { ExecutionHistory } from '../execution/ExecutionStore';
 import { scanDeployedFunctions } from '../workflow/functionDeclarations';
+import { carriesCredential } from '../security/state';
 import type { IdempotencyStore } from '../execution/IdempotencyStore';
 import { buildRunPayload } from '../workflow/runPayload';
 import type { WorkflowRunner } from '../workflow/WorkflowRunner';
@@ -289,6 +290,11 @@ export interface RouteInfo {
 
 interface RouteDef extends RouteInfo {
   handler: (ctx: RequestContext) => Promise<void> | void;
+  /**
+   * P109 ISL-040 (P100-UPG001-LOCKOUT): the route takes a credential in its BODY (a password), and spends
+   * BAK-005's failure budget, so a locked-out address is held back from it as from a header credential.
+   */
+  takesCredential?: true;
 }
 
 export interface HttpServerDeps {
@@ -1464,7 +1470,7 @@ export class HttpServer {
       // sits on the auth budget (rate-limit.ts) and its failures count against
       // the same per-IP budget as a wrong token. `setup` is admin-gated: the
       // credential (or a full admin) is the proof that makes the first account.
-      { method: 'POST', pattern: '_admin/login', access: { kind: 'public' }, handler: (ctx) => dashboard.login(ctx) },
+      { method: 'POST', pattern: '_admin/login', access: { kind: 'public' }, takesCredential: true, handler: (ctx) => dashboard.login(ctx) },
       { method: 'POST', pattern: '_admin/setup', access: { kind: 'admin' }, handler: (ctx) => dashboard.setup(ctx) }
     ];
   }
@@ -1784,7 +1790,8 @@ export class HttpServer {
     // count, and the refusal is a plain 429 — it reveals nothing about which
     // credential was wrong.
     const authBucket = trace.clientIp;
-    if (this.authLimiter.isLockedOut(authBucket)) {
+    // P109 ISL-040 (P100-UPG001-LOCKOUT): only a request carrying a credential is held back.
+    if ((carriesCredential(req.headers) || route.takesCredential) && this.authLimiter.isLockedOut(authBucket)) {
       const retryAfter = this.authLimiter.retryAfterSeconds(authBucket);
       res.setHeader('Retry-After', String(retryAfter));
       throw new HttpError(429, `Too many failed credential attempts. Try again in ${retryAfter}s.`);

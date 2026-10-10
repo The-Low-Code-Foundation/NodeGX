@@ -171,6 +171,18 @@ export function undeclaredFunctionDeployMessage(unresolved: UnresolvedFunction[]
   );
 }
 
+/**
+ * P109 ISL-040 (P100-UPG001-LOCKOUT): the headers `resolvePrincipal` reads a credential from. BAK-005's
+ * failure budget holds back only a request carrying one of these: it is a speed bump against guessing a
+ * credential, and a request with none has nothing to guess. Before, a locked-out address was refused
+ * everything, `/health` and anonymous public reads included.
+ */
+export const CREDENTIAL_HEADERS: readonly string[] = ['authorization', 'x-parse-master-key', 'x-nodegx-api-key', 'x-parse-session-token'];
+
+export function carriesCredential(headers: Record<string, string | string[] | undefined>): boolean {
+  return CREDENTIAL_HEADERS.some((h) => headers[h] !== undefined && headers[h] !== '');
+}
+
 export interface SecurityDeps {
   dataDir: string;
   /** Loopback bind? (The interlock and the dev-open fast-path both key on it.) */
