@@ -2,7 +2,7 @@
 id: P109-S40-ROWWRAPINSTANCE
 title: "`row-cannot-wrap` misses a wrapping, content-sized row when it is another component's root placed in a row"
 status: fixed
-commit: PENDING
+commit: ec1f21e96
 phase: P109
 task: ISL-022
 severity: medium
