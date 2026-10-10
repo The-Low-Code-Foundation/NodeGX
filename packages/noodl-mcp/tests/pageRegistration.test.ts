@@ -18,6 +18,9 @@
  * and it is why these specs assert on the router's written value rather than on
  * a diff.
  */
+import * as fs from 'fs';
+import * as path from 'path';
+
 import type { NodesV2File } from '../src/editor-deps';
 import type { CreateComponentResponse, UpdateComponentResponse } from '../src/tools/responses';
 import { call, connect, copyFixture, readJson, TestSession } from './helpers';
@@ -167,6 +170,96 @@ describe('AAQ-005 — page registration through the MCP door', () => {
 
     expect(applied.isError).toBe(false);
     expect(applied.data.registeredPages).toBeUndefined();
+  });
+});
+
+// ─── P109-S4: a page with no Router to be listed in ─────────────────────────
+
+/** The fixture with its one Router taken out of App, so the project has no Router at all. */
+function withoutRouter(dir: string, settings: Record<string, unknown> = {}): void {
+  const appNodes = path.join(dir, 'components/App/nodes.json');
+  const app = JSON.parse(fs.readFileSync(appNodes, 'utf8')) as NodesV2File;
+  app.nodes = app.nodes.filter((n) => n.type !== 'Router').map((n) => (n.children ? { ...n, children: n.children.filter((c) => c !== 'app_router') } : n));
+  fs.writeFileSync(appNodes, JSON.stringify(app, null, 2));
+  const projectFile = path.join(dir, 'nodegx.project.json');
+  const project = JSON.parse(fs.readFileSync(projectFile, 'utf8'));
+  project.settings = { ...project.settings, ...settings };
+  fs.writeFileSync(projectFile, JSON.stringify(project, null, 2));
+}
+
+describe('P109-S4 — a page written where no Router can list it is said to be unreachable, in that call', () => {
+  let dir: string;
+  let session: TestSession;
+
+  afterEach(async () => {
+    await session.close();
+  });
+
+  it('create_component names the page, says no Router can open it, and still writes it', async () => {
+    dir = copyFixture();
+    withoutRouter(dir);
+    session = await connect(dir);
+    const res = await call<CreateComponentResponse>(session, 'create_component', { path: 'Pages/Settings', nodes: PAGE_NODES('st', 'Settings') });
+
+    expect(res.isError).toBe(false);
+    expect(res.data.registeredPages).toBeUndefined();
+    expect(res.data.unroutedPages?.pages).toEqual(['/Pages/Settings']);
+    expect(res.data.unroutedPages?.summary).toMatch(/"\/Pages\/Settings" is a page, but this project has no Router, so nothing can open it/);
+    expect(res.data.unroutedPages?.summary).toMatch(/Add a Router/);
+  });
+
+  it('update_component says it again while the project still has no Router', async () => {
+    dir = copyFixture();
+    withoutRouter(dir);
+    session = await connect(dir);
+    await call(session, 'create_component', { path: 'Pages/Settings', nodes: PAGE_NODES('st', 'Settings') });
+    const res = await call<UpdateComponentResponse>(session, 'update_component', {
+      path: 'Pages/Settings',
+      set: { nodes: PAGE_NODES('st', 'Settings again') }
+    });
+
+    expect(res.isError).toBe(false);
+    expect(res.data.unroutedPages?.pages).toEqual(['/Pages/Settings']);
+  });
+
+  it('apply_plan names every page it wrote that no Router can open', async () => {
+    dir = copyFixture();
+    withoutRouter(dir);
+    session = await connect(dir);
+    const plan = await call<CreatePlanResponse>(session, 'create_plan', {
+      request: 'Add a catalogue and a basket',
+      operations: [
+        { kind: 'create', target: 'Pages/Catalogue', intent: 'The listing page' },
+        { kind: 'create', target: 'Pages/Basket', intent: 'The basket page' }
+      ]
+    });
+    for (const op of plan.data.operations) {
+      await call(session, 'stage_plan_operation', { plan_id: plan.data.planId, operation_id: op.id, nodes: PAGE_NODES(op.id.replace('-', '_'), op.target.split('/').pop() as string) });
+    }
+    const applied = await call<ApplyPlanResponse & { unroutedPages?: { pages: string[]; summary: string } }>(session, 'apply_plan', { plan_id: plan.data.planId, render: 'off' });
+
+    expect(applied.isError).toBe(false);
+    expect(applied.data.unroutedPages?.pages).toEqual(['/Pages/Catalogue', '/Pages/Basket']);
+    expect(applied.data.unroutedPages?.summary).toMatch(/are pages, but this project has no Router/);
+  });
+
+  it('says nothing when a Router lists the page — the control on the same fixture', async () => {
+    dir = copyFixture();
+    session = await connect(dir);
+    const res = await call<CreateComponentResponse>(session, 'create_component', { path: 'Pages/Settings', nodes: PAGE_NODES('st', 'Settings') });
+
+    expect(res.data.registeredPages?.added).toEqual(['/Pages/Settings']);
+    expect(res.data.unroutedPages).toBeUndefined();
+  });
+
+  it('says nothing about the page the app opens on: it needs no Router to be seen', async () => {
+    dir = copyFixture();
+    withoutRouter(dir, { rootComponent: '/Pages/Settings' });
+    session = await connect(dir);
+    const res = await call<CreateComponentResponse>(session, 'create_component', { path: 'Pages/Settings', nodes: PAGE_NODES('st', 'Settings') });
+
+    expect(res.isError).toBe(false);
+    expect(res.data.unroutedPages).toBeUndefined();
   });
 });
 

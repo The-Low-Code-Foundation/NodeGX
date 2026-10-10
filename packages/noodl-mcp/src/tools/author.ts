@@ -31,6 +31,7 @@ import {
   componentIsPage,
   registerPages,
   registrationSummary,
+  unroutedPagesSummary,
   unregisterPages,
   unregistrationSummary
 } from '../project/pageRegistration';
@@ -585,6 +586,7 @@ export function registerAuthorTools(
           revision,
           registry: 'updated',
           ...registrationSummary(registration),
+          ...(isPage ? unroutedPagesSummary(store, [legacyName]) : {}),
           ...remapPayload(remapped),
           ...tickedPayload(ticked),
           ...successPayload(validation),
@@ -731,15 +733,15 @@ export function registerAuthorTools(
         // Updates register too, exactly as the editor's apply does: a page that
         // exists but was never listed is the state this task is about, and
         // re-listing one already listed is a no-op.
-        const registration = componentIsPage(stored.legacyName, candidate)
-          ? registerPages(store, [stored.legacyName])
-          : undefined;
+        const isPage = componentIsPage(stored.legacyName, candidate);
+        const registration = isPage ? registerPages(store, [stored.legacyName]) : undefined;
         const payload: UpdateComponentResponse = {
           updated: stored.key,
           revision,
           ...(unchanged ? { unchanged } : {}),
           ...(applied ? { applied } : {}),
           ...registrationSummary(registration),
+          ...(isPage ? unroutedPagesSummary(store, [stored.legacyName]) : {}),
           ...remapPayload(remapped),
           ...tickedPayload(ticked),
           ...successPayload(validation),

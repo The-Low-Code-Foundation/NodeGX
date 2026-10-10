@@ -448,6 +448,15 @@ export interface PageRegistrationSummary {
     /** One human-readable sentence: what happened, in the user's terms. */
     summary: string;
   };
+  /**
+   * P109-S4 — pages this write left reachable from nowhere: the project has no Router to list them in, and they are not
+   * the component the app opens on. Saved, said, never refused.
+   */
+  unroutedPages?: {
+    pages: string[];
+    /** What happened and the two ways out, in the user's terms. */
+    summary: string;
+  };
 }
 
 /**

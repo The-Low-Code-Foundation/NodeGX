@@ -74,7 +74,7 @@ import { reconcileHierarchy } from '../graph';
 import { deconflictNodeIds, remapNote } from '../project/nodeIds';
 import { type TickedBox, tickedPayload } from '../project/runOnChangePins';
 import { pathToLegacyName, toPathForm, validateComponentPath } from '../paths';
-import { componentIsPage, registerPages, registrationSummary } from '../project/pageRegistration';
+import { componentIsPage, registerPages, registrationSummary, unroutedPagesSummary } from '../project/pageRegistration';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import type { ProjectStore } from '../project/ProjectStore';
 import { authoredProjectViews, preconditionDiagnostics } from '../validate';
@@ -1111,6 +1111,7 @@ export function registerPlanTools(
         docs: docsWritten,
         skipped: [...skip],
         ...registrationSummary(registration),
+        ...unroutedPagesSummary(store, pages),
         ...tickedPayload(ticked),
         ...(settingsWritten.length > 0 ? { settings: settingsWritten } : {}),
         ...validationBlock(surviving, summarize(surviving)),
