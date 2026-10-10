@@ -93,3 +93,12 @@ at the same point: Break, elapsed 0 — no bounce. **An editor running its own l
 was not.** The real engine also already runs in a page whole, viewer included, through `@noodl/preview` (the deploy
 runtime, 1.74 MB, every template); what still does not exist is setting an input or sending a signal into it from
 outside, which is this task's step 2. Not yet asked again: R1 (README §8).
+
+**Since, from OWN-004 s6 (2026-10-10) — the prototype's missions now play on the real engine.** `prototype/real/orbit.html`
+checks each mission on a copy of the files in a second real app in the same page (a second `mountPreview`), with the
+scenario written into the copy as parameters, presses made on the copy's own buttons and the verdict read off its
+screen. All three fail on the graph as it starts and pass after Show me (OWN-004 §6.4). So for a *mission*, "run the
+real app" already works with no way in but the files and the screen; what it cannot do is what a graph scenario
+needs — set one input, send one signal, settle, read one port — which is still step 2. AC3's `#selftest` / `#demo`
+now have a real-engine form (`real/check.mjs`'s mission arm; `?demo`); `page.html` is superseded (its removal is
+Richard's call).

@@ -1,5 +1,16 @@
 /**
- * P112 OWN-004 slice 2 — the gate for orbit.html, in headless Chrome (software WebGL), over CDP:
+ * P112 OWN-004 — the gate for orbit.html, in headless Chrome (software WebGL), over CDP.
+ *
+ * Slice 3 (AC3), in Graph, with real input (Input.dispatchMouseEvent / insertText at the points the page draws things):
+ *  - editing: + Add node → the picker → a Counter; its Start Value typed in the Node panel; a wire dragged from Seconds
+ *    elapsed's connector to the new card and picked in the connect popup; a card moved; the new node deleted. Each is
+ *    read back from the STORE (the files), the app is rebuilt from them, and the new wire is seen carrying signals in
+ *    the real app's trace. Moving a card writes its position and does not rebuild the app.
+ *  - the missions: each Check fails on the graph as it starts, for its own reason (the checks have teeth); each
+ *    "Show me" (pressed with the mouse) builds the answer through the store and its Check then passes; all three pass
+ *    together at the end. A Check plays the graph on a COPY of the files in a second real app, never on a stand-in.
+ *
+ * Slice 2, in Orbit, both poses:
  *
  *  - Orbit's v2 files run as the real app (NodeGX's own runtime, `@noodl/preview` in the page): 28 cards, 37 wires,
  *    9 visual nodes, and each visual node's element found in the app (`preview.elementsOf`).
@@ -73,16 +84,95 @@ try {
     for (let now = await text(); Date.now() - t < 6000 && (expect ? !expect(now, before) : now === before); now = await text()) await wait(100);
     return { at, hit, before, got: await evaluate(client, 'window.__got'), after: await text(), trace: await evaluate(client, `__orbit.recent.filter((e) => e.seq > ${seq} && !/smooth|barPct|sky|toMs|clockface|hud|glow|progress/.test(e.fromNode + e.fromPort)).slice(0, 30).map((e) => e.seq + ' ' + e.fromNode + '.' + e.fromPort + '>' + e.toNode + '.' + e.toPort + '=' + e.value)`) };
   }
+  const mouse = async (type, x, y) => client.send('Input.dispatchMouseEvent', { type, x, y, button: 'left', buttons: type === 'mouseReleased' ? 0 : 1, clickCount: 1 });
+  const click = async (x, y) => { await mouse('mouseMoved', x, y); await mouse('mousePressed', x, y); await mouse('mouseReleased', x, y); };
+  const rectOf = (sel) => evaluate(client, `(() => { const el = document.querySelector(${JSON.stringify(sel)}); el?.scrollIntoView({ block: 'nearest' }); const r = el?.getBoundingClientRect(); return r && r.width ? { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) } : null; })()`);
+  const clickSel = async (sel) => { const at = await rectOf(sel); if (!at) throw new Error(`nothing on screen at ${sel}`); await click(at.x, at.y); return at; };
+  async function drag(from, to, steps = 12) {
+    await client.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: from.x, y: from.y, button: 'none' });
+    await client.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: from.x, y: from.y, button: 'left', buttons: 1, clickCount: 1 });
+    for (let i = 1; i <= steps; i++) { await client.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: Math.round(from.x + (to.x - from.x) * i / steps), y: Math.round(from.y + (to.y - from.y) * i / steps), button: 'left', buttons: 1 }); await wait(30); }
+    await client.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: to.x, y: to.y, button: 'left', buttons: 0, clickCount: 1 });
+  }
+  const until = async (expr, ms) => { const t = Date.now(); let v = await evaluate(client, expr); while (!v && Date.now() - t < ms) { await wait(150); v = await evaluate(client, expr); } return v; };
+  const stored = `__orbit.store.readComponent('App').files`;
   const waitFor = async (pred, ms) => { const t = Date.now(); let s = await text(); while (!pred(s) && Date.now() - t < ms) { await wait(150); s = await text(); } return s; };
+
+  {
+    console.log('check: graph — editing and missions (slice 3)');
+    await client.send('Page.navigate', { url: `http://127.0.0.1:${sitePort}/orbit.html?stage=graph` });
+    let title = 'pending';
+    for (let i = 0; i < 200 && (title === 'pending' || title === ''); i++) { await wait(200); title = await evaluate(client, 'document.title').catch(() => 'pending'); }
+    ok(title.startsWith('ready nodes=28 wires=37 visual=9'), `page ready in Graph (${title})`);
+    if (!title.startsWith('ready')) throw new Error('the page did not start');
+    await wait(1000);
+    // + Add node → search → a Counter
+    await clickSel('#add');
+    ok(await until('!document.getElementById("picker").hidden', 2000), 'the picker opens on + Add node');
+    await client.send('Input.insertText', { text: 'Counter' });
+    await wait(200);
+    await clickSel('#picklist [data-type="Counter"]');
+    const added = await until(`${stored}.nodes.nodes.length === 29 && __orbit.lastShow.status === 'ok' && __orbit.selected`, 8000);
+    const id = added ? await evaluate(client, '__orbit.selected') : null;
+    ok(!!added && /^counter\d+$/.test(id), `the picker adds a Counter to the files and selects it (${id}); the app rebuilt`);
+    // its Start Value, typed into the Node panel
+    await clickSel('#prop-startValue');
+    await evaluate(client, 'document.getElementById("prop-startValue").select()');
+    await client.send('Input.insertText', { text: '7' });
+    await client.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
+    await client.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
+    ok(await until(`${stored}.nodes.nodes.find((n) => n.id === '${id}').parameters.startValue === 7`, 5000), 'a property typed in the Node panel is written into the files (startValue 7)');
+    // a wire, dragged from Seconds elapsed's connector onto the new card, then picked in the connect popup
+    await drag(await evaluate(client, `__orbit.screenOf('elapsed', 'handle')`), await evaluate(client, `__orbit.screenOf('${id}')`));
+    ok(await until('!document.getElementById("conpop").hidden', 3000), 'dropping a dragged wire on a card opens the connect popup');
+    await clickSel('#conpop [data-out="countChanged"]');
+    await clickSel('#conpop [data-in="increase"]');
+    const wkey = `elapsed.countChanged>${id}.increase`;
+    ok(await until(`${stored}.connections.connections.some((c) => c.fromId + '.' + c.fromProperty + '>' + c.toId + '.' + c.toProperty === '${wkey}')`, 5000), `the wire is written into the files (${wkey})`);
+    ok(await until(`__orbit.wiresSeen.has('${wkey}')`, 15000), 'the new wire carries signals in the real app (its trace)');
+    // a card moved: its position is written, the app is not rebuilt
+    const shows = await evaluate(client, '__orbit.shows');
+    const xy0 = await evaluate(client, `(({ x, y }) => [x, y])(${stored}.nodes.nodes.find((n) => n.id === 'breakLen'))`);
+    const from = await evaluate(client, `__orbit.screenOf('breakLen')`);
+    await drag(from, { x: from.x, y: from.y + 60 });
+    const xy1 = await until(`(({ x, y }) => (y !== ${xy0[1]} ? [x, y] : null))(${stored}.nodes.nodes.find((n) => n.id === 'breakLen'))`, 3000);
+    ok(!!xy1 && (await evaluate(client, '__orbit.shows')) === shows, `moving a card writes its position into the files (${xy0} → ${xy1}) and does not rebuild the app`);
+    // delete the new node from its panel
+    const at = await evaluate(client, `__orbit.screenOf('${id}')`);
+    await click(at.x, at.y);
+    await until(`__orbit.selected === '${id}' && !!document.getElementById('delnode')`, 3000);
+    await clickSel('#delnode');
+    ok(await until(`${stored}.nodes.nodes.length === 28 && ${stored}.connections.connections.length === 37 && __orbit.lastShow.status === 'ok'`, 8000), 'Delete node removes it and its wire from the files; the app rebuilt');
+    // the missions: every Check fails first, for its own reason
+    const why = ['still running', 'switched back to Focus', 'Still running after'];
+    for (let i = 0; i < 3; i++) {
+      const v = await evaluate(client, `__orbit.check(${i})`);
+      ok(v[0] === false && v[1].includes(why[i]), `mission ${i + 1} fails on the graph as it starts: "${v[1]}" (${v[2]})`);
+    }
+    for (let i = 0; i < 3; i++) {
+      await evaluate(client, 'document.getElementById("tab-missions").click()');
+      await clickSel(`[data-show="${i}"]`);
+      ok(await until(`__orbit.mstate[${i}].busy`, 3000), `mission ${i + 1}: the press on Show me starts the build`);
+      const v = await until(`__orbit.mstate[${i}].verdict && __orbit.mstate[${i}].verdict[0] !== null && !__orbit.mstate[${i}].busy && __orbit.mstate[${i}].verdict`, 90000);
+      ok(v && v[0] === true, `mission ${i + 1}: Show me builds it and its Check passes in the real app${v ? ` — "${v[1]}" (${v[2]})` : ''}`);
+    }
+    const all = [];
+    for (let i = 0; i < 3; i++) all.push((await evaluate(client, `__orbit.check(${i})`))[0]);
+    const size = await evaluate(client, `[${stored}.nodes.nodes.length, ${stored}.connections.connections.length]`);
+    ok(all.every(Boolean), `all three hold together (${all.join(', ')}) on ${size[0]} nodes, ${size[1]} wires`);
+    if (shotDir) { const { data } = await client.send('Page.captureScreenshot', { format: 'png' }); writeFileSync(join(shotDir, 'orbit-graph.png'), Buffer.from(data, 'base64')); }
+    ok(problems.length === 0, `no exception or console error${problems.length ? ': ' + [...new Set(problems)].slice(0, 3).join(' / ') : ''}`);
+    problems.length = 0;
+  }
 
   for (const pose of ['scene', 'window']) {
     console.log(`check: ${pose}`);
-    await client.send('Page.navigate', { url: `http://127.0.0.1:${sitePort}/orbit.html?speed=1&set=focusLen.value=3&set=breakLen.value=2&pose=${pose}` });
+    await client.send('Page.navigate', { url: `http://127.0.0.1:${sitePort}/orbit.html?stage=orbit&speed=1&set=focusLen.value=3&set=breakLen.value=2&pose=${pose}` });
     let title = 'pending';
     for (let i = 0; i < 200 && (title === 'pending' || title === ''); i++) { await wait(200); title = await evaluate(client, 'document.title').catch(() => 'pending'); }
     ok(title.startsWith('ready nodes=28 wires=37 visual=9'), `page ready (${title})`);
     if (!title.startsWith('ready')) continue;
-    await wait(1500);   // the pose settles (the switch eases in)
+    await wait(1500);
     const found = await evaluate(client, '__orbit.visual.filter((id) => __orbit.preview.elementsOf(id).length > 0).length');
     ok(found === 9, `each visual node's element found in the app (${found} / 9)`);
     const cycle = await waitFor((s) => /BREAK/.test(s), 15000);

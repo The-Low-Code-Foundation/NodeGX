@@ -41,8 +41,8 @@
           "unit": "px"
         }
       },
-      "x": 40,
-      "y": 40
+      "x": 1650,
+      "y": -50
     },
     {
       "id": "phaseTxt",
@@ -65,8 +65,8 @@
         "color": "#ff5a36",
         "fontFamily": "system-ui, -apple-system, Segoe UI, sans-serif"
       },
-      "x": 100,
-      "y": 160
+      "x": 1670,
+      "y": 32
     },
     {
       "id": "timeTxt",
@@ -85,8 +85,8 @@
         "fontVariantNumeric": "tabular-nums",
         "fontFamily": "system-ui, -apple-system, Segoe UI, sans-serif"
       },
-      "x": 100,
-      "y": 280
+      "x": 1670,
+      "y": 134
     },
     {
       "id": "track",
@@ -115,8 +115,8 @@
         "flexDirection": "column",
         "alignItems": "flex-start"
       },
-      "x": 100,
-      "y": 400
+      "x": 1670,
+      "y": 216
     },
     {
       "id": "bar",
@@ -139,8 +139,8 @@
         },
         "backgroundColor": "#ff5a36"
       },
-      "x": 100,
-      "y": 520
+      "x": 1690,
+      "y": 278
     },
     {
       "id": "footTxt",
@@ -157,8 +157,8 @@
         "color": "rgba(238,242,246,0.8)",
         "fontFamily": "system-ui, -apple-system, Segoe UI, sans-serif"
       },
-      "x": 100,
-      "y": 640
+      "x": 1670,
+      "y": 380
     },
     {
       "id": "btnRow",
@@ -181,8 +181,8 @@
           "unit": "px"
         }
       },
-      "x": 100,
-      "y": 760
+      "x": 1670,
+      "y": 462
     },
     {
       "id": "pauseBtn",
@@ -214,8 +214,8 @@
         "fontFamily": "system-ui, -apple-system, Segoe UI, sans-serif",
         "label": "Pause"
       },
-      "x": 100,
-      "y": 880
+      "x": 1690,
+      "y": 524
     },
     {
       "id": "skipBtn",
@@ -247,8 +247,8 @@
         "fontFamily": "system-ui, -apple-system, Segoe UI, sans-serif",
         "label": "Skip"
       },
-      "x": 100,
-      "y": 1000
+      "x": 1690,
+      "y": 626
     },
     {
       "id": "focusLen",
@@ -257,8 +257,8 @@
       "parameters": {
         "value": 1500
       },
-      "x": 520,
-      "y": 40
+      "x": 40,
+      "y": 318
     },
     {
       "id": "breakLen",
@@ -267,8 +267,8 @@
       "parameters": {
         "value": 300
       },
-      "x": 520,
-      "y": 150
+      "x": 40,
+      "y": 450
     },
     {
       "id": "running",
@@ -277,8 +277,8 @@
       "parameters": {
         "onFromStart": true
       },
-      "x": 520,
-      "y": 260
+      "x": 40,
+      "y": 126
     },
     {
       "id": "btnLabel",
@@ -288,8 +288,8 @@
         "trueString": "Pause",
         "falseString": "Start"
       },
-      "x": 520,
-      "y": 370
+      "x": 270,
+      "y": 238
     },
     {
       "id": "ticker",
@@ -298,16 +298,16 @@
       "parameters": {
         "interval": 1000
       },
-      "x": 520,
-      "y": 480
+      "x": 270,
+      "y": 66
     },
     {
       "id": "elapsed",
       "type": "Counter",
       "label": "Seconds elapsed",
       "parameters": {},
-      "x": 520,
-      "y": 590
+      "x": 500,
+      "y": 192
     },
     {
       "id": "phase",
@@ -323,8 +323,8 @@
         "value-Focus-glow": "#ff5a36",
         "value-Break-glow": "#2ee6a6"
       },
-      "x": 520,
-      "y": 700
+      "x": 270,
+      "y": 390
     },
     {
       "id": "remaining",
@@ -336,8 +336,8 @@
         "minOutputValue": 1500,
         "maxOutputValue": 0
       },
-      "x": 520,
-      "y": 810
+      "x": 730,
+      "y": 172
     },
     {
       "id": "progress",
@@ -349,16 +349,16 @@
         "minOutputValue": 0,
         "maxOutputValue": 1
       },
-      "x": 520,
-      "y": 920
+      "x": 730,
+      "y": 364
     },
     {
       "id": "zero",
       "type": "Inverter",
       "label": "Nothing left?",
       "parameters": {},
-      "x": 520,
-      "y": 1030
+      "x": 960,
+      "y": 50
     },
     {
       "id": "finished",
@@ -367,16 +367,16 @@
       "parameters": {
         "runOnChange-condition": false
       },
-      "x": 520,
-      "y": 1140
+      "x": 1190,
+      "y": 40
     },
     {
       "id": "rounds",
       "type": "Counter",
       "label": "Rounds done",
       "parameters": {},
-      "x": 520,
-      "y": 1250
+      "x": 500,
+      "y": 364
     },
     {
       "id": "toMs",
@@ -389,8 +389,8 @@
         "maxOutputValue": 1000,
         "clamp": false
       },
-      "x": 520,
-      "y": 1360
+      "x": 960,
+      "y": 202
     },
     {
       "id": "clockface",
@@ -400,8 +400,8 @@
         "formatString": "{minutes}:{seconds}",
         "timeZone": "UTC"
       },
-      "x": 520,
-      "y": 1470
+      "x": 1190,
+      "y": 212
     },
     {
       "id": "sky",
@@ -412,8 +412,8 @@
         "color 1": "#3a1c71",
         "color 2": "#ffaf7b"
       },
-      "x": 520,
-      "y": 1580
+      "x": 1190,
+      "y": 364
     },
     {
       "id": "skyIdx",
@@ -425,8 +425,8 @@
         "minOutputValue": 0,
         "maxOutputValue": 2
       },
-      "x": 520,
-      "y": 1690
+      "x": 960,
+      "y": 354
     },
     {
       "id": "smooth",
@@ -436,8 +436,8 @@
         "duration": 800,
         "easingCurve": "easeOut"
       },
-      "x": 520,
-      "y": 1800
+      "x": 960,
+      "y": 506
     },
     {
       "id": "barPct",
@@ -449,8 +449,8 @@
         "minOutputValue": 0,
         "maxOutputValue": 100
       },
-      "x": 520,
-      "y": 1910
+      "x": 1190,
+      "y": 516
     },
     {
       "id": "hud",
@@ -459,8 +459,8 @@
       "parameters": {
         "format": "Round {round} · {phase} ends in {time}"
       },
-      "x": 520,
-      "y": 2020
+      "x": 1420,
+      "y": 258
     }
   ],
   "visualRoots": [

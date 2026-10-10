@@ -4,63 +4,250 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>pending</title>
 <!--
-  P112 OWN-004 slice 2 — Orbit's graph in 3D beside (or around) the REAL app.
+  P112 OWN-004 — Orbit: a home-made NodeGX editor beside the REAL app it makes.
 
-  The project is v2 files held in memory (`orbit/`, served as one map by serve.mjs). The app is
-  `@noodl/preview`'s in-page build running those files on NodeGX's own runtime; nothing here draws the
-  screen. The cards are the files' nodes, their port names from the runtime's own node library; the
-  values on them and the pulses on the wires are the running app's trace.
+  The project is v2 files held in memory (`orbit/`, served as one map by serve.mjs). Every edit on this page — a card
+  moved, a node added from the picker, a wire dragged, a property changed, a node deleted, a mission's step — is a
+  write through `V2ProjectStore` (OWN-001), and the app is the files running on NodeGX's own runtime
+  (`@noodl/preview`'s in-page build, OWN-004 slice 1). Nothing here draws the screen or runs a node: the cards'
+  values and the wires' pulses are the running app's own trace, and a mission's Check plays the graph on a COPY of
+  the files in a second real app.
 
-  One switch: the app as a flat window beside the graph, or as an object inside the scene. Both are the
-  same element (a CSS3DObject sharing the WebGL camera); only its pose changes, so the app keeps running
-  through the move.
+  Three stages: Graph (the editor's canvas, from the files' positions; editable), Lift (a staircase by data flow),
+  Orbit (rings around the app). In Graph and Lift the app sits in a window; in Orbit one switch puts it inside the
+  scene or keeps it in its window (Richard's R7, s4). Both are the same element, so the app keeps running.
 
-    node serve.mjs   →   /orbit.html   (#window or ?pose=window starts flat; ?speed=1 for a real-time clock; ?set=node.param=value writes a parameter first)
+    node serve.mjs → /orbit.html   ?stage=graph|lift|orbit  ?pose=scene|window  ?speed=1|60  ?set=node.param=value (repeatable)
 -->
 <style>
-  :root { --ui: system-ui, -apple-system, "Segoe UI", sans-serif; --mono: ui-monospace, "SF Mono", Menlo, monospace; --ground: #141318; --text: #eef2f6; --muted: #9aa3ad; --line: #2a2933; --accent: #a78bfa; --visual: #5ca9ff; }
-  html, body { margin: 0; height: 100%; background: var(--ground); color: var(--text); font: 14px/1.4 var(--ui); overflow: hidden; }
-  #css { position: fixed; inset: 0; cursor: grab; }
-  #css.dragging { cursor: grabbing; }
-  #gl { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-  #app { width: 380px; height: 680px; border-radius: 36px; overflow: hidden; background: #0b1026; box-shadow: 0 0 0 8px #0d0e12, 0 30px 80px rgba(0,0,0,.55); }
-  header { position: fixed; top: 0; left: 0; right: 0; display: flex; gap: 16px; align-items: center; padding: 14px 18px; background: linear-gradient(var(--ground) 60%, transparent); z-index: 2; flex-wrap: wrap; }
-  header h1 { font-size: 15px; font-weight: 650; margin: 0; letter-spacing: .01em; }
-  header h1 small { font-weight: 400; color: var(--muted); margin-left: 8px; }
-  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
-  .seg button { font: 600 13px var(--ui); color: var(--muted); background: transparent; border: 0; padding: 8px 14px; cursor: pointer; }
-  .seg button + button { border-left: 1px solid var(--line); }
-  .seg button[aria-pressed="true"] { color: var(--text); background: #2a2440; box-shadow: inset 0 0 0 1px var(--accent); }
-  .spacer { flex: 1; }
-  label.fmt { display: inline-flex; gap: 8px; align-items: center; color: var(--muted); font-size: 12px; }
-  label.fmt input { font: 12px var(--mono); color: var(--text); background: #1d1c24; border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; width: 290px; }
-  #caption { position: fixed; left: 18px; bottom: 16px; max-width: 520px; z-index: 2; background: rgba(20,19,24,.86); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
-  #caption b { display: block; font-size: 14px; margin-bottom: 4px; }
-  #caption p { margin: 0; color: #c4ccd4; font-size: 13px; }
-  #caption .k { margin-top: 8px; display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
-  #caption .k span::before { content: ""; display: inline-block; width: 18px; height: 3px; border-radius: 2px; background: var(--c); vertical-align: middle; margin-right: 6px; }
-  #toast { position: fixed; right: 18px; bottom: 16px; z-index: 2; font-size: 12px; color: var(--muted); }
-  @media (max-width: 720px) { label.fmt input { width: 180px; } #caption { right: 16px; } }
+:root {
+  --ground: #141318; --bar: #1b1a21; --panel: rgba(27, 26, 33, 0.96); --rule: rgba(238, 242, 246, 0.09);
+  --fg: #eef2f6; --dim: #9aa3ad; --faint: #6b7480; --wire-data: #45d08a; --wire-signal: #35c3e8;
+  --visual: #5ca9ff; --accent: #a78bfa; --good: #45d08a; --bad: #ff7a7a;
+  --ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  color-scheme: dark;
+}
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--ground); color: var(--fg); font: 13px/1.45 var(--ui); overflow: hidden; }
+#css { position: fixed; inset: 0; touch-action: none; cursor: grab; }
+#css.dragging { cursor: grabbing; }
+#css.connecting { cursor: crosshair; }
+#gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+#app { width: 380px; height: 680px; border-radius: 36px; overflow: hidden; background: #0b1026; box-shadow: 0 0 0 8px #0d0e12, 0 30px 80px rgba(0,0,0,.55); }
+
+.bar { position: fixed; left: 0; right: 0; top: 0; z-index: 4; padding: 8px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--bar); border-bottom: 1px solid var(--rule); }
+.crumb { font-weight: 600; white-space: nowrap; }
+.crumb span { color: var(--faint); font-weight: 400; margin: 0 4px; }
+.spacer { flex: 1; }
+button, input, select { font: inherit; color: var(--fg); }
+button { background: #2b323b; border: 1px solid var(--rule); border-radius: 6px; padding: 6px 11px; cursor: pointer; font-weight: 600; font-size: 12.5px; }
+button:hover { background: #333c46; }
+button:disabled { opacity: 0.45; cursor: default; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 7px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; background: transparent; color: var(--dim); padding: 6px 10px; }
+.seg button[aria-pressed="true"] { background: #333c46; color: var(--fg); }
+.mono { font-family: var(--mono); font-size: 11.5px; }
+.stages button { display: inline-flex; gap: 6px; align-items: center; padding: 6px 12px; }
+.stages button b { font: 600 10px var(--mono); color: var(--faint); }
+.stages button[aria-pressed="true"] { background: var(--accent); color: #17121f; }
+.stages button[aria-pressed="true"] b { color: #3b2a63; }
+#add { background: #2d435b; border-color: rgba(92, 169, 255, 0.35); }
+#add:hover { background: #345274; }
+
+.side { position: fixed; z-index: 2; right: 16px; top: 64px; bottom: 16px; width: 330px; display: flex; flex-direction: column; }
+.win { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45); }
+.eyebrow { font: 600 10px var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); }
+.panel { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.tabs { display: flex; border-bottom: 1px solid var(--rule); padding: 0 8px; }
+.tabs button { background: none; border: 0; border-bottom: 2px solid transparent; border-radius: 0; padding: 9px 10px 8px; color: var(--dim); }
+.tabs button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); }
+.tabs .count { font: 600 10px var(--mono); color: var(--faint); margin-left: 4px; }
+.tabbody { overflow: auto; padding: 12px 14px 16px; flex: 1; min-height: 0; }
+.lead { color: var(--dim); margin: 0 0 10px; font-size: 12.5px; }
+
+.mission { border: 1px solid var(--rule); border-radius: 9px; padding: 11px 12px; margin-bottom: 10px; display: grid; gap: 7px; }
+.mission.done { border-color: rgba(69, 208, 138, 0.45); background: rgba(69, 208, 138, 0.05); }
+.mission h3 { margin: 0; font-size: 13.5px; display: flex; gap: 8px; align-items: baseline; }
+.mission h3 b { font: 600 10.5px var(--mono); color: var(--faint); }
+.mission.done h3 b { color: var(--good); }
+.mission p { margin: 0; color: var(--dim); font-size: 12.5px; }
+.mission details { font-size: 12px; color: var(--dim); }
+.mission summary { cursor: pointer; color: var(--faint); font-size: 11.5px; }
+.mission .row { display: flex; gap: 8px; flex-wrap: wrap; }
+.mission .row button:first-child { background: #2d435b; border-color: rgba(92, 169, 255, 0.35); }
+.verdict { font-size: 12px; padding: 7px 9px; border-radius: 7px; }
+.verdict.ok { background: rgba(69, 208, 138, 0.12); color: #bff0d5; }
+.verdict.no { background: rgba(255, 122, 122, 0.1); color: #ffc9c9; }
+.verdict.run { background: rgba(92, 169, 255, 0.1); color: #cfe4ff; }
+.verdict small { display: block; color: var(--faint); font-size: 10.5px; margin-top: 2px; }
+.steps { margin: 0; padding-left: 18px; font-size: 12px; color: var(--dim); display: grid; gap: 2px; }
+.steps li.on { color: var(--fg); }
+.steps li.did { color: var(--good); }
+.allDone { padding: 10px; border-radius: 8px; background: rgba(167, 139, 250, 0.1); border: 1px solid rgba(167, 139, 250, 0.3); font-size: 12.5px; color: var(--fg); margin-bottom: 10px; }
+
+.knob { padding: 10px 0; border-top: 1px solid var(--rule); display: grid; gap: 6px; }
+.knob .top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.knob label { font-weight: 600; }
+.knob .to { font: 10.5px var(--mono); color: var(--faint); cursor: pointer; text-decoration: underline dotted; text-underline-offset: 2px; background: none; border: 0; padding: 0; justify-self: start; }
+.knob .val { font: 12px var(--mono); color: var(--wire-data); font-variant-numeric: tabular-nums; }
+.knob input[type="range"] { width: 100%; accent-color: var(--accent); }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chips button { padding: 3px 8px; font: 11px var(--mono); color: var(--dim); }
+.swatches { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.swatches label { display: inline-flex; gap: 6px; align-items: center; font-weight: 500; color: var(--dim); font-size: 12px; }
+input[type="color"] { width: 30px; height: 22px; padding: 0; border: 1px solid var(--rule); border-radius: 5px; background: none; cursor: pointer; }
+input[type="text"], input[type="number"], select { width: 100%; box-sizing: border-box; background: var(--ground); border: 1px solid var(--rule); border-radius: 6px; padding: 5px 8px; font: 12px var(--mono); }
+.knob small { color: var(--faint); font-size: 11px; }
+.chain { margin: 2px 0 10px; padding: 10px; border-radius: 8px; background: rgba(167, 139, 250, 0.08); border: 1px solid rgba(167, 139, 250, 0.22); font-size: 12px; color: var(--dim); }
+.chain b { color: var(--fg); }
+.chain ol { margin: 6px 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 4px 2px; }
+.chain li { font: 11px var(--mono); color: var(--fg); }
+.chain li + li::before { content: "→ "; color: var(--faint); }
+.chain li.v { color: #a9d0ff; }
+
+.props h2 { margin: 0; font-size: 16px; font-weight: 650; }
+.props .type { color: var(--dim); font-size: 12px; }
+.props .src { margin-top: 12px; font: 10.5px var(--mono); color: var(--faint); word-break: break-all; }
+.props .draws { margin-top: 10px; padding: 10px; border-radius: 8px; border: 1px dashed rgba(92, 169, 255, 0.55); color: var(--dim); font-size: 12px; }
+.props .draws b { color: var(--fg); }
+.props .eyebrow { margin: 14px 0 4px; }
+.prop { display: grid; grid-template-columns: minmax(0, 1fr) 128px; gap: 8px; align-items: center; padding: 4px 0; }
+.prop label { font-size: 12px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.prop input[type="checkbox"] { justify-self: start; accent-color: var(--accent); width: 16px; height: 16px; }
+.port { padding: 7px 0; border-top: 1px solid var(--rule); display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 8px; }
+.port .n { font-weight: 600; font-size: 12.5px; }
+.port .n::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 7px; vertical-align: 1px; background: var(--wire-data); }
+.port .v { font: 11.5px var(--mono); color: var(--wire-data); max-width: 13ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; }
+.conn { display: flex; gap: 8px; align-items: center; padding: 4px 0; font: 11.5px var(--mono); color: var(--dim); }
+.conn span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.conn button { padding: 1px 7px; font-size: 11px; }
+.danger { margin-top: 14px; color: #ffc9c9; border-color: rgba(255, 122, 122, 0.3); }
+
+.pop { position: fixed; z-index: 6; background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; box-shadow: 0 16px 50px rgba(0, 0, 0, 0.55); }
+.picker { top: 56px; width: 300px; max-height: min(520px, calc(100% - 80px)); display: flex; flex-direction: column; }
+.picker .head { padding: 10px; border-bottom: 1px solid var(--rule); display: grid; gap: 6px; }
+.picker .head small { color: var(--faint); font-size: 11px; }
+.picker .list { overflow: auto; padding: 6px 0 8px; }
+.picker .cat { padding: 8px 12px 3px; }
+.picker .item { display: flex; justify-content: space-between; gap: 8px; width: 100%; text-align: left; background: none; border: 0; border-radius: 0; padding: 6px 12px; font-weight: 500; }
+.picker .item:hover, .picker .item:focus-visible { background: #2b323b; }
+.picker .item em { font: normal 10.5px var(--mono); color: var(--faint); }
+.conpop { width: 420px; max-width: calc(100% - 32px); padding: 10px; display: grid; gap: 8px; }
+.conpop .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.conpop .col { display: grid; gap: 2px; align-content: start; max-height: 280px; overflow: auto; }
+.conpop .col button { text-align: left; background: none; border: 1px solid transparent; font: 11.5px var(--mono); padding: 4px 6px; display: flex; gap: 6px; align-items: center; }
+.conpop .col button::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--wire-data); flex: none; }
+.conpop .col button.sig::before { background: var(--wire-signal); }
+.conpop .col button[aria-pressed="true"] { border-color: var(--accent); background: rgba(167, 139, 250, 0.12); }
+.conpop .col button:hover:not(:disabled) { background: #2b323b; }
+.conpop .foot { display: flex; justify-content: space-between; align-items: center; color: var(--faint); font-size: 11px; }
+.toast { position: fixed; z-index: 5; left: 50%; top: 60px; transform: translateX(-50%); background: #2b323b; border: 1px solid var(--rule); border-radius: 8px; padding: 7px 12px; font-size: 12.5px; max-width: calc(100% - 32px); pointer-events: none; opacity: 0; transition: opacity 0.25s; }
+.toast.on { opacity: 1; }
+
+.caption { position: fixed; z-index: 1; left: 16px; bottom: 16px; max-width: min(560px, calc(100% - 760px)); pointer-events: none; }
+.caption .h { font-weight: 650; font-size: 15px; }
+.caption .s { color: var(--dim); font-size: 12.5px; margin-top: 2px; }
+.caption .k { margin-top: 6px; display: flex; gap: 12px; flex-wrap: wrap; font: 10.5px var(--mono); color: var(--faint); }
+.caption .k span::before { content: ""; display: inline-block; width: 10px; height: 8px; margin-right: 5px; border-radius: 2px; background: var(--c); vertical-align: 0; }
+.caption .k span.dash::before { background: transparent; border: 1px dashed var(--c); }
+
+/* a mission's Check: the copy of the app it plays on, small, while it plays */
+.checkapp { position: fixed; z-index: 3; left: 16px; top: 64px; width: 160px; padding: 8px; display: grid; gap: 6px; }
+.checkapp .lbl { font-size: 11px; color: var(--dim); }
+.checkapp .lbl b { color: var(--fg); display: block; }
+.checkapp .box { width: 160px; height: 286px; overflow: hidden; border-radius: 16px; }
+#checkframe { width: 380px; height: 680px; transform: scale(0.421); transform-origin: 0 0; }
+#err { position: fixed; inset: 40% 16px auto; text-align: center; font-size: 14px; z-index: 9; }
+@media (max-width: 760px) { .side { left: 16px; right: 16px; width: auto; top: auto; height: 46vh; } .caption, .crumb { display: none; } .picker { left: 16px !important; right: 16px; width: auto; } }
 </style>
-<div id="css"></div>
+
+<div id="css" aria-label="The focus timer's NodeGX graph and the app it makes. In Graph: drag a card to move it, drag from the dot on a card's header to another card to connect them, drag the background to pan. In Lift and Orbit, drag to turn. Scroll to zoom; click a node to inspect it."></div>
 <canvas id="gl"></canvas>
-<header>
-  <h1>Orbit<small>the graph, and the real app it makes</small></h1>
-  <div class="seg" role="group" aria-label="Where the app sits">
-    <button type="button" data-mode="window" aria-pressed="false">App in a window</button>
+
+<header class="bar">
+  <div class="crumb">Orbit<span>›</span>App</div>
+  <div class="seg stages" role="group" aria-label="View">
+    <button type="button" data-stage="0" aria-pressed="true"><b>1</b>Graph</button>
+    <button type="button" data-stage="1" aria-pressed="false"><b>2</b>Lift</button>
+    <button type="button" data-stage="2" aria-pressed="false"><b>3</b>Orbit</button>
+  </div>
+  <button id="add" type="button" aria-haspopup="dialog">+ Add node</button>
+  <div class="seg" id="poses" role="group" aria-label="Where the app sits" hidden>
     <button type="button" data-mode="scene" aria-pressed="true">App in the scene</button>
+    <button type="button" data-mode="window" aria-pressed="false">App in a window</button>
   </div>
   <div class="spacer"></div>
-  <label class="fmt">Round line <input id="fmt" type="text" spellcheck="false"></label>
+  <span class="mono" style="color:var(--faint)">clock</span>
   <div class="seg" role="group" aria-label="Clock speed">
-    <button type="button" data-speed="1" aria-pressed="false">1×</button>
-    <button type="button" data-speed="60" aria-pressed="true">60×</button>
+    <button type="button" class="mono" data-speed="1" aria-pressed="false">1×</button>
+    <button type="button" class="mono" data-speed="60" aria-pressed="true">60×</button>
   </div>
+  <button id="reset" type="button" title="Put the project back the way it started">Reset</button>
 </header>
-<div id="caption"><b id="capH"></b><p id="capS"></p>
-  <div class="k"><span style="--c:#5ca9ff">draws on screen</span><span style="--c:var(--wd)" id="kData">a value</span><span style="--c:var(--ws)" id="kSig">a signal</span></div>
+
+<div class="side">
+  <section class="win panel">
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tab-missions" aria-selected="true">Missions<span class="count" id="mcount">0/3</span></button>
+      <button type="button" role="tab" id="tab-try" aria-selected="false">Try it</button>
+      <button type="button" role="tab" id="tab-node" aria-selected="false">Node</button>
+    </div>
+    <div class="tabbody" id="body-missions" role="tabpanel"></div>
+    <div class="tabbody" id="body-try" role="tabpanel" hidden>
+      <p class="lead">A focus timer: work until the clock runs out, take a break, repeat. Each change here is written into one node in the project's files, and the app is rebuilt from them (it starts again from the top).</p>
+      <div class="chain" id="chain"><b>Nothing changed yet.</b> The list will show every node a change can reach, in the order the wires reach them.</div>
+      <div class="knob">
+        <div class="top"><label for="kFocus">Focus length</label><span class="val" id="vFocus">25:00</span></div>
+        <input id="kFocus" type="range" min="5" max="3600" step="5" value="1500">
+        <div class="chips" data-for="kFocus"><button type="button" data-v="10">10 s</button><button type="button" data-v="300">5 min</button><button type="button" data-v="1500">25 min</button></div>
+        <button type="button" class="to" data-node="focusLen">→ Focus length (Number) · Value</button>
+      </div>
+      <div class="knob">
+        <div class="top"><label for="kBreak">Break length</label><span class="val" id="vBreak">05:00</span></div>
+        <input id="kBreak" type="range" min="5" max="1800" step="5" value="300">
+        <div class="chips" data-for="kBreak"><button type="button" data-v="5">5 s</button><button type="button" data-v="60">1 min</button><button type="button" data-v="300">5 min</button></div>
+        <button type="button" class="to" data-node="breakLen">→ Break length (Number) · Value</button>
+      </div>
+      <div class="knob">
+        <div class="top"><label>Phase colours</label></div>
+        <div class="swatches"><label>Focus <input id="kFocusGlow" type="color"></label><label>Break <input id="kBreakGlow" type="color"></label></div>
+        <button type="button" class="to" data-node="phase">→ Focus / Break (States) · glow in each state</button>
+      </div>
+      <div class="knob">
+        <div class="top"><label>Sky, start to end of a phase</label></div>
+        <div class="swatches"><input id="kSky0" type="color" aria-label="Sky at the start"><input id="kSky1" type="color" aria-label="Sky halfway"><input id="kSky2" type="color" aria-label="Sky at the end"></div>
+        <button type="button" class="to" data-node="sky">→ Sky (Color Blend) · Color 0, 1, 2</button>
+      </div>
+      <div class="knob">
+        <div class="top"><label for="kFormat">Round line</label></div>
+        <input id="kFormat" type="text" spellcheck="false">
+        <small>Placeholders: {round} {phase} {time}. A new one becomes a new input on the node.</small>
+        <button type="button" class="to" data-node="hud">→ Round line (String Format) · Format</button>
+      </div>
+    </div>
+    <div class="tabbody props" id="body-node" role="tabpanel" hidden></div>
+  </section>
 </div>
-<div id="toast" role="status"></div>
+
+<div class="pop picker" id="picker" role="dialog" aria-label="Add a node" hidden>
+  <div class="head"><input id="pickq" type="text" placeholder="Search nodes" spellcheck="false" autocomplete="off"><small id="pickcount"></small></div>
+  <div class="list" id="picklist"></div>
+</div>
+<div class="pop conpop" id="conpop" role="dialog" aria-label="Connect" hidden></div>
+<div class="toast" id="toast" role="status"></div>
+<div class="caption" id="caption">
+  <div class="h" id="capH"></div>
+  <div class="s" id="capS"></div>
+  <div class="k"><span style="--c:#333c46">a node</span><span class="dash" style="--c:#5ca9ff">draws on screen</span><span style="--c:var(--wd)">a value</span><span style="--c:var(--ws)">a signal</span></div>
+</div>
+<div class="win checkapp" id="checkapp" hidden>
+  <div class="lbl" id="checklbl"></div>
+  <div class="box"><div id="checkframe"></div></div>
+</div>
+<div id="err" hidden></div>
 <div id="app"></div>
 
 <script src="/preview.js"></script>
@@ -73,29 +260,30 @@
 <script type="module">
 import * as THREE from 'three';
 import { CSS3DRenderer, CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js';
-import { Line2 } from 'three/addons/lines/Line2.js';
-import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
-import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
 import { look, nodeScheme, wireColors } from './look.js';
+import { portsFor, hasSpec } from './specs.js';
 
 const $ = (id) => document.getElementById(id);
 const say = (t) => { document.title = t; };
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep = (ms) => new Promise((r) => setTimeout(r, reduce ? Math.min(ms, 80) : ms));
+const query = new URLSearchParams(location.search);
 try {
 
-/* ================= the project, held in memory ================= */
+/* ================= the project, held in memory; every edit is a write through the store ================= */
 const files = NodegxPreview.memoryFiles(await (await fetch('/project/orbit.json')).json());
 const store = new NodegxPreview.V2ProjectStore(files);
 const KEY = 'App';
-function writeParam(node, param, value) {
+/** One write through the store: `mutate` edits the component's files as read; the store checks nothing changed under it. */
+function write(mutate) {
   const c = store.readComponent(KEY);
-  c.files.nodes.nodes.find((n) => n.id === node).parameters[param] = value;
+  mutate(c.files.nodes.nodes, c.files.connections.connections);
   store.writeComponent(KEY, c.files, { ifRevision: c.revision });
 }
-const query = new URLSearchParams(location.search);
+const writeParam = (node, param, value) => write((ns) => { ns.find((n) => n.id === node).parameters[param] = value; });
 let speed = Number(query.get('speed') || 60);
 writeParam('ticker', 'interval', Math.round(1000 / speed));
-// ?set=node.param=value (repeatable): any parameter, written through the store before the first render (the gate shortens Focus with it)
 for (const s of query.getAll('set')) {
   const [, node, param, raw] = s.match(/^([^.]+)\.([^=]+)=(.*)$/);
   writeParam(node, param, isNaN(Number(raw)) ? raw : Number(raw));
@@ -110,18 +298,22 @@ const cssRenderer = new CSS3DRenderer();
 $('css').appendChild(cssRenderer.domElement);
 const scene = new THREE.Scene();
 const GROUND = new THREE.Color(look.colors.dark.ground);
-scene.fog = new THREE.Fog(GROUND, 34, 70);
-const camera = new THREE.PerspectiveCamera(38, 1, 0.5, 400);
-scene.add(camera);
+scene.fog = new THREE.Fog(GROUND, 30, 90);
+const camera = new THREE.PerspectiveCamera(14, 1, 0.5, 600);
+scene.add(camera, new THREE.AmbientLight(0xffffff, 1.6));
+const sun = new THREE.DirectionalLight(0xffffff, 1.4);
+sun.position.set(-6, 14, 10);
+scene.add(sun);
+const css = getComputedStyle(document.documentElement);
+const UI = css.getPropertyValue('--ui'), MONO = css.getPropertyValue('--mono');
 
-const PHONE = { w: 380, h: 680, y: 3.7, s: 0.01 };
+const APP = { w: 380, h: 680 };
 const appObj = new CSS3DObject($('app'));
-appObj.position.set(0, PHONE.y, 0);
-appObj.scale.setScalar(PHONE.s);
+appObj.scale.setScalar(0.01);
 scene.add(appObj);
-// The hole: transparent pixels with depth, where the app is, so a card behind the app is hidden and one in front is not.
+// the hole: transparent pixels with depth where the app is, so a card behind the app is hidden and one in front is not
 {
-  const r = 36, w = PHONE.w / 2, h = PHONE.h / 2, s = new THREE.Shape();
+  const r = 36, w = APP.w / 2, h = APP.h / 2, s = new THREE.Shape();
   s.moveTo(-w + r, -h); s.lineTo(w - r, -h); s.quadraticCurveTo(w, -h, w, -h + r); s.lineTo(w, h - r); s.quadraticCurveTo(w, h, w - r, h);
   s.lineTo(-w + r, h); s.quadraticCurveTo(-w, h, -w, h - r); s.lineTo(-w, -h + r); s.quadraticCurveTo(-w, -h, -w + r, -h);
   const hole = new THREE.Mesh(new THREE.ShapeGeometry(s, 8), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0, blending: THREE.NoBlending, side: THREE.DoubleSide }));
@@ -129,14 +321,11 @@ scene.add(appObj);
   appObj.add(hole);
 }
 function resize() {
-  const w = innerWidth, h = innerHeight;
-  renderer.setSize(w, h, false);
-  cssRenderer.setSize(w, h);
-  camera.aspect = w / h;
+  renderer.setSize(innerWidth, innerHeight, false);
+  cssRenderer.setSize(innerWidth, innerHeight);
+  camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
-  for (const m of lineMats) m.resolution.set(w, h);
 }
-const lineMats = [];
 addEventListener('resize', resize);
 resize();
 cssRenderer.render(scene, camera);   // the app's element is in the CSS layer BEFORE the preview writes into it (moving an iframe reloads it)
@@ -145,71 +334,162 @@ cssRenderer.render(scene, camera);   // the app's element is in the CSS layer BE
 const preview = await NodegxPreview.mountPreview($('app'), { runtimeBase: '/runtime/' });
 const first = await preview.update(files.entries());
 if (first.status !== 'ok') throw new Error('the app did not start: ' + JSON.stringify(first).slice(0, 300));
-
-/* ================= the graph, from the files ================= */
-const comp = store.readComponent(KEY).files;
-const nodes = comp.nodes.nodes;
-const conns = comp.connections.connections;
-const byId = Object.fromEntries(nodes.map((n) => [n.id, n]));
 const library = preview.nodeLibrary;
-const typeDef = (type) => (library.nodetypes || []).find((t) => t.name === type);
-const typeName = (type) => typeDef(type)?.displayNodeName || typeDef(type)?.displayName || type;
-const portLabel = (type, port) => {
-  const p = (typeDef(type)?.ports || []).find((x) => x.name === port);
-  if (p?.displayName) return p.displayName;
-  // dynamic ports the library cannot list: States' per-state values, String Format's {placeholders}
-  const m = port.match(/^value-(.+)-(.+)$/) || port.match(/^reached-(.+)$/);
-  if (m) return m.length === 3 ? `${m[2]} in ${m[1]}` : `Reached ${m[1]}`;
-  return port;
-};
-const visual = new Set();
-{
-  const walk = (id) => { if (!byId[id] || visual.has(id)) return; visual.add(id); for (const c of byId[id].children || []) walk(c); };
-  for (const r of comp.nodes.visualRoots || []) walk(r);
-}
-const rows = {};
-for (const n of nodes) {
-  const ins = [...new Set(conns.filter((c) => c.toId === n.id).map((c) => c.toProperty))];
-  const outs = [...new Set(conns.filter((c) => c.fromId === n.id).map((c) => c.fromProperty))];
-  rows[n.id] = [...ins.map((p) => ({ dir: 'in', name: p })), ...outs.map((p) => ({ dir: 'out', name: p }))];
-}
-const isSignalOut = (id, port) => {
-  const p = (typeDef(byId[id].type)?.ports || []).find((x) => x.name === port && x.plug === 'output');
-  return p ? (typeof p.type === 'object' ? p.type.name : p.type) === 'signal' : /^reached-/.test(port);
-};
-for (const id in rows) for (const r of rows[id]) r.signal = r.dir === 'out' ? isSignalOut(id, r.name) : conns.some((c) => c.toId === id && c.toProperty === r.name && isSignalOut(c.fromId, c.fromProperty));
+const libIndex = new Map((library.nodetypes || []).map((t) => [t.name, t]));
 
-/* ================= the look (@nodegx/canvas-look, generated from the editor's theme) ================= */
-const SCHEME = { logic: nodeScheme('default'), visual: { ...nodeScheme('visual'), outline: nodeScheme('visual').outlineHighlighted } };
-const WIRE = { data: wireColors('number').normal, signal: wireColors('signal').normal };
-document.documentElement.style.setProperty('--wd', WIRE.data);
-document.documentElement.style.setProperty('--ws', WIRE.signal);
-const RING = (k) => 6.6 + (k - 1) * 1.9;
-const PX = 0.01, CW = 150, HEAD = 44, ROW = 20, FOOT = 10, SCALE = 3;
+/* ================= the graph, read from the files ================= */
+let nodes, conns, byId, visual, parentOf, visOrder;
+const wireKey = (c) => `${c.fromId}.${c.fromProperty}>${c.toId}.${c.toProperty}`;
+function readGraph() {
+  const comp = store.readComponent(KEY).files;
+  nodes = comp.nodes.nodes;
+  conns = comp.connections.connections;
+  byId = Object.fromEntries(nodes.map((n) => [n.id, n]));
+  visual = new Set(); parentOf = {}; visOrder = [];
+  const walk = (id, parent) => { if (!byId[id] || visual.has(id)) return; visual.add(id); visOrder.push(id); if (parent) parentOf[id] = parent; for (const c of byId[id].children || []) walk(c, id); };
+  for (const r of comp.nodes.visualRoots || []) walk(r, null);
+}
+readGraph();
+const ids = () => nodes.map((n) => n.id);
+
+/* ================= ports: the spec's (OWN-002) where the type has one, else the runtime's library ================= */
+const tname = (t) => (typeof t === 'object' && t !== null ? t.name : t) ?? '*';
+const typeName = (type) => libIndex.get(type)?.displayNodeName || libIndex.get(type)?.displayName || ({ 'net.noodl.controls.button': 'Button', 'net.noodl.animatetovalue': 'Animate To Value' })[type] || type;
+const labelOf = (id) => byId[id]?.label || typeName(byId[id]?.type);
+const libPorts = (type, plug) => (libIndex.get(type)?.ports || []).filter((p) => p.plug === plug || p.plug === 'input/output').map((p) => ({
+  name: p.name, label: p.displayName || p.name, type: tname(p.type), signal: tname(p.type) === 'signal', default: p.default,
+  enums: Array.isArray(p.type?.enums) ? p.type.enums.map((e) => (typeof e === 'object' ? e.value : e)) : undefined, group: p.group
+}));
+function portsOf(id, dir) {
+  const n = byId[id], plug = dir === 'in' ? 'input' : 'output';
+  const spec = portsFor(n.type, n.parameters || {});
+  const lib = libPorts(n.type, plug);
+  const list = (spec ? (dir === 'in' ? spec.inputs : spec.outputs) : lib).map((p) => ({ ...p, label: lib.find((l) => l.name === p.name)?.label || p.label }));
+  // a wired port the lists do not name (a port the runtime makes from something neither knows) is still a port
+  for (const c of conns) {
+    const name = dir === 'in' ? (c.toId === id ? c.toProperty : null) : (c.fromId === id ? c.fromProperty : null);
+    if (name && !list.some((p) => p.name === name)) list.push({ name, label: name, type: '*', signal: dir === 'out' ? false : outIsSignal(c.fromId, c.fromProperty) });
+  }
+  return list;
+}
+const portLabel = (id, dir, name) => portsOf(id, dir).find((p) => p.name === name)?.label ?? name;
+const outIsSignal = (id, port) => {
+  const n = byId[id];
+  const spec = portsFor(n.type, n.parameters || {});
+  const p = (spec?.outputs || []).find((x) => x.name === port) || libPorts(n.type, 'output').find((x) => x.name === port);
+  return p ? p.signal : /^(reached-|on[A-Z])/.test(port);
+};
+const wireText = (c) => `${labelOf(c.fromId)} · ${portLabel(c.fromId, 'out', c.fromProperty)} → ${labelOf(c.toId)} · ${portLabel(c.toId, 'in', c.toProperty)}`;
+
+/* ================= each card's rows: the connected ports, as the editor shows them ================= */
+const rows = {};
+function computeRows(id) {
+  const ins = [...new Set(conns.filter((c) => c.toId === id).map((c) => c.toProperty))];
+  const outs = [...new Set(conns.filter((c) => c.fromId === id).map((c) => c.fromProperty))];
+  return [
+    ...ins.map((name) => ({ dir: 'in', name, label: portLabel(id, 'in', name), signal: conns.some((c) => c.toId === id && c.toProperty === name && outIsSignal(c.fromId, c.fromProperty)) })),
+    ...outs.map((name) => ({ dir: 'out', name, label: portLabel(id, 'out', name), signal: outIsSignal(id, name) }))
+  ];
+}
+for (const id of ids()) rows[id] = computeRows(id);
+
+/* ================= layout: the files' positions; Lift by data flow; Orbit by wires from the screen ================= */
+const PX = 0.01;
+const CARD_W = look.card.size.width * PX, HEAD = 44 * PX, ROW = look.card.propertyConnectionHeight * PX, FOOT = look.card.verticalSpacing * PX;
 const cardH = (id) => HEAD + rows[id].length * ROW + FOOT;
+const PITCH = 2.3, STEP = 0.8;
+const place = {};
+for (const n of nodes) place[n.id] = { x: (n.x ?? 0) * PX, z: (n.y ?? 0) * PX };
+// Lift: the step is how far along the data flow a node is (loop-back wires — a signal wire whose target reaches its source — ignored)
+let layer = {}, maxLayer = 1;
+function computeLayers() {
+  const reach = (a, b) => { const seen = new Set([a]), q = [a]; while (q.length) { const u = q.shift(); if (u === b) return true; for (const c of conns) if (c.fromId === u && !seen.has(c.toId)) { seen.add(c.toId); q.push(c.toId); } } return false; };
+  const dag = conns.filter((c) => !visual.has(c.fromId) && !visual.has(c.toId) && !(outIsSignal(c.fromId, c.fromProperty) && reach(c.toId, c.fromId)));
+  layer = Object.fromEntries(ids().map((i) => [i, 0]));
+  for (let k = 0; k < nodes.length; k++) for (const c of dag) layer[c.toId] = Math.max(layer[c.toId], layer[c.fromId] + 1);
+  maxLayer = Math.max(1, ...ids().filter((i) => !visual.has(i)).map((i) => layer[i]));
+  for (const id of visual) layer[id] = maxLayer + 1;
+}
+// Orbit: rings by how many wires a node is from the screen (its visual nodes)
+let hops = {}, maxHop = 1;
+const ringR = (k) => 7.4 + (k - 1) * 1.25;
+const ring = {};
+let bounds = { x0: 0, x1: 1, z0: 0, z1: 1 };
+const center = new THREE.Vector3();
+function computeBounds() {
+  const all = ids();
+  bounds = { x0: Math.min(...all.map((i) => place[i].x)), x1: Math.max(...all.map((i) => place[i].x + CARD_W)), z0: Math.min(...all.map((i) => place[i].z)), z1: Math.max(...all.map((i) => place[i].z + cardH(i))) + 0.9 };
+}
+computeBounds();
+center.set((bounds.x0 + bounds.x1) / 2, 0, (bounds.z0 + bounds.z1) / 2);
+const ORBIT_C = center.clone(); // the orbit's centre stays put while the graph is edited
+function computeRings() {
+  hops = Object.fromEntries([...visual].map((k) => [k, 0]));
+  let frontier = [...visual], d = 0;
+  while (frontier.length) {
+    d++;
+    const next = [];
+    for (const c of conns) for (const [a, b] of [[c.fromId, c.toId], [c.toId, c.fromId]]) if (frontier.includes(b) && !(a in hops)) { hops[a] = d; next.push(a); }
+    frontier = next;
+  }
+  maxHop = Math.max(1, ...Object.values(hops));
+  for (const id of ids()) if (!(id in hops)) hops[id] = maxHop + 1;
+  maxHop = Math.max(...Object.values(hops));
+  for (const k in ring) delete ring[k];
+  for (let k = 1; k <= maxHop; k++) {
+    const col = ids().filter((i) => hops[i] === k).sort((p, q) => place[p].z - place[q].z);
+    col.forEach((id, j) => {
+      const a = k * 0.8 + (j / col.length) * Math.PI * 2;
+      ring[id] = { x: ORBIT_C.x + Math.cos(a) * ringR(k), y: 0.8 - k * 0.08, z: ORBIT_C.z + Math.sin(a) * ringR(k) };
+    });
+  }
+}
+computeLayers();
+computeRings();
+function findFree(x, z, h, skip) {
+  const hit = (zz) => ids().some((i) => i !== skip && place[i] && x < place[i].x + CARD_W + 0.2 && x + CARD_W + 0.2 > place[i].x && zz < place[i].z + cardH(i) + 0.25 && zz + h + 0.25 > place[i].z);
+  let zz = z;
+  for (let n = 0; n < 80 && hit(zz); n++) zz += 0.3;
+  return { x, z: zz };
+}
+
+/* ================= the floor, the stars, the ring guides ================= */
+const soft = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.35, 'rgba(255,255,255,0.6)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  x.fillStyle = gr; x.fillRect(0, 0, 64, 64);
+  return new THREE.CanvasTexture(c);
+})();
+let gridMat;
+{
+  const c = document.createElement('canvas'); c.width = c.height = 32;
+  const x = c.getContext('2d'); x.fillStyle = 'rgba(255,255,255,0.14)'; x.beginPath(); x.arc(16, 16, 1.6, 0, Math.PI * 2); x.fill();
+  const tex = new THREE.CanvasTexture(c); tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.anisotropy = 8;
+  const size = 200; tex.repeat.set(size / (20 * PX), size / (20 * PX));
+  gridMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false });
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(size, size), gridMat);
+  m.rotation.x = -Math.PI / 2; m.position.copy(center).setY(-0.001);
+  scene.add(m);
+}
+const starMat = new THREE.PointsMaterial({ color: 0xcfd6ff, size: 0.35, transparent: true, opacity: 0, depthWrite: false, fog: false });
+{
+  const n = 900, p = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) { const r = 70 + Math.random() * 80, t = Math.random() * Math.PI * 2, u = Math.acos(2 * Math.random() - 1); p.set([ORBIT_C.x + r * Math.sin(u) * Math.cos(t), r * Math.cos(u), ORBIT_C.z + r * Math.sin(u) * Math.sin(t)], i * 3); }
+  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(p, 3));
+  scene.add(new THREE.Points(geo, starMat));
+}
+const ringGuides = [];
+for (let k = 1; k <= 16; k++) {
+  const m = new THREE.MeshBasicMaterial({ color: 0x8f86d9, transparent: true, opacity: 0, depthWrite: false });
+  const t = new THREE.Mesh(new THREE.TorusGeometry(ringR(k), 0.008, 4, 180), m);
+  t.rotation.x = Math.PI / 2; t.position.set(ORBIT_C.x, 0.8 - k * 0.08 - 0.05, ORBIT_C.z);
+  scene.add(t);
+  ringGuides.push({ k, m });
+}
 
 /* ================= live values: the app's own trace ================= */
-const last = {};   // `${id}.${dir}.${port}` → value preview
-const heat = {};   // id → 0..1, cools each frame
-const flash = {};  // `${id}.${dir}.${port}` → 0..1 for signals
-const wireKey = (c) => `${c.fromId}.${c.fromProperty}>${c.toId}.${c.toProperty}`;
-const wireIndex = new Map(conns.map((c, i) => [wireKey(c), i]));
-const pulses = [];
-const wireHeat = {};
-let eventCount = 0;
-preview.onTrace(({ events }) => {
-  for (const e of events) {
-    eventCount++;
-    const shown = e.kind === 'signal' ? '' : e.value;
-    last[`${e.fromNode}.out.${e.fromPort}`] = shown;
-    last[`${e.toNode}.in.${e.toPort}`] = shown;
-    heat[e.fromNode] = 1; heat[e.toNode] = 1;
-    if (e.kind === 'signal') { flash[`${e.fromNode}.out.${e.fromPort}`] = 1; flash[`${e.toNode}.in.${e.toPort}`] = 1; }
-    const i = wireIndex.get(`${e.fromNode}.${e.fromPort}>${e.toNode}.${e.toPort}`);
-    if (i !== undefined) wireHeat[i] = 1;
-    if (i !== undefined && pulses.length < 400) pulses.push({ i, t0: performance.now() + Math.random() * 60, sig: e.kind === 'signal' });
-  }
-});
+const last = {};   // `${id}.${dir}.${port}` → value preview, as the runtime wrote it
 const fmt = (v) => {
   if (v === undefined || v === '') return '';
   let s = String(v);
@@ -217,187 +497,716 @@ const fmt = (v) => {
   else if (/^-?\d+\.\d{4,}$/.test(s)) s = Number(s).toFixed(3);
   return s.length > 17 ? s.slice(0, 16) + '…' : s;
 };
+const raw = (k) => { const v = last[k]; return v === undefined ? undefined : /^".*"$/.test(v) ? v.slice(1, -1) : v; };
+const recent = [], wiresSeen = new Set();
+let eventCount = 0;
+preview.onTrace(({ events }) => {
+  for (const e of events) {
+    eventCount++;
+    const shown = e.kind === 'signal' ? '' : e.value;
+    last[`${e.fromNode}.out.${e.fromPort}`] = shown;
+    last[`${e.toNode}.in.${e.toPort}`] = shown;
+    const key = `${e.fromNode}.${e.fromPort}>${e.toNode}.${e.toPort}`;
+    wiresSeen.add(key);
+    pulse(key, e.kind === 'signal');
+    recent.push(e);
+  }
+  if (recent.length > 400) recent.splice(0, recent.length - 400);
+});
 
-/* ================= cards ================= */
+/* ================= cards (the editor's look, @nodegx/canvas-look) ================= */
+const SCHEMES = { default: nodeScheme('default'), visual: { ...nodeScheme('visual'), outline: nodeScheme('visual').outlineHighlighted } };
+const WIRE = { data: wireColors('number').normal, signal: wireColors('signal').normal };
+document.documentElement.style.setProperty('--wd', WIRE.data);
+document.documentElement.style.setProperty('--ws', WIRE.signal);
+const SCALE = 3;
 const rr = (x, X, Y, W, H, r) => { x.beginPath(); x.roundRect(X, Y, W, H, r); };
-let hoverId = null;
-function drawCard(id) {
-  const cd = cards[id], ctx = cd.ctx, n = byId[id], vis = visual.has(id), S = vis ? SCHEME.visual : SCHEME.logic;
-  const H = cardH(id), h = cd.heat, hi = hoverId === id;
+let selected = null, hoverId = null;
+const fresh = new Set(); // nodes added on this page: drawn with a small "new" tag
+function drawCard(id, ctx, hi, heat) {
+  const vis = visual.has(id), S = vis ? SCHEMES.visual : SCHEMES.default;
+  const W = 150, H = Math.round(cardH(id) / PX);
   ctx.setTransform(SCALE, 0, 0, SCALE, 0, 0);
-  ctx.clearRect(0, 0, CW, H);
-  rr(ctx, 0.5, 0.5, CW - 1, H - 1, 9); ctx.fillStyle = S.base; ctx.fill();
-  ctx.save(); rr(ctx, 0.5, 0.5, CW - 1, H - 1, 9); ctx.clip(); ctx.fillStyle = S.header; ctx.fillRect(0, 0, CW, HEAD); ctx.restore();
+  ctx.clearRect(0, 0, W, H);
+  rr(ctx, 0.5, 0.5, W - 1, H - 1, 9); ctx.fillStyle = S.base; ctx.fill();
+  ctx.save(); rr(ctx, 0.5, 0.5, W - 1, H - 1, 9); ctx.clip(); ctx.fillStyle = S.header; ctx.fillRect(0, 0, W, 44); ctx.restore();
   rr(ctx, 7, 11, 22, 22, 6); ctx.fillStyle = 'rgba(255,255,255,0.07)'; ctx.fill();
   ctx.strokeStyle = 'rgba(238,242,246,0.8)'; ctx.lineWidth = 1.4;
   if (vis) { rr(ctx, 12.5, 16.5, 11, 11, 2); ctx.stroke(); rr(ctx, 15.5, 19.5, 5, 5, 1); ctx.stroke(); }
   else { ctx.beginPath(); ctx.arc(18, 22, 4.5, 0, Math.PI * 2); ctx.stroke(); }
   ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
-  ctx.fillStyle = S.text; ctx.font = `600 12.5px ${getComputedStyle(document.body).fontFamily}`; ctx.fillText(n.label || typeName(n.type), 37, 20, CW - 46);
-  ctx.fillStyle = vis ? '#8fc2ff' : '#9aa3ad'; ctx.font = '10.5px system-ui, sans-serif';
-  ctx.fillText(typeName(n.type), 37, 34, CW - 46);
-  ctx.font = '10.5px ui-monospace, Menlo, monospace';
+  ctx.fillStyle = S.text; ctx.font = `600 12.5px ${UI}`; ctx.fillText(labelOf(id), 37, 20, W - 52);
+  ctx.fillStyle = vis ? '#8fc2ff' : fresh.has(id) ? '#cbb8ff' : '#9aa3ad'; ctx.font = `10.5px ${UI}`;
+  ctx.fillText(fresh.has(id) ? `${typeName(byId[id].type)} · new` : typeName(byId[id].type), 37, 34, W - 52);
+  ctx.font = `10.5px ${MONO}`;
   rows[id].forEach((r, i) => {
-    const y = HEAD + i * ROW + 14, k = `${id}.${r.dir}.${r.name}`, label = portLabel(n.type, r.name);
-    const f = flash[k] || 0;
-    if (f > 0.02) { ctx.fillStyle = `rgba(53,195,232,${0.28 * f})`; ctx.fillRect(1, HEAD + i * ROW + 1, CW - 2, ROW - 2); }
-    const val = r.signal ? '' : fmt(last[k]);
+    const y = 44 + i * 20 + 14;
+    const val = r.signal ? '' : fmt(last[`${id}.${r.dir}.${r.name}`]);
+    const valCol = vis ? '#a9d0ff' : WIRE.data;
     if (r.dir === 'in' || val) {
-      ctx.textAlign = 'left'; ctx.fillStyle = '#c4ccd4'; ctx.fillText(label, 10, y, val ? CW - 88 : CW - 20);
+      ctx.textAlign = 'left'; ctx.fillStyle = '#c4ccd4'; ctx.fillText(r.label, 10, y, val ? W - 88 : W - 20);
       if (val) {
         ctx.textAlign = 'right';
-        if (/^#[0-9a-f]{6}$/i.test(val)) { ctx.fillStyle = val; rr(ctx, CW - 22, y - 9, 12, 12, 3); ctx.fill(); ctx.fillStyle = vis ? '#a9d0ff' : WIRE.data; ctx.fillText(val, CW - 26, y, 60); }
-        else { ctx.fillStyle = vis ? '#a9d0ff' : WIRE.data; ctx.fillText(val, CW - 10, y, 72); }
+        if (/^#[0-9a-f]{6}$/i.test(val)) { ctx.fillStyle = val; rr(ctx, W - 22, y - 9, 12, 12, 3); ctx.fill(); ctx.fillStyle = valCol; ctx.fillText(val, W - 26, y, 60); }
+        else { ctx.fillStyle = valCol; ctx.fillText(val, W - 10, y, 70); }
       }
-    } else { ctx.textAlign = 'right'; ctx.fillStyle = '#c4ccd4'; ctx.fillText(label, CW - 10, y, CW - 20); }
+    } else { ctx.textAlign = 'right'; ctx.fillStyle = '#c4ccd4'; ctx.fillText(r.label, W - 10, y, W - 20); }
   });
-  rr(ctx, 0.5, 0.5, CW - 1, H - 1, 9);
+  ctx.textAlign = 'left';
+  rr(ctx, 0.5, 0.5, W - 1, H - 1, 9);
   ctx.setLineDash(vis && !hi ? [4, 3] : []);
   ctx.lineWidth = hi ? 2 : 1;
-  ctx.strokeStyle = hi ? (vis ? '#5ca9ff' : '#a78bfa') : h > 0.15 ? (vis ? '#9fcbff' : `rgba(170,182,196,${0.35 + h * 0.65})`) : S.outline;
-  ctx.stroke(); ctx.setLineDash([]);
-  cd.tex.needsUpdate = true;
+  ctx.strokeStyle = hi ? (vis ? '#5ca9ff' : '#a78bfa') : vis ? (heat > 0.15 ? '#9fcbff' : S.outline) : heat > 0.15 ? `rgba(160,172,186,${0.35 + heat * 0.65})` : fresh.has(id) ? 'rgba(167,139,250,0.5)' : S.outline;
+  ctx.stroke();
+  ctx.setLineDash([]);
 }
 const cards = {};
-for (const n of nodes) {
-  const c = document.createElement('canvas'); c.width = CW * SCALE; c.height = cardH(n.id) * SCALE;
+const handleMat = new THREE.MeshBasicMaterial({ color: 0xeef2f6, side: THREE.DoubleSide });
+const handleRingMat = new THREE.MeshBasicMaterial({ color: 0xa78bfa, side: THREE.DoubleSide });
+function makeCard(id) {
+  const W = 150, H = Math.round(cardH(id) / PX);
+  const c = document.createElement('canvas'); c.width = W * SCALE; c.height = H * SCALE;
   const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
-  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(CW * PX, cardH(n.id) * PX), new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide }));
-  mesh.userData.id = n.id;
-  scene.add(mesh);
-  cards[n.id] = { mesh, tex, ctx: c.getContext('2d'), heat: 0, home: new THREE.Vector3() };
+  const grp = new THREE.Group(); grp.rotation.order = 'YXZ';
+  const top = new THREE.Mesh(new THREE.PlaneGeometry(CARD_W, cardH(id)), new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide }));
+  top.rotation.x = -Math.PI / 2; top.userData.id = id;
+  const slab = new THREE.Mesh(new THREE.BoxGeometry(CARD_W - 0.05, 1, cardH(id) - 0.05), new THREE.MeshStandardMaterial({ color: visual.has(id) ? 0x1d3046 : 0x232a32, roughness: 0.8 }));
+  grp.add(slab, top);
+  // the connector: drag from it to another card to wire them (the editor's titlebar plug)
+  const handle = new THREE.Group();
+  const ringM = new THREE.Mesh(new THREE.CircleGeometry(0.075, 24), handleRingMat);
+  const dot = new THREE.Mesh(new THREE.CircleGeometry(0.045, 24), handleMat);
+  dot.position.z = 0.001;
+  handle.add(ringM, dot); handle.rotation.x = -Math.PI / 2;
+  ringM.userData.handle = id; dot.userData.handle = id;
+  grp.add(handle);
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 1, 6), new THREE.MeshBasicMaterial({ color: 0x7d8a98, transparent: true, opacity: 0 }));
+  const shadow = new THREE.Mesh(new THREE.PlaneGeometry(CARD_W * 1.7, cardH(id) * 1.5), new THREE.MeshBasicMaterial({ map: soft, color: 0x000000, transparent: true, opacity: 0, depthWrite: false }));
+  shadow.rotation.x = -Math.PI / 2;
+  scene.add(grp, stem, shadow);
+  const dots = rows[id].map((r) => {
+    const m = new THREE.Mesh(new THREE.CircleGeometry(0.045, 20), new THREE.MeshBasicMaterial({ color: r.signal ? WIRE.signal : WIRE.data, side: THREE.DoubleSide }));
+    m.rotation.x = -Math.PI / 2; grp.add(m);
+    return { m, r };
+  });
+  const old = cards[id];
+  cards[id] = { grp, top, slab, stem, shadow, handle, dots, tex, ctx: c.getContext('2d'), key: '', heat: old?.heat ?? 0, thick: 0.04, pop: old ? 1 : fresh.has(id) ? 0 : 1 };
 }
+function dropCard(id) {
+  const cd = cards[id];
+  if (!cd) return;
+  for (const o of [cd.grp, cd.stem, cd.shadow]) { scene.remove(o); o.traverse((m) => { m.geometry?.dispose(); if (m.material && m.material !== handleMat && m.material !== handleRingMat) m.material.dispose(); }); }
+  cd.tex.dispose();
+  delete cards[id];
+}
+function rebuildCard(id) { rows[id] = computeRows(id); const pop = cards[id]?.pop; dropCard(id); makeCard(id); if (pop !== undefined) cards[id].pop = pop; }
+for (const id of ids()) makeCard(id);
+const portLocal = (id, dir, name, out) => {
+  const i = rows[id].findIndex((r) => r.dir === dir && r.name === name);
+  return out.set(dir === 'out' ? CARD_W / 2 : -CARD_W / 2, cards[id].thick + 0.004, -cardH(id) / 2 + HEAD + Math.max(0, i) * ROW + ROW / 2);
+};
+const wireWorld = (id, dir, name, out) => { portLocal(id, dir, name, out); out.y = cards[id].thick * 0.3; return cards[id].grp.localToWorld(out); };
 
-/* ================= layout: visual nodes beside the app, the rest in rings by how many wires from the screen ================= */
+/* ================= the structure lane (around the visual nodes, as the editor draws it) ================= */
+const lane = new THREE.Group();
+const laneParts = [];
 {
-  // the screen's tree in order, top half of it on the left, the rest on the right (as the editor's structure lane reads, split in two)
-  const vis = [...visual];
-  const half = vis.reduce((t, id) => t + cardH(id), 0) / 2;
-  const side = {};
-  vis.reduce((t, id) => { side[id] = t < half ? -1 : 1; return t + cardH(id); }, 0);
-  for (const s of [-1, 1]) {
-    const col = vis.filter((id) => side[id] === s);
-    const total = col.reduce((t, id) => t + cardH(id), 0) * PX + 0.22 * (col.length - 1);
-    let y = PHONE.y + total / 2;
-    for (const id of col) {
-      const h = cardH(id) * PX;
-      cards[id].home.set(s * (PHONE.w * PHONE.s / 2 + 0.55 + CW * PX / 2), y - h / 2, 0.15);
-      cards[id].side = s;
-      y -= h + 0.22;
-    }
+  const gs = [...visual];
+  const LP = look.lane.padding * PX, LE = look.lane.eyebrowHeight * PX;
+  const x0 = Math.min(...gs.map((i) => place[i].x)) - LP, x1 = Math.max(...gs.map((i) => place[i].x + CARD_W)) + LP;
+  const z0 = Math.min(...gs.map((i) => place[i].z)) - (LP + LE), z1 = Math.max(...gs.map((i) => place[i].z + cardH(i))) + LP;
+  const r = look.lane.cornerRadius * PX, shape = new THREE.Shape();
+  shape.moveTo(x0 + r, z0); shape.lineTo(x1 - r, z0); shape.quadraticCurveTo(x1, z0, x1, z0 + r); shape.lineTo(x1, z1 - r);
+  shape.quadraticCurveTo(x1, z1, x1 - r, z1); shape.lineTo(x0 + r, z1); shape.quadraticCurveTo(x0, z1, x0, z1 - r); shape.lineTo(x0, z0 + r); shape.quadraticCurveTo(x0, z0, x0 + r, z0);
+  const washMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(look.colors.dark.categoryVisual), transparent: true, opacity: look.lane.washAlpha, depthWrite: false, side: THREE.DoubleSide });
+  const wash = new THREE.Mesh(new THREE.ShapeGeometry(shape, 8), washMat); wash.rotation.x = Math.PI / 2;
+  const outlineMat = new THREE.LineDashedMaterial({ color: 0x6a6680, dashSize: 0.05, gapSize: 0.05, transparent: true });
+  const outline = new THREE.Line(new THREE.BufferGeometry().setFromPoints(shape.getPoints(8).map((p) => new THREE.Vector3(p.x, 0, p.y))), outlineMat);
+  outline.computeLineDistances();
+  const c = document.createElement('canvas'); c.width = 600; c.height = 60;
+  const x = c.getContext('2d'); x.font = `600 30px ${MONO}`; if ('letterSpacing' in x) x.letterSpacing = '4px';
+  x.fillStyle = '#8a93a0'; x.textBaseline = 'middle'; x.fillText(look.lane.eyebrowLabel, 0, 30);
+  const eyeTex = new THREE.CanvasTexture(c); eyeTex.colorSpace = THREE.SRGBColorSpace; eyeTex.anisotropy = 8;
+  const eyeMat = new THREE.MeshBasicMaterial({ map: eyeTex, transparent: true, depthWrite: false });
+  const eye = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.15), eyeMat); eye.rotation.x = -Math.PI / 2;
+  eye.position.set(x0 + 12 * PX + 0.75, 0, z0 + 11 * PX + 0.02);
+  const seg = [];
+  for (const [child, parent] of Object.entries(parentOf)) {
+    const sx = place[parent].x + 10 * PX, sz = place[parent].z + cardH(parent), cz = place[child].z + 22 * PX;
+    seg.push(new THREE.Vector3(sx, 0, sz), new THREE.Vector3(sx, 0, cz), new THREE.Vector3(sx, 0, cz), new THREE.Vector3(place[child].x, 0, cz));
   }
-  const hops = Object.fromEntries(vis.map((v) => [v, 0]));
-  let frontier = vis, d = 0;
-  while (frontier.length) {
-    d++;
-    const next = [];
-    for (const c of conns) for (const [a, b] of [[c.fromId, c.toId], [c.toId, c.fromId]]) if (frontier.includes(b) && !(a in hops)) { hops[a] = d; next.push(a); }
-    frontier = next;
-  }
-  const maxHop = Math.max(1, ...Object.values(hops));
-  for (let k = 1; k <= maxHop; k++) {
-    const ring = nodes.filter((n) => hops[n.id] === k).map((n) => n.id);
-    const R = RING(k);
-    ring.forEach((id, j) => {
-      const a = -Math.PI / 2 + k * 0.7 + ((j + 0.5) / ring.length) * Math.PI * 2;
-      cards[id].home.set(Math.cos(a) * R, 0.75 + (cardH(id) * PX) / 2, Math.sin(a) * R);
-    });
-  }
-  for (const n of nodes) if (!(n.id in hops)) cards[n.id].home.set(0, 0.8, -16);
-  for (const id in cards) cards[id].mesh.position.copy(cards[id].home);
+  const spineMat = new THREE.LineBasicMaterial({ color: 0x6a6680, transparent: true });
+  const spine = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(seg), spineMat); spine.position.y = 0.006;
+  lane.add(wash, outline, eye, spine);
+  laneParts.push([washMat, 0.05], [outlineMat, 1], [eyeMat, 1], [spineMat, 1]);
+  scene.add(lane);
 }
 
-/* ================= wires, pulses, and the lines from a visual node to what it draws ================= */
-const tmp = new THREE.Vector3(), right = new THREE.Vector3();
-function anchor(id, dir, port, out) {
-  const i = rows[id].findIndex((r) => r.dir === dir && r.name === port);
-  const m = cards[id].mesh;
-  out.set((dir === 'out' ? 1 : -1) * (CW * PX) / 2, (cardH(id) / 2 - HEAD - Math.max(0, i) * ROW - ROW / 2) * PX, 0.002);
-  return m.localToWorld(out);
+/* ================= leaders: from a screen node's card to the part of the app it draws ================= */
+const leaders = {};
+for (const id of visual) {
+  const mat = new THREE.LineBasicMaterial({ color: 0x5ca9ff, transparent: true, opacity: 0 });
+  const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), mat);
+  line.frustumCulled = false;
+  scene.add(line);
+  leaders[id] = { line, mat };
 }
-const wires = conns.map((c) => {
-  const sig = isSignalOut(c.fromId, c.fromProperty);
-  const mat = new LineMaterial({ color: sig ? WIRE.signal : WIRE.data, linewidth: 1.5, transparent: true, opacity: 0.3 });
-  lineMats.push(mat);
-  const line = new Line2(new LineGeometry(), mat);
-  line.frustumCulled = false;
-  scene.add(line);
-  return { c, sig, mat, line, heat: 0, curve: new THREE.CubicBezierCurve3(new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()) };
-});
-const leaders = [...visual].map((id) => {
-  const mat = new LineMaterial({ color: 0x5ca9ff, linewidth: 1.4, transparent: true, opacity: 0.5, dashed: true, dashSize: 0.12, gapSize: 0.08 });
-  lineMats.push(mat);
-  const line = new Line2(new LineGeometry(), mat);
-  line.frustumCulled = false;
-  scene.add(line);
-  return { id, mat, line };
-});
-resize();
-const soft = (() => {
-  const c = document.createElement('canvas'); c.width = c.height = 64;
-  const x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
-  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.35, 'rgba(255,255,255,0.55)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
-  x.fillStyle = gr; x.fillRect(0, 0, 64, 64);
-  return new THREE.CanvasTexture(c);
-})();
-const MAXP = 400, pPos = new Float32Array(MAXP * 3), pCol = new Float32Array(MAXP * 3);
+const PHONE_W = 4.75, PHONE_H = PHONE_W * APP.h / APP.w, PHONE_Y = 4.6, VIS_SCALE = 1.6;
+// beside the app in Orbit: the screen's tree in order, the top half of it on the left, the rest on the right
+const slot = {};
+{
+  const half = visOrder.reduce((t, id) => t + cardH(id), 0) / 2;
+  let t = 0;
+  for (const id of visOrder) { slot[id] = { side: t < half ? -1 : 1 }; t += cardH(id); }
+  for (const s of [-1, 1]) {
+    const col = visOrder.filter((id) => slot[id].side === s);
+    const gap = 0.22, total = col.reduce((a, id) => a + cardH(id) * VIS_SCALE, 0) + gap * (col.length - 1);
+    let y = total / 2;
+    for (const id of col) { const h = cardH(id) * VIS_SCALE; slot[id].y = y - h / 2; y -= h + gap; }
+  }
+}
+
+/* ================= wires ================= */
+const WHITE = new THREE.Color(1, 1, 1);
+const wireObjs = new Map();
+function syncWireObjs() {
+  const keys = new Set(conns.map(wireKey));
+  for (const [k, wo] of wireObjs) if (!keys.has(k)) { scene.remove(wo.mesh); wo.mesh.geometry.dispose(); wo.mat.dispose(); wireObjs.delete(k); }
+  for (const c of conns) {
+    const key = wireKey(c);
+    if (wireObjs.has(key)) continue;
+    const sig = outIsSignal(c.fromId, c.fromProperty);
+    const base = new THREE.Color(sig ? WIRE.signal : WIRE.data);
+    const mat = new THREE.MeshBasicMaterial({ color: base.clone(), transparent: true, opacity: 1 });
+    const mesh = new THREE.Mesh(new THREE.BufferGeometry(), mat);
+    scene.add(mesh);
+    wireObjs.set(key, { c, sig, base, mat, mesh, curve: new THREE.CubicBezierCurve3(new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()), heat: 0 });
+  }
+}
+syncWireObjs();
+const rightA = new THREE.Vector3(), rightB = new THREE.Vector3();
+let lift = 0, orb = 0;
+function curveFor(cv, a, ap, b, bp) {
+  wireWorld(a, 'out', ap, cv.v0);
+  wireWorld(b, 'in', bp, cv.v3);
+  rightA.set(1, 0, 0).applyQuaternion(cards[a].grp.quaternion);
+  rightB.set(1, 0, 0).applyQuaternion(cards[b].grp.quaternion);
+  const back = cv.v3.x < cv.v0.x - 0.05;
+  const dx = back ? 1.4 : Math.max(0.5, Math.abs(cv.v3.x - cv.v0.x) * 0.5) * (1 - orb) + orb * 0.9;
+  cv.v1.copy(cv.v0).addScaledVector(rightA, dx);
+  cv.v2.copy(cv.v3).addScaledVector(rightB, -dx);
+  if (back) {
+    const flat = (1 - lift) * (1 - orb), up = lift * (1 - orb);
+    const drop = (bounds.z1 - 0.2) - Math.max(cv.v0.z, cv.v3.z);
+    cv.v1.z += drop * 1.4 * flat; cv.v2.z += drop * 1.4 * flat;
+    cv.v1.y += up * 4.5; cv.v2.y += up * 4.5;
+  }
+}
+function buildWires() {
+  for (const wo of wireObjs.values()) {
+    const { c } = wo;
+    if (!cards[c.fromId] || !cards[c.toId]) continue;
+    curveFor(wo.curve, c.fromId, c.fromProperty, c.toId, c.toProperty);
+    wo.mesh.geometry.dispose();
+    wo.mesh.geometry = new THREE.TubeGeometry(wo.curve, 48, 0.014, 5, false);
+  }
+}
+const ghostWire = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ color: 0xcbb8ff, transparent: true, opacity: 0.85 }));
+ghostWire.visible = false;
+scene.add(ghostWire);
+
+/* ================= pulses: each event of the trace runs down its wire ================= */
+const MAXP = 500, TRAIL = 6;
+const pPos = new Float32Array(MAXP * TRAIL * 3), pCol = new Float32Array(MAXP * TRAIL * 3);
 const pGeo = new THREE.BufferGeometry();
 pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
 pGeo.setAttribute('color', new THREE.BufferAttribute(pCol, 3));
-const pts = new THREE.Points(pGeo, new THREE.PointsMaterial({ size: 0.28, map: soft, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+const pts = new THREE.Points(pGeo, new THREE.PointsMaterial({ size: 0.17, map: soft, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
 pts.frustumCulled = false;
 scene.add(pts);
-// the floor: the editor's dot grid, and the rings the cards stand on
-{
-  const c = document.createElement('canvas'); c.width = c.height = 32;
-  const x = c.getContext('2d'); x.fillStyle = 'rgba(255,255,255,0.13)'; x.beginPath(); x.arc(16, 16, 1.6, 0, Math.PI * 2); x.fill();
-  const tex = new THREE.CanvasTexture(c); tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(160, 160); tex.anisotropy = 8;
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }));
-  floor.rotation.x = -Math.PI / 2;
-  scene.add(floor);
-  for (let k = 1; k <= 6; k++) {
-    const t = new THREE.Mesh(new THREE.TorusGeometry(RING(k), 0.006, 4, 200), new THREE.MeshBasicMaterial({ color: 0x8f86d9, transparent: true, opacity: 0.22, depthWrite: false }));
-    t.rotation.x = Math.PI / 2; t.position.y = 0.01;
-    scene.add(t);
-  }
+const live = [];
+function pulse(key, signal) {
+  const wo = wireObjs.get(key);
+  if (!wo) return;
+  wo.heat = 1;
+  if (cards[wo.c.fromId]) cards[wo.c.fromId].heat = Math.min(1, cards[wo.c.fromId].heat + 0.4);
+  if (cards[wo.c.toId]) cards[wo.c.toId].heat = Math.min(1, cards[wo.c.toId].heat + 0.6);
+  if (live.length < MAXP) live.push({ key, t: 0, dur: signal ? 0.45 : 0.7 });
 }
 
-/* ================= the switch: the app's pose, in the scene or in a window ================= */
-const MODES = {
-  scene: ['Your app inside the graph', 'The app is an object in the 3D scene: it turns with the graph, cards in front of it pass in front of it, and you can still press its buttons. Drag the background to turn it.'],
-  window: ['Your app in a window, beside the graph', 'The app stays flat and still in its own window while the graph turns behind it. The dashed blue lines join each screen node to the part of the app it draws.']
-};
-let mode = (query.get('pose') || location.hash.slice(1)) === 'window' ? 'window' : 'scene';
-let mix = mode === 'window' ? 1 : 0;   // 0 = in the scene, 1 = in a window
-function setMode(m) {
-  mode = m;
-  history.replaceState(null, '', '#' + m);
-  for (const b of document.querySelectorAll('[data-mode]')) b.setAttribute('aria-pressed', String(b.dataset.mode === m));
-  $('capH').textContent = MODES[m][0];
-  $('capS').textContent = MODES[m][1] + ' It is the real app, made from the project\'s files by NodeGX\'s own runtime.';
-}
-for (const b of document.querySelectorAll('[data-mode]')) b.addEventListener('click', () => setMode(b.dataset.mode));
-setMode(mode);
-
-/* ================= edits: written through the store, shown by the preview ================= */
-const toast = (t) => { $('toast').textContent = t; };
+/* ================= editing: every change is a write through the store, then the app is rebuilt from the files ================= */
+let graphVersion = 0, seq = 0;
+let toastT;
+function toast(text) { $('toast').textContent = text; $('toast').classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => $('toast').classList.remove('on'), 3200); }
+let lastShow = first, shows = 1;
 async function show(what) {
   const s = await preview.update(files.entries());
-  toast(s.status === 'ok' ? `${what}: the app was rebuilt from the files in ${Math.round(s.exportMs + s.frameMs)} ms (it starts again from the top).` : `Not shown: ${s.message || s.status}`);
+  lastShow = s; shows++;
+  if (s.status === 'ok') { if (what) toast(`${what}. The app was rebuilt from the files in ${Math.round(s.exportMs + s.frameMs)} ms.`); }
+  else toast(`Not shown: ${s.message || s.status}`);
   hookFrame();
+  return s;
 }
-$('fmt').value = store.readComponent(KEY).files.nodes.nodes.find((n) => n.id === 'hud').parameters.format;
-let fmtTimer;
-$('fmt').addEventListener('input', () => { clearTimeout(fmtTimer); fmtTimer = setTimeout(() => { writeParam('hud', 'format', $('fmt').value); show('Round line changed'); }, 450); });
-for (const b of document.querySelectorAll('[data-speed]')) b.addEventListener('click', () => {
-  speed = Number(b.dataset.speed);
-  for (const o of document.querySelectorAll('[data-speed]')) o.setAttribute('aria-pressed', String(o === b));
-  writeParam('ticker', 'interval', Math.round(1000 / speed));
-  show(`Clock at ${speed}×`);
+/** The page's picture of the graph, after a write: cards, rows and wires follow the files. */
+function graphChanged() {
+  const before = new Set(Object.keys(cards));
+  readGraph();
+  for (const id of before) if (!byId[id]) { dropCard(id); delete place[id]; delete rows[id]; }
+  for (const n of nodes) {
+    place[n.id] = { x: (n.x ?? 0) * PX, z: (n.y ?? 0) * PX };
+    const r = computeRows(n.id);
+    if (!cards[n.id]) { rows[n.id] = r; makeCard(n.id); }
+    else if (JSON.stringify(r) !== JSON.stringify(rows[n.id])) rebuildCard(n.id);
+    else cards[n.id].key = '';
+  }
+  syncWireObjs();
+  computeBounds(); computeLayers(); computeRings();
+  graphVersion++;
+  if (selected && !byId[selected]) selected = null;
+  drawNode(true);
+}
+const newId = (type) => { const base = type.replace(/^net\.noodl\./, '').replace(/[^A-Za-z]/g, '').replace(/^./, (c) => c.toLowerCase()) || 'node'; let id; do id = `${base}${++seq}`; while (byId[id]); return id; };
+async function addNode(type, at, label, params = {}) {
+  const id = newId(type);
+  const h = HEAD + FOOT;
+  const spot = findFree(at.x, at.z, h, id);
+  fresh.add(id);
+  write((ns) => { ns.push({ id, type, ...(label ? { label } : {}), x: Math.round(spot.x / PX), y: Math.round(spot.z / PX), parameters: { ...params } }); });
+  graphChanged();
+  await show(`Added ${labelOf(id)}`);
+  return id;
+}
+async function removeNode(id) {
+  if (visual.has(id)) return;
+  const name = labelOf(id);
+  write((ns, cs) => { ns.splice(ns.findIndex((n) => n.id === id), 1); for (let i = cs.length - 1; i >= 0; i--) if (cs[i].fromId === id || cs[i].toId === id) cs.splice(i, 1); });
+  graphChanged();
+  await show(`Deleted ${name}`);
+}
+const kindOk = (outSig, inSig) => outSig === inSig;
+async function connect(from, to) {
+  const [fromId, fromProperty] = [from.slice(0, from.indexOf('.')), from.slice(from.indexOf('.') + 1)];
+  const [toId, toProperty] = [to.slice(0, to.indexOf('.')), to.slice(to.indexOf('.') + 1)];
+  const c = { fromId, fromProperty, toId, toProperty };
+  if (conns.some((x) => wireKey(x) === wireKey(c))) return false;
+  write((ns, cs) => { cs.push(c); });
+  graphChanged();
+  await show(`Connected ${wireText(c)}`);
+  return true;
+}
+async function disconnect(key) {
+  const c = conns.find((x) => wireKey(x) === key);
+  if (!c) return;
+  const text = wireText(c);
+  write((ns, cs) => { cs.splice(cs.findIndex((x) => wireKey(x) === key), 1); });
+  graphChanged();
+  await show(`Removed ${text}`);
+}
+async function setParam(id, name, value, what) {
+  writeParam(id, name, value);
+  graphChanged();
+  await show(what);
+}
+/** A card moved in Graph: its position is written into the files, as the editor does. The app is not rebuilt for it. */
+function moveNode(id) {
+  write((ns) => { const n = ns.find((x) => x.id === id); n.x = Math.round(place[id].x / PX); n.y = Math.round(place[id].z / PX); });
+  readGraph();
+  computeBounds(); computeRings();
+  graphVersion++;
+}
+function viewCentreOnGround() {
+  ndc.set(((innerWidth - rightW()) / 2 / innerWidth) * 2 - 1, 0.1);
+  ray.setFromCamera(ndc, camera);
+  const p = new THREE.Vector3();
+  return ray.ray.intersectPlane(groundPlane, p) ? { x: p.x - CARD_W / 2, z: p.z } : { x: center.x, z: bounds.z1 };
+}
+
+/* ================= "what a change can reach" ================= */
+const downstream = (src) => {
+  const seen = [src], q = [src];
+  while (q.length) { const n = q.shift(); for (const c of conns) if (c.fromId === n && !seen.includes(c.toId)) { seen.push(c.toId); q.push(c.toId); } }
+  return seen.slice(1);
+};
+async function change(src, what, act) {
+  const reach = downstream(src);
+  if (cards[src]) cards[src].heat = 1;
+  $('chain').innerHTML = reach.length
+    ? `<b>${esc(what)}</b> went into ${esc(labelOf(src))}. ${reach.length} node${reach.length === 1 ? '' : 's'} downstream of it, in wire order:<ol>${reach.map((id) => `<li class="${visual.has(id) ? 'v' : ''}">${esc(labelOf(id))}</li>`).join('')}</ol>`
+    : `<b>${esc(what)}</b> went into ${esc(labelOf(src))}. Nothing is wired downstream of it.`;
+  await act();
+}
+
+/* ================= Try it ================= */
+const param = (id, name) => byId[id]?.parameters?.[name];
+const mmss = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+function lengthKnob(inputId, valId, node, name) {
+  const el = $(inputId), out = $(valId);
+  el.value = param(node, 'value'); out.textContent = mmss(Number(el.value));
+  const setTo = (v) => { el.value = v; out.textContent = mmss(v); change(node, `${name} ${mmss(v)}`, () => setParam(node, 'value', v, `${name} is ${mmss(v)}`)); };
+  el.addEventListener('input', () => (out.textContent = mmss(Number(el.value))));
+  el.addEventListener('change', () => setTo(Number(el.value)));
+  for (const b of document.querySelectorAll(`.chips[data-for="${inputId}"] button`)) b.onclick = () => setTo(Number(b.dataset.v));
+}
+lengthKnob('kFocus', 'vFocus', 'focusLen', 'Focus length');
+lengthKnob('kBreak', 'vBreak', 'breakLen', 'Break length');
+for (const [inputId, state] of [['kFocusGlow', 'Focus'], ['kBreakGlow', 'Break']]) {
+  $(inputId).value = param('phase', `value-${state}-glow`);
+  $(inputId).addEventListener('change', (e) => change('phase', `${state} colour ${e.target.value}`, () => setParam('phase', `value-${state}-glow`, e.target.value, `${state} colour changed`)));
+}
+['kSky0', 'kSky1', 'kSky2'].forEach((inputId, i) => {
+  $(inputId).value = param('sky', `color ${i}`);
+  $(inputId).addEventListener('change', (e) => change('sky', `Sky colour ${i + 1} ${e.target.value}`, () => setParam('sky', `color ${i}`, e.target.value, 'Sky changed')));
 });
+$('kFormat').value = param('hud', 'format');
+$('kFormat').addEventListener('change', () => change('hud', 'A new format', () => setParam('hud', 'format', $('kFormat').value, 'Round line changed')));
+$('kFormat').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('kFormat').blur(); });
+for (const b of document.querySelectorAll('.to')) b.onclick = () => select(b.dataset.node);
+
+/* ================= tabs and the Node panel ================= */
+const TABS = ['missions', 'try', 'node'];
+function showTab(which) { for (const t of TABS) { $(`tab-${t}`).setAttribute('aria-selected', String(t === which)); $(`body-${t}`).hidden = t !== which; } }
+for (const t of TABS) $(`tab-${t}`).onclick = () => showTab(t);
+const bodyNode = $('body-node');
+let nodeKey = '';
+const fid = (name) => `prop-${name.replace(/[^a-z0-9]/gi, '_')}`;
+// a dimension the editor stores as { value, unit } is edited as "100%"
+const shownValue = (v) => (v && typeof v === 'object' && 'value' in v && 'unit' in v ? `${v.value}${v.unit}` : typeof v === 'object' && v !== null ? JSON.stringify(v) : v ?? '');
+function readBack(el, p, old) {
+  if (el.type === 'checkbox') return el.checked;
+  if (el.type === 'number') return Number(el.value);
+  if (old && typeof old === 'object' && 'unit' in old) { const m = el.value.trim().match(/^(-?[\d.]+)\s*([a-z%]*)$/i); return m ? { value: Number(m[1]), unit: m[2] || old.unit } : old; }
+  if (old && typeof old === 'object') { try { return JSON.parse(el.value); } catch { return old; } }
+  if (p.type === 'number' && el.value.trim() !== '' && !isNaN(Number(el.value))) return Number(el.value);
+  return el.value;
+}
+function propEditor(p, v) {
+  let field;
+  if (p.enums) field = `<select id="${fid(p.name)}">${p.enums.map((e) => `<option${e === v ? ' selected' : ''}>${esc(e)}</option>`).join('')}</select>`;
+  else if (p.type === 'boolean') field = `<input id="${fid(p.name)}" type="checkbox"${v ? ' checked' : ''}>`;
+  else if (p.type === 'number' && (typeof v === 'number' || v === undefined)) field = `<input id="${fid(p.name)}" type="number" value="${esc(v ?? '')}">`;
+  else if (p.type === 'color' && typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v)) field = `<input id="${fid(p.name)}" type="color" value="${esc(v)}">`;
+  else field = `<input id="${fid(p.name)}" type="text" value="${esc(shownValue(v))}" spellcheck="false">`;
+  const label = p.name.startsWith('runOnChange-') ? `Run on change (${p.name.slice(12)})` : p.label;
+  return `<div class="prop" title="${esc(p.name)}"><label for="${fid(p.name)}">${esc(label)}</label>${field}</div>`;
+}
+function drawNode(force) {
+  if (!selected || !byId[selected]) { bodyNode.innerHTML = '<p class="lead">Click a node on the canvas to see its ports, change its properties, or remove its wires. Every change is written into the project\'s files.</p>'; nodeKey = ''; return; }
+  const id = selected, n = byId[id], vis = visual.has(id);
+  if (!force && bodyNode.contains(document.activeElement) && document.activeElement !== document.body) return; // never redraw under the cursor
+  const mine = conns.filter((c) => c.fromId === id || c.toId === id);
+  const wiredIn = new Set(mine.filter((c) => c.toId === id).map((c) => c.toProperty));
+  const ins = portsOf(id, 'in');
+  // a logic node: every input it can take a value on; a screen node: the properties its author set (a Group has a hundred)
+  const editable = ins.filter((p) => !p.signal && !wiredIn.has(p.name) && !/^(type-|transition|currentState$|states$|values$|useTransitions$)/.test(p.name) && !['array', 'object', 'stringlist', 'component', 'curve', 'proplist'].includes(p.type) && (!vis || p.name in (n.parameters || {})));
+  const outs = rows[id].filter((r) => r.dir === 'out' && !r.signal);
+  const k = JSON.stringify([id, outs.map((r) => last[`${id}.out.${r.name}`]), mine.length, n.parameters]);
+  if (!force && k === nodeKey) return;
+  nodeKey = k;
+  const connsHtml = mine.length ? `<div class="eyebrow">Connections</div>${mine.map((c) => `<div class="conn"><span title="${esc(wireText(c))}">${c.fromId === id ? '→ ' + esc(labelOf(c.toId)) + ' · ' + esc(portLabel(c.toId, 'in', c.toProperty)) : '← ' + esc(labelOf(c.fromId)) + ' · ' + esc(portLabel(c.fromId, 'out', c.fromProperty))}</span><button type="button" data-unwire="${esc(wireKey(c))}" aria-label="Remove this wire">×</button></div>`).join('')}` : '';
+  bodyNode.innerHTML = `
+    <h2>${esc(labelOf(id))}</h2>
+    <div class="type">${esc(typeName(n.type))}${hasSpec(n.type) ? ' · has a spec' : ''}</div>
+    ${vis ? `<div class="draws"><b>Draws on screen.</b> Hover this card and the part of the app it draws is outlined; point at the app and its card lights up.</div>` : ''}
+    ${editable.length ? `<div class="eyebrow">Properties</div>${editable.map((p) => propEditor(p, n.parameters?.[p.name] ?? p.default)).join('')}` : ''}
+    ${outs.length ? `<div class="eyebrow">Outputs now, from the app</div>${outs.map((r) => `<div class="port"><div class="n">${esc(r.label)}</div><div class="v">${esc(fmt(last[`${id}.out.${r.name}`]))}</div></div>`).join('')}` : ''}
+    ${connsHtml}
+    <div class="src">${esc(n.type)} · id ${esc(id)} · components/App/nodes.json</div>
+    ${vis ? '' : '<button type="button" class="danger" id="delnode">Delete node</button>'}`;
+  for (const p of editable) {
+    const el = $(fid(p.name));
+    if (!el) continue;
+    el.addEventListener('change', () => {
+      const v = readBack(el, p, n.parameters?.[p.name]);
+      change(id, `${p.label} = ${fmt(JSON.stringify(v))}`, () => setParam(id, p.name, v, `${labelOf(id)} · ${p.label} changed`));
+      el.blur();
+    });
+  }
+  if ($('delnode')) $('delnode').onclick = () => removeNode(id);
+  for (const b of bodyNode.querySelectorAll('[data-unwire]')) b.onclick = () => disconnect(b.dataset.unwire);
+}
+function select(id) {
+  selected = id;
+  for (const k of ids()) if (cards[k]) cards[k].key = '';
+  drawNode(true);
+  if (id) showTab('node');
+}
+drawNode(true);
+
+/* ================= the picker: the runtime's own node library ================= */
+const picker = $('picker'), pickq = $('pickq'), picklist = $('picklist');
+const HIDE = ['Visual', 'Component Utilities', 'Navigation'];
+const pickable = (library.nodetypes || []).filter((t) => !HIDE.includes(t.category) && t.category).sort((a, b) => a.category.localeCompare(b.category) || typeName(a.name).localeCompare(typeName(b.name)));
+$('pickcount').textContent = `${pickable.length} node types, from the runtime the app runs on. Screen nodes are added in the structure, which this page does not edit yet.`;
+function drawPicker() {
+  const q = pickq.value.trim().toLowerCase();
+  const items = pickable.filter((p) => !q || typeName(p.name).toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
+  let html = '', cat = '';
+  for (const p of items) {
+    if (p.category !== cat) { cat = p.category; html += `<div class="cat eyebrow">${esc(cat)}</div>`; }
+    html += `<button type="button" class="item" data-type="${esc(p.name)}"><span>${esc(typeName(p.name))}</span>${hasSpec(p.name) ? '<em>spec</em>' : ''}</button>`;
+  }
+  picklist.innerHTML = html || '<p class="lead" style="padding:8px 12px">No node by that name.</p>';
+}
+function openPicker() {
+  if (stage !== 0) setStage(0);
+  const r = $('add').getBoundingClientRect();
+  picker.style.left = `${Math.max(16, Math.min(r.left, innerWidth - 316))}px`;
+  picker.hidden = false; pickq.value = ''; drawPicker(); pickq.focus();
+}
+$('add').onclick = () => (picker.hidden ? openPicker() : (picker.hidden = true));
+pickq.addEventListener('input', drawPicker);
+picklist.addEventListener('click', async (e) => {
+  const b = e.target.closest('[data-type]');
+  if (!b) return;
+  picker.hidden = true;
+  const id = await addNode(b.dataset.type, viewCentreOnGround());
+  select(id);
+  toast(`Added ${labelOf(id)}. Drag from the dot on its header to wire it.`);
+});
+addEventListener('keydown', (e) => { if (e.key === 'Escape') { picker.hidden = true; closeConpop(); } });
+addEventListener('pointerdown', (e) => {
+  if (!picker.hidden && !picker.contains(e.target) && e.target !== $('add')) picker.hidden = true;
+  if (!conpop.hidden && !conpop.contains(e.target)) closeConpop();
+}, true);
+
+/* ================= the connection popup: pick an output, then an input ================= */
+const conpop = $('conpop');
+const wirable = (p) => !/^(type-|transition|runOnChange-)/.test(p.name);
+function openConpop(a, b, x, y) {
+  const outs = portsOf(a, 'out').filter(wirable), ins = portsOf(b, 'in').filter(wirable);
+  const fits = outs.filter((o) => ins.some((i) => kindOk(o.signal, i.signal)));
+  let pick = fits.length === 1 ? fits[0].name : null;
+  const draw = () => {
+    const po = outs.find((o) => o.name === pick);
+    conpop.innerHTML = `
+      <div class="eyebrow">Connect ${esc(labelOf(a))} → ${esc(labelOf(b))}</div>
+      <div class="cols">
+        <div class="col">${outs.map((o) => `<button type="button" class="${o.signal ? 'sig' : ''}" data-out="${esc(o.name)}" aria-pressed="${o.name === pick}">${esc(o.label)}</button>`).join('') || '<span class="lead">No outputs</span>'}</div>
+        <div class="col">${ins.map((i) => `<button type="button" class="${i.signal ? 'sig' : ''}" data-in="${esc(i.name)}" ${!po || !kindOk(po.signal, i.signal) ? 'disabled' : ''}>${esc(i.label)}</button>`).join('') || '<span class="lead">No inputs</span>'}</div>
+      </div>
+      <div class="foot"><span>${po ? 'Now pick the input it goes into.' : 'Pick an output first. Signals connect to signals, values to values.'}</span><button type="button" id="concancel">Cancel</button></div>`;
+    for (const el of conpop.querySelectorAll('[data-out]')) el.onclick = () => { pick = el.dataset.out; draw(); };
+    for (const el of conpop.querySelectorAll('[data-in]')) el.onclick = async () => {
+      closeConpop();
+      if (!(await connect(`${a}.${pick}`, `${b}.${el.dataset.in}`))) toast('Those two are already connected.');
+    };
+    $('concancel').onclick = closeConpop;
+  };
+  draw();
+  conpop.hidden = false;
+  const w = conpop.offsetWidth, h = conpop.offsetHeight;
+  conpop.style.left = `${Math.max(16, Math.min(x - w / 2, innerWidth - w - 16))}px`;
+  conpop.style.top = `${Math.max(56, Math.min(y + 12, innerHeight - h - 16))}px`;
+}
+function closeConpop() { conpop.hidden = true; ghostWire.visible = false; }
+
+/* ================= Missions: each Check plays the graph on a COPY of the files, in a second real app ================= */
+let checker = null;
+const secs = (t) => { const m = String(t).match(/(\d+):(\d+)/); return m ? Number(m[1]) * 60 + Number(m[2]) : NaN; };
+/** A copy of the project as it stands, with the scenario's parameters written into it, running in its own real app. */
+async function playCopy(title, set) {
+  const copy = NodegxPreview.memoryFiles(files.entries());
+  const cs = new NodegxPreview.V2ProjectStore(copy);
+  const c = cs.readComponent(KEY);
+  for (const [k, v] of Object.entries(set)) { const [node, p] = [k.slice(0, k.indexOf('.')), k.slice(k.indexOf('.') + 1)]; const n = c.files.nodes.nodes.find((x) => x.id === node); if (n) n.parameters[p] = v; }
+  cs.writeComponent(KEY, c.files, { ifRevision: c.revision });
+  $('checkapp').hidden = false;
+  $('checklbl').innerHTML = `<b>${esc(title)}</b>A copy of your app, playing the check`;
+  checker ??= await NodegxPreview.mountPreview($('checkframe'), { runtimeBase: '/runtime/' });
+  const s = await checker.update(copy.entries());
+  if (s.status !== 'ok') throw new Error(`the copy did not start: ${s.message || s.status}`);
+  // the app on screen, read the way a person reads it: by the part each node draws
+  const app = {
+    text: (id) => (checker.elementsOf(id)[0]?.innerText ?? '').trim(),
+    press: (id) => { const el = checker.elementsOf(id)[0]; (el && (el.matches('button') ? el : el.querySelector('button') || el))?.click(); },
+    async until(pred, ms) { const t = performance.now(); while (performance.now() - t < ms) { if (pred()) return true; await new Promise((r) => setTimeout(r, 40)); } return pred(); },
+    time: () => secs(app.text('timeTxt')),
+    phase: () => app.text('phaseTxt').toLowerCase(),
+    running: () => app.text('pauseBtn') === 'Pause'
+  };
+  return app;
+}
+const MISSIONS = [
+  {
+    title: 'Skip should wait for you',
+    goal: 'Skip jumps to the next phase but keeps the clock running. Make Skip also pause the timer, so the next phase waits until you press Start.',
+    hint: 'Drag from the dot on the Skip button\'s header to the Running? node (a Switch), then pick Click → Off. One wire, no new nodes.',
+    steps: [
+      { say: 'Wire Skip button · Click → Running? · Off', run: () => connect('skipBtn.onClick', 'running.off') }
+    ],
+    async check() {
+      const app = await playCopy('Skip should wait for you', { 'focusLen.value': 600, 'breakLen.value': 300, 'ticker.interval': 50 });
+      if (!(await app.until(() => app.time() <= 597, 10000))) return [false, 'The clock never started counting.'];
+      app.press('skipBtn');
+      if (!(await app.until(() => app.phase() === 'break', 4000))) return [false, 'Skip no longer moves on to the break.'];
+      if (!(await app.until(() => !app.running(), 1500))) return [false, 'After Skip the timer is still running.'];
+      const t = app.text('timeTxt');
+      await new Promise((r) => setTimeout(r, 1200));
+      if (app.text('timeTxt') !== t) return [false, 'The clock kept counting after Skip.'];
+      return [true, 'Skip moves to the break and waits. The Pause button now says Start.'];
+    }
+  },
+  {
+    title: 'No skipping breaks',
+    goal: 'Skipping a break is cheating. Make Skip work during focus and do nothing during a break. This is an if: you need a branch.',
+    hint: 'Add a Condition and untick its "Run on change". Wire Focus / Break · At Focus into its Condition, and the Skip button\'s Click into its Evaluate. Then move Skip\'s Reset To Start and Toggle wires so they leave from the Condition\'s On True instead.',
+    steps: [
+      { say: 'Add a Condition, "Only in focus", with Run on change off', run: async () => { mission.made = await addNode('Condition', { x: place.skipBtn.x - PITCH, z: place.skipBtn.z }, 'Only in focus', { 'runOnChange-condition': false }); } },
+      { say: 'Wire Focus / Break · At Focus → its Condition', run: () => connect('phase.at-Focus', `${mission.made}.condition`) },
+      { say: 'Unwire Skip from Reset To Start and from Toggle', run: async () => { await disconnect('skipBtn.onClick>elapsed.reset'); await disconnect('skipBtn.onClick>phase.toggle'); } },
+      { say: 'Wire Skip button · Click → its Evaluate', run: () => connect('skipBtn.onClick', `${mission.made}.eval`) },
+      { say: 'Wire On True → Seconds elapsed · Reset To Start', run: () => connect(`${mission.made}.ontrue`, 'elapsed.reset') },
+      { say: 'Wire On True → Focus / Break · Toggle', run: () => connect(`${mission.made}.ontrue`, 'phase.toggle') }
+    ],
+    async check() {
+      const app = await playCopy('No skipping breaks', { 'focusLen.value': 600, 'breakLen.value': 300, 'ticker.interval': 50 });
+      if (!(await app.until(() => app.time() <= 597, 10000))) return [false, 'The clock never started counting.'];
+      app.press('skipBtn');
+      if (!(await app.until(() => app.phase() === 'break', 4000))) return [false, 'During focus, Skip should still move on to the break. It did not.'];
+      if (!app.running()) { app.press('pauseBtn'); await app.until(() => app.running(), 2000); }
+      const t = app.time();
+      if (!(await app.until(() => app.time() <= t - 2, 10000))) return [false, 'The break never started counting.'];
+      app.press('skipBtn');
+      await new Promise((r) => setTimeout(r, 1500));
+      if (app.phase() !== 'break') return [false, 'During a break, Skip still switched back to Focus.'];
+      return [true, 'Skip works in focus and does nothing in a break. That branch is a Condition deciding which way the signal goes.'];
+    }
+  },
+  {
+    title: 'Three rounds, then stop',
+    goal: 'Three rounds is a good morning. Make the timer stop by itself when the third focus ends.',
+    hint: 'Count down: a Counter with Start Value 3, decreased by Focus / Break · Has Reached Break. An Inverter turns its 0 into true. A Condition fires On True at that moment: send it to Running? · Off.',
+    steps: [
+      { say: 'Add a Counter, "Rounds left", Start Value 3', run: async () => { mission.counter = await addNode('Counter', { x: place.rounds.x, z: bounds.z1 - 0.4 }, 'Rounds left', { startValue: 3 }); } },
+      { say: 'Wire Focus / Break · Has Reached Break → Decrease Count', run: () => connect('phase.reached-Break', `${mission.counter}.decrease`) },
+      { say: 'Add an Inverter, "None left?"', run: async () => { mission.inv = await addNode('Inverter', { x: place[mission.counter].x + PITCH, z: place[mission.counter].z }, 'None left?'); } },
+      { say: 'Wire Current Count → its Value', run: () => connect(`${mission.counter}.currentCount`, `${mission.inv}.value`) },
+      { say: 'Add a Condition, "Out of rounds"', run: async () => { mission.cond = await addNode('Condition', { x: place[mission.inv].x + PITCH, z: place[mission.inv].z }, 'Out of rounds'); } },
+      { say: 'Wire Result → its Condition', run: () => connect(`${mission.inv}.result`, `${mission.cond}.condition`) },
+      { say: 'Wire On True → Running? · Off', run: () => connect(`${mission.cond}.ontrue`, 'running.off') }
+    ],
+    async check() {
+      const app = await playCopy('Three rounds, then stop', { 'focusLen.value': 2, 'breakLen.value': 1, 'ticker.interval': 40 });
+      const round = () => Number((app.text('footTxt').match(/Round (\d+)/) || [])[1] || 0);
+      await app.until(() => !app.running() || round() >= 5, 30000);
+      const n = round();
+      if (app.running()) return [false, `Still running after ${n} round${n === 1 ? '' : 's'}.`];
+      if (n !== 3) return [false, `It stopped after ${n} round${n === 1 ? '' : 's'}, not 3.`];
+      const t = app.text('timeTxt');
+      await new Promise((r) => setTimeout(r, 1000));
+      if (app.text('timeTxt') !== t) return [false, 'It says Start, but the clock is still counting.'];
+      return [true, 'Stopped after round 3. Press Start and it carries on.'];
+    }
+  }
+];
+const mission = {};   // what a "Show me" made, by name, for its later steps
+const mstate = MISSIONS.map(() => ({ done: false, verdict: null, step: -1, busy: false }));
+const bodyMissions = $('body-missions');
+function drawMissions() {
+  const n = mstate.filter((m) => m.done).length;
+  $('mcount').textContent = `${n}/${MISSIONS.length}`;
+  bodyMissions.innerHTML = `
+    <p class="lead">Change what the app does by wiring nodes. <b>Check</b> plays your graph on a copy of the project, in a second real app, and says whether it works. <b>Show me</b> builds the answer one step at a time, each step written into the files.</p>
+    ${n === MISSIONS.length ? '<div class="allDone">All three done. You changed how an app behaves by adding nodes and wires, and every check ran your graph in the real app.</div>' : ''}
+    ${MISSIONS.map((m, i) => {
+      const s = mstate[i];
+      return `<div class="mission${s.done ? ' done' : ''}">
+        <h3><b>${s.done ? '✓' : i + 1}</b>${esc(m.title)}</h3>
+        <p>${esc(m.goal)}</p>
+        <details${s.step >= 0 ? ' open' : ''}><summary>${s.step >= 0 ? 'Building it' : 'Hint'}</summary>${s.step >= 0 ? `<ol class="steps">${m.steps.map((st, j) => `<li class="${j < s.step ? 'did' : j === s.step ? 'on' : ''}">${esc(st.say)}</li>`).join('')}</ol>` : esc(m.hint)}</details>
+        ${s.verdict ? `<div class="verdict ${s.verdict[0] === null ? 'run' : s.verdict[0] ? 'ok' : 'no'}">${s.verdict[0] === null ? '' : s.verdict[0] ? 'Passed. ' : 'Not yet. '}${esc(s.verdict[1])}<small>${esc(s.verdict[2])}</small></div>` : ''}
+        <div class="row"><button type="button" data-check="${i}" ${s.busy || checking ? 'disabled' : ''}>Check</button><button type="button" data-show="${i}" ${s.busy || s.done ? 'disabled' : ''}>Show me</button></div>
+      </div>`;
+    }).join('')}`;
+  for (const b of bodyMissions.querySelectorAll('[data-check]')) b.onclick = () => runCheck(Number(b.dataset.check));
+  for (const b of bodyMissions.querySelectorAll('[data-show]')) b.onclick = () => showMe(Number(b.dataset.show));
+}
+let checking = false, hideCopy;
+async function runCheck(i) {
+  if (checking) return mstate[i].verdict;
+  checking = true;
+  clearTimeout(hideCopy);
+  const t0 = performance.now();
+  mstate[i].verdict = [null, 'Playing your graph on a copy of the app…', ''];
+  drawMissions();
+  let res;
+  try { res = await MISSIONS[i].check(); } catch (e) { res = [false, `The copy could not play: ${e.message}`]; }
+  mstate[i].verdict = [res[0], res[1], `Played on a copy of the real app: ${nodes.length} nodes, ${conns.length} wires, in ${((performance.now() - t0) / 1000).toFixed(1)} s.`];
+  if (res[0]) mstate[i].done = true;
+  checking = false;
+  hideCopy = setTimeout(() => { $('checkapp').hidden = true; }, 4000);   // the copy steps aside; the verdict stays
+  drawMissions();
+  toast(res[0] ? `Mission ${i + 1} passed` : `Mission ${i + 1}: not yet`);
+  return mstate[i].verdict;
+}
+async function showMe(i) {
+  const m = MISSIONS[i], s = mstate[i];
+  if (s.busy) return;
+  s.busy = true;
+  if (stage !== 0) setStage(0);
+  showTab('missions');
+  for (let j = 0; j < m.steps.length; j++) {
+    s.step = j; drawMissions();
+    await sleep(500);
+    await m.steps[j].run();
+    toast(m.steps[j].say);
+    await sleep(700);
+  }
+  s.step = m.steps.length; drawMissions();
+  await sleep(300);
+  s.step = -1; s.busy = false;
+  return runCheck(i);
+}
+drawMissions();
+$('reset').onclick = () => location.reload();
+
+/* ================= stages, and where the app sits ================= */
+const CAPTIONS = [
+  ['Your app\'s graph, as the editor draws it.', 'Every card is a node in the project\'s files, where the files put it; the app beside it is those files running on NodeGX\'s own runtime. Drag a card to move it; drag from the dot on its header to wire it; + Add node puts a new one down.'],
+  ['Each step up is one more wire along the data flow.', 'A tick from the clock climbs the staircase to the screen nodes at the top. The values on the cards and the pulses on the wires come from the running app.'],
+  ['The same nodes, arranged around the app they make.', 'The screen\'s nodes line up beside the app, each pointing at what it draws. Each ring out is one more wire away from the screen.']
+];
+const POSES = { scene: ' The app is an object in the scene: it turns with the graph, and you can still press its buttons.', window: ' The app stays flat in its window while the graph turns behind it.' };
+const STAGES = ['graph', 'lift', 'orbit'];
+let stage = Math.max(0, STAGES.indexOf(query.get('stage') || 'graph')), stageT = stage;
+let mode = query.get('pose') === 'window' ? 'window' : 'scene';
+let pan = new THREE.Vector3(), zoom = 1, turnYaw = 0, turnPitch = 0, autoYaw = 0, userTurned = false;
+const stageBtns = [...document.querySelectorAll('[data-stage]')];
+function caption() {
+  $('capH').textContent = CAPTIONS[stage][0];
+  $('capS').textContent = CAPTIONS[stage][1] + (stage === 2 ? POSES[mode] : '');
+}
+function keepInUrl() { const q = new URLSearchParams(location.search); q.set('stage', STAGES[stage]); q.set('pose', mode); history.replaceState(null, '', '?' + q); }
+function setStage(s) {
+  stage = s;
+  if (reduce) stageT = s;
+  stageBtns.forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.stage) === s)));
+  $('poses').hidden = s !== 2;
+  turnYaw = 0; turnPitch = 0; userTurned = false;
+  if (s !== 0) pan.set(0, 0, 0);
+  closeConpop();
+  caption(); keepInUrl();
+}
+function setMode(m) {
+  mode = m;
+  for (const b of document.querySelectorAll('[data-mode]')) b.setAttribute('aria-pressed', String(b.dataset.mode === m));
+  caption(); keepInUrl();
+}
+stageBtns.forEach((b) => (b.onclick = () => setStage(Number(b.dataset.stage))));
+for (const b of document.querySelectorAll('[data-mode]')) b.addEventListener('click', () => setMode(b.dataset.mode));
+for (const b of document.querySelectorAll('[data-speed]')) {
+  b.setAttribute('aria-pressed', String(Number(b.dataset.speed) === speed));
+  b.onclick = () => {
+    speed = Number(b.dataset.speed);
+    for (const o of document.querySelectorAll('[data-speed]')) o.setAttribute('aria-pressed', String(o === b));
+    setParam('ticker', 'interval', Math.round(1000 / speed), `Clock at ${speed}×`);
+  };
+}
+setMode(mode);
+setStage(stage);
+let mix = stage === 2 && mode === 'scene' ? 0 : 1;   // 0 = the app in the scene, 1 = in its window
 
 /* ================= hover: a card lights what it draws, and what you point at in the app lights its card ================= */
-const ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
 let lit = [];
 function light(id) {
   if (hoverId === id) return;
@@ -406,16 +1215,10 @@ function light(id) {
   lit = id && visual.has(id) ? preview.elementsOf(id) : [];
   for (const el of lit) { el.style.outline = '2px dashed #5ca9ff'; el.style.outlineOffset = '3px'; }
 }
-addEventListener('pointermove', (e) => {
-  if (drag) return;
-  mouse.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
-  ray.setFromCamera(mouse, camera);
-  const hit = ray.intersectObjects(Object.values(cards).map((c) => c.mesh))[0];
-  light(hit ? hit.object.userData.id : null);
-});
 function hookFrame() {
   const doc = preview.frame?.contentDocument;
-  if (!doc) return;
+  if (!doc || doc.__orbitHooked) return;
+  doc.__orbitHooked = true;
   doc.addEventListener('mouseover', (e) => {
     let best = null;
     for (const id of visual) for (const el of preview.elementsOf(id)) if (el.contains(e.target) && (!best || best.el.contains(el))) best = { id, el };
@@ -424,114 +1227,275 @@ function hookFrame() {
 }
 hookFrame();
 
-/* ================= camera: drag the background to turn ================= */
-let drag = null, yaw = 0, pitch = 0;
-$('css').addEventListener('pointerdown', (e) => { drag = { x: e.clientX, y: e.clientY, yaw, pitch }; $('css').classList.add('dragging'); $('css').setPointerCapture(e.pointerId); });
-$('css').addEventListener('pointermove', (e) => { if (!drag) return; yaw = drag.yaw - (e.clientX - drag.x) * 0.006; pitch = Math.max(-0.35, Math.min(0.5, drag.pitch + (e.clientY - drag.y) * 0.004)); });
-$('css').addEventListener('pointerup', () => { drag = null; $('css').classList.remove('dragging'); });
+/* ================= pointer: move, connect, pan, turn, pick ================= */
+const host = $('css');
+const ptrs = new Map();
+let gesture = null, pinch0 = 0, zoom0 = 1, camDist = 50;
+const clampZoom = (z) => Math.max(0.35, Math.min(5, z));
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+const setNdc = (x, y) => ndc.set((x / innerWidth) * 2 - 1, -(y / innerHeight) * 2 + 1);
+const hitAt = (x, y, objs) => { setNdc(x, y); ray.setFromCamera(ndc, camera); return ray.intersectObjects(objs, true)[0]; };
+const groundAt = (x, y) => { setNdc(x, y); ray.setFromCamera(ndc, camera); const p = new THREE.Vector3(); return ray.ray.intersectPlane(groundPlane, p) ? p : null; };
+const tops = () => ids().filter((i) => cards[i]).map((i) => cards[i].top);
+const editing = () => stage === 0 && stageT < 0.05;
+host.addEventListener('pointerdown', (e) => {
+  host.setPointerCapture(e.pointerId);
+  ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch0 = Math.hypot(a.x - b.x, a.y - b.y); zoom0 = zoom; gesture = { kind: 'pinch' }; return; }
+  gesture = { kind: editing() ? 'pan' : 'turn', x0: e.clientX, y0: e.clientY, moved: false };
+  if (editing()) {
+    const hh = hitAt(e.clientX, e.clientY, ids().filter((i) => cards[i]).map((i) => cards[i].handle));
+    if (hh) { gesture = { kind: 'connect', from: hh.object.userData.handle, x0: e.clientX, y0: e.clientY, moved: false }; host.classList.add('connecting'); return; }
+    const hc = hitAt(e.clientX, e.clientY, tops());
+    if (hc) {
+      const id = hc.object.userData.id, gp = groundAt(e.clientX, e.clientY);
+      gesture = { kind: visual.has(id) ? 'pan' : 'move', id, off: gp ? { x: gp.x - place[id].x, z: gp.z - place[id].z } : { x: 0, z: 0 }, x0: e.clientX, y0: e.clientY, moved: false, pickId: id };
+    }
+  } else {
+    const hc = hitAt(e.clientX, e.clientY, tops());
+    if (hc) gesture.pickId = hc.object.userData.id;
+  }
+  host.classList.add('dragging');
+});
+host.addEventListener('pointermove', (e) => {
+  const p = ptrs.get(e.pointerId);
+  if (!p || !gesture) {
+    const hc = hitAt(e.clientX, e.clientY, tops());
+    light(hc ? hc.object.userData.id : null);
+    return;
+  }
+  const dx = e.clientX - p.x, dy = e.clientY - p.y;
+  p.x = e.clientX; p.y = e.clientY;
+  if (gesture.kind === 'pinch') { const [a, b] = [...ptrs.values()]; zoom = clampZoom(zoom0 * Math.hypot(a.x - b.x, a.y - b.y) / Math.max(1, pinch0)); return; }
+  if (Math.hypot(e.clientX - gesture.x0, e.clientY - gesture.y0) > 4) gesture.moved = true;
+  if (gesture.kind === 'turn') { turnYaw -= dx * 0.005; userTurned = true; turnPitch = Math.max(-0.4, Math.min(0.8, turnPitch + dy * 0.004)); }
+  else if (gesture.kind === 'pan') { const perPx = (camDist * 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) / innerHeight; pan.x -= dx * perPx; pan.z -= dy * perPx; }
+  else if (gesture.kind === 'move' && gesture.moved) { const gp = groundAt(e.clientX, e.clientY); if (gp) { place[gesture.id] = { x: gp.x - gesture.off.x, z: gp.z - gesture.off.z }; graphVersion++; } }
+  else if (gesture.kind === 'connect') {
+    const gp = groundAt(e.clientX, e.clientY);
+    if (!gp) return;
+    const cv = new THREE.CubicBezierCurve3(new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3());
+    cards[gesture.from].handle.getWorldPosition(cv.v0);
+    cv.v3.set(gp.x, 0.06, gp.z);
+    const dxx = Math.max(0.4, Math.abs(cv.v3.x - cv.v0.x) * 0.5);
+    cv.v1.copy(cv.v0).add(new THREE.Vector3(dxx, 0, 0)); cv.v2.copy(cv.v3).add(new THREE.Vector3(-dxx, 0, 0));
+    ghostWire.geometry.dispose(); ghostWire.geometry = new THREE.TubeGeometry(cv, 40, 0.016, 5, false); ghostWire.visible = true;
+  }
+});
+const up = (e) => {
+  const gst = gesture;
+  ptrs.delete(e.pointerId);
+  if (!ptrs.size) { host.classList.remove('dragging', 'connecting'); gesture = null; }
+  if (!gst || gst.kind === 'pinch') return;
+  if (gst.kind === 'connect') {
+    const hc = hitAt(e.clientX, e.clientY, tops());
+    const to = hc?.object.userData.id;
+    if (to && to !== gst.from && portsOf(to, 'in').length) openConpop(gst.from, to, e.clientX, e.clientY);
+    else { ghostWire.visible = false; if (gst.moved) toast('Drop the wire on another card to connect it.'); }
+    return;
+  }
+  if (gst.kind === 'move' && gst.moved) { moveNode(gst.id); return; }
+  if (!gst.moved) select(gst.pickId ?? null);
+};
+host.addEventListener('pointerup', up);
+host.addEventListener('pointercancel', (e) => { ptrs.delete(e.pointerId); gesture = null; host.classList.remove('dragging', 'connecting'); ghostWire.visible = false; });
+host.addEventListener('wheel', (e) => { e.preventDefault(); zoom = clampZoom(zoom * (1 - Math.sign(e.deltaY) * 0.08)); }, { passive: false });
 
 /* ================= frame ================= */
-const target = new THREE.Vector3(), camRight = new THREE.Vector3();
-const poseScene = { p: new THREE.Vector3(0, PHONE.y, 0), q: new THREE.Quaternion(), s: PHONE.s };
-const poseWin = { p: new THREE.Vector3(), q: new THREE.Quaternion(), s: PHONE.s };
+const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const eased = (t) => t * t * (3 - 2 * t);
-let lastT = performance.now(), redraw = 0;
-const t0 = performance.now();
-function frame(now) {
-  const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
-  mix += ((mode === 'window' ? 1 : 0) - mix) * Math.min(1, dt * 3.2);
-  const m = eased(Math.max(0, Math.min(1, mix)));
-  // the camera: a slow sway around the graph, plus your drag; in window mode the view slides so the rings sit left of the window
-  const t = reduce ? 0 : (now - t0) / 1000;
-  const az = Math.sin(t * 0.09) * 0.55 + yaw, pol = 1.1 + pitch - m * 0.12, dist = 24 + m * 3;
-  target.set(0, 2.5 - m * 0.4, 0);
-  camera.position.set(Math.sin(az) * Math.sin(pol) * dist, Math.cos(pol) * dist + target.y, Math.cos(az) * Math.sin(pol) * dist);
-  camera.lookAt(target);
-  camRight.set(1, 0, 0).applyQuaternion(camera.quaternion);
-  const visH = 2 * 10 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)), visW = visH * camera.aspect;
-  const sWin = (visH / innerHeight) * Math.min(1, (0.86 * innerHeight) / PHONE.h);
-  const pan = visW * 0.17 * (camera.aspect > 1.1 ? 1 : 0);
-  camera.position.addScaledVector(camRight, pan * m * 2.4);
+const clamp01 = (t) => Math.max(0, Math.min(1, t));
+const side = () => (innerWidth > 760 ? 346 : 0);
+/** The app's window, in screen pixels: left of the panel; smaller while the graph is being edited. */
+function windowRect() {
+  const h = innerHeight - 80;
+  const sc = Math.min(1, (h * THREE.MathUtils.lerp(0.52, 1, orb)) / APP.h);
+  const w = APP.w * sc;
+  return { sc, w, h: APP.h * sc, cx: innerWidth - side() - 16 - w / 2, cy: 64 + (APP.h * sc) / 2 };
+}
+const rightW = () => side() + windowRect().w + 16;
+let lastT = performance.now(), frameN = 0, builtKey = '';
+const v = new THREE.Vector3(), tgt = new THREE.Vector3(), pA = new THREE.Vector3(), pB = new THREE.Vector3();
+const camRight = new THREE.Vector3(), camFwd = new THREE.Vector3(), UP = new THREE.Vector3(0, 1, 0), phonePos = new THREE.Vector3();
+const poseScene = { p: new THREE.Vector3(), q: new THREE.Quaternion(), s: PHONE_W / APP.w };
+const poseWin = { p: new THREE.Vector3(), q: new THREE.Quaternion(), s: 0.01 };
+const clear = new THREE.Color(), skyCol = new THREE.Color();
+const appPoint = (px, py, out) => out.set(px - APP.w / 2, APP.h / 2 - py, 2).applyMatrix4(appObj.matrixWorld);
+function tick(now) {
+  const dt = Math.max(0, Math.min(0.1, (now - lastT) / 1000));
+  lastT = now;
+  if (!reduce) stageT += Math.sign(stage - stageT) * Math.min(Math.abs(stage - stageT), dt / 1.7);
+  lift = ease(clamp01(stageT));
+  orb = ease(clamp01(stageT - 1));
+  if (orb > 0 && !reduce && !userTurned) autoYaw += dt * 0.06 * orb;
+  const maxStep = maxLayer + 1;
+
+  // the camera first: in Orbit the cards turn to face it
+  const win = windowRect();
+  const usable = (innerWidth - side() - win.w - 32) / innerWidth;
+  const fov = 14 + lift * 30 + orb * 2;
+  camera.fov = fov;
+  const half = Math.tan(THREE.MathUtils.degToRad(fov / 2));
+  center.set((bounds.x0 + bounds.x1) / 2, 0, (bounds.z0 + bounds.z1) / 2);
+  const fitFlat = Math.max((bounds.z1 - bounds.z0 + 1.6) / (2 * half) * (innerHeight / Math.max(200, innerHeight - 56)), (bounds.x1 - bounds.x0 + 1.4) / (2 * half * camera.aspect * usable));
+  const inWindow = eased(clamp01(mix));   // last frame's: how far the app is in its window, which takes width from the rings
+  const fitOrbit = Math.max(((ringR(maxHop) + 1.6) * 2) / (2 * half * Math.min(1.6, camera.aspect * ((innerWidth - side() - (win.w + 16) * inWindow) / innerWidth))) * 1.1, (PHONE_H + 2.4) / (2 * half));
+  camDist = THREE.MathUtils.lerp(fitFlat * (1 + lift * 0.18), fitOrbit, orb) / zoom;
+  const pitch = Math.min(Math.PI / 2 - 0.0005, THREE.MathUtils.lerp(THREE.MathUtils.lerp(Math.PI / 2 - 0.0005, 0.6, lift), 0.24, orb) + turnPitch * Math.max(lift, orb));
+  const yaw = THREE.MathUtils.lerp(THREE.MathUtils.lerp(0, -0.36, lift), autoYaw, orb) + turnYaw * Math.max(lift, orb);
+  const worldPerPx = (2 * camDist * half) / innerHeight;
+  tgt.copy(center).lerp(ORBIT_C, orb).add(pan);
+  tgt.y = THREE.MathUtils.lerp(lift * maxStep * STEP * 0.5, PHONE_Y - 1.0, orb);
+  tgt.x += ((side() + (win.w + 16) * inWindow) / 2) * worldPerPx;   // the view's centre is what the panel and the app's window leave
+  tgt.z -= 28 * worldPerPx * (1 - lift);
+  camera.position.set(tgt.x + Math.sin(yaw) * Math.cos(pitch) * camDist, tgt.y + Math.sin(pitch) * camDist, tgt.z + Math.cos(yaw) * Math.cos(pitch) * camDist);
+  camera.lookAt(tgt);
+  camera.updateProjectionMatrix();
   camera.updateMatrixWorld();
-  // the window pose: 10 units in front of the camera, right of centre, facing it, one CSS pixel per screen pixel where it fits
-  poseWin.p.set(Math.max(0, visW / 2 - (PHONE.w * sWin) / 2 - visH * 0.035), -visH * 0.03, -10).applyMatrix4(camera.matrixWorld);
+  scene.fog.near = camDist * 0.9; scene.fog.far = camDist * 3;
+  camRight.set(Math.cos(yaw), 0, -Math.sin(yaw));
+  camFwd.set(Math.sin(yaw), 0, Math.cos(yaw));
+  phonePos.set(ORBIT_C.x, PHONE_Y, ORBIT_C.z);
+
+  // the app: in the scene at the centre of the rings, facing the camera's turn; or in its window, 10 units in front of the camera
+  mix += ((stage === 2 && mode === 'scene' ? 1 - orb : 1) - mix) * Math.min(1, dt * 3.2);
+  const m = eased(clamp01(mix));
+  poseScene.p.copy(phonePos); poseScene.q.setFromEuler(new THREE.Euler(0, yaw, 0, 'YXZ'));
+  const D = 10, wpp = (2 * D * half) / innerHeight;
+  poseWin.p.set((win.cx - innerWidth / 2) * wpp, -(win.cy - innerHeight / 2) * wpp, -D).applyMatrix4(camera.matrixWorld);
   poseWin.q.copy(camera.quaternion);
-  poseWin.s = sWin;
+  poseWin.s = wpp * win.sc;
   appObj.position.lerpVectors(poseScene.p, poseWin.p, m);
   appObj.quaternion.slerpQuaternions(poseScene.q, poseWin.q, m);
   appObj.scale.setScalar(poseScene.s + (poseWin.s - poseScene.s) * m);
   appObj.updateMatrixWorld(true);
-  // cards face the camera
-  for (const id in cards) {
+
+  // cards: flat → staircase → rings (new cards pop in)
+  for (const id of ids()) {
     const cd = cards[id];
-    cd.mesh.quaternion.copy(camera.quaternion);
-    cd.heat = Math.max((heat[id] || 0), cd.heat * Math.pow(0.12, dt));
-    heat[id] = 0;
-    cd.mesh.updateMatrixWorld();
+    if (!cd) continue;
+    const p = place[id], R = ring[id];
+    const cx = p.x + CARD_W / 2, cz = p.z + cardH(id) / 2;
+    pA.set(cx, lift * (layer[id] ?? 0) * STEP, cz);
+    if (visual.has(id)) pB.copy(phonePos).addScaledVector(camRight, slot[id].side * (PHONE_W / 2 + 0.6 + (CARD_W * VIS_SCALE) / 2)).addScaledVector(UP, slot[id].y).addScaledVector(camFwd, 0.02);
+    else if (R) pB.set(R.x, R.y, R.z);
+    else pB.copy(pA);
+    cd.grp.position.lerpVectors(pA, pB, orb);
+    cd.thick = 0.04 + lift * 0.05 * (1 - orb);
+    cd.slab.scale.set(1, cd.thick, 1); cd.slab.position.y = cd.thick / 2; cd.top.position.y = cd.thick + 0.002;
+    cd.slab.visible = lift > 0.01 || orb > 0.01;
+    cd.pop = Math.min(1, cd.pop + dt * 3.5);
+    const popS = cd.pop < 1 ? 0.6 + 0.4 * (1 - Math.pow(1 - cd.pop, 3)) * 1.06 : 1;
+    cd.grp.rotation.set(orb * (visual.has(id) ? Math.PI / 2 : 1.2), orb * yaw, 0);
+    cd.grp.scale.setScalar(popS * (1 + orb * (visual.has(id) ? VIS_SCALE - 1 : 0.25)));
+    cd.handle.visible = editing();
+    cd.handle.position.set(CARD_W / 2, cd.thick + 0.006, -cardH(id) / 2 + 0.22);
+    const base = pA.y * (1 - orb);
+    cd.stem.visible = base > 0.01; cd.stem.scale.set(1, Math.max(0.001, base), 1); cd.stem.position.set(cx, base / 2, cz);
+    cd.stem.material.opacity = lift * (1 - orb) * 0.3;
+    cd.shadow.position.set(cx, 0.001, cz); cd.shadow.material.opacity = lift * (1 - orb) * 0.5;
+    cd.heat *= Math.pow(0.08, dt);
+    for (const d of cd.dots) { portLocal(id, d.r.dir, d.r.name, d.m.position); d.m.position.y += 0.002; }
+    cd.grp.updateMatrixWorld();
   }
-  for (const k in flash) flash[k] *= Math.pow(0.05, dt);
-  if (now - redraw > 90) { redraw = now; for (const id in cards) drawCard(id); }
-  // wires
-  for (const w of wires) {
-    const c = w.curve;
-    anchor(w.c.fromId, 'out', w.c.fromProperty, c.v0);
-    anchor(w.c.toId, 'in', w.c.toProperty, c.v3);
-    right.set(1, 0, 0).applyQuaternion(camera.quaternion);
-    const dx = Math.max(0.6, c.v0.distanceTo(c.v3) * 0.35);
-    c.v1.copy(c.v0).addScaledVector(right, dx);
-    c.v2.copy(c.v3).addScaledVector(right, -dx);
-    const p = c.getPoints(28), arr = [];
-    for (const q of p) arr.push(q.x, q.y, q.z);
-    w.line.geometry.setPositions(arr);
-    w.heat = Math.max(wireHeat[wires.indexOf(w)] || 0, w.heat * Math.pow(0.08, dt));
-    wireHeat[wires.indexOf(w)] = 0;
-    w.mat.opacity = 0.22 + w.heat * 0.6;
+  lane.position.y = lift * (maxLayer + 1) * STEP * (1 - orb) + 0.002;
+  lane.visible = orb < 0.99;
+  for (const [mat, a] of laneParts) mat.opacity = a * (1 - orb);
+  // leaders: in Orbit always; elsewhere for the card you point at
+  for (const id of visual) {
+    const L = leaders[id], cd = cards[id], el = preview.elementsOf(id)[0];
+    const on = hoverId === id || selected === id;
+    L.line.visible = !!el && !!cd && (orb > 0.01 || on);
+    if (!L.line.visible) continue;
+    const r = el.getBoundingClientRect(), s = orb > 0.5 ? slot[id].side : 1;
+    const pos = L.line.geometry.attributes.position;
+    v.set((s < 0 ? -1 : 1) * CARD_W / 2, cd.thick + 0.003, -cardH(id) / 2 + 0.22);
+    cd.grp.localToWorld(v);
+    pos.setXYZ(0, v.x, v.y, v.z);
+    appPoint(s < 0 ? r.left : r.right, r.top + Math.min(r.height / 2, 26), v);
+    pos.setXYZ(1, v.x, v.y, v.z);
+    pos.needsUpdate = true;
+    L.mat.opacity = Math.max(orb * Math.min(1, 0.4 + cd.heat * 0.5), on ? 0.95 : 0);
   }
-  // leaders: from each screen node's card to the part of the app it draws
-  for (const L of leaders) {
-    const el = preview.elementsOf(L.id)[0];
-    const cd = cards[L.id];
-    if (!el || !cd) { L.line.visible = false; continue; }
-    const r = el.getBoundingClientRect(), s = cd.side ?? -1;
-    const px = s < 0 ? r.left : r.right, py = r.top + Math.min(r.height / 2, 26);
-    const a = new THREE.Vector3(s * (CW * PX) / 2 * -1, (cardH(L.id) / 2 - 22) * PX, 0.003);
-    cd.mesh.localToWorld(a);
-    const b = new THREE.Vector3(px - PHONE.w / 2, PHONE.h / 2 - py, 2).applyMatrix4(appObj.matrixWorld);
-    L.line.geometry.setPositions([a.x, a.y, a.z, b.x, b.y, b.z]);
-    L.line.computeLineDistances();
-    L.line.visible = true;
-    L.mat.opacity = hoverId === L.id ? 1 : 0.28 + cd.heat * 0.4;
+  const anyPop = ids().some((i) => cards[i] && cards[i].pop < 1);
+  const key = `${stageT.toFixed(4)}|${orb > 0 ? yaw.toFixed(3) : ''}|${graphVersion}|${anyPop ? frameN : ''}`;
+  if (key !== builtKey) { buildWires(); builtKey = key; }
+  for (const wo of wireObjs.values()) {
+    wo.heat *= Math.pow(0.05, dt);
+    wo.mat.color.copy(wo.base).lerp(WHITE, wo.heat * 0.5);
+    wo.mat.opacity = 1 - orb * 0.55 + wo.heat * orb * 0.55;
   }
-  // pulses
+  // the ground takes the app's sky in Orbit
+  skyCol.set(raw('screen.in.backgroundColor') || '#0b1026').lerp(GROUND, 0.45);
+  clear.copy(GROUND).lerp(skyCol, orb);
+  document.body.style.background = `#${clear.getHexString()}`;
+  scene.fog.color.copy(clear);
+  gridMat.opacity = 1 - orb;
+  starMat.opacity = orb * 0.7;
+  for (const r of ringGuides) r.m.opacity = r.k <= maxHop ? orb * 0.2 : 0;
+
   let n = 0;
-  for (let i = pulses.length - 1; i >= 0; i--) {
-    const P = pulses[i], u = (now - P.t0) / 520;
-    if (u > 1) { pulses.splice(i, 1); continue; }
-    if (u < 0 || n >= MAXP) continue;
-    wires[P.i].curve.getPoint(u, tmp);
-    pPos.set([tmp.x, tmp.y, tmp.z], n * 3);
-    const col = new THREE.Color(P.sig ? WIRE.signal : WIRE.data).lerp(new THREE.Color(1, 1, 1), 0.35);
-    pCol.set([col.r, col.g, col.b], n * 3);
-    n++;
+  for (let i = live.length - 1; i >= 0; i--) { live[i].t += dt / live[i].dur; if (live[i].t >= 1 || !wireObjs.has(live[i].key)) live.splice(i, 1); }
+  for (const c of live) {
+    const wo = wireObjs.get(c.key);
+    for (let k = 0; k < TRAIL && n < MAXP * TRAIL; k++) {
+      const t = c.t - k * 0.022;
+      if (t < 0) break;
+      wo.curve.getPoint(t, v);
+      pPos.set([v.x, v.y + 0.01, v.z], n * 3);
+      const a = 1 - k / TRAIL;
+      if (k === 0) pCol.set([1, 1, 1], n * 3);
+      else pCol.set([(wo.base.r * 0.7 + 0.3) * a, (wo.base.g * 0.7 + 0.3) * a, (wo.base.b * 0.7 + 0.3) * a], n * 3);
+      n++;
+    }
   }
   pGeo.setDrawRange(0, n);
   pGeo.attributes.position.needsUpdate = true; pGeo.attributes.color.needsUpdate = true;
+
+  if (frameN % 3 === 0) {
+    for (const id of ids()) {
+      const cd = cards[id];
+      if (!cd) continue;
+      const heatStep = cd.heat > 0.15 ? Math.round(cd.heat * 4) : 0;
+      const vals = rows[id].map((r) => (r.signal ? 0 : last[`${id}.${r.dir}.${r.name}`]));
+      const k = JSON.stringify([vals, id === selected, id === hoverId, heatStep, byId[id].label]);
+      if (k !== cd.key) { cd.key = k; drawCard(id, cd.ctx, id === selected || id === hoverId, cd.heat); cd.tex.needsUpdate = true; }
+    }
+  }
+  if (frameN % 6 === 0 && !bodyNode.hidden) drawNode(false);
   renderer.render(scene, camera);
   cssRenderer.render(scene, camera);
-  requestAnimationFrame(frame);
+  frameN++;
+  requestAnimationFrame(tick);
 }
-requestAnimationFrame(frame);
+requestAnimationFrame(tick);
 
 /** Where a point of the app (its own CSS pixels) is on this page's screen, wherever the app is posed. */
 function project(px, py) {
-  const v = new THREE.Vector3(px - PHONE.w / 2, PHONE.h / 2 - py, 0).applyMatrix4(appObj.matrixWorld).project(camera);
-  return { x: Math.round((v.x + 1) / 2 * innerWidth), y: Math.round((1 - v.y) / 2 * innerHeight) };
+  const p = new THREE.Vector3(px - APP.w / 2, APP.h / 2 - py, 0).applyMatrix4(appObj.matrixWorld).project(camera);
+  return { x: Math.round((p.x + 1) / 2 * innerWidth), y: Math.round((1 - p.y) / 2 * innerHeight) };
 }
-const wiresSeen = new Set();
-const recent = [];
-preview.onTrace(({ events }) => { for (const e of events) { wiresSeen.add(`${e.fromNode}.${e.fromPort}>${e.toNode}.${e.toPort}`); recent.push(e); } if (recent.length > 400) recent.splice(0, recent.length - 400); });
-window.__orbit = { recent, wiresSeen, conns, project, preview, store, cards, rows, last, get mode() { return mode; }, get mix() { return mix; }, setMode, get events() { return eventCount; }, visual: [...visual] };
+/** Where a card, or its connector, is on this page's screen (a gate presses there with a real mouse). */
+function screenOf(id, what = 'card') {
+  const cd = cards[id];
+  const p = what === 'handle' ? cd.handle.getWorldPosition(new THREE.Vector3()) : cd.top.getWorldPosition(new THREE.Vector3());
+  p.project(camera);
+  return { x: Math.round((p.x + 1) / 2 * innerWidth), y: Math.round((1 - p.y) / 2 * innerHeight) };
+}
+window.__orbit = {
+  recent, wiresSeen, project, screenOf, preview, store, files, cards, rows, last, MISSIONS, mstate,
+  get conns() { return conns; }, get nodes() { return nodes; }, get mode() { return mode; }, get mix() { return mix; }, get stage() { return stage; }, get stageT() { return stageT; },
+  get events() { return eventCount; }, get lastShow() { return lastShow; }, get shows() { return shows; }, get checker() { return checker; }, get selected() { return selected; },
+  setMode, setStage, select, check: runCheck, showMe, visual: [...visual], portsOf
+};
+// ?demo plays the three missions by itself, then lifts and orbits the result
+if (query.has('demo')) (async () => {
+  await sleep(1200);
+  for (let i = 0; i < MISSIONS.length; i++) { await showMe(i); await sleep(1400); }
+  setStage(1); await sleep(4000); setStage(2);
+})();
 say(`ready nodes=${nodes.length} wires=${conns.length} visual=${visual.size} export=${Math.round(first.exportMs)}ms frame=${Math.round(first.frameMs)}ms`);
-} catch (e) { say('FAIL ' + (e && e.stack || e)); console.error(e); }
+} catch (e) { say('FAIL ' + (e && e.stack || e)); console.error(e); $('err').hidden = false; $('err').textContent = String(e && e.message || e); }
 </script>
 </html>

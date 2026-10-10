@@ -1,7 +1,7 @@
 # OWN-004 — The real app beside it
 
 **Opened 2026-10-02.** **Depends on OWN-001** (the in-memory project) **and R4** (README §8).
-**Status: 🟡 slices 1–2 built (s3, s4, 2026-10-10): AC1 met (todo template; 13 / 13 templates render, parity exact); AC2 met (Orbit as v2 files, every one of its 37 wires seen live, its cards fed from the app's trace, in both poses Richard ruled). AC3 open: the prototype's original `page.html` still draws its own screen (§6.3).**
+**Status: 🟢 slices 1–3 built (s3, s4, s6, 2026-10-10): AC1 met (todo template; 13 / 13 templates render, parity exact); AC2 met (Orbit as v2 files, every one of its 37 wires seen live, in both poses Richard ruled); AC3 met in the page (s6: `real/orbit.html` is the whole prototype — three stages, editing, missions — on the real app, every edit through the store, every mission checked in a second real app; §6.4). The old `page.html` and its build are superseded and still in the folder: removing them waits on Richard (§6.4).**
 **Model:** **Opus.** Embedding the preview and feeding it from memory is wiring with a clear finish line. Switch to Fable only if the preview's internals resist and the task turns into design. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
 ## 1. The person sentence
@@ -185,11 +185,7 @@ trace is not measured (§6.3).
 
 ### 6.3 Next
 
-1. **AC3: one prototype page.** Port `page.html`'s editing (the picker, drag-a-wire, the property panel, delete) and
-   its three missions onto `orbit.html`, every edit written through `V2ProjectStore` and shown by `update`; then
-   `page.html` retires (git keeps it) and the prototype README says so. The Graph and Lift stages come with it
-   (Richard's "recognisable first, then the surprise"). A mission checks the graph by running it: on a copy, in the
-   real app (R1), not on `GraphRun`, which this slice showed answers differently.
+1. ~~**AC3: one prototype page.**~~ Built in s6 (§6.4). Left: removing `page.html` and its build, which is Richard's call.
 2. **Keep the app's state across an edit**, or say why not: every update is a fresh frame, so the clock returns to
    25:00 on each change. The editor's own preview patches the running app over its socket instead.
 3. **Diagnostics to the page:** whether the runtime's diagnostics (FLD-004's "a wired dimension became a share")
@@ -199,3 +195,54 @@ trace is not measured (§6.3).
    only; decide where binary files live (OWN-001's store or beside it), then serve them as `blob:` URLs like kits.
 5. Measure the trace pump on the largest live graph (planning-demo: 1,090 live nodes, 4,999 wires): it builds the
    session dictionary on every tick to see whether the shape changed.
+
+### 6.4 Slice 3 — one prototype page, on the real app (s6, 2026-10-10, Opus)
+
+**AC3 met in the page.** `prototype/real/orbit.html` (1,500 lines) now does everything `page.html` did — the Graph,
+Lift and Orbit stages, + Add node, drag-a-wire with the connect popup, the Node panel (properties, live outputs,
+wires, delete), Try it, three missions with Check and Show me, `?demo` — and none of it runs a node or draws the screen:
+
+- **Every edit is a write through `V2ProjectStore`** (a read, the change, `writeComponent(…, { ifRevision })`), then
+  `preview.update` rebuilds the app from the files. Moving a card writes its `x`/`y` and does **not** rebuild (the
+  gate checks both). The cards are where the files put them: Orbit's `nodes.json` was laid out once (columns by
+  longest path, loops broken at a signal wire whose target reaches its source, the screen's stack last), so Graph
+  reads like the editor; Lift's steps are the same data-flow depth, computed from the wires.
+- **A mission's Check plays the graph as it stands on a copy of the files in a second real app** (a second
+  `mountPreview`, shown small while it plays), with the scenario's parameters written into the copy (lengths, a fast
+  clock), presses made on the copy's own buttons, and the verdict read off the copy's screen by the element each node
+  draws (`elementsOf('phaseTxt')` → `BREAK`). No stand-in runner anywhere. The page's three reasons for "not yet" on
+  the graph as it starts are the sentences `page.html`'s checks are written to give for the same failures (read from
+  its code; `page.html` was not re-run this session): on these three scenarios the real engine fails where the
+  prototype's runner did (they disagreed on s4's Skip bounce, which Orbit's files no longer have).
+- **Ports for the connect popup and the panel come from the node's spec where it has one** (`specs-entry.ts` →
+  `specs.js`, `@nodegx/node-spec`'s browser entry, 108 specs, Group/Text/Button among them), else the runtime's
+  library, plus any wired port neither names. Measured why: the library lists a type's **static** ports only
+  (States: 11, no `at-Focus`, no `reached-Break`), and the runtime tells **only a connected editor** about the dynamic
+  ones (`StatesModule.setup` returns unless `editorConnection.isRunningLocally()`, `states.ts:1244`), so a page has no
+  way to ask the running app. The spec's `derived` ports are a pure function of the parameters, which is what a page
+  needs. **One trap, by design in the spec, recorded here not in the ledger:** some specs derive over the conformance
+  generator's whole universe as well as the node's own lists (States adds `at-A`, `x`, `label`, `on` … so a generated
+  scenario can wire a list that arrives mid-play, `states.ts:134-149`). `portsFor` drops a derived port the universe
+  alone brings (derived with no parameters, named by none of this node's); it cannot tell a state an author really
+  called `A` from the universe's `A`, and nor can any reader of the spec alone.
+- **The picker is the runtime's own node library**: 118 types (163 less Visual, Component Utilities, Navigation),
+  every one the real node, the specced ones tagged. Screen nodes are not offered: the page does not edit the
+  structure yet (below).
+
+**Readings** (2026-10-10, headless Chrome with software WebGL, tree at `087e78cdd` plus this slice):
+
+| | |
+|---|---|
+| `node prototype/real/check.mjs` | **PASS** — editing with real input (picker → Counter; Start Value typed; a wire dragged from Seconds elapsed's connector and picked; a card moved; the node deleted — each read back from the store, the new wire seen carrying signals in the real app's trace); each mission fails first for its own reason, Show me (a real press) builds it, its Check passes, all three hold together on 32 nodes / 44 wires; then both poses as in §6.2 (37 / 37 wires, real presses). Runs: 1 FAIL (the gate's own bug: a Show me button below the panel's fold, pressed off-screen, read the stale "not yet" — fixed: scroll into view, and assert the press started a build), then **4 / 4 PASS** in a row, the last 3 on the page as committed (one before the Orbit camera's window fit) |
+| a mission's Check | 2.1–3.4 s each on the copy (clock at 20–25 ticks a second, starved by software WebGL) |
+| the three missions by Show me | about 45 s for all three (each step a write and a rebuild, paced for a person to watch) |
+| an edit | export 3–12 ms; the new frame 100–600 ms headless |
+
+**Not built, and what OWN-006 AC2 needs from this page:** structure edits (add a screen node into the tree at an
+index, move one under another parent, remove a screen node and its subtree), rename (a node's label), and any
+component but `App`. The suite's small fixture uses all of them, so the page cannot pass it until it has them.
+
+**`page.html` and its build** (`page.html`, `build.sh`, `src/app.ts`, `src/entry.ts`, `src/graphrun.ts`,
+`src/picker.json`, `tools/genpicker.ts`, and the gitignored `dist/`) are superseded and **still in the folder**: the
+session's attempt to remove them was stopped for Richard's say-so. They are unchanged; NEEDS.md and OWN-000 cite them by
+line, which stays true while they stay (and through `git show 087e78cdd:<path>` once they go).

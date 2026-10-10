@@ -1,5 +1,7 @@
 # Orbit — the prototype this phase was scoped from
 
+**Now: [`real/orbit.html`](#real--the-prototype-now-a-home-made-editor-beside-the-real-app-own-004-s4s6)** — the same editor, missions and stages on the real app. What follows first is the original page, as it was built.
+
 A focus timer (Pomodoro) built as a NodeGX graph, running in a browser page on `@nodegx/node-spec` with no editor and
 no runtime. The page is also a small editor: the NodeGX canvas look, three stages (Graph, Lift, Orbit), add a node
 from a picker, wire by dragging, set properties, delete, and three missions that a fresh copy of your graph checks on
@@ -47,20 +49,46 @@ Re-measured on 2026-10-03 after OWN-002 (built from the package's browser entry,
 4. **The look.** Copied by reading `CanvasTheme.ts`, `NodeGraphEditorNode.ts` and `structureLane.ts`: a third copy
    of the canvas palette, which is exactly what memory says drifts.
 
-## `real/` — Orbit as a real project (OWN-004 s4, 2026-10-10)
+## `real/` — the prototype now: a home-made editor beside the real app (OWN-004, s4–s6)
 
-The same timer as v2 files (`real/orbit/`), run by NodeGX's own runtime through `@noodl/preview` in the page, with
-its graph drawn in 3D around the real app or beside it in a flat window (one switch; Richard ruled *keep both*, R7).
-Nothing in it draws the screen: the app is the app. Its graph differs from `src/app.ts` in one place, on purpose:
-*Phase over* is evaluated on each tick, because the real engine showed the original wiring bounces a Skip back
-(OWN-004 §6.2); this page's own runner never did.
+**`real/orbit.html` is the prototype.** The same timer as v2 files (`real/orbit/`), run by NodeGX's own runtime
+through `@noodl/preview` in the page, with everything `page.html` did, on the real thing:
+
+- **Three stages.** Graph (the editor's canvas, cards where the files put them, the structure lane), Lift (a
+  staircase by data flow), Orbit (rings around the app). In Graph and Lift the app sits in a window; in Orbit one switch
+  puts it inside the scene or keeps it in its window (Richard ruled *keep both*, R7).
+- **Editing, every change a write through `V2ProjectStore`** (OWN-001) and the app rebuilt from the files: + Add node
+  (the runtime's own node library: 118 types, every one the real node), drag a wire from a card's connector and
+  pick the ports (each node's ports from its spec where it has one, `@nodegx/node-spec`, else the library), the Node
+  panel (properties, the outputs' live values, the wires, delete), Try it (lengths, colours, the round line). Moving a
+  card writes its position into the files and does not rebuild the app.
+- **Three missions, checked in the real app.** Check plays the graph as it stands on a **copy** of the files in a
+  second real app (shown small while it plays) and reads the screen by the part each node draws. Each fails on the
+  graph as it starts, for its own reason; Show me builds the answer step by step through the store; then it passes.
+- **Live values** on the cards and pulses on the wires come from the running app's trace; hover a screen node's card
+  and its part of the app is outlined, point at the app and its card lights.
+
+Nothing in it draws the screen or runs a node: the app is the app.
 
 ```sh
-real/build.sh                       # bundles @nodegx/canvas-look for the page (look.js, gitignored)
-node real/serve.mjs 47812           # then open http://127.0.0.1:47812/orbit.html  (#window starts flat)
-node real/check.mjs                 # the gate: both poses, 37 / 37 wires live, real presses, a full cycle
+real/build.sh                       # bundles look.js (@nodegx/canvas-look) and specs.js (@nodegx/node-spec), both gitignored
+node real/serve.mjs 47812           # then open http://127.0.0.1:47812/orbit.html
+                                    #   ?stage=graph|lift|orbit  ?pose=scene|window  ?speed=1|60  ?demo plays the three missions, then lifts and orbits
+node real/check.mjs                 # the gate: editing with real input, the three missions (fail, Show me, pass), both poses, 37 / 37 wires live
 ```
 
 Needs the deploy runtime (`npm run build:editor:_viewer`) and the preview bundle (`npm --prefix
 packages/noodl-preview run build`). `app.html` is the smallest host; `library.html` shows the runtime's ports for any
-node type. When `orbit.html` gains this page's editing and missions (OWN-004 §6.3), `page.html` retires.
+node type.
+
+Orbit's graph differs from `src/app.ts` in one place, on purpose: *Phase over* is evaluated on each tick, because the
+real engine showed the original wiring bounces a Skip back (OWN-004 §6.2); `page.html`'s own runner never did. The
+files' positions were laid out once in s6 (columns by data flow, the screen's stack last), so Graph reads like the
+editor.
+
+### `page.html` and its build: superseded, awaiting removal
+
+`page.html`, `build.sh`, `src/` (`app.ts`, `entry.ts`, `graphrun.ts`, `picker.json`) and `tools/genpicker.ts` exist only
+to build the original page, which runs the graph on its own wave-at-a-time runner and draws the screen by hand. Every
+thing it did now runs on the real app in `real/orbit.html` (OWN-004 §6.4). Removing them was asked for in s6 and left
+to Richard; until then they stay, unchanged, as the evidence NEEDS.md and OWN-000 cite by line.
