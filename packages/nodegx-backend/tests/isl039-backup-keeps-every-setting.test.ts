@@ -254,3 +254,51 @@ describe('ISL-039 P100-UPG001-BACKUP — a running backend', () => {
     expect(await read()).toEqual(before);
   });
 });
+
+/**
+ * P100-UPG001-ARRAYEQ and -PTREQ over the wire, on a collection a Parse client made by writing to it
+ * (nothing declared): the contract cases `filters/equality-on-an-array-matches-an-element` and
+ * `filters/a-pointer-written-as-a-parse-pointer-is-a-value` declare their columns.
+ */
+describe('ISL-039 ARRAYEQ and PTREQ — a Parse client on /classes', () => {
+  let dataDir: string;
+  let service: BackendService;
+  let base: string;
+  const T = { authorization: 'Bearer t0k' };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const req = <R = any>(method: string, p: string, body?: unknown) => request<R>(base, method, p, { body, headers: T });
+  const names = async (where: unknown) => {
+    const res = await req<{ results: Array<{ name: string }> }>('GET', `/classes/Book?where=${encodeURIComponent(JSON.stringify(where))}`);
+    expect([JSON.stringify(where), res.status]).toEqual([JSON.stringify(where), 200]);
+    return res.json.results.map((r) => r.name).sort();
+  };
+
+  beforeAll(async () => {
+    dataDir = tmp('isl039-wire-');
+    fs.writeFileSync(path.join(dataDir, 'ops.json'), JSON.stringify({ version: 1, rateLimit: { enabled: false } }));
+    service = new BackendService({ dataDir, port: 0, backendId: 'isl039w', backendName: 'ISL-039 wire', authToken: 't0k' });
+    base = (await service.start()).listen.url;
+    const author = (id: string) => ({ __type: 'Pointer', className: '_User', objectId: id });
+    for (const [name, tags, by] of [
+      ['ada', ['fantasy', 'sea'], 'u1'],
+      ['bo', ['crime'], 'u2'],
+      ['cy', ['fantasy'], 'u2']
+    ] as const) {
+      expect((await req('POST', '/classes/Book', { name, tags, author: author(by) })).status).toBe(201);
+    }
+  });
+  afterAll(async () => {
+    if (service) await service.stop();
+  });
+
+  it('an equality filter on an array field matches the rows whose array holds the value', async () => {
+    expect(await names({ name: 'bo' })).toEqual(['bo']); // control: the route answers
+    expect(await names({ tags: 'fantasy' })).toEqual(['ada', 'cy']);
+    expect(await names({ tags: { $eq: 'crime' } })).toEqual(['bo']);
+  });
+
+  it('a pointer written as a Parse pointer matches like its id', async () => {
+    expect(await names({ author: 'u2' })).toEqual(['bo', 'cy']); // control: the bare id
+    expect(await names({ author: { __type: 'Pointer', className: '_User', objectId: 'u2' } })).toEqual(['bo', 'cy']);
+  });
+});

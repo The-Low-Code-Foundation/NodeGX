@@ -269,6 +269,41 @@ export interface ColumnScope {
   present: ReadonlySet<string>;
   /** Out-parameter: every name substituted, so the caller can report the typo case. */
   absent?: Set<string>;
+  /**
+   * P109 ISL-039 (P100-UPG001-ARRAYEQ): the columns the schema declares `Array`. Equality on one
+   * of them matches a row whose array holds the value, as Parse does; the column's stored JSON
+   * can never equal one element. Omitted = no column is treated as an array.
+   */
+  arrays?: ReadonlySet<string>;
+}
+
+/**
+ * P109 ISL-039 (P100-UPG001-PTREQ): a Parse Pointer or Date — `{__type: 'Pointer', …}`,
+ * `{__type: 'Date', iso}` — standing where a condition goes is a value to match, not a map of
+ * operators. Read as operators, `__type` reached `translateOperator` and was refused (a 500).
+ */
+function isTaggedValue(condition: unknown): boolean {
+  return (
+    !!condition &&
+    typeof condition === 'object' &&
+    !Array.isArray(condition) &&
+    ['Pointer', 'Date'].includes(String((condition as { __type?: unknown }).__type))
+  );
+}
+
+/** ISL-039: the columns a table's schema declares `Array`, for {@link ColumnScope.arrays}. */
+export function arrayColumns(schema: { columns?: Array<{ name: string; type?: string }> } | null | undefined): Set<string> {
+  return new Set((schema?.columns || []).filter((c) => c.type === 'Array').map((c) => c.name));
+}
+
+/** ISL-039: "the array in `col` holds `value`" — one element, compared as its JSON value. */
+function arrayHolds(col: string, value: unknown, params: unknown[], dialect: SqlDialect): string {
+  if (dialect === 'postgres') {
+    params.push(JSON.stringify([value]));
+    return `${col} @> ?::jsonb`;
+  }
+  params.push(value);
+  return `EXISTS (SELECT 1 FROM json_each(CASE WHEN json_valid(${col}) THEN ${col} END) WHERE "value" = ?)`;
 }
 
 /**
@@ -503,10 +538,16 @@ export function buildWhereClause(
     // Handle field conditions
     const col = columnRef(key, scope, tableAlias);
 
-    if (typeof condition !== 'object' || condition === null) {
+    const isArray = !!scope?.arrays?.has(key) && col !== 'NULL';
+    if (typeof condition !== 'object' || condition === null || isTaggedValue(condition)) {
       // Direct equality
+      const value = convertQueryValue(condition);
+      if (isArray && value !== null) {
+        conditions.push(arrayHolds(col, value, params, dialect));
+        continue;
+      }
       conditions.push(`${col} = ?`);
-      params.push(convertQueryValue(condition));
+      params.push(value);
       continue;
     }
 
@@ -520,7 +561,7 @@ export function buildWhereClause(
     // condition of its own.
     const siblings = condition as Record<string, unknown>;
     for (const [op, value] of Object.entries(condition)) {
-      const sqlCondition = translateOperator(col, op, value, params, schema, siblings, dialect);
+      const sqlCondition = translateOperator(col, op, value, params, schema, siblings, dialect, isArray);
       if (sqlCondition) {
         conditions.push(sqlCondition);
       }
@@ -561,7 +602,8 @@ function translateOperator(
   params: unknown[],
   schema?: unknown,
   siblings?: Record<string, unknown>,
-  dialect: SqlDialect = 'sqlite'
+  dialect: SqlDialect = 'sqlite',
+  arrayColumn = false
 ): string | null {
   // Convert special types
   const convertedValue = convertQueryValue(value);
@@ -570,6 +612,13 @@ function translateOperator(
     case '$eq':
       if (convertedValue === null) {
         return `${col} IS NULL`;
+      }
+      // P109 ISL-039: on an Array column, an element is "holds this element" (see `arrayHolds`), and
+      // an array is the whole array, compared as JSON (the admin's "is empty" asks `$eq: []`).
+      if (arrayColumn && !Array.isArray(convertedValue)) return arrayHolds(col, convertedValue, params, dialect);
+      if (arrayColumn) {
+        params.push(JSON.stringify(convertedValue));
+        return dialect === 'postgres' ? `${col} = ?::jsonb` : `CASE WHEN json_valid(${col}) THEN json(${col}) END = json(?)`;
       }
       params.push(convertedValue);
       return `${col} = ?`;

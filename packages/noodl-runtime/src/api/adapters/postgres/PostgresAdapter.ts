@@ -401,7 +401,7 @@ export class PostgresAdapter {
   private _columnScope(collection: string): QueryBuilder.ColumnScope | undefined {
     const present = this._sm().tableColumns(collection);
     if (present.size === 0) return undefined;
-    return { present, absent: new Set<string>() };
+    return { present, absent: new Set<string>(), arrays: QueryBuilder.arrayColumns(this._sm().getTableSchema(collection)) };
   }
 
   private _reportAbsentColumns(collection: string, scope: QueryBuilder.ColumnScope | undefined): void {

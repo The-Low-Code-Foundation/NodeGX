@@ -313,7 +313,8 @@ export function condWhere(c: Cond, fields: FilterField[], now: Date = new Date()
       // spelling inside it (`"red"`, quotes included), which is what stops
       // "red" matching "redwood".
       if (c.op === 'contains') return { [k]: { contains: JSON.stringify(need(k, c.value)) } };
-      if (c.op === 'empty') return orMissing(k, { $eq: '[]' });
+      // P109 ISL-039: `$eq` with an ARRAY is the whole array; with a string it is one element (as Parse).
+      if (c.op === 'empty') return orMissing(k, { $eq: [] });
       break;
     case 'location':
       if (c.op === 'near') {
@@ -373,7 +374,7 @@ function orMissingPattern(legs: unknown[], fields: FilterField[], now: Date): Co
   const f = fields.find((x) => x.name === field);
   if (!f) return null;
   const first = legs[0][field];
-  if (f.kind === 'list') return isObj(first) && Object.keys(first).length === 1 && first.$eq === '[]' ? { kind: 'cond', field, op: 'empty' } : null;
+  if (f.kind === 'list') return isObj(first) && Object.keys(first).length === 1 && Array.isArray(first.$eq) && first.$eq.length === 0 ? { kind: 'cond', field, op: 'empty' } : null;
   const c = fieldCond(f, first, now);
   if (!c) return null;
   if (f.kind === 'text' && c.op === 'is' && c.value === '') return { kind: 'cond', field, op: 'empty' };

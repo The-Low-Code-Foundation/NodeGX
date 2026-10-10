@@ -172,5 +172,56 @@ export const filterCases: readonly ConformanceCase[] = Object.freeze([
       }
       ok(matched === 0, `a filter on an unknown column returned ${String(matched)} rows instead of 0 or an error`);
     }
+  },
+
+  {
+    id: 'filters/equality-on-an-array-matches-an-element',
+    area: 'filters',
+    pins: 'a bare value against an Array field matches the rows whose array holds it, as Parse does',
+    async run(ctx) {
+      // P109 ISL-039 (P100-UPG001-ARRAYEQ): the equality compared the value with the array's stored
+      // JSON text, so `tags = "fantasy"` matched nothing, with no error.
+      const c = ctx.collection('Arr');
+      ctx.createTable(c, [
+        { name: 'name', type: 'String' },
+        { name: 'tags', type: 'Array' }
+      ]);
+      await ctx.create(c, { name: 'ada', tags: ['fantasy', 'sea'] });
+      await ctx.create(c, { name: 'bo', tags: ['crime'] });
+      await ctx.create(c, { name: 'cy', tags: ['fantasy'] });
+      await ctx.create(c, { name: 'di', tags: [] });
+      await ctx.create(c, { name: 'eve', tags: [1, 2] });
+      deepEq(await names(ctx, c, { tags: 'fantasy' }), ['ada', 'cy'], 'equality on an array did not match by element');
+      deepEq(await names(ctx, c, { tags: { $eq: 'crime' } }), ['bo'], '$eq on an array did not match by element');
+      deepEq(await names(ctx, c, { tags: 2 }), ['eve'], 'a number did not match its element');
+      deepEq(await names(ctx, c, { tags: 'nothing' }), [], 'a value no array holds matched');
+      // An array value is the whole array (the admin's "is empty" asks `$eq: []`).
+      deepEq(await names(ctx, c, { tags: { $eq: [] } }), ['di'], '$eq with an empty array did not find the empty array');
+      deepEq(await names(ctx, c, { tags: { $eq: ['crime'] } }), ['bo'], '$eq with an array did not compare the whole array');
+    }
+  },
+
+  {
+    id: 'filters/a-pointer-written-as-a-parse-pointer-is-a-value',
+    area: 'filters',
+    pins: 'a condition `{__type: "Pointer", objectId}` matches like the bare id, rather than being read as operators',
+    async run(ctx) {
+      // P109 ISL-039 (P100-UPG001-PTREQ): every key of the object was read as an operator, and
+      // `__type` was refused as one the backend "cannot translate" — a 500 for the way a Parse
+      // client writes a pointer match.
+      const c = ctx.collection('Ptr');
+      ctx.createTable(c, [
+        { name: 'name', type: 'String' },
+        { name: 'author', type: 'Pointer', targetClass: '_User' }
+      ]);
+      await ctx.create(c, { name: 'ada', author: { __type: 'Pointer', className: '_User', objectId: 'u1' } });
+      await ctx.create(c, { name: 'bo', author: { __type: 'Pointer', className: '_User', objectId: 'u2' } });
+      deepEq(await names(ctx, c, { author: 'u1' }), ['ada'], 'the bare id (the control) did not match');
+      deepEq(
+        await names(ctx, c, { author: { __type: 'Pointer', className: '_User', objectId: 'u1' } }),
+        ['ada'],
+        'a Parse pointer did not match like its id'
+      );
+    }
   }
 ]);

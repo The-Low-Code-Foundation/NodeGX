@@ -704,7 +704,7 @@ class LocalSQLAdapter {
       if (!Array.isArray(rows) || rows.length === 0) return undefined;
       const present = new Set(rows.map((r) => r.name).filter((n): n is string => typeof n === 'string'));
       if (present.size === 0) return undefined;
-      return { present, absent: new Set<string>() };
+      return { present, absent: new Set<string>(), arrays: QueryBuilder.arrayColumns(this.schemaManager?.getTableSchema(collection)) };
     } catch (e) {
       return undefined;
     }
