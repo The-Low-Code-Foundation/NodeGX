@@ -1,91 +1,69 @@
 # P107 — next session
 
-**Written 2026-10-10 (s77).** Read the [README](README.md) §2–§7 (R18 is the newest ruling), [NSP-018 §5.6 and
-§6](NSP-018-THE-SPEC-SPEAKS.md), [NSP-019 §5.1](NSP-019-RICHARD-READS-IT.md) and [NSP-002 §6](NSP-002-TRACES-AND-THE-RUNTIME-ADAPTER.md).
-s77 ran eleven lanes in parallel with every other session paused: that is what landed, and what is left is mostly Richard's.
+**Written 2026-10-10 (s78).** Read the [README](README.md) §2–§7 (R18 is the newest ruling), [NSP-010 §5](NSP-010-A-CHANGE-IS-A-VERSION.md)
+(new this session), [NSP-019 §5.1](NSP-019-RICHARD-READS-IT.md) and [NSP-020](NSP-020-PORTS-WITHOUT-A-RUNNING-VIEWER.md) (next on the board).
 
 ## Board (from the task files)
 
 | task | built | committed |
 |---|---|---|
-| NSP-000 … NSP-015 | as s44 (NSP-013 left: AC2, the export half with no reach here, and the deep run for s11–s14; NSP-014 / NSP-015 left: AC2's export half, P18's) | s1 … s44 |
-| NSP-016 the visual nodes | ✅ s71 (all four ACs); s73 SCROLLROOM | `aa8abb06f` … `fd6385beb` |
-| **NSP-018 the spec speaks** | ✅ **s77: all five ACs — 507 of 507 reducers in words (103 specs), `says` REQUIRED on an input reducer's patch (planted), the reader follows the `relationNode` factory, the docs pages render the rules** | s72 … s77 |
-| **NSP-019 Richard reads it** | 🟡 **s77: AC1 (the rules fold), AC2 (*Try this node* on the interpreter) and the §2 disagreements table built; AC3 is Richard's drive** | s77 |
-| NSP-009 the ratchet | ✅ s64; s65: a `contract` column | `6a1ed0084`, s65 |
+| NSP-000 … NSP-015 | as s44 (NSP-013 left: AC2's export half and the deep run for s11–s14; NSP-014 / NSP-015 left: AC2's export half, P18's) | s1 … s44 |
+| NSP-016 the visual nodes | ✅ s71; s73 SCROLLROOM | `aa8abb06f` … `fd6385beb` |
+| NSP-018 the spec speaks | ✅ s77 (507 of 507 reducers in words, `says` required) | s72 … s77 |
+| NSP-019 Richard reads it | 🟡 s77: AC1, AC2 and the §2 table built; **AC3 is Richard's drive** | s77 |
+| NSP-009 the ratchet | ✅ s64; s65 a `contract` column | `6a1ed0084`, s65 |
+| **NSP-010 a change is a version** | ✅ **s78: all four ACs** — `changes` on a spec with a migration answer, golden traces for 108 specs / 9,204 scenarios, `npm run spec-golden:check` in the PR workflow, Counter's FH-022 history replayed on the runtime at `328a025dc^` | `36e08e29e` + the s78 docs commit |
 | NSP-017 the escape hatches | 🟡 s64–s68. Left: AC1's export half (P18's) | s64 … s68 |
 | NSP-023 the spec without React | ✅ (s50) | s45 … s57 |
-| NSP-006 the stranger | ✅ rounds 1–4 (hashes rewritten s70, s72, s73, s74, s75, s77) | `649e6864d`, s70 … s77 |
-| NSP-020 ports without a viewer | 📋 rows only (s20) | s20 |
-| NSP-010, NSP-021 | 📋 not started (NSP-021 carries a P112 note, not ours) | — |
+| NSP-006 the stranger | ✅ rounds 1–4 (hashes rewritten s70 … s78) | `649e6864d`, s70 … s78 |
+| NSP-020 ports without a viewer | 📋 rows only (s20) — **next to build** | s20 |
+| NSP-021 the second editor | 📋 not started (depends on NSP-018 ✅ and NSP-020) | — |
 | NSP-022 the cloud-only nodes | 📋 (needs a second runtime target) | s21 |
 
-**`node scripts/node-spec/spec-ledger.js --check` (s77): holds at 125 of 147 on the runtime · 3 as a contract · 2 on the
-export · 2 exempt · 17 owed (all NSP-022)**, unchanged since s68. **`in words: 507 of 507`**, 103 specs fully, nothing unread.
+`spec-ledger --check` (s78): exit 0, unchanged since s68 (125 of 147 on the runtime · 3 contract · 2 export · 2 exempt · 17 owed, all NSP-022).
 
-## What s77 did
+## What s78 did
 
-1. **NSP-018 AC2 closed, and the gate is on** ([§5.6](NSP-018-THE-SPEC-SPEAKS.md)). Seven word lanes by spec file (Video,
-   WebSocket, SSE, Circle + Drag, the radios + the Page Stack family, the streams + parsers, the record / cloud / user /
-   HTTP / contract specs) and one reader lane (the `relationNode` factory). `Reducers` now returns `SaidPatch` /
-   `SaidOutcomePatch`; the flip cost 17 `tsc` errors (five helper types, twelve test fixtures), all given words; one
-   `says` removed from Counter → exactly one error; restored. `afterInputs` / `world` / `person` / dynamic `on` keep a
-   plain `Patch` — nothing reads their words yet.
-2. **§6 item 4: the docs pages render the rules** — `### What each input does` after the Inputs tables, 103 pages.
-3. **P107-C155 fixed** ([NSP-002 §6](NSP-002-TRACES-AND-THE-RUNTIME-ADAPTER.md)): a scenario's `wired: string[]` reaches a
-   reducer as `world.wired(port)`; the runtime target wires a stub source through the runtime's own `connectInput` before
-   the params; Function and Expression gained their wired arms with seven scenarios, traces read on both targets, plant
-   shown (a target that drops the list: 4 / 4 Function and 1 / 3 Expression wired scenarios red at index 2). Out of reach
-   and said so in the bug file: the Uses setter, Run Tasks, Page, `layout.ts`. **Observation left in the row:** the runtime
-   GRAPH target applies params before it makes wires, the reverse of a loaded project — no graph scenario wires a Run
-   today, so nothing is graded wrong; fix the order when one does.
-4. **NSP-019 AC1 + AC2** ([§5.1](NSP-019-RICHARD-READS-IT.md)): `packages/noodl-editor/src/editor/src/views/panels/propertyeditor/spec/` —
-   `NodeRulesSection` (a `<details>` fold "What this node does" from `projectCatalog()`'s `rules`, absent without them),
-   `TryNodePanel` (plays the SPEC on the interpreter, a plain-English timeline; dynamic `import()` so an ordinary selection
-   pays nothing), `spec-disagreements.json` (161 rows over 60 types from the bug ledger, `scripts/spec-disagreements.js
-   --check`). `@nodegx/node-spec` is mapped by source (`src/browser.ts`) in the editor tsconfig, the root tsconfig, jest
-   and webpack, like `@nodegx/export`. 32 tests; editor `tsc` 0 errors. **Driven in the real app** (§5.2): the first build shadowed the
-   module with its JSON snapshot (webpack resolves `.json` before `.ts`, which `tsc` and jest never see) — renamed; after
-   that both folds render and the Try timeline reads right.
-5. **Six defects found by the words, filed** (`node scripts/bugs.js --from P107`): C156 SSE On Close twice · C157 SSE
-   replayed id moves the resume point back · C158 WebSocket Auto Connect dead once a connection object exists (HIGH) ·
-   C159 WebSocket stale ping · C160 Drag Enabled only on exactly `false` (**needs-ruling**) · C161 Video Restart / Reset
-   seek to second 0, not Start Time (**needs-ruling**). Plus P107-S77-LIBRARYDOCS (P109's: the ask-a-local-model prefab
-   landed without its docs page; `hlt-013/libraryDocs.test.ts` red at HEAD) and P107-S77-CHR007SNAPSHOT (P109's: Page
-   Stack's `keepPagesWhenUnmounted` not in `chr-007/widgetDispatch`'s snapshot; red at HEAD).
-6. **The census** regenerated from a clean `git archive HEAD` export (five rows moved, other phases' committed tests);
-   `spec-census:check` stays red by construction while P18's and TPL-011's uncommitted tests sit in the tree.
+NSP-010, whole ([§5](NSP-010-A-CHANGE-IS-A-VERSION.md)). A spec now has `changes: [{ version, says, row?, commit?, migration }]`,
+the migration exactly one of `{ none: why }` / `{ project: id }` / `{ parameter: input name }`. `packages/nodegx-node-spec/golden/<type>.json`
+holds every spec's hand scenarios played on the interpreter (18 MB, one scenario per line, each with a hash of what it plays).
+`scripts/node-spec/golden.js --check --base <ref>` fails a stale golden file, a moved trace or renamed port at an unchanged
+version, and a new version with no entry; `--diff` prints a table per moved scenario. In the PR workflow after `spec-ledger:check`.
+Counter's entry is FH-022 slice 3 at `version: 1`; its before-traces are replayed on the runtime at `328a025dc^`
+(`noodl-runtime/test/node-spec/nsp-010-counter-history.test.ts`). The three plants are shown in §5.3.
 
-## What s78 does
+**Where the task file was wrong:** §2 says Counter "already has" *Treat Unchanged As* as a compatibility parameter. It does
+not (counter.ts spreads `outcomeOutputs` only; the FH-022 commit said so), and `changesProblems` would refuse that answer.
+Counter's answer is `none`.
 
-1. **Richard drives NSP-019 (AC3)** and rules on the three choices in §5.1: the Try fold gated on "has rules" (the catalog
-   has no other spec marker), the rules fold open and Try closed by default, and whether `spec-disagreements.js` moves
-   under `catalog:generate`. It was driven once in s77 (§5.2); the drive recipe is there.
-2. **Rulings owed:** C160 (coerce Drag's Enabled or say "exactly false"), C161 (seek to Start Time or say "second 0"),
-   C162 (Parse XML / Feed: count bytes, or rename Max Bytes).
-   D38 is still P109's to put to Richard.
-3. **Then:** NSP-013's deep run for s11–s14 when the box is quiet; or NSP-010 (a change is a version), which is next on
-   the board and depends on nothing open.
+## What s79 does
 
-**Human decisions:** AC3 and the three NSP-019 choices; C160; C161; C162. The two Frappe notes in NSP-010 §4 and NSP-017
-(uncommitted, 13:15 on 10 Oct, not from a P107 session) each end in "ask Richard" — left uncommitted for whoever wrote them.
+1. **Richard (unchanged from s77):** drive NSP-019 (AC3) and rule its three choices (§5.1); C160, C161, C162.
+2. **Build NSP-020** (ports without a running viewer) — next on the board, depends only on NSP-004. Read its rows (s20) first
+   and re-measure them: they are three weeks old ([[a-none-owned-blocker-is-the-one-most-likely-already-fixed]]).
+3. **Optional, NSP-010's leftovers** (§5.4): a "previous version" mutant built on the base's golden traces (NSP-006's
+   hole (3)/(5)); a target saying which version it implements. Neither is an AC.
+4. NSP-013's deep run for s11–s14 when the box is quiet.
+
+**Human decisions:** NSP-019 AC3 and its three choices; C160; C161; C162. The Frappe note in NSP-010 §4 (where a project records
+the migrations it has had) is owed to Richard **before the first `changes` entry answers `project`** — none does yet. That
+note and the NSP-017 one are still uncommitted and not a P107 session's: left out of s78's commits.
 **P109 holds:** D38, the Page Stack, the Router, LIBRARYDOCS, CHR007SNAPSHOT. **P112 holds:** P107-SIZE.
 
-## Gates (s77)
+## Gates (s78)
 
-- `tsc --noEmit` (node-spec) 0 errors with `says` required; the plant (one `says` off Counter) exactly 1; `tsc -p packages/noodl-editor` 0.
-- **The full node-spec suite, one worker, after every lane landed: 32 / 32 suites, 1,857 passed, 18 skipped, exit 0, 982 s**
-  (stranger 479 s with the rewritten hashes, batch-visual 386 s).
-- Runtime conformance at seed 20736: Video, Circle, Drag, WebSocket, SSE (and Counter) CONFORM, 10 passed, exit 0, 365 s;
-  Function + Expression with the wired arms CONFORM (C155 lane: 46 / 46 and 32 / 32 scenarios, 200 / 200 sequences each).
-- `catalog:check`, `catalog:merge:check`, `docs:nodes:check`, `spec-ledger --check` exit 0; `spec-census:check` exit 1 by
-  construction (other phases' uncommitted tests in the tree; the clean-export census is committed).
-- noodl-mcp `nodeDocBudget` + `nsp018RulesOnTheWire` + `toolDisclosure` 38 / 38 (`[surface] 8279 / 8280`, P112's 18).
-- Editor: `tests-unit/nsp-019` 32 / 32; `tests-unit/alpha-006/docsCatalogFreshness` 11 / 11; `scripts/spec-disagreements.js --check` up to date.
-- Not run: `test:main`, `test:ci`, the editor's Jasmine suite, the export package's tests (P18's uncommitted edits sit in it).
+- `npm run spec-golden:check` exit 0 (108 specs, 9,204 scenarios; same result under `TZ=America/New_York LC_ALL=de_DE.UTF-8` and `TZ=UTC LC_ALL=C`).
+- node-spec `tests/golden.test.ts` 22 / 22; node-spec `tsc` 0; `tsc -p packages/noodl-editor --noEmit` 0.
+- Stranger suite, hashes rewritten: 46 passed, 18 skipped, exit 0, 440 s.
+- noodl-runtime `NSP_ONLY=Counter`: conformance + runtime-target + nsp-010-counter-history, 24 passed, 1 skipped, exit 0.
+- `catalog:check`, `catalog:merge:check`, `docs:nodes:check`, `spec-ledger:check` exit 0.
+- Not run: the full node-spec suite, the full runtime batch, `test:main`, `test:ci`.
 
 ## Before you start
 
+- **A spec edit that changes a trace owes the golden pipe (NSP-010):** `npm run spec-golden` → read `npm run spec-golden -- --diff`
+  → bump `version` and add its `changes` entry with a migration answer → `npm run
+  spec-golden:check`. A new scenario owes only `npm run spec-golden`. The PR gate compares against the PR's base.
 - **A session was NOT paused.** P112 wrote into the tree all through s77 (ProjectStore, ComponentSaver, project-contract,
   `add_node`'s `index`). "All other sessions are paused" is a claim to measure with `git status` + `stat` before every
   commit ([[a-peer-all-clear-is-about-that-peer]]). s77's commits were cut through a temporary index by pathspec.
