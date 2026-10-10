@@ -344,10 +344,41 @@ describe('FLD-011 AC6 — the orphan reaper still reaps, under the parallel path
     }
   };
 
+  /** The orphan's parent pid, or null once it is gone. */
+  const parentOf = (pid: number): number | null => {
+    try {
+      const out = require('child_process').execFileSync('ps', ['-o', 'ppid=', '-p', String(pid)], { encoding: 'utf8' });
+      return Number(String(out).trim()) || null;
+    } catch {
+      return null;
+    }
+  };
+
+  /**
+   * 🔴 P109-S15-FLD011ORPHANRACE — plant an orphan that is still there when this test's sweep starts.
+   *
+   * Every render drive reaps orphans at its START, and this orphan is exactly what they look for. In a full parallel run
+   * (or beside another session's drive) a sweep in another process killed it during the fixed 1.5 s this used to wait,
+   * and the test went red at its own precondition for a reason that was not the product. Now it waits only until init has
+   * adopted the child (milliseconds), and plants again if a foreign sweep still got there first. Three tries; a fourth
+   * miss is a box with a reaper running continuously, which this test cannot grade and says so.
+   */
+  const leakAdoptedOrphan = async (): Promise<number> => {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const pid = await leakOne();
+      const until = Date.now() + 3000;
+      let parent = parentOf(pid);
+      while (parent !== null && parent !== 1 && Date.now() < until) {
+        await new Promise((r) => setTimeout(r, 20));
+        parent = parentOf(pid);
+      }
+      if (parent === 1) return pid;
+    }
+    throw new Error('three planted orphans were reaped by another render sweep before this one could start');
+  };
+
   it('reaps an orphan left before a parallel sweep, and the sweep still swept in parallel', async () => {
-    const pid = await leakOne();
-    // Long enough for `sh` to exit and init to adopt the child; the reaper only looks at ppid 1.
-    await new Promise((r) => setTimeout(r, 1500));
+    const pid = await leakAdoptedOrphan();
     expect(alive(pid)).toBe(true);
 
     const { report } = await renderReport({ projectDir: dir, screenshot: 'none', concurrency: PAGE_TABS });
