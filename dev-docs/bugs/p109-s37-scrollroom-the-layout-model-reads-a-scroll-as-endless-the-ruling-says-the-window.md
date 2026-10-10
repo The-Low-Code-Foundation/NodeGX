@@ -10,7 +10,8 @@ area: node-spec / the layout model (`packages/nodegx-node-spec/src/layout.ts`, a
 found: P109 ISL-052 s37, 2026-10-09 (first filed as P109-S37-SCROLLCENTRE, the centring half)
 evidence: dev-docs/tasks/phase-109-the-defects-the-island-found/ISL-052-A-SCROLLING-GROUP-LAYS-OUT-AS-IT-DOES-WITHOUT-THE-SCROLL.md §6; the layout check's KNOWN rows marked ROOM (scroll-percent-content, scroll-align, scroll-fill, scroll-slides)
 kit: node-spec
-regression: packages/nodegx-node-spec/tests/layout-check.test.ts (the 30 boxes, no longer KNOWN) and tests/layout.test.ts (three scroll rows)
+commit: fd6385beb
+regression: packages/nodegx-node-spec/tests/layout-check.test.ts "the 30 ROOM boxes, no longer KNOWN; and tests/layout.test.ts, three scroll rows"
 ---
 
 **Ruled 2026-10-09 (Richard, from three worked screens: a checkout, onboarding slides, an inbox):** "go with your way" — inside

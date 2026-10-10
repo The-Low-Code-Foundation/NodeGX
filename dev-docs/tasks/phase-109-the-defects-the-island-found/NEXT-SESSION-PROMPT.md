@@ -1,51 +1,60 @@
-# Next session — P109 session 38
+# Next session — P109 session 39
 
 **Phase:** [README](README.md) · **Audit:** [AUDIT-2026-10-01.md](AUDIT-2026-10-01.md) · scoped at `27d891bf3`.
-**Session 37 (2026-10-09, on `cline-dev`):** built in worktree `p109-isl049` (branch `p109-isl052`), landed by compare-and-swap.
-Board: **30 of 52 closed** (ISL-052 new and ✅).
+**Session 38 (2026-10-10, on `cline-dev`, primary tree):** board **31 of 52 closed** (ISL-012 ✅).
 
-- **ISL-052 ✅ 7 of 7** ([task](ISL-052-A-SCROLLING-GROUP-LAYS-OUT-AS-IT-DOES-WITHOUT-THE-SCROLL.md)) — P107's C152, C153 and
-  P109-S37-ISCROLLALIGN (`0859bbbde`: with Native platform scroll off the inner box takes the gap and the alignment, the Group
-  clips); then **ruled by Richard** — *inside a scrolling Group the room is the visible window, unless the content is longer,
-  and then the content wins* — and built (`afac7de50`): C154, P109-S37-FILLCAP (a long "fill the rest" ran under the footer),
-  ISCROLLPERCENT (with it off, a % was of the children added up), CENTRECUT (a centred long list lost its top). Every child of
-  the native and off twins in four fixtures lands in the same place; the layout check 8 / 8; control and one planted variant
-  per piece red.
-- **The viewer build** (P116-ONT-007-viewerbuild, `06ec2d4e7`): three Map iterations in P116's migration executor, refused at
-  ES5 — and a production webpack with errors writes no bundle. P116's next commit repeated it in `targetGoes.ts:226`; **P116
-  (opennoodl-5d) has the fix in its tree and said it lands within the hour** (22:50).
+- **ISL-012 ✅** ([task](ISL-012-A-KIT-CAN-SHIP-A-MODERN-LIBRARY.md) §8 s38) — AC3's server render with hydration, driven: the docs'
+  recipe rebuilt today (three 0.186.1 + OrbitControls, 762,803 B), deployed in the server-rendered layout, served by the
+  folder's own `npm start`; the browser hydrated the server's own cube host (`adopted`), drew r186, a drag turned it (10,232 of
+  102,400 px), no warning; screenshots looked at. Controls: the stamp changed to `0` → `adopted: false`; `public/` alone → no
+  server DOM. **Found:** `P109-S38-SSRNOPAGES` (medium, open, P109's): a hydrated page logs *"This Router has no Pages
+  configured"* as an error twice (the server too); neither control does; the page draws.
+- **`deploy-from-disk --ssr`** (`4e0aa53db`): the editor's two passes (server at the root, browser app in `public/`). The devtool
+  did not run at HEAD from the repo root (bootstrap import below editor imports; runtime folder found under the cwd) — fixed;
+  `--external <dir>` names the runtime folder. The bundle (`scripts/devtools/deploy-from-disk.cjs`) is gitignored, rebuilt in the
+  primary. A project with no `rootNodeId` is still refused by the devtool (the product's `nodegx deploy` guesses one).
+- **P116-ONT-003-tsc fixed** (`4e0aa53db`): the ISL-010 drive spec typechecks; `typecheck:backend-tests` 4 errors → 0.
+- **P112's `140bdeb41` had put back s37's last docs commit** (the four SCROLLROOM files, 10 s after `3b643c675`); restored
+  `c4e7f965d`. SCROLLROOM's ledger row given its `commit:` and a `regression:` the check can read.
+
+## Where s37's handoff was wrong
+
+- *"Track G waits on Richard; the rest is his"* — **no.** ISL-034 (the door and the deploy say what went wrong, 6 bugs) and
+  ISL-036 (the gates are green for the right reason, 6 low) are Track F, need no ruling, and have been ⬜ not started since
+  2026-10-05; no handoff listed them. ISL-035 and ISL-037 hand over to P18 / P108, both live.
+- Item 1 had already landed (`a54294a1d`, P116's `targetGoes.ts`).
 
 ## Do, in this order
 
-1. **Check P116's `targetGoes.ts` landed** (`git show cline-dev:packages/nodegx-backend-contract/src/targetGoes.ts | grep -c
-   "\[\.\.\.counts"` → 0) and the viewer builds clean (`npx webpack --config webpack-configs/webpack.viewer.prod.js` in
-   noodl-viewer-react: "compiled successfully", exit 0, the bundle's mtime new). Until then 5 viewer suites do not run and the PR
-   gate `ci:build:viewer` is red. If it has not landed, ask P116 once; do not edit their open file.
-2. ISL-012 AC3 (a full server render with hydration). ISL-018's only remaining AC is AC7 on the DBT demo, its owner's.
-3. P109-S36-STALEMCPDIST's lasting fix, if Richard wants it now (about ISL-014's size).
-4. **Track G** waits on Richard's order.
+1. **ISL-034** ([task](ISL-034-THE-DOOR-AND-THE-DEPLOY-SAY-WHAT-WENT-WRONG.md)) — its AC1 re-measures each of the 6 rows first
+   (filed 2026-10-05, not re-measured since; some may be fixed by ISL-014/ISL-018 work — a none-owned row is the one most
+   likely already fixed). Then build.
+2. **ISL-036** ([task](ISL-036-THE-GATES-ARE-GREEN-FOR-THE-RIGHT-REASON.md)), the same way.
+3. `P109-S38-SSRNOPAGES` once a task's AC needs it, or when 1–2 are done: the reading so far is in the bug file
+   (`triggerDidMount` → Router `didMount` → `registerRouter` → `reset()` before `pages` is set). Its drive is
+   `drive-isl012-cube.js <origin>`'s `messages` on the hydrated arm, with the two controls.
+4. P109-S36-STALEMCPDIST's lasting fix, if Richard wants it now (about ISL-014's size).
+5. **Track G** (ISL-039 … ISL-047) waits on Richard's order.
 
-## What s37 learned
+## What s38 learned
 
-- **A ruling asked over abstract boxes is not asked.** Richard twice: "I still don't understand". What landed: a page of three
-  real screens (a checkout, onboarding slides, an inbox), the working phone beside today's, each opened in the state that shows
-  the fault (https://claude.ai/artifact/VG6KyQgitumwDgycJbXJW1). Measure every caption on the runtime first.
-- **A box-position check cannot see how far a scroller scrolls.** A Fixed % of the inner box put the slides in the right places
-  inside a box one window wide that better-scroll could not move past: green on every box. `layout-measure.js` now records a
-  Group's inner box as `inner`.
-- **A production webpack with errors writes nothing**, and the last bundle stays on disk: a measurement after "compiled with N
-  errors" measures the old code. Twice in s37 (once from a planted variant left built). Read the bundle's mtime.
-- **The worktree's `packages/noodl-editor/src/external/viewer` was a symlink into the primary** — and the viewer build has
-  `clean: true`. Replaced with a real copy in `p109-isl049` before building; do the same in any new worktree.
+- **A devtool's bundle can be fine and its source broken.** The gitignored `deploy-from-disk.cjs` (2026-09-17) ran — from
+  `packages/noodl-editor` only — while a fresh build of its entry threw at load. A bundle on disk says nothing about its source.
+- **"It hydrated" needs a reading that can say no.** A page that draws after a server render may have been re-rendered from
+  scratch (the client's fallback is silent but for one console line). Mark the server's element while the HTML parses and ask
+  whether the live canvas is in it; the control that changes the stamp reads `false`.
+- **A temp-index commit from an older base reverts whatever landed in between** — `140bdeb41` took back four files committed
+  10 s before it. After a peer's commit lands beside yours, `git diff <yours> HEAD -- <your paths>`.
 
-## Gate readings taken s37 (2026-10-09)
+## Gate readings taken s38 (2026-10-10)
 
-- Layout check 8 / 8 at `afac7de50` (206 boxes match; KNOWN: 2 FLOOR, 30 ROOM — the ROOM rows left KNOWN with P107's `fd6385beb`; 8 / 8 there too). Control (HEAD's `layout.ts`, `Group.tsx`,
-  `react-component-node.ts`): red on the rule's test and KNOWN. Planted: no min-content, Fixed % of the inner box, no window-high
-  inner box, no `safe` — each red.
-- Viewer 1,837 / 1,837 with P116's pending `targetGoes.ts` line applied locally (without it, 5 suites fail to run: TS2802).
-  Viewer tsc: no errors in the three files. Backend contract `migration.test.ts` 20 / 20, tsc clean.
-- `bugs.js check`: none of P109's.
+- Viewer prod build at `d97d9d5c8`+: `webpack.viewer.prod.js` compiled, 0 errors, exit 0, bundle written 09:12:43; deploy and SSR
+  prod builds the same (09:15:53, 09:16:09).
+- Viewer jest on `cline-dev` with no local patch: **150 / 150 suites, 1,837 / 1,837** (`-w 2`).
+- `typecheck:backend-tests`: exit 2, 4 errors before; exit 0, 0 after (`4e0aa53db`). ISL-010 drive spec 2 passed, 2 skipped (no
+  local model), the same at HEAD's version.
+- `bugs.js check`: none of P109's s37/s38 rows (two older P109 rows still flagged: S17-EXPORTKITDEPS and S19-SCRIPTSUNBOUND's
+  `regression:` lines are prose, not a path — cosmetic).
 
 ## Decisions for Richard (not yours)
 
@@ -85,6 +94,12 @@ symlink), so a build there stays there; its untracked probes (`zz-s31-*`, `zz-s3
 meaning to replace the primary's. The older worktrees are spent; remove with `git worktree remove` when convenient.
 
 ## Recipes
+
+- **A server render, driven:** `node scripts/devtools/deploy-from-disk.cjs <project> --out <dir> --ssr` (the project needs
+  `rootNodeId`; rebuild the devtool with `node scripts/devtools/build-deploy-from-disk.mjs` after a pull, and the deploy/SSR
+  runtimes with `webpack.deploy.prod.js` / `webpack.ssr.prod.js` in noodl-viewer-react); in `<dir>`: `npm install && npm run build
+  && PORT=<p> node server.js` (backgrounded); `node scripts/devtools/drive-isl012-cube.js http://127.0.0.1:<p>`. Stop the server
+  by its LISTEN pid (`lsof -t -iTCP:<p> -sTCP:LISTEN`).
 
 - **Land:** commit in the worktree; `git rebase cline-dev` there if it moved; in the primary tree, in ONE command:
   `merge-base --is-ancestor`, `git status --porcelain` each path the diff lists (abort on any), `git update-ref refs/heads/cline-dev

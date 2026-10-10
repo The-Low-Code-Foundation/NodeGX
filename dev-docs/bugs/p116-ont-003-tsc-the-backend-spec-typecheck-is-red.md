@@ -1,7 +1,9 @@
 ---
 id: P116-ONT-003-tsc
 title: The backend's spec typecheck (a PR gate) is red — four errors in the ISL-010 drive spec
-status: open
+status: fixed
+fixed: P109 s38, 2026-10-10
+commit: 4e0aa53db
 severity: medium
 area: backend / tests typecheck — `packages/nodegx-backend/tests/isl010-ask-the-owl-drive.test.ts:110-112`
 found: P116 ONT-003 s3, 2026-10-08
@@ -22,3 +24,7 @@ reads `n.type` and `model.parameters` off them. The spec itself runs (jest trans
 `isolatedModules`, no typecheck), so nothing goes red locally; the PR workflow's typecheck step does. The fix is
 local to the spec: type the found node (`as { type: string; parameters?: Record<string, unknown> }`), ~3 lines.
 Found while typechecking ONT-003's new specs, which add no errors of their own.
+
+**Fixed (P109 s38, `4e0aa53db`).** The spec types the one node shape it reads and writes (`{ type, parameters }`).
+`npm run typecheck:backend-tests`: 4 errors, exit 2 → 0 errors, exit 0. The spec's own run is unchanged (2 passed, 2 skipped
+without a local model, the same at HEAD's version).

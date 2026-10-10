@@ -1,6 +1,6 @@
 # ISL-012 — A kit can ship a library as it is published today
 
-**Status: 🟡 s18 (2026-10-05): AC1's reader arm read (one definition-time read fails the whole kit in the reader); ruling 2 ruled "No, say why instead" and AC4 built (the refusal and `get_project_info` say the reader loads the kit file only; spec + sabotage); AC5 read (the 3 kits with dependencies register in full). Owed: AC3's full server render with hydration.** **Earlier status: 🟡 s17 (2026-10-05): ruled "Recipe now, loader later"; AC2 (the recipe), AC1's browser half and AC3 met on deployed pages, AC6 recorded (the export does not load dependencies: P109-S17-EXPORTKITDEPS, P18); owed: AC1's reader arm, AC3's full server render + hydration, AC4 (ruling 2) — scoped 2026-10-01 at `27d891bf3`.** **Source:** [the island audit](AUDIT-2026-10-01.md) row
+**Status: ✅ s38 (2026-10-10): closed — AC3's server render driven: the docs' recipe rebuilt today (three 0.186.1 + OrbitControls, 762,803 B), deployed the way Deploy → Self Hosting → Server-side rendering writes it, served by its own `npm start`; the browser hydrated the server's cube host (a control that renders afresh reads otherwise), drew r186, a drag turned it, no warning. Found beside it: `P109-S38-SSRNOPAGES`.** **Earlier: 🟡 s18 (2026-10-05): AC1's reader arm read (one definition-time read fails the whole kit in the reader); ruling 2 ruled "No, say why instead" and AC4 built (the refusal and `get_project_info` say the reader loads the kit file only; spec + sabotage); AC5 read (the 3 kits with dependencies register in full). Owed: AC3's full server render with hydration.** **Earlier status: 🟡 s17 (2026-10-05): ruled "Recipe now, loader later"; AC2 (the recipe), AC1's browser half and AC3 met on deployed pages, AC6 recorded (the export does not load dependencies: P109-S17-EXPORTKITDEPS, P18); owed: AC1's reader arm, AC3's full server render + hydration, AC4 (ruling 2) — scoped 2026-10-01 at `27d891bf3`.** **Source:** [the island audit](AUDIT-2026-10-01.md) row
 **F16** · found by P106 [IG-007](../phase-106-the-island-grows/IG-007-GARDEN-3D.md) session 1 and P108
 [IW-004](../phase-108-the-island-works/IW-004-REAL-BLOCKS.md), 2026-09-28 → 09-30 · **Side:** product (module
 injector, SSR kit loader, kit catalog extractor, kit docs; the export is read, not owned)
@@ -224,3 +224,45 @@ node mounts"*. Server-side on purpose: the reader bundle (`kitExtract/entry.js`)
 `dist/kit-extract.cjs` does not go stale. Re-run of the reader arm: the note in both answers; the mount control has none.
 Spec: a new row in `isl014KitRefusal.test.ts` (a `Library Kit` whose `index.js` reads `window.LIB` at the top, `lib.js`
 listed) grades both answers; the throwing kit beside it (`dependencies: []`) is the no-note control.
+
+### Session 38 (2026-10-10) — AC3's server render with hydration: met; ✅
+
+**The deploy.** No headless door wrote the server-rendered layout (`nodegx deploy` has no such mode), so
+`scripts/devtools/deploy-from-disk` got `--ssr`, composed as the editor composes it (`compilation.deployToFolderWithContext`:
+the server at the root with runtime type `ssr`, then the browser app in `public/`), in `4e0aa53db`. On the way the devtool was
+found not to run at HEAD from the repo root: its platform bootstrap sat below two editor imports (`EditorSettings` read web
+storage at load and threw), and it found its runtime files under the caller's folder; both fixed there. The deploy and SSR
+runtime bundles were rebuilt first (`webpack.deploy.prod.js`, `webpack.ssr.prod.js`, 0 errors, written 09:15–09:16; the ones on
+disk dated from 2026-10-09 18:53, before ISL-052).
+
+**The project** (scratch): App → Router → `/Pages/Home` = this folder's [`Home.nodes.json`](isl012-cube-kit/Home.nodes.json),
+the kit [`isl012-cube-kit/index.js`](isl012-cube-kit/index.js), and its library made by following the docs page word for
+word in an empty folder: `npm install three esbuild` (three 0.186.1), the three-line `entry.js`, the esbuild line → 762,803 B,
+the same size s17 measured. `"dependencies": ["three.bundle.js"]`. Then the folder README's own `npm install && npm run build
+&& npm start` (esbuild 0.18 bundle of the server, express).
+
+**The server's answer** (`curl /`): 200; `<div id="root" data-ssr="1">` holding the page's Text and the kit's host
+`<div data-testid="cube" style="width:320px;height:320px">`; the server log *"SSR: loaded 2 kit script(s) for the server
+render"*, no kit failure, no warning from three.
+
+**The browser** (`scripts/devtools/drive-isl012-cube.js <origin>`, software WebGL; `4e0aa53db` added the origin and the
+`ssr` reading: the cube host is marked only while the HTML parses, and `adopted` asks whether the canvas ended up in that
+same element):
+
+| arm | root stamp | server cube parsed | `adopted` | `__cube` | ink · changed by drag | three's warning |
+|---|---|---|---|---|---|---|
+| **AC3: the server render** | `1` | yes | **yes** (1 cube) | r186, OrbitControls | 11,991 · **10,232** | none |
+| control: same server, stamp changed to `0` (the browser renders afresh) | `0` | yes | **no** (1 cube) | r186, OrbitControls | 11,991 · 10,232 | none |
+| control: the `public/` folder alone (client render) | — | no | no | r186, OrbitControls | 11,991 · 10,232 | none |
+
+The first control shows the reading can say no, and says it for exactly the change that matters: the server's DOM thrown
+away. **Screenshots looked at:** before, the cube with a blue, a green and a pink face; after the drag, turned, a purple face
+forward. The pixel counts are s17's client-render counts to the unit.
+
+**Found: `P109-S38-SSRNOPAGES`** (medium, filed). On the hydrated arm only, the browser logs *"This Router has no Pages
+configured"* as an error, twice, and the server logs it twice; neither control does, and the page draws. The two paths that
+send `didMount` before React commits (the server render and the hydrate pre-settle) mount the Router before its `pages`
+arrive. Every server-rendered site with a Router is its reach. Not fixed here.
+
+AC1–AC6 are now all met or recorded (AC1 s17–s18, AC2 s17, AC3 s17 + s38, AC4 s18, AC5 s18, AC6 s17). The loader for modern
+modules waits for a second kit, as ruled.
