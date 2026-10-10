@@ -184,7 +184,7 @@ function bigWorld(node: Record<string, any>) {
     rows.push(r);
   }
   const map = node.world.parseMap({ rows });
-  const things = [];
+  const things: Array<{ kind: string; x: number; y: number; watered: boolean; full: boolean; left: number; text: string }> = [];
   // P106 s2: the brief's §4 kinds too — rock (every `left`), sign, note, stone, post box — so the budget holds with them.
   for (let i = 0; i < 30; i++) things.push({ kind: THING_KINDS[i % THING_KINDS.length], x: i % 24, y: (i * 3) % 16, watered: i % 2 === 0, full: i % 3 === 0, left: i % 5, text: 'hi' });
   const robots = node.world.parseRobots([

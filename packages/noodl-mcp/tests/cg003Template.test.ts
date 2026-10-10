@@ -369,7 +369,7 @@ describe('CG-003 — Bot Garden, the artefact', () => {
     });
 
     // P109 ISL-005: byte for byte as the artefact carries it — each shared block out, a Uses entry for its file.
-    const asShipped = (fn: Record<string, unknown>, script: string) => {
+    const asShipped = (fn: LegacyNode, script: string) => {
       const shared = shareScript(script);
       return String(params(fn).functionScript) === shared.script && String(params(fn).uses ?? '') === shared.uses.join(',');
     };
@@ -819,7 +819,8 @@ describe('CG-003 — Bot Garden, the artefact', () => {
 
     it('🔴 D8: no Ask Olive on the bar; the hint follows every program edit one step later (a Timer restarted by Read program, then Choose hint)', () => {
       expect(play().some((n) => n.id === 'plAsk')).toBe(false);
-      expect((pnode('plControls').children as string[]) ?? []).not.toContain('plAsk');
+      // P109-S10: `children` holds nodes, not ids — cast to string[] this never went red; compare ids
+      expect((pnode('plControls').children ?? []).map((n) => n.id)).not.toContain('plAsk');
       expect([pnode('plHintLater').type, params(pnode('plHintLater')).duration]).toEqual(['Timer', TICK_MS]);
       expect(pinto('plHintLater', 'restart')).toEqual(['plRead.ran>restart']);
       expect(pinto('plChoose', 'go')).toContain('plHintLater.timerFinished>go');
@@ -1628,7 +1629,7 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     for (const r of REQ_ROWS) {
       for (const lang of ['en', 'fr']) {
         const card = run(REQUEST_CARD_SCRIPT, { requests: REQ_ROWS, requestId: r.id, words: WORD_ROWS, lang, botName: 'Rosie' });
-        const own = String((PAGE_WORDS[REQUEST_SUBS[r.id].key] as Record<string, string>)[lang]).split('{b}').join('Rosie');
+        const own = String(PAGE_WORDS[REQUEST_SUBS[r.id].key][lang as 'en' | 'fr']).split('{b}').join('Rosie');
         expect({ id: r.id, lang, sub: card.sub }).toEqual({ id: r.id, lang, sub: own });
       }
     }
@@ -2421,7 +2422,7 @@ describe('IW-003 (P108 s3, lane P) — Draw world hands the kits a door with its
   it('the envelopes’ own line under the Workshop title, the robot’s name in it, and its sticker on the sticker page — EN and FR', () => {
     for (const lang of ['en', 'fr']) {
       const card = run(REQUEST_CARD_SCRIPT, { requests: REQ_ROWS, requestId: 'envelopes', words: WORD_ROWS, lang, botName: 'Pocket' });
-      expect({ lang, sub: card.sub }).toEqual({ lang, sub: String((PAGE_WORDS.iw3pSubEnvelopes as Record<string, string>)[lang]).split('{b}').join('Pocket') });
+      expect({ lang, sub: card.sub }).toEqual({ lang, sub: String(PAGE_WORDS.iw3pSubEnvelopes[lang as 'en' | 'fr']).split('{b}').join('Pocket') });
     }
     for (const lang of ['en', 'fr'] as const) {
       const rows = run(LOOK_ROWS_SCRIPT, { words: WORD_ROWS, lang, stickers: ['envelope'], hats: [] }).stickers;

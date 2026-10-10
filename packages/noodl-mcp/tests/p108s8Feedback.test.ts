@@ -50,7 +50,7 @@ describe('P108 s8 (1) — every watering mission lays the can on the grass', () 
     // Known-firing beside the rule: tulip-door was the one mission that did this before s8.
     expect(WATERING.map((r) => r.id).sort()).toEqual(['mamie-note', 'rock-flower', 'rows-trick', 'tulip-door', 'tulips-three']);
     for (const r of WATERING) {
-      const cans = r.things.filter((t) => t.kind === 'can') as Array<Record<string, unknown>>;
+      const cans = r.things.filter((t) => t.kind === 'can') as unknown as Array<Record<string, unknown>>;
       expect({ id: r.id, cans: cans.map((c) => [c.level, c.max]), hand: r.robotStart.can ?? null, pick: r.palette.includes('pick'), first: r.referenceProgram[0]?.t }).toEqual({ id: r.id, cans: [[0, 3]], hand: null, pick: true, first: 'pick' });
       // Home is where it starts, so a lap on the island (the can already in hand) runs the same program from there.
       expect({ id: r.id, home: r.job ? [r.job.home.x, r.job.home.y, r.job.home.d] : null }).toEqual({ id: r.id, home: [r.robotStart.x, r.robotStart.y, r.robotStart.d] });

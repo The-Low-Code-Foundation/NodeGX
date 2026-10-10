@@ -328,7 +328,7 @@ describe('CG-001 — garden-kit, the built artefact', () => {
       const glows: Array<[number, number, string | null]> = RUN.map((id, step) => {
         const html = render('garden-kit.BlockList', { program: PROGRAM, runningId: String(id) });
         const lit = html.match(/data-id="([^"]+)"[^>]*data-run="true"/g) ?? [];
-        const on = lit.length ? (/data-id="([^"]+)"/.exec(lit[0]) || [])[1] : null;
+        const on = lit.length ? (/data-id="([^"]+)"/.exec(lit[0] ?? '') || [])[1] : null;
         return [step, lit.length, on];
       });
       expect(glows[7]).toEqual([7, 1, '4']);

@@ -173,7 +173,7 @@ describe('IW-007 AC2 + AC3 (lane A) — feeding on the land: the bowl filled fro
     const r = runOn(landWorld(landWithRabbit()), feeding({ id: 'a1', x: 3, y: 4 }));
     expect([r.done, bowlOf(r.w).count, bowlOf(r.w).capacity, r.w.things.find((t: any) => t.id === 'patch').left]).toEqual([true, capacity('rabbit'), capacity('rabbit'), 0]);
     // Known-firing: the same walk to the TREE brings planks her bowl refuses — a fixed three trips leave it empty.
-    const wrong = runOn(landWorld(landWithRabbit()), [blk(1, 'repeat', { n: 3, body: feeding({ id: 'a1', x: 3, y: 4 }, 'tree')[0].body })]);
+    const wrong = runOn(landWorld(landWithRabbit()), [blk(1, 'repeat', { n: 3, body: (feeding({ id: 'a1', x: 3, y: 4 }, 'tree')[0] as { body?: unknown }).body })]);
     expect([wrong.done, bowlOf(wrong.w).count]).toEqual([true, 0]);
   });
 

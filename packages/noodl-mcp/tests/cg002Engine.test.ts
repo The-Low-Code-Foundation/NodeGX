@@ -2827,7 +2827,7 @@ describe('IW-003 (P108 s3, lane P) — the post: a door takes letters, an addres
     const worn = due.find((d) => d.wear);
     const letter = due.find((d) => d.letter);
     expect([worn.wear.kind, worn.wear.have]).toEqual(['door', 0]);
-    const owner = full().things.find((t: any) => t.id === worn.wear.id)!.owner;
+    const owner = (full().things.find((t: any) => t.id === worn.wear.id) as { owner?: string }).owner;
     expect(letter.letter).toEqual({ x: 2, y: 2, to: owner });
     let w: any = full();
     for (const d of due) w = eng('apply', w, d);
