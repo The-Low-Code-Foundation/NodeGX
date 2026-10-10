@@ -658,8 +658,8 @@
   }
  },
  {
-  "name": "UNNAMED: placed with no Name at #/about — the project's index leaves an unnamed Router out, so every URL shows the start page (P109-S18)",
-  "because": "getRouterIndex filters on the saved name; getPagesForRouter :114-121",
+  "name": "UNNAMED: placed with no Name at #/about — the project's index names an unnamed Router Main, so the URL's page shows, and Back to #/product/3 shows Product (P109-S18)",
+  "because": "getRouterIndex names a blank Router Main; getPagesForRouter looks a blank name up as Main",
   "params": {
    "pages": {
     "routes": [
@@ -689,7 +689,7 @@
   }
  },
  {
-  "name": "UNNAMED: placed with Name '' — the same",
+  "name": "UNNAMED: placed with Name '' — the same: '' is Main on both sides",
   "because": "'' is falsy",
   "params": {
    "pages": {
@@ -716,8 +716,8 @@
   }
  },
  {
-  "name": "UNNAMED: placed with no Name, Name written Main — the index is the saved project, so still no URL matches",
-  "because": "",
+  "name": "UNNAMED: placed with no Name, Name written Main — the index already names it Main, so #/about still matches",
+  "because": "the index is the saved project; the lookup is the Name now",
   "params": {
    "pages": {
     "routes": [
@@ -748,6 +748,74 @@
     "height": 800
    },
    "location": "https://app.example/#/about"
+  }
+ },
+ {
+  "name": "UNNAMED: placed with no Name, Name written Side — the index is the saved project (Main), the lookup is Side, so no URL matches and the start page shows",
+  "because": "getPagesForRouter filters the index by the Name now",
+  "params": {
+   "pages": {
+    "routes": [
+     "Home",
+     "Product",
+     "About",
+     "Twice"
+    ],
+    "startPage": "Home"
+   }
+  },
+  "steps": [
+   "settle",
+   {
+    "set": "name",
+    "value": "Side"
+   },
+   "settle",
+   {
+    "act": "traverse",
+    "value": "#/about"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/#/about"
+  }
+ },
+ {
+  "name": "UNNAMED at #/product/7: the mount's Reset builds Product; Url path written shop and a Reset in the same frame wait behind the build and fail when it lands (the start page Twice is not a page) — Product stays on, so a second Reset fails the same way and builds nothing",
+  "because": "world.resume lands the build (Page Inputs handed) and then runs the queued Reset, which matches no page under shop and refuses the start page; the Reset after reads what the landing kept (P109 ISL-034: once an unnamed router matched its URL, only generated sequences reached this landing)",
+  "params": {
+   "pages": {
+    "routes": [
+     "Product"
+    ],
+    "startPage": "Twice"
+   }
+  },
+  "steps": [
+   {
+    "set": "urlPath",
+    "value": "shop"
+   },
+   {
+    "signal": "reset"
+   },
+   "settle",
+   {
+    "signal": "reset"
+   },
+   "settle"
+  ],
+  "world": {
+   "viewport": {
+    "width": 1280,
+    "height": 800
+   },
+   "location": "https://app.example/#/product/7"
   }
  },
  {

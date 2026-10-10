@@ -13,8 +13,9 @@
  * page components: `Home` at `/`, `Product` at `/product/{id}` (each holding a Page and a Page Inputs), `About` at `/about` (a Page),
  * and `Twice` at `/twice` (two Pages — a component the router refuses to show by its URL). The index's routers are this node, by the
  * Name it was PLACED with (the saved project: a wired Name never moves the index) and its Pages as they are now (Pages is edit-only,
- * and the editor sends the index again with every edit) — and only when that Name is truthy: the exporter leaves an unnamed Router
- * out (`getRouterIndex`), so an unnamed router matches no URL and shows its start page (P109-S18).
+ * and the editor sends the index again with every edit) — an unnamed one (no Name, or `''`) as Main (`getRouterIndex`, P109-S18,
+ * fixed in P109 ISL-034: it left an unnamed Router out, so every URL showed the start page). The router looks itself up in the index by
+ * its Name now, a blank one as Main (`getPagesForRouter`), so a Name WRITTEN after placing it moves the lookup, not the index.
  *
  * THE URL (world.ts LOCATION). The router reads the location — its hash (`navigationPathType` unset or `hash`) or its path (`path`) —
  * and its query, matching the path against each page's path (with Url path in front): the page whose pattern has the fewest parts
@@ -112,7 +113,7 @@ type State = {
   nextHand: number;
   pages: unknown;
   urlPath: unknown;
-  /** the Name the router was placed with: the project's page index names it so (THE PROJECT) */
+  /** the Name the router was placed with, Main when blank: the project's page index names it so (THE PROJECT) */
   indexName: unknown;
   /** `_internal.currentPage` — the page it shows (its snapshot: the index never changes in a play) */
   current: PageInfo | undefined;
@@ -152,11 +153,12 @@ const LOOK = (displayName: string, group: string, description: string, extra: Re
 
 export const PageRouter = defineNode({
   type: 'Router',
+  // v6 (P109 ISL-034, s39): an unnamed Router is Main in the project's index and in its own lookup — it matches the URL (row P109-S18)
   // v5 (P109 ISL-048, s30): a Reset onto the page a Navigate built hands that page its new parameters — Back to the same page with other ones shows them (row C117)
   // v4 (P109 ISL-048, s30): a blank-named Navigate queued before the router is on the page waits as Main, so a router registering as Main takes it (row C118)
   // v3 (P109 ISL-048, s30): a Url path of null is none — the router matches and pushes its URLs as with no Url path (row C116)
   // v2 (P109 ISL-048, s30): a malformed escape in the query is kept as written, as a path segment's is — the router shows its page and answers (row C115)
-  version: 5,
+  version: 6,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/router.tsx',
   needs: ['person', 'clock', 'location', 'project'],
   worldPool: {
@@ -179,7 +181,7 @@ export const PageRouter = defineNode({
   // :280-291 `outcomeOutputs({ done, unchanged, failure })` — Reset's
   outcomes: ['done', 'unchanged', 'failure'],
 
-  init: (_w, params) => ({ indexName: params.name, name: params.name, pages: params.pages, urlPath: params.urlPath === null ? undefined : params.urlPath }),
+  init: (_w, params) => ({ indexName: params.name || 'Main', name: params.name, pages: params.pages, urlPath: params.urlPath === null ? undefined : params.urlPath }),
 
   state: {
     mounted: true,
@@ -478,12 +480,12 @@ function decodePathSegment(segment: string): string {
 function pageFor(component: unknown): PageInfo | undefined {
   return ROUTER_PAGES.find((p) => p.component === component);
 }
-/** `getPagesForRouter` (router-handler.ts :114-135): the index's router — the first when the name is undefined, else by name — its routes' pages */
+/** `getPagesForRouter` (router-handler.ts :117-137): the index's routers under the name — a blank one Main — their routes' pages */
 function pagesForRouter(s: State): PageInfo[] {
-  // the exporter lists only a Router whose saved Name is truthy (noodl-editor utils/exporter/router.ts `getRouterIndex`, P109-S18)
-  const routers = s.indexName ? [{ name: s.indexName, pages: s.pages as any }] : []; // eslint-disable-line @typescript-eslint/no-explicit-any
-  if (routers.length === 0) return [];
-  const matching = s.name === undefined ? [routers[0]] : routers.filter((r) => r.name === s.name);
+  // the exporter lists every Router, an unnamed one as Main (noodl-editor utils/exporter/router.ts `getRouterIndex`, P109-S18)
+  const routers = [{ name: s.indexName, pages: s.pages as any }]; // eslint-disable-line @typescript-eslint/no-explicit-any
+  const wanted = s.name || 'Main';
+  const matching = routers.filter((r) => r.name === wanted);
   const comps = new Set<unknown>();
   matching.forEach((r) => {
     const pages = r.pages;

@@ -2094,9 +2094,9 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       const internal = (node as unknown as { _internal: { pages?: unknown } })._internal;
       Object.defineProperty(graphModel, 'routerIndex', {
         configurable: true,
-        // the exporter lists a Router only when its saved Name is truthy (noodl-editor utils/exporter/router.ts `getRouterIndex`), and a
-        // page once per Page node — `Twice`'s second entry is the first's twin, and the lookup takes the first
-        get: () => ({ routers: placedName ? [{ name: placedName, pages: internal.pages }] : [], pages: ROUTER_PAGES.map((x) => ({ component: x.component, path: x.path, title: x.title })) })
+        // the exporter lists every Router, an unnamed one as Main (noodl-editor utils/exporter/router.ts `getRouterIndex`, P109-S18),
+        // and a page once per Page node — `Twice`'s second entry is the first's twin, and the lookup takes the first
+        get: () => ({ routers: [{ name: placedName || 'Main', pages: internal.pages }], pages: ROUTER_PAGES.map((x) => ({ component: x.component, path: x.path, title: x.title })) })
       });
       page.restoreIndex = () => {
         if (savedIndex) Object.defineProperty(graphModel, 'routerIndex', savedIndex);

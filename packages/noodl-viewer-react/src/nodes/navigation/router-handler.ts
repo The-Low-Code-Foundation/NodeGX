@@ -120,7 +120,9 @@ export class RouterHandler {
 
     if (routers === undefined || routers.length === 0) return [];
 
-    const matchingRouters = name === undefined ? [routers[0]] : routers.filter((r) => r.name === name);
+    // P109-S18: a blank name is Main here too, as `registerRouter` reads it and as the index names an unnamed Router
+    const wanted = name || 'Main';
+    const matchingRouters = routers.filter((r) => r.name === wanted);
 
     const pageComponents = new Set();
     matchingRouters.forEach((r) => {
