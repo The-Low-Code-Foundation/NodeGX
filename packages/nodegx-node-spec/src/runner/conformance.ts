@@ -27,7 +27,7 @@ import type { Step, TargetAdapter } from '../adapter';
 import { play, PlayError } from '../adapter';
 import { canonicalise } from '../canonical';
 import { interpreterAdapter } from '../adapters/interpreter';
-import type { AnyNodeSpec } from '../spec';
+import type { AnyNodeSpec, PortContext } from '../spec';
 import type { TraceEvent } from '../trace';
 import { World, type WorldScript } from '../world';
 import { compareTraces, differenceWithThrow, formatDifference, hasObservation, type Difference } from './compare';
@@ -172,9 +172,9 @@ function worldFor(spec: AnyNodeSpec, script: WorldScript | undefined): World | u
 }
 
 /** The reference play: the interpreter, on its own world. A spec that violates its own script is a scenario error, not a divergence. */
-export async function playReference(spec: AnyNodeSpec, params: Record<string, unknown>, steps: readonly Step[], script: WorldScript | undefined, wired?: readonly string[]): Promise<TraceEvent[]> {
+export async function playReference(spec: AnyNodeSpec, params: Record<string, unknown>, steps: readonly Step[], script: WorldScript | undefined, wired?: readonly string[], context?: Readonly<PortContext>): Promise<TraceEvent[]> {
   const world = worldFor(spec, script);
-  const t = await play(interpreterAdapter({ resolve: () => spec }), spec.type, params, steps, world, wired);
+  const t = await play(interpreterAdapter({ resolve: () => spec }), spec.type, params, steps, world, wired, context);
   if (world && world.violations.length > 0) throw new Error(`${spec.type}: the reference play touched what the script did not answer — ${world.violations.join('; ')}`);
   return t;
 }
@@ -186,10 +186,10 @@ export async function playReference(spec: AnyNodeSpec, params: Record<string, un
  * play VIOLATED the world (a request no rule answers, AC5) is a divergence too, reported as a
  * throw at the end of its trace: the traces may agree, and the run still may not pass.
  */
-async function playTarget(spec: AnyNodeSpec, target: TargetAdapter, params: Record<string, unknown>, steps: readonly Step[], reference: TraceEvent[], script: WorldScript | undefined, wired?: readonly string[]) {
+async function playTarget(spec: AnyNodeSpec, target: TargetAdapter, params: Record<string, unknown>, steps: readonly Step[], reference: TraceEvent[], script: WorldScript | undefined, wired?: readonly string[], context?: Readonly<PortContext>) {
   const world = worldFor(spec, script);
   try {
-    const actual = await play(target, spec.type, params, steps, world, wired);
+    const actual = await play(target, spec.type, params, steps, world, wired, context);
     if (world && world.violations.length > 0) return { actual, difference: { index: actual.length, threw: `the world refused (AC5): ${world.violations.join('; ')}` } as Difference };
     return { actual, difference: compareTraces(reference, actual) };
   } catch (e) {
@@ -236,12 +236,12 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
       continue;
     }
     // P107-C155 — a scenario's `wired` ports reach both plays (adapter.ts `mount`); a sequence never wires any
-    const reference = project(sc.expect ?? (await playReference(spec, sc.params, sc.steps, sc.world, sc.wired)));
+    const reference = project(sc.expect ?? (await playReference(spec, sc.params, sc.steps, sc.world, sc.wired, sc.context)));
     if (!hasObservation(reference)) {
       report.scenarios.push({ name: sc.name, status: 'refused', reason: `the reference trace has no observation event${reach ? ' inside the reach' : ''} — an arm with no predicate grades nothing` });
       continue;
     }
-    const { actual, difference } = await playTarget(spec, target, sc.params, sc.steps, reference, sc.world, sc.wired);
+    const { actual, difference } = await playTarget(spec, target, sc.params, sc.steps, reference, sc.world, sc.wired, sc.context);
     if (difference.index < 0) {
       // a scenario that carries a row and PASSES says the row no longer reproduces on this target
       report.scenarios.push(

@@ -186,7 +186,7 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
   // before (the pinned digest in tests/runner.test.ts).
   const drivable: Array<[string, InputDecl]> = [...valuePorts];
   if (spec.derived) {
-    const derived = spec.derived.inputs(params);
+    const derived = spec.derived.inputs(params, {});
     for (const [name, decl] of Object.entries(derived)) if (!(name in spec.inputs) && poolFor(decl).length > 0) drivable.push([name, decl]);
     for (const name of spec.derived.candidates ?? []) {
       if (name in derived || name in spec.inputs) continue;
@@ -200,7 +200,7 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
     // ports these params draw, then the candidates `discover` declares a signal. Appended only when
     // there are any, after every param draw, so a spec without one draws exactly what it drew before
     const derivedSignals: Array<[string, InputDecl]> = [];
-    for (const [name, decl] of Object.entries(spec.derived.inputs(params))) {
+    for (const [name, decl] of Object.entries(spec.derived.inputs(params, {}))) {
       if (isSignalInput(decl) && !(name in spec.inputs) && inReachInputs(name)) derivedSignals.push([name, decl]);
     }
     for (const name of spec.derived.candidates ?? []) {

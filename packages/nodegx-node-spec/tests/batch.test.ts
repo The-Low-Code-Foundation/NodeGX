@@ -127,14 +127,14 @@ describe('ports(params) — the three numbered families of the batch (R6, NSP-02
     const O = Or as unknown as AnyNodeSpec;
     const SM = StringMapper as unknown as AnyNodeSpec;
     const CB = ColorBlend as unknown as AnyNodeSpec;
-    expect(Object.keys(O.derived!.inputs({}))).toEqual(['input 0']);
-    expect(Object.keys(SM.derived!.inputs({}))).toEqual(['input 0', 'output 0']);
-    expect(Object.keys(SM.derived!.inputs({ 'input 2': 'a', 'output 0': 'A', inputString: 'x' }))).toEqual(['input 0', 'input 1', 'input 2', 'input 3', 'output 0', 'output 1']);
-    expect(SM.derived!.inputs({})['output 0']).toEqual({ type: 'string', coerce: 'none', displayName: 'Mapping 0', group: 'Mappings' });
+    expect(Object.keys(O.derived!.inputs({}, {}))).toEqual(['input 0']);
+    expect(Object.keys(SM.derived!.inputs({}, {}))).toEqual(['input 0', 'output 0']);
+    expect(Object.keys(SM.derived!.inputs({ 'input 2': 'a', 'output 0': 'A', inputString: 'x' }, {}))).toEqual(['input 0', 'input 1', 'input 2', 'input 3', 'output 0', 'output 1']);
+    expect(SM.derived!.inputs({}, {})['output 0']).toEqual({ type: 'string', coerce: 'none', displayName: 'Mapping 0', group: 'Mappings' });
     expect(SM.derived!.discover!('inputString')).toBeUndefined();
     expect(SM.derived!.discover!('output 7')?.displayName).toBe('Mapping 7');
-    expect(Object.keys(CB.derived!.inputs({ 'color 1': '#fff' }))).toEqual(['color 0', 'color 1', 'color 2']);
-    expect(CB.derived!.inputs({})['color 0']).toEqual({ type: 'color', coerce: 'none', displayName: 'Color 0' });
+    expect(Object.keys(CB.derived!.inputs({ 'color 1': '#fff' }, {}))).toEqual(['color 0', 'color 1', 'color 2']);
+    expect(CB.derived!.inputs({}, {})['color 0']).toEqual({ type: 'color', coerce: 'none', displayName: 'Color 0' });
   });
 });
 

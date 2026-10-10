@@ -16,6 +16,7 @@
 
 import type { Step } from '../adapter';
 import { canonicalise, revive } from '../canonical';
+import type { PortContext } from '../spec';
 import type { TraceEvent } from '../trace';
 import type { WorldScript } from '../world';
 
@@ -33,6 +34,12 @@ export interface Scenario {
    * before this meant, and what the generated sequences still mean.
    */
   wired?: string[];
+  /**
+   * NSP-020: what an editor has about the node without a viewer, beyond its params (spec.ts `PortContext`) — the backend
+   * schema a Record draws `prop-*` from, the popup component Show Popup reads. Handed to `derived.inputs` / `outputs` at
+   * mount with `wired` folded in. Absent, an empty context: what every scenario before this meant.
+   */
+  context?: PortContext;
   /** When present, both targets are graded against it; when absent, against the interpreter. */
   expect?: TraceEvent[];
   /** For a replay file: the seed the sequence came from. */

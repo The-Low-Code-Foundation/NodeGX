@@ -1466,7 +1466,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     const derived = specFor(s.h.type)?.derived;
     if (!derived) return false;
     const params = ((s.h.node as unknown as { model?: { parameters?: Record<string, unknown> } }).model?.parameters ?? {}) as Record<string, unknown>;
-    const decl = derived.inputs(params)[port] ?? derived.discover?.(port);
+    const decl = derived.inputs(params, {})[port] ?? derived.discover?.(port);
     return !!decl && decl.type === 'signal';
   }
   function isSignalOutput(s: State, port: string): boolean {
@@ -1872,14 +1872,14 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     // `createFromExportData` → `addOutputPort`); the Function reads its signal ports there (simplejavascript.ts :600-618, :843-846)
     const spec = specFor(type);
     const outputPorts: Record<string, { name: string; type: string }> = {};
-    for (const [name, decl] of Object.entries(spec?.derived?.outputs?.(params) ?? {})) outputPorts[name] = { name, type: decl.type as string };
+    for (const [name, decl] of Object.entries(spec?.derived?.outputs?.(params, {}) ?? {})) outputPorts[name] = { name, type: decl.type as string };
     // NSP-017 s66 — `inputPorts` the same way: the Script tells a signal input from a value by its type there (javascript.ts :640)
     const inputPorts: Record<string, { name: string; type: string }> = {};
-    for (const [name, decl] of Object.entries(spec?.derived?.inputs?.(params) ?? {})) inputPorts[name] = { name, type: decl.type as string };
+    for (const [name, decl] of Object.entries(spec?.derived?.inputs?.(params, {}) ?? {})) inputPorts[name] = { name, type: decl.type as string };
     (node as unknown as { model?: unknown }).model = { type, parameters: { ...params }, outputPorts, inputPorts, removeListenersWithRef: () => undefined };
     // the derived outputs the spec declares for these params — registered as a wire would make the runtime do
     if (spec?.derived?.outputs) {
-      for (const name of Object.keys(spec.derived.outputs(params))) (node as unknown as NodeInstance).registerOutputIfNeeded(name);
+      for (const name of Object.keys(spec.derived.outputs(params, {}))) (node as unknown as NodeInstance).registerOutputIfNeeded(name);
     }
     // POPUP (world.ts, NSP-015 s20) — a Close Popup's call to the handler it resolved, recorded AS HANDED, before the call
     if (type === 'NavigationClosePopup') {

@@ -98,7 +98,7 @@ import type { Step } from './adapter';
 import { canonicalise, canonicalKey } from './canonical';
 import { coerce } from './coerce';
 import { isRegistryEntry, performRegistryWrite } from './registry';
-import type { AnswerCall, AnyNodeSpec, BackendAnswerEvent, ChangeEvent, Outcome, InputDecl, RealtimeEvent, ReducerOutcome, SignalOutputDecl, SocketEvent, SpecBackendCall, StreamEvent, SpecRequest, SpecSocketOp, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
+import type { AnswerCall, AnyNodeSpec, BackendAnswerEvent, ChangeEvent, Outcome, InputDecl, PortContext, RealtimeEvent, ReducerOutcome, SignalOutputDecl, SocketEvent, SpecBackendCall, StreamEvent, SpecRequest, SpecSocketOp, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
 import { isSignalInput } from './spec';
 import type { TraceEvent } from './trace';
 import { backendEvent, installTimeZone, isAuthOp, locationEvent, openReturnsWindow, pushTarget, userRecordEvent, World, writeStoreEvent, type AuthNotice, type AuthReturnState, type AuthStep, type BackendDelivery, type Delivery, type LocationCall, type PickerClick, type PickerEvent, type PopupCall, type PopupEvent, type StoreEvent, type StreamDelivery, type WorldSocket, type WorldSubscription } from './world';
@@ -437,20 +437,23 @@ function hearRegistryWrites(world: World, all: Instance[]): void {
   });
 }
 
-export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, world: World = new World(), wired: readonly string[] = []): Instance {
+export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, world: World = new World(), wired: readonly string[] = [], context: Readonly<PortContext> = {}): Instance {
   const inputs: Record<string, unknown> = {};
   for (const [name, decl] of Object.entries(spec.inputs)) {
     if (!isSignalInput(decl)) inputs[name] = decl.default;
   }
   for (const v of Object.values(params)) markExternal(v);
   const frozenParams = deepFreeze({ ...params });
-  const derivedInputs = spec.derived ? spec.derived.inputs(frozenParams) : {};
+  // NSP-020 — the derived ports read the scenario's `context` (what an editor has without a viewer) with the mount's
+  // `wired` folded in: And counts a wired `input 3` the way `collectPorts` does, from the wire, not from a param.
+  const portContext = deepFreeze({ ...context, wired: [...(context.wired ?? []), ...wired] }) as Readonly<PortContext>;
+  const derivedInputs = spec.derived ? spec.derived.inputs(frozenParams, portContext) : {};
   const derivedValues: Record<string, unknown> = {};
   for (const [name, decl] of Object.entries(derivedInputs)) {
     if (name in spec.inputs) throw new SpecError(`${spec.type}: derived port "${name}" shadows a declared input`);
     if (!isSignalInput(decl)) derivedValues[name] = decl.default;
   }
-  const derivedOutputs = spec.derived?.outputs ? spec.derived.outputs(frozenParams) : {};
+  const derivedOutputs = spec.derived?.outputs ? spec.derived.outputs(frozenParams, portContext) : {};
   for (const name of Object.keys(derivedOutputs)) {
     if (name in spec.outputs) throw new SpecError(`${spec.type}: derived output "${name}" shadows a declared output`);
   }
@@ -1272,12 +1275,12 @@ export function trace(inst: Instance): TraceEvent[] {
   return inst.trace.map((e) => ({ ...e }));
 }
 
-/** Runs a scripted sequence from a fresh mount and returns its trace. `wired` (P107-C155): the ports a wire reaches, as `mount` takes them. */
-export function run(spec: AnyNodeSpec, params: Record<string, unknown>, steps: readonly Step[], world?: World, wired?: readonly string[]): TraceEvent[] {
+/** Runs a scripted sequence from a fresh mount and returns its trace. `wired` (P107-C155): the ports a wire reaches, as `mount` takes them; `context` (NSP-020) likewise. */
+export function run(spec: AnyNodeSpec, params: Record<string, unknown>, steps: readonly Step[], world?: World, wired?: readonly string[], context?: Readonly<PortContext>): TraceEvent[] {
   // a play under a world runs in its zone (NSP-013, world.ts TIME ZONE), as the adapter's does
   const restoreZone = world ? installTimeZone(world) : () => undefined;
   try {
-    const inst = mount(spec, params, world, wired);
+    const inst = mount(spec, params, world, wired, context);
     for (const step of steps) {
       if (step === 'settle') settle(inst);
       else if ('signal' in step) signal(inst, step.signal);

@@ -15,7 +15,7 @@
 
 import { HostFileCtor } from '../host-file';
 
-import type { AnyNodeSpec } from '../spec';
+import type { AnyNodeSpec, PortContext } from '../spec';
 import type { Handle, TargetAdapter } from '../adapter';
 import type { TraceEvent } from '../trace';
 import { act, advance, mount, set, signal, settle, trace, type Instance } from '../interpreter';
@@ -38,11 +38,11 @@ export function interpreterAdapter(options: InterpreterAdapterOptions = {}): Tar
   let current: World | undefined;
   return {
     name: 'interpreter',
-    mount(type, params, wired) {
+    mount(type, params, wired, context) {
       const spec = resolve(type);
       if (!spec) throw new Error(`interpreter: no spec for "${type}"`);
-      // P107-C155 — the ports a wire reaches, handed to the instance (spec.ts `WorldView.wired`)
-      const h: InterpreterHandle = { id: `${type}#${next++}`, type, inst: mount(spec, params, current, wired) };
+      // P107-C155 — the ports a wire reaches, handed to the instance (spec.ts `WorldView.wired`); NSP-020 — the scenario's context too
+      const h: InterpreterHandle = { id: `${type}#${next++}`, type, inst: mount(spec, params, current, wired, context) };
       live.set(h.id, h);
       return h;
     },

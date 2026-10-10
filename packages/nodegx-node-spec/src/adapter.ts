@@ -119,6 +119,7 @@
  * something every target can compute; declaration order is knowledge of one file.
  */
 
+import type { PortContext } from './spec';
 import type { TraceEvent } from './trace';
 import type { World } from './world';
 
@@ -130,7 +131,8 @@ export interface Handle {
 
 export interface TargetAdapter<H extends Handle = Handle> {
   readonly name: string;
-  mount(type: string, params: Record<string, unknown>, wired?: readonly string[]): H;
+  /** `wired` (P107-C155) and `context` (NSP-020, spec.ts `PortContext`) are the scenario's; a target that takes neither is called with two arguments. */
+  mount(type: string, params: Record<string, unknown>, wired?: readonly string[], context?: Readonly<PortContext>): H;
   set(h: H, port: string, value: unknown): void;
   signal(h: H, port: string): void;
   settle(): Promise<void>;
@@ -220,7 +222,8 @@ export async function play<H extends Handle>(
   params: Record<string, unknown>,
   steps: readonly Step[],
   world?: World,
-  wired?: readonly string[]
+  wired?: readonly string[],
+  context?: Readonly<PortContext>
 ): Promise<TraceEvent[]> {
   let h: H | undefined;
   const restore = world && adapter.install ? adapter.install(world) : undefined;
@@ -241,7 +244,9 @@ export async function play<H extends Handle>(
   };
   try {
     const resolved = Object.fromEntries(Object.entries(params).map(([k, v]) => [k, resolve(v)]));
-    h = wired && wired.length > 0 ? adapter.mount(type, resolved, wired) : adapter.mount(type, resolved);
+    // NSP-020 — a scenario with a `context` hands it as the fourth argument (with `wired`, possibly empty); without one the
+    // call is exactly what it was, so every target that takes two or three arguments sees no change
+    h = context ? adapter.mount(type, resolved, wired ?? [], context) : wired && wired.length > 0 ? adapter.mount(type, resolved, wired) : adapter.mount(type, resolved);
     for (const step of steps) {
       if (step === 'settle') await adapter.settle();
       else if ('signal' in step) adapter.signal(h, step.signal);

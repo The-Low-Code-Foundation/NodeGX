@@ -9,6 +9,7 @@
  * (src/index.ts) adds the file loaders and fills `scenarioIO`.
  */
 export * from './spec';
+export * from './ports';
 export * from './coerce';
 export * from './canonical';
 export * from './schema';

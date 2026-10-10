@@ -67,8 +67,11 @@ export const And = defineNode({
       // What an editor draws (nodedefinition.ts `collectPorts`): one port per index up to the
       // highest `input <n>` mentioned PLUS ONE SPARE — `numPorts = maxIndex + 1` where `maxIndex`
       // is already `1 + highest` — and a single `input 0` when nothing is mentioned.
-      inputs: (params) => {
-        const indices = Object.keys(params)
+      // NSP-020 (s79): `collectPorts` reads the node's parameters AND the target ports of the wires into it (:624) — a
+      // wire on `input 3` with no param mints `input 0 … input 4`. The wires are `context.wired`; the first thing the
+      // ports-parity drive found was this function counting params alone.
+      inputs: (params, context) => {
+        const indices = [...Object.keys(params), ...(context.wired ?? [])]
           .filter((k) => NUMBERED.test(k))
           .map((k) => Number(k.slice('input '.length)));
         const count = indices.length ? Math.max(...indices) + 2 : 1;
@@ -76,6 +79,7 @@ export const And = defineNode({
         for (let i = 0; i < count; i++) ports['input ' + i] = port(i);
         return ports;
       },
+      needs: ['wired'],
       // :33-49. Store the coerced boolean under its index; recompute; publish `result` only when
       // the ANSWER changed (:44-47 — "unlike Or this one caches `result`"). The :37-39 guard (same
       // value again → return) is not carried: it changes nothing a wire can see.

@@ -85,7 +85,7 @@ describe('catalog parity — every spec draws the same ports the editor draws', 
       if (!node.dynamicPorts || !derivesPorts) return;
       // numbered-inputs: `ports({})` draws the first numbered port with the catalog's prefix
       for (const n of node.dynamicPorts.numberedInputs ?? []) {
-        const first = spec.derived!.inputs({})[`${n.nameBase} 0`];
+        const first = spec.derived!.inputs({}, {})[`${n.nameBase} 0`];
         expect(first).toBeDefined();
         expect(first.displayName).toBe(`${n.displayPrefix} 0`);
         expect(first.type).toBe(n.type.name);
@@ -112,12 +112,12 @@ describe('catalog parity — every spec draws the same ports the editor draws', 
         const fromParameter = (p: { variables?: Record<string, string> }) =>
           !!p.variables && Object.values(p.variables).some((v) => node.parameterEncoding!.seededBy!.some((seed) => v.includes('`' + seed + '`')));
         for (const seed of node.parameterEncoding.seededBy) {
-          if (patterns.length === 0 || 'probe' in spec.derived!.inputs({ [seed]: 'x {probe}' })) {
-            expect(Object.keys(spec.derived!.inputs({ [seed]: 'x {probe}' }))).toContain('probe');
+          if (patterns.length === 0 || 'probe' in spec.derived!.inputs({ [seed]: 'x {probe}' }, {})) {
+            expect(Object.keys(spec.derived!.inputs({ [seed]: 'x {probe}' }, {}))).toContain('probe');
             continue;
           }
-          const inputs = Object.keys(spec.derived!.inputs(probe));
-          const outputs = Object.keys(spec.derived!.outputs?.(probe) ?? {});
+          const inputs = Object.keys(spec.derived!.inputs(probe, {}));
+          const outputs = Object.keys(spec.derived!.outputs?.(probe, {}) ?? {});
           // NSP-016 s56 — each pattern with ITS seed's token: the Component Stack is seeded by a list (`pageComp-<pageId>`, a row of
           // `pages`, probed with the id `probe`) and by a filtered name list (`<name>`, Data Attributes' `data-testid`) at once
           const tokenFor = (p: { variables?: Record<string, string> }) => {
@@ -132,11 +132,11 @@ describe('catalog parity — every spec draws the same ports the editor draws', 
             const when = (p as { when?: Record<string, unknown> }).when;
             if (when) {
               if (p.plug === 'input' || p.plug === 'input/output') {
-                expect(Object.keys(spec.derived!.inputs({ ...probe, ...when }))).toContain(name);
+                expect(Object.keys(spec.derived!.inputs({ ...probe, ...when }, {}))).toContain(name);
                 expect(inputs).not.toContain(name);
               }
               if (p.plug === 'output' || p.plug === 'input/output') {
-                expect(Object.keys(spec.derived!.outputs?.({ ...probe, ...when }) ?? {})).toContain(name);
+                expect(Object.keys(spec.derived!.outputs?.({ ...probe, ...when }, {}) ?? {})).toContain(name);
                 expect(outputs).not.toContain(name);
               }
               continue;

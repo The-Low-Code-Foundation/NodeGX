@@ -32,9 +32,9 @@ describe('NSP-017 — every batch spec conforms on the interpreter: scenarios, 2
 
 describe('NSP-017 §6.1 — the Expression runs its text as JavaScript, with the ports the lexer names', () => {
   test('the ports an editor draws: each name read, once, in order, with its checkbox; JavaScript and the Math shortcuts are not ports', () => {
-    expect(Object.keys(Expression.derived!.inputs({ expression: 'String(n) + max(a, pi) + typeof b + a' }))).toEqual(['n', 'runOnChange-n', 'a', 'runOnChange-a', 'b', 'runOnChange-b']);
+    expect(Object.keys(Expression.derived!.inputs({ expression: 'String(n) + max(a, pi) + typeof b + a' }, {}))).toEqual(['n', 'runOnChange-n', 'a', 'runOnChange-a', 'b', 'runOnChange-b']);
     // a declared input's name is never derived: the runtime mints no input for it (the editor still draws one — row C145)
-    expect(Object.keys(Expression.derived!.inputs({ expression: 'run + expression' }))).toEqual([]);
+    expect(Object.keys(Expression.derived!.inputs({ expression: 'run + expression' }, {}))).toEqual([]);
   });
 
   test('a text over two ports: a template literal and a Math shortcut — JavaScript as the engine runs it', async () => {

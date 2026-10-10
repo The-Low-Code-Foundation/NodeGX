@@ -343,6 +343,14 @@ export interface PortMeta {
    * does (tests/layout-map.test.ts).
    */
   layout?: LayoutRole;
+  /**
+   * NSP-020 (s79) — the catalog's `declaredPortGroups` condition, said in the spec: the port is DRAWN only when this
+   * holds for the node's params (Image's `objectFit` only with `sizeMode = explicit`). Absent, the port is always drawn.
+   * Visibility only: a hidden port still exists for a reducer and a wire, as it does on the runtime (the editor filters
+   * the drawn list, `nodelibrary.ts applyPortConditionsFilterForNode`). Read by ports.ts `portsOf`; graded against the
+   * catalog's condition by the editor-side parity test (the condition grammar is editor code).
+   */
+  when?: (params: Readonly<Record<string, unknown>>) => boolean;
 }
 
 /** NSP-016 — the portability classes of RESEARCH-LAYOUT-SEMANTICS.md §2, as `visual-params.json` spells them. */
@@ -379,6 +387,14 @@ export interface ValueInputDecl extends PortMeta {
    * by no scenario until the spec's next version says what it does. A sentence, read by the reviewer; the generator draws nothing.
    */
   undriven?: string;
+  /**
+   * NSP-020 (s79) — the catalog's `runtime-narrowed` mechanism: the fields of THIS declared port that change per instance
+   * (Dropdown's `value` becomes an enum of its `items`; Text Input's `startValue` takes the type its `type` names). The
+   * runtime announces the narrowed port and the editor lets it REPLACE the static one of the same name and plug
+   * (`NodeGraphNode.ts replaceOrAppendPorts`); here the declaration stays one and `portsOf` applies what this returns on
+   * top. Only the shape — never the behaviour: a reducer reads the declared `type`/`coerce`.
+   */
+  narrow?: (params: Readonly<Record<string, unknown>>, context: Readonly<PortContext>) => Partial<Pick<ValueInputDecl, 'type' | 'enums' | 'default'>>;
 }
 
 export interface SignalInputDecl extends PortMeta {
@@ -702,14 +718,64 @@ export type Reducers<S, I, O> = {
  * a declared name (the interpreter refuses one as a spec error). So String Format's `{format}`
  * reads an unset placeholder (`''`), never the `format` input — one behaviour, not two.
  */
+/**
+ * NSP-020 (s79) — what an EDITOR has about a node WITHOUT a viewer, beyond its params: the things the runtime's
+ * `setup(context, graphModel)` hooks read from the graph model before they announce ports (nodedefinition.ts
+ * `collectPorts` counts wires; eventreceiver.ts reads the Senders on its channel; schema-ports.ts reads the backend's
+ * classes; showpopup.ts reads the popup component's interface). Plain JSON — a scenario carries one under `context`,
+ * a project-model builder (`@nodegx/project-contract`) makes one from a project, the MCP server from a request. Every
+ * field optional: a spec names the ones it reads in `DerivedPorts.needs`, and the needs gate (tests/ports.test.ts)
+ * hands it a context with ONLY those, trapping a read of any other. `wired` is the scenario format's C155 list.
+ */
+export interface PortContext {
+  /** The input port names a wire reaches on this node (the mount's `wired`). Numbered inputs count them; the Record family draws `prop-*` from them. */
+  wired?: readonly string[];
+  /** The ports the user drew on the node itself — Component Inputs / Outputs carry theirs in the project's `ports` field. */
+  instancePorts?: readonly PortRef[];
+  /** The interface of each component a node may name: For Each's template, Push's target page, Show Popup's popup, a cloud function's request / response. */
+  components?: Readonly<Record<string, ComponentInterface>>;
+  /** The project's Routers and the pages each lists (Navigate's `router` / `target`). */
+  routers?: readonly NamedPages[];
+  /** The project's Component Stacks and their pages (Push Component To Stack's `target`). */
+  stacks?: readonly NamedPages[];
+  /** The backend's classes and their fields; the user class is `_User` (the Record, Query and User families' `prop-*`). */
+  schema?: BackendSchema;
+  /** Nodes of a type elsewhere in the project, with their params (Event Receiver reads the Senders on its channel; Page Inputs its siblings). */
+  siblings?: Readonly<Record<string, readonly { params: Readonly<Record<string, unknown>> }[]>>;
+}
+
+export interface PortRef {
+  name: string;
+  plug: 'input' | 'output';
+  type?: ValueType;
+}
+
+export interface ComponentInterface {
+  inputs: Readonly<Record<string, { type: ValueType }>>;
+  outputs: Readonly<Record<string, { type: ValueType }>>;
+}
+
+export interface NamedPages {
+  name: string;
+  pages: readonly string[];
+}
+
+export interface BackendSchema {
+  classes: Readonly<Record<string, { fields: Readonly<Record<string, { type: ValueType }>> }>>;
+}
+
+export const PORT_CONTEXT_FIELDS = ['wired', 'instancePorts', 'components', 'routers', 'stacks', 'schema', 'siblings'] as const satisfies readonly (keyof PortContext)[];
+
 export interface DerivedPorts<S, O> {
   /**
    * The ports an EDITOR draws for these params — R6's `ports(params)`, what the runtime today
    * computes only inside a live viewer (`sendDynamicPorts`; NSP-020). String Format: one port
    * per `{placeholder}` in `format`. And: `input 0 … input N+1`, one spare beyond the highest
-   * mentioned, as `collectPorts` (nodedefinition.ts) does.
+   * mentioned, as `collectPorts` (nodedefinition.ts) does — mentioned by a PARAM or by a WIRE
+   * (`context.wired`), which is why the second argument exists (NSP-020 §3.1). Pure in
+   * `(params, context)`: no fixture, no padding — ports.ts `portsOf` is what an editor calls.
    */
-  inputs: (params: Readonly<Record<string, unknown>>) => Record<string, InputDecl>;
+  inputs: (params: Readonly<Record<string, unknown>>, context: Readonly<PortContext>) => Record<string, InputDecl>;
   /**
    * The OUTPUT ports these params derive (NSP-012): the Object node's `prop-<p>` value and
    * `changed-<p>` signal per property named. A target registers them at mount the way a graph
@@ -718,7 +784,15 @@ export interface DerivedPorts<S, O> {
    * interpreter observes them like declared ones; a reducer reaches them through `sendDerived` /
    * `emitDerived`. A derived output's `from` is read like a declared one's.
    */
-  outputs?: (params: Readonly<Record<string, unknown>>) => Record<string, OutputDecl<S>>;
+  outputs?: (params: Readonly<Record<string, unknown>>, context: Readonly<PortContext>) => Record<string, OutputDecl<S>>;
+  /**
+   * NSP-020 — the `PortContext` fields `inputs`, `outputs` and any `narrow` read. Absent or empty: the node's own params
+   * are enough (21 of the 43 derived specs at s79). The needs gate calls them with a context holding only these and
+   * traps the rest, so a spec that reaches for the schema without saying so is red. The ledger's "ports derivable
+   * without a viewer" column reads this: *params only* / *+ project* (`components`, `routers`, `stacks`, `siblings`,
+   * `instancePorts`, `wired`) / *+ schema*.
+   */
+  needs?: readonly (keyof PortContext)[];
   on: (state: Readonly<S>, port: string, value: unknown, derived: Readonly<Record<string, unknown>>, world: WorldView) => Patch<S, O>;
   /**
    * NSP-013 s14 — the reducer for a derived SIGNAL input: a port `inputs` or `discover` declares
@@ -1174,8 +1248,9 @@ export interface AnyNodeSpec {
   /** NSP-016 s37 — the person's acts (`PersonReducers`), erased. */
   person?: Readonly<Record<string, (state: never, inputs: never, value: unknown, world: WorldView) => unknown>>;
   derived?: {
-    inputs: (params: Readonly<Record<string, unknown>>) => Record<string, InputDecl>;
-    outputs?: (params: Readonly<Record<string, unknown>>) => Record<string, ErasedValueOutput | SignalOutputDecl>;
+    inputs: (params: Readonly<Record<string, unknown>>, context: Readonly<PortContext>) => Record<string, InputDecl>;
+    outputs?: (params: Readonly<Record<string, unknown>>, context: Readonly<PortContext>) => Record<string, ErasedValueOutput | SignalOutputDecl>;
+    needs?: readonly (keyof PortContext)[];
     on: (state: never, port: string, value: unknown, derived: Readonly<Record<string, unknown>>, world: WorldView) => unknown;
     signal?: (state: never, port: string, derived: Readonly<Record<string, unknown>>, world: WorldView) => unknown;
     discover?: (port: string) => InputDecl | undefined;

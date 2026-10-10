@@ -24,16 +24,16 @@ const SF = StringFormat as unknown as AnyNodeSpec;
 
 describe('ports(params) — what an editor draws without a viewer (R6, NSP-020 rows 1 and 2)', () => {
   test('String Format: one string port per UNIQUE placeholder, in order of first appearance; none for a non-string format', () => {
-    expect(Object.keys(SF.derived!.inputs({ format: 'Hi {name}, {name}: {a_1} and {} but not {first-name}' }))).toEqual(['name', 'a_1', '']);
-    expect(SF.derived!.inputs({})).toEqual({});
-    expect(SF.derived!.inputs({ format: 5 })).toEqual({});
-    expect(SF.derived!.inputs({ format: '{x}' }).x).toEqual({ type: 'string', coerce: 'none' });
+    expect(Object.keys(SF.derived!.inputs({ format: 'Hi {name}, {name}: {a_1} and {} but not {first-name}' }, {}))).toEqual(['name', 'a_1', '']);
+    expect(SF.derived!.inputs({}, {})).toEqual({});
+    expect(SF.derived!.inputs({ format: 5 }, {})).toEqual({});
+    expect(SF.derived!.inputs({ format: '{x}' }, {}).x).toEqual({ type: 'string', coerce: 'none' });
   });
 
   test('And: `input 0` alone with nothing mentioned; the highest index mentioned plus one spare otherwise (collectPorts)', () => {
-    expect(Object.keys(A.derived!.inputs({}))).toEqual(['input 0']);
-    expect(Object.keys(A.derived!.inputs({ 'input 2': true }))).toEqual(['input 0', 'input 1', 'input 2', 'input 3']);
-    expect(A.derived!.inputs({ 'input 0': false })['input 0']).toEqual({ type: 'boolean', coerce: 'js-boolean', displayName: 'Input 0' });
+    expect(Object.keys(A.derived!.inputs({}, {}))).toEqual(['input 0']);
+    expect(Object.keys(A.derived!.inputs({ 'input 2': true }, {}))).toEqual(['input 0', 'input 1', 'input 2', 'input 3']);
+    expect(A.derived!.inputs({ 'input 0': false }, {})['input 0']).toEqual({ type: 'boolean', coerce: 'js-boolean', displayName: 'Input 0' });
   });
 
   test('discover: And takes what the editor mints and nothing else; String Format takes any name', () => {
