@@ -229,6 +229,33 @@ catalog-parity, pilot): 11 / 11, 630 passed, exit 0. Stranger, hashes rewritten 
 unchanged). `catalog:check`, `catalog:merge:check`, `docs:nodes:check`, `spec-ledger --check` exit 0. Not run: the full
 node-spec suite, the editor's `tsc`, `test:main`.
 
+## 5.4 s76, 2026-10-10 — rules priced on the default summary, and kept off it
+
+§6 item 3, by CMP-006's method (count the traffic, price through the real function). **Traffic:** every `get_node_type`
+call in every transcript under `~/.claude/projects`, deduplicated by tool-use id: **67 calls, 2026-09-10 … 10-09** (41 default,
+20 `ports`, 6 `full`). CMP-006's 45 earlier calls are no longer on disk: transcripts older than about a month are gone, so
+its count is the only record of them. **Price:** the 141 type-requests on the default path, each through `getNodeTypeSummary`
+and pretty-printed as `jsonResult` sends it, without and with the type's `rules`. At 52 worded specs, 108 of the 141 requests
+hit a type with rules.
+
+| | rules on the summary | signal inputs' rules only | `antiPatterns` (CMP-006 AC3) |
+|---|---|---|---|
+| whole default traffic | **+30.7%** (358,979 → 469,110 B) | +11.9% | +5.8% |
+| weighted median / max | +30.5% / +84.2% (Update Record) | | 17% / 59% |
+| storefront basket (AWP-005 ratchet 8,350 on the wire) | ~7,530 → ~10,449 tok of payload | ~8,116 | |
+| biggest summary (gate 3,000) | Group 1,792 → 2,694 tok | 2,092 | |
+
+**Kept off.** It costs five times what `antiPatterns` cost, and the cost lands on the types asked for most (Group +50%,
+Text Input +47%, For Each +48%). It also grows with each spec given words, and 260 reducers are still to come. Signal inputs
+alone would still break the basket ratchet. The `ports` path already hands an agent a port's rules when it sets that port,
+and the tool description already sends agents there. So the negative assertion in `nsp018RulesOnTheWire.test.ts` stays, now
+with these numbers in its header (and in `NodeTypeDetail.rules`' doc comment). What would overturn it is a replay showing
+that rules on the default change what an agent builds. The benefit is unmeasured, as it was for CMP-006.
+
+**The same traffic, used to rank AC2.** Of the 51 specs still owing words, only Slider (`net.noodl.controls.range`) was
+asked for, once. Templates (s75), MCP traffic (s76): both rankings are used up. The remaining order is by cost (one spec
+file at a time), because the gate needs every reducer anyway.
+
 ## 6. Left
 
 1. **AC2's words for the other 260 reducers** (s75), batch by batch (done: the pilot five, NSP-011's 13, the top logic nodes, the top visual and record nodes, and s75's fifteen; next by template use — re-rank first; what is left is mostly unplaced in the templates, so rank by the editor's picker use or by CMP-006 traffic). Then
@@ -236,7 +263,7 @@ node-spec suite, the editor's `tsc`, `test:main`.
    first whether `afterInputs` / `world` / `person` patches get read as rules too.
 2. **The record-relation pair:** the rules reader can't see reducers written inside `relationNode`. Teach it the factory,
    or move `says` up to the factory's call site.
-3. **The default summary:** price `rules` on it once a dozen specs have their words (CMP-006's method: weight by real
-   call traffic), then overturn or keep the negative assertion in `nsp018RulesOnTheWire.test.ts`.
+3. ~~**The default summary**~~ — priced and kept off (§5.4): +30.7% of the default path's traffic. Reopen only with a replay
+   that measures the benefit.
 4. **The docs pages** (`scripts/generate-node-docs.js`) could render `rules` under the port table. That's the "docs"
    half of the person sentence.

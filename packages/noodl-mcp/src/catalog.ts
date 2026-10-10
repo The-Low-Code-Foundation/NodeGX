@@ -498,8 +498,10 @@ export interface NodeTypeDetail {
    * NSP-018 (phase 107) — for a node with an executable spec, what it does in words: per input port, one line per
    * case — `increase: ["at Max Value with Limits Enabled → Unchanged; Count Changed stays silent", …]`. Generated
    * from the spec the conformance suite grades (the catalog's `rules`), so it cannot say one thing while the node
-   * does another. Here and, narrowed to the asked ports, on the `ports` path; not on the summary, whose size is a
-   * measured contract and a big visual node's rules are not yet priced (phase 107 NSP-018 §5).
+   * does another. Here and, narrowed to the asked ports, on the `ports` path. Not on the summary: priced against the
+   * real call traffic (phase 107 NSP-018 §5.4), it would add 30.7% to the default path's bytes, five times what
+   * `antiPatterns` cost, and push the storefront basket past AWP-005's ratchet. `tests/nsp018RulesOnTheWire.test.ts`
+   * carries the numbers.
    */
   rules?: Record<string, string[]>;
   inputs: PortDetail[];

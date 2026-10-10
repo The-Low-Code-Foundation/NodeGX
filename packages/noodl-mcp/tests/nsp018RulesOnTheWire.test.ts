@@ -8,8 +8,23 @@
  * example, which is checked by content so a relay that dropped the wire half would show.
  *
  * Where they travel: full detail (all of them) and the `ports` path (the asked ports' only). NOT the default summary —
- * its size is a measured contract (AWP-005 §2) and the rules of a node with dozens of reducers are not priced yet; the
- * negative assertion below is there to be overturned on purpose, with a measurement, as CMP-006 AC3 did for antiPatterns.
+ * its size is a measured contract (AWP-005 §2).
+ *
+ * 🔴 KEPT OFF, with CMP-006's measurement (P107 s76, 2026-10-10). Every `get_node_type` call in every transcript on the
+ * authoring machine since the older ones aged out — 67 calls, 2026-09-10 … 10-09: 41 default, 20 `ports`, 6 full — and
+ * the 141 type-requests on the default path priced through `getNodeTypeSummary` itself, pretty-printed as the wire is.
+ * At 52 worded specs, 108 of those 141 requests hit a type with rules:
+ *
+ *   whole default traffic   +30.7%  (358,979 B → 469,110 B)   — antiPatterns cost +5.8% (CMP-006 AC3)
+ *   signal inputs only      +11.9%
+ *   storefront basket       ~7,530 → ~10,449 tok of payload   — the AWP-005 ratchet is 8,350 on the wire
+ *   biggest single summary  Group 1,792 → 2,694 tok           — the per-summary gate is 3,000
+ *
+ * The cost grows with every spec given words (260 reducers to go), and it lands on the types asked for most (Group +50%,
+ * Text Input +47%, For Each +48%). The `ports` path already carries a port's rules to an agent about to set it, and
+ * the tool description already routes there ("the authored semantics of just the ports you are setting"). Whether
+ * rules on the default would change what an agent builds is unmeasured, as CMP-006's benefit was. A session that wants to
+ * overturn this needs that replay, not a new price.
  */
 import * as fs from 'fs';
 import * as path from 'path';
@@ -72,7 +87,7 @@ describe('NSP-018 — get_node_type carries the rules the spec says', () => {
     expect(data.types[0].rules).toBeUndefined();
   });
 
-  it('the default summary does not carry them (yet — see the header)', async () => {
+  it('the default summary does not carry them (priced and kept off — see the header)', async () => {
     const { data } = await call<{ types: Row[] }>(session, 'get_node_type', { type_names: ['Counter'] });
     // the control: a summary always has its port lines
     expect((data.types[0].ports ?? []).length).toBeGreaterThan(0);
