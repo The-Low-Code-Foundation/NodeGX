@@ -12,6 +12,7 @@
 import * as fs from 'fs';
 
 import { parseArgs } from './args';
+import { cliBundleWarning } from './cliBundle';
 import { runDeploy } from './deploy';
 import { runLive } from './live';
 import { runRender } from './render';
@@ -23,6 +24,10 @@ const io = {
   out: (text: string) => process.stdout.write(text),
   err: (text: string) => process.stderr.write(text)
 };
+
+// P109-S39 — a checkout's bin older than its source says so before it does anything.
+const staleBin = cliBundleWarning(process.argv[1]);
+if (staleBin) io.err(staleBin);
 
 // HLS-006 — `serve` is the one command that does not return, so it is dispatched here rather
 // than inside `runCli`, which stays synchronous precisely so every command it owns is gradeable

@@ -136,11 +136,11 @@ export const ENGINE_INPUTS = 'nodegx-deploy.inputs.json';
  * blaming the project) while every other check passed it; one built Oct 5 loaded kits in the wrong order on Oct 9.
  */
 export function engineStaleness(entry: string): string | null {
-  return staleness(entry, path.join(path.dirname(entry), ENGINE_INPUTS), path.dirname(path.dirname(entry)));
+  return bundleStaleness(entry, path.join(path.dirname(entry), ENGINE_INPUTS), path.dirname(path.dirname(entry)));
 }
 
-/** The one rule both lists follow: `bundle` is out of date when a file on `listFile` (relative to `root`) is gone or newer. */
-function staleness(bundle: string, listFile: string, root: string): string | null {
+/** The one rule every list follows: `bundle` is out of date when a file on `listFile` (relative to `root`) is gone or newer. */
+export function bundleStaleness(bundle: string, listFile: string, root: string): string | null {
   let inputs: string[];
   try {
     inputs = (JSON.parse(fs.readFileSync(listFile, 'utf8')) as { inputs: string[] }).inputs;
@@ -172,7 +172,7 @@ export function runtimeWarning(resolved: ResolvedEngine, env: NodeJS.ProcessEnv 
   const runtimeDir = path.join(packages, 'noodl-editor', 'src', 'external', 'deploy');
   const runtime = path.join(runtimeDir, 'noodl.deploy.js');
   if (!fs.existsSync(path.join(packages, 'noodl-viewer-react', 'package.json')) || !fs.existsSync(runtime)) return null;
-  const why = staleness(runtime, path.join(runtimeDir, RUNTIME_INPUTS), runtimeDir);
+  const why = bundleStaleness(runtime, path.join(runtimeDir, RUNTIME_INPUTS), runtimeDir);
   if (why === null) return null;
   return (
     `Warning: the viewer runtime this site carries may be older than its source (${why}), so the site may not\n` +
