@@ -222,7 +222,7 @@ export const SCHEMA_COVERAGE: { readonly [K in keyof IStorageSchema]-?: Coverage
     why: 'Optional and feature-detected, and the type-affinity rules it depends on are exactly what diverges. Belongs to the migrator.',
     owes: 'BRG-004'
   },
-  deleteTable: { kind: 'uncovered', why: 'Optional; same migration path as renameColumn.', owes: 'BRG-004' },
+  deleteTable: { kind: 'cases', cases: ['schema/delete-table-takes-only-its-own-relations'] },
   renameTable: {
     kind: 'uncovered',
     why:

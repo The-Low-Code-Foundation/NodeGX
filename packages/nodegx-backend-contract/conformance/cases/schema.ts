@@ -369,6 +369,45 @@ export const schemaCases: readonly ConformanceCase[] = Object.freeze([
     }
   },
   {
+    id: 'schema/delete-table-takes-only-its-own-relations',
+    area: 'schema',
+    pins:
+      "P116-ONT-007-junctions: deleteTable drops the junction tables of the collection it deletes and no other's — a " +
+      'name match took the links of every collection whose name ended with its name ("Account" took "MyAccount"\'s on ' +
+      'one engine and "My_Account"\'s on both) — and leaves none of its own behind, declared or made by addRelation alone',
+    async run(ctx) {
+      if (typeof ctx.schema.deleteTable !== 'function') {
+        throw new Error('deleteTable is absent — declare this case unsupported (§3.4)');
+      }
+      const base = ctx.collection('Acct');
+      const tags = ctx.collection('Tag');
+      const names = [base, `My${base}`, `My_${base}`];
+      ctx.createTable(tags, [{ name: 'label', type: 'String' }]);
+      const t = String((await ctx.create(tags, { label: 't' })).objectId);
+      const owner: Record<string, string> = {};
+      const related = async (n: string, key: string): Promise<string[]> => {
+        const got = await Promise.resolve(ctx.schema.getRelatedIds(n, owner[n], key));
+        return (Array.isArray(got) ? got : []).map(String);
+      };
+      for (const n of names) {
+        ctx.createTable(n, [{ name: 'tags', type: 'Relation', targetClass: tags }]);
+        owner[n] = String((await ctx.create(n, { title: n })).objectId);
+        await ctx.addRelation(n, owner[n], 'tags', t);
+      }
+      // A key nothing declares, made by addRelation alone: it is the deleted collection's too.
+      await ctx.addRelation(base, owner[base], 'loose', t);
+      for (const n of names) deepEq(await related(n, 'tags'), [t], `the control: "${n}" has its link before the delete`);
+      deepEq(await related(base, 'loose'), [t], 'the control: the undeclared link is there before the delete');
+
+      ok(ctx.schema.deleteTable(base) === true, 'deleteTable did not report the delete');
+      for (const n of names.slice(1)) deepEq(await related(n, 'tags'), [t], `deleting "${base}" took "${n}"'s links`);
+      // Made again under the same name, the collection has none of the old links.
+      ctx.createTable(base, [{ name: 'tags', type: 'Relation', targetClass: tags }]);
+      deepEq(await related(base, 'tags'), [], 'the deleted collection\'s declared links came back with its name');
+      deepEq(await related(base, 'loose'), [], 'the deleted collection\'s undeclared links came back with its name');
+    }
+  },
+  {
     id: 'schema/set-when-target-goes-changes-the-declaration',
     area: 'schema',
     pins: 'P116 R10: setWhenTargetGoes changes what a link says happens when its record goes — read back by getTableSchema, taken away by null, refused on a field that is not a link and on a required one told to stay without it; the other columns untouched',

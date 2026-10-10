@@ -34,6 +34,7 @@ import {
   junctionTableName,
   quoteLiteral,
   refuseColumnInUse,
+  ownedJunctions,
   refuseTableRename,
   sameIndexSignature,
   sanitizeIdent,
@@ -402,24 +403,27 @@ class SchemaManager {
       return false;
     }
 
+    // P116-ONT-007-junctions: its own junction tables, read before its declaration goes — never
+    // a `LIKE` over names, where `_` matches any one character and "Account" took "MyAccount"'s.
+    this.ensureSchemaTable();
+    const declared = new Map<string, string[]>();
+    for (const r of this.db.prepare('SELECT "name", "schema" FROM "_Schema"').all() as Array<{ name: string; schema: string }>) {
+      const cols = (JSON.parse(r.schema) as TableSchema).columns || [];
+      declared.set(r.name, cols.filter((c) => c.type === 'Relation').map((c) => c.name));
+    }
+    const tables = (this.db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as Array<{ name: string }>).map((t) => t.name);
+    const junctions = ownedJunctions(tableName, tables, declared);
+
     // Drop the table
     this.db.exec(`DROP TABLE IF EXISTS ${escapeTable(tableName)}`);
 
     // Remove from schema tracking
-    this.ensureSchemaTable();
     this.db.prepare('DELETE FROM "_Schema" WHERE "name" = ?').run(tableName);
 
     // Clear cache
     this._schemaCache.delete(tableName);
 
-    // Drop any junction tables for relations
-    const junctionTables = this.db
-      .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE ?")
-      .all(`_Join_%_${tableName}`) as Array<{ name: string }>;
-
-    for (const jt of junctionTables) {
-      this.db.exec(`DROP TABLE IF EXISTS ${escapeTable(jt.name)}`);
-    }
+    for (const j of junctions) this.db.exec(`DROP TABLE IF EXISTS ${escapeTable(j)}`);
 
     return true;
   }

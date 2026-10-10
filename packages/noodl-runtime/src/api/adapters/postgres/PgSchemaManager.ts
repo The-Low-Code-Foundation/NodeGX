@@ -78,6 +78,7 @@ import {
   indexName,
   junctionTableName,
   refuseColumnInUse,
+  ownedJunctions,
   refuseTableRename,
   normalizeIndexDecls,
   POSTGRES_TYPE_MAP,
@@ -94,7 +95,7 @@ import {
   type TableSchema
 } from '../local-sql/schemaCommon';
 import { checkConstraintDDL, columnToPostgres, declaredIndexDDL, junctionDDL, tableDDL } from './ddl';
-import { translatePgError, PG_UNIQUE_VIOLATION } from './errors';
+import { translatePgError, PG_UNDEFINED_TABLE, PG_UNIQUE_VIOLATION } from './errors';
 import type { PgConnectionPool } from './pool';
 
 /** PostgreSQL truncates an identifier longer than this silently. Refused instead. */
@@ -203,6 +204,15 @@ function freshSchema<T>(schema: T): T {
   return JSON.parse(JSON.stringify(schema)) as T;
 }
 
+/** How many times `load()` reads the catalog when a table is dropped under it. */
+const LOAD_ATTEMPTS = 5;
+
+/** A read failed because a table it listed was dropped by someone else in between. */
+function droppedUnderTheLoad(e: unknown): boolean {
+  const err = e as { code?: string; message?: string };
+  return err?.code === PG_UNDEFINED_TABLE || (err?.code === 'XX000' && /could not open relation with OID/.test(String(err.message)));
+}
+
 export class PgSchemaManager {
   static SchemaQueueError = SchemaQueueError;
 
@@ -230,8 +240,27 @@ export class PgSchemaManager {
   // Priming the model from the live database
   // ===========================================================================
 
-  /** Create the two meta tables and read everything the model needs. Called once, by `connect()`. */
+  /**
+   * Create the two meta tables and read everything the model needs. Called once, by `connect()`.
+   *
+   * P116-S14-pgloadrace: the reads are several statements, and another backend on the same
+   * database can drop a table between them — a collection deleted while this one starts. The
+   * listing then names a table a later read cannot open (`no such table`, or an index definition
+   * whose relation is gone), and the backend refused to start. Read again from an empty model;
+   * once the drop is committed the catalog is whole.
+   */
   async load(): Promise<void> {
+    for (let attempt = 1; ; attempt++) {
+      try {
+        return await this.loadOnce();
+      } catch (e) {
+        if (attempt >= LOAD_ATTEMPTS || !droppedUnderTheLoad(e)) throw e;
+        for (const m of [this.s.tables, this.s.schemas, this.s.columns, this.s.built, this.s.checks, this.s.relations, this.s.owners, this.s.search]) m.clear();
+      }
+    }
+  }
+
+  private async loadOnce(): Promise<void> {
     await this.pool.run(META_DDL);
     const st = this.s;
 
@@ -596,7 +625,10 @@ export class PgSchemaManager {
     const st = this.s;
     if (!st.tables.has(tableName)) return false;
 
-    const junctions = [...st.tables].filter((t) => t.startsWith('_Join_') && t.endsWith(`_${tableName}`));
+    // P116-ONT-007-junctions: its own junction tables, never a suffix match ("Account" took "My_Account"'s).
+    const declared = new Map<string, string[]>();
+    for (const [name, sch] of st.schemas) declared.set(name, (sch.columns || []).filter((c) => c.type === 'Relation').map((c) => c.name));
+    const junctions = ownedJunctions(tableName, st.tables, declared);
     const removed = {
       schema: st.schemas.get(tableName),
       columns: st.columns.get(tableName),

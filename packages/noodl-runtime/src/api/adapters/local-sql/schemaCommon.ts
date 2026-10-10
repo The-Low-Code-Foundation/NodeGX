@@ -199,6 +199,32 @@ export function junctionTableName(owningClass: string, relationName: string): st
   return `_Join_${relationName}_${owningClass}`;
 }
 
+/**
+ * P116-ONT-007-junctions — the junction tables a collection owns, of the ones that `exist`.
+ * A junction's name alone cannot say whose it is: `_Join_tags_My_Account` is key `tags` on
+ * "My_Account" or key `tags_My` on "Account", and a `LIKE '_Join_%_Account'` (where `_` is any
+ * one character) also matched `_Join_tags_MyAccount`. So: the junctions the collection's own
+ * Relation fields name are its own; a junction another collection's declaration names is never
+ * its; and one nobody declares (made by `addRelation` alone) is its only when no longer-named
+ * collection that exists ends it too.
+ *
+ * @param declared every collection's declared Relation field names, by collection
+ */
+export function ownedJunctions(table: string, exist: Iterable<string>, declared: ReadonlyMap<string, readonly string[]>): string[] {
+  const all = [...exist];
+  const mine = new Set((declared.get(table) || []).map((key) => junctionTableName(table, key)));
+  const theirs = new Set<string>();
+  for (const [t, keys] of declared) if (t !== table) for (const key of keys) theirs.add(junctionTableName(t, key));
+  const ends = (j: string, t: string): boolean => j.length > `_Join__${t}`.length && j.endsWith(`_${t}`);
+  const collections = all.filter((t) => !t.startsWith('_Join_'));
+  for (const j of all) {
+    if (!j.startsWith('_Join_') || mine.has(j) || theirs.has(j) || !ends(j, table)) continue;
+    if (collections.some((t) => t !== table && t.length > table.length && ends(j, t))) continue;
+    mine.add(j);
+  }
+  return all.filter((j) => mine.has(j));
+}
+
 /** The two indexes every table gets on creation. They cannot be declared away. */
 export function builtInIndexNames(tableName: string): string[] {
   const t = sanitizeIdent(tableName);
