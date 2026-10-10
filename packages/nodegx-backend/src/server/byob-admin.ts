@@ -32,6 +32,10 @@ import type {
 } from '@noodl/backend-contract';
 import { validateAclShape } from '../security/model';
 import { isVisibleAccountColumn, accountWriteRefusal } from '../users/accountColumns';
+import { declaredFunctionsIn, type FunctionDeclaration } from '../workflow/functionDeclarations';
+
+/** P109 ISL-040: SB-016's rule for functions arriving after start (`SecurityState.undeclaredOnDeploy`). */
+export type DeployGate = (arriving: FunctionDeclaration[]) => { refused: boolean; message: string } | null;
 
 /** The four columns every record carries; never a person's to drop. */
 const SYSTEM_FIELDS: readonly string[] = ['objectId', 'createdAt', 'updatedAt', 'ACL'];
@@ -956,12 +960,19 @@ export class ByobAdminRoutes {
     sendJSON(res, 200, runner ? runner.getStatus() : { initialized: false, workflowCount: 0, functions: [] });
   }
 
-  async updateWorkflow(req: http.IncomingMessage, res: http.ServerResponse, name: string): Promise<void> {
+  /**
+   * `gate` (P109 ISL-040, P78-DBT-UNRULED): SB-016's rule for the functions this bundle declares, asked
+   * before anything loads — refused on a public bind (409), a `warning` on loopback.
+   */
+  async updateWorkflow(req: http.IncomingMessage, res: http.ServerResponse, name: string, gate?: DeployGate): Promise<void> {
     const runner = this.getRunner();
     if (!runner) throw new HttpError(503, 'Workflows not initialized');
     const body = await readJSONBody(req);
+    const verdict = gate ? gate(declaredFunctionsIn(body, name)) : null;
+    // `success: false` too: the editor's and the MCP door's deploy clients read that field, not the status.
+    if (verdict && verdict.refused) throw new HttpError(409, verdict.message, undefined, { success: false });
     const result = await runner.loadWorkflow(name, body);
-    sendJSON(res, result.success ? 200 : 500, result);
+    sendJSON(res, result.success ? 200 : 500, verdict ? { ...result, warning: verdict.message } : result);
   }
 
   async deleteWorkflow(res: http.ServerResponse, name: string): Promise<void> {
@@ -971,11 +982,14 @@ export class ByobAdminRoutes {
     sendJSON(res, result.success ? 200 : 500, result);
   }
 
-  async reloadWorkflows(res: http.ServerResponse): Promise<void> {
+  async reloadWorkflows(res: http.ServerResponse, gate?: () => ReturnType<DeployGate>): Promise<void> {
+    const verdict = gate ? gate() : null;
+    // `success: false` too: the editor's and the MCP door's deploy clients read that field, not the status.
+    if (verdict && verdict.refused) throw new HttpError(409, verdict.message, undefined, { success: false });
     const runner = this.getRunner();
     if (!runner) throw new HttpError(503, 'Workflows not initialized');
     const result = await runner.reloadWorkflows();
-    sendJSON(res, 200, result);
+    sendJSON(res, 200, verdict ? { ...result, warning: verdict.message } : result);
   }
 
   // ==========================================================================

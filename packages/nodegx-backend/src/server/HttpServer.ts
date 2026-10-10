@@ -26,12 +26,14 @@
 import { createHash } from 'crypto';
 import * as fs from 'fs';
 import * as http from 'http';
+import * as path from 'path';
 
 import type { BackendServiceOptions } from '../config';
 import type { PersistenceHandle } from '../persistence/createAdapter';
 import type { IStorageFacade } from '@noodl/backend-contract';
 import type { AclOption } from '../persistence/AdapterFacade';
 import type { ExecutionHistory } from '../execution/ExecutionStore';
+import { scanDeployedFunctions } from '../workflow/functionDeclarations';
 import type { IdempotencyStore } from '../execution/IdempotencyStore';
 import { buildRunPayload } from '../workflow/runPayload';
 import type { WorkflowRunner } from '../workflow/WorkflowRunner';
@@ -975,13 +977,18 @@ export class HttpServer {
         method: 'POST',
         pattern: 'admin/workflows/reload',
         access: { kind: 'admin' },
-        handler: (ctx) => byob.reloadWorkflows(ctx.res)
+        // P109 ISL-040 (P78-DBT-UNRULED): the folder's functions meet SB-016's rule, as at start.
+        handler: (ctx) =>
+          byob.reloadWorkflows(ctx.res, () =>
+            this.security.undeclaredOnDeploy(scanDeployedFunctions(path.join(this.options.dataDir, 'workflows')))
+          )
       },
       {
         method: 'PUT',
         pattern: 'admin/workflows/:name',
         access: { kind: 'admin' },
-        handler: (ctx) => byob.updateWorkflow(ctx.req, ctx.res, ctx.params.name)
+        // P109 ISL-040 (P78-DBT-UNRULED): a deploy's functions meet SB-016's rule, as at start.
+        handler: (ctx) => byob.updateWorkflow(ctx.req, ctx.res, ctx.params.name, (arriving) => this.security.undeclaredOnDeploy(arriving))
       },
       {
         method: 'DELETE',

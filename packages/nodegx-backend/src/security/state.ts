@@ -147,6 +147,30 @@ export function undeclaredFunctionMessage(
   );
 }
 
+/**
+ * P109 ISL-040 (P78-DBT-UNRULED) — SB-016's sentence for a function that arrives AFTER start (a deploy to
+ * `PUT /admin/workflows/:name`, or a reload of the folder). Refused on a public bind, warned on loopback,
+ * the way the start-up interlock is. The fix is the running backend's own: declare the rule, then deploy.
+ */
+export function undeclaredFunctionDeployMessage(unresolved: UnresolvedFunction[], functionsBlock: string, refused: boolean): string {
+  const rows = unresolved.map(
+    (fn) =>
+      `  - ${fn.name}: "Allow Unauthenticated" is ${fn.allowNoAuth ? 'TICKED' : 'unticked'} in the graph, ` +
+      `so it would run for ${fn.rule === 'public' ? 'anyone on the internet' : fn.rule === 'authenticated' ? 'any signed-in account' : JSON.stringify(fn.rule)}`
+  );
+  const n = unresolved.length;
+  return (
+    (refused
+      ? `Refusing to deploy: ${n} cloud function${n === 1 ? '' : 's'} ${n === 1 ? 'has' : 'have'} no rule, and this backend is reachable beyond localhost.`
+      : `Deployed on localhost, but ${n} cloud function${n === 1 ? '' : 's'} ${n === 1 ? 'has' : 'have'} no rule. A public backend would refuse ${n === 1 ? 'it' : 'them'}.`) +
+    `\n\nAn undeclared function takes its rule from the Request node's "Allow Unauthenticated" port, which cannot say ` +
+    `"role:admin", and it runs as system.\n\n${rows.join('\n')}\n\n` +
+    `  Fix: give each one its rule on the Permissions page (PUT /admin/permissions/functions/<name> {"call": …}), ` +
+    `then deploy again. Or add this to security.json; every rule in it is the one the graph port gives, so it ` +
+    `changes nothing until you tighten it:\n\n${functionsBlock}`
+  );
+}
+
 export interface SecurityDeps {
   dataDir: string;
   /** Loopback bind? (The interlock and the dev-open fast-path both key on it.) */
@@ -343,6 +367,17 @@ export class SecurityState {
         );
       }
     }
+  }
+
+  /**
+   * P109 ISL-040 (P78-DBT-UNRULED): SB-016's check, for functions arriving after start. Null when every
+   * one has a rule; otherwise whether it is refused (a public bind) and the sentence.
+   */
+  undeclaredOnDeploy(arriving: DeployedFunction[]): { refused: boolean; message: string } | null {
+    const unresolved = unresolvedFunctionRules(this.config, arriving);
+    if (unresolved.length === 0) return null;
+    const refused = !this.deps.loopback;
+    return { refused, message: undeclaredFunctionDeployMessage(unresolved, proposedFunctionsBlock(this.config, unresolved), refused) };
   }
 
   /** Persist the (mutated) config. Callers mutate this.config then save. */
