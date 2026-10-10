@@ -190,6 +190,7 @@ const sink = NodeDefinition.defineNode({
 const CHIP_NAME = '/Admin/PresetChip';
 const REVERTED_CHIP_NAME = '/Admin/PresetChipAsItShipped';
 const BARE_NAME_CHIP_NAME = '/Admin/PresetChipPublishingABareName';
+const BARE_NAME_SPLIT_CHIP_NAME = '/Admin/PresetChipPublishingABareNameSignalledElsewhere';
 
 /**
  * The chip and the picker as they SHIPPED before the fix — derived from the
@@ -243,8 +244,9 @@ const PRESET_ORDER = ['studio', 'press', 'night'] as const;
  * right chip, at the right moment — as a bare string.
  *
  * 🔴 Kept as a MUTANT because it is the shape anybody simplifying this would
- * reach for, and it is right for exactly as long as nobody presses the same chip
- * twice. A Function's `Outputs` proxy publishes only when the value CHANGES, so
+ * reach for, and it was right for exactly as long as nobody pressed the same chip
+ * twice — until GAM-011 (2026-09-17) made it right outright; the mutant is now
+ * {@link bareNameSplitChip}. What follows is how it failed before that. A Function's `Outputs` proxy publishes only when the value CHANGES, so
  * a chip re-pressed after another one sends nothing and the picker answers with
  * whatever the other chip left behind. Measured on the deployed bundle before
  * this arm existed: Studio, Press, Night read correctly, and **Studio again read
@@ -276,15 +278,44 @@ function bareNamePressChip(chip: ArtefactComponent) {
   };
 }
 
+/**
+ * P109-S6-D54 — the bare name with its signal sent from somewhere else: the chip's Function only writes `name`, and the
+ * button's press goes straight to `Picked`. GAM-011 (`85c640b6c`, 2026-09-17) made a Function publish an unchanged value
+ * when it fires a signal in the same run, which is what made {@link bareNamePressChip} correct; a run that fires no
+ * signal still publishes only on change, so this chip, re-pressed, still sends nothing.
+ */
+function bareNameSplitChip(chip: ArtefactComponent) {
+  const bare = bareNamePressChip(chip);
+  const nodes = flatNodes(chip.graph.roots);
+  const idOf = (type: string) => nodes.find((n) => n.type === type)!.id;
+  return {
+    ...bare,
+    name: BARE_NAME_SPLIT_CHIP_NAME,
+    nodes: bare.nodes.map((n) =>
+      n.type === 'JavaScriptFunction' ? { ...n, parameters: { ...n.parameters, functionScript: 'Outputs.name = Inputs.name;' } } : n
+    ),
+    connections: [
+      ...bare.connections.filter((c) => c.sourcePort !== 'out-picked'),
+      { sourceId: idOf('net.noodl.controls.button'), sourcePort: 'onClick', targetId: idOf('Component Outputs'), targetPort: 'Picked' }
+    ]
+  };
+}
+
 /** One page: three chips, the picker, and a sink on three of its outputs. */
-async function pageWith(shape: 'shipped' | 'reverted' | 'bare-name') {
+async function pageWith(shape: 'shipped' | 'reverted' | 'bare-name' | 'bare-name-split') {
   const themeEditor = componentNamed('/Pages/ThemeEditor');
   const shippedPicker = nodeLabelled(themeEditor, 'The three presets');
   const chip = componentNamed(CHIP_NAME);
   const reverted = revertedPair(chip, shippedPicker);
 
   const chipName =
-    shape === 'shipped' ? CHIP_NAME : shape === 'reverted' ? REVERTED_CHIP_NAME : BARE_NAME_CHIP_NAME;
+    shape === 'shipped'
+      ? CHIP_NAME
+      : shape === 'reverted'
+        ? REVERTED_CHIP_NAME
+        : shape === 'bare-name'
+          ? BARE_NAME_CHIP_NAME
+          : BARE_NAME_SPLIT_CHIP_NAME;
   const picker = shape === 'shipped' ? asNode(shippedPicker) : reverted.picker;
   const valuePort = shape === 'shipped' ? { from: 'pick', to: 'in-pick' } : reverted.valuePort;
 
@@ -311,6 +342,7 @@ async function pageWith(shape: 'shipped' | 'reverted' | 'bare-name') {
   });
   await register(reverted.component);
   await register(bareNamePressChip(chip));
+  await register(bareNameSplitChip(chip));
 
   // The placements, verbatim: the parameters are the whole difference between them.
   const placements = PRESET_ORDER.map((name) => {
@@ -398,12 +430,26 @@ describe('D54 — the chip a person presses is the preset they get', () => {
   });
 
   /**
-   * 🔴 MUTANT. The first draft of the fix — a bare name rather than an object.
-   * It reads correctly until a chip is pressed a second time. See
-   * {@link bareNamePressChip}.
+   * The first draft of the fix — a bare name rather than an object — reads correctly now, re-press included. It was the
+   * mutant until GAM-011 (`85c640b6c`, 2026-09-17): a Function publishes an unchanged value when it fires a signal in
+   * the same run, and this chip writes its name and fires `picked` together. P109-S6-D54: the old arm asserted the
+   * swallowed re-press and read red from that day. See {@link bareNamePressChip}.
    */
-  it('MUTANT: a chip publishing a bare name is swallowed on the re-press', async () => {
+  it('a chip publishing a bare name WITH its signal in the same run is heard on the re-press (GAM-011)', async () => {
     const page = await pageWith('bare-name');
+    page.press('studio');
+    page.press('night');
+    page.press('studio');
+    expect(page.sink._internal.seen.primary).toBe(PRESETS.studio.colorPrimary);
+  });
+
+  /**
+   * 🔴 MUTANT. The shape GAM-011 does not cover: the bare name written by the Function, the press sent to `Picked`
+   * straight from the button. A run that fires no signal publishes only on change, so a chip re-pressed after another
+   * one sends nothing and the picker answers with what the other chip left. See {@link bareNameSplitChip}.
+   */
+  it('MUTANT: a bare name sent without its signal is swallowed on the re-press', async () => {
+    const page = await pageWith('bare-name-split');
     page.press('studio');
     expect(page.sink._internal.seen.primary).toBe(PRESETS.studio.colorPrimary);
     page.press('night');
