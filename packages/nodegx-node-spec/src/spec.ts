@@ -969,6 +969,27 @@ export interface WorldPool {
 // ------------------------------------------------------------------------------------------------
 // the spec
 
+/**
+ * NSP-010 — what happens to apps built on the old behaviour when a spec's behaviour changes. Exactly one key:
+ *   `none`       no migration, and the sentence says why (the old behaviour was a defect nobody could rely on, …);
+ *   `project`    a project migration's id — that migration's own task owns the save; this only records the answer;
+ *   `parameter`  the name of an input of THIS spec that keeps the old behaviour for a project that sets it.
+ */
+export type Migration = { none: string } | { project: string } | { parameter: string };
+
+/** NSP-010 — one entry in a spec's history: the behaviour change that made `version`. */
+export interface Change {
+  /** The version this change made. Every version above the one the gate last saw owes exactly one entry. */
+  version: number;
+  /** What a person's app does differently now, in words. */
+  says: string;
+  /** The ledger row, ruling or task that decided it. */
+  row?: string;
+  /** The commit that changed the RUNTIME, when the change was made there (the before-traces are its parent's). */
+  commit?: string;
+  migration: Migration;
+}
+
 /** NSP-018 — one shape of hand-written code a node replaces (`NodeDecl.idioms`). */
 export interface Idiom {
   /** The shape, in words: "a number in state with +1 / −1 / reset handlers". */
@@ -1020,6 +1041,12 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
    * code — written while the spec's author has the behaviour in their head. Not served over MCP; `spec-ledger` counts it.
    */
   idioms?: readonly Idiom[];
+  /**
+   * NSP-010 — the spec's history: one entry per behaviour change, each with its migration answer. A golden trace
+   * (`golden/<type>.json`) that changes needs a higher `version` in the same commit, and every new version needs its entry
+   * here (`scripts/node-spec/golden.js --check`).
+   */
+  changes?: readonly Change[];
   /**
    * What of the world this node's behaviour depends on (T2/T3). The runner builds a scripted
    * world for a spec that declares any (NSP-007) and refuses to play it on a target that has no
@@ -1138,6 +1165,7 @@ export interface AnyNodeSpec {
   /** NSP-017 AC3 — a contract, not a behaviour (`NodeDecl.contract`). */
   contract?: string;
   idioms?: readonly Idiom[];
+  changes?: readonly Change[];
   needs?: readonly WorldNeed[];
   worldPool?: WorldPool;
   acts?: Readonly<Record<string, ActDecl>>;

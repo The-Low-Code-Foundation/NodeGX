@@ -1,0 +1,6 @@
+{"type":"Unique Id","version":1,"ports":{"inputs":["new"],"outputs":["guid"]},"scenarios":[
+{"name":"one id at creation: the first settle publishes the world's first ten draws, no pulse","input":"5107627095e6036c","trace":[{"t":"settle"},{"port":"guid","t":"value","value":"15iCnKz2Hk"}]},
+{"name":"New replaces the id with the next ten draws and reports done","input":"9aea92decf05662f","trace":[{"t":"settle"},{"port":"guid","t":"value","value":"15iCnKz2Hk"},{"port":"new","t":"in"},{"t":"settle"},{"port":"guid","t":"value","value":"Qr3xpUEPJ3"},{"port":"new","t":"outcome","value":"done"}]},
+{"name":"two News in one frame: the wire carries the second id, two dones","input":"378aff465e401742","trace":[{"t":"settle"},{"port":"guid","t":"value","value":"15iCnKz2Hk"},{"port":"new","t":"in"},{"port":"new","t":"in"},{"t":"settle"},{"port":"guid","t":"value","value":"MxMwFQsNrQ"},{"port":"new","t":"outcome","value":"done"},{"port":"new","t":"outcome","value":"done"}]},
+{"name":"a different seed is a different id — the draws are the world's, not the node's","input":"f7578b392d29bb15","trace":[{"t":"settle"},{"port":"guid","t":"value","value":"FzRi4lqVXu"},{"port":"new","t":"in"},{"t":"settle"},{"port":"guid","t":"value","value":"SBV8kJHAoa"},{"port":"new","t":"outcome","value":"done"}]}
+]}

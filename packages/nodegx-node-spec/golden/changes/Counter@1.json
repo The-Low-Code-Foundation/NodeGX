@@ -1,0 +1,289 @@
+{
+ "type": "Counter",
+ "version": 1,
+ "row": "FH-022 slice 3",
+ "commit": "328a025dc",
+ "before": "328a025dc^",
+ "scenarios": [
+  {
+   "name": "the NSP-001 script: seed pulse, one-frame pair, reset done, reset unchanged",
+   "before": [
+    {
+     "port": "startValue",
+     "t": "set",
+     "value": 5
+    },
+    {
+     "t": "settle"
+    },
+    {
+     "port": "currentCount",
+     "t": "value",
+     "value": 5
+    },
+    {
+     "port": "countChanged",
+     "t": "signal"
+    },
+    {
+     "port": "increase",
+     "t": "in"
+    },
+    {
+     "t": "settle"
+    },
+    {
+     "port": "currentCount",
+     "t": "value",
+     "value": 6
+    },
+    {
+     "port": "countChanged",
+     "t": "signal"
+    },
+    {
+     "port": "increase",
+     "t": "outcome",
+     "value": "done"
+    },
+    {
+     "port": "increase",
+     "t": "in"
+    },
+    {
+     "port": "decrease",
+     "t": "in"
+    },
+    {
+     "t": "settle"
+    },
+    {
+     "port": "countChanged",
+     "t": "signal"
+    },
+    {
+     "port": "countChanged",
+     "t": "signal"
+    },
+    {
+     "port": "increase",
+     "t": "outcome",
+     "value": "done"
+    },
+    {
+     "port": "decrease",
+     "t": "outcome",
+     "value": "done"
+    },
+    {
+     "port": "reset",
+     "t": "in"
+    },
+    {
+     "t": "settle"
+    },
+    {
+     "port": "currentCount",
+     "t": "value",
+     "value": 5
+    },
+    {
+     "port": "countChanged",
+     "t": "signal"
+    },
+    {
+     "port": "reset",
+     "t": "outcome",
+     "value": "done"
+    },
+    {
+     "port": "reset",
+     "t": "in"
+    },
+    {
+     "t": "settle"
+    },
+    {
+     "port": "countChanged",
+     "t": "signal"
+    },
+    {
+     "port": "reset",
+     "t": "outcome",
+     "value": "done"
+    }
+   ],
+   "after": [
+    {
+     "port": "startValue",
+     "t": "set",
+     "value": 5
+    },
+    {
+     "t": "settle"
+    },
+    {
+     "port": "currentCount",
+     "t": "value",
+     "value": 5
+    },
+    {
+     "port": "countChanged",
+     "t": "signal"
+    },
+    {
+     "port": "increase",
+     "t": "in"
+    },
+    {
+     "t": "settle"
+    },
+    {
+     "port": "currentCount",
+     "t": "value",
+     "value": 6
+    },
+    {
+     "port": "countChanged",
+     "t": "signal"
+    },
+    {
+     "port": "increase",
+     "t": "outcome",
+     "value": "done"
+    },
+    {
+     "port": "increase",
+     "t": "in"
+    },
+    {
+     "port": "decrease",
+     "t": "in"
+    },
+    {
+     "t": "settle"
+    },
+    {
+     "port": "countChanged",
+     "t": "signal"
+    },
+    {
+     "port": "countChanged",
+     "t": "signal"
+    },
+    {
+     "port": "increase",
+     "t": "outcome",
+     "value": "done"
+    },
+    {
+     "port": "decrease",
+     "t": "outcome",
+     "value": "done"
+    },
+    {
+     "port": "reset",
+     "t": "in"
+    },
+    {
+     "t": "settle"
+    },
+    {
+     "port": "currentCount",
+     "t": "value",
+     "value": 5
+    },
+    {
+     "port": "countChanged",
+     "t": "signal"
+    },
+    {
+     "port": "reset",
+     "t": "outcome",
+     "value": "done"
+    },
+    {
+     "port": "reset",
+     "t": "in"
+    },
+    {
+     "t": "settle"
+    },
+    {
+     "port": "reset",
+     "t": "outcome",
+     "value": "unchanged"
+    }
+   ]
+  },
+  {
+   "name": "Reset when already at Start Value: unchanged, Count Changed silent",
+   "before": [
+    {
+     "port": "startValue",
+     "t": "set",
+     "value": 3
+    },
+    {
+     "t": "settle"
+    },
+    {
+     "port": "currentCount",
+     "t": "value",
+     "value": 3
+    },
+    {
+     "port": "countChanged",
+     "t": "signal"
+    },
+    {
+     "port": "reset",
+     "t": "in"
+    },
+    {
+     "t": "settle"
+    },
+    {
+     "port": "countChanged",
+     "t": "signal"
+    },
+    {
+     "port": "reset",
+     "t": "outcome",
+     "value": "done"
+    }
+   ],
+   "after": [
+    {
+     "port": "startValue",
+     "t": "set",
+     "value": 3
+    },
+    {
+     "t": "settle"
+    },
+    {
+     "port": "currentCount",
+     "t": "value",
+     "value": 3
+    },
+    {
+     "port": "countChanged",
+     "t": "signal"
+    },
+    {
+     "port": "reset",
+     "t": "in"
+    },
+    {
+     "t": "settle"
+    },
+    {
+     "port": "reset",
+     "t": "outcome",
+     "value": "unchanged"
+    }
+   ]
+  }
+ ]
+}

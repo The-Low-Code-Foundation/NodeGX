@@ -305,6 +305,17 @@ jobs:
       # fails, named. The grading itself is the `test-packages` job (every registered spec at 200
       # sequences with its mutants, every graph scenario); this step counts, it does not re-run.
       - run: npm run spec-ledger:check
+      # NSP-010 (phase 107): a behaviour change is a version. Every spec's hand scenarios, played on the
+      # interpreter, are committed as packages/nodegx-node-spec/golden/<type>.json; this fails a stale golden
+      # file, a golden trace that moved (or a port renamed) with the spec's `version` unchanged since the base,
+      # and a new version with no `changes` entry saying what happens to apps built on the old one. The base is
+      # the PR's base, or the commit before a push; the checkout is shallow, so it is fetched first.
+      - name: Golden traces and the version rule
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then BASE=HEAD; else git fetch --no-tags --depth=1 origin "$BASE"; fi
+          npm run spec-golden:check -- --base "$BASE"
       # SUB-012: the catalog validator's duplicate-node-id rule, against its
       # committed corrupt/clean fixture pair. A project with two nodes sharing
       # an id used to pass every gate with zero failures.

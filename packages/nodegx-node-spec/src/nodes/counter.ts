@@ -13,6 +13,19 @@ import { defineNode } from '../spec';
 export const Counter = defineNode({
   type: 'Counter',
   version: 1,
+  // NSP-010 — the history. FH-022 slice 3 came before this spec, so v1 is the behaviour after it; the before and after traces
+  // are golden/changes/Counter@1.json, the before replayed on the runtime at 328a025dc^ (noodl-runtime nsp-010-counter-history)
+  changes: [
+    {
+      version: 1,
+      says: 'A Reset when the count is already at Start Value reports Unchanged and Count Changed stays silent. Before, every Reset reported Done and pulsed Count Changed, even when nothing moved',
+      row: 'FH-022 slice 3',
+      commit: '328a025dc',
+      migration: {
+        none: "The old pulse said the count moved when it had not, and the guard meant to stop it was dead from the day it was written. Counter has no Treat Unchanged As input to keep it (counter.ts spreads outcomeOutputs, never outcomeInputs), and the change shipped alone so one revert brings it back if a project depended on it"
+      }
+    }
+  ],
   source: 'packages/noodl-runtime/src/nodes/std-library/counter.ts',
   // NSP-018 — the hand-written code this node replaces (read by nothing yet; `spec-ledger` counts it)
   idioms: [

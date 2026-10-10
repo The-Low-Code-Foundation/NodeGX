@@ -172,7 +172,7 @@ function worldFor(spec: AnyNodeSpec, script: WorldScript | undefined): World | u
 }
 
 /** The reference play: the interpreter, on its own world. A spec that violates its own script is a scenario error, not a divergence. */
-async function playReference(spec: AnyNodeSpec, params: Record<string, unknown>, steps: readonly Step[], script: WorldScript | undefined, wired?: readonly string[]): Promise<TraceEvent[]> {
+export async function playReference(spec: AnyNodeSpec, params: Record<string, unknown>, steps: readonly Step[], script: WorldScript | undefined, wired?: readonly string[]): Promise<TraceEvent[]> {
   const world = worldFor(spec, script);
   const t = await play(interpreterAdapter({ resolve: () => spec }), spec.type, params, steps, world, wired);
   if (world && world.violations.length > 0) throw new Error(`${spec.type}: the reference play touched what the script did not answer — ${world.violations.join('; ')}`);

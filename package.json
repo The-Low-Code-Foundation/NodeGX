@@ -134,6 +134,8 @@
     "spec-census:check": "node scripts/node-spec/census.js --check",
     "spec-ledger": "node scripts/node-spec/spec-ledger.js",
     "spec-ledger:check": "node scripts/node-spec/spec-ledger.js --check",
+    "spec-golden": "node scripts/node-spec/golden.js",
+    "spec-golden:check": "node scripts/node-spec/golden.js --check",
     "own-census": "node scripts/own/census.js",
     "own-census:check": "node scripts/own/census.js --check",
     "ontology-census": "node scripts/ontology/census.js",

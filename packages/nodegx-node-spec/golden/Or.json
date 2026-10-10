@@ -1,0 +1,7 @@
+{"type":"Or","version":1,"ports":{"inputs":[],"outputs":["result"]},"scenarios":[
+{"name":"no params: the first settle publishes false — unlike And, which publishes nothing","input":"5107627095e6036c","trace":[{"t":"settle"},{"port":"result","t":"value","value":false}]},
+{"name":"false, true → true; the true one goes false → false","input":"f3a29396f558a05d","trace":[{"port":"input 0","t":"set","value":false},{"port":"input 1","t":"set","value":true},{"t":"settle"},{"port":"result","t":"value","value":true},{"port":"input 1","t":"set","value":false},{"t":"settle"},{"port":"result","t":"value","value":false}]},
+{"name":"a hole counts as false: input 2 alone true → true, then false → false","input":"c23ee8e262df85bb","trace":[{"port":"input 2","t":"set","value":true},{"t":"settle"},{"port":"result","t":"value","value":true},{"port":"input 2","t":"set","value":false},{"t":"settle"},{"port":"result","t":"value","value":false}]},
+{"name":"coercion `value ? true : false`: 'false' is true, 0 is false","input":"d8e4ee0915cbdf76","trace":[{"port":"input 0","t":"set","value":"false"},{"t":"settle"},{"port":"result","t":"value","value":true},{"port":"input 0","t":"set","value":0},{"t":"settle"},{"port":"result","t":"value","value":false}]},
+{"name":"numbered inputs as parameters, in the caller's order","input":"7e41d5570e7a4719","trace":[{"port":"input 1","t":"set","value":true},{"port":"input 0","t":"set","value":0},{"t":"settle"},{"port":"result","t":"value","value":true}]}
+]}
