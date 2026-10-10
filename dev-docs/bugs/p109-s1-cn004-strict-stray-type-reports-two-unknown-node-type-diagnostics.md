@@ -1,13 +1,15 @@
 ---
 id: P109-S1-CN004
 title: Under strict validation a stray node type is reported as two unknown-node-type diagnostics, not one
-status: scheduled
+status: fixed
+commit: c6abe20c3
 phase: P109
 task: ISL-034
 severity: low
 area: noodl-mcp / validate_project (strict) — the validator report joined with the precondition checks
 found: P109 ISL-014 s1, 2026-10-01 (met as a red neighbour spec; not this task's)
 evidence: packages/noodl-mcp/tests/cn004.test.ts "acceptance criterion 3 — a type no kit declares is unchanged › still errors under strict" — Expected 1, Received 2
+regression: packages/noodl-mcp/tests/cn004.test.ts
 ---
 
 `cn004.test.ts`'s strict arm adds one node of a type nothing declares (`nothing.declares.This`) to the kit-dynports
@@ -39,3 +41,7 @@ stray wire is `{ fromId: 'dyn_panel', fromProperty: 'title', … }`, and Panel's
 So there is no duplicate producer. The fix is in the spec's fixture: wire from a real Panel output (e.g. the shared
 `childIndex`), or count `unknown-node-type` errors only. Not fixed here (CN-004's spec, not ISL-009's); the title of
 this file is kept so its links hold, and is now known to be false.
+
+**Fixed 2026-10-10 (P109 s39, ISL-034, `c6abe20c3`), in the spec as s6 said.** Still red at the session's HEAD (the full
+noodl-mcp run read 2 for 1). The fixture's wire now runs from the stray node into Panel's `title` (an input), and the arm
+counts the one error it is about. cn004 13/13. The product was right all along: no producer changed.
