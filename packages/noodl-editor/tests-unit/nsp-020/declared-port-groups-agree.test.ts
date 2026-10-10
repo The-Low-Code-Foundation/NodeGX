@@ -4,7 +4,9 @@
  * A declared port group is never announced by the runtime: `dynamicports: [{condition, inputs,
  * outputs}]` is static registration metadata the EDITOR evaluates, port by port, with
  * `evaluateDynamicPortsCondition` (models/nodelibrary/dynamicPortRules.ts :116-172) over
- * `node.getParameter(name)` — which falls back to the port's default (NodeGraphNode.ts :829-833).
+ * `node.getParameter(name)` — which falls back to the port's default (NodeGraphNode.ts :829-833); the test's node
+ * falls back to the CATALOG's default (the registration's), never the spec's, so a spec default that drifted from the
+ * editor's shows as a disagreement instead of agreeing with itself (s80).
  * The spec says the same thing as `when(params)` on the declared port (spec.ts `PortMeta.when`),
  * read by `portsOf` over the params with the declared defaults filled in (ports.ts
  * `effectiveParams`). This test is where the two dialects meet: for every catalog group whose
@@ -15,8 +17,8 @@
  * Ports the catalog puts under a condition and the spec has not yet given a `when` are OWED, counted
  * and printed, never failed — `WHEN_FLOOR` is the ratchet: it is the number of graded ports at the
  * last commit, and a lane that adds `when`s raises it to what the census prints (never to a round
- * number; the census is the artefact). A `#js` condition (six, the icon-source pair on Checkbox,
- * Radio Button and Icon) is owed with its own reason until the spec says it in a `when`.
+ * number; the census is the artefact). A `#js` condition (the icon-source pair on Checkbox, Radio Button and Icon)
+ * is graded the same way, over the cross product of every `params.<name> === <literal>` it names, each also unset.
  *
  *   cd packages/noodl-editor && npx jest tests-unit/nsp-020
  */
@@ -28,8 +30,8 @@ import type { AnyNodeSpec } from '@nodegx/node-spec';
 
 import { evaluateDynamicPortsCondition, tokenizeCondition } from '../../src/editor/src/models/nodelibrary/dynamicPortRules';
 
-/** Graded `when` ports at the last commit — s79: Image's objectFit, width and height. Raise to the census, never past it. */
-const WHEN_FLOOR = 3;
+/** Graded `when` ports at the last commit — s79: 3 (Image's size-mode trio); s80: 448, every conditioned port of every specced node. Raise to the census, never past it. */
+const WHEN_FLOOR = 448;
 
 interface Group {
   condition?: string;
@@ -39,20 +41,23 @@ interface Group {
 }
 interface CatalogNode {
   typeName: string;
+  inputs?: Array<{ name: string; default?: unknown }>;
   dynamicPorts?: { declaredPortGroups?: Group[] } | null;
 }
 
 const ROOT = path.resolve(__dirname, '..', '..', '..');
 const catalog = JSON.parse(fs.readFileSync(path.join(ROOT, 'noodl-types', 'src', 'node-catalog.json'), 'utf8')) as { nodes: CatalogNode[] };
 
-/** The editor's node, as the evaluator reads it: the probe's params, a declared default under an unset name. */
-function nodeFor(spec: AnyNodeSpec, probe: Record<string, unknown>) {
+const catalogByType = new Map(catalog.nodes.map((n) => [n.typeName, n]));
+
+/** The editor's node, as the evaluator reads it: the probe's params, the REGISTRATION's default (the catalog's) under an unset name. */
+function nodeFor(type: string, probe: Record<string, unknown>) {
+  const inputs = catalogByType.get(type)?.inputs ?? [];
   return {
     parameters: probe,
     getParameter: (name: string) => {
       if (probe[name] !== undefined) return probe[name];
-      const decl = spec.inputs[name] as { default?: unknown } | undefined;
-      return decl?.default;
+      return inputs.find((p) => p.name === name)?.default;
     }
   };
 }
@@ -68,8 +73,23 @@ function assignments(condition: string): Array<[string, string]> {
   return out;
 }
 
+/** A `#js` condition's probe set: every `params.<name> === <literal>` it names, crossed, each name also unset and also something else. */
+function jsProbesFor(condition: string): Array<Record<string, unknown>> {
+  const values = new Map<string, unknown[]>();
+  for (const m of condition.matchAll(/params\.(\w+)\s*===?\s*(true|false|undefined|'[^']*'|"[^"]*"|-?\d+(?:\.\d+)?)/g)) {
+    const literal = m[2] === 'undefined' ? undefined : JSON.parse(m[2].replace(/^'|'$/g, '"'));
+    const list = values.get(m[1]) ?? [undefined, 'something-else'];
+    if (!list.includes(literal)) list.push(literal);
+    values.set(m[1], list);
+  }
+  let probes: Array<Record<string, unknown>> = [{}];
+  for (const [name, list] of values) probes = probes.flatMap((probe) => list.map((v) => (v === undefined ? probe : { ...probe, [name]: v })));
+  return probes;
+}
+
 /** A condition's probe set: the defaults; each assignment alone; every assignment at once; each with its value negated. */
 function probesFor(condition: string): Array<Record<string, unknown>> {
+  if (condition.startsWith('#js')) return jsProbesFor(condition);
   const pairs = assignments(condition);
   const probes: Array<Record<string, unknown>> = [{}];
   for (const [param, value] of pairs) probes.push({ [param]: revive(value) }, { [param]: 'not-' + value });
@@ -108,9 +128,6 @@ function census(): Census {
           const decl = (plug === 'input' ? spec.inputs[port] : spec.outputs[port]) as { when?: unknown } | undefined;
           if (!decl) {
             c.owed.push({ type: node.typeName, port, condition: group.condition, why: 'the spec does not declare the port' });
-          } else if (group.condition.startsWith('#js')) {
-            c.owed.push({ type: node.typeName, port, condition: group.condition, why: '#js condition' + (decl.when ? ' (the spec has a when; graded by evaluation only)' : '') });
-            if (decl.when) c.graded.push({ type: node.typeName, port, condition: group.condition });
           } else if (decl.when) {
             c.graded.push({ type: node.typeName, port, condition: group.condition });
           } else {
@@ -151,12 +168,12 @@ describe('NSP-020 oracle (b): a declared port group and its `when` agree', () =>
   });
 
   describe('every graded port: the editor evaluating the condition == the port being in portsOf', () => {
-    const cases = c.graded.filter((g) => !g.condition.startsWith('#js')).map((g) => [`${g.type} · ${g.port} · ${g.condition}`, g] as const);
+    const cases = c.graded.map((g) => [`${g.type} · ${g.port} · ${g.condition}`, g] as const);
     test.each(cases)('%s', (_name, g) => {
       const spec = specs[g.type];
       const plug = g.port in spec.inputs ? 'inputs' : 'outputs';
       for (const probe of probesFor(g.condition)) {
-        const editor = evaluateDynamicPortsCondition(g.condition, nodeFor(spec, probe));
+        const editor = evaluateDynamicPortsCondition(g.condition, nodeFor(g.type, probe));
         const drawn = g.port in portsOf(spec, probe)[plug];
         expect({ probe, drawn }).toEqual({ probe, drawn: editor });
       }
@@ -167,7 +184,16 @@ describe('NSP-020 oracle (b): a declared port group and its `when` agree', () =>
     const image = specs['Image'];
     const planted = { ...image, inputs: { ...image.inputs, objectFit: { ...image.inputs.objectFit, when: (p: Readonly<Record<string, unknown>>) => p.sizeMode !== 'explicit' } } };
     const condition = 'sizeMode = explicit';
-    const disagreements = probesFor(condition).filter((probe) => evaluateDynamicPortsCondition(condition, nodeFor(planted, probe)) !== 'objectFit' in portsOf(planted, probe).inputs);
+    const disagreements = probesFor(condition).filter((probe) => evaluateDynamicPortsCondition(condition, nodeFor('Image', probe)) !== 'objectFit' in portsOf(planted, probe).inputs);
     expect(disagreements.length).toBeGreaterThan(0);
+  });
+
+  test('PLANTED: a spec default that drifted from the editor\'s is red (the node falls back to the catalog, not the spec)', () => {
+    const image = specs['Image'];
+    const planted = { ...image, inputs: { ...image.inputs, sizeMode: { ...image.inputs.sizeMode, default: 'explicit' } } };
+    const condition = 'sizeMode = explicit';
+    expect(evaluateDynamicPortsCondition(condition, nodeFor('Image', {}))).toBe(false); // the editor's default: contentSize
+    expect('objectFit' in portsOf(image, {}).inputs).toBe(false);
+    expect('objectFit' in portsOf(planted, {}).inputs).toBe(true); // the drifted spec draws a port the editor hides
   });
 });

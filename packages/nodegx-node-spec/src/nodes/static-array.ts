@@ -97,6 +97,7 @@ export const StaticData = defineNode({
     },
     // :103-114
     csv: {
+      when: (p) => p.type === 'csv' || p.type === undefined,
       type: 'string',
       coerce: 'none',
       editOnly: true,
@@ -108,6 +109,7 @@ export const StaticData = defineNode({
     },
     // :115-126
     json: {
+      when: (p) => p.type === 'json',
       type: 'string',
       coerce: 'none',
       editOnly: true,

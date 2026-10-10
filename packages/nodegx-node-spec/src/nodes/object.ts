@@ -145,6 +145,7 @@ export const Model2 = defineNode({
     },
     // :227-239
     repeaterComponent: {
+      when: (p) => p.idSource === 'foreach',
       type: 'component',
       coerce: 'none',
       displayName: 'Repeater Component',
@@ -154,6 +155,7 @@ export const Model2 = defineNode({
     },
     // :240-273
     modelId: {
+      when: (p) => p.idSource === 'explicit' || p.idSource === undefined,
       type: 'string',
       coerce: 'none',
       displayName: 'Id',

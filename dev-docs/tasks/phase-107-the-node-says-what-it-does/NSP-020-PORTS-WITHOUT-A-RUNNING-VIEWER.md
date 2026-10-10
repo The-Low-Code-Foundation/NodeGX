@@ -2,7 +2,7 @@
 
 **Opened 2026-09-30 (s1), from Richard's ruling that the editor is a target (README §1, R6).**
 **Depends on NSP-004.** Runs alongside the batches (NSP-011 to NSP-017): each batch closes its nodes' rows here.
-**Status: 🟡 s79 (2026-10-10, Fable): the design is decided and built in the format (§3.1) — `portsOf` / `drawnPorts`, `PortContext` + `derived.needs` with the needs gate, `when` and `narrow` on declared ports, `context` through the scenario, the adapter and the interpreter; the three-oracle parity drive stands with its first proofs (And with wires, String Format, Image's size-mode groups) and planted mutants. Left: the lanes (§6 s79) — `needs` on the 22 project- and schema-dependent specs, `when` on 445 owed ports, the padding out of four specs, the module table for ~50 `setup` hooks, oracle (c), the context builder in `project-contract`, AC3 (MCP) and AC4 (ledger column).**
+**Status: 🟡 s79 (2026-10-10, Fable): the design is decided and built in the format (§3.1) — `portsOf` / `drawnPorts`, `PortContext` + `derived.needs` with the needs gate, `when` and `narrow` on declared ports, `context` through the scenario, the adapter and the interpreter; the three-oracle parity drive stands with its first proofs (And with wires, String Format, Image's size-mode groups) and planted mutants. s80 (Opus): L2 done — `when` on all 448 conditioned ports, oracle (b) green and made honest (§6.2). Left: the lanes (§6 s79) — `needs` on the 22 project- and schema-dependent specs, the padding out of four specs, the module table for ~50 `setup` hooks, oracle (c), the context builder in `project-contract`, AC3 (MCP) and AC4 (ledger column).**
 
 ## 1. The person sentence
 
@@ -225,3 +225,33 @@ suite, the runtime batch, `spec-golden:check` (no trace moves: `golden.ts` hashe
 
 L1–L4 are independent; L5 needs L1's `context` shape settled (it is — the fields are in `PortContext`; a new field is a
 row). Oracle (c) waits on P107-S79-ADAPTERLABEL.
+
+### 6.2 s80 (2026-10-11, Opus) — L2: `when` on every conditioned port
+
+**Built.** All 445 owed ports carry a `when` — 439 declaration sites in 21 spec files (`record-base.ts`'s `modelId` and
+`repeaterComponent` serve four record types each; the two shared ones carry a typed parameter because they sit outside a
+`defineNode` call). Written by a generator from the catalog's `declaredPortGroups` condition, one per port (no port sits
+under two conditions): `<p> = v` → `p.x === 'v'` (`true`/`false` as booleans), `!=` → `!==`, `NOT SET` → `=== undefined`,
+`AND`/`OR` right-associative as the evaluator reads them (no condition in the catalog mixes the two so that precedence
+differs); the nine `#js` conditions (the icon-source pair on Checkbox, Radio Button and Icon) as their own expression over
+`p`. Census: **448 ports graded by a `when`, 0 owed, 0 `when` in no catalog group**; `WHEN_FLOOR = 448`.
+
+**Oracle (b) made honest in two ways.** (1) The editor's node in the test fell back to the SPEC's default under an unset
+name — so a spec default that drifted from the registration's agreed with itself. It now falls back to the CATALOG's
+default (the registration's, what `getParameter` really reads); a planted drift (Image `sizeMode` default `explicit`
+against the editor's `contentSize`) is red. (2) `#js` conditions were census-only; they are graded now, over the cross
+product of every `params.<name> === <literal>` they name, each also unset and also something else. 452 / 452.
+
+**Where the handoff was wrong:** s79 changed three stranger-guarded files (`src/spec.ts`, `src/adapter.ts`,
+`src/nodes/and.ts`) and did not refresh `tests/stranger-suite-hashes.json` — the stranger gate was red at HEAD
+`32745136a` before this session touched anything. Refreshed with `dropdown.ts` (this lane's guarded edit); all four
+rounds re-graded green at 200 (46 passed, the 18 deep tests skipped as designed, 460 s). No behaviour moved in any of the
+four files (s79: `context` is optional and no scenario sets it on And; s80: `when` is read only by `portsOf`).
+
+**Cost:** the browser entry grows ~6.2 KB gzipped (310.2 → 316.5 KB measured the same way at HEAD and after; P107-SIZE
+already over its 240 KB budget, P112's call — noted on the row).
+
+**Gates (s80 L2):** `spec-golden:check` 0 and `spec-ledger:check` 0 (125 / 147) BEFORE the lane; node-spec `tsc --noEmit`
+0; node-spec jest `ports, catalog-parity, golden, types, batch-visual, page-model, page-model-plants, layout,
+layout-map, layout-check, rules-reader, schema` 1,341 / 1,341; `stranger.test.ts` 46 / 46 (+18 deep skipped); editor
+`tests-unit/nsp-020` 452 / 452; `typecheck:editor-tests` 0.

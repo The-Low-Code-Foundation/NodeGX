@@ -150,6 +150,7 @@ export const UpdateRecord = defineNode({
     store: { type: 'signal', outcome: true, displayName: 'Do', group: 'Actions', description: 'Writes the property inputs onto the record named by Id, and on to the backend unless Store to is Local only' },
     // :69-85
     storeProperties: {
+      when: (p) => p.storeType === 'cloud' || p.storeType === undefined,
       type: 'enum',
       enums: ['specified', 'all'],
       default: 'specified',

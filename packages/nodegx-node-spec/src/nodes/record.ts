@@ -212,6 +212,7 @@ export const RecordNode = defineNode({
     },
     // :234-246
     repeaterComponent: {
+      when: (p) => p.idSource === 'foreach',
       type: 'component',
       coerce: 'none',
       displayName: 'Repeater Component',
@@ -221,6 +222,7 @@ export const RecordNode = defineNode({
     },
     // :247-276
     modelId: {
+      when: (p) => p.idSource === 'explicit' || p.idSource === undefined,
       type: 'string',
       coerce: 'none',
       displayName: 'Id',

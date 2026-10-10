@@ -531,9 +531,9 @@ export const Repeater = defineNode({
     // :321-337
     templateType: { type: 'enum', enums: ['explicit', 'dynamic'], default: 'explicit', coerce: 'none', displayName: 'Template Type', group: 'Appearance', description: 'Explicit uses one component for every item; Dynamic picks one per item by running Script', portability: 'logic' },
     // :338-347
-    template: { type: 'component', coerce: 'none', displayName: 'Template', group: 'Appearance', description: 'Component to create once per item, with the item available to it as its Component Object', portability: 'logic', examples: TEMPLATES },
+    template: { when: (p) => p.templateType === 'explicit' || p.templateType === undefined, type: 'component', coerce: 'none', displayName: 'Template', group: 'Appearance', description: 'Component to create once per item, with the item available to it as its Component Object', portability: 'logic', examples: TEMPLATES },
     // :348-378 — v2: JavaScript, run per record by Template Type Dynamic (the spec runs the same code on the same record)
-    templateScript: { type: 'string', default: DEFAULT_SCRIPT, editOnly: true, coerce: 'none', displayName: 'Script', group: 'Appearance', description: 'JavaScript run per item that sets `component` to a component path; the item is available as `item`', portability: 'logic', examples: SCRIPTS },
+    templateScript: { when: (p) => p.templateType === 'dynamic', type: 'string', default: DEFAULT_SCRIPT, editOnly: true, coerce: 'none', displayName: 'Script', group: 'Appearance', description: 'JavaScript run per item that sets `component` to a component path; the item is available as `item`', portability: 'logic', examples: SCRIPTS },
     // :379-391
     refresh: { type: 'signal', outcome: true, displayName: 'Refresh', group: 'Appearance', description: 'Rebuilds every item from the current Items, discarding any state the item components held', portability: 'logic' }
   },

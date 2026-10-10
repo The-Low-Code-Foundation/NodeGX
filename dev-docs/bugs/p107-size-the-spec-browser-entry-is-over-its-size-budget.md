@@ -24,3 +24,7 @@ estimate was made from.
 
 **To decide (P112, OWN-002's owner):** raise the budget to what the full vocabulary measures, or split the entry
 (the visual specs lazy, as the XML parser already is), and put the check where it runs.
+
+**s80 (2026-10-11, P107 NSP-020 L2):** `npm run size:node-spec` now prints 308.2 KB gzipped without the parser (318.8 KB
+with it). The `when` functions on 448 conditioned ports added about 6.2 KB gzipped (esbuild `--minify` + `gzip -9` over
+`src/browser.ts`: 310.2 KB at HEAD `32745136a`, 316.5 KB after). Still P112's decision; the visual specs remain the bulk.

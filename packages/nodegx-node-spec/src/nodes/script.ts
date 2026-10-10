@@ -573,6 +573,7 @@ export const Script = defineNode({
     },
     // :287-317
     code: {
+      when: (p) => p.useExternalFile === 'no' || p.useExternalFile === undefined,
       type: 'string',
       default: '',
       coerce: 'none',
@@ -584,6 +585,7 @@ export const Script = defineNode({
     },
     // :318-343
     externalFile: {
+      when: (p) => p.useExternalFile === 'yes',
       type: 'string',
       coerce: 'none',
       editOnly: true,

@@ -77,6 +77,7 @@ export const RECORD_ID_INPUTS = {
   },
   // :527-539
   repeaterComponent: {
+    when: (p: Readonly<Record<string, unknown>>) => p.idSource === 'foreach',
     type: 'component',
     coerce: 'none',
     displayName: 'Repeater Component',
@@ -86,6 +87,7 @@ export const RECORD_ID_INPUTS = {
   },
   // :540-555
   modelId: {
+    when: (p: Readonly<Record<string, unknown>>) => p.idSource === 'explicit' || p.idSource === undefined,
     type: 'string',
     coerce: 'none',
     displayName: 'Id',

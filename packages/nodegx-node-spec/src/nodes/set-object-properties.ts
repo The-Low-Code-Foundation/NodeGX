@@ -69,6 +69,7 @@ export const SetModelProperties = defineNode({
     },
     // :209-221
     repeaterComponent: {
+      when: (p) => p.idSource === 'foreach',
       type: 'component',
       coerce: 'none',
       displayName: 'Repeater Component',
@@ -78,6 +79,7 @@ export const SetModelProperties = defineNode({
     },
     // :222-237
     modelId: {
+      when: (p) => p.idSource === 'explicit' || p.idSource === undefined,
       type: 'string',
       coerce: 'none',
       displayName: 'Id',
