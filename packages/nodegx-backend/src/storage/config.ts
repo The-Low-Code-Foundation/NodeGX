@@ -171,6 +171,23 @@ export class FileConfigStore {
     return JSON.parse(JSON.stringify(this.config));
   }
 
+  /**
+   * ISL-039: re-read files.json after a restore. A fresh instance does the reading, so
+   * the rules are the constructor's; the live config is replaced in place. An
+   * invalid file is refused: the live config is written back over it, and the
+   * refusal thrown (as `EmailConfigState.reload`).
+   */
+  reload(): void {
+    let fresh: FileStorageConfig;
+    try {
+      fresh = this.load();
+    } catch (e) {
+      this.persist();
+      throw e;
+    }
+    this.config = fresh;
+  }
+
   update(patch: FileConfigPatch): FileStorageConfig {
     if (patch.maxUploadBytes !== undefined) {
       if (!(patch.maxUploadBytes > 0)) throw new FileConfigError('maxUploadBytes must be a positive number');

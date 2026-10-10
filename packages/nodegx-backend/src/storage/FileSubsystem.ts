@@ -372,6 +372,17 @@ export class FileSubsystem {
     return updated;
   }
 
+  /**
+   * ISL-039: a restore unpacked `files.json`. Re-read it (refused as
+   * `FileConfigStore.reload` refuses), then let the driver and the sweep follow
+   * it, as `updateConfig` does.
+   */
+  reloadConfig(): void {
+    this.config.reload();
+    this.applyDriver(this.config.get().driver);
+    this.reschedule();
+  }
+
   setOrphanSweepSchedule(schedule: OrphanSweepSchedule): void {
     if (schedule.enabled) {
       const err = validateCron(schedule.cron);

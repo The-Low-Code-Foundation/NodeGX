@@ -234,7 +234,7 @@ export function BackupsView(_props: ViewProps) {
             empty={<EmptyState action={{ label: 'Back up now', onClick: backUpNow }}>No backups yet.</EmptyState>}
           />
           <Sub style="margin-top:10px">
-            {whereWords(config.destination, bucket) + ' A restore replaces everything in the backend with the archive; with '}
+            {whereWords(config.destination, bucket) + ' A restore replaces the records, files, workflows and settings with the archive\'s; the run history is not in a backup and stays as it is. With '}
             <i>Back up first</i>
             {' ticked, what is there now is archived before it goes.'}
           </Sub>

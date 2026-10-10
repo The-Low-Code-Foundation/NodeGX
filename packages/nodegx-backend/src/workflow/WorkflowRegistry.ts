@@ -86,6 +86,24 @@ export class WorkflowRegistry {
     }
   }
 
+  /**
+   * ISL-039: re-read `workflow-defs/` after a restore. A fresh registry does the
+   * reading, so the rules are the start-up ones. One invalid definition refuses
+   * the whole folder: the live definitions are written back in its place (so the
+   * next start is not refused either), and the refusal thrown.
+   */
+  reload(): void {
+    let fresh: WorkflowRegistry;
+    try {
+      fresh = new WorkflowRegistry(this.dataDir);
+    } catch (e) {
+      fs.rmSync(this.dir, { recursive: true, force: true });
+      for (const def of this.defs.values()) this.persist(def);
+      throw e;
+    }
+    this.defs = fresh.defs;
+  }
+
   list(): WorkflowDefinition[] {
     return [...this.defs.values()].map((d) => ({ ...d }));
   }

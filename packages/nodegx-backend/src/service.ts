@@ -1058,8 +1058,9 @@ export class BackendService {
 
   /**
    * BMG-011 §7: a restore unpacks the archive's `config/` over the data dir —
-   * security.json, triggers.json, email.json, backups.json (config-params.json
-   * is read per request already). Each was read ONCE at start, so the running
+   * security.json, triggers.json, email.json, backups.json and, since ISL-039,
+   * auth.json, search.json, files.json, ops.json and `workflow-defs/`
+   * (config-params.json and views.json are read per request already). Each was read ONCE at start, so the running
    * backend went on enforcing the pre-restore permissions, firing the
    * pre-restore schedules, and the next edit on any of those pages wrote the
    * OLD settings back over the restored file. Each is re-read here with its
@@ -1092,6 +1093,16 @@ export class BackendService {
       this.backups.config.reload();
       this.backups.reschedule();
     });
+    // ISL-039: the settings the archive did not carry before (views.json is read per request).
+    step('auth.json', () => this.auth && this.auth.reload());
+    step('search.json', () => this.search && this.search.reload());
+    step('files.json', () => this.files && this.files.reloadConfig());
+    step('ops.json', () => {
+      if (!this.ops) return;
+      this.ops.reload();
+      logger.configure({ level: this.ops.config.logging.level, format: this.ops.config.logging.format });
+    });
+    step('workflow-defs', () => this.workflows && this.workflows.registry.reload());
     return out;
   }
 
