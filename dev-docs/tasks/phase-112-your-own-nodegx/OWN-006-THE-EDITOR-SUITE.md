@@ -2,7 +2,7 @@
 
 **Opened 2026-10-02.** **Depends on OWN-001** (the reference reader and writer) **and OWN-003** (the graph runner and
 its scenarios).
-**Status: 🟡 first half built, s5 (2026-10-10): the adapter, the eight edits, the reference, the comparison, the runner, the command and the fixtures, in `@nodegx/project-contract/editor-suite`; AC1 and AC4 met; the MCP is the first adapter (AC3's first half). s6 (2026-10-10): **AC2 met** — the prototype page (`prototype/real/orbit.html`) is the second adapter and passes small, todo-list and planning; its first run found P112-S6-SUITEIDS (fixed). The graph half (`graphTarget()`, the 76 scenarios) waits for OWN-003 / R1; the Electron adapter (AC3's second half) is next. §6.**
+**Status: 🟡 first half built, s5 (2026-10-10): the adapter, the eight edits, the reference, the comparison, the runner, the command and the fixtures, in `@nodegx/project-contract/editor-suite`; AC1 and AC4 met; the MCP is the first adapter (AC3's first half). s6 (2026-10-10): **AC2 met** — the prototype page (`prototype/real/orbit.html`) is the second adapter and passes small, todo-list and planning; its first run found P112-S6-SUITEIDS (fixed). The graph half (`graphTarget()`, the 76 scenarios) waits for OWN-003 / R1; the Electron adapter (AC3's second half) is next. s7 (2026-10-10): **AC3 met** — the Electron editor is the third adapter (`packages/noodl-editor/tests/editor-suite/electronAdapter.test.ts`, in `test:ci`) and passes small, todo-list and planning; its first run found P112-S7-LOGICTYPE (fixed) and P112-S7-TEXTDEFAULTS (open). **Left: the graph half, after OWN-003.** §6.**
 **Model:** **Fable.** The adapter, the edit vocabulary and the comparison rule are the design every later task and every stranger depends on. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
 ## 1. The person sentence
@@ -167,3 +167,68 @@ find `home-box` and failed before any file was compared. The existing "mints its
 wrapped reference keeps a named id: a hole shaped like the defect. `inEditorIds` translates `id`, `parent`, `from.node`,
 `to.node` through the reverse map; a test whose editor always mints is red without it. **It would have stopped the
 Electron adapter the same way.**
+
+### 6.3 AC3 — the Electron editor is the third adapter, s7 (2026-10-10, Opus)
+
+**NSP-021's round trip, built once.** `packages/noodl-editor/tests/editor-suite/electronAdapter.test.ts` (in `test:ci`,
+registered in `tests/index.ts`) is the official editor as an adapter, through the code a person's click goes through:
+
+| suite edit | the editor's path |
+|---|---|
+| open | `ProjectStructureService.loadProject` on an in-memory filesystem (`MemFs`), then `projectFromDirectory`'s `openFromContent`: `applyPatches`, `upgradeOnLoad`, `ProjectModel.fromJSON` with the model listeners off |
+| `add_node` | the picker (`NodePicker.utils` `createNodeFunction`; `NodeOperations` for a place in a parent): `NodeGraphNode.fromJSON` with a `guid()`, `insertChild` / `addChild` / `addRoot`, `seedNewNode`; each parameter as the property panel sets it; the label as the Node panel renames |
+| `remove_node` | `NodeGraphNodeDelete`: `graph.removeNode` in an undo group |
+| `connect` / `disconnect` | the connect popup's `addConnection`; `NodeOperations.removeConnection` |
+| `set_parameter` | `setParameter` (an absent value unsets) |
+| `move` | `NodeOperations.commitMoveNode`: `model.set({ x, y })` |
+| `rename` | `NodeGraphNodeRename`: `setLabel` |
+| `add_child` | the Layers drag (`layersDragApply` `applyMove`): `detachNode`, then `attachNode` at the index |
+| save | `ProjectStructureService.saveProject(dir, model.toJSON())`, `ProjectModel.toDirectory`'s v2 branch |
+
+The suite grades from the project **after the editor has opened and saved it once** (§5): what the open alone changes
+is printed, not compared. On todo-list and planning it is `nodegx.project.json`'s `version` (4 → 5, the
+run-on-value-change migration's own save, P109 ISL-018, by design). §3.5's two editor-owned checks are handed in: the
+**semantic validator** (nothing the reference's save of the same script lacks) and the **official loader** (what the
+editor saved reopens with no warning). With the suite's own structural validator, all three run on every fixture.
+
+**The first run: 29 / 16 / 16 differences on small / todo-list / planning.** Sorted by cause:
+
+1. **The editor's save rewrote `Logic/Counter`'s `type` from `logic` to `visual`** → **P112-S7-LOGICTYPE** (low, fixed).
+   `buildComponentV2Files` wrote `inferComponentType(name)`, a guess from the path; the registry kept `logic`. Carried
+   now on LEG-006's four seams, only when the declared type is not what the name says (no new key elsewhere, F46).
+   Regression `tests-unit/p112/logicTypeRoundTrip.test.ts`, 2 of 3 red with the old line.
+2. **A Text from the picker carries STYLE-002's look**: ten parameters the reference does not write, and the editor's
+   own semantic validator calls five of them **2 errors and 4 warnings** (`width`/`height` `"auto"`, `flexShrink` /
+   `flexGrow` that Text never reads, `minWidth` `"0"` read as 0%) → **P112-S7-TEXTDEFAULTS** (medium, **open**: the
+   look is not this task's to change, and what the runtime does with a `width` of `"auto"` is not measured).
+3. **The small fixture's own bytes**: `$schema` URLs that are not the schemas' `$id`s (`component.json` for
+   `component-v2.json`) and no `version` on nodes / connections. The fixture's fault (written s5): rewritten as the
+   official writers write them. The MCP and the prototype pass it unchanged.
+4. **A moved child**: the official editor saves no position for a node with a `parent` (`normalizeComponentForV2`;
+   the canvas lays a tree out from its root). The comparison now ignores `x`/`y` on a child even when the script
+   moved it, and `PROJECT-FORMAT-V2.md` says so; the small script's `move` now moves a root (`Logic/Counter`'s
+   `counter`), so `move` still grades a position. The package's layout test grades both arms.
+
+**The picker's look is a door's policy, not the vocabulary's.** The suite's `add_node` is "a node of this type with
+these parameters", the MCP's intent; the picker adds the look on top. So the round-trip specs take the picker's path
+without `ElementConfigRegistry.applyDefaults`, and a spec of its own takes it **with** the look and requires that the
+only differences are exactly what `applyDefaults` writes on the nodes the script added (10 on small), with a control
+that they arrived. Whether an agent's Text should wear the same look as a person's is a question, not settled here
+(the MCP adds none).
+
+**Readings (2026-10-10):**
+
+| | |
+|---|---|
+| `test:ci` run 1 (before the fixes, HEAD `dc4e0b51`) | 3,010 specs, 4 failures: the three round-trip specs (above) and `SUB-006 rules nonexistent-port …` (a floor red, not this work); the control passed |
+| `test:ci` run 2 (`32745136` + the fixes) | 3,011 specs, 4 failures: the same floor red, and the three round-trip specs **printing PASS** but red on my own assertion (the suite records a third check, `structural validator`; the assertion named two). Picker-look spec and control passed |
+| `test:ci` run 3 (the assertion fixed, `32745136` + this work) | **3,011 specs, 1 failure** (seed 32918): the floor's `SUB-006 … nonexistent-port` only. All five OWN-006 specs ran and passed — small / todo-list / planning **PASS** (8 / 244 / 394 ms), the picker's look, the control |
+| MCP `editorSuite.test.ts` on the rewritten small fixture | **3 / 3** |
+| the prototype (`suite-adapter.mjs`) on the rewritten small | **PASS** (15.4 s) |
+| `@nodegx/project-contract` `editor-suite.test.ts` | **15 / 15** |
+| `tests-unit` `p112/logicTypeRoundTrip`, `leg-006`, `def-039` | 23 / 23 |
+| `tsc -p tsconfig.tests.json` (editor), `typecheck:mcp` | clean |
+
+**So the round trip is three adapters on one reference**: the MCP, the prototype page and the Electron editor each save
+what the reference saves on small, todo-list and planning. If two of them agree with the reference, they agree with
+each other.
