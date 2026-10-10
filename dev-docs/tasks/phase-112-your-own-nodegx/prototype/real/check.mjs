@@ -6,6 +6,8 @@
  *    elapsed's connector to the new card and picked in the connect popup; a card moved; the new node deleted. Each is
  *    read back from the STORE (the files), the app is rebuilt from them, and the new wire is seen carrying signals in
  *    the real app's trace. Moving a card writes its position and does not rebuild the app.
+ *  - the structure from the Node panel: a screen node put first in its parent (the real app draws it first), renamed,
+ *    and put back — each read back from the files.
  *  - the missions: each Check fails on the graph as it starts, for its own reason (the checks have teeth); each
  *    "Show me" (pressed with the mouse) builds the answer through the store and its Check then passes; all three pass
  *    together at the end. A Check plays the graph on a COPY of the files in a second real app, never on a stand-in.
@@ -143,6 +145,24 @@ try {
     await until(`__orbit.selected === '${id}' && !!document.getElementById('delnode')`, 3000);
     await clickSel('#delnode');
     ok(await until(`${stored}.nodes.nodes.length === 28 && ${stored}.connections.connections.length === 37 && __orbit.lastShow.status === 'ok'`, 8000), 'Delete node removes it and its wire from the files; the app rebuilt');
+    // the structure, from the Node panel: a screen node moved to first place in its parent, renamed, and put back
+    const typeInto = async (sel, text) => {
+      await clickSel(sel);
+      await evaluate(client, `document.querySelector(${JSON.stringify(sel)}).select()`);
+      await client.send('Input.insertText', { text });
+      await client.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
+      await client.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
+    };
+    const foot = await evaluate(client, `__orbit.screenOf('footTxt')`);
+    await click(foot.x, foot.y);
+    ok(await until(`__orbit.selected === 'footTxt' && !!document.getElementById('prop--index')`, 3000), 'a screen node selected on the canvas shows where it sits (Inside, Place in it)');
+    await typeInto('#prop--index', '1');
+    const first = await until(`${stored}.nodes.nodes.find((n) => n.id === 'screen').children[0] === 'footTxt' && __orbit.lastShow.status === 'ok' && (() => { const f = __orbit.preview.elementsOf('footTxt')[0], p = __orbit.preview.elementsOf('phaseTxt')[0]; return f && p && f.getBoundingClientRect().top < p.getBoundingClientRect().top; })()`, 8000);
+    ok(!!first, 'Place in it = 1 writes the footer first among the screen\'s children, and the real app draws it above the phase label');
+    await typeInto('#prop--label', 'Round line text');
+    ok(await until(`${stored}.nodes.nodes.find((n) => n.id === 'footTxt').label === 'Round line text'`, 5000), 'a label typed in the Node panel renames the node in the files');
+    await typeInto('#prop--index', '4');
+    ok(await until(`${stored}.nodes.nodes.find((n) => n.id === 'screen').children[3] === 'footTxt' && __orbit.lastShow.status === 'ok'`, 8000), 'and Place in it = 4 puts it back');
     // the missions: every Check fails first, for its own reason
     const why = ['still running', 'switched back to Focus', 'Still running after'];
     for (let i = 0; i < 3; i++) {

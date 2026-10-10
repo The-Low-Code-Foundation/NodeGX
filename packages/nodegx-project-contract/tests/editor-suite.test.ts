@@ -93,6 +93,27 @@ describe('what the comparison forgives and what it does not', () => {
     expect(report.sentences).toEqual([]);
   });
 
+  test('P112-S6-SUITEIDS: an editor that mints its own id even for a node the script names gets later edits in its ids', async () => {
+    // The official editor mints every id. The small fixture names `home-box` on add_node and reparents into it later;
+    // the suite must hand that later edit the editor's id, or no minting editor can pass. Red when `runSuite` passes
+    // the script's edits through untranslated ("there is no node "home-box"").
+    const inner = referenceAdapter((i) => `mine-${i}`);
+    const seen: Edit[] = [];
+    const minting: EditorAdapter = {
+      name: 'minting always',
+      open: (f) => inner.open(f),
+      apply: (e) => {
+        seen.push(e);
+        return inner.apply(e.edit === 'add_node' ? { ...e, id: undefined } : e);
+      },
+      save: () => inner.save()
+    };
+    const report = await runSuite(minting, small());
+    expect(report.sentences).toEqual([]);
+    const reparent = seen.find((e) => e.edit === 'add_child' && e.id === 'home-count');
+    expect(reparent).toMatchObject({ parent: expect.stringMatching(/^mine-\d+$/) });
+  });
+
   test('layout is free: nodes the script did not move may sit anywhere, moved ones may not', async () => {
     const reference = await saved(referenceAdapter());
     const nodesFile = 'components/Pages/Home/nodes.json';

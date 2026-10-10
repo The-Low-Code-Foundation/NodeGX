@@ -147,6 +147,27 @@ export function validateStructure(saved: Files): string[] {
   return out;
 }
 
+/**
+ * P112-S6-SUITEIDS — an edit as the editor must receive it: every node the script named and the editor minted its
+ * own id for (`apply` returned it) is called by the editor's id. A script names the nodes it adds so its later edits
+ * can find them; an editor that mints its own ids (the official one does) would otherwise be handed a name it never
+ * gave anything. The `add_node`'s own `id` is left as the script's request.
+ */
+export function inEditorIds(edit: Edit, editorIdOf: Readonly<Record<string, string>>): Edit {
+  const t = (id: string) => editorIdOf[id] ?? id;
+  switch (edit.edit) {
+    case 'add_node':
+      return edit.parent !== undefined ? { ...edit, parent: t(edit.parent) } : edit;
+    case 'connect':
+    case 'disconnect':
+      return { ...edit, from: { ...edit.from, node: t(edit.from.node) }, to: { ...edit.to, node: t(edit.to.node) } };
+    case 'add_child':
+      return { ...edit, id: t(edit.id), parent: t(edit.parent) };
+    default:
+      return { ...edit, id: t(edit.id) };
+  }
+}
+
 /** Runs one adapter on one fixture. */
 export async function runSuite(
   adapter: EditorAdapter,
@@ -168,6 +189,8 @@ export async function runSuite(
   // The reference first: a fixture whose script the reference refuses is the fixture's fault.
   const reference = referenceAdapter(mint);
   const idMap: Record<string, string> = {};
+  // the other way round: the id the editor gave a node the script named, so a later edit names it the editor's way
+  const editorIdOf: Record<string, string> = {};
   const movedIds = new Set<string>();
   const referenceIds: Array<string | undefined> = [];
   let tr = now();
@@ -195,11 +218,14 @@ export async function runSuite(
   try {
     await adapter.open(fixture.files);
     for (const [i, edit] of fixture.edits.entries()) {
-      const r = await adapter.apply(edit);
+      const r = await adapter.apply(inEditorIds(edit, editorIdOf));
       const refId = referenceIds[i];
       if (edit.edit === 'add_node' && refId !== undefined) {
         const theirs = r && typeof r === 'object' && typeof r.id === 'string' ? r.id : edit.id ?? refId;
-        if (theirs !== refId) idMap[theirs] = refId;
+        if (theirs !== refId) {
+          idMap[theirs] = refId;
+          editorIdOf[refId] = theirs;
+        }
       }
     }
     saved = await adapter.save();

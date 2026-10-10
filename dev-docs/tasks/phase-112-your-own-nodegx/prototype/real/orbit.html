@@ -168,7 +168,7 @@ input[type="text"], input[type="number"], select { width: 100%; box-sizing: bord
 <canvas id="gl"></canvas>
 
 <header class="bar">
-  <div class="crumb">Orbit<span>›</span>App</div>
+  <div class="crumb"><span id="projName" style="color:var(--fg);font-weight:600;margin:0">Orbit</span><span>›</span><select id="compSel" aria-label="Component" style="width:auto;font:600 13px var(--ui);padding:3px 6px"></select></div>
   <div class="seg stages" role="group" aria-label="View">
     <button type="button" data-stage="0" aria-pressed="true"><b>1</b>Graph</button>
     <button type="button" data-stage="1" aria-pressed="false"><b>2</b>Lift</button>
@@ -272,18 +272,29 @@ const query = new URLSearchParams(location.search);
 try {
 
 /* ================= the project, held in memory; every edit is a write through the store ================= */
-const files = NodegxPreview.memoryFiles(await (await fetch('/project/orbit.json')).json());
+// the project: a folder beside serve.mjs (?project=orbit), or — ?open=wait — files handed to window.__openProject (the editor suite's adapter)
+const source = query.get('open') === 'wait'
+  ? await new Promise((resolve) => { window.__openProject = resolve; say('waiting'); })
+  : await (await fetch(`/project/${query.get('project') || 'orbit'}.json`)).json();
+const files = NodegxPreview.memoryFiles(source);
 const store = new NodegxPreview.V2ProjectStore(files);
-const KEY = 'App';
+const KEYS = store.componentKeys();
+let KEY = query.get('component') || (KEYS.includes('App') ? 'App' : KEYS[0]);
 /** One write through the store: `mutate` edits the component's files as read; the store checks nothing changed under it. */
 function write(mutate) {
   const c = store.readComponent(KEY);
-  mutate(c.files.nodes.nodes, c.files.connections.connections);
+  mutate(c.files.nodes.nodes, c.files.connections.connections, c.files.nodes);
   store.writeComponent(KEY, c.files, { ifRevision: c.revision });
 }
-const writeParam = (node, param, value) => write((ns) => { ns.find((n) => n.id === node).parameters[param] = value; });
+/** A parameter written, or with `undefined` unset, as the property panel does it. */
+const writeParam = (node, param, value) => write((ns) => {
+  const n = ns.find((x) => x.id === node);
+  if (value === undefined) { if (n.parameters) delete n.parameters[param]; }
+  else n.parameters = { ...(n.parameters ?? {}), [param]: value };
+});
+const ORBIT = KEY === 'App' && ['ticker', 'focusLen', 'breakLen', 'hud'].every((id) => store.readComponent('App').files.nodes.nodes.some((n) => n.id === id));
 let speed = Number(query.get('speed') || 60);
-writeParam('ticker', 'interval', Math.round(1000 / speed));
+if (ORBIT) writeParam('ticker', 'interval', Math.round(1000 / speed));
 for (const s of query.getAll('set')) {
   const [, node, param, raw] = s.match(/^([^.]+)\.([^=]+)=(.*)$/);
   writeParam(node, param, isNaN(Number(raw)) ? raw : Number(raw));
@@ -333,8 +344,9 @@ cssRenderer.render(scene, camera);   // the app's element is in the CSS layer BE
 /* ================= the real app ================= */
 const preview = await NodegxPreview.mountPreview($('app'), { runtimeBase: '/runtime/' });
 const first = await preview.update(files.entries());
-if (first.status !== 'ok') throw new Error('the app did not start: ' + JSON.stringify(first).slice(0, 300));
-const library = preview.nodeLibrary;
+// a project that does not run yet is still a project to edit: the editor keeps going and says why the app is not shown
+if (first.status !== 'ok') setTimeout(() => toast(`The app is not shown: ${first.message || first.status}`), 0);
+const library = preview.nodeLibrary || { nodetypes: [] };
 const libIndex = new Map((library.nodetypes || []).map((t) => [t.name, t]));
 
 /* ================= the graph, read from the files ================= */
@@ -399,7 +411,19 @@ const CARD_W = look.card.size.width * PX, HEAD = 44 * PX, ROW = look.card.proper
 const cardH = (id) => HEAD + rows[id].length * ROW + FOOT;
 const PITCH = 2.3, STEP = 0.8;
 const place = {};
-for (const n of nodes) place[n.id] = { x: (n.x ?? 0) * PX, z: (n.y ?? 0) * PX };
+/** Where each card sits: a logic node where the files put it; the screen's nodes stacked under their root in tree order, indented by depth (the structure lane is a view of the tree, so its positions are derived, never written). */
+function placeAll() {
+  for (const k in place) if (!byId[k]) delete place[k];
+  for (const n of nodes) if (!visual.has(n.id)) place[n.id] = { x: (n.x ?? 0) * PX, z: (n.y ?? 0) * PX };
+  let z = null, x0 = 0;
+  const depth = (id) => (parentOf[id] ? 1 + depth(parentOf[id]) : 0);
+  for (const id of visOrder) {
+    if (!parentOf[id]) { x0 = (byId[id].x ?? 0) * PX; if (z === null) z = (byId[id].y ?? 0) * PX; }
+    place[id] = { x: x0 + depth(id) * look.card.childMargin * PX, z };
+    z += cardH(id) + look.card.childSpacing * PX;
+  }
+}
+placeAll();
 // Lift: the step is how far along the data flow a node is (loop-back wires — a signal wire whose target reaches its source — ignored)
 let layer = {}, maxLayer = 1;
 function computeLayers() {
@@ -422,7 +446,7 @@ function computeBounds() {
 }
 computeBounds();
 center.set((bounds.x0 + bounds.x1) / 2, 0, (bounds.z0 + bounds.z1) / 2);
-const ORBIT_C = center.clone(); // the orbit's centre stays put while the graph is edited
+const ORBIT_C = center.clone(); // the orbit's centre stays put while the graph is edited (it moves with the component)
 function computeRings() {
   hops = Object.fromEntries([...visual].map((k) => [k, 0]));
   let frontier = [...visual], d = 0;
@@ -471,6 +495,7 @@ let gridMat;
   const m = new THREE.Mesh(new THREE.PlaneGeometry(size, size), gridMat);
   m.rotation.x = -Math.PI / 2; m.position.copy(center).setY(-0.001);
   scene.add(m);
+  var groundMesh = m;
 }
 const starMat = new THREE.PointsMaterial({ color: 0xcfd6ff, size: 0.35, transparent: true, opacity: 0, depthWrite: false, fog: false });
 {
@@ -485,7 +510,7 @@ for (let k = 1; k <= 16; k++) {
   const t = new THREE.Mesh(new THREE.TorusGeometry(ringR(k), 0.008, 4, 180), m);
   t.rotation.x = Math.PI / 2; t.position.set(ORBIT_C.x, 0.8 - k * 0.08 - 0.05, ORBIT_C.z);
   scene.add(t);
-  ringGuides.push({ k, m });
+  ringGuides.push({ k, m, t });
 }
 
 /* ================= live values: the app's own trace ================= */
@@ -590,7 +615,7 @@ function makeCard(id) {
     return { m, r };
   });
   const old = cards[id];
-  cards[id] = { grp, top, slab, stem, shadow, handle, dots, tex, ctx: c.getContext('2d'), key: '', heat: old?.heat ?? 0, thick: 0.04, pop: old ? 1 : fresh.has(id) ? 0 : 1 };
+  cards[id] = { grp, top, slab, stem, shadow, handle, dots, tex, ctx: c.getContext('2d'), key: '', heat: old?.heat ?? 0, thick: 0.04, pop: old ? 1 : fresh.has(id) ? 0 : 1, vis: visual.has(id) };
 }
 function dropCard(id) {
   const cd = cards[id];
@@ -610,8 +635,13 @@ const wireWorld = (id, dir, name, out) => { portLocal(id, dir, name, out); out.y
 /* ================= the structure lane (around the visual nodes, as the editor draws it) ================= */
 const lane = new THREE.Group();
 const laneParts = [];
-{
+scene.add(lane);
+/** The lane, drawn again whenever the structure changes (a component with no screen nodes has none, as in the editor). */
+function buildLane() {
+  for (const o of [...lane.children]) { lane.remove(o); o.geometry?.dispose(); o.material?.map?.dispose(); o.material?.dispose(); }
+  laneParts.length = 0;
   const gs = [...visual];
+  if (!gs.length) return;
   const LP = look.lane.padding * PX, LE = look.lane.eyebrowHeight * PX;
   const x0 = Math.min(...gs.map((i) => place[i].x)) - LP, x1 = Math.max(...gs.map((i) => place[i].x + CARD_W)) + LP;
   const z0 = Math.min(...gs.map((i) => place[i].z)) - (LP + LE), z1 = Math.max(...gs.map((i) => place[i].z + cardH(i))) + LP;
@@ -639,22 +669,28 @@ const laneParts = [];
   const spine = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(seg), spineMat); spine.position.y = 0.006;
   lane.add(wash, outline, eye, spine);
   laneParts.push([washMat, 0.05], [outlineMat, 1], [eyeMat, 1], [spineMat, 1]);
-  scene.add(lane);
 }
+buildLane();
 
 /* ================= leaders: from a screen node's card to the part of the app it draws ================= */
 const leaders = {};
-for (const id of visual) {
-  const mat = new THREE.LineBasicMaterial({ color: 0x5ca9ff, transparent: true, opacity: 0 });
-  const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), mat);
-  line.frustumCulled = false;
-  scene.add(line);
-  leaders[id] = { line, mat };
+function syncLeaders() {
+  for (const id in leaders) if (!visual.has(id)) { scene.remove(leaders[id].line); leaders[id].line.geometry.dispose(); leaders[id].mat.dispose(); delete leaders[id]; }
+  for (const id of visual) {
+    if (leaders[id]) continue;
+    const mat = new THREE.LineBasicMaterial({ color: 0x5ca9ff, transparent: true, opacity: 0 });
+    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), mat);
+    line.frustumCulled = false;
+    scene.add(line);
+    leaders[id] = { line, mat };
+  }
 }
+syncLeaders();
 const PHONE_W = 4.75, PHONE_H = PHONE_W * APP.h / APP.w, PHONE_Y = 4.6, VIS_SCALE = 1.6;
 // beside the app in Orbit: the screen's tree in order, the top half of it on the left, the rest on the right
 const slot = {};
-{
+function computeSlots() {
+  for (const k in slot) delete slot[k];
   const half = visOrder.reduce((t, id) => t + cardH(id), 0) / 2;
   let t = 0;
   for (const id of visOrder) { slot[id] = { side: t < half ? -1 : 1 }; t += cardH(id); }
@@ -665,6 +701,7 @@ const slot = {};
     for (const id of col) { const h = cardH(id) * VIS_SCALE; slot[id].y = y - h / 2; y -= h + gap; }
   }
 }
+computeSlots();
 
 /* ================= wires ================= */
 const WHITE = new THREE.Color(1, 1, 1);
@@ -752,36 +789,109 @@ function graphChanged() {
   const before = new Set(Object.keys(cards));
   readGraph();
   for (const id of before) if (!byId[id]) { dropCard(id); delete place[id]; delete rows[id]; }
+  const structure = JSON.stringify([visOrder, parentOf]);
   for (const n of nodes) {
-    place[n.id] = { x: (n.x ?? 0) * PX, z: (n.y ?? 0) * PX };
     const r = computeRows(n.id);
     if (!cards[n.id]) { rows[n.id] = r; makeCard(n.id); }
-    else if (JSON.stringify(r) !== JSON.stringify(rows[n.id])) rebuildCard(n.id);
+    else if (JSON.stringify(r) !== JSON.stringify(rows[n.id]) || cards[n.id].vis !== visual.has(n.id)) rebuildCard(n.id);
     else cards[n.id].key = '';
   }
+  placeAll();
   syncWireObjs();
   computeBounds(); computeLayers(); computeRings();
+  if (structure !== lastStructure) { lastStructure = structure; buildLane(); syncLeaders(); computeSlots(); }
   graphVersion++;
   if (selected && !byId[selected]) selected = null;
   drawNode(true);
 }
+let lastStructure = JSON.stringify([visOrder, parentOf]);
+/** Shows another component of the project: every card, wire and lane is the new component's. */
+function openComponent(key) {
+  if (key === KEY) return;
+  KEY = key;
+  for (const id of Object.keys(cards)) dropCard(id);
+  for (const k of Object.keys(place)) delete place[k];
+  for (const k of Object.keys(rows)) delete rows[k];
+  for (const [k, wo] of wireObjs) { scene.remove(wo.mesh); wo.mesh.geometry.dispose(); wo.mat.dispose(); wireObjs.delete(k); }
+  selected = null; hoverId = null; pan.set(0, 0, 0);
+  readGraph();
+  for (const id of ids()) rows[id] = computeRows(id);
+  placeAll();
+  for (const id of ids()) makeCard(id);
+  syncWireObjs();
+  computeBounds();
+  center.set((bounds.x0 + bounds.x1) / 2, 0, (bounds.z0 + bounds.z1) / 2);
+  ORBIT_C.copy(center);
+  groundMesh.position.copy(center).setY(-0.001);
+  for (const r of ringGuides) r.t.position.set(ORBIT_C.x, r.t.position.y, ORBIT_C.z);
+  computeLayers(); computeRings();
+  lastStructure = JSON.stringify([visOrder, parentOf]);
+  buildLane(); syncLeaders(); computeSlots();
+  graphVersion++;
+  $('compSel').value = key;
+  drawNode(true);
+}
 const newId = (type) => { const base = type.replace(/^net\.noodl\./, '').replace(/[^A-Za-z]/g, '').replace(/^./, (c) => c.toLowerCase()) || 'node'; let id; do id = `${base}${++seq}`; while (byId[id]); return id; };
-async function addNode(type, at, label, params = {}) {
+/** A new node: where `at` says (exactly, or the nearest free spot), and — for a screen node — into `parent`'s children at `index` (the end when absent). */
+async function addNode(type, at, label, params = {}, { parent, index, exact } = {}) {
   const id = newId(type);
-  const h = HEAD + FOOT;
-  const spot = findFree(at.x, at.z, h, id);
+  const spot = exact ? at : findFree(at.x, at.z, HEAD + FOOT, id);
   fresh.add(id);
-  write((ns) => { ns.push({ id, type, ...(label ? { label } : {}), x: Math.round(spot.x / PX), y: Math.round(spot.z / PX), parameters: { ...params } }); });
+  write((ns) => {
+    const node = { id, type };
+    if (label) node.label = label;
+    node.x = Math.round(spot.x / PX); node.y = Math.round(spot.z / PX);
+    if (Object.keys(params).length) node.parameters = { ...params };
+    if (parent !== undefined) {
+      const p = ns.find((n) => n.id === parent);
+      if (!p) throw new Error(`there is no node "${parent}" to put it in`);
+      p.children ??= [];
+      p.children.splice(index === undefined ? p.children.length : Math.max(0, Math.min(index, p.children.length)), 0, id);
+      node.parent = parent;
+    }
+    ns.push(node);
+  });
   graphChanged();
   await show(`Added ${labelOf(id)}`);
   return id;
 }
+/** A node and its wires; a screen node takes everything inside it with it. */
 async function removeNode(id) {
-  if (visual.has(id)) return;
   const name = labelOf(id);
-  write((ns, cs) => { ns.splice(ns.findIndex((n) => n.id === id), 1); for (let i = cs.length - 1; i >= 0; i--) if (cs[i].fromId === id || cs[i].toId === id) cs.splice(i, 1); });
+  write((ns, cs, file) => {
+    const doomed = new Set([id]);
+    for (let grew = true; grew; ) {
+      grew = false;
+      for (const n of ns) if (!doomed.has(n.id) && ((n.parent !== undefined && doomed.has(n.parent)) || [...doomed].some((d) => byId[d]?.children?.includes(n.id)))) { doomed.add(n.id); grew = true; }
+    }
+    for (let i = ns.length - 1; i >= 0; i--) if (doomed.has(ns[i].id)) ns.splice(i, 1);
+    for (const n of ns) if (n.children) { n.children = n.children.filter((c) => !doomed.has(c)); if (!n.children.length) delete n.children; }
+    for (let i = cs.length - 1; i >= 0; i--) if (doomed.has(cs[i].fromId) || doomed.has(cs[i].toId)) cs.splice(i, 1);
+    if (file.visualRoots) { file.visualRoots = file.visualRoots.filter((r) => !doomed.has(r)); if (!file.visualRoots.length) delete file.visualRoots; }
+  });
   graphChanged();
   await show(`Deleted ${name}`);
+}
+/** A screen node moved inside another (or to another place in the same one): what dragging it in the structure lane does. */
+async function reparent(id, parent, index) {
+  for (let cur = parent; cur; cur = parentOf[cur]) if (cur === id) throw new Error(`${labelOf(parent)} is inside ${labelOf(id)}`);
+  write((ns) => {
+    const node = ns.find((n) => n.id === id), p = ns.find((n) => n.id === parent);
+    if (!p) throw new Error(`there is no node "${parent}" to put it in`);
+    const old = node.parent !== undefined ? ns.find((n) => n.id === node.parent) : undefined;
+    if (old?.children) { old.children = old.children.filter((c) => c !== id); if (!old.children.length) delete old.children; }
+    p.children ??= [];
+    if (!p.children.includes(id)) p.children.splice(index === undefined ? p.children.length : Math.max(0, Math.min(index, p.children.length)), 0, id);
+    node.parent = parent;
+  });
+  graphChanged();
+  await show(`${labelOf(id)} is now inside ${labelOf(parent)}`);
+}
+async function rename(id, label) {
+  write((ns) => { ns.find((n) => n.id === id).label = label; });
+  graphChanged();
+  for (const k of ids()) if (cards[k]) cards[k].key = '';
+  await show(`Renamed to ${label}`);
 }
 const kindOk = (outSig, inSig) => outSig === inSig;
 async function connect(from, to) {
@@ -796,21 +906,23 @@ async function connect(from, to) {
 }
 async function disconnect(key) {
   const c = conns.find((x) => wireKey(x) === key);
-  if (!c) return;
+  if (!c) return false;
   const text = wireText(c);
   write((ns, cs) => { cs.splice(cs.findIndex((x) => wireKey(x) === key), 1); });
   graphChanged();
   await show(`Removed ${text}`);
+  return true;
 }
 async function setParam(id, name, value, what) {
   writeParam(id, name, value);
   graphChanged();
   await show(what);
 }
-/** A card moved in Graph: its position is written into the files, as the editor does. The app is not rebuilt for it. */
-function moveNode(id) {
-  write((ns) => { const n = ns.find((x) => x.id === id); n.x = Math.round(place[id].x / PX); n.y = Math.round(place[id].z / PX); });
+/** A card moved: its position is written into the files, as the editor does. The app is not rebuilt for it. */
+function moveNode(id, x = place[id].x / PX, y = place[id].z / PX) {
+  write((ns) => { const n = ns.find((k) => k.id === id); n.x = Math.round(x); n.y = Math.round(y); });
   readGraph();
+  placeAll();
   computeBounds(); computeRings();
   graphVersion++;
 }
@@ -847,6 +959,7 @@ function lengthKnob(inputId, valId, node, name) {
   el.addEventListener('change', () => setTo(Number(el.value)));
   for (const b of document.querySelectorAll(`.chips[data-for="${inputId}"] button`)) b.onclick = () => setTo(Number(b.dataset.v));
 }
+if (ORBIT) {
 lengthKnob('kFocus', 'vFocus', 'focusLen', 'Focus length');
 lengthKnob('kBreak', 'vBreak', 'breakLen', 'Break length');
 for (const [inputId, state] of [['kFocusGlow', 'Focus'], ['kBreakGlow', 'Break']]) {
@@ -860,6 +973,7 @@ for (const [inputId, state] of [['kFocusGlow', 'Focus'], ['kBreakGlow', 'Break']
 $('kFormat').value = param('hud', 'format');
 $('kFormat').addEventListener('change', () => change('hud', 'A new format', () => setParam('hud', 'format', $('kFormat').value, 'Round line changed')));
 $('kFormat').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('kFormat').blur(); });
+}
 for (const b of document.querySelectorAll('.to')) b.onclick = () => select(b.dataset.node);
 
 /* ================= tabs and the Node panel ================= */
@@ -903,15 +1017,27 @@ function drawNode(force) {
   if (!force && k === nodeKey) return;
   nodeKey = k;
   const connsHtml = mine.length ? `<div class="eyebrow">Connections</div>${mine.map((c) => `<div class="conn"><span title="${esc(wireText(c))}">${c.fromId === id ? '→ ' + esc(labelOf(c.toId)) + ' · ' + esc(portLabel(c.toId, 'in', c.toProperty)) : '← ' + esc(labelOf(c.fromId)) + ' · ' + esc(portLabel(c.fromId, 'out', c.fromProperty))}</span><button type="button" data-unwire="${esc(wireKey(c))}" aria-label="Remove this wire">×</button></div>`).join('')}` : '';
+  // a screen node can go inside any screen node that is not inside it
+  const inside = (a, b) => { for (let cur = a; cur; cur = parentOf[cur]) if (cur === b) return true; return false; };
+  const parents = vis && parentOf[id] ? [...visual].filter((p) => !inside(p, id)) : [];
+  const siblings = parentOf[id] ? byId[parentOf[id]].children || [] : [];
   bodyNode.innerHTML = `
     <h2>${esc(labelOf(id))}</h2>
     <div class="type">${esc(typeName(n.type))}${hasSpec(n.type) ? ' · has a spec' : ''}</div>
+    <div class="prop"><label for="prop--label">Label</label><input id="prop--label" type="text" value="${esc(n.label ?? '')}" placeholder="${esc(typeName(n.type))}" spellcheck="false"></div>
+    ${parents.length ? `<div class="prop"><label for="prop--parent">Inside</label><select id="prop--parent">${parents.map((p) => `<option value="${esc(p)}"${p === parentOf[id] ? ' selected' : ''}>${esc(labelOf(p))}</option>`).join('')}</select></div>
+    <div class="prop"><label for="prop--index">Place in it</label><input id="prop--index" type="number" min="1" max="${siblings.length}" value="${siblings.indexOf(id) + 1}"></div>` : ''}
     ${vis ? `<div class="draws"><b>Draws on screen.</b> Hover this card and the part of the app it draws is outlined; point at the app and its card lights up.</div>` : ''}
     ${editable.length ? `<div class="eyebrow">Properties</div>${editable.map((p) => propEditor(p, n.parameters?.[p.name] ?? p.default)).join('')}` : ''}
     ${outs.length ? `<div class="eyebrow">Outputs now, from the app</div>${outs.map((r) => `<div class="port"><div class="n">${esc(r.label)}</div><div class="v">${esc(fmt(last[`${id}.out.${r.name}`]))}</div></div>`).join('')}` : ''}
     ${connsHtml}
     <div class="src">${esc(n.type)} · id ${esc(id)} · components/App/nodes.json</div>
-    ${vis ? '' : '<button type="button" class="danger" id="delnode">Delete node</button>'}`;
+    <button type="button" class="danger" id="delnode">${vis && (n.children || []).length ? 'Delete it and what is inside it' : 'Delete node'}</button>`;
+  $('prop--label').addEventListener('change', (e) => { rename(id, e.target.value); e.target.blur(); });
+  if ($('prop--parent')) {
+    $('prop--parent').addEventListener('change', (e) => reparent(id, e.target.value).catch((err) => toast(`Not moved: ${err.message}`)));
+    $('prop--index').addEventListener('change', (e) => reparent(id, parentOf[id], Math.max(1, Number(e.target.value)) - 1).catch((err) => toast(`Not moved: ${err.message}`)));
+  }
   for (const p of editable) {
     const el = $(fid(p.name));
     if (!el) continue;
@@ -934,12 +1060,14 @@ drawNode(true);
 
 /* ================= the picker: the runtime's own node library ================= */
 const picker = $('picker'), pickq = $('pickq'), picklist = $('picklist');
-const HIDE = ['Visual', 'Component Utilities', 'Navigation'];
+const HIDE = ['Component Utilities', 'Navigation'];
 const pickable = (library.nodetypes || []).filter((t) => !HIDE.includes(t.category) && t.category).sort((a, b) => a.category.localeCompare(b.category) || typeName(a.name).localeCompare(typeName(b.name)));
-$('pickcount').textContent = `${pickable.length} node types, from the runtime the app runs on. Screen nodes are added in the structure, which this page does not edit yet.`;
+const into = () => (selected && visual.has(selected) ? selected : null);   // a screen node goes inside the selected screen node
 function drawPicker() {
   const q = pickq.value.trim().toLowerCase();
-  const items = pickable.filter((p) => !q || typeName(p.name).toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
+  const offered = pickable.filter((t) => t.category !== 'Visual' || into());
+  $('pickcount').textContent = `${offered.length} node types, from the runtime the app runs on. ${into() ? `Screen nodes go inside ${labelOf(into())}.` : 'Select a screen node first to add a screen node inside it.'}`;
+  const items = offered.filter((p) => !q || typeName(p.name).toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
   let html = '', cat = '';
   for (const p of items) {
     if (p.category !== cat) { cat = p.category; html += `<div class="cat eyebrow">${esc(cat)}</div>`; }
@@ -959,7 +1087,8 @@ picklist.addEventListener('click', async (e) => {
   const b = e.target.closest('[data-type]');
   if (!b) return;
   picker.hidden = true;
-  const id = await addNode(b.dataset.type, viewCentreOnGround());
+  const isVisual = libIndex.get(b.dataset.type)?.category === 'Visual';
+  const id = await addNode(b.dataset.type, viewCentreOnGround(), undefined, {}, isVisual && into() ? { parent: into() } : {});
   select(id);
   toast(`Added ${labelOf(id)}. Drag from the dot on its header to wire it.`);
 });
@@ -1157,8 +1286,34 @@ async function showMe(i) {
   s.step = -1; s.busy = false;
   return runCheck(i);
 }
-drawMissions();
+if (ORBIT) drawMissions();
+else { $('tab-missions').hidden = true; $('tab-try').hidden = true; showTab('node'); }
 $('reset').onclick = () => location.reload();
+// the crumb: the project, and which of its components the canvas shows
+$('projName').textContent = JSON.parse(files.read('nodegx.project.json') || '{}').name || 'Project';
+$('compSel').innerHTML = KEYS.map((k) => `<option${k === KEY ? ' selected' : ''}>${esc(k)}</option>`).join('');
+$('compSel').addEventListener('change', (e) => openComponent(e.target.value));
+
+/** OWN-006's adapter, inside the page: one suite edit, done by the page's own editing functions (the ones its picker, connect popup and Node panel call). */
+async function applyEdit(e) {
+  openComponent(e.component);
+  const wire = (w) => `${w.node}.${w.port}`;
+  switch (e.edit) {
+    case 'add_node': {
+      const placed = e.x !== undefined && e.y !== undefined;
+      const id = await addNode(e.type, placed ? { x: e.x * PX, z: e.y * PX } : viewCentreOnGround(), e.label, e.parameters || {}, { parent: e.parent, index: e.index, exact: placed });
+      return { id };
+    }
+    case 'remove_node': await removeNode(e.id); return {};
+    case 'connect': if (!(await connect(wire(e.from), wire(e.to)))) throw new Error(`the wire ${wire(e.from)} → ${wire(e.to)} is already there`); return {};
+    case 'disconnect': if (!(await disconnect(`${wire(e.from)}>${wire(e.to)}`))) throw new Error(`there is no wire ${wire(e.from)} → ${wire(e.to)}`); return {};
+    case 'set_parameter': await setParam(e.id, e.name, e.value); return {};
+    case 'move': moveNode(e.id, e.x, e.y); return {};
+    case 'rename': await rename(e.id, e.label); return {};
+    case 'add_child': await reparent(e.id, e.parent, e.index); return {};
+    default: throw new Error(`this page cannot do "${e.edit}"`);
+  }
+}
 
 /* ================= stages, and where the app sits ================= */
 const CAPTIONS = [
@@ -1487,7 +1642,7 @@ window.__orbit = {
   recent, wiresSeen, project, screenOf, preview, store, files, cards, rows, last, MISSIONS, mstate,
   get conns() { return conns; }, get nodes() { return nodes; }, get mode() { return mode; }, get mix() { return mix; }, get stage() { return stage; }, get stageT() { return stageT; },
   get events() { return eventCount; }, get lastShow() { return lastShow; }, get shows() { return shows; }, get checker() { return checker; }, get selected() { return selected; },
-  setMode, setStage, select, check: runCheck, showMe, visual: [...visual], portsOf
+  setMode, setStage, select, check: runCheck, showMe, get visual() { return [...visual]; }, portsOf, apply: applyEdit, openComponent, get component() { return KEY; }
 };
 // ?demo plays the three missions by itself, then lifts and orbits the result
 if (query.has('demo')) (async () => {
