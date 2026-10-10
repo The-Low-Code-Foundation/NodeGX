@@ -470,6 +470,17 @@ const RouterNode = {
       return group;
     },
     reset(outcomes?: OutcomeToken[]) {
+      // P109-S38-SSRNOPAGES: a server render and a hydrate mount the router (`triggerDidMount`) before its inputs have
+      // been applied, so the mount's reset found no Pages and reported `router/no-pages` (a console error on every
+      // load at a start-page URL) while the Pages list was one update away. A tokenless reset with no Pages yet waits
+      // once for the inputs to land; the Pages setter's own reset joins it. A Router that really has no Pages still
+      // reports it, one update later.
+      if (outcomes === undefined && this._internal.pages === undefined && !this._internal.resetWaitedForInputs) {
+        this._internal.resetWaitedForInputs = true;
+        this.scheduleReset();
+        return;
+      }
+      this._internal.resetWaitedForInputs = false;
       this._internal.asyncQueue.enqueue(this.resetAsync.bind(this, outcomes));
     },
     scrollToTop() {
