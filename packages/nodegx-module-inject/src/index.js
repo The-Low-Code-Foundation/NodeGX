@@ -744,6 +744,7 @@ module.exports = {
   MANIFEST_SCHEMA,
   DEPENDENCIES_PLACEHOLDER,
   MAIN_PLACEHOLDER,
+  manifestEntry,
   scanModuleManifests,
   scanModuleManifestsSync,
   toInjectModules,

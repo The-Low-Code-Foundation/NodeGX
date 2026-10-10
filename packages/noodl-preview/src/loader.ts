@@ -39,6 +39,7 @@ import { ProjectModel } from '@noodl-models/projectmodel';
 import * as Exporter from '@noodl-utils/exporter';
 import { HtmlProcessor } from '@noodl-utils/compilation/build/processors/html-processor';
 
+import { PREVIEW_EXPORT_OPTIONS, projectModelFromLegacy } from './projectExport';
 import { validateLegacyProject, type PreviewReport } from './validate';
 
 /** Everything the preview server serves for one snapshot of the project. */
@@ -149,34 +150,6 @@ function readV2(dir: string): { project: LegacyProject; warnings: string[] } {
 }
 
 /**
- * Picks a root node when the project file does not name one.
- *
- * `ProjectModel.fromJSON` resolves `rootNodeId` and `rootComponent`; projects
- * written by the editor always carry one. Projects authored from outside (an
- * agent writing v2 files, the MCP server) frequently do not, and the exporter
- * returns `undefined` without a root — a blank page with no explanation. So we
- * guess, using the editor's own predicate (`allowAsExportRoot`, via
- * `setRootComponent`), and tell the user we guessed.
- */
-function resolveRootNode(project: ProjectModel): string | null {
-  const components = project.getComponents();
-  const byName = (name: string) => components.find((c) => c.name === name);
-
-  const candidates = [byName('/%rootcomponent'), byName('/App'), byName('/#App'), ...components].filter(
-    Boolean
-  ) as ReturnType<typeof byName>[];
-
-  for (const component of candidates) {
-    project.setRootComponent(component);
-    if (project.getRootNode()) {
-      return `No root node declared — previewing "${component.name}". ` +
-        `Set "rootNodeId" in the project file to pin it.`;
-    }
-  }
-  return null;
-}
-
-/**
  * Reads the project on disk into the legacy project object, whichever format it is in.
  *
  * Split out of {@link loadPreview} by HLS-015 so the deploy reads a project through the same code
@@ -204,23 +177,11 @@ export function buildProjectModel(
   legacy: LegacyProject,
   dir: string
 ): { project: ProjectModel; warnings: string[] } {
-  const warnings: string[] = [];
-  const project = ProjectModel.fromJSON(legacy);
+  const built = projectModelFromLegacy(legacy);
   // The HtmlProcessor reads noodl_modules from here, and asset URLs resolve
   // against it — the deploy path sets the same field.
-  project._retainedProjectDirectory = dir;
-
-  if (!project.getRootNode()) {
-    const note = resolveRootNode(project);
-    if (!note) {
-      throw new Error(
-        'No renderable root node found. The project has no "rootNodeId" and no component ' +
-          'with a node that can be an export root (a Group, Page Router, …).'
-      );
-    }
-    warnings.push(note);
-  }
-  return { project, warnings };
+  built.project._retainedProjectDirectory = dir;
+  return built;
 }
 
 /**
@@ -279,18 +240,19 @@ export async function loadPreview(dir: string, format: ProjectFormat): Promise<P
     return { status: 'invalid', report };
   }
 
+  // P112-S3-DISPOSE. Released when the build is made: a `ProjectModel` registers listeners on the one `NodeLibrary`
+  // (and its components with it) that only `dispose()` removes, so every rebuild made the next one slower —
+  // measured on the todo template, 256 → 1,668 ms over eight saves. The build keeps no reference to it.
+  let project: ProjectModel | undefined;
   try {
     const built = buildProjectModel(legacy, dir);
-    const project = built.project;
+    project = built.project;
     warnings.push(...built.warnings);
 
-    // `environment: null` blanks the cloud-services metadata: a local preview
-    // must never inherit a deployed backend by accident.
     const exportJson = Exporter.exportToJSON(project, {
+      ...PREVIEW_EXPORT_OPTIONS,
       useBundles: true,
-      useBundleHashes: true,
-      environment: null,
-      ignoreComponentFilter: (c) => !c.name.startsWith('/#__cloud__/')
+      useBundleHashes: true
     });
     if (!exportJson) {
       return { status: 'error', message: 'Export produced nothing — the root component may have been deleted.' };
@@ -330,6 +292,8 @@ export async function loadPreview(dir: string, format: ProjectFormat): Promise<P
     };
   } catch (err) {
     return { status: 'error', message: err instanceof Error ? err.message : String(err) };
+  } finally {
+    project?.dispose();
   }
 }
 

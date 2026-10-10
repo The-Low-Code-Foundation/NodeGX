@@ -155,6 +155,12 @@ export declare const MANIFEST_SCHEMA: Record<string, unknown>;
 export declare const DEPENDENCIES_PLACEHOLDER: '<%modules_dependencies%>';
 export declare const MAIN_PLACEHOLDER: '<%modules_main%>';
 
+/**
+ * One kit folder's manifest text → its `ScannedModule` (`null` = the read failed). The scan's core, exported so a
+ * reader that is not a file system — P112 OWN-004's page, holding a project's files in memory — reads kits the
+ * same way.
+ */
+export declare function manifestEntry(dir: string, raw: string | null): ScannedModule;
 export declare function scanModuleManifests(projectDirectory: string | undefined): Promise<ScannedModule[]>;
 /**
  * `scanModuleManifests`, synchronously — a twin sharing the same core, not a

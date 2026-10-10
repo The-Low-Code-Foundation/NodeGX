@@ -119,6 +119,52 @@ for (const { entry, out } of ENTRIES) {
 }
 
 /**
+ * P112 OWN-004 — the in-page preview: the same export, run by a page on files it holds in memory.
+ *
+ * The editor modules the export reaches are browser code (the editor runs in a renderer), except
+ * for seven imports of Node built-ins on paths the export never takes: the kit scanner and kit
+ * scaffold (`@nodegx/module-inject`, `@nodegx/kit-scaffold`, via `projectmodules.ts`; the scan
+ * returns before touching `fs` when there is no project folder, and a page has none), the format
+ * detector, `verifyJson`, `utils.ts` and `bugtracker` (stubbed as above). Each built-in becomes a
+ * module whose every function **throws** "not available in a page" when called — not a silent
+ * no-op — so the day the export does reach one, the page says which.
+ *
+ * Node's `Buffer` is the `buffer` package, injected (`src/inPage/buffer.ts` says who needs it).
+ *
+ * No viewer node register and no runtime: the page's own deploy runtime supplies the node library
+ * (see `src/inPage/index.ts`), so this bundle carries only the export.
+ */
+const NODE_BUILTINS = /^(node:)?(fs|path|os|vm|child_process|http|https)$/;
+const inPagePlugin = {
+  name: 'noodl-preview-in-page',
+  setup(build) {
+    build.onResolve({ filter: NODE_BUILTINS }, (args) => ({ path: args.path, namespace: 'in-page-builtin' }));
+    build.onLoad({ filter: /.*/, namespace: 'in-page-builtin' }, (args) => ({
+      contents:
+        `const fail = (name) => () => { throw new Error('${args.path}.' + String(name) + ' is not available in a page (noodl-preview in-page build).'); };\n` +
+        'module.exports = new Proxy({}, { get: (_, name) => (name === "__esModule" ? false : fail(name)) });',
+      loader: 'js'
+    }));
+  }
+};
+
+await esbuild.build({
+  ...shared,
+  platform: 'browser',
+  target: 'es2020',
+  format: 'iife',
+  globalName: 'NodegxPreview',
+  external: [],
+  // NOODL_PREVIEW_MINIFY=0 for a readable stack in the browser.
+  minify: process.env.NOODL_PREVIEW_MINIFY !== '0',
+  define: { 'process.env.NODE_ENV': '"production"', global: 'globalThis' },
+  plugins: [shimPlugin, inPagePlugin],
+  inject: [path.join(HERE, 'src/inPage/buffer.ts')],
+  entryPoints: [path.join(HERE, 'src/inPage/index.ts')],
+  outfile: path.join(HERE, 'dist/browser/noodl-preview-in-page.js')
+});
+
+/**
  * HLS-015 / register row C68 — the bundle needs a `package.json` beside it, and that is not
  * housekeeping.
  *

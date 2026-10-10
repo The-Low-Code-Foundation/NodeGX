@@ -32,6 +32,8 @@ import { NodeLibrary } from '@noodl-models/nodelibrary/nodelibrary';
 const NoodlRuntime = require('@noodl/runtime');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const registerViewerNodes = require('../../noodl-viewer-react/src/register-nodes').default;
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const viewerProjectSettings = require('../../noodl-viewer-react/src/project-settings').default;
 
 let bootstrapped = false;
 
@@ -57,6 +59,11 @@ export function bootstrapNodeLibrary(): number {
     }
   });
   registerViewerNodes(runtime);
+  // P112-S3-IGNOREINEXPORT. The viewer's project-settings ports (Title, Head code, …), as the viewer's
+  // constructor and `ssrSetupRuntime` hand them over. Without them the library's `projectsettings` had no
+  // ports, `exportSettings` found no `ignoreInExport` flag to honour, and this CLI and `nodegx deploy`
+  // published `htmlTitle` and `headCode` in `window.projectData` — which the editor's own deploy leaves out.
+  runtime.setProjectSettings(viewerProjectSettings);
 
   // `NodeLibrary.loadLibrary()` reads `window.NodeLibraryData` — the same shape
   // `sendNodeLibrary()` puts on the wire.
