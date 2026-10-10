@@ -19,7 +19,7 @@ what the window leaves and is never shorter than its content, a Fixed % is of th
 
 **What is left.** The runtime does this on both paths since ISL-052 (P107-C154, P109-S37-FILLCAP, ISCROLLPERCENT, CENTRECUT).
 The model still gives a scroller's children unbounded room on its axis (RESEARCH-LAYOUT-SEMANTICS.md §2, the native toolkits'
-reading): 32 boxes in the layout check mismatch and are listed KNOWN as ROOM. The model is P107's (R16): it learns the rule,
+reading): 30 boxes in the layout check mismatch and are listed KNOWN as ROOM. The model is P107's (R16): it learns the rule,
 then the ROOM rows leave KNOWN. The code export (P18) is told the same.
 
 **Fixed (P107 s73, NSP-016 §8.4).** `layout.ts` gives a scroll axis the window as its room and reference, a `fill` its
