@@ -19,7 +19,7 @@ describe('defineNode — what fails to typecheck', () => {
       inputs: { go: { type: 'signal', outcome: true }, v: { type: 'number', default: 0 } },
       outputs: { n: { type: 'number', from: (s) => s.n }, fired: { type: 'signal' } }
     }).on({
-      go: (s) => ({ set: { n: s.n + 1 }, emit: ['fired'], outcome: 'done' })
+      go: (s) => ({ says: 'always: one up', set: { n: s.n + 1 }, emit: ['fired'], outcome: 'done' })
     });
     expect(ok.type).toBe('T');
   });

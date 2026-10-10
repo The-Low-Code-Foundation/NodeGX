@@ -39,6 +39,40 @@ Attachments, avatars, imports — any user-picked file that must persist server-
 |---|---|---|---|
 | `upload` | Signal | — | Starts uploading File, and fails straight away when no file has been set |
 
+### What each input does
+
+**File** (`file`)
+
+- always: held as handed; read when the next Upload goes — an upload already running keeps the file it was sent with
+
+**Private** (`private`)
+
+- always: held as handed; read when the next Upload goes
+
+**Bucket (Supabase)** (`bucket`)
+
+- always: held as handed; read when the next Upload goes — set, the file goes to this bucket at Path (or under the file's own name)
+
+**Path (Supabase)** (`path`)
+
+- always: held as handed; read when the next Upload goes, and only with a Bucket
+
+**Collection (PocketBase)** (`collection`)
+
+- always: held as handed; read when the next Upload goes — with Field set and no Bucket, the file attaches to a record of this collection
+
+**Record ID (PocketBase)** (`recordId`)
+
+- always: held as handed; read when the next Upload goes, and only with Collection and Field — blank attaches the file to a new record
+
+**Field (PocketBase)** (`field`)
+
+- always: held as handed; read when the next Upload goes, and only with Collection — a half-filled group is no location at all
+
+**Upload** (`upload`)
+
+- always: its own upload at the frame's end — two presses are two uploads — with File, Private and the File Location held then: no File, or a Backend the project does not have, is Error, Error Status Code 0 and Failure at once; otherwise the backend answers with Cloud File then Done, or Error, Error Status Code and Failure
+
 ## Outputs
 
 ### Values

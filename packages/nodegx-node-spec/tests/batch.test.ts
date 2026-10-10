@@ -69,7 +69,7 @@ describe('a deferred outcome — the Variables\' Set, resolved at frame end (spe
 
   const probe = (afterInputs: (s: { n: number }) => { outcomes?: Array<{ port: 'go'; outcome: 'done' }> }) =>
     defineNode({ type: 'probe', version: 1, source: 'tests', state: { n: 0 }, inputs: { go: { type: 'signal', outcome: true } }, outputs: { n: { type: 'number', from: (s) => s.n } } }).on(
-      { go: (s) => ({ set: { n: s.n + 1 }, outcome: 'deferred' }) },
+      { go: (s) => ({ says: 'always: one up, decided at the end of the frame', set: { n: s.n + 1 }, outcome: 'deferred' }) },
       { afterInputs }
     );
 
@@ -80,7 +80,7 @@ describe('a deferred outcome — the Variables\' Set, resolved at frame end (spe
     expect(() => run(probe(() => ({ outcomes: [{ port: 'go', outcome: 'done' }] })), {}, ['settle'])).toThrow(/no invocation deferred/);
   });
   test('a deferred outcome on a spec with no afterInputs is refused', () => {
-    const bare = defineNode({ type: 'bare', version: 1, source: 'tests', state: {}, inputs: { go: { type: 'signal', outcome: true } }, outputs: {} }).on({ go: () => ({ outcome: 'deferred' }) });
+    const bare = defineNode({ type: 'bare', version: 1, source: 'tests', state: {}, inputs: { go: { type: 'signal', outcome: true } }, outputs: {} }).on({ go: () => ({ says: 'always: decided at the end of the frame', outcome: 'deferred' }) });
     expect(() => run(bare, {}, [{ signal: 'go' }, 'settle'])).toThrow(/no afterInputs to resolve it/);
   });
 

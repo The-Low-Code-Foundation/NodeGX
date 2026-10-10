@@ -138,6 +138,51 @@ One-of-many choices too numerous or space-constrained for radio buttons: country
 | `focus` | Signal | — | Puts the keyboard on this dropdown, so Enter, Space and the arrow keys go to it |
 | `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 
+### What each input does
+
+**Enabled** (`enabled`)
+
+- the value it already holds: nothing
+- a change: Enabled follows; disabled, the list takes no pick, no click and no focus
+
+**Items** (`items`)
+
+- nothing handed (undefined): the list it has stays
+- otherwise: the list is kept as handed and drawn at the next paint; the value stays, so a list handed again keeps the pick
+
+**Value** (`value`)
+
+- null: ignored
+- the value it already holds, as text: nothing
+- a change: kept as text, Value follows, and the list selects it at the next paint if it names an option — Changed does not fire (only a person's pick fires it)
+
+**Mounted** (`mounted`)
+
+- always: the list is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint
+
+**Enable Label** (`useLabel`)
+
+- always: a label is drawn beside the list, or not; the list, its keyboard and its pick stay
+
+**Focus** (`focus`)
+
+- not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent
+- it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent
+- otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done
+
+**Blur** (`blur`)
+
+- it does not hold the keyboard (or is disabled, and gives it up to nobody): nothing changes → Done; Blurred stays silent
+- it holds the keyboard: it is taken off it, and the Focused state goes false → Blurred, Done
+
+**Scroll Into View** (`scrollIntoView`)
+
+- always: the page, or the scrolling Group holding it, scrolls until the list can be seen
+
+**Visible** (`visible`)
+
+- always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it
+
 ## Outputs
 
 ### Values

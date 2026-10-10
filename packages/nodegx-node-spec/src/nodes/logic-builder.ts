@@ -178,11 +178,11 @@ type Pulse = 'failure' | 'success' | { derived: string };
 function run(s: Readonly<LogicBuilderState>, trigger: string, _world: { send(port: string, state?: Readonly<Record<string, unknown>>): void }) {
   const code = s.code || '';
   // :385-422 — no code: Unchanged; code that will not compile: Error, a failure
-  if (!code) return { outcome: 'unchanged' as const };
+  if (!code) return { says: 'no Generated Code: nothing runs', outcome: 'unchanged' as const };
   const compiled = compile(code);
   if (!compiled.fn) {
     const error = 'The blocks could not be compiled: ' + compiled.error;
-    return { set: { error }, send: ['error' as const], outcome: 'failure' as const, error: 'logic-builder/code-not-compiled' };
+    return { says: "code that will not compile: Error says so, in the engine's words — nothing runs", set: { error }, send: ['error' as const], outcome: 'failure' as const, error: 'logic-builder/code-not-compiled' };
   }
   const inputs: Record<string, unknown> = { ...s.inputs };
   const written: Record<string, unknown> = {};
@@ -202,7 +202,15 @@ function run(s: Readonly<LogicBuilderState>, trigger: string, _world: { send(por
   } catch (e) {
     // :503-511 — the values written are dropped; the signals sent have fired
     const message = e && (e as Error).message ? String((e as Error).message) : String(e);
-    return { set: { inputs, error: message }, send: ['error' as const], sendDerived: [], pulses, outcome: 'failure' as const, error: 'logic-builder/blocks-threw' };
+    return {
+      says: 'the code throws: the signals it sent before the throw have fired, the values it wrote are dropped, what it wrote to Inputs stays; Error is the message (or the thrown text)',
+      set: { inputs, error: message },
+      send: ['error' as const],
+      sendDerived: [],
+      pulses,
+      outcome: 'failure' as const,
+      error: 'logic-builder/blocks-threw'
+    };
   }
   // :466-481 — each value lands after the code, in the order first written, and is sent; a name the node owns is skipped
   const outputs: Record<string, unknown> = { ...s.outputs };
@@ -218,14 +226,37 @@ function run(s: Readonly<LogicBuilderState>, trigger: string, _world: { send(por
   }
   if (refused !== null) {
     // :487-497 (v2, C149) — the signal side answers as the value side does
-    return { set: { inputs, outputs, error: reservedSignal(refused) }, send: ['error' as const], sendDerived: sent, pulses, outcome: 'failure' as const, error: 'logic-builder/reserved-port-name' };
+    return {
+      says: "a signal sent to a name the node owns (Done, Failure, Success …): that send does nothing; the other signals have fired, the values written land, then Error names it — no Success",
+      set: { inputs, outputs, error: reservedSignal(refused) },
+      send: ['error' as const],
+      sendDerived: sent,
+      pulses,
+      outcome: 'failure' as const,
+      error: 'logic-builder/reserved-port-name'
+    };
   }
   if (reserved !== null) {
     // :483-490
-    return { set: { inputs, outputs, error: reservedValue(reserved) }, send: ['error' as const], sendDerived: sent, pulses, outcome: 'failure' as const, error: 'logic-builder/reserved-port-name' };
+    return {
+      says: 'a value written to a name the node owns (Error, Done …): the signals have fired, the other values land, then Error names it — no Success',
+      set: { inputs, outputs, error: reservedValue(reserved) },
+      send: ['error' as const],
+      sendDerived: sent,
+      pulses,
+      outcome: 'failure' as const,
+      error: 'logic-builder/reserved-port-name'
+    };
   }
   // :492-502 — Error cleared to blank and sent, Success, then Done
-  return { set: { inputs, outputs, error: '' }, send: ['error' as const], sendDerived: sent, pulses: [...pulses, 'success' as const], outcome: 'done' as const };
+  return {
+    says: 'the code runs through: the signals it sent have fired, in its order; the values it wrote land after it, each sent every run, the same value too (undefined never); Error goes blank, then Success',
+    set: { inputs, outputs, error: '' },
+    send: ['error' as const],
+    sendDerived: sent,
+    pulses: [...pulses, 'success' as const],
+    outcome: 'done' as const
+  };
 }
 
 /** The ports a workspace's blocks name, without the node's own (:833-883). */
@@ -313,9 +344,9 @@ export const LogicBuilder = defineNode({
 }).on(
   {
     // :759-763 — kept, compiled at the next run
-    generatedCode: (_s, v) => ({ set: { code: v as string | undefined }, send: [] }),
+    generatedCode: (_s, v) => ({ says: 'always: kept, and compiled at the next Run or declared signal — nothing runs now, and a text that will not compile is reported then', set: { code: v as string | undefined }, send: [] }),
     // :740-746 — nothing on the wire: the kinds are the placing's (A PORT'S KIND, header)
-    workspace: () => ({ set: {}, send: [] }),
+    workspace: () => ({ says: 'always: nothing on the wire — the blocks decide the ports when the node is placed, and the code that runs is Generated Code', set: {}, send: [] }),
     // :771-780
     run: (s, _i, world) => run(s, 'run', world)
   },

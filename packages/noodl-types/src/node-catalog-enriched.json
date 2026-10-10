@@ -332,6 +332,25 @@
           }
         ]
       },
+      "rules": {
+        "idSource": [
+          "From repeater: at the frame's end it binds to the record of the row it sits in",
+          "otherwise: kept; the record stays bound until the next Id"
+        ],
+        "repeaterComponent": [
+          "under From repeater: at the frame's end it binds to the record of that repeater's row (blank: the nearest)",
+          "otherwise: kept, and read only under From repeater"
+        ],
+        "modelId": [
+          "always: the record with that id is bound now (a record handed in, by its id; an empty id binds nothing), and Id is sent again"
+        ],
+        "targetId": [
+          "always: kept, unchecked, for the next Do — the record at the other end of the relation; it must have been loaded (from a Query Records or Record), or the Do fails with its class unknown"
+        ],
+        "store": [
+          "always: no check at the press — it joins the frame's batch, and at the end of the frame one call answers every press: Done for each (what the backend hands back is written onto the record), or Error and Failure for each (no Class, no Relation, no Target Record Id, no record bound, a target record never loaded, no backend, or the backend refuses)"
+        ]
+      },
       "enrichment": {
         "typeName": "AddDbModelRelation",
         "summary": "Add Record Relation: links a target record onto a named relation field of an owner record in the cloud database.",
@@ -4921,6 +4940,58 @@
         ],
         "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
       },
+      "rules": {
+        "mounted": [
+          "a change: the element is put on the page, or taken off it, at the next paint",
+          "the value it already holds: nothing"
+        ],
+        "scrollIntoView": [
+          "always: the page, or the scrolling Group holding it, scrolls until the element can be seen"
+        ],
+        "visible": [
+          "always: shown or hidden at the next paint, its space kept; hidden, it takes no pointer"
+        ],
+        "opacity": [
+          "always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it"
+        ],
+        "pointerEventsMode": [
+          "Inherit: its own pointer style comes off",
+          "Explicit: the last Pointer Events Enabled is written back (on, before one was set)"
+        ],
+        "pointerEventsEnabled": [
+          "always, whatever the mode: off, the pointer passes through to what is behind it"
+        ],
+        "draggable": [
+          "always: on, every element it draws can be picked up, by pointer or keyboard; off, the one on the page cannot"
+        ],
+        "dragValue": [
+          "always: read by the zone it is dropped on, which reports it as Dropped Value"
+        ],
+        "dragKind": [
+          "always: read by a zone with an Accept Kind as it is dragged over one"
+        ],
+        "holdToDrag": [
+          "always: read at the next press — whether it must be held before it picks up"
+        ],
+        "holdTime": [
+          "always: read at the next held press — how many seconds it is held before it picks up"
+        ],
+        "acceptDrops": [
+          "on: a Draggable can be dropped here",
+          "off while a drag is over it: the drag leaves it — Is Drop Target goes false",
+          "off: nothing can be dropped here"
+        ],
+        "acceptKind": [
+          "always: read as a drag comes over it — a source of another kind does not light it up"
+        ],
+        "acceptFileDrops": [
+          "on: a file dragged from the desktop can be dropped here",
+          "off: no file can be dropped here, and a drag over it is forgotten — Is Dragging Over goes false if it was true"
+        ],
+        "acceptedFileTypes": [
+          "always: read at a drop — which files count as accepted"
+        ]
+      },
       "enrichment": {
         "typeName": "Circle",
         "summary": "An SVG circle or arc with fill, stroke and start/end angles — the quick way to dots, rings and progress arcs.",
@@ -5026,6 +5097,12 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "file": [
+          "a stored file: held, and URL, Name, Content Type and Size are sent from it",
+          "anything else (nothing, text, a plain object): ignored — the file held before stays, nothing is sent"
+        ]
+      },
       "enrichment": {
         "typeName": "Cloud File",
         "summary": "Unwraps a cloudfile value into its name and URL, for display or download links.",
@@ -9261,6 +9338,52 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "snapToPositionX.do": [
+          "always: at the end of the frame the element starts moving on X from where it is to Value, over Duration, easing out, Drag X sent each frame (no Drag Moved) — Done once it has started, or at once when it is already at Value; a drag under way is moved too; before the Drag is on the page it waits for the mount (at most 16 wait, and the oldest pushed out reports Failure)"
+        ],
+        "snapToPositionY.do": [
+          "always: at the end of the frame the element starts moving on Y from where it is to Value, over Duration, easing out, Drag Y sent each frame (no Drag Moved) — Done once it has started, or at once when it is already at Value; a drag under way is moved too; before the Drag is on the page it waits for the mount (at most 16 wait, and the oldest pushed out reports Failure)"
+        ],
+        "snapToPositionX.value": [
+          "nothing, null, empty, or not readable as a number: the X the snap goes to is left as it was (what cannot be read is reported as a runtime error)",
+          "a number, or text that reads as one: where Snap To Position X — Do takes the element"
+        ],
+        "snapToPositionY.value": [
+          "nothing, null, empty, or not readable as a number: the Y the snap goes to is left as it was (what cannot be read is reported as a runtime error)",
+          "a number, or text that reads as one: where Snap To Position Y — Do takes the element"
+        ],
+        "snapToPositionX.duration": [
+          "always: read at the next Do — how long the X snap takes, in milliseconds; nothing means 300, and 0 or less lands at Value at the next frame"
+        ],
+        "snapToPositionY.duration": [
+          "always: read at the next Do — how long the Y snap takes, in milliseconds; nothing means 300, and 0 or less lands at Value at the next frame"
+        ],
+        "enabled": [
+          "always: read at the next press — off (exactly false; 0 or the text \"false\" is not off), a press starts no drag, a drag under way carries on to its let go, and the snaps still run"
+        ],
+        "axis": [
+          "always: read at the next press, move or let go, a drag under way included — X, Y or Both; on an axis it does not allow the element stays, Drag X / Y say where it is and Delta X / Y is 0; any other value moves it on neither"
+        ],
+        "useParentBounds": [
+          "always: read at the next move, a drag under way included — on, the element is kept inside its parent's box; off, it can leave it"
+        ],
+        "scale": [
+          "always: read at the next press, move or let go, a drag under way included — the pointer's movement is divided by it before it moves the element; nothing or 0 counts as 1"
+        ],
+        "inputPositionX": [
+          "always: where the element starts on X — at the next paint a change moves it there and sends Drag X and Delta X (the change from the last one; a drag under way goes on from there); text is read as a number, and a value that is not a number again is no change"
+        ],
+        "inputPositionY": [
+          "always: where the element starts on Y — at the next paint a change moves it there and sends Drag Y and Delta Y (the change from the last one; a drag under way goes on from there); text is read as a number, and a value that is not a number again is no change"
+        ],
+        "mounted": [
+          "always: at the next paint — off takes the Drag and its child off the page (Will Unmount; both snaps stop, and a drag under way ends with no Drag Ended); on again makes a new one at Start Drag X / Y (Did Mount, all four values sent, and the snaps that waited run from there)"
+        ],
+        "scrollIntoView": [
+          "always: asks the page to scroll until the element it moves can be seen — nothing on the wire"
+        ]
+      },
       "enrichment": {
         "typeName": "Drag",
         "summary": "Makes its child subtree draggable along X and/or Y, reporting position and drag signals, with animated snap-to-position.",
@@ -9839,6 +9962,7 @@
       },
       "rules": {
         "expression": [
+          "new text, with Run wired: its inputs become the names it reads, and nothing is evaluated until Run or a changed ticked input",
           "new text, with Run not wired: its inputs become the names it reads, and it is evaluated at the end of the frame — On True or On False; before any input has arrived, only if Evaluate At Load is ticked"
         ],
         "run": [
@@ -11365,6 +11489,29 @@
             "valueType": "query-sorting",
             "example": "visualSorting"
           }
+        ]
+      },
+      "rules": {
+        "items": [
+          "always: kept, and watched when it is a shared array; ticked under Run On Value Change, the filter runs at the frame's end"
+        ],
+        "enabled": [
+          "always: kept; a change, ticked under Run On Value Change, runs the filter at the frame's end — off, every record passes through, unfiltered, unsorted and unlimited"
+        ],
+        "filter": [
+          "always: the filter runs at the frame's end, one run for the frame's presses — Items, First Record Id and Count are sent, Filtered fires, then each press's Done or Failure; with nothing on Items, each press is Failure and nothing else moves"
+        ],
+        "runOnChange-items": [
+          "always: read when the next Items arrives"
+        ],
+        "runOnChange-enabled": [
+          "always: read when Enabled next changes"
+        ],
+        "runOnChange-records": [
+          "always: read when the bound array's contents next change, and when a save of the Class is next heard on the Backend's store"
+        ],
+        "runOnChange-filterSettings": [
+          "always: kept; read when the Filter or the Sorting next arrives, or a Limit setting next changes (a filter parameter has a box of its own)"
         ]
       },
       "enrichment": {
@@ -18283,6 +18430,7 @@
       "rules": {
         "functionScript": [
           "no code: nothing to run, and a later Run is answered Unchanged (a message on Error is cleared)",
+          "new code, with Run wired: compiled, and nothing runs until Run or a changed ticked input — a message on Error is cleared",
           "new code, with Run not wired: compiled and run at the end of the frame — Success, or Error and Failure if it does not compile or throws"
         ],
         "run": [
@@ -18489,6 +18637,12 @@
           }
         ],
         "notes": "Names are interpolated verbatim, including spaces — a value called `bg color` produces a port called `value-true-bg color`, not `value-true-bgColor`."
+      },
+      "rules": {
+        "code": [
+          "empty text: ignored — the code before keeps running",
+          "new text: read at the frame's end — the code before is told it is going (its destroy), then the new code's setup and run are asked for, and every value and signal that arrived before the first read is handed to it; text that will not compile, or throws while read, leaves the code before running, after its destroy — nothing reaches the wire for that"
+        ]
       },
       "enrichment": {
         "typeName": "Javascript2",
@@ -20225,6 +20379,22 @@
       "parameterEncoding": {
         "known": false,
         "reason": "Ports follow the visual logic program stored in the node parameters."
+      },
+      "rules": {
+        "generatedCode": [
+          "always: kept, and compiled at the next Run or declared signal — nothing runs now, and a text that will not compile is reported then"
+        ],
+        "workspace": [
+          "always: nothing on the wire — the blocks decide the ports when the node is placed, and the code that runs is Generated Code"
+        ],
+        "run": [
+          "no Generated Code: nothing runs → Unchanged",
+          "code that will not compile: Error says so, in the engine's words — nothing runs → Failure",
+          "the code throws: the signals it sent before the throw have fired, the values it wrote are dropped, what it wrote to Inputs stays; Error is the message (or the thrown text) → Failure",
+          "a signal sent to a name the node owns (Done, Failure, Success …): that send does nothing; the other signals have fired, the values written land, then Error names it — no Success → Failure",
+          "a value written to a name the node owns (Error, Done …): the signals have fired, the other values land, then Error names it — no Success → Failure",
+          "the code runs through: the signals it sent have fired, in its order; the values it wrote land after it, each sent every run, the same value too (undefined never); Error goes blank, then Success → Done"
+        ]
       },
       "enrichment": {
         "typeName": "Logic Builder",
@@ -22487,6 +22657,18 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "acceptedFileTypes": [
+          "always: held as handed; put on the dialog at the next Open — blank offers every file"
+        ],
+        "capture": [
+          "always: held as handed; put on the dialog at the next Open — blank asks for the file list, not a camera"
+        ],
+        "open": [
+          "the browser refuses to open the dialog: an Open still waiting is answered Unchanged first; Error says why, and this press fails at once → Failure",
+          "the dialog opens, with Accepted file types and Capture as held: an Open still waiting is answered Unchanged first; this press waits for the person — a file chosen sends File, Path, Name, Size in bytes and Type, then Done; the dialog cancelled or closed with nothing is Unchanged"
+        ]
+      },
       "enrichment": {
         "typeName": "Open File Picker",
         "summary": "Opens the browser's native file dialog on a signal and outputs the picked file plus its name, size and MIME type.",
@@ -25150,6 +25332,29 @@
           }
         ]
       },
+      "rules": {
+        "name": [
+          "a name with another key (blank is Main): the stack leaves its old name and, on the page, takes the new one — its pages are deleted and its start page rebuilt, then the pushes that waited for that name run (a replace that waited runs with no rebuild first); off the page, the next mount rebuilds. The same key again: kept, and the pages stay"
+        ],
+        "pages": [
+          "always: the pages the stack can show (not a list: none) — on the page, every page is deleted at the end of the frame and the Start Page built, Top Component Name its label and Stack Depth 1 (with Use Routes, its address written); the stack is left empty with no pages, or a Start Page the project does not have. Off the page, the next mount rebuilds"
+        ],
+        "useRoutes": [
+          "always: kept; on, the next push, replace or back writes the top page into the address, a mount reads its start page from the address, and the browser's Back or Forward rebuilds the page the address names; off, the address is left alone"
+        ],
+        "keepPagesWhenUnmounted": [
+          "always: kept; read when the stack mounts — on, a stack still holding its pages comes back as it was, unless its Components or Name changed meanwhile or (with Use Routes) the address moved; off, a mount starts at the Start Page"
+        ],
+        "reset": [
+          "always: one reset at the end of the frame, however many Resets — every page is deleted, pushed ones included, and the Start Page is built: Top Component Name its label, Stack Depth 1 (with Use Routes, its address written), then Done for each Reset; Failure for each with no Components, or a Start Page the project does not have, and the stack is left empty (Top Component Name blank, Stack Depth 0). A transition still running is not stopped"
+        ],
+        "mounted": [
+          "always: at the next paint the stack is put on the page (Did Mount; it takes its Name and builds its Start Page — with Use Routes, the page the address names; with Keep Pages When Unmounted, it comes back as it was — then the pushes that waited for the name run) or taken off it (Will Unmount; a push for its name waits until it is back)"
+        ],
+        "scrollIntoView": [
+          "always: the page, or the scrolling Group holding it, scrolls until the stack can be seen"
+        ]
+      },
       "enrichment": {
         "typeName": "Page Stack",
         "summary": "Component Stack: push/pop navigation container — pages stack on top of each other with transitions, ideal for wizards and drill-in flows.",
@@ -25421,6 +25626,17 @@
         "known": false,
         "reason": "Ports mirror the input ports of the target page component."
       },
+      "rules": {
+        "stack": [
+          "always: kept as written; the next Navigate goes to the Page Stack of this name (blank: Main)"
+        ],
+        "mode": [
+          "always: kept; read by the next Navigate — Push adds Target Page on top of the stack, Replace swaps it for every page showing; anything else (a wire can carry any value) fails the Navigate, Error naming the value"
+        ],
+        "navigate": [
+          "always: one request at the end of the frame, however many presses, from the frame's final Stack, Mode, Target Page, Transition and parameters — Done for each press when the stack shows the page (Unchanged when that page with those parameters is already on top), Error and Failure for each when it cannot (no such page, an empty Components list, a transition still running) or when Mode is neither Push nor Replace; while no Page Stack is mounted under the name the request waits, and runs when one mounts (a push: after that stack rebuilds its start page)"
+        ]
+      },
       "enrichment": {
         "typeName": "PageStackNavigate",
         "summary": "Push Component To Stack: pushes a chosen page onto a named Component Stack with a transition when triggered.",
@@ -25592,6 +25808,17 @@
         ],
         "notes": "Names are interpolated verbatim, including spaces — a value called `bg color` produces a port called `value-true-bg color`, not `value-true-bgColor`."
       },
+      "rules": {
+        "results": [
+          "always: kept, and read by nothing here — the editor draws one Results port per name, and what those ports hold is what a pop hands back"
+        ],
+        "backActions": [
+          "always: kept, and read by nothing here — the editor draws one signal per name, each a Navigate that carries that name as its back action"
+        ],
+        "navigate": [
+          "always: one pop at the end of the frame for each press, in press order — the first carries the last back action pressed since the last pop (then cleared) and every Results value, to the node that pushed this page; Done when the stack goes back to the page below (this page leaves at the transition's end), Unchanged when the stack is at its first page, Error and Failure when it is still animating or when this node is not inside a page a Page Stack pushed"
+        ]
+      },
       "enrichment": {
         "typeName": "PageStackNavigateBack",
         "summary": "Pop Component Stack: returns to the previous page on the stack, optionally handing result values back to the popper's caller.",
@@ -25761,6 +25988,20 @@
             "valueType": "*",
             "example": "q-Sa1"
           }
+        ]
+      },
+      "rules": {
+        "path": [
+          "always: kept; read by the next Navigate — each {name} in it is filled from its parameter port as written (an unset one as nothing), and a value that is not text counts as no Path"
+        ],
+        "queryNames": [
+          "always: kept; read by the next Navigate — one name=value after a ? for each name whose port holds a value, each encoded; an unset or null one is left out"
+        ],
+        "openInNewTab": [
+          "always: whether the next Navigate opens a new tab or moves this one"
+        ],
+        "navigate": [
+          "always: one navigation at the end of the frame, however many presses, from the frame's final Path, parameters and Query — no Path is Error and Failure for each press; otherwise the URL is built (after a # unless the project routes by path) and, with Open in new tab, handed to a new tab (Done; the browser blocking it is Error and Failure), else pushed into the address (Done; a push the browser refuses is Error and Failure); with no window, Unchanged"
         ]
       },
       "enrichment": {
@@ -28155,6 +28396,21 @@
         ],
         "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
       },
+      "rules": {
+        "value": [
+          "nothing, a value no text can be made from, or the value it already holds: the selection stays",
+          "different text (or what a toString makes text): the selection is this and Value follows — Changed does not fire; at the next paint the button whose Value matches shows selected and the one that was loses it, each with Checked and no Changed"
+        ],
+        "mounted": [
+          "always: the group is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint; its buttons go with it"
+        ],
+        "scrollIntoView": [
+          "always: the page, or the scrolling Group holding it, scrolls until the group can be seen"
+        ],
+        "visible": [
+          "always: shown or hidden at the next paint, its space kept; hidden, its buttons take no click"
+        ]
+      },
       "enrichment": {
         "typeName": "Radio Button Group",
         "summary": "Layout container that makes its child Radio Buttons mutually exclusive and outputs the selected value.",
@@ -29476,6 +29732,25 @@
             "valueType": "enum",
             "example": "relationProperty"
           }
+        ]
+      },
+      "rules": {
+        "idSource": [
+          "From repeater: at the frame's end it binds to the record of the row it sits in",
+          "otherwise: kept; the record stays bound until the next Id"
+        ],
+        "repeaterComponent": [
+          "under From repeater: at the frame's end it binds to the record of that repeater's row (blank: the nearest)",
+          "otherwise: kept, and read only under From repeater"
+        ],
+        "modelId": [
+          "always: the record with that id is bound now (a record handed in, by its id; an empty id binds nothing), and Id is sent again"
+        ],
+        "targetId": [
+          "always: kept, unchecked, for the next Do — the record at the other end of the relation; it must have been loaded (from a Query Records or Record), or the Do fails with its class unknown"
+        ],
+        "store": [
+          "always: no check at the press — it joins the frame's batch, and at the end of the frame one call answers every press: Done for each (what the backend hands back is written onto the record), or Error and Failure for each (no Class, no Relation, no Target Record Id, no record bound, a target record never loaded, no backend, or the backend refuses)"
         ]
       },
       "enrichment": {
@@ -31665,6 +31940,15 @@
         "known": false,
         "reason": "No parameter on this node carries the list its ports are generated from, so the port set could not be observed headlessly."
       },
+      "rules": {
+        "file": [
+          "a stored file: held; read when the next Sign goes",
+          "anything else (nothing, text, a plain object): ignored — the file held before stays"
+        ],
+        "sign": [
+          "always: its own call at the frame's end — two presses are two calls — for the File held then: no File, or a Backend the project does not have, is Error, Error Status Code 0 and Failure at once; otherwise the backend answers with Signed URL, URL Kind, Safe To Share, Expires At and TTL (Seconds) then Done, or Error, Error Status Code and Failure"
+        ]
+      },
       "enrichment": {
         "typeName": "Sign File URL",
         "summary": "Mints a short-lived signed URL for a cloud file, for previewing or downloading files uploaded as private.",
@@ -32959,6 +33243,12 @@
       "parameterEncoding": {
         "known": false,
         "reason": "No parameter on this node carries the list its ports are generated from, so the port set could not be observed headlessly."
+      },
+      "rules": {
+        "enabled": [
+          "a change (on is anything truthy): at the frame's end the subscription held is closed — Subscribed and Realtime Status sent when one was held — and, on, with a Class and a Backend the project has, a new one is opened: Realtime Status is connecting, then whatever the backend tells",
+          "the value it already holds: nothing — the subscription stays as it is"
+        ]
       },
       "enrichment": {
         "typeName": "SubscribeToChanges",
@@ -36961,6 +37251,11 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "new": [
+          "always: a fresh ten-character id replaces the one on Id — never the one it held, and it cannot fail → Done"
+        ]
+      },
       "enrichment": {
         "typeName": "Unique Id",
         "summary": "Provides a random 10-character alphanumeric id, with a signal to generate a fresh one on demand.",
@@ -37211,6 +37506,32 @@
       "parameterEncoding": {
         "known": false,
         "reason": "No parameter on this node carries the list its ports are generated from, so the port set could not be observed headlessly."
+      },
+      "rules": {
+        "file": [
+          "always: held as handed; read when the next Upload goes — an upload already running keeps the file it was sent with"
+        ],
+        "private": [
+          "always: held as handed; read when the next Upload goes"
+        ],
+        "bucket": [
+          "always: held as handed; read when the next Upload goes — set, the file goes to this bucket at Path (or under the file's own name)"
+        ],
+        "path": [
+          "always: held as handed; read when the next Upload goes, and only with a Bucket"
+        ],
+        "collection": [
+          "always: held as handed; read when the next Upload goes — with Field set and no Bucket, the file attaches to a record of this collection"
+        ],
+        "recordId": [
+          "always: held as handed; read when the next Upload goes, and only with Collection and Field — blank attaches the file to a new record"
+        ],
+        "field": [
+          "always: held as handed; read when the next Upload goes, and only with Collection — a half-filled group is no location at all"
+        ],
+        "upload": [
+          "always: its own upload at the frame's end — two presses are two uploads — with File, Private and the File Location held then: no File, or a Backend the project does not have, is Error, Error Status Code 0 and Failure at once; otherwise the backend answers with Cloud File then Done, or Error, Error Status Code and Failure"
+        ]
       },
       "enrichment": {
         "typeName": "Upload File",
@@ -39822,6 +40143,97 @@
         ],
         "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
       },
+      "rules": {
+        "mounted": [
+          "a change: the element is put on the page, or taken off it, at the next paint",
+          "the value it already holds: nothing"
+        ],
+        "scrollIntoView": [
+          "always: the page, or the scrolling Group holding it, scrolls until the element can be seen"
+        ],
+        "visible": [
+          "always: shown or hidden at the next paint, its space kept; hidden, it takes no pointer"
+        ],
+        "opacity": [
+          "always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it"
+        ],
+        "pointerEventsMode": [
+          "Inherit: its own pointer style comes off",
+          "Explicit: the last Pointer Events Enabled is written back (on, before one was set)"
+        ],
+        "pointerEventsEnabled": [
+          "always, whatever the mode: off, the pointer passes through to what is behind it"
+        ],
+        "draggable": [
+          "always: on, every element it draws can be picked up, by pointer or keyboard; off, the one on the page cannot"
+        ],
+        "dragValue": [
+          "always: read by the zone it is dropped on, which reports it as Dropped Value"
+        ],
+        "dragKind": [
+          "always: read by a zone with an Accept Kind as it is dragged over one"
+        ],
+        "holdToDrag": [
+          "always: read at the next press — whether it must be held before it picks up"
+        ],
+        "holdTime": [
+          "always: read at the next held press — how many seconds it is held before it picks up"
+        ],
+        "acceptDrops": [
+          "on: a Draggable can be dropped here",
+          "off while a drag is over it: the drag leaves it — Is Drop Target goes false",
+          "off: nothing can be dropped here"
+        ],
+        "acceptKind": [
+          "always: read as a drag comes over it — a source of another kind does not light it up"
+        ],
+        "acceptFileDrops": [
+          "on: a file dragged from the desktop can be dropped here",
+          "off: no file can be dropped here, and a drag over it is forgotten — Is Dragging Over goes false if it was true"
+        ],
+        "acceptedFileTypes": [
+          "always: read at a drop — which files count as accepted"
+        ],
+        "src": [
+          "always: what is drawn at the end of the frame — a project file or a URL as a video, a YouTube or Vimeo link in an embedded player, or nothing; a different file loads afresh, paused and back at the start"
+        ],
+        "startTime": [
+          "always: where the video begins, put into the address it loads from (blank: the start; below 0 is 0); a change that moves it loads the video again at the next paint, paused"
+        ],
+        "endTime": [
+          "always: where the first play-through stops, put into the address with Start Time (ignored unless later than Start Time; approximate on YouTube, ignored on Vimeo); a change that moves it loads the video again at the next paint, paused"
+        ],
+        "muted": [
+          "always: drawn at the next paint — on, the video is silent, and Play or Autoplay may start it before a person has pressed, clicked or typed on the page"
+        ],
+        "autoplay": [
+          "always: drawn at the next paint, and read as a load completes — on, a video that may play (Muted, or a person has acted on the page) and that Pause or Reset has not stopped since the load began starts by itself: On Can Play, then On Play"
+        ],
+        "loop": [
+          "always: drawn at the next paint, and read as the video reaches its end — on, it goes back to the start and plays on; off, it pauses there (On Pause)"
+        ],
+        "srcObject": [
+          "off the page: waits for the element behind the actions already waiting, in order, and is written at the paint that puts the video there (at most 16 wait, and the oldest is pushed out)",
+          "null (what it already has), a value that is not a stream, or anything on an embedded player: nothing changes — a live stream itself plays in place of Source, and no scenario holds one",
+          "nothing (undefined) on a video: the browser is handed null, so it loads Source again — paused, back at the start (Playback Position 0 when it had moved) — and Play waits for the new On Can Play before it can start it"
+        ],
+        "play": [
+          "on the page: wants the video playing and, once it has loaded, starts it — On Play if it was paused (from the start again after its end); Error then Playback Failure if the browser refuses (not Muted and no person has acted on the page) or the load failed; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved",
+          "off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and plays at the paint that puts the video there — Done then"
+        ],
+        "restart": [
+          "on the page: wants the video playing and, once it has loaded, goes back to second 0 (Playback Position 0 — not Start Time) and starts it as Play does; before the load, only the wanting; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved",
+          "off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and restarts at the paint that puts the video there — Done then"
+        ],
+        "pause": [
+          "on the page: stops wanting the video playing, and pauses one that is playing — Playback Position, then On Pause; one already paused stays so; Autoplay no longer starts it on this load; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved",
+          "off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and pauses at the paint that puts the video there — Done then"
+        ],
+        "reset": [
+          "on the page: stops wanting the video playing, goes back to second 0 (Playback Position 0 once loaded — not Start Time) and pauses it — On Pause if it was playing; Autoplay no longer starts it on this load; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved",
+          "off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and resets at the paint that puts the video there — Done then"
+        ]
+      },
       "enrichment": {
         "typeName": "Video",
         "summary": "Plays video from a URL or MediaStream, with play/pause/restart/reset signals and playback-position output.",
@@ -42410,6 +42822,18 @@
         "known": false,
         "reason": "Ports are parsed from the configured headers, query parameters and response mappings in the node parameters."
       },
+      "rules": {
+        "url": [
+          "always: kept as handed; read when the next Fetch goes — a request already running keeps the address it was sent to"
+        ],
+        "fetch": [
+          "always: one request at the frame's end, however many Fetches arrived, with the values held then, beside any request already running: a 2xx answer sends Response, Status Code and Response Headers, then Done for each Fetch; any other status the same and Error, then Failure; a 304 is Not Modified and Unchanged; no URL, an input that is not text, a body that is not JSON, no answer by Timeout (ms) or none at all is Error and Failure"
+        ],
+        "cancel": [
+          "a request still running: every one is abandoned — each lands as Canceled and Unchanged for its Fetches, Response and Status Code as they were — and this press is Done → Done",
+          "nothing running: Unchanged → Unchanged"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.HTTP",
         "summary": "HTTP Request: fetches a URL on demand, delivering the parsed response, status code and an outcome signal.",
@@ -42588,6 +43012,20 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "value": [
+          "always: read at the end of the frame by a Do pressed in it — as its text, in UTF-8 bytes (nothing, 0 or false as the empty text)"
+        ],
+        "algorithm": [
+          "always: read at the end of the frame by a Do pressed in it (empty reads as SHA-256; one the host does not know fails that Do)"
+        ],
+        "encoding": [
+          "always: read at the end of the frame by a Do pressed in it (empty reads as hex; one not in the list fails that Do)"
+        ],
+        "hash": [
+          "always: one digest at the end of the frame however many presses, of Value as it stands then — Digest and a cleared Error, then Done per press; an unknown Algorithm or Encoding puts the reason on Error, Digest untouched, Failure per press"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.Hash",
         "summary": "SHA-256/384/512 digest of a string, rendered as hex, base64 or base64url. Works in the browser and in a cloud function.",
@@ -42869,6 +43307,29 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "chunk": [
+          "always: kept as text (nothing as empty) for the next Parse, and retained after it — a second Parse appends it again"
+        ],
+        "format": [
+          "always: read at the next Parse — one value per line, any run of complete values, or one whole document (empty reads as NDJSON; anything else as Stream)"
+        ],
+        "maxLength": [
+          "always: read at the next Parse — the pending text a Parse gives up on when longer (not above 0: no cap)"
+        ],
+        "parse": [
+          "nothing pending and an empty Chunk: nothing to read → Unchanged; Success stays silent",
+          "the Chunk appended makes the pending text longer than Max Pending: all of it is dropped unread, the reason on Error, Error Count grows — Pending Characters and Is Complete are not re-sent → Failure; Success stays silent",
+          "some values came out complete and something would not parse (a bad line, or a value that scans whole but is not JSON): the values are on Values and Parsed, the last reason on Error, Error Count grows by each — the Parse still fails → Success, Failure",
+          "at least one value came out complete and nothing failed: Values holds them, Parsed the last, Value Count grows; what is left waits as Pending Characters → Success, Done",
+          "nothing came out complete and something would not parse: the last reason on Error, Error Count grows by each → Failure; Success stays silent",
+          "no value is complete yet and nothing failed: the text waits as Pending Characters, Is Complete false → Done; Success stays silent"
+        ],
+        "clear": [
+          "anything pending, parsed or failed: the pending text, Values, both counts and the Error are emptied — Parsed keeps its last value on the wire, and the Chunk is retained → Cleared, Done",
+          "nothing held: the same empty values are sent again → Cleared, Unchanged"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.JSONStreamParser",
         "summary": "JSON Stream Parser: turns stream fragments into JSON values as NDJSON, concatenated values, or one whole document.",
@@ -44002,6 +44463,17 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "text": [
+          "always: parsed at the end of the frame (once, however many inputs moved) — Items, Count and Changed, or Error and Failure with Items and Count untouched; nothing (undefined or null) is not parsed, a number parses as its text"
+        ],
+        "hasHeader": [
+          "always: the CSV is parsed again at the end of the frame, once any has arrived — the first row names the columns and Items holds records in a fresh array, or Items holds the rows as arrays of cells"
+        ],
+        "delimiter": [
+          "always: the CSV is parsed again at the end of the frame, once any has arrived, split on this (cleared reads as a comma)"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.ParseCSV",
         "summary": "Turns CSV text that arrived at runtime into an array — records when the first row is a header, rows of cells when it is not.",
@@ -44215,6 +44687,14 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "text": [
+          "always: parsed at the end of the frame (once, however many inputs moved) — Items in a fresh array, Count, the six Feed outputs and Changed, or Error, Error Code and Failure with everything else untouched; nothing (undefined or null) is not parsed"
+        ],
+        "maxBytes": [
+          "always: the Feed is parsed again at the end of the frame, once any has arrived — a text longer than this (counted in characters) is refused as xml/too-large before parsing; not a finite number above 0 reads as the default, 5 MB"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.ParseFeed",
         "summary": "Reads an RSS, Atom or RDF feed and gives every item one shape — blog, YouTube channel, subreddit or podcast alike.",
@@ -44396,6 +44876,23 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "text": [
+          "always: parsed at the end of the frame (once, however many inputs moved) — Result and Changed, or Error, Error Code and Failure with Result untouched; nothing (undefined or null) is not parsed"
+        ],
+        "attributePrefix": [
+          "always: the XML is parsed again at the end of the frame, once any has arrived, with attribute keys starting with this (nothing reads as @; empty is a real prefix: the bare name)"
+        ],
+        "alwaysArray": [
+          "always: read as text — the XML is parsed again at the end of the frame, once any has arrived, with these comma-separated tags always arrays"
+        ],
+        "trimValues": [
+          "always: the XML is parsed again at the end of the frame, once any has arrived, with text values trimmed or kept as written"
+        ],
+        "maxBytes": [
+          "always: the XML is parsed again at the end of the frame, once any has arrived — a text longer than this (counted in characters) is refused as xml/too-large before parsing; not a finite number above 0 reads as the default, 5 MB"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.ParseXML",
         "summary": "Turns XML text that arrived at runtime into an object, with attributes prefixed and hostile documents refused rather than parsed.",
@@ -44657,6 +45154,25 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "text": [
+          "always: kept as text (nothing as empty) and read at the next Extract"
+        ],
+        "pattern": [
+          "always: kept as text (nothing as empty) and read at the next Extract — a regular expression without its slashes"
+        ],
+        "flags": [
+          "always: kept as text (nothing as empty) and read at the next Extract — only i, m, s, u and y count; g comes from Extract All"
+        ],
+        "extractAll": [
+          "always: read at the next Extract — every match into Matches, or only the first"
+        ],
+        "extract": [
+          "a blank Pattern, or one that is not a valid regular expression: every output is rewritten empty and Error says why → Failure; Not Found, Found stay silent",
+          "the Pattern ran and matched nothing (empty Text matches nothing): every output is rewritten empty, Error cleared — an ordinary result → Not Found, Done; Found stays silent",
+          "the Pattern ran and matched: Match, Matches, Groups, First Group, Named Groups and Match Count are rewritten, Error cleared → Found, Done; Not Found stays silent"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.PatternExtractor",
         "summary": "Pattern Extractor: pulls matches and capture groups out of text with a regular expression, without needing a Function node.",
@@ -44826,6 +45342,13 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "generate": [
+          "Length not a whole number from 1 to 4096: nothing is drawn, the reason on Error, Value untouched → Failure",
+          "an Encoding not in the list (empty reads as hex): Length bytes were drawn and are thrown away, the reason on Error, Value untouched → Failure",
+          "Length bytes are drawn from the cryptographic source and rendered in Encoding: Value replaced, Error cleared → Done"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.RandomBytes",
         "summary": "A block of cryptographically random bytes as hex, base64 or base64url. Never falls back to Math.random().",
@@ -45355,6 +45878,64 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "url": [
+          "always: stored as text (nothing as empty); at the end of the frame a stream opened against another URL is dropped silently (a Connect still waiting: Unchanged) and reopened to this one when Auto Connect is on and it is not blank, else said idle (Connection State, Connected, Retry Count); with no stream, Auto Connect on and a URL: it connects; the URL the stream was opened against: left alone"
+        ],
+        "autoConnect": [
+          "always: on or off, read at the end of the frame — on with a URL and no stream: it connects; a stream opened against another URL is dropped silently (a Connect still waiting: Unchanged) and reopened when on, said idle when off; a stream on the URL it holds is left alone either way, so off never closes one"
+        ],
+        "transport": [
+          "always: read by the next connection, not one already open (nothing as Auto) — Auto and Fetch make a streaming request that carries Method, Headers and Body; EventSource asks the browser for one, which carries none of them and listens for Event Types, and where there is none that Connect fails for good (Last Error `EventSource is not available in this environment`)"
+        ],
+        "method": [
+          "always: read by the next connection, not one already open — the request's method, upper-cased (nothing as GET); with GET the Body stays home"
+        ],
+        "headers": [
+          "always: read by the next connection, not one already open — an object's entries go on the request as text after Accept and Cache-Control (a null or undefined one skipped), and a content-type among them, any case, keeps the JSON one off; anything else: none; the EventSource transport carries none"
+        ],
+        "body": [
+          "always: read by the next connection, not one already open — with a Method other than GET or HEAD a string goes as itself, anything else as JSON with Content-Type application/json unless Headers names one; nothing, or GET: no body; the EventSource transport carries none"
+        ],
+        "withCredentials": [
+          "always: read by the next connection, not one already open — on, the request carries cookies and HTTP auth across origins (credentials include); off, same-origin only"
+        ],
+        "eventTypes": [
+          "always: read by the next connection, not one already open, as text (nothing as none) split on commas and trimmed — the named events the EventSource transport listens for beside message; the Fetch transport delivers every type whatever is here"
+        ],
+        "autoReconnect": [
+          "always: read by the next connection, not one already open — on, a failure that can be retried (the server unreachable, a 5xx, 408 or 429, a stream cut short) schedules a reconnect; off, it is reported and the stream stops: Last Error, On Error, Connection State error, On Close"
+        ],
+        "reconnectOnStreamEnd": [
+          "always: read by the next connection, not one already open — on, a stream the server ends cleanly is reopened after the backoff wait, no error told and the retry count unmoved; off, it is closed (Connection State closed, On Close); either way a last event the server did not finish with a blank line is delivered first"
+        ],
+        "reconnectDelay": [
+          "always: read by the next connection, not one already open — the first retry's wait in milliseconds, doubled per consecutive failure after the first and capped at Max Reconnect Delay; a `retry:` the server sends replaces it for the rest of that connection; 0, below, or not a number: 1000"
+        ],
+        "maxReconnectDelay": [
+          "always: read by the next connection, not one already open — the ceiling on the retry wait in milliseconds, however many failures in a row; 0, below, or not a number: 30000"
+        ],
+        "maxRetries": [
+          "always: read by the next connection, not one already open — above 0, that many retries are made and the failure after the last gives up: Last Error `… (gave up after n attempts)`, On Error again, Connection State error, On Close, a waiting Connect Failure; 0, below, or not a number: it retries for as long as Auto Reconnect is on"
+        ],
+        "dedupeById": [
+          "always: read by the next connection, not one already open — on, an event whose id is among the last 512 seen on that connection is dropped: Duplicates Suppressed counts it (sent) and nothing else is told, though the resume point moves to it; off, every event is delivered and Delivery Semantics says at-least-once once ids are seen"
+        ],
+        "textPath": [
+          "always: stored as text (nothing as empty) and Text is sent at once, re-read from the last event — the field at this dot path in Data when it is a string, number or boolean, Raw when the path is blank, empty when it does not resolve"
+        ],
+        "connect": [
+          "no URL: a stream already open or retrying is dropped silently (its request abandoned, its timer cancelled; a Connect still waiting: Unchanged), then it fails for good — Last Error `No URL was set on the stream`, On Error, Connection State error (Connected false, Retry Count 0), On Close; Failure (sse/connect-failed)",
+          "Transport EventSource: the old stream dropped silently (a Connect still waiting: Unchanged), Retry Count 0, Last Error cleared, Connection State connecting, then the browser's EventSource is asked for — none here, so it fails for good: Last Error `EventSource is not available in this environment`, On Error, Connection State error, On Close; Failure (sse/connect-failed)",
+          "otherwise: the old stream dropped silently (its request abandoned, its timer cancelled; a Connect still waiting: Unchanged), Retry Count 0, Last Error cleared, Connection State connecting (Connected false), and a fresh request goes out — Method, Headers, Body, no Last-Event-ID (only a reconnect resumes); the answer settles it later: Connection State open, Last Error, On Open and Done at a 2xx with a body, else a failure (retried with Auto Reconnect unless it is a 4xx other than 408 and 429)"
+        ],
+        "disconnect": [
+          "no connection (none made yet, or the last dropped by a URL change): nothing is sent; Unchanged",
+          "a stream open, connecting or waiting to retry: its request is abandoned and its timer cancelled, nothing more arrives, Connection State closed (Connected false), On Close; a Connect still waiting: Unchanged; Done",
+          "a connection that already failed for good: it is marked closed — Connection State closed, Connected, Retry Count, and On Close once more; Unchanged",
+          "a connection already closed: nothing is sent; Unchanged"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.SSE",
         "summary": "Server-Sent Events: consumes a streaming HTTP endpoint, with connection state, retries and errors as graph outputs.",
@@ -46654,6 +47235,39 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "data": [
+          "always: kept as it came for the next Add, and retained after it — any write counts as data having arrived, nothing included"
+        ],
+        "flushSize": [
+          "always: read at the next Add — the size at which that Add flushes (not above 0: never by size); a buffer already that big waits for an Add"
+        ],
+        "maxSize": [
+          "always: read at the next Add — the cap past which the oldest are dropped (not at least 0: 0, no cap); a buffer already over it is trimmed by the next Add"
+        ],
+        "flushInterval": [
+          "the period it already holds (not above 0 reads as 0): nothing",
+          "a different period above 0 with anything buffered: a running timer stops and a new one starts, to flush after the new period",
+          "a different period with nothing buffered, or 0 (never by time): a running timer stops; a period above 0 is armed by the next Add"
+        ],
+        "add": [
+          "before anything has arrived on Data: refused — the reason on Error, which nothing later clears → Failure; Overflowed, Flushed stay silent",
+          "Data joins, past Max Size the oldest go (counted on Dropped Items), and the buffer reaches Flush Size: it becomes Flushed Data, a fresh one starts, Flush Count grows, a running timer stops → Overflowed, Flushed, Done",
+          "Data joins, past Max Size the oldest go (counted on Dropped Items), under Flush Size, with Flush Interval above 0 and no timer running: a timer is armed to flush after Flush Interval → Overflowed, Done; Flushed stays silent",
+          "Data joins, past Max Size the oldest go (counted on Dropped Items), under Flush Size, with no timer to arm (Flush Interval 0, or one already running): it waits → Overflowed, Done; Flushed stays silent",
+          "Data joins and the buffer reaches Flush Size: it becomes Flushed Data, a fresh one starts, Flush Count grows, a running timer stops → Flushed, Done; Overflowed stays silent",
+          "Data joins, under Flush Size, with Flush Interval above 0 and no timer running: a timer is armed to flush after Flush Interval → Done; Overflowed, Flushed stay silent",
+          "Data joins, under Flush Size, with no timer to arm (Flush Interval 0, or one already running): it waits → Done; Overflowed, Flushed stay silent"
+        ],
+        "flush": [
+          "nothing buffered: nothing to hand over, and Flush Count stays → Unchanged; Flushed stays silent",
+          "anything buffered: it becomes Flushed Data, a fresh buffer starts, Flush Count grows, a running timer stops → Flushed, Done"
+        ],
+        "clear": [
+          "anything buffered, flushed or counted: the buffer, Flushed Data and both counts are emptied — not Error, not the Data retained — and a running timer stops → Cleared, Done",
+          "nothing held: the same empty values are sent again → Cleared, Unchanged"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.StreamBuffer",
         "summary": "Stream Buffer: batches items arriving faster than the UI wants to react, flushing on a count, an interval, or on demand.",
@@ -46984,6 +47598,36 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "chunk": [
+          "text (a number, boolean or bigint as its text; nothing as empty) while an Error stands: kept for the next Add, and the Error is cleared → failure stays silent",
+          "text (a number, boolean or bigint as its text; nothing as empty): kept for the next Add, and retained after it → failure stays silent",
+          "an object, array or Date again, the same refusal already on Error: the chunk is emptied and nothing more is said → failure stays silent",
+          "an object, array or Date: refused before any Add — the chunk is emptied and Error names what arrived → Failure"
+        ],
+        "delimiter": [
+          "always: read at the next Add — where complete messages are split off (nothing, or empty: never split)"
+        ],
+        "maxLength": [
+          "always: read at the next Add — the cap the oldest characters are dropped past (not above 0: no cap); a buffer already over it is trimmed by the next Add"
+        ],
+        "maxMessages": [
+          "always: read at the next Add that completes a message — the cap the oldest messages are dropped past (not at least 0: 0, keep all)"
+        ],
+        "add": [
+          "an empty Chunk (a keep-alive, or one that was refused): nothing is appended → Unchanged; Overflowed, Changed, Message Received stay silent",
+          "the chunk is appended, past Max Length the oldest characters go (counted on Dropped Characters), and no Delimiter completes a message: Accumulated grows → Overflowed, Changed, Done; Message Received stays silent",
+          "the chunk is appended and no Delimiter completes a message: Accumulated grows → Changed, Done; Overflowed, Message Received stay silent",
+          "the chunk is appended, past Max Length the oldest characters go (counted on Dropped Characters), a Delimiter completes a message, and past Max Messages the oldest messages go (counted on Dropped Messages): Overflowed twice, the last complete one is Last Message, the rest stays in Accumulated → Overflowed, Overflowed, Message Received, Changed, Done",
+          "the chunk is appended, a Delimiter completes a message, and past Max Messages the oldest messages go (counted on Dropped Messages): the last complete one is Last Message, the rest stays in Accumulated → Overflowed, Message Received, Changed, Done",
+          "the chunk is appended, past Max Length the oldest characters go (counted on Dropped Characters), and a Delimiter completes a message: it joins Messages, the last complete one is Last Message, the rest stays in Accumulated → Overflowed, Message Received, Changed, Done",
+          "the chunk is appended and a Delimiter completes a message: it joins Messages, the last complete one is Last Message, the rest stays in Accumulated — Message Received once however many completed → Message Received, Changed, Done; Overflowed stays silent"
+        ],
+        "clear": [
+          "anything accumulated, kept, dropped or refused: the buffer, Messages, Last Message, both dropped counts and the Error are emptied — not the Chunk retained → Cleared, Done",
+          "nothing held: the same empty values are sent again → Cleared, Unchanged"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.TextAccumulator",
         "summary": "Text Accumulator: collects stream fragments into growing text, and splits complete messages off a delimiter.",
@@ -47128,6 +47772,20 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "items": [
+          "always: written at the end of the frame (once, however many inputs moved) — CSV, Count and Changed; nothing (undefined or null) is not written; rows that are all arrays go cell for cell with no header, anything else as records"
+        ],
+        "columns": [
+          "always: the Items are written again at the end of the frame, once any have arrived — these properties in this order (comma-separated, blanks dropped), or every property first seen when empty"
+        ],
+        "delimiter": [
+          "always: the Items are written again at the end of the frame, once any have arrived, with this between cells (cleared reads as a comma)"
+        ],
+        "includeHeader": [
+          "always: the Items are written again at the end of the frame, once any have arrived, with the column names as the first row or not — rows of cells never get one"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.ToCSV",
         "summary": "Writes an array out as CSV text, quoting any cell that needs it.",
@@ -47801,6 +48459,79 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "url": [
+          "no connection yet: stored as text (nothing as blank); at the end of the frame one connects to it when Auto Connect is on and it is not blank — Connection State connecting, the Status outputs sent (a URL not starting with ws:// or wss:// fails at once instead: Connection State error, Last Error, On Error); with Auto Connect off it waits for a Connect",
+          "the URL the connection was made with (its Protocols too): stored; nothing else, now or at the end of the frame — a closed or failed connection is not retried by setting its URL again",
+          "a URL other than the connection's: stored; at the end of the frame that connection is dropped silently (its socket closed, its countdown and heartbeat stopped, no On Close; a Connect still waiting, or made before then against the old URL: Unchanged), the Status outputs sent, and a fresh one (Retry Count 0, Queue Size 0, Dropped 0) connects to this URL when it is not blank and Auto Connect is on or the old one was connecting, open or reconnecting — Connection State connecting (not starting with ws:// or wss://: error, Last Error, On Error); otherwise idle"
+        ],
+        "autoConnect": [
+          "on or off, with a connection (open, closed or failed alike): held for the next URL or Protocols change, after which the new one connects when this is on; nothing now or at the end of the frame — off closes nothing, on reopens nothing",
+          "on, with no connection yet: at the end of the frame one connects when the URL is not blank — Connection State connecting, the Status outputs sent (a URL not starting with ws:// or wss://: error, Last Error, On Error); a blank URL: idle until one arrives",
+          "off, with no connection yet: nothing — it waits for a Connect"
+        ],
+        "protocols": [
+          "no connection yet: split on commas and trimmed (blank or not text: none), offered at the handshake when a connection is made — at the end of the frame when Auto Connect is on and there is a URL, else at the next Connect",
+          "the list the connection was made with (its URL too): stored; nothing else, now or at the end of the frame",
+          "a list other than the connection's: stored; at the end of the frame that connection is dropped silently (no On Close; a Connect still waiting: Unchanged), the Status outputs sent, and a fresh one offering these connects when the URL is not blank and Auto Connect is on or the old one was connecting, open or reconnecting — Connection State connecting; otherwise idle"
+        ],
+        "autoReconnect": [
+          "on or off: onto the connection at once, read at its next unsolicited close — on, the drop is retried after the backoff wait (Connection State reconnecting, Last Error says when, On Close); off, it is final: a goodbye (1000 or 1001) is Connection State closed and On Close, anything else error, Last Error, On Error and On Close; a reconnect already counting down still fires either way"
+        ],
+        "reconnectDelay": [
+          "always: onto the connection at once, read when the next backoff is drawn — the first retry of an outage waits this many milliseconds, each later one twice the last, capped at Max Reconnect Delay (ms); 0, below, or not a number: 1000; a wait already counting down keeps its length"
+        ],
+        "maxReconnectDelay": [
+          "always: onto the connection at once, read when the next backoff is drawn — the ceiling on the wait in milliseconds, however many retries; 0, below, or not a number: 30000"
+        ],
+        "maxRetries": [
+          "always: onto the connection at once, read at its next unsolicited close — Retry Count (the retries so far in this outage) below it: one more; at it: gives up — Connection State error, Last Error `… gave up after n reconnect attempts`, On Error, On Close (a waiting Connect: Failure); 0, or not a number: no retry; below 0: unlimited; a close code retrying cannot help (1002, 1003, 1007 to 1010, 1015) gives up whatever this is"
+        ],
+        "jitter": [
+          "on or off: onto the connection at once, read when the next backoff is drawn — on, the wait is scaled by a random draw into its second half (from half of it to all of it); off, the whole wait exactly"
+        ],
+        "heartbeatInterval": [
+          "a different interval while the socket is open: the heartbeat restarts now — a reply still awaited is forgotten, and the Heartbeat Message goes this many milliseconds from now, then every interval; 0, below, or not a number: the heartbeat stops",
+          "the same interval, or no open socket: read when the socket next opens — above 0, the Heartbeat Message is sent every this many milliseconds (not On Message Sent) and the Heartbeat Reply swallowed; 0, below, or not a number: no heartbeat, and a Heartbeat Reply arriving is an ordinary message"
+        ],
+        "heartbeatMessage": [
+          "always: onto the connection at once (not text: blank), read at the next beat — the text sent as the heartbeat, not On Message Sent; blank: no beat is sent and no reply awaited, so no connection is declared dead"
+        ],
+        "heartbeatReply": [
+          "always: onto the connection at once (not text: blank), read at the next beat and the next message — while a heartbeat runs, a message equal to it is swallowed instead of On Message and, when a beat was awaiting it, measured as Latency (ms) (the Status outputs sent); a beat still unanswered when the next is due is a dead connection: Last Error, On Error, then handled as a 1006 close; blank: nothing is awaited"
+        ],
+        "message": [
+          "always: held for the next Send (nothing or null fails it)"
+        ],
+        "messageType": [
+          "always: onto the connection at once (nothing as Auto), read at the next send — Binary encodes text, and an object's JSON, as UTF-8 bytes; Auto and Text send them as text; a buffer or typed array goes as bytes whatever this says"
+        ],
+        "whenDisconnected": [
+          "always: onto the connection at once (nothing as Queue), read by the next Send while the socket is not open — Queue holds it in order (Done; sent at the next open), Drop discards it and counts it in Dropped (Unchanged), Report Error counts it and fails (Last Error, On Error, Failure websocket/not-connected); messages already queued stay queued"
+        ],
+        "maxQueueSize": [
+          "always: onto the connection at once, read by the next Send that would queue — above 0, a queue already this long refuses it: Dropped, Last Error, On Error, Failure websocket/queue-full; 0, below, or not a number: no limit; a queue already longer than a new limit keeps what it holds"
+        ],
+        "connect": [
+          "a blank URL: any socket held is closed quietly and the countdown and heartbeat stopped (a Connect still waiting: Unchanged), then it fails at once — Connection State error, Last Error `URL is required to connect`, Retry Count 0, the Status outputs sent, On Error; Failure (websocket/connect-failed)",
+          "a URL not starting with ws:// or wss://: any socket held is closed quietly (a Connect still waiting: Unchanged), then it fails at once — Connection State error, Last Error `URL must start with ws:// or wss://`, Retry Count 0, the Status outputs sent, On Error; Failure (websocket/connect-failed)",
+          "a URL the browser refuses to open: any socket held is closed quietly (a Connect still waiting: Unchanged), Connection State connecting, then error at once — Last Error `Could not open WebSocket: …`, Retry Count 0, the Status outputs sent, On Error; Failure (websocket/connect-failed)",
+          "a URL starting with ws:// or wss:// (the connection's own: one changed this frame is taken at the frame's end, which then supersedes this): any socket held is closed quietly, the countdown and heartbeat stopped (a Connect still waiting: Unchanged), Retry Count 0, Close Code 0, Connection State connecting (Connected false), the Status outputs sent, and a socket is made with the URL trimmed and the Protocols; settled later — Done when it opens (On Open, however many retried drops lie between), Failure (websocket/connect-failed) when the connection fails or gives up, Unchanged when a later Connect, a Disconnect or a URL change supersedes it"
+        ],
+        "disconnect": [
+          "no connection was ever made: nothing is sent (a Connect still waiting: Unchanged); Unchanged",
+          "a socket held, or a connection connecting, open or reconnecting: the socket is closed (1000 `Client disconnect`), the countdown and heartbeat stopped, nothing more arrives — Connection State closed, Connected false, Retry Count 0, Close Code 1000, Close Reason `Client disconnect`, the Status outputs sent, On Close (a Connect still waiting: Unchanged); Done",
+          "a connection idle, closed or failed, holding no socket: Connection State closed, Retry Count 0, Close Code 1000, Close Reason `Client disconnect` (Last Error kept), the Status outputs sent, no On Close; Unchanged"
+        ],
+        "send": [
+          "Message empty (nothing or null), whatever the socket is doing: Last Error `Nothing to send: the Message input is empty`, the Status outputs sent, On Error; Failure (websocket/nothing-to-send)",
+          "the socket not open (idle, connecting, reconnecting, closed or failed), When Disconnected Report Error: Dropped counts it, Last Error `Cannot send: the connection is not open`, the Status outputs sent, On Error; Failure (websocket/not-connected)",
+          "the socket not open, When Disconnected Queue, Max Queue Size above 0 and Queue Size at it: Dropped counts it, Last Error `Send queue is full`, the Status outputs sent, On Error; Failure (websocket/queue-full)",
+          "the socket not open, When Disconnected Drop: discarded — Dropped counts it, the Status outputs sent, no On Error; Unchanged",
+          "the socket not open (an idle connection is made if there is none), When Disconnected Queue, with room: held at the back of the queue — Queue Size, the Status outputs sent; sent in order when the socket next opens, On Message Sent for each then; Done",
+          "the socket open: handed to it now — text as itself, an object as JSON, anything else as text, a buffer or typed array as bytes, and with Message Type Binary the text as UTF-8 bytes — On Message Sent; the Status outputs stay silent; Done"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.WebSocket",
         "summary": "Two-way WebSocket connection: send and receive text, JSON or binary, with connection state as graph outputs.",
@@ -57335,6 +58066,36 @@
         ],
         "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
       },
+      "rules": {
+        "enabled": [
+          "the value it already holds: nothing",
+          "a change: Enabled follows; disabled, the button takes no click and no focus"
+        ],
+        "value": [
+          "always: what this button contributes when selected; at the next paint it shows selected when its group's Value is this and not otherwise — Checked follows, Changed does not fire"
+        ],
+        "mounted": [
+          "always: the button is put on the page (Did Mount, showing its group's choice — Checked follows without Changed), or taken off it (Will Unmount, with the keyboard and the states it held), at the next paint"
+        ],
+        "useLabel": [
+          "always: a label is drawn beside the button, or not; the button and its keyboard stay"
+        ],
+        "focus": [
+          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
+          "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
+        ],
+        "blur": [
+          "it does not hold the keyboard (or is disabled, and gives it up to nobody): nothing changes → Done; Blurred stays silent",
+          "it holds the keyboard: it is taken off it, and the Focused state goes false → Blurred, Done"
+        ],
+        "scrollIntoView": [
+          "always: the page, or the scrolling Group holding it, scrolls until the button can be seen"
+        ],
+        "visible": [
+          "always: shown or hidden at the next paint, its space kept; hidden, it takes no click and a Focus does not reach it"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.controls.radiobutton",
         "summary": "Radio Button control: one selectable option; place several inside a Radio Button Group, which reports the chosen value.",
@@ -63580,6 +64341,18 @@
         "known": false,
         "reason": "No parameter on this node carries the list its ports are generated from, so the port set could not be observed headlessly."
       },
+      "rules": {
+        "store": [
+          "the first press this frame: one write goes to the backend at the frame's end, with Email, Username and the properties held then — Done for each press, or Error (the backend's words, when it gives any) and Failure for each; nobody signed in, or a Backend the project does not have, is a Failure too",
+          "another press this frame: it joins that write, and is answered with it"
+        ],
+        "email": [
+          "always: held as handed; read when the next write goes"
+        ],
+        "username": [
+          "always: held as handed; read when the next write goes — a REST backend refuses a Username that is not blank, and writes nothing"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.user.SetUserProperties",
         "summary": "Saves changes to the signed-in user's email, username and custom properties on the cloud backend.",
@@ -63729,6 +64502,12 @@
         "signIn": [
           "the first press this frame: the call goes to the backend at the frame's end, with the values held then",
           "another press this frame: it joins that call, and is answered with it"
+        ],
+        "provider": [
+          "always: held as handed; read when the next handover goes — none set, the handover is refused with Error and Failure"
+        ],
+        "redirect": [
+          "always: held as handed; read when the next handover goes"
         ]
       },
       "enrichment": {

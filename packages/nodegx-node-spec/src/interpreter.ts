@@ -180,6 +180,8 @@ export interface Instance {
   subscriptions?: Map<string, WorldSubscription>;
   /** NSP-014 s34: the WebSockets this instance made, by the spec's id (world.ts SOCKET). */
   sockets?: Map<string, WorldSocket>;
+  /** P107-C155: the input ports a wire reaches for the whole play (spec.ts `WorldView.wired`); empty unless the mount named any. */
+  readonly wired: ReadonlySet<string>;
 }
 
 export class SpecError extends Error {
@@ -292,7 +294,9 @@ function viewOf(inst: Instance): WorldView {
     authReturn: () => world.backend.authReturn,
     pickerAnswer: (ahead) => world.picker.answer(ahead ?? 0),
     socketAnswer: (url) => world.sockets.answerFor(url),
-    group: () => ({ present: world.group.present, load: world.group.load })
+    group: () => ({ present: world.group.present, load: world.group.load }),
+    // P107-C155 — the ports the mount named as wired (adapter.ts `mount`): a fact of this instance, not of the world
+    wired: (port) => inst.wired.has(port)
   };
 }
 
@@ -433,7 +437,7 @@ function hearRegistryWrites(world: World, all: Instance[]): void {
   });
 }
 
-export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, world: World = new World()): Instance {
+export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, world: World = new World(), wired: readonly string[] = []): Instance {
   const inputs: Record<string, unknown> = {};
   for (const [name, decl] of Object.entries(spec.inputs)) {
     if (!isSignalInput(decl)) inputs[name] = decl.default;
@@ -469,9 +473,15 @@ export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, w
     timers: new Map(),
     requests: new Map(),
     changes: [],
-    watches: new Map()
+    watches: new Map(),
+    wired: new Set(wired)
   };
   (inst as { view: WorldView }).view = viewOf(inst);
+  // P107-C155 — a wired port is one the node has (the runtime's `connectInput` throws on one it does not); checked before
+  // anything is applied, as the unknown params are below
+  for (const port of wired) {
+    if (!(port in spec.inputs) && !(port in derivedInputs) && !discoverable(inst, port)) throw new SpecError(`${spec.type}: wired port "${port}" is not an input`);
+  }
   // s24: a node that watches the store hears the writes made elsewhere (spec.ts `WorldHandlers.store`)
   if (spec.world?.store && spec.needs?.includes('backend')) listenToStore(inst);
   // s26: every instance is in its world's list (the bridge's record write); a listener of the session events in the other
@@ -1262,12 +1272,12 @@ export function trace(inst: Instance): TraceEvent[] {
   return inst.trace.map((e) => ({ ...e }));
 }
 
-/** Runs a scripted sequence from a fresh mount and returns its trace. */
-export function run(spec: AnyNodeSpec, params: Record<string, unknown>, steps: readonly Step[], world?: World): TraceEvent[] {
+/** Runs a scripted sequence from a fresh mount and returns its trace. `wired` (P107-C155): the ports a wire reaches, as `mount` takes them. */
+export function run(spec: AnyNodeSpec, params: Record<string, unknown>, steps: readonly Step[], world?: World, wired?: readonly string[]): TraceEvent[] {
   // a play under a world runs in its zone (NSP-013, world.ts TIME ZONE), as the adapter's does
   const restoreZone = world ? installTimeZone(world) : () => undefined;
   try {
-    const inst = mount(spec, params, world);
+    const inst = mount(spec, params, world, wired);
     for (const step of steps) {
       if (step === 'settle') settle(inst);
       else if ('signal' in step) signal(inst, step.signal);

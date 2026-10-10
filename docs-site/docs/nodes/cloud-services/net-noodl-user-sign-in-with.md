@@ -34,6 +34,21 @@ For 'Sign in with Google/GitHub/SSO' buttons on an app served by a NodeGX backen
 |---|---|---|---|
 | `signIn` | Signal | — | Hands over to the provider, which navigates the browser away — nothing downstream of this runs |
 
+### What each input does
+
+**Do** (`signIn`)
+
+- the first press this frame: the call goes to the backend at the frame's end, with the values held then
+- another press this frame: it joins that call, and is answered with it
+
+**Provider** (`provider`)
+
+- always: held as handed; read when the next handover goes — none set, the handover is refused with Error and Failure
+
+**Redirect** (`redirect`)
+
+- always: held as handed; read when the next handover goes
+
 ## Outputs
 
 ### Values

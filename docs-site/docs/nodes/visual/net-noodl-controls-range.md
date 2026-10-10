@@ -130,6 +130,54 @@ Continuous or stepped numeric input where feel matters more than precision: volu
 | `focus` | Signal | — | Puts the keyboard on this slider, so Enter, Space and the arrow keys go to it |
 | `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 
+### What each input does
+
+**Enabled** (`enabled`)
+
+- the value it already holds: nothing
+- a change: Enabled follows; disabled, the handle takes no slide and no focus
+
+**Value** (`value`)
+
+- empty: no word, and the handle stays where it is
+- not a number: no word (the runtime reports it), and the handle stays where it is
+- a number: at the next paint the handle goes there, clamped to Min and Max and rounded to the Step; Value and Value Percent follow when they move — Changed does not fire (only a person's slide fires it)
+
+**Min** (`min`)
+
+- always: at the next paint the handle is held at or above it (an empty Min is 0) and on the Step; Value and Value Percent follow when they move — never Changed
+
+**Max** (`max`)
+
+- always: at the next paint the handle is held at or below it (an empty Max is 100; below Min, the handle holds Min) and on the Step; Value and Value Percent follow when they move — never Changed
+
+**Step** (`step`)
+
+- always: at the next paint the handle is rounded to it (one that is not above 0 is 1); Value and Value Percent follow when they move — never Changed
+
+**Mounted** (`mounted`)
+
+- always: the slider is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint; put back, the handle is where it was left
+
+**Focus** (`focus`)
+
+- not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent
+- it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent
+- otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done
+
+**Blur** (`blur`)
+
+- it does not hold the keyboard (or is disabled, and gives it up to nobody): nothing changes → Done; Blurred stays silent
+- it holds the keyboard: it is taken off it, and the Focused state goes false → Blurred, Done
+
+**Scroll Into View** (`scrollIntoView`)
+
+- always: the page, or the scrolling Group holding it, scrolls until the slider can be seen
+
+**Visible** (`visible`)
+
+- always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it
+
 ## Outputs
 
 ### Values

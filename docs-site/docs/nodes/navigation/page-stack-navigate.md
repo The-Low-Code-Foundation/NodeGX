@@ -34,6 +34,20 @@ Advancing stack flows: next wizard step, opening a detail page over a list. To g
 |---|---|---|---|
 | `navigate` | Signal | — | Navigates the Component Stack to Target Page |
 
+### What each input does
+
+**Stack** (`stack`)
+
+- always: kept as written; the next Navigate goes to the Page Stack of this name (blank: Main)
+
+**Mode** (`mode`)
+
+- always: kept; read by the next Navigate — Push adds Target Page on top of the stack, Replace swaps it for every page showing; anything else (a wire can carry any value) fails the Navigate, Error naming the value
+
+**Navigate** (`navigate`)
+
+- always: one request at the end of the frame, however many presses, from the frame's final Stack, Mode, Target Page, Transition and parameters — Done for each press when the stack shows the page (Unchanged when that page with those parameters is already on top), Error and Failure for each when it cannot (no such page, an empty Components list, a transition still running) or when Mode is neither Push nor Replace; while no Page Stack is mounted under the name the request waits, and runs when one mounts (a push: after that stack rebuilds its start page)
+
 ## Outputs
 
 ### Signals

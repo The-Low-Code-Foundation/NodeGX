@@ -101,5 +101,8 @@ export const CloudFile = defineNode({
   }
 }).on({
   // :75-84 — only a stored file is taken, and then all four are sent
-  file: (_s, v) => (isStoredFile(v) ? { set: { file: v }, send: ['name', 'url', 'contentType', 'size'] } : { send: [] })
+  file: (_s, v) =>
+    isStoredFile(v)
+      ? { says: 'a stored file: held, and URL, Name, Content Type and Size are sent from it', set: { file: v }, send: ['name', 'url', 'contentType', 'size'] }
+      : { says: 'anything else (nothing, text, a plain object): ignored — the file held before stays, nothing is sent', send: [] }
 });

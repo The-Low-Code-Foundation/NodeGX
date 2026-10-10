@@ -115,7 +115,7 @@ describe('Counter through the interpreter', () => {
     }).on({
       go: (s) => {
         (s as { n: number }).n = 99;
-        return {};
+        return { says: 'always: nothing' };
       }
     });
     const inst = mount(Mutant as never);

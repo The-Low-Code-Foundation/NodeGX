@@ -33,6 +33,17 @@ The one node to read who is logged in and their properties, anywhere in the app.
 |---|---|---|---|
 | `fetch` | Signal | — | Re-reads the signed-in user from the backend, which is also how an expired session is discovered |
 
+### What each input does
+
+**Fetch** (`fetch`)
+
+- always: the user is re-read from the backend at the frame's end, one call for the frame's presses; each answered when it returns
+
+**User properties** (`runOnChange-user`)
+
+- the value it already holds: nothing
+- a change: ticked, a property of the signed-in user that moves is sent with its Changed; unticked, it moves silently
+
 ## Outputs
 
 ### Values

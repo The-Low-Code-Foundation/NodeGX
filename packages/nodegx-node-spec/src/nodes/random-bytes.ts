@@ -72,20 +72,20 @@ export const RandomBytes = defineNode({
   }
 }).on({
   // :108-134 `_generate`
+  // NSP-018: the two refusals as literal arms (a `fail` helper before), the same patches
   generate: (_s, i, w) => {
     const length = i.length; // :112 — `undefined ? 32 : length`; the input holds 32 until written (initialize)
     const encoding = i.encoding || 'hex'; // :113
-    const fail = (message: string) => ({ set: { error: message }, send: ['error'] as Array<'error'>, outcome: 'failure' as const, error: 'random-bytes/failed' });
     if (!Number.isFinite(length) || length < 1 || length > MAX_LENGTH || Math.floor(length) !== length) {
-      return fail(`Random Bytes: Length must be a whole number from 1 to ${MAX_LENGTH}, and was ${String(length)}.`); // :121-124
+      return { says: 'Length not a whole number from 1 to 4096: nothing is drawn, the reason on Error, Value untouched', set: { error: `Random Bytes: Length must be a whole number from 1 to ${MAX_LENGTH}, and was ${String(length)}.` }, send: ['error'], outcome: 'failure', error: 'random-bytes/failed' }; // :121-124
     }
     const bytes = w.bytes(length); // :127 `randomBytes(length)` — the draw, before the render
     let value: string;
     try {
       value = encodeBytes(bytes, encoding); // :127
     } catch (e) {
-      return fail((e as Error).message); // :128-131
+      return { says: 'an Encoding not in the list (empty reads as hex): Length bytes were drawn and are thrown away, the reason on Error, Value untouched', set: { error: (e as Error).message }, send: ['error'], outcome: 'failure', error: 'random-bytes/failed' }; // :128-131
     }
-    return { set: { value, error: undefined }, send: ['value', 'error'], outcome: 'done' }; // :133-137
+    return { says: 'Length bytes are drawn from the cryptographic source and rendered in Encoding: Value replaced, Error cleared', set: { value, error: undefined }, send: ['value', 'error'], outcome: 'done' }; // :133-137
   }
 });

@@ -1,6 +1,6 @@
 # The census — every picker node, its tier, and where its behaviour is written
 
-**Generated 2026-10-09 by `scripts/node-spec/census.js` — do not edit by hand; edit `tiers.json` and regenerate.**
+**Generated 2026-10-10 by `scripts/node-spec/census.js` — do not edit by hand; edit `tiers.json` and regenerate.**
 
 Catalog format 1.1.0: **180** node types, of which **147** are in the picker and not deprecated (the population), **33** excluded (listed at the end). Cardinality checked both ways by the script.
 
@@ -48,15 +48,15 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 
 | # | node | tier | batch | places | plan.ts lines | emit libs | tests typed | tests loose |
 |---:|---|---|---|---:|---:|---|---:|---:|
-| 1 | **Group** | T5 | NSP-016 | 65 | 0 | — | 64 | 101 |
-| 2 | **Text** | T5 | NSP-016 | 64 | 0 | sseLib.ts | 62 | 100 |
+| 1 | **Group** | T5 | NSP-016 | 67 | 0 | — | 66 | 103 |
+| 2 | **Text** | T5 | NSP-016 | 65 | 0 | sseLib.ts | 63 | 101 |
 | 3 | **Set Variable** | T1 | NSP-012 | 49 | 12 | — | 36 | 42 |
 | 4 | **Repeater** (`For Each`) | T5 | NSP-016 | 46 | 24 | — | 21 | 48 |
 | 5 | **Component Inputs** | T4 | NSP-015 | 36 | 10 | — | 25 | 49 |
 | 6 | **Component Outputs** | T4 | NSP-015 | 34 | 20 | — | 13 | 25 |
 | 7 | **String** | T1 | NSP-011 | 27 | 1 | — | 25 | 36 |
-| 8 | **Function** (`JavaScriptFunction`) | T6 | NSP-017 | 25 | 0 | — | 24 | 44 |
-| 9 | **Button** (`net.noodl.controls.button`) | T5 | NSP-016 | 25 | 0 | — | 24 | 40 |
+| 8 | **Button** (`net.noodl.controls.button`) | T5 | NSP-016 | 26 | 0 | — | 25 | 41 |
+| 9 | **Function** (`JavaScriptFunction`) | T6 | NSP-017 | 25 | 0 | — | 24 | 44 |
 | 10 | **Variable** (`Variable2`) | T1 | NSP-012 | 23 | 5 | — | 17 | 26 |
 
 ## Every node
@@ -207,20 +207,20 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | **Component Children** | `Component Children` | T5 | browser | `noodl-runtime/src/nodelibraryexport.ts` |  |  | 4 |  | translated | 1 / 5 | providedBy noodl-editor in the catalog |
 | **Drag** | `Drag` | T5 | browser | `noodl-viewer-react/src/nodes/visual/drag.ts` |  |  | 10 | dragLib | translated | 3 / 12 |  |
 | **Repeater** | `For Each` | T5 | browser | `noodl-viewer-react/src/nodes/std-library/data/foreach.tsx` | ✓ | ✓ | 24 |  | translated | 21 / 48 |  |
-| **Group** | `Group` | T5 | browser | `noodl-viewer-react/src/nodes/visual/group.ts` | ✓ | ✓ | 0 |  | translated | 64 / 101 |  |
+| **Group** | `Group` | T5 | browser | `noodl-viewer-react/src/nodes/visual/group.ts` | ✓ | ✓ | 0 |  | translated | 66 / 103 |  |
 | **Image** | `Image` | T5 | browser | `noodl-viewer-react/src/nodes/visual/image.ts` |  | ✓ | 0 |  | translated | 2 / 11 |  |
-| **Button** | `net.noodl.controls.button` | T5 | browser | `noodl-viewer-react/src/nodes/controls/button.ts` |  | ✓ | 0 |  | translated | 24 / 40 |  |
+| **Button** | `net.noodl.controls.button` | T5 | browser | `noodl-viewer-react/src/nodes/controls/button.ts` |  | ✓ | 0 |  | translated | 25 / 41 |  |
 | **Checkbox** | `net.noodl.controls.checkbox` | T5 | browser | `noodl-viewer-react/src/nodes/controls/checkbox.ts` | ✓ | ✓ | 1 |  | translated | 2 / 10 |  |
 | **Dropdown** | `net.noodl.controls.options` | T5 | browser | `noodl-viewer-react/src/nodes/controls/options.ts` |  | ✓ | 0 |  | translated | 1 / 5 |  |
 | **Radio Button** | `net.noodl.controls.radiobutton` | T5 | browser | `noodl-viewer-react/src/nodes/controls/radiobutton.ts` |  | ✓ | 0 |  | translated | 1 / 7 |  |
-| **Slider** | `net.noodl.controls.range` | T5 | browser | `noodl-viewer-react/src/nodes/controls/slider.ts` |  | ✓ | 0 |  | translated | 1 / 4 |  |
+| **Slider** | `net.noodl.controls.range` | T5 | browser | `noodl-viewer-react/src/nodes/controls/slider.ts` |  | ✓ | 0 |  | translated | 1 / 5 |  |
 | **Text Input** | `net.noodl.controls.textinput` | T5 | browser | `noodl-viewer-react/src/nodes/controls/text-input.ts` | ✓ | ✓ | 0 |  | translated | 8 / 19 |  |
 | **Columns** | `net.noodl.visual.columns` | T5 | browser | `noodl-viewer-react/src/nodes/visual/columns.ts` |  | ✓ | 0 |  | translated | 3 / 10 |  |
 | **Icon** | `net.noodl.visual.icon` | T5 | browser | `noodl-viewer-react/src/nodes/visual/icon.ts` |  | ✓ | 0 |  | translated | 0 / 4 |  |
 | **Component Stack** | `Page Stack` | T5 | browser | `noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx` | ✓ | ✓ | 4 |  | translated | 1 / 5 |  |
 | **Radio Button Group** | `Radio Button Group` | T5 | browser | `noodl-viewer-react/src/nodes/controls/radiobuttongroup.ts` |  | ✓ | 0 |  | translated | 0 / 5 |  |
-| **Page Router** | `Router` | T5 | browser | `noodl-viewer-react/src/nodes/navigation/router.tsx` | ✓ | ✓ | 5 |  | translated | 2 / 20 |  |
-| **Text** | `Text` | T5 | browser | `noodl-viewer-react/src/nodes/visual/text.ts` |  | ✓ | 0 | sseLib | translated | 62 / 100 |  |
+| **Page Router** | `Router` | T5 | browser | `noodl-viewer-react/src/nodes/navigation/router.tsx` | ✓ | ✓ | 5 |  | translated | 2 / 21 |  |
+| **Text** | `Text` | T5 | browser | `noodl-viewer-react/src/nodes/visual/text.ts` |  | ✓ | 0 | sseLib | translated | 63 / 101 |  |
 | **Video** | `Video` | T5 | browser | `noodl-viewer-react/src/nodes/visual/video.ts` |  | ✓ | 0 |  | translated | 0 / 9 |  |
 
 ### NSP-017 — the escape hatches (5)

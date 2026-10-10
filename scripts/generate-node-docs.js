@@ -198,6 +198,40 @@ function renderPortsSection(title, ports) {
   return parts.join('\n');
 }
 
+/**
+ * NSP-018 §2 "Rules in words" — what each input does, read off the spec's reducers.
+ *
+ * `catalog:generate` writes `rules: { [inputPortName]: string[] }` on every specced node, one
+ * line per reducer branch in the form `<case> → <what the wire carries>`, and `catalog:merge`
+ * carries it through verbatim. This is the "docs" half of the task's person sentence: the same
+ * lines the property panel and `get_node_type` serve, so the page cannot say one thing while
+ * the node does another.
+ *
+ * Rendered as a subsection of `## Inputs`, after the port tables, because every line is about
+ * an input. Each port is headed by its display name — the words the lines themselves use
+ * ("at Max Value with Limits Enabled") — with the port's code name beside it, which is what the
+ * table above lists and what tells two inputs with one display name apart (Filter Collection's
+ * `items` and `runOnChange-items` are both shown as "Items").
+ *
+ * A node without `rules` gets nothing — not an empty section. Port order and line order are the
+ * catalog's own, so the output is a deterministic function of the catalog and `--check` can stay
+ * a byte comparison.
+ */
+function renderRulesSection(node) {
+  const rules = node.rules;
+  if (!rules || typeof rules !== 'object') return '';
+  const entries = Object.entries(rules).filter(([, lines]) => Array.isArray(lines) && lines.length);
+  if (!entries.length) return '';
+
+  const inputsByName = new Map((node.inputs || []).map((p) => [p.name, p]));
+  const blocks = entries.map(([portName, lines]) => {
+    const port = inputsByName.get(portName);
+    const label = escapeAngles((port && port.displayName) || portName);
+    return `**${label}** (\`${portName}\`)\n\n${lines.map((line) => `- ${escapeAngles(line)}`).join('\n')}\n`;
+  });
+  return `### What each input does\n\n${blocks.join('\n')}`;
+}
+
 function renderDynamicPorts(dynamicPorts) {
   if (!dynamicPorts) return '';
   const parts = [
@@ -321,6 +355,7 @@ function main() {
       parts.push(`## At a glance\n\n${meta.join('\n')}\n`);
 
       parts.push(renderPortsSection('Inputs', node.inputs || []));
+      parts.push(renderRulesSection(node));
       parts.push(renderPortsSection('Outputs', node.outputs || []));
       parts.push(renderDynamicPorts(node.dynamicPorts));
 
@@ -409,7 +444,7 @@ if (require.main === module) {
   runCli();
 }
 
-module.exports = { assertEnrichedCatalogIsFresh, StaleCatalogError };
+module.exports = { assertEnrichedCatalogIsFresh, StaleCatalogError, renderRulesSection };
 
 function runCli() {
   try {

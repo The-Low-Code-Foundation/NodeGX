@@ -29,6 +29,32 @@ Date Compare answers all three questions at once, as booleans and as signals, an
 | `b` | Date | — | The instant it is compared against |
 | `granularity` | Enum (`millisecond`, `second`, `minute`, `hour`, `day`, `month`, `year`) | `millisecond` | How coarsely to compare. Day answers "is this the same day", which is almost always the question — two instants are hardly ever the same millisecond |
 
+### What each input does
+
+**Date** (`a`)
+
+- Date or Compare To not given yet: kept for when both are; nothing is sent → Invalid Date, On Same, On Before, On After stay silent
+- either cannot be read as a date: Is Before, Is After and Is Same go empty → Invalid Date; On Same, On Before, On After stay silent
+- the same instant, once both are cut to Granularity (millisecond when empty): Is Same goes true, the other two false → On Same; Invalid Date, On Before, On After stay silent
+- Date is earlier, at Granularity: Is Before goes true, the other two false → On Before; Invalid Date, On Same, On After stay silent
+- Date is later, at Granularity: Is After goes true, the other two false → On After; Invalid Date, On Same, On Before stay silent
+
+**Compare To** (`b`)
+
+- Date or Compare To not given yet: kept for when both are; nothing is sent → Invalid Date, On Same, On Before, On After stay silent
+- either cannot be read as a date: Is Before, Is After and Is Same go empty → Invalid Date; On Same, On Before, On After stay silent
+- the same instant, once both are cut to Granularity (millisecond when empty): Is Same goes true, the other two false → On Same; Invalid Date, On Before, On After stay silent
+- Date is earlier, at Granularity: Is Before goes true, the other two false → On Before; Invalid Date, On Same, On After stay silent
+- Date is later, at Granularity: Is After goes true, the other two false → On After; Invalid Date, On Same, On Before stay silent
+
+**Granularity** (`granularity`)
+
+- Date or Compare To not given yet: kept for when both are; nothing is sent → Invalid Date, On Same, On Before, On After stay silent
+- either cannot be read as a date: Is Before, Is After and Is Same go empty → Invalid Date; On Same, On Before, On After stay silent
+- the same instant, once both are cut to Granularity (millisecond when empty): Is Same goes true, the other two false → On Same; Invalid Date, On Before, On After stay silent
+- Date is earlier, at Granularity: Is Before goes true, the other two false → On Before; Invalid Date, On Same, On After stay silent
+- Date is later, at Granularity: Is After goes true, the other two false → On After; Invalid Date, On Same, On Before stay silent
+
 ## Outputs
 
 ### Values

@@ -137,13 +137,13 @@ export const ParseXML = defineNode({
   }
 }).on(
   {
-    text: (_s, v) => ({ set: { text: v, textSupplied: v !== undefined && v !== null, scheduled: true }, send: [] }), // :80-82
-    attributePrefix: (_s, v) => ({ set: { attributePrefix: v === undefined || v === null ? '@' : v, scheduled: true }, send: [] }), // :94-95
-    alwaysArray: (_s, v) => ({ set: { alwaysArray: v ? String(v) : '', scheduled: true }, send: [] }), // :108-109 — v2 (C18): as text
-    trimValues: (_s, v) => ({ set: { trimValues: v, scheduled: true }, send: [] }), // :119-120
+    text: (_s, v) => ({ says: 'always: parsed at the end of the frame (once, however many inputs moved) — Result and Changed, or Error, Error Code and Failure with Result untouched; nothing (undefined or null) is not parsed', set: { text: v, textSupplied: v !== undefined && v !== null, scheduled: true }, send: [] }), // :80-82
+    attributePrefix: (_s, v) => ({ says: 'always: the XML is parsed again at the end of the frame, once any has arrived, with attribute keys starting with this (nothing reads as @; empty is a real prefix: the bare name)', set: { attributePrefix: v === undefined || v === null ? '@' : v, scheduled: true }, send: [] }), // :94-95
+    alwaysArray: (_s, v) => ({ says: 'always: read as text — the XML is parsed again at the end of the frame, once any has arrived, with these comma-separated tags always arrays', set: { alwaysArray: v ? String(v) : '', scheduled: true }, send: [] }), // :108-109 — v2 (C18): as text
+    trimValues: (_s, v) => ({ says: 'always: the XML is parsed again at the end of the frame, once any has arrived, with text values trimmed or kept as written', set: { trimValues: v, scheduled: true }, send: [] }), // :119-120
     maxBytes: (_s, v) => {
       const n = Number(v); // :132
-      return { set: { maxBytes: isFinite(n) && n > 0 ? n : DEFAULT_MAX_BYTES, scheduled: true }, send: [] }; // :133-134
+      return { says: 'always: the XML is parsed again at the end of the frame, once any has arrived — a text longer than this (counted in characters) is refused as xml/too-large before parsing; not a finite number above 0 reads as the default, 5 MB', set: { maxBytes: isFinite(n) && n > 0 ? n : DEFAULT_MAX_BYTES, scheduled: true }, send: [] }; // :133-134
     }
   },
   {

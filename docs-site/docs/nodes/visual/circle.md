@@ -83,6 +83,73 @@ Status dots, avatars' presence badges, decorative shapes, and progress rings/pie
 |---|---|---|---|
 | `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 
+### What each input does
+
+**Mounted** (`mounted`)
+
+- a change: the element is put on the page, or taken off it, at the next paint
+- the value it already holds: nothing
+
+**Scroll Into View** (`scrollIntoView`)
+
+- always: the page, or the scrolling Group holding it, scrolls until the element can be seen
+
+**Visible** (`visible`)
+
+- always: shown or hidden at the next paint, its space kept; hidden, it takes no pointer
+
+**Opacity** (`opacity`)
+
+- always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it
+
+**Pointer Events Mode** (`pointerEventsMode`)
+
+- Inherit: its own pointer style comes off
+- Explicit: the last Pointer Events Enabled is written back (on, before one was set)
+
+**Pointer Events Enabled** (`pointerEventsEnabled`)
+
+- always, whatever the mode: off, the pointer passes through to what is behind it
+
+**Draggable** (`draggable`)
+
+- always: on, every element it draws can be picked up, by pointer or keyboard; off, the one on the page cannot
+
+**Drag Value** (`dragValue`)
+
+- always: read by the zone it is dropped on, which reports it as Dropped Value
+
+**Drag Kind** (`dragKind`)
+
+- always: read by a zone with an Accept Kind as it is dragged over one
+
+**Hold To Drag** (`holdToDrag`)
+
+- always: read at the next press — whether it must be held before it picks up
+
+**Hold Time** (`holdTime`)
+
+- always: read at the next held press — how many seconds it is held before it picks up
+
+**Accept Drops** (`acceptDrops`)
+
+- on: a Draggable can be dropped here
+- off while a drag is over it: the drag leaves it — Is Drop Target goes false
+- off: nothing can be dropped here
+
+**Accept Kind** (`acceptKind`)
+
+- always: read as a drag comes over it — a source of another kind does not light it up
+
+**Accept File Drops** (`acceptFileDrops`)
+
+- on: a file dragged from the desktop can be dropped here
+- off: no file can be dropped here, and a drag over it is forgotten — Is Dragging Over goes false if it was true
+
+**Accepted file types** (`acceptedFileTypes`)
+
+- always: read at a drop — which files count as accepted
+
 ## Outputs
 
 ### Values

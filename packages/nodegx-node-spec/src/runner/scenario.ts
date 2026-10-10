@@ -27,6 +27,12 @@ export interface Scenario {
   steps: Step[];
   /** NSP-007: the world's script for this play — the seed, the network's answers. Absent, a default world (seed 1, no answers). */
   world?: WorldScript;
+  /**
+   * P107-C155: the input ports a wire reaches for the whole play — connected at mount, before the params, to a source that
+   * never sends (adapter.ts `mount`; the spec reads `world.wired(port)`). Absent, nothing is wired: what every scenario
+   * before this meant, and what the generated sequences still mean.
+   */
+  wired?: string[];
   /** When present, both targets are graded against it; when absent, against the interpreter. */
   expect?: TraceEvent[];
   /** For a replay file: the seed the sequence came from. */
@@ -62,6 +68,7 @@ export function reviveScenarios(parsed: unknown, type: string, file = `${type}.j
   return parsed.map((s, i) => {
     const sc = s as Scenario;
     if (!sc || typeof sc.name !== 'string' || !Array.isArray(sc.steps)) throw new Error(`${file}[${i}]: a scenario needs a name and steps`);
+    if (sc.wired !== undefined && (!Array.isArray(sc.wired) || sc.wired.some((p) => typeof p !== 'string'))) throw new Error(`${file}[${i}]: \`wired\` is a list of port names`);
     const out: Scenario = { ...sc, node: sc.node ?? type, params: reviveParams(sc.params ?? {}), steps: sc.steps.map(reviveStep) };
     if (sc.world) out.world = reviveWorld(sc.world);
     return out;

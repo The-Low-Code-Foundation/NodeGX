@@ -38,10 +38,11 @@ export function interpreterAdapter(options: InterpreterAdapterOptions = {}): Tar
   let current: World | undefined;
   return {
     name: 'interpreter',
-    mount(type, params) {
+    mount(type, params, wired) {
       const spec = resolve(type);
       if (!spec) throw new Error(`interpreter: no spec for "${type}"`);
-      const h: InterpreterHandle = { id: `${type}#${next++}`, type, inst: mount(spec, params, current) };
+      // P107-C155 — the ports a wire reaches, handed to the instance (spec.ts `WorldView.wired`)
+      const h: InterpreterHandle = { id: `${type}#${next++}`, type, inst: mount(spec, params, current, wired) };
       live.set(h.id, h);
       return h;
     },

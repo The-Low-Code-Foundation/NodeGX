@@ -34,6 +34,21 @@ Use it whenever the user must supply a file from their device — avatar upload,
 |---|---|---|---|
 | `open` | Signal | — | Opens the browser file dialog |
 
+### What each input does
+
+**Accepted file types** (`acceptedFileTypes`)
+
+- always: held as handed; put on the dialog at the next Open — blank offers every file
+
+**Capture** (`capture`)
+
+- always: held as handed; put on the dialog at the next Open — blank asks for the file list, not a camera
+
+**Open** (`open`)
+
+- the browser refuses to open the dialog: an Open still waiting is answered Unchanged first; Error says why, and this press fails at once → Failure
+- the dialog opens, with Accepted file types and Capture as held: an Open still waiting is answered Unchanged first; this press waits for the person — a file chosen sends File, Path, Name, Size in bytes and Type, then Done; the dialog cancelled or closed with nothing is Unchanged
+
 ## Outputs
 
 ### Values

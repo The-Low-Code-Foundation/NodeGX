@@ -276,36 +276,49 @@ export const Circle = defineNode({
 }).on(
   {
     // react-component-node.ts :2283-2294 — what the node wants; the page follows at the next paint. The value it holds already: nothing
-    mounted: (s, v) => (!!v !== s.mounted ? { set: { mounted: !!v }, send: [] } : NOTHING),
+    mounted: (s, v) =>
+      !!v !== s.mounted
+        ? { says: 'a change: the element is put on the page, or taken off it, at the next paint', set: { mounted: !!v }, send: [] }
+        : { says: 'the value it already holds: nothing', send: [] },
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire
-    scrollIntoView: () => NOTHING,
+    scrollIntoView: () => ({ says: 'always: the page, or the scrolling Group holding it, scrolls until the element can be seen', send: [] }),
     // :366-375
-    visible: (_s, v) => ({ set: { visible: !!v }, send: [] }),
+    visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, it takes no pointer', set: { visible: !!v }, send: [] }),
     // :320-328 — the style holds the value as written; Circle.tsx :388-390 compares it with the number 0
-    opacity: (_s, v) => ({ set: { opacityZero: v === 0 }, send: [] }),
+    opacity: (_s, v) => ({ says: 'always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it', set: { opacityZero: v === 0 }, send: [] }),
     // :772-781 — `inherit` removes the style; anything else writes it from the last Enabled (`auto` before one)
-    pointerEventsMode: (s, v) => ({ set: { peStyle: v === 'inherit' ? undefined : s.peEnabled === false ? 'none' : 'auto' }, send: [] }),
+    pointerEventsMode: (s, v) =>
+      v === 'inherit'
+        ? { says: 'Inherit: its own pointer style comes off', set: { peStyle: undefined }, send: [] }
+        : { says: 'Explicit: the last Pointer Events Enabled is written back (on, before one was set)', set: { peStyle: s.peEnabled === false ? 'none' : 'auto' }, send: [] },
     // :787-793 — written whatever the mode
-    pointerEventsEnabled: (_s, v) => ({ set: { peEnabled: !!v, peStyle: v ? 'auto' : 'none' }, send: [] }),
+    pointerEventsEnabled: (_s, v) => ({ says: 'always, whatever the mode: off, the pointer passes through to what is behind it', set: { peEnabled: !!v, peStyle: v ? 'auto' : 'none' }, send: [] }),
     // drag-drop.ts `setDraggable`, `elementChanged` — the attributes go on every element the node has while Draggable is on (a
-    // remount, a new Tag, a mount however late), and come off the one on the page with it (row C77, fixed in P109 ISL-031)
-    draggable: (_s, v) => ({ set: { draggable: !!v }, send: [] }),
+    // remount, a mount however late — there is no Tag here), and come off the one on the page with it (row C77, fixed in P109 ISL-031)
+    draggable: (_s, v) => ({ says: 'always: on, every element it draws can be picked up, by pointer or keyboard; off, the one on the page cannot', set: { draggable: !!v }, send: [] }),
     // read by the zone it is dropped on: this page's only zone is itself, and a drag never takes its own node (C78, fixed in P109 ISL-031)
-    dragValue: () => NOTHING,
-    dragKind: () => NOTHING,
-    holdToDrag: (_s, v) => ({ set: { holdToDrag: v }, send: [] }),
-    holdTime: (_s, v) => ({ set: { holdTime: v }, send: [] }),
+    dragValue: () => ({ says: 'always: read by the zone it is dropped on, which reports it as Dropped Value', send: [] }),
+    dragKind: () => ({ says: 'always: read by a zone with an Accept Kind as it is dragged over one', send: [] }),
+    holdToDrag: (_s, v) => ({ says: 'always: read at the next press — whether it must be held before it picks up', set: { holdToDrag: v }, send: [] }),
+    holdTime: (_s, v) => ({ says: 'always: read at the next held press — how many seconds it is held before it picks up', set: { holdTime: v }, send: [] }),
     // drag-drop.ts :112-120 — off while the gesture is over this zone: it leaves it (`leaveZone` :489-512)
     acceptDrops: (s, v) => {
-      if (v) return { set: { acceptDrops: true }, send: [] };
-      if (s.inZone) return { set: { acceptDrops: false, inZone: false, isDropTarget: false }, send: ['isDropTarget'] };
-      return { set: { acceptDrops: false }, send: [] };
+      if (v) return { says: 'on: a Draggable can be dropped here', set: { acceptDrops: true }, send: [] };
+      if (s.inZone) return { says: 'off while a drag is over it: the drag leaves it — Is Drop Target goes false', set: { acceptDrops: false, inZone: false, isDropTarget: false }, send: ['isDropTarget'] };
+      return { says: 'off: nothing can be dropped here', set: { acceptDrops: false }, send: [] };
     },
-    acceptKind: (_s, v) => ({ set: { acceptKind: v }, send: [] }),
+    acceptKind: (_s, v) => ({ says: 'always: read as a drag comes over it — a source of another kind does not light it up', set: { acceptKind: v }, send: [] }),
     // :958-981 — read at each drag event, never at a render
     // C81 (fixed in P109 ISL-038): switched off, the zone forgets the count and goes dark — it could not hear the leave
-    acceptFileDrops: (s, v) => (v ? { set: { acceptFileDrops: true }, send: [] } : { set: { acceptFileDrops: false, dragDepth: 0, isDragOver: false }, send: s.isDragOver ? ['isDragOver'] : [] }),
-    acceptedFileTypes: (_s, v) => ({ set: { acceptedFileTypes: v }, send: [] })
+    acceptFileDrops: (s, v) =>
+      v
+        ? { says: 'on: a file dragged from the desktop can be dropped here', set: { acceptFileDrops: true }, send: [] }
+        : {
+            says: 'off: no file can be dropped here, and a drag over it is forgotten — Is Dragging Over goes false if it was true',
+            set: { acceptFileDrops: false, dragDepth: 0, isDragOver: false },
+            send: s.isDragOver ? ['isDragOver'] : []
+          },
+    acceptedFileTypes: (_s, v) => ({ says: 'always: read at a drop — which files count as accepted', set: { acceptedFileTypes: v }, send: [] })
   },
   {
     world: {

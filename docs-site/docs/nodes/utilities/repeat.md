@@ -34,6 +34,24 @@ Use it for anything that happens on its own at a steady pace: a clock, a countdo
 | `start` | Signal | — | Starts ticking from a Count of 0: the first Tick fires one Interval later. Fires Unchanged while already running |
 | `stop` | Signal | — | Stops ticking. Count keeps its value until the next Start |
 
+### What each input does
+
+**Interval** (`interval`)
+
+- always: kept as handed; read at the next Start and at each Tick, so the beat under way keeps its time
+
+**Start** (`start`)
+
+- already running: nothing → Unchanged
+- Interval is not a number above zero (a text '100' included): nothing starts → Failure
+- otherwise: Count goes back to 0, and the first Tick is due one Interval after the last frame → Done
+- otherwise, Count already 0: the first Tick is due one Interval after the last frame → Done
+
+**Stop** (`stop`)
+
+- running: it stops, and no Tick follows; Count keeps its value until the next Start → Done
+- not running: nothing → Unchanged
+
 ## Outputs
 
 ### Values

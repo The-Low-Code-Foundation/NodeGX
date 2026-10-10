@@ -1055,5 +1055,69 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "with Run wired, a new text is not evaluated at load: Result stays null until Run (P107-C155)",
+    "because": "expression.ts :611 `if (!this.isInputConnected('run')) this._scheduleLoadEvaluation()` — NDA-017 §2's surviving guard; P109 ISL-033 measured it (wired: null at load). The unwired twin is the first scenario",
+    "wired": [
+      "run"
+    ],
+    "params": {
+      "expression": "2 + 2"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "with Run wired, a port's arrival still evaluates the text (P107-C155)",
+    "because": "expression.ts :215-228 — Run adds a trigger and takes nothing away (NDA-017 §2); ISL-033's measurement: wired, 6 after the input",
+    "wired": [
+      "run"
+    ],
+    "params": {
+      "expression": "a + 1"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "a",
+        "value": 5
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "with Run wired, editing the text re-derives its ports and evaluates nothing: the new port's arrival does (P107-C155)",
+    "because": "expression.ts :502-535 (the ports taken either way), :611 (no load evaluation while Run is wired)",
+    "wired": [
+      "run"
+    ],
+    "params": {
+      "expression": "a + 1"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "expression",
+        "value": "b * 2"
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": 5
+      },
+      "settle",
+      {
+        "set": "b",
+        "value": 4
+      },
+      "settle"
+    ]
   }
 ]

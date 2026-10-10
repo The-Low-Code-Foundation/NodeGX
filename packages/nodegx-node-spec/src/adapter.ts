@@ -14,7 +14,14 @@
  *                        runtime does with a node's parameters: `Object.keys(parameters)`,
  *                        nodescope.ts `setNodeParameters`), applies each as an ordinary write, and
  *                        does NOT settle. The scenario's first `settle` is where the first frame's
- *                        events land (C8, the first update consolidates).
+ *                        events land (C8, the first update consolidates). The OPTIONAL third
+ *                        argument (P107-C155) names the input ports a wire reaches: BEFORE the
+ *                        params are applied, each named port is connected to a source that never
+ *                        sends (a loaded project makes its wires before a node's parameters drain,
+ *                        nodescope.ts `setComponentModel`), so a setter that asks whether its port
+ *                        is wired (`isInputConnected`; the spec's `world.wired(port)`) reads true
+ *                        and nothing arrives on the wire. Absent or empty: nothing is wired, as
+ *                        every play before it. A port the node does not have throws.
  *   set(h, port, value)  records `{ t: 'set' }` carrying the value AS SENT (raw, canonicalised for
  *                        the trace; `value` omitted for undefined), then coerces it by the port's
  *                        declared coercion and writes it. An unknown port throws — a port the spec
@@ -123,7 +130,7 @@ export interface Handle {
 
 export interface TargetAdapter<H extends Handle = Handle> {
   readonly name: string;
-  mount(type: string, params: Record<string, unknown>): H;
+  mount(type: string, params: Record<string, unknown>, wired?: readonly string[]): H;
   set(h: H, port: string, value: unknown): void;
   signal(h: H, port: string): void;
   settle(): Promise<void>;
@@ -203,13 +210,17 @@ export class PlayError extends Error {
  * because a node may draw from the world at creation — and unpointed in `finally`. A target
  * without `install` is played without one (the runner never hands a world to a target that
  * cannot take it; `runConformance` refuses that pairing first).
+ *
+ * `wired` (P107-C155) is handed to `mount` as its third argument: the ports a wire reaches for
+ * the whole play. Absent, the mount is the two-argument one every target already answers.
  */
 export async function play<H extends Handle>(
   adapter: TargetAdapter<H>,
   type: string,
   params: Record<string, unknown>,
   steps: readonly Step[],
-  world?: World
+  world?: World,
+  wired?: readonly string[]
 ): Promise<TraceEvent[]> {
   let h: H | undefined;
   const restore = world && adapter.install ? adapter.install(world) : undefined;
@@ -229,7 +240,8 @@ export async function play<H extends Handle>(
     return adapter.registryArray(value.$array);
   };
   try {
-    h = adapter.mount(type, Object.fromEntries(Object.entries(params).map(([k, v]) => [k, resolve(v)])));
+    const resolved = Object.fromEntries(Object.entries(params).map(([k, v]) => [k, resolve(v)]));
+    h = wired && wired.length > 0 ? adapter.mount(type, resolved, wired) : adapter.mount(type, resolved);
     for (const step of steps) {
       if (step === 'settle') await adapter.settle();
       else if ('signal' in step) adapter.signal(h, step.signal);

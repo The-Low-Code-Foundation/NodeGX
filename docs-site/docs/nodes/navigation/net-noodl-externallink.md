@@ -34,6 +34,23 @@ Documentation links, third-party checkout, mailto/tel URLs. For anything inside 
 |---|---|---|---|
 | `do` | Signal | — | Opens Link, or fires Failure if there is no Link or the link was opened outside a user action |
 
+### What each input does
+
+**Link** (`link`)
+
+- always: kept; read by the next Do
+
+**Open In New Tab** (`openInNewTab`)
+
+- always: kept; read by the next Do
+
+**Do** (`do`)
+
+- no browser window (a server render): nothing opens → Unchanged
+- no Link: Error says so, and nothing opens → Failure
+- a new tab asked for outside a person's click or key: the browser blocks it, and Error says so → Failure
+- otherwise: Link opens, in a new tab unless Open In New Tab is off → Done
+
 ## Outputs
 
 ### Signals

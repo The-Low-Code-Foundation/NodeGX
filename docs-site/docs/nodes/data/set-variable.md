@@ -34,6 +34,20 @@ Use it when writing shared state should happen at an explicit moment — on clic
 |---|---|---|---|
 | `do` | Signal | — | Writes Value into the named variable, or fires Failure when no Name is set |
 
+### What each input does
+
+**Name** (`name`)
+
+- always: the variable the next Do writes
+
+**Set as** (`setWith`)
+
+- always: how the next Do converts Value
+
+**Do** (`do`)
+
+- always: Value is written to the variable at the end of the frame, once however many Dos arrived — Done for each Do; Error, and Failure for each Do, when Name is empty
+
 ## Outputs
 
 ### Signals

@@ -75,7 +75,7 @@
  * back to its start page too) — unless the address names the page, and parameters, already on top (v18, row C120).
  */
 
-import { defineNode, type AnswerCall, type InputDecl, type ValueInputDecl } from '../spec';
+import { defineNode, said, type AnswerCall, type InputDecl, type ValueInputDecl } from '../spec';
 import { SELF_REFERENCE } from '../trace';
 import { pushTarget } from '../world';
 import { dataAttributeInput, dataAttributeNames } from './data-attributes';
@@ -325,49 +325,71 @@ export const ComponentStack = defineNode({
     // :255-269 — off the handler under the old name; on under the new one if on the page (which resets, or replays what waited);
     // the same key: stored only (row C113)
     name: (s, v, _i, view) =>
-      run(
-        s,
-        (w) => {
-          // a write that keeps the handler's key is stored and nothing more (row C113, fixed in P109 ISL-048: it registered again,
-          // which resets)
-          if (keyOf(norm(v)) === keyOf(norm(w.st.name))) {
+      said(
+        'a name with another key (blank is Main): the stack leaves its old name and, on the page, takes the new one — its pages are deleted and its start page rebuilt, then the pushes that waited for that name run (a replace that waited runs with no rebuild first); off the page, the next mount rebuilds. The same key again: kept, and the pages stay',
+        run(
+          s,
+          (w) => {
+            // a write that keeps the handler's key is stored and nothing more (row C113, fixed in P109 ISL-048: it registered again,
+            // which resets)
+            if (keyOf(norm(v)) === keyOf(norm(w.st.name))) {
+              w.st.name = v;
+              return;
+            }
+            deregister(w);
             w.st.name = v;
-            return;
-          }
-          deregister(w);
-          w.st.name = v;
-          if (w.st.isMounted) register(w);
-          // v17, row C139 — a mounted stack would have reset: the next mount does
-          else w.st.resetOwed = true;
-        },
-        view
+            if (w.st.isMounted) register(w);
+            // v17, row C139 — a mounted stack would have reset: the next mount does
+            else w.st.resetOwed = true;
+          },
+          view
+        )
       ),
     // :303-314
     pages: (s, v, _i, view) =>
-      run(
-        s,
-        (w) => {
-          // a value that is not a list is none (row C109, fixed in P109 ISL-048)
-          w.st.pages = Array.isArray(v) ? v : undefined;
-          // v18, row C126 — the Start Page
-          if (w.st.isMounted) (scheduleReset(w), void (w.st.resetToStart = true));
-          // v17, row C139 — a mounted stack would have reset: the next mount does
-          else w.st.resetOwed = true;
-        },
-        view
+      said(
+        'always: the pages the stack can show (not a list: none) — on the page, every page is deleted at the end of the frame and the Start Page built, Top Component Name its label and Stack Depth 1 (with Use Routes, its address written); the stack is left empty with no pages, or a Start Page the project does not have. Off the page, the next mount rebuilds',
+        run(
+          s,
+          (w) => {
+            // a value that is not a list is none (row C109, fixed in P109 ISL-048)
+            w.st.pages = Array.isArray(v) ? v : undefined;
+            // v18, row C126 — the Start Page
+            if (w.st.isMounted) (scheduleReset(w), void (w.st.resetToStart = true));
+            // v17, row C139 — a mounted stack would have reset: the next mount does
+            else w.st.resetOwed = true;
+          },
+          view
+        )
       ),
     // :279-288 — stored; read by the next reset and the next URL pushed
-    useRoutes: (s, v, _i, view) => run(s, (w) => void (w.st.useRoutes = !!v), view),
+    useRoutes: (s, v, _i, view) =>
+      said(
+        "always: kept; on, the next push, replace or back writes the top page into the address, a mount reads its start page from the address, and the browser's Back or Forward rebuilds the page the address names; off, the address is left alone",
+        run(s, (w) => void (w.st.useRoutes = !!v), view)
+      ),
     // v17, row C139 — stored; read when the stack mounts
-    keepPagesWhenUnmounted: (s, v, _i, view) => run(s, (w) => void (w.st.keepPages = !!v), view),
+    keepPagesWhenUnmounted: (s, v, _i, view) =>
+      said(
+        'always: kept; read when the stack mounts — on, a stack still holding its pages comes back as it was, unless its Components or Name changed meanwhile or (with Use Routes) the address moved; off, a mount starts at the Start Page',
+        run(s, (w) => void (w.st.keepPages = !!v), view)
+      ),
     // :315-326, :463-479 — every Reset of the frame is answered by the one reset at the frame's end
     // v18, row C126 — the Start Page, as its description says
-    reset: (s, _i, view) => ({ ...run(s, (w) => (scheduleReset(w), (w.st.resetTokens += 1), void (w.st.resetToStart = true)), view), outcome: 'pending' }),
+    reset: (s, _i, view) =>
+      said(
+        "always: one reset at the end of the frame, however many Resets — every page is deleted, pushed ones included, and the Start Page is built: Top Component Name its label, Stack Depth 1 (with Use Routes, its address written), then Done for each Reset; Failure for each with no Components, or a Start Page the project does not have, and the stack is left empty (Top Component Name blank, Stack Depth 0). A transition still running is not stopped",
+        { ...run(s, (w) => (scheduleReset(w), (w.st.resetTokens += 1), void (w.st.resetToStart = true)), view), outcome: 'pending' }
+      ),
     // react-component-node.ts :2310-2320
-    mounted: (s, v, _i, view) => run(s, (w) => void (w.st.mounted = !!v), view),
+    mounted: (s, v, _i, view) =>
+      said(
+        "always: at the next paint the stack is put on the page (Did Mount; it takes its Name and builds its Start Page — with Use Routes, the page the address names; with Keep Pages When Unmounted, it comes back as it was — then the pushes that waited for the name run) or taken off it (Will Unmount; a push for its name waits until it is back)",
+        run(s, (w) => void (w.st.mounted = !!v), view)
+      ),
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire, nothing the queue reads (an owed hop waits for the next step
     // that can see it, which applies it first). The look has no reducer: stored, and read by nothing here
-    scrollIntoView: () => NOTHING
+    scrollIntoView: () => ({ says: 'always: the page, or the scrolling Group holding it, scrolls until the stack can be seen', send: [] })
   },
   {
     derived: {

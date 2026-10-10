@@ -33,6 +33,17 @@ Reset-style actions on local shared arrays ('clear the list', 'empty the cart').
 |---|---|---|---|
 | `clear` | Signal | — | Removes every item from the array, or fires Failure if no array is bound |
 
+### What each input does
+
+**Array Id** (`collectionId`)
+
+- empty: no array bound, so a Do fails
+- otherwise: bound to the array it names (made if none has it), or to the array handed
+
+**Do** (`clear`)
+
+- always: at the frame's end, once per press, the array is emptied; answered Done, Unchanged when it was empty already, Failure with no array bound
+
 ## Outputs
 
 ### Signals

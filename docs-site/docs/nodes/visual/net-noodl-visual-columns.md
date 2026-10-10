@@ -50,6 +50,44 @@ Card grids, dashboards, magazine-style layouts — anywhere content should reflo
 |---|---|---|---|
 | `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 
+### What each input does
+
+**Mounted** (`mounted`)
+
+- always: the container is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint
+
+**Scroll Into View** (`scrollIntoView`)
+
+- always: the page, or the scrolling Group holding it, scrolls until the columns can be seen
+
+**Layout String** (`layoutString`)
+
+- always: the column proportions, whatever it is handed; one that cannot be read draws the children bare, in the Default band
+
+**Column Sizing** (`sizing`)
+
+- always: Layout String or Auto Fit; while Auto Fit, the band is Default
+
+**Medium Layout** (`mediumLayout`)
+
+- always: the layout below Medium Below; blank makes that breakpoint inert — the band (Breakpoint, At Medium, At Small) is picked again from it at the next render
+
+**Small Layout** (`smallLayout`)
+
+- always: the layout below Small Below; blank makes that breakpoint inert — the band (Breakpoint, At Medium, At Small) is picked again from it at the next render
+
+**Horizontal Gap** (`marginX`)
+
+- always: a size (a bare number in the unit it holds, else pixels); the container is measured again, less the gap
+
+**Medium Below** (`mediumBreakpoint`)
+
+- always: a size (a bare number in the unit it holds, else pixels); nothing, or 0, makes the Medium breakpoint inert — the band (Breakpoint, At Medium, At Small) is picked again from it at the next render
+
+**Small Below** (`smallBreakpoint`)
+
+- always: a size (a bare number in the unit it holds, else pixels); nothing, or 0, makes the Small breakpoint inert — the band (Breakpoint, At Medium, At Small) is picked again from it at the next render
+
 ## Outputs
 
 ### Values

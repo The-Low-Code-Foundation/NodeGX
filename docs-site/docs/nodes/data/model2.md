@@ -38,6 +38,31 @@ Read client-side objects: repeater items, records fetched from the cloud (record
 |---|---|---|---|
 | `fetch` | Signal | — | Re-reads the object named by Id now. This is additional to Id rebinding on change and to changes being announced; untick either under Run On Value Change to stop it |
 
+### What each input does
+
+**Get Id from** (`idSource`)
+
+- From repeater: at the frame's end it binds to the object of the row it sits in
+- otherwise: kept; the object stays bound until the next Id
+
+**Repeater Component** (`repeaterComponent`)
+
+- under From repeater: at the frame's end it binds to the object of that repeater's row (blank: the nearest)
+- otherwise: kept, and read only under From repeater
+
+**Id** (`modelId`)
+
+- a new Id, ticked under Run On Value Change: bound to the object it names now (made if none has it) and Fetched fires — an empty Id unbinds, silently; an object handed writes its keys onto that object first
+- otherwise (the same Id, or unticked): Id is sent and the binding stays; an object handed still writes its keys onto the object it names
+
+**Properties** (`properties`)
+
+- always: nothing while it runs; each name makes an input, an output and its own Changed
+
+**Fetch** (`fetch`)
+
+- always: at the frame's end the node rebinds to the object its Id names, one rebind for the frame's presses; Fetched fires, and each press is answered Done, or Failure with no Id
+
 ## Outputs
 
 ### Values

@@ -145,8 +145,8 @@ export const OpenFilePicker = defineNode({
   }
 }).on(
   {
-    acceptedFileTypes: (_s, v) => ({ set: { acceptedFileTypes: v }, send: [] }),
-    capture: (_s, v) => ({ set: { capture: v }, send: [] }),
+    acceptedFileTypes: (_s, v) => ({ says: 'always: held as handed; put on the dialog at the next Open — blank offers every file', set: { acceptedFileTypes: v }, send: [] }),
+    capture: (_s, v) => ({ says: 'always: held as handed; put on the dialog at the next Open — blank asks for the file list, not a camera', set: { capture: v }, send: [] }),
     // :58-174 — supersede, a token, the attributes, the click; a refused click fails at once
     open: (s, _i, w: WorldView) => {
       const settles = s.pending ? [{ outcome: 'unchanged' as const }] : undefined;
@@ -157,10 +157,25 @@ export const OpenFilePicker = defineNode({
       const answer = w.pickerAnswer(0);
       if ('throws' in answer) {
         const error = openFailed(answer.throws);
-        return { set: { pending: false, error }, send: ['error' as const], outcome: 'failure' as const, error: OPEN_FAILED, settles, picker };
+        return {
+          says: 'the browser refuses to open the dialog: an Open still waiting is answered Unchanged first; Error says why, and this press fails at once',
+          set: { pending: false, error },
+          send: ['error' as const],
+          outcome: 'failure' as const,
+          error: OPEN_FAILED,
+          settles,
+          picker
+        };
       }
       // only what changes (record.ts's rule): a superseding Open finds the press already pending
-      return { set: s.pending ? {} : { pending: true }, send: [], outcome: 'pending' as const, settles, picker };
+      return {
+        says: 'the dialog opens, with Accepted file types and Capture as held: an Open still waiting is answered Unchanged first; this press waits for the person — a file chosen sends File, Path, Name, Size in bytes and Type, then Done; the dialog cancelled or closed with nothing is Unchanged',
+        set: s.pending ? {} : { pending: true },
+        send: [],
+        outcome: 'pending' as const,
+        settles,
+        picker
+      };
     }
   },
   {

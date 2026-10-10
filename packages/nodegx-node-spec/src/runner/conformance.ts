@@ -172,9 +172,9 @@ function worldFor(spec: AnyNodeSpec, script: WorldScript | undefined): World | u
 }
 
 /** The reference play: the interpreter, on its own world. A spec that violates its own script is a scenario error, not a divergence. */
-async function playReference(spec: AnyNodeSpec, params: Record<string, unknown>, steps: readonly Step[], script: WorldScript | undefined): Promise<TraceEvent[]> {
+async function playReference(spec: AnyNodeSpec, params: Record<string, unknown>, steps: readonly Step[], script: WorldScript | undefined, wired?: readonly string[]): Promise<TraceEvent[]> {
   const world = worldFor(spec, script);
-  const t = await play(interpreterAdapter({ resolve: () => spec }), spec.type, params, steps, world);
+  const t = await play(interpreterAdapter({ resolve: () => spec }), spec.type, params, steps, world, wired);
   if (world && world.violations.length > 0) throw new Error(`${spec.type}: the reference play touched what the script did not answer — ${world.violations.join('; ')}`);
   return t;
 }
@@ -186,10 +186,10 @@ async function playReference(spec: AnyNodeSpec, params: Record<string, unknown>,
  * play VIOLATED the world (a request no rule answers, AC5) is a divergence too, reported as a
  * throw at the end of its trace: the traces may agree, and the run still may not pass.
  */
-async function playTarget(spec: AnyNodeSpec, target: TargetAdapter, params: Record<string, unknown>, steps: readonly Step[], reference: TraceEvent[], script: WorldScript | undefined) {
+async function playTarget(spec: AnyNodeSpec, target: TargetAdapter, params: Record<string, unknown>, steps: readonly Step[], reference: TraceEvent[], script: WorldScript | undefined, wired?: readonly string[]) {
   const world = worldFor(spec, script);
   try {
-    const actual = await play(target, spec.type, params, steps, world);
+    const actual = await play(target, spec.type, params, steps, world, wired);
     if (world && world.violations.length > 0) return { actual, difference: { index: actual.length, threw: `the world refused (AC5): ${world.violations.join('; ')}` } as Difference };
     return { actual, difference: compareTraces(reference, actual) };
   } catch (e) {
@@ -235,12 +235,13 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
       report.scenarios.push({ name: sc.name, status: 'outside', row: sc.row, reason: outside });
       continue;
     }
-    const reference = project(sc.expect ?? (await playReference(spec, sc.params, sc.steps, sc.world)));
+    // P107-C155 — a scenario's `wired` ports reach both plays (adapter.ts `mount`); a sequence never wires any
+    const reference = project(sc.expect ?? (await playReference(spec, sc.params, sc.steps, sc.world, sc.wired)));
     if (!hasObservation(reference)) {
       report.scenarios.push({ name: sc.name, status: 'refused', reason: `the reference trace has no observation event${reach ? ' inside the reach' : ''} — an arm with no predicate grades nothing` });
       continue;
     }
-    const { actual, difference } = await playTarget(spec, target, sc.params, sc.steps, reference, sc.world);
+    const { actual, difference } = await playTarget(spec, target, sc.params, sc.steps, reference, sc.world, sc.wired);
     if (difference.index < 0) {
       // a scenario that carries a row and PASSES says the row no longer reproduces on this target
       report.scenarios.push(
@@ -291,10 +292,10 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
 
   // 3. mutants — the suite is the hand scenarios plus the same generated sequences
   if (options.mutants) {
-    const suite: Array<{ name: string; params: Record<string, unknown>; steps: Step[]; world?: WorldScript }> = [
+    const suite: Array<{ name: string; params: Record<string, unknown>; steps: Step[]; world?: WorldScript; wired?: readonly string[] }> = [
       ...(options.scenarios ?? scenarioIO.load(spec.type))
         .filter((s) => !reach || outsideReach(s.params, s.steps, reach) === undefined)
-        .map((s) => ({ name: `scenario ${s.name}`, params: s.params, steps: s.steps, world: s.world }))
+        .map((s) => ({ name: `scenario ${s.name}`, params: s.params, steps: s.steps, world: s.world, wired: s.wired }))
     ];
     for (let i = 0; i < requested; i++) {
       const seq = generateSequence(spec, seed, i, { reach, withheld: options.withheld });
@@ -303,7 +304,7 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
     const discovered = discoverBranches(spec);
     const probe = interpreterAdapter({ resolve: () => discovered.spec });
     const referenceTraces: TraceEvent[][] = [];
-    for (const s of suite) referenceTraces.push(project(await play(probe, spec.type, s.params, s.steps, worldFor(spec, s.world))));
+    for (const s of suite) referenceTraces.push(project(await play(probe, spec.type, s.params, s.steps, worldFor(spec, s.world), s.wired)));
 
     const results: MutantResult[] = [];
     // NSP-016 s52 — the order the suite is tried in, per mutant: first the plays that killed this reducer's mutants most recently,
@@ -333,7 +334,7 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
       for (const i of orderFor(m.reducer)) {
         let actual: TraceEvent[];
         try {
-          actual = await play(mutantTarget, spec.type, suite[i].params, suite[i].steps, worldFor(spec, suite[i].world));
+          actual = await play(mutantTarget, spec.type, suite[i].params, suite[i].steps, worldFor(spec, suite[i].world), suite[i].wired);
         } catch (e) {
           // a mutant that breaks a spec rule (an outcome input returning none) is caught by the interpreter itself
           result.killed = true;

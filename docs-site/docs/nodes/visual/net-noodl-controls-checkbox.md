@@ -119,6 +119,55 @@ Boolean choices the user flips directly: settings, consent, done flags. For one-
 | `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 | `uncheck` | Signal | — | Unticks the box if it is ticked, then fires Done — or Unchanged if it already was. Does not fire Changed |
 
+### What each input does
+
+**Enabled** (`enabled`)
+
+- the value it already holds: nothing
+- a change: Enabled follows; disabled, the box takes no click and no focus
+
+**Checked** (`checked`)
+
+- the value it already holds: nothing
+- a change: the box shows it, and Checked follows — Changed does not fire (only a person's click fires it)
+
+**Check** (`check`)
+
+- already checked → Unchanged
+- unchecked: it is checked, and Checked goes true — never Changed → Done
+
+**Uncheck** (`uncheck`)
+
+- checked: it is unchecked, and Checked goes false — never Changed → Done
+- already unchecked → Unchanged
+
+**Mounted** (`mounted`)
+
+- always: the box is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint
+
+**Enable Label** (`useLabel`)
+
+- always: a label is drawn beside the box, or not; the box and its keyboard stay
+
+**Focus** (`focus`)
+
+- not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent
+- it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent
+- otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done
+
+**Blur** (`blur`)
+
+- it does not hold the keyboard (or is disabled, and gives it up to nobody): nothing changes → Done; Blurred stays silent
+- it holds the keyboard: it is taken off it, and the Focused state goes false → Blurred, Done
+
+**Scroll Into View** (`scrollIntoView`)
+
+- always: the page, or the scrolling Group holding it, scrolls until the box can be seen
+
+**Visible** (`visible`)
+
+- always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it
+
 ## Outputs
 
 ### Values

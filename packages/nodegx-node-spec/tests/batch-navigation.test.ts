@@ -255,8 +255,8 @@ describe('LOCATION — the world records an open and says whether the press was 
       outputs: { log: { type: 'string', from: (s) => s.log } }
     }).on(
       {
-        go: (s) => ({ set: { log: s.log + 'go;' }, historyBack: 1 }),
-        swap: (s) => ({ set: { log: s.log + 'swap;' }, replace: { url: '#/swapped' } })
+        go: (s) => ({ says: 'always: one entry back', set: { log: s.log + 'go;' }, historyBack: 1 }),
+        swap: (s) => ({ says: 'always: the entry replaced', set: { log: s.log + 'swap;' }, replace: { url: '#/swapped' } })
       },
       {
         afterInputs: (s) => (s.log.endsWith('go;') ? { set: { log: s.log + 'frame;' } } : {}),

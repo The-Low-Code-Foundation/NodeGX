@@ -162,3 +162,55 @@ adapter already did exactly this ("the LAST value sent per output in the frame")
 JSON both ways (`revive` in canonical.ts; `loadScenarios` / `writeReplay`), and the runtime handle carries Log's line
 (`logs`, through a `runContext.log` sink on the scope) beside `errors`; `withViewerNodes` registers the three
 viewer-provided specced nodes from the viewer's source.
+
+## 6. Built — P107-C155, 2026-10-10: a port is wired
+
+**What.** The format can now say "this port is wired" — the one notion the five `isInputConnected` branches NDA-017 §2 left
+needed (dev-docs/bugs/p107-c155). Additive, four seams: (1) a scenario's `wired: ["run"]` (`src/runner/scenario.ts` `Scenario.wired`,
+checked as a list of names in `reviveScenarios`; `scenarios/README.md` has the row); (2) the adapter contract's `mount(type, params,
+wired?)` — the third argument, OPTIONAL, handed only when the list is non-empty, so every existing target (the strangers' included)
+answers the two-argument call it always has (`src/adapter.ts` header and `play`'s sixth parameter); (3) the reducer's read,
+`WorldView.wired(port)` (`src/spec.ts`), a fact of the instance and not of the world — `interpreter.ts` keeps `Instance.wired`, refuses
+a port the node does not have at mount as it refuses an unknown param, and `viewOf` answers from it; `run()` and the interpreter
+adapter's `mount` take it; `runConformance` threads a scenario's list through the reference, the target and the mutant suite
+(`src/runner/conformance.ts`); (4) the runtime target's `wireStub` (`packages/noodl-runtime/test/helpers/node-spec-target.ts`): each
+named port gets the runtime's own `connectInput` from a source that never sends — the four things `connectInput` reads of a source
+(name, an output with owner / name / value / connection registry, the signals-sent map) plus the no-op `update` the sink's
+`_updateDependencies` calls on every connected source — made BEFORE the params, as a loaded project makes its wires before a node's
+parameters drain (nodescope.ts `setComponentModel`: nodes with `updateOnDirtyFlagging` off, the connections, then the first update).
+The output's value stays `undefined`, so `connectInput` seeds nothing (C3). `world.ts`, `coerce.ts`, `canonical.ts`, `trace.ts` and the
+trace schema are untouched: no trace event changed, so `validateTrace` and the schema parity are as they were.
+
+**The two arms.** `src/nodes/function.ts` `functionScript` (:386) and `src/nodes/expression.ts` `expression` (:611) branch on
+`w.wired('run')`, each arm with its own `says` — "new code, with Run wired: compiled, and nothing runs until Run or a changed ticked
+input" beside "new code, with Run not wired: compiled and run at the end of the frame"; "new text, with Run wired: … nothing is
+evaluated until Run or a changed ticked input" beside the load-evaluation sentence. The docblock lines that said "Run is never wired in
+a lone node" are corrected. Seven scenarios play the wired arm: Function — a new Script does not run at load (then one run on Run), a
+changed ticked input still runs the code, a Script that will not compile reports nothing until Run, a new Script after a throw clears
+Error and runs nothing (row C146's twin); Expression — a new text is not evaluated at load (null until Run), a port's arrival still
+evaluates, editing the text re-derives the ports and evaluates nothing until the new port arrives.
+
+**Read, not counted.** The interpreter's and the runtime's traces for "with Run wired, a new Script does not run at load" are the same
+eight events: `set functionScript`, `settle`, `settle`, `in run`, `settle`, `value out-count 1`, `signal success`, `outcome run done` —
+nothing at either load settle; the unwired twin sends `out-sum NaN` and `success` at the first settle. The Expression's: the six nulls
+at load, then `4`, `On True` and `done` after Run; its twin sends `4` at load. Every one of the seven: difference index −1 between the
+two targets.
+
+**Plant.** A runtime target whose `mount` drops the `wired` argument (the stub never wired — the exact path a target that ignores the
+third argument takes): 4 of 4 Function and 1 of 3 Expression wired scenarios go red at index 2 (the load run appears: `out-count 1`,
+`success` before the first settle; `result 4` at load). The two Expression scenarios that stay green are the input-arrival ones, which
+agree on both arms by design (ISL-033: "wired, still on the input"). Restored (the plant was a wrapper, never an edit of the target).
+
+**Gates.** `packages/nodegx-node-spec`: `tsc --noEmit` 0; `jest -w 1 schema, world, rules-reader, batch-escape` 4 suites, 113 tests, exit 0
+(batch-escape plays both specs with 200 sequences and every mutant on the interpreter); `page-model -t "world kinds"` 1 passed, exit 0.
+`packages/noodl-runtime`: `tsc --noEmit` 0; `NSP_ONLY=JavaScriptFunction,Expression jest -w 1 test/node-spec/conformance.test.ts` exit 0,
+seed 20736 — Expression 46/46 scenarios, 200/200 sequences, 181/181 mutants; JavaScriptFunction 32/32, 200/200, 211/214 with the 3 the
+declared "stuck scheduled flag" equivalents (×3, as before). Stranger hashes rewritten for the two guarded files that moved (`spec.ts`,
+`adapter.ts`); `tests/stranger.test.ts` not run here (the coordinator's). The interpreter's own mutant readout over the new arms: every
+`drop-set` / `swap-branch` of both wired shapes killed, three by the wired scenarios themselves; the Function's wired arm sets the same
+keys as its "Script set to nothing" arm and so shares its mutant shape — the C146 twin is what kills the `lastError` variant.
+
+**Out of a lone spec's reach, said so in the bug file:** simplejavascript.ts :408/:414 (the Uses setter, `undriven`), runtasks.ts :417
+(Run Tasks forcing a TASK node's Start to read wired — a graph rule; no Run Tasks spec), page.ts :65 (no Page spec; an SSR event no port
+carries), layout.ts :262 (the layout model). One order to fix when a graph scenario first wires a Function's Run: the runtime graph
+target applies params at mount and wires after, the reverse of a loaded project — such a Function would take the unwired arm there.

@@ -32,6 +32,32 @@ The no-code way to scale a value between domains: a count to a progress-bar widt
 | `minInputValue` | Number | `0` | Value of Input Value that maps to Output Minimum |
 | `minOutputValue` | Number | `0` | Result when Input Value is at Input Minimum |
 
+### What each input does
+
+**Input Value** (`inputValue`)
+
+- always: Remapped Value follows
+
+**Input Minimum** (`minInputValue`)
+
+- always: Remapped Value follows
+
+**Input Maximum** (`maxInputValue`)
+
+- always: Remapped Value follows
+
+**Output Minimum** (`minOutputValue`)
+
+- always: Remapped Value follows
+
+**Output Maximum** (`maxOutputValue`)
+
+- always: Remapped Value follows
+
+**Clamp Output** (`clamp`)
+
+- always: Remapped Value follows
+
 ## Outputs
 
 ### Values

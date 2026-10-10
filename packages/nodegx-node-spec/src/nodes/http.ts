@@ -367,13 +367,20 @@ export const HttpRequest = defineNode({
 }).on(
   {
     // :375-385 — raw
-    url: (_s, v) => ({ set: { url: v } }),
+    url: (_s, v) => ({ says: 'always: kept as handed; read when the next Fetch goes — a request already running keeps the address it was sent to', set: { url: v } }),
 
     // :386-394 + :494-500 — a token, and one request at the end of the frame
-    fetch: (s) => ({ set: { pendingTokens: s.pendingTokens + 1, scheduled: true }, outcome: 'pending' }),
+    fetch: (s) => ({
+      says: "always: one request at the frame's end, however many Fetches arrived, with the values held then, beside any request already running: a 2xx answer sends Response, Status Code and Response Headers, then Done for each Fetch; any other status the same and Error, then Failure; a 304 is Not Modified and Unchanged; no URL, an input that is not text, a body that is not JSON, no answer by Timeout (ms) or none at all is Error and Failure",
+      set: { pendingTokens: s.pendingTokens + 1, scheduled: true },
+      outcome: 'pending'
+    }),
 
     // `cancelFetch` — abort every request still running and report at once (v5, D12)
-    cancel: (s) => (s.abortable.length > 0 ? { set: { abortable: [] }, abort: [...s.abortable], outcome: 'done' } : { outcome: 'unchanged' })
+    cancel: (s) =>
+      s.abortable.length > 0
+        ? { says: 'a request still running: every one is abandoned — each lands as Canceled and Unchanged for its Fetches, Response and Status Code as they were — and this press is Done', set: { abortable: [] }, abort: [...s.abortable], outcome: 'done' }
+        : { says: 'nothing running: Unchanged', outcome: 'unchanged' }
   },
   {
     derived: {

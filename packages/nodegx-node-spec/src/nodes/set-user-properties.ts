@@ -146,10 +146,18 @@ export const SetUserProperties = defineNode({
 }).on(
   {
     // :120-122 → :167-177 — a token per press, one write per frame
-    store: (s) => ({ set: s.storeScheduled ? { presses: s.presses + 1 } : { presses: s.presses + 1, storeScheduled: true }, send: [], outcome: 'pending' }),
+    store: (s) =>
+      !s.storeScheduled
+        ? {
+            says: "the first press this frame: one write goes to the backend at the frame's end, with Email, Username and the properties held then — Done for each press, or Error (the backend's words, when it gives any) and Failure for each; nobody signed in, or a Backend the project does not have, is a Failure too",
+            set: { presses: s.presses + 1, storeScheduled: true },
+            send: [],
+            outcome: 'pending'
+          }
+        : { says: 'another press this frame: it joins that write, and is answered with it', set: { presses: s.presses + 1 }, send: [], outcome: 'pending' },
     // :129-131, :138-140 — held as they arrive
-    email: (_s, v) => ({ set: { email: v }, send: [] }),
-    username: (_s, v) => ({ set: { username: v }, send: [] })
+    email: (_s, v) => ({ says: 'always: held as handed; read when the next write goes', set: { email: v }, send: [] }),
+    username: (_s, v) => ({ says: 'always: held as handed; read when the next write goes — a REST backend refuses a Username that is not blank, and writes nothing', set: { username: v }, send: [] })
   },
   {
     derived: {

@@ -92,6 +92,51 @@ describe('fixtures — what the reader follows', () => {
   it('a reducer with no said branch reads as []', () => {
     expect(read({ x: spec(`  go: (s) => ({ set: { n: 1 } })`) }).X.go).toEqual([]);
   });
+
+  // s77 (§6 item 2): Add / Remove Record Relation are built by `relationNode(o)` — `defineNode({ type: o.type }).on({ … })` inside a
+  // function, called twice with a literal `type`. The reader follows the factory's calls in the same file: its reducers are
+  // each call's, with the same lines (the words are shared by design, so they are written to fit both).
+  it("a factory-built pair: `defineNode({ type: o.type })` inside a function is every literal-typed call's spec, the same lines", () => {
+    const r = read({
+      pair: [
+        `function pair(o: { type: string; word: string }) {`,
+        `  return defineNode({ type: o.type, idioms: [{ says: 'an idiom', example: 'x()' }] }).on({`,
+        `    go: (s) => (s.on ? { says: 'on: the relation is added or removed', emit: ['a'], outcome: 'done' } : { says: 'off', outcome: 'failure' }),`,
+        `    quiet: (s) => ({ set: { n: 1 } })`,
+        `  });`,
+        `}`,
+        `export const A = pair({ type: 'A', word: 'add' });`,
+        `export const B = pair({ type: 'B', word: 'remove' });`,
+        `export const C = pair({ type: someName, word: 'computed' });` // not literal: names no spec
+      ].join('\n')
+    });
+    expect(Object.keys(r).sort()).toEqual(['A', 'B']);
+    for (const type of ['A', 'B']) {
+      expect(r[type].go).toEqual([
+        expect.objectContaining({ says: 'on: the relation is added or removed', emit: ['a'], outcome: 'done', file: expect.stringMatching(/pair\.ts$/) }),
+        expect.objectContaining({ says: 'off', emit: [], outcome: 'failure' })
+      ]);
+      expect(r[type].quiet).toEqual([]);
+    }
+  });
+
+  it("a factory's `type` destructured from its parameter is followed too; one from anywhere else is not (the spec stays unread)", () => {
+    const r = read({
+      d: `function d({ type }: { type: string }) { return defineNode({ type }).on({ go: () => ({ says: 'd', send: [] }) }); }\nexport const D = d({ type: 'D' });`,
+      e: `const NAME = 'E';\nfunction e(o: { type: string }) { return defineNode({ type: NAME }).on({ go: () => ({ says: 'e', send: [] }) }); }\nexport const E = e({ type: 'E' });`
+    });
+    expect(Object.keys(r)).toEqual(['D']);
+    expect(r.D.go.map((b) => b.says)).toEqual(['d']);
+  });
+
+  it('the real tree: Add and Remove Record Relation read through `relationNode`, every reducer said, the same lines', () => {
+    const all = rules.readReducers();
+    const add = all.AddDbModelRelation;
+    const remove = all.RemoveDbModelRelation;
+    expect(Object.keys(add)).toEqual(['idSource', 'repeaterComponent', 'modelId', 'targetId', 'store']);
+    expect(remove).toEqual(add);
+    for (const branches of Object.values(add)) expect(branches.length).toBeGreaterThan(0);
+  });
 });
 
 describe('fixtures — what the reader refuses (a line that would name fewer pulses than the branch sends)', () => {

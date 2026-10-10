@@ -43,6 +43,32 @@ The standard top-level navigation of an app: distinct pages with URLs, deep-link
 | `reset` | Signal | — | Re-reads the URL and rebuilds the current page from scratch |
 | `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 
+### What each input does
+
+**Name** (`name`)
+
+- always: it leaves the old name and, while on the page, registers under the new one — which resets it, or hands it the navigates that waited for that name (blank is Main)
+
+**Pages** (`pages`)
+
+- always: the pages it can show, the first its start page; while on the page, it resets at the end of the frame
+
+**Url path** (`urlPath`)
+
+- always: read by the next match and the next URL — put in front of every page's path (null as none)
+
+**Reset** (`reset`)
+
+- always: one reset at the end of the frame answers every Reset — it reads the URL and shows its page: Done when it built one or moved the parameters, Unchanged when it shows that page with them already, Failure when there is no page to show
+
+**Mounted** (`mounted`)
+
+- always: the router is put on the page (Did Mount, registering, a reset), or taken off it (Will Unmount), at the next paint
+
+**Scroll Into View** (`scrollIntoView`)
+
+- always: the page, or the scrolling Group holding it, scrolls until the router can be seen
+
 ## Outputs
 
 ### Values

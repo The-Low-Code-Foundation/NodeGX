@@ -34,6 +34,20 @@ The back/cancel/done affordance inside any pushed page. Pair result values with 
 |---|---|---|---|
 | `navigate` | Signal | — | Pops the enclosing Component Stack back to the component underneath |
 
+### What each input does
+
+**Results** (`results`)
+
+- always: kept, and read by nothing here — the editor draws one Results port per name, and what those ports hold is what a pop hands back
+
+**Back Actions** (`backActions`)
+
+- always: kept, and read by nothing here — the editor draws one signal per name, each a Navigate that carries that name as its back action
+
+**Navigate** (`navigate`)
+
+- always: one pop at the end of the frame for each press, in press order — the first carries the last back action pressed since the last pop (then cleared) and every Results value, to the node that pushed this page; Done when the stack goes back to the page below (this page leaves at the transition's end), Unchanged when the stack is at its first page, Error and Failure when it is still animating or when this node is not inside a page a Page Stack pushed
+
 ## Outputs
 
 ### Signals

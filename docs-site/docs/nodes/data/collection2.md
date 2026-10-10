@@ -36,6 +36,23 @@ Local list state shared across components without any wiring between them: give 
 |---|---|---|---|
 | `fetch` | Signal | — | Re-reads the array named by Id and rebinds this node to it. This is additional to Id rebinding on change and to array changes being announced; untick either under Run On Value Change to stop it |
 
+### What each input does
+
+**Id** (`collectionId`)
+
+- a new Id, ticked under Run On Value Change: bound to the array it names now (made if none has it); Id, Items, First Item Id and Count follow
+- otherwise (the same Id, or unticked): Id is sent and the binding stays
+
+**Items** (`items`)
+
+- empty: nothing
+- the bound array itself: nothing
+- otherwise: at the frame's end its items are copied into the bound array (a new one when none is bound and Id is ticked under Run On Value Change), and the node follows that list as it changes; Changed fires when the copy moved anything and Array contents is ticked
+
+**Fetch** (`fetch`)
+
+- always: at the frame's end the node rebinds to the array its Id names, one rebind for the frame's presses; Fetched fires, and each press is answered Done
+
 ## Outputs
 
 ### Values

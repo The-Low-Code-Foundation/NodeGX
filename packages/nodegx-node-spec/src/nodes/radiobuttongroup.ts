@@ -66,7 +66,6 @@ type Send = Patch<State, O>;
 type Pulse = 'didMount' | 'willUnmount' | 'onChange';
 type Act = { set?: Partial<State>; send: Array<'value'>; emit?: Pulse[] };
 
-const NOTHING: Send = { send: [] };
 const NONE: Act = { send: [] };
 
 export const RadioButtonGroup = defineNode({
@@ -156,15 +155,15 @@ export const RadioButtonGroup = defineNode({
     // radiobuttongroup.ts :84-99 — text, or what a `toString` makes text; anything else ignored; a change sends Value, never Changed
     value: (s, v) => {
       const text = asGroupValue(v);
-      if (text === undefined || text === s.value) return NOTHING;
-      return { set: { value: text }, send: ['value'] };
+      if (text === undefined || text === s.value) return { says: 'nothing, a value no text can be made from, or the value it already holds: the selection stays', send: [] };
+      return { says: "different text (or what a toString makes text): the selection is this and Value follows — Changed does not fire; at the next paint the button whose Value matches shows selected and the one that was loses it, each with Checked and no Changed", set: { value: text }, send: ['value'] };
     },
     // react-component-node.ts :2310-2320
-    mounted: (_s, v) => ({ set: { mounted: !!v }, send: [] }),
+    mounted: (_s, v) => ({ says: 'always: the group is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint; its buttons go with it', set: { mounted: !!v }, send: [] }),
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire
-    scrollIntoView: () => NOTHING,
+    scrollIntoView: () => ({ says: 'always: the page, or the scrolling Group holding it, scrolls until the group can be seen', send: [] }),
     // node-shared-port-definitions.ts :366-375 — the page follows at the next paint
-    visible: (_s, v) => ({ set: { visible: !!v }, send: [] })
+    visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, its buttons take no click', set: { visible: !!v }, send: [] })
   },
   {
     // placed on the page with its params set and its buttons added — the first render: Did Mount; the buttons' count at the frame's end

@@ -36,6 +36,31 @@ Use it to change one or more properties of an existing client-side object in a s
 |---|---|---|---|
 | `store` | Signal | — | Writes the property values currently on the inputs onto the object named by Id |
 
+### What each input does
+
+**Id Source** (`idSource`)
+
+- From repeater: at the frame's end it binds to the object of the row it sits in
+- otherwise: kept; the object stays bound until the next Id
+
+**Repeater Component** (`repeaterComponent`)
+
+- under From repeater: at the frame's end it binds to the object of that repeater's row (blank: the nearest)
+- otherwise: kept, and read only under From repeater
+
+**Id** (`modelId`)
+
+- empty: no object bound, so a Do fails; Id is sent
+- otherwise: bound to the object it names (made if none has it); Id is sent
+
+**Properties** (`properties`)
+
+- always: nothing while it runs; each name makes a value input (and a type for it)
+
+**Do** (`store`)
+
+- always: at the frame's end the property inputs are written onto the bound object, one write for the frame's presses; each answered Done, or Failure with no object bound
+
 ## Outputs
 
 ### Values

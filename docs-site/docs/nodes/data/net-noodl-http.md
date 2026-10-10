@@ -34,6 +34,21 @@ One-off or simple API calls where the response can be consumed directly or hande
 | `cancel` | Signal | — | Abandons every request still in flight, each answering on Canceled rather than Failure; reports Unchanged when there is nothing to cancel |
 | `fetch` | Signal | — | Sends the request using the values currently on the inputs |
 
+### What each input does
+
+**URL** (`url`)
+
+- always: kept as handed; read when the next Fetch goes — a request already running keeps the address it was sent to
+
+**Fetch** (`fetch`)
+
+- always: one request at the frame's end, however many Fetches arrived, with the values held then, beside any request already running: a 2xx answer sends Response, Status Code and Response Headers, then Done for each Fetch; any other status the same and Error, then Failure; a 304 is Not Modified and Unchanged; no URL, an input that is not text, a body that is not JSON, no answer by Timeout (ms) or none at all is Error and Failure
+
+**Cancel** (`cancel`)
+
+- a request still running: every one is abandoned — each lands as Canceled and Unchanged for its Fetches, Response and Status Code as they were — and this press is Done → Done
+- nothing running: Unchanged → Unchanged
+
 ## Outputs
 
 ### Values

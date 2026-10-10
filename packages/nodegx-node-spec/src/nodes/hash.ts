@@ -78,11 +78,11 @@ export const Hash = defineNode({
   }
 }).on(
   {
-    value: (_s, v) => ({ set: { value: v }, send: [] }),
-    algorithm: (_s, v) => ({ set: { algorithm: v }, send: [] }),
-    encoding: (_s, v) => ({ set: { encoding: v }, send: [] }),
+    value: (_s, v) => ({ says: 'always: read at the end of the frame by a Do pressed in it — as its text, in UTF-8 bytes (nothing, 0 or false as the empty text)', set: { value: v }, send: [] }),
+    algorithm: (_s, v) => ({ says: 'always: read at the end of the frame by a Do pressed in it (empty reads as SHA-256; one the host does not know fails that Do)', set: { algorithm: v }, send: [] }),
+    encoding: (_s, v) => ({ says: 'always: read at the end of the frame by a Do pressed in it (empty reads as hex; one not in the list fails that Do)', set: { encoding: v }, send: [] }),
     // :101-110 — the token is kept until the frame-end run reports it
-    hash: (s) => ({ set: { pending: s.pending + 1 }, outcome: 'deferred' })
+    hash: (s) => ({ says: 'always: one digest at the end of the frame however many presses, of Value as it stands then — Digest and a cleared Error, then Done per press; an unknown Algorithm or Encoding puts the reason on Error, Digest untouched, Failure per press', set: { pending: s.pending + 1 }, outcome: 'deferred' })
   },
   {
     // :139-162 `_run` at the frame end, and the continuation that follows it

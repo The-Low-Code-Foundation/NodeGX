@@ -29,6 +29,23 @@ Use it to turn app state into UI copy: a toggle button's label, an on/off status
 | `input` | Boolean | — | Which of the two strings to publish: false, 0, empty text or no value picks String for false; anything else picks String for true |
 | `trueString` | String | — | Text published on Current Value while Selector is true |
 
+### What each input does
+
+**String for true** (`trueString`)
+
+- the same text: nothing, not even a send
+- new text: kept, and sent on Current Value if Selector picks String for true
+
+**String for false** (`falseString`)
+
+- the same text: nothing, not even a send
+- new text: kept, and sent on Current Value if Selector picks String for false
+
+**Selector** (`input`)
+
+- the same value: nothing, not even a send → Selector Changed stays silent
+- a different value, even one that picks the same string: Current Value follows → Selector Changed
+
 ## Outputs
 
 ### Values

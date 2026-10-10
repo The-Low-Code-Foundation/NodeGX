@@ -91,7 +91,7 @@ type State = {
 };
 
 type O = typeof Slider extends { outputs: infer X } ? X : never;
-type Send = Patch<State, O>;
+type Send = Patch<State, O> & { says: string }; // NSP-018 s77: every input patch says its case
 type Pulse = 'didMount' | 'willUnmount' | 'pointerDown' | 'pointerUp' | 'onFocus' | 'onBlur' | 'hoverStart' | 'hoverEnd' | 'onChange';
 type ValueOut = 'pressedState' | 'focusState' | 'hoverState' | 'value' | 'valuePercent';
 type Act = { set?: Partial<State>; send: ValueOut[]; emit?: Pulse[] };

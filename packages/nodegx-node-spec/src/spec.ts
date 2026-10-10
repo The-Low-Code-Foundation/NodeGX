@@ -243,6 +243,15 @@ export interface WorldView {
    * load (raw, as the script sets it; `undefined`: never set). What the graph writes to it later reaches `WorldHandlers.group`.
    */
   group(): { present: boolean; load: { value: unknown } | undefined };
+  /**
+   * P107-C155 — whether a wire reaches `port` on THIS node: the runtime's `isInputConnected` (node.ts :637). A fact
+   * of the graph the node sits in, not of the world, read by the branches that keep NDA-017 §2's one exception (a
+   * Function's Script, simplejavascript.ts :386, and an Expression's text, expression.ts :611, run on their own only
+   * while Run is not wired). A scenario names the ports under `wired` (scenario.ts; the adapter's `mount` takes them);
+   * absent, nothing is wired — what every play before this read. A declared or a derived input; a port the node does
+   * not have is a scenario error at mount.
+   */
+  wired(port: string): boolean;
 }
 
 /** One registry entry to watch: a record by id or an array by name (the raw id, as the registry keeps it). */
@@ -663,12 +672,21 @@ export interface AfterInputsPatch<S, I, O> extends Patch<S, O> {
 // Every reducer is handed the WORLD as its last argument (NSP-007) — `now()`, `random()`,
 // `uuid()` — and may ignore it; the eighteen specs before NSP-007 do.
 
+/**
+ * NSP-018 AC2 (s77, 2026-10-10) — an INPUT reducer's patch carries its words. Flipped from optional the day the ledger read
+ * 507 of 507: a branch without `says` now fails this typecheck, which is the gate. Only `on({})` reducers owe it — the
+ * rules reader (scripts/node-spec/rules.js) reads those alone; `afterInputs`, `world`, `person` and a dynamic port's `on`
+ * still return a plain `Patch`, because nothing reads their words yet (NSP-018 §6 item 1).
+ */
+export type SaidPatch<S, O> = Patch<S, O> & { says: string };
+export type SaidOutcomePatch<S, O> = OutcomePatch<S, O> & { says: string };
+
 export type Reducers<S, I, O> = {
-  [K in OutcomeKeys<I>]: (state: Readonly<S>, inputs: Inputs<I>, world: WorldView) => OutcomePatch<S, O>;
+  [K in OutcomeKeys<I>]: (state: Readonly<S>, inputs: Inputs<I>, world: WorldView) => SaidOutcomePatch<S, O>;
 } & {
-  [K in PlainSignalKeys<I>]: (state: Readonly<S>, inputs: Inputs<I>, world: WorldView) => Patch<S, O>;
+  [K in PlainSignalKeys<I>]: (state: Readonly<S>, inputs: Inputs<I>, world: WorldView) => SaidPatch<S, O>;
 } & {
-  [K in ValueKeys<I>]?: (state: Readonly<S>, value: ValueOf<I[K]>, inputs: Inputs<I>, world: WorldView) => Patch<S, O>;
+  [K in ValueKeys<I>]?: (state: Readonly<S>, value: ValueOf<I[K]>, inputs: Inputs<I>, world: WorldView) => SaidPatch<S, O>;
 };
 
 // ------------------------------------------------------------------------------------------------

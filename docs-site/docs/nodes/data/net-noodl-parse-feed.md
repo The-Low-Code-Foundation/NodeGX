@@ -28,6 +28,16 @@ Any time you are reading a feed: a blog, a news site, a YouTube channel's /feeds
 | `maxBytes` | Number | `5242880` | Refuse a document larger than this, before parsing it. Raise it for a source that really does publish its whole archive in one file |
 | `text` | String | — | The feed document — RSS 2.0, Atom 1.0 or RDF/RSS 1.0. Wire an HTTP Request node's Response here with its Response Type set to Text: feeds are served as application/rss+xml, text/xml and, from some sources, text/html, and Text is what guarantees the body arrives untouched |
 
+### What each input does
+
+**Feed** (`text`)
+
+- always: parsed at the end of the frame (once, however many inputs moved) — Items in a fresh array, Count, the six Feed outputs and Changed, or Error, Error Code and Failure with everything else untouched; nothing (undefined or null) is not parsed
+
+**Max Bytes** (`maxBytes`)
+
+- always: the Feed is parsed again at the end of the frame, once any has arrived — a text longer than this (counted in characters) is refused as xml/too-large before parsing; not a finite number above 0 reads as the default, 5 MB
+
 ## Outputs
 
 ### Values

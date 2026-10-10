@@ -1825,7 +1825,21 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
    * its project id — what a node that REPORTS ids reads (On App Error's Node Id, NSP-013 s13); a
    * lone node keeps the generated `<type>#<n>`.
    */
-  function mountIn(type: string, params: Record<string, unknown>, scope?: InstanceType<typeof NodeScope>, graphId?: string): RuntimeHandle {
+  /**
+   * P107-C155 — a wire into `port` from a source that never sends: what `connectInput` reads of a source (node.ts :569-605) —
+   * its name, an output port with an owner, a name, a value and the connection registry, and the signals-sent map — plus the
+   * `update` the sink's update loop calls on every connected source first (`_updateDependencies`, :820-826), a no-op here.
+   * The output's value stays `undefined`, so the wire seeds nothing; the stub has nothing to update, so it never sends.
+   */
+  function wireStub(node: NodeInstance, port: string, type: string): void {
+    node.registerInputIfNeeded(port);
+    if (!node.hasInput(port)) throw new Error(`${type}: no input "${port}" on the runtime to wire`);
+    const stub = { name: `wired:${port}`, _signalsSentThisUpdate: {} as Record<string, boolean>, getOutput: () => output, update: () => undefined };
+    const output = { name: 'value', owner: stub, value: undefined as unknown, registerConnection: () => undefined, deregisterConnection: () => undefined };
+    (node as unknown as { connectInput(input: string, source: unknown, sourcePort: string): void }).connectInput(port, stub, 'value');
+  }
+
+  function mountIn(type: string, params: Record<string, unknown>, scope?: InstanceType<typeof NodeScope>, graphId?: string, wired?: readonly string[]): RuntimeHandle {
     if (!context.nodeRegister.hasNode(type)) throw new Error(`runtime: no node type "${type}" is registered`);
     if (graphId !== undefined && states.has(graphId)) throw new Error(`runtime: a node "${graphId}" is still mounted — a previous play leaked it`);
     const id = graphId ?? `${type}#${next++}`;
@@ -1889,6 +1903,13 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     // BEFORE its parameters are set (`setNodeModel` → `updateTarget`, which schedules a rebuild) and it joins the parent's children after
     // (`insertNodeInTree`, in `putOnPage`). The row templates are the play's project's (repeater.ts THE PLAY'S PROJECT)
     if (type === 'For Each' && !scope) repeaterParent(node, nodeScope as unknown as InstanceType<typeof NodeScope>, id);
+    // P107-C155 — THE WIRED PORTS (adapter.ts `mount`): each named port gets the runtime's own connection (node.ts `connectInput`)
+    // from a source that never sends, BEFORE the params — a loaded project makes its wires before a node's parameters drain
+    // (nodescope.ts `setComponentModel`: nodes made with `updateOnDirtyFlagging` off, the connections added, then the first
+    // update), so a setter that asks `isInputConnected` (simplejavascript.ts :386, expression.ts :611) reads true, and nothing
+    // ever arrives on the wire (the source's output holds `undefined`, which `connectInput` does not seed — C3). The lone
+    // node's `set` keeps writing through `setInputValue`, as a parameter does.
+    for (const port of wired ?? []) wireStub(node as unknown as NodeInstance, port, type);
     const h = adopt(node, id, type, metadata, params, logs, made);
     // PERSON (above, NSP-016 s37) — a node a person acts on is put on the page, its params already applied as a
     // loaded project's are before the first render; its Did Mount lands in the first settle
@@ -3096,8 +3117,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     types: () => Object.keys((context.nodeRegister as unknown as { _constructors: Record<string, unknown> })._constructors),
     hasType: (type) => context.nodeRegister.hasNode(type),
 
-    mount(type, params) {
-      return mountIn(type, params);
+    mount(type, params, wired) {
+      return mountIn(type, params, undefined, undefined, wired);
     },
 
     set(h, port, value) {

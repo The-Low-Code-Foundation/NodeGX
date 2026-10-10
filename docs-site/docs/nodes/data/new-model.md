@@ -33,6 +33,16 @@ Use it to mint new client-side state records: items added to a local list, draft
 |---|---|---|---|
 | `new` | Signal | — | Creates a new object with a generated id and writes the property values currently on the inputs |
 
+### What each input does
+
+**Properties** (`properties`)
+
+- always: nothing while it runs; each name makes a value input (and a type for it)
+
+**Do** (`new`)
+
+- always: at the frame's end one new object is made holding the property inputs' values, Id is sent, and each press of the frame is answered Done
+
 ## Outputs
 
 ### Values

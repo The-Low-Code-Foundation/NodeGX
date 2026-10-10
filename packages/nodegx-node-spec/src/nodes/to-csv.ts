@@ -93,10 +93,10 @@ export const ToCSV = defineNode({
   }
 }).on(
   {
-    items: (_s, v) => ({ set: { items: v, itemsSupplied: v !== undefined && v !== null, scheduled: true }, send: [] }), // :79-83
-    columns: (_s, v) => ({ set: { columns: v, scheduled: true }, send: [] }), // :92-95
-    delimiter: (_s, v) => ({ set: { delimiter: v || ',', scheduled: true }, send: [] }), // :105-108
-    includeHeader: (_s, v) => ({ set: { includeHeader: v, scheduled: true }, send: [] }) // :115-118
+    items: (_s, v) => ({ says: 'always: written at the end of the frame (once, however many inputs moved) — CSV, Count and Changed; nothing (undefined or null) is not written; rows that are all arrays go cell for cell with no header, anything else as records', set: { items: v, itemsSupplied: v !== undefined && v !== null, scheduled: true }, send: [] }), // :79-83
+    columns: (_s, v) => ({ says: 'always: the Items are written again at the end of the frame, once any have arrived — these properties in this order (comma-separated, blanks dropped), or every property first seen when empty', set: { columns: v, scheduled: true }, send: [] }), // :92-95
+    delimiter: (_s, v) => ({ says: 'always: the Items are written again at the end of the frame, once any have arrived, with this between cells (cleared reads as a comma)', set: { delimiter: v || ',', scheduled: true }, send: [] }), // :105-108
+    includeHeader: (_s, v) => ({ says: 'always: the Items are written again at the end of the frame, once any have arrived, with the column names as the first row or not — rows of cells never get one', set: { includeHeader: v, scheduled: true }, send: [] }) // :115-118
   },
   {
     // :147-155 `_schedule` → :156-190 `_render`

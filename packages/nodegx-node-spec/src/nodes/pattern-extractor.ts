@@ -105,16 +105,17 @@ export const PatternExtractor = defineNode({
     notFound: { type: 'signal', displayName: 'Not Found', group: 'Events', description: 'Fires when the pattern ran and matched nothing, which is an ordinary outcome rather than a mistake' }
   }
 }).on({
-  text: (_s, v) => ({ set: { text: asText(v) }, send: [] }), // :74
-  pattern: (_s, v) => ({ set: { pattern: asText(v) }, send: [] }), // :85
-  flags: (_s, v) => ({ set: { flags: asText(v) }, send: [] }), // :97
-  extractAll: (_s, v) => ({ set: { extractAll: v }, send: [] }), // :108
+  text: (_s, v) => ({ says: 'always: kept as text (nothing as empty) and read at the next Extract', set: { text: asText(v) }, send: [] }), // :74
+  pattern: (_s, v) => ({ says: 'always: kept as text (nothing as empty) and read at the next Extract — a regular expression without its slashes', set: { pattern: asText(v) }, send: [] }), // :85
+  flags: (_s, v) => ({ says: 'always: kept as text (nothing as empty) and read at the next Extract — only i, m, s, u and y count; g comes from Extract All', set: { flags: asText(v) }, send: [] }), // :97
+  extractAll: (_s, v) => ({ says: 'always: read at the next Extract — every match into Matches, or only the first', set: { extractAll: v }, send: [] }), // :108
 
-  // :116-119 → :228-261
+  // :116-119 → :228-261 (NSP-018: the Found / Not Found ternary as two literal arms)
   extract: (s) => {
     const result = extractPattern(s.text, s.pattern, { all: s.extractAll, flags: s.flags }); // :230-233
     const set = { match: result.match, matches: result.matches, groups: result.groups, namedGroups: result.namedGroups, error: result.ok ? '' : result.error || 'Invalid pattern' }; // :235-239
-    if (!result.ok) return { set, outcome: 'failure', error: EXTRACT_ERROR_CODE }; // :249-257 — every output was flagged (:241-247)
-    return { set, emit: [result.match === null ? 'notFound' : 'found'], outcome: 'done' }; // :259-260
+    if (!result.ok) return { says: 'a blank Pattern, or one that is not a valid regular expression: every output is rewritten empty and Error says why', set, outcome: 'failure', error: EXTRACT_ERROR_CODE }; // :249-257 — every output was flagged (:241-247)
+    if (result.match === null) return { says: 'the Pattern ran and matched nothing (empty Text matches nothing): every output is rewritten empty, Error cleared — an ordinary result', set, emit: ['notFound'], outcome: 'done' }; // :259-260
+    return { says: 'the Pattern ran and matched: Match, Matches, Groups, First Group, Named Groups and Match Count are rewritten, Error cleared', set, emit: ['found'], outcome: 'done' }; // :259-260
   }
 });

@@ -35,6 +35,25 @@ Destructive removal of cloud records. If the product needs undo or soft delete, 
 |---|---|---|---|
 | `store` | Signal | — | Deletes the record named by Id from its Class in the backend |
 
+### What each input does
+
+**Id Source** (`idSource`)
+
+- always: From repeater binds the surrounding Repeater's item at the end of the frame (outside one, nothing); Explicit leaves it to Id
+
+**Repeater Component** (`repeaterComponent`)
+
+- always: which Repeater supplies the record (blank, the nearest); while From repeater, it is bound again at the end of the frame
+
+**Id** (`modelId`)
+
+- always: the record with that id is bound now (a record handed in, by its id; an empty id binds nothing), and Id is sent again
+
+**Do** (`store`)
+
+- no Class: refused at once, and Error says so → Failure
+- otherwise it joins the frame's batch: at the end of the frame one delete answers every press — Done for each, or Error and Failure for each (no record bound, no backend, or the backend refuses)
+
 ## Outputs
 
 ### Values

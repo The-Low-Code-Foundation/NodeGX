@@ -35,6 +35,24 @@ Content addressing, a cache key, an integrity check, or comparing a value agains
 |---|---|---|---|
 | `hash` | Signal | — | Computes the digest of Value |
 
+### What each input does
+
+**Value** (`value`)
+
+- always: read at the end of the frame by a Do pressed in it — as its text, in UTF-8 bytes (nothing, 0 or false as the empty text)
+
+**Algorithm** (`algorithm`)
+
+- always: read at the end of the frame by a Do pressed in it (empty reads as SHA-256; one the host does not know fails that Do)
+
+**Encoding** (`encoding`)
+
+- always: read at the end of the frame by a Do pressed in it (empty reads as hex; one not in the list fails that Do)
+
+**Do** (`hash`)
+
+- always: one digest at the end of the frame however many presses, of Value as it stands then — Digest and a cleared Error, then Done per press; an unknown Algorithm or Encoding puts the reason on Error, Digest untouched, Failure per press
+
 ## Outputs
 
 ### Values

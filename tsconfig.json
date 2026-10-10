@@ -44,7 +44,10 @@
       // package's build. Two mappings, verbatim from packages/noodl-editor/tsconfig.json,
       // which is where the editor's own program has always resolved them.
       "@nodegx/export": ["./packages/nodegx-export/src/index.ts"],
-      "@nodegx/export/*": ["./packages/nodegx-export/src/*"]
+      "@nodegx/export/*": ["./packages/nodegx-export/src/*"],
+      // NSP-019: the editor's property panel imports the spec package's browser entry; its
+      // `types` points at a gitignored `dist/`. Same mapping as packages/noodl-editor/tsconfig.json.
+      "@nodegx/node-spec": ["./packages/nodegx-node-spec/src/browser.ts"]
     }
   },
   "include": [

@@ -27,6 +27,13 @@ Use it when something must happen at the moment data changes: restart a debounce
 |---|---|---|---|
 | `value` | * | — | Value to watch; changes are detected by identity, so editing an Object or Array in place is not a change here |
 
+### What each input does
+
+**Input** (`value`)
+
+- the same value as the last one (by identity): nothing → Value Changed stays silent
+- a different value, or the first one → Value Changed
+
 ## Outputs
 
 ### Signals

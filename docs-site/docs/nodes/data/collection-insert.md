@@ -34,6 +34,21 @@ Adding items to a local shared array — typically right after Create New Object
 |---|---|---|---|
 | `add` | Signal | — | Adds the object named by Object Id to the array, or fires Failure if either cannot be resolved |
 
+### What each input does
+
+**Array Id** (`collectionId`)
+
+- empty: no array bound, so a Do fails
+- otherwise: bound to the array it names (made if none has it), or to the array handed
+
+**Object Id** (`modifyId`)
+
+- always: kept as the object the next Do adds
+
+**Do** (`add`)
+
+- always: at the frame's end, once per press, the object is added to the array (made if no object has that Id); answered Done, Unchanged when it was in it already, Failure with no Object Id or no array bound
+
 ## Outputs
 
 ### Signals

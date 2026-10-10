@@ -35,6 +35,24 @@ Cross-cutting jumps where composing router+page choices is clumsier than stating
 |---|---|---|---|
 | `navigate` | Signal | — | Navigates to Path, filling in any brace placeholders from their input ports |
 
+### What each input does
+
+**Path** (`path`)
+
+- always: kept; read by the next Navigate — each {name} in it is filled from its parameter port as written (an unset one as nothing), and a value that is not text counts as no Path
+
+**Query** (`queryNames`)
+
+- always: kept; read by the next Navigate — one name=value after a ? for each name whose port holds a value, each encoded; an unset or null one is left out
+
+**Open in new tab** (`openInNewTab`)
+
+- always: whether the next Navigate opens a new tab or moves this one
+
+**Navigate** (`navigate`)
+
+- always: one navigation at the end of the frame, however many presses, from the frame's final Path, parameters and Query — no Path is Error and Failure for each press; otherwise the URL is built (after a # unless the project routes by path) and, with Open in new tab, handed to a new tab (Done; the browser blocking it is Error and Failure), else pushed into the address (Done; a push the browser refuses is Error and Failure); with no window, Unchanged
+
 ## Outputs
 
 ### Signals

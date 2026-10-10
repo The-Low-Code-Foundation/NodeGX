@@ -34,6 +34,21 @@ The action node behind a login form. To read who is logged in, or to react to se
 |---|---|---|---|
 | `login` | Signal | — | Attempts to sign in with Username and Password |
 
+### What each input does
+
+**Do** (`login`)
+
+- the first press this frame: the call goes to the backend at the frame's end, with the values held then
+- another press this frame: it joins that call, and is answered with it
+
+**Username** (`username`)
+
+- always: held as handed; read when the next sign-in goes
+
+**Password** (`password`)
+
+- always: held as handed; read when the next sign-in goes
+
 ## Outputs
 
 ### Signals

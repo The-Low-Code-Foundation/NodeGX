@@ -630,5 +630,88 @@
       "settle",
       "settle"
     ]
+  },
+  {
+    "name": "with Run wired, a new Script does not run at load: nothing until Run, then one run (P107-C155)",
+    "because": "simplejavascript.ts :386 `if (!this.isInputConnected('run')) this.scheduleRun()` — NDA-017 §2's surviving guard; P109 ISL-033 measured it (wired: not at load, still on an input). The unwired twin is the first scenario: count 1 at load, 2 after Run",
+    "wired": [
+      "run"
+    ],
+    "params": {
+      "functionScript": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n"
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "with Run wired, a changed ticked input still runs the code (P107-C155)",
+    "because": "simplejavascript.ts :784-799 — Run adds a trigger and takes nothing away (NDA-017 §2); ISL-033's measurement: wired, still on the input",
+    "wired": [
+      "run"
+    ],
+    "params": {
+      "functionScript": "Outputs.sum = Inputs.a + Inputs.b"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "in-a",
+        "value": 1
+      },
+      {
+        "set": "in-b",
+        "value": 2
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "with Run wired, a Script that will not compile reports nothing until Run: then Error, and the Run answered failure (P107-C155)",
+    "because": "simplejavascript.ts :386 (no run asked), :534-561 (the run Run asks for meets the kept compile failure)",
+    "wired": [
+      "run"
+    ],
+    "params": {
+      "functionScript": "Outputs.sum = ("
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "with Run wired, a new Script after a throw clears Error to blank text and sends it, and runs nothing (P107-C155, row C146's twin)",
+    "because": "simplejavascript.ts :771-775 clearRunDiagnostics before the guard at :386 — the clearing is not guarded, the run is",
+    "wired": [
+      "run"
+    ],
+    "params": {
+      "functionScript": "throw new Error(\"boom \" + Inputs.a)"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle",
+      {
+        "set": "functionScript",
+        "value": "this.n = (this.n || 0) + 1;\nOutputs.count = this.n"
+      },
+      "settle",
+      {
+        "signal": "run"
+      },
+      "settle"
+    ]
   }
 ]

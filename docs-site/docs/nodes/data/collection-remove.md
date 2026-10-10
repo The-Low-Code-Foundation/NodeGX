@@ -34,6 +34,21 @@ Per-item delete actions in local lists. Inside a Repeater's item component, feed
 |---|---|---|---|
 | `remove` | Signal | — | Removes the object named by Object Id from the array, or fires Failure if either cannot be resolved |
 
+### What each input does
+
+**Array Id** (`collectionId`)
+
+- empty: no array bound, so a Do fails
+- otherwise: bound to the array it names (made if none has it), or to the array handed
+
+**Object Id** (`modifyId`)
+
+- always: kept as the object the next Do removes
+
+**Do** (`remove`)
+
+- always: at the frame's end, once per press, the object is taken out of the array; answered Done, Unchanged when it was not in it, Failure with no Object Id, no array bound, or no object with that Id
+
 ## Outputs
 
 ### Signals

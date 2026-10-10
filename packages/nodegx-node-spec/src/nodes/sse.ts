@@ -69,7 +69,7 @@
  */
 
 import { canonicalKey } from '../canonical';
-import { defineNode, type SpecRequest, type WorldView } from '../spec';
+import { defineNode, said, type SpecRequest, type WorldView } from '../spec';
 import type { Answer, StreamChunk } from '../world';
 import { parseJsonOrText, parseSseChunk, textForPath, type SseFrame } from './stream-parsers';
 
@@ -163,6 +163,11 @@ function hasHeaderNamed(headers: Readonly<Record<string, string>>, name: string)
   const lower = name.toLowerCase();
   for (const key in headers) if (key.toLowerCase() === lower) return true;
   return false;
+}
+
+/** conn :759 — a stream there is to stop: a request in flight, or one about to be made (connecting, or a retry timer waiting) */
+function activeStream(c: Conn): boolean {
+  return c.transport !== undefined || c.state === 'connecting' || c.state === 'reconnecting';
 }
 
 /** conn :712-715 */
@@ -337,7 +342,7 @@ class Run {
   disconnect(): boolean {
     const c = this.c;
     this.clearReconnectTimer();
-    const wasActive = c.transport !== undefined || c.state === 'connecting' || c.state === 'reconnecting';
+    const wasActive = activeStream(c);
     this.closeTransport();
     if (wasActive || c.state !== 'closed') this.setState('closed');
     return wasActive;
@@ -822,30 +827,90 @@ export const ServerSentEvents = defineNode({
   }
 }).on(
   {
+    // NSP-018 (s77): every patch here is computed on a working copy (`Run`), so each is `said` — the words carry what the wire does.
     // sse :133-136, :244-247 — the two that schedule the frame end's pass
-    url: (s, v, _i, w) => store(s, w, { url: v === undefined || v === null ? '' : String(v), scheduled: true }),
-    autoConnect: (s, v, _i, w) => store(s, w, { autoConnect: !!v, scheduled: true }),
+    url: (s, v, _i, w) =>
+      said(
+        'always: stored as text (nothing as empty); at the end of the frame a stream opened against another URL is dropped silently (a Connect still waiting: Unchanged) and reopened to this one when Auto Connect is on and it is not blank, else said idle (Connection State, Connected, Retry Count); with no stream, Auto Connect on and a URL: it connects; the URL the stream was opened against: left alone',
+        store(s, w, { url: v === undefined || v === null ? '' : String(v), scheduled: true })
+      ),
+    autoConnect: (s, v, _i, w) =>
+      said(
+        'always: on or off, read at the end of the frame — on with a URL and no stream: it connects; a stream opened against another URL is dropped silently (a Connect still waiting: Unchanged) and reopened when on, said idle when off; a stream on the URL it holds is left alone either way, so off never closes one',
+        store(s, w, { autoConnect: !!v, scheduled: true })
+      ),
     // sse :153-322 — stored for the next connection
-    transport: (s, v, _i, w) => store(s, w, { transport: (v as string) || 'auto' }),
-    method: (s, v, _i, w) => store(s, w, { method: (v as string) || 'GET' }),
-    headers: (s, v, _i, w) => store(s, w, { headers: v && typeof v === 'object' ? (v as Record<string, unknown>) : null }),
-    body: (s, v, _i, w) => store(s, w, { body: v }),
-    withCredentials: (s, v, _i, w) => store(s, w, { withCredentials: !!v }),
-    eventTypes: (s, v, _i, w) => store(s, w, { eventTypes: (v as string) || '' }),
-    autoReconnect: (s, v, _i, w) => store(s, w, { autoReconnect: !!v }),
-    reconnectOnStreamEnd: (s, v, _i, w) => store(s, w, { reconnectOnStreamEnd: !!v }),
-    reconnectDelay: (s, v, _i, w) => store(s, w, { reconnectDelay: Number(v) > 0 ? Number(v) : 1000 }),
-    maxReconnectDelay: (s, v, _i, w) => store(s, w, { maxReconnectDelay: Number(v) > 0 ? Number(v) : 30000 }),
-    maxRetries: (s, v, _i, w) => store(s, w, { maxRetries: Number(v) > 0 ? Number(v) : 0 }),
-    dedupeById: (s, v, _i, w) => store(s, w, { dedupeById: !!v }),
+    transport: (s, v, _i, w) =>
+      said(
+        'always: read by the next connection, not one already open (nothing as Auto) — Auto and Fetch make a streaming request that carries Method, Headers and Body; EventSource asks the browser for one, which carries none of them and listens for Event Types, and where there is none that Connect fails for good (Last Error `EventSource is not available in this environment`)',
+        store(s, w, { transport: (v as string) || 'auto' })
+      ),
+    method: (s, v, _i, w) =>
+      said(
+        'always: read by the next connection, not one already open — the request\'s method, upper-cased (nothing as GET); with GET the Body stays home',
+        store(s, w, { method: (v as string) || 'GET' })
+      ),
+    headers: (s, v, _i, w) =>
+      said(
+        'always: read by the next connection, not one already open — an object\'s entries go on the request as text after Accept and Cache-Control (a null or undefined one skipped), and a content-type among them, any case, keeps the JSON one off; anything else: none; the EventSource transport carries none',
+        store(s, w, { headers: v && typeof v === 'object' ? (v as Record<string, unknown>) : null })
+      ),
+    body: (s, v, _i, w) =>
+      said(
+        'always: read by the next connection, not one already open — with a Method other than GET or HEAD a string goes as itself, anything else as JSON with Content-Type application/json unless Headers names one; nothing, or GET: no body; the EventSource transport carries none',
+        store(s, w, { body: v })
+      ),
+    withCredentials: (s, v, _i, w) =>
+      said(
+        'always: read by the next connection, not one already open — on, the request carries cookies and HTTP auth across origins (credentials include); off, same-origin only',
+        store(s, w, { withCredentials: !!v })
+      ),
+    eventTypes: (s, v, _i, w) =>
+      said(
+        'always: read by the next connection, not one already open, as text (nothing as none) split on commas and trimmed — the named events the EventSource transport listens for beside message; the Fetch transport delivers every type whatever is here',
+        store(s, w, { eventTypes: (v as string) || '' })
+      ),
+    autoReconnect: (s, v, _i, w) =>
+      said(
+        'always: read by the next connection, not one already open — on, a failure that can be retried (the server unreachable, a 5xx, 408 or 429, a stream cut short) schedules a reconnect; off, it is reported and the stream stops: Last Error, On Error, Connection State error, On Close',
+        store(s, w, { autoReconnect: !!v })
+      ),
+    reconnectOnStreamEnd: (s, v, _i, w) =>
+      said(
+        'always: read by the next connection, not one already open — on, a stream the server ends cleanly is reopened after the backoff wait, no error told and the retry count unmoved; off, it is closed (Connection State closed, On Close); either way a last event the server did not finish with a blank line is delivered first',
+        store(s, w, { reconnectOnStreamEnd: !!v })
+      ),
+    reconnectDelay: (s, v, _i, w) =>
+      said(
+        'always: read by the next connection, not one already open — the first retry\'s wait in milliseconds, doubled per consecutive failure after the first and capped at Max Reconnect Delay; a `retry:` the server sends replaces it for the rest of that connection; 0, below, or not a number: 1000',
+        store(s, w, { reconnectDelay: Number(v) > 0 ? Number(v) : 1000 })
+      ),
+    maxReconnectDelay: (s, v, _i, w) =>
+      said(
+        'always: read by the next connection, not one already open — the ceiling on the retry wait in milliseconds, however many failures in a row; 0, below, or not a number: 30000',
+        store(s, w, { maxReconnectDelay: Number(v) > 0 ? Number(v) : 30000 })
+      ),
+    maxRetries: (s, v, _i, w) =>
+      said(
+        'always: read by the next connection, not one already open — above 0, that many retries are made and the failure after the last gives up: Last Error `… (gave up after n attempts)`, On Error again, Connection State error, On Close, a waiting Connect Failure; 0, below, or not a number: it retries for as long as Auto Reconnect is on',
+        store(s, w, { maxRetries: Number(v) > 0 ? Number(v) : 0 })
+      ),
+    dedupeById: (s, v, _i, w) =>
+      said(
+        'always: read by the next connection, not one already open — on, an event whose id is among the last 512 seen on that connection is dropped: Duplicates Suppressed counts it (sent) and nothing else is told, though the resume point moves to it; off, every event is delivered and Delivery Semantics says at-least-once once ids are seen',
+        store(s, w, { dedupeById: !!v })
+      ),
     // sse :232-235 — and Text is sent at once
     textPath: (s, v, _i, w) => {
       const run = new Run(s, w);
       run.s.textPath = v === undefined || v === null ? '' : String(v);
       w.send('text', run.s);
-      return run.patch();
+      return said(
+        'always: stored as text (nothing as empty) and Text is sent at once, re-read from the last event — the field at this dot path in Data when it is a string, number or boolean, Raw when the path is blank, empty when it does not resolve',
+        run.patch()
+      );
     },
-    // sse :328-334
+    // sse :328-334 — the words are chosen by the inputs the connection is made from, as `connect()` and `openTransport()` read them
     connect: (s, _i, w) => {
       const run = new Run(s, w);
       const settles = s.pendingConnect ? [{ outcome: 'unchanged' as const }] : undefined;
@@ -853,16 +918,40 @@ export const ServerSentEvents = defineNode({
       run.doConnect(true);
       const own = run.own.settled;
       const p = run.patch();
-      if (own) return { ...p, outcome: own.outcome, ...(own.error !== undefined ? { error: own.error } : {}), ...(settles ? { settles } : {}) };
-      return { ...p, outcome: 'pending' as const, ...(settles ? { settles } : {}) };
+      const patch = own ? { ...p, outcome: own.outcome, ...(own.error !== undefined ? { error: own.error } : {}), ...(settles ? { settles } : {}) } : { ...p, outcome: 'pending' as const, ...(settles ? { settles } : {}) };
+      if (!s.url)
+        return said(
+          'no URL: a stream already open or retrying is dropped silently (its request abandoned, its timer cancelled; a Connect still waiting: Unchanged), then it fails for good — Last Error `No URL was set on the stream`, On Error, Connection State error (Connected false, Retry Count 0), On Close; Failure (sse/connect-failed)',
+          patch
+        );
+      if (s.transport === 'eventsource')
+        return said(
+          'Transport EventSource: the old stream dropped silently (a Connect still waiting: Unchanged), Retry Count 0, Last Error cleared, Connection State connecting, then the browser\'s EventSource is asked for — none here, so it fails for good: Last Error `EventSource is not available in this environment`, On Error, Connection State error, On Close; Failure (sse/connect-failed)',
+          patch
+        );
+      return said(
+        'otherwise: the old stream dropped silently (its request abandoned, its timer cancelled; a Connect still waiting: Unchanged), Retry Count 0, Last Error cleared, Connection State connecting (Connected false), and a fresh request goes out — Method, Headers, Body, no Last-Event-ID (only a reconnect resumes); the answer settles it later: Connection State open, Last Error, On Open and Done at a 2xx with a body, else a failure (retried with Auto Reconnect unless it is a 4xx other than 408 and 429)',
+        patch
+      );
     },
-    // sse :340-348
+    // sse :340-348 — the words are chosen as `disconnect()` decides: whether there was a stream to stop (conn :759)
     disconnect: (s, _i, w) => {
       const run = new Run(s, w);
       run.settleConnect('unchanged');
-      const stopped = run.s.conn ? run.disconnect() : false;
+      if (run.s.conn) run.disconnect();
       const settles = run.settled.map((o) => ({ port: 'connect', ...o }));
-      return { ...run.patch(), outcome: stopped ? ('done' as const) : ('unchanged' as const), ...(settles.length > 0 ? { settles } : {}) };
+      if (!s.conn) return said('no connection (none made yet, or the last dropped by a URL change): nothing is sent; Unchanged', { ...run.patch(), outcome: 'unchanged' as const, ...(settles.length > 0 ? { settles } : {}) });
+      if (activeStream(s.conn))
+        return said(
+          'a stream open, connecting or waiting to retry: its request is abandoned and its timer cancelled, nothing more arrives, Connection State closed (Connected false), On Close; a Connect still waiting: Unchanged; Done',
+          { ...run.patch(), outcome: 'done' as const, ...(settles.length > 0 ? { settles } : {}) }
+        );
+      if (s.conn.state !== 'closed')
+        return said(
+          'a connection that already failed for good: it is marked closed — Connection State closed, Connected, Retry Count, and On Close once more; Unchanged',
+          { ...run.patch(), outcome: 'unchanged' as const, ...(settles.length > 0 ? { settles } : {}) }
+        );
+      return said('a connection already closed: nothing is sent; Unchanged', { ...run.patch(), outcome: 'unchanged' as const, ...(settles.length > 0 ? { settles } : {}) });
     }
   },
   {

@@ -38,6 +38,28 @@ Use it for user-driven tallies: quantity steppers, pagination cursors, wizard st
 | `increase` | Signal | — | Adds one to the count, or does nothing at all when Limits Enabled and the count is already at Max Value |
 | `reset` | Signal | — | Puts the count back to Start Value, or reports Unchanged and leaves Count Changed silent when it is already there |
 
+### What each input does
+
+**Increase Count** (`increase`)
+
+- at Max Value with Limits Enabled → Unchanged; Count Changed stays silent
+- otherwise the count goes up by one → Count Changed, Done
+
+**Decrease Count** (`decrease`)
+
+- at Min Value with Limits Enabled → Unchanged; Count Changed stays silent
+- otherwise the count goes down by one → Count Changed, Done
+
+**Reset To Start** (`reset`)
+
+- already at Start Value → Unchanged; Count Changed stays silent
+- otherwise the count goes back to Start Value → Count Changed, Done
+
+**Start Value** (`startValue`)
+
+- after the first: only where Reset returns to → Count Changed stays silent
+- the first one: the count starts there too → Count Changed
+
 ## Outputs
 
 ### Values

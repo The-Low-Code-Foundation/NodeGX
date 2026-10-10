@@ -16,6 +16,9 @@ const alias = {
   '@noodl-core-ui': path.join(packagesDir, 'noodl-core-ui/src'),
   // EXP-012: the code exporter, aliased by path like core-ui — a TypeScript source package with no build step.
   '@nodegx/export': path.join(packagesDir, 'nodegx-export/src'),
+  // NSP-019: the spec package's browser entry, by source like the exporter — its `main` is a gitignored
+  // `dist/`. Reached only through a dynamic `import()` in the property panel's Try panel, so it is a chunk.
+  '@nodegx/node-spec': path.join(packagesDir, 'nodegx-node-spec/src/browser.ts'),
   '@noodl-viewer-cloud/execution-history': path.join(packagesDir, 'noodl-viewer-cloud/src/execution-history'),
   '@noodl-hooks': path.join(editorDir, 'src/editor/src/hooks'),
   '@noodl-utils': path.join(editorDir, 'src/editor/src/utils'),

@@ -27,6 +27,12 @@ A record id, an idempotency key, a correlation id across services, a filename th
 |---|---|---|---|
 | `generate` | Signal | — | Generates a fresh UUID, replacing the one on Id |
 
+### What each input does
+
+**New** (`generate`)
+
+- always: a fresh UUID goes on Id, and Error is cleared → Done
+
 ## Outputs
 
 ### Values

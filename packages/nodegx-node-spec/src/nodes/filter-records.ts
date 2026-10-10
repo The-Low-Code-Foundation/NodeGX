@@ -272,16 +272,16 @@ export const FilterRecords = defineNode({
     items: (s, v, i, w) => {
       if (w.registry.isCollection(s.source)) w.unwatch({ collection: s.source.getId() }); // :313
       if (w.registry.isCollection(v)) w.watch({ collection: v.getId() }); // :319
-      return { set: { source: v, scheduled: s.scheduled || i['runOnChange-items'] }, send: [] }; // :205
+      return { says: "always: kept, and watched when it is a shared array; ticked under Run On Value Change, the filter runs at the frame's end", set: { source: v, scheduled: s.scheduled || i['runOnChange-items'] }, send: [] }; // :205
     },
     // :214-219
-    enabled: (s, v, i) => ({ set: { enabled: v, scheduled: s.scheduled || (valueDidChange(s.enabled, v) && i['runOnChange-enabled']) }, send: [] }),
+    enabled: (s, v, i) => ({ says: "always: kept; a change, ticked under Run On Value Change, runs the filter at the frame's end — off, every record passes through, unfiltered, unsorted and unlimited", set: { enabled: v, scheduled: s.scheduled || (valueDidChange(s.enabled, v) && i['runOnChange-enabled']) }, send: [] }),
     // :227-229 → requestFilter :394-401
-    filter: (s) => ({ set: { tokens: s.tokens + 1, scheduled: true }, outcome: 'deferred', send: [] }),
-    'runOnChange-items': () => ({ send: [] }),
-    'runOnChange-enabled': () => ({ send: [] }),
-    'runOnChange-records': () => ({ send: [] }),
-    'runOnChange-filterSettings': (_s, v) => ({ set: { settingsBox: v }, send: [] })
+    filter: (s) => ({ says: "always: the filter runs at the frame's end, one run for the frame's presses — Items, First Record Id and Count are sent, Filtered fires, then each press's Done or Failure; with nothing on Items, each press is Failure and nothing else moves", set: { tokens: s.tokens + 1, scheduled: true }, outcome: 'deferred', send: [] }),
+    'runOnChange-items': () => ({ says: 'always: read when the next Items arrives', send: [] }),
+    'runOnChange-enabled': () => ({ says: 'always: read when Enabled next changes', send: [] }),
+    'runOnChange-records': () => ({ says: "always: read when the bound array's contents next change, and when a save of the Class is next heard on the Backend's store", send: [] }),
+    'runOnChange-filterSettings': (_s, v) => ({ says: 'always: kept; read when the Filter or the Sorting next arrives, or a Limit setting next changes (a filter parameter has a box of its own)', set: { settingsBox: v }, send: [] })
   },
   {
     derived: {

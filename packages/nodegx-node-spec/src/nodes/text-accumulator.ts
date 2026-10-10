@@ -52,7 +52,6 @@ type State = {
 }
 
 type Port = 'accumulated' | 'messages' | 'lastMessage' | 'messageCount' | 'characterCount' | 'byteCount' | 'droppedCharacters' | 'droppedMessages' | 'error';
-type Pulse = 'overflowed' | 'messageReceived' | 'changed';
 
 export const TextAccumulator = defineNode({
   type: 'net.noodl.TextAccumulator',
@@ -124,49 +123,42 @@ export const TextAccumulator = defineNode({
     else if (kind === 'number' || kind === 'boolean' || kind === 'bigint') text = String(v);
     if (text !== undefined) {
       // :132 → :376-380 clearChunkError
-      return s.error ? { set: { pendingChunk: text, error: '' }, send: ['error'] } : { set: { pendingChunk: text }, send: [] };
+      if (s.error) return { says: 'text (a number, boolean or bigint as its text; nothing as empty) while an Error stands: kept for the next Add, and the Error is cleared', set: { pendingChunk: text, error: '' }, send: ['error'] };
+      return { says: 'text (a number, boolean or bigint as its text; nothing as empty): kept for the next Add, and retained after it', set: { pendingChunk: text }, send: [] };
     }
     // :127-129 → :343-365 reportChunkError, no token
     const message = describeBadChunk(v);
-    if (s.error === message) return { set: { pendingChunk: '' }, send: [] }; // :345, :357 — a repeat says nothing
-    return { set: { pendingChunk: '', error: message }, send: ['error'], emit: ['failure'] }; // :347-348, :362-365
+    if (s.error === message) return { says: 'an object, array or Date again, the same refusal already on Error: the chunk is emptied and nothing more is said', set: { pendingChunk: '' }, send: [] }; // :345, :357 — a repeat says nothing
+    return { says: 'an object, array or Date: refused before any Add — the chunk is emptied and Error names what arrived', set: { pendingChunk: '', error: message }, send: ['error'], emit: ['failure'] }; // :347-348, :362-365
   },
-  delimiter: (_s, v) => ({ set: { delimiter: v === undefined || v === null ? '' : String(v) }, send: [] }), // :146
-  maxLength: (_s, v) => ({ set: { maxLength: Number(v) > 0 ? Number(v) : 0 }, send: [] }), // :159
-  maxMessages: (_s, v) => ({ set: { maxMessages: Number(v) >= 0 ? Number(v) : 0 }, send: [] }), // :172
+  delimiter: (_s, v) => ({ says: 'always: read at the next Add — where complete messages are split off (nothing, or empty: never split)', set: { delimiter: v === undefined || v === null ? '' : String(v) }, send: [] }), // :146
+  maxLength: (_s, v) => ({ says: 'always: read at the next Add — the cap the oldest characters are dropped past (not above 0: no cap); a buffer already over it is trimmed by the next Add', set: { maxLength: Number(v) > 0 ? Number(v) : 0 }, send: [] }), // :159
+  maxMessages: (_s, v) => ({ says: 'always: read at the next Add that completes a message — the cap the oldest messages are dropped past (not at least 0: 0, keep all)', set: { maxMessages: Number(v) >= 0 ? Number(v) : 0 }, send: [] }), // :172
 
-  // :181-185 → :388-443
+  // :181-185 → :388-443 (NSP-018: one literal arm per case — characters dropped or not, then no message, messages, messages with some dropped)
   add: (s) => {
-    if (s.pendingChunk === '') return { send: [], outcome: 'unchanged' }; // :390-397
+    if (s.pendingChunk === '') return { says: 'an empty Chunk (a keep-alive, or one that was refused): nothing is appended', send: [], outcome: 'unchanged' }; // :390-397
 
-    const set: Partial<State> = {};
-    const send: Port[] = [];
-    const emit: Pulse[] = [];
     const capped = truncateHead(s.buffer + s.pendingChunk, s.maxLength); // :400-403
-    if (capped.dropped > 0) {
-      set.droppedCharacters = s.droppedCharacters + capped.dropped; // :404-408
-      send.push('droppedCharacters');
-      emit.push('overflowed');
-    }
+    const droppedCharacters = s.droppedCharacters + capped.dropped; // :404-408
     const split = splitDelimited(capped.text, s.delimiter); // :410-411
-    set.buffer = split.rest;
-    if (split.messages.length > 0) {
-      let messages = s.messages.concat(split.messages); // :414-415
-      set.lastMessage = split.messages[split.messages.length - 1];
-      if (s.maxMessages > 0 && messages.length > s.maxMessages) {
-        const dropped = messages.length - s.maxMessages; // :417-424
-        messages = messages.slice(dropped);
-        set.droppedMessages = s.droppedMessages + dropped;
-        send.push('droppedMessages');
-        emit.push('overflowed');
-      }
-      set.messages = messages;
-      send.push('messages', 'lastMessage', 'messageCount'); // :426-428
-      emit.push('messageReceived'); // :438
+    const buffer = split.rest;
+    if (split.messages.length === 0) {
+      if (capped.dropped > 0) return { says: 'the chunk is appended, past Max Length the oldest characters go (counted on Dropped Characters), and no Delimiter completes a message: Accumulated grows', set: { droppedCharacters, buffer }, send: ['droppedCharacters', 'accumulated', 'characterCount', 'byteCount'], emit: ['overflowed', 'changed'], outcome: 'done' };
+      return { says: 'the chunk is appended and no Delimiter completes a message: Accumulated grows', set: { buffer }, send: ['accumulated', 'characterCount', 'byteCount'], emit: ['changed'], outcome: 'done' };
     }
-    send.push('accumulated', 'characterCount', 'byteCount'); // :431-433
-    emit.push('changed'); // :439
-    return { set, send, emit, outcome: 'done' }; // :442
+    const messages = s.messages.concat(split.messages); // :414-415
+    const lastMessage = split.messages[split.messages.length - 1];
+    if (s.maxMessages > 0 && messages.length > s.maxMessages) {
+      const dropped = messages.length - s.maxMessages; // :417-424
+      const kept = messages.slice(dropped);
+      const droppedMessages = s.droppedMessages + dropped;
+      if (capped.dropped > 0) return { says: 'the chunk is appended, past Max Length the oldest characters go (counted on Dropped Characters), a Delimiter completes a message, and past Max Messages the oldest messages go (counted on Dropped Messages): Overflowed twice, the last complete one is Last Message, the rest stays in Accumulated', set: { droppedCharacters, buffer, lastMessage, droppedMessages, messages: kept }, send: ['droppedCharacters', 'droppedMessages', 'messages', 'lastMessage', 'messageCount', 'accumulated', 'characterCount', 'byteCount'], emit: ['overflowed', 'overflowed', 'messageReceived', 'changed'], outcome: 'done' };
+      return { says: 'the chunk is appended, a Delimiter completes a message, and past Max Messages the oldest messages go (counted on Dropped Messages): the last complete one is Last Message, the rest stays in Accumulated', set: { buffer, lastMessage, droppedMessages, messages: kept }, send: ['droppedMessages', 'messages', 'lastMessage', 'messageCount', 'accumulated', 'characterCount', 'byteCount'], emit: ['overflowed', 'messageReceived', 'changed'], outcome: 'done' };
+    }
+    // :426-428, :438-439
+    if (capped.dropped > 0) return { says: 'the chunk is appended, past Max Length the oldest characters go (counted on Dropped Characters), and a Delimiter completes a message: it joins Messages, the last complete one is Last Message, the rest stays in Accumulated', set: { droppedCharacters, buffer, lastMessage, messages }, send: ['droppedCharacters', 'messages', 'lastMessage', 'messageCount', 'accumulated', 'characterCount', 'byteCount'], emit: ['overflowed', 'messageReceived', 'changed'], outcome: 'done' };
+    return { says: 'the chunk is appended and a Delimiter completes a message: it joins Messages, the last complete one is Last Message, the rest stays in Accumulated — Message Received once however many completed', set: { buffer, lastMessage, messages }, send: ['messages', 'lastMessage', 'messageCount', 'accumulated', 'characterCount', 'byteCount'], emit: ['messageReceived', 'changed'], outcome: 'done' }; // :442
   },
 
   // :193 → :445-471
@@ -174,11 +166,8 @@ export const TextAccumulator = defineNode({
     const hadSomething = s.buffer.length > 0 || s.messages.length > 0 || s.droppedCharacters > 0 || s.droppedMessages > 0 || !!s.error; // :448-453
     const send: Port[] = s.error ? ['error'] : []; // :459 → :376-380, flagged only when one stood
     send.push('accumulated', 'messages', 'lastMessage', 'messageCount', 'characterCount', 'byteCount', 'droppedCharacters', 'droppedMessages'); // :461-468
-    return {
-      set: { buffer: '', messages: [], lastMessage: '', droppedCharacters: 0, droppedMessages: 0, error: '' }, // :454-459
-      send,
-      emit: ['cleared'], // :469
-      outcome: hadSomething ? 'done' : 'unchanged' // :470
-    };
+    const set: Partial<State> = { buffer: '', messages: [], lastMessage: '', droppedCharacters: 0, droppedMessages: 0, error: '' }; // :454-459
+    if (hadSomething) return { says: 'anything accumulated, kept, dropped or refused: the buffer, Messages, Last Message, both dropped counts and the Error are emptied — not the Chunk retained', set, send, emit: ['cleared'], outcome: 'done' }; // :469-470
+    return { says: 'nothing held: the same empty values are sent again', set, send, emit: ['cleared'], outcome: 'unchanged' }; // :470
   }
 });

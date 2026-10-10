@@ -152,8 +152,8 @@ export const CHANGED = {
 export const VARIABLE_OUTCOMES = ['done', 'unchanged'] as const;
 
 type VariableInputsSeen = { readonly treatEmptyAs: string; readonly treatUnchangedAs: string; readonly 'runOnChange-value': boolean };
-type ValuePatch = { says?: string; set?: Partial<VariableState>; emit?: readonly ['changed'] };
-type SetsPatch = ValuePatch & { outcomes?: ReadonlyArray<{ port: 'saveValue'; outcome: Outcome; error?: string }> };
+type ValuePatch = { says: string; set?: Partial<VariableState>; emit?: readonly ['changed'] };
+type SetsPatch = Omit<ValuePatch, 'says'> & { says?: string; outcomes?: ReadonlyArray<{ port: 'saveValue'; outcome: Outcome; error?: string }> };
 
 /** :248-296 `setValueTo`, as a pure function of (current, hasBeenSet, value, Treat empty as). */
 export function setValueTo(

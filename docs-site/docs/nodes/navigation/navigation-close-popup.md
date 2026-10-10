@@ -35,6 +35,24 @@ Every dismissal affordance inside a popup: confirm buttons, cancel crosses, back
 |---|---|---|---|
 | `close` | Signal | — | Closes the popup and hands back any Results |
 
+### What each input does
+
+**Popup** (`targetComponent`)
+
+- always: kept (blank: the nearest popup it sits in); read by the next close
+
+**Results** (`results`)
+
+- always: kept; names the Results ports
+
+**Close Actions** (`closeActions`)
+
+- always: kept; names the close-action signals
+
+**Close** (`close`)
+
+- always: at the frame's end the popup it sits in closes, handing back the Results — Failure with Error when it sits in no such popup
+
 ## Outputs
 
 ### Signals

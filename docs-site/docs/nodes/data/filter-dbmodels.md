@@ -38,6 +38,36 @@ Deriving multiple views from one fetched result set — tabs, local search-as-yo
 |---|---|---|---|
 | `filter` | Signal | — | Re-runs the filter now. This is additional to it re-running when Items, Enabled, the filter settings or the records themselves change; untick any of those under Run On Value Change to stop it |
 
+### What each input does
+
+**Items** (`items`)
+
+- always: kept, and watched when it is a shared array; ticked under Run On Value Change, the filter runs at the frame's end
+
+**Enabled** (`enabled`)
+
+- always: kept; a change, ticked under Run On Value Change, runs the filter at the frame's end — off, every record passes through, unfiltered, unsorted and unlimited
+
+**Filter** (`filter`)
+
+- always: the filter runs at the frame's end, one run for the frame's presses — Items, First Record Id and Count are sent, Filtered fires, then each press's Done or Failure; with nothing on Items, each press is Failure and nothing else moves
+
+**Items** (`runOnChange-items`)
+
+- always: read when the next Items arrives
+
+**Enabled** (`runOnChange-enabled`)
+
+- always: read when Enabled next changes
+
+**Record changes** (`runOnChange-records`)
+
+- always: read when the bound array's contents next change, and when a save of the Class is next heard on the Backend's store
+
+**Filter settings** (`runOnChange-filterSettings`)
+
+- always: kept; read when the Filter or the Sorting next arrives, or a Limit setting next changes (a filter parameter has a box of its own)
+
 ## Outputs
 
 ### Values

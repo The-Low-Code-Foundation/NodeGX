@@ -50,8 +50,6 @@ type State = {
   isComplete: boolean;
 }
 
-type Port = 'parsed' | 'values' | 'valueCount' | 'pendingCharacters' | 'isComplete' | 'error' | 'errorCount';
-
 export const JSONStreamParser = defineNode({
   type: 'net.noodl.JSONStreamParser',
   version: 1,
@@ -115,19 +113,19 @@ export const JSONStreamParser = defineNode({
     cleared: { type: 'signal', displayName: 'Cleared', group: 'Events', description: 'Fires once the pending text and the values have been discarded' }
   }
 }).on({
-  chunk: (_s, v) => ({ set: { pendingChunk: v === undefined || v === null ? '' : String(v) }, send: [] }), // :79-81
-  format: (_s, v) => ({ set: { format: v || 'ndjson' }, send: [] }), // :98-100
-  maxLength: (_s, v) => ({ set: { maxLength: Number(v) > 0 ? Number(v) : 0 }, send: [] }), // :112-114
+  chunk: (_s, v) => ({ says: 'always: kept as text (nothing as empty) for the next Parse, and retained after it — a second Parse appends it again', set: { pendingChunk: v === undefined || v === null ? '' : String(v) }, send: [] }), // :79-81
+  format: (_s, v) => ({ says: 'always: read at the next Parse — one value per line, any run of complete values, or one whole document (empty reads as NDJSON; anything else as Stream)', set: { format: v || 'ndjson' }, send: [] }), // :98-100
+  maxLength: (_s, v) => ({ says: 'always: read at the next Parse — the pending text a Parse gives up on when longer (not above 0: no cap)', set: { maxLength: Number(v) > 0 ? Number(v) : 0 }, send: [] }), // :112-114
 
-  // :122-126 → :248-323
+  // :122-126 → :248-323 (NSP-018: the tail's ternaries as literal arms — values or none, errors or none)
   parse: (s) => {
     const buffer = s.pendingChunk !== '' ? s.buffer + s.pendingChunk : s.buffer; // :250-251
-    if (buffer === '') return { send: [], outcome: 'unchanged' }; // :252-257
+    if (buffer === '') return { says: 'nothing pending and an empty Chunk: nothing to read', send: [], outcome: 'unchanged' }; // :252-257
 
     if (s.maxLength > 0 && buffer.length > s.maxLength) {
       // :259-272 — the reason, then failure; Pending Characters and Is Complete are not flagged here
       const error = 'Gave up on ' + s.maxLength + '+ characters of unparsed text; check the Format setting';
-      return { set: { buffer: '', error, errorCount: s.errorCount + 1 }, send: ['error', 'errorCount'], outcome: 'failure', error: PARSE_ERROR_CODE };
+      return { says: 'the Chunk appended makes the pending text longer than Max Pending: all of it is dropped unread, the reason on Error, Error Count grows — Pending Characters and Is Complete are not re-sent', set: { buffer: '', error, errorCount: s.errorCount + 1 }, send: ['error', 'errorCount'], outcome: 'failure', error: PARSE_ERROR_CODE };
     }
 
     const values: unknown[] = [];
@@ -160,34 +158,23 @@ export const JSONStreamParser = defineNode({
       for (const e of scan.errors) errors.push(e);
     }
 
-    const set: Partial<State> = { buffer: rest, isComplete: rest.length === 0 }; // :302
-    const send: Port[] = ['isComplete', 'pendingCharacters']; // :303-304
-    if (values.length > 0) {
-      // :306-313
-      set.values = values;
-      set.parsed = values[values.length - 1];
-      set.totalValues = s.totalValues + values.length;
-      send.push('parsed', 'values', 'valueCount');
-    }
-    if (errors.length > 0) {
-      // :315-316 → :341-347, once per error: the last message stands
-      set.error = errors[errors.length - 1];
-      set.errorCount = s.errorCount + errors.length;
-      send.push('error', 'errorCount');
-    }
-    const emit = values.length > 0 ? (['success'] as const) : ([] as const); // :320
-    // :322 → :333-339
-    return errors.length > 0 ? { set, send, emit, outcome: 'failure', error: PARSE_ERROR_CODE } : { set, send, emit, outcome: 'done' };
+    const read: Partial<State> = { buffer: rest, isComplete: rest.length === 0 }; // :302 — then :303-304 sent
+    // :306-313 — the values replace Values, the last is Parsed, Value Count grows
+    const got: Partial<State> = { values, parsed: values[values.length - 1], totalValues: s.totalValues + values.length };
+    // :315-316 → :341-347, once per error: the last message stands
+    const failed: Partial<State> = { error: errors[errors.length - 1], errorCount: s.errorCount + errors.length };
+    // :320, :322 → :333-339
+    if (values.length > 0 && errors.length > 0) return { says: 'some values came out complete and something would not parse (a bad line, or a value that scans whole but is not JSON): the values are on Values and Parsed, the last reason on Error, Error Count grows by each — the Parse still fails', set: { ...read, ...got, ...failed }, send: ['isComplete', 'pendingCharacters', 'parsed', 'values', 'valueCount', 'error', 'errorCount'], emit: ['success'], outcome: 'failure', error: PARSE_ERROR_CODE };
+    if (values.length > 0) return { says: 'at least one value came out complete and nothing failed: Values holds them, Parsed the last, Value Count grows; what is left waits as Pending Characters', set: { ...read, ...got }, send: ['isComplete', 'pendingCharacters', 'parsed', 'values', 'valueCount'], emit: ['success'], outcome: 'done' };
+    if (errors.length > 0) return { says: 'nothing came out complete and something would not parse: the last reason on Error, Error Count grows by each', set: { ...read, ...failed }, send: ['isComplete', 'pendingCharacters', 'error', 'errorCount'], emit: [], outcome: 'failure', error: PARSE_ERROR_CODE };
+    return { says: 'no value is complete yet and nothing failed: the text waits as Pending Characters, Is Complete false', set: read, send: ['isComplete', 'pendingCharacters'], emit: [], outcome: 'done' };
   },
 
   // :133-135 → :349-369
   clear: (s) => {
     const hadSomething = s.buffer !== '' || s.values.length > 0 || s.errorCount > 0 || s.totalValues > 0; // :351-352
-    return {
-      set: { buffer: '', values: [], parsed: undefined, error: '', errorCount: 0, totalValues: 0, isComplete: false }, // :353-359
-      send: ['values', 'valueCount', 'pendingCharacters', 'isComplete', 'error', 'errorCount'], // :361-366 — not `parsed`
-      emit: ['cleared'], // :367
-      outcome: hadSomething ? 'done' : 'unchanged' // :368
-    };
+    const set: Partial<State> = { buffer: '', values: [], parsed: undefined, error: '', errorCount: 0, totalValues: 0, isComplete: false }; // :353-359
+    if (hadSomething) return { says: 'anything pending, parsed or failed: the pending text, Values, both counts and the Error are emptied — Parsed keeps its last value on the wire, and the Chunk is retained', set, send: ['values', 'valueCount', 'pendingCharacters', 'isComplete', 'error', 'errorCount'], emit: ['cleared'], outcome: 'done' }; // :361-368 — not `parsed`
+    return { says: 'nothing held: the same empty values are sent again', set, send: ['values', 'valueCount', 'pendingCharacters', 'isComplete', 'error', 'errorCount'], emit: ['cleared'], outcome: 'unchanged' }; // :368
   }
 });

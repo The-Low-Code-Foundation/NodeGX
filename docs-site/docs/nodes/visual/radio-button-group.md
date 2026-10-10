@@ -68,6 +68,25 @@ Always wrap radio buttons in one — it is the single point logic should read. N
 |---|---|---|---|
 | `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 
+### What each input does
+
+**Value** (`value`)
+
+- nothing, a value no text can be made from, or the value it already holds: the selection stays
+- different text (or what a toString makes text): the selection is this and Value follows — Changed does not fire; at the next paint the button whose Value matches shows selected and the one that was loses it, each with Checked and no Changed
+
+**Mounted** (`mounted`)
+
+- always: the group is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint; its buttons go with it
+
+**Scroll Into View** (`scrollIntoView`)
+
+- always: the page, or the scrolling Group holding it, scrolls until the group can be seen
+
+**Visible** (`visible`)
+
+- always: shown or hidden at the next paint, its space kept; hidden, its buttons take no click
+
 ## Outputs
 
 ### Values

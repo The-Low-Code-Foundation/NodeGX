@@ -34,6 +34,21 @@ Small computations and predicates inline in a graph: arithmetic, comparisons, st
 |---|---|---|---|
 | `run` | Signal | — | Evaluates the expression now. This is additional to the inputs that re-run it; untick an input under Run On Value Change to stop that one triggering a run |
 
+### What each input does
+
+**Expression** (`expression`)
+
+- new text, with Run wired: its inputs become the names it reads, and nothing is evaluated until Run or a changed ticked input
+- new text, with Run not wired: its inputs become the names it reads, and it is evaluated at the end of the frame — On True or On False; before any input has arrived, only if Evaluate At Load is ticked
+
+**Run** (`run`)
+
+- always: evaluated once at the end of the frame, however many Runs arrived — On True or On False, and Done for each Run; Error, and Failure for each Run, if it does not compile or throws
+
+**Evaluate At Load** (`evaluateAtLoad`)
+
+- always: whether an evaluation before any input has arrived goes ahead
+
 ## Outputs
 
 ### Values

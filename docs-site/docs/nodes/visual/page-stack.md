@@ -44,6 +44,36 @@ Flows with a natural back relationship: wizards, mobile-style master→detail dr
 | `reset` | Signal | — | Empties the stack and rebuilds the start component |
 | `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 
+### What each input does
+
+**Name** (`name`)
+
+- a name with another key (blank is Main): the stack leaves its old name and, on the page, takes the new one — its pages are deleted and its start page rebuilt, then the pushes that waited for that name run (a replace that waited runs with no rebuild first); off the page, the next mount rebuilds. The same key again: kept, and the pages stay
+
+**Components** (`pages`)
+
+- always: the pages the stack can show (not a list: none) — on the page, every page is deleted at the end of the frame and the Start Page built, Top Component Name its label and Stack Depth 1 (with Use Routes, its address written); the stack is left empty with no pages, or a Start Page the project does not have. Off the page, the next mount rebuilds
+
+**Use Routes** (`useRoutes`)
+
+- always: kept; on, the next push, replace or back writes the top page into the address, a mount reads its start page from the address, and the browser's Back or Forward rebuilds the page the address names; off, the address is left alone
+
+**Keep Pages When Unmounted** (`keepPagesWhenUnmounted`)
+
+- always: kept; read when the stack mounts — on, a stack still holding its pages comes back as it was, unless its Components or Name changed meanwhile or (with Use Routes) the address moved; off, a mount starts at the Start Page
+
+**Reset** (`reset`)
+
+- always: one reset at the end of the frame, however many Resets — every page is deleted, pushed ones included, and the Start Page is built: Top Component Name its label, Stack Depth 1 (with Use Routes, its address written), then Done for each Reset; Failure for each with no Components, or a Start Page the project does not have, and the stack is left empty (Top Component Name blank, Stack Depth 0). A transition still running is not stopped
+
+**Mounted** (`mounted`)
+
+- always: at the next paint the stack is put on the page (Did Mount; it takes its Name and builds its Start Page — with Use Routes, the page the address names; with Keep Pages When Unmounted, it comes back as it was — then the pushes that waited for the name run) or taken off it (Will Unmount; a push for its name waits until it is back)
+
+**Scroll Into View** (`scrollIntoView`)
+
+- always: the page, or the scrolling Group holding it, scrolls until the stack can be seen
+
 ## Outputs
 
 ### Values

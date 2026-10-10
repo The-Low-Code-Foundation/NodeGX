@@ -247,10 +247,10 @@ describe('the world\'s own rules', () => {
   });
 
   test('a pending outcome needs world handlers, and a resolution with nothing pending is refused', () => {
-    const bare = defineNode({ type: 'bare', version: 1, source: 'tests', state: {}, inputs: { go: { type: 'signal', outcome: true } }, outputs: {} }).on({ go: () => ({ outcome: 'pending' }) });
+    const bare = defineNode({ type: 'bare', version: 1, source: 'tests', state: {}, inputs: { go: { type: 'signal', outcome: true } }, outputs: {} }).on({ go: () => ({ says: 'always: pending', outcome: 'pending' }) });
     expect(() => run(bare as unknown as AnyNodeSpec, {}, [{ signal: 'go' }, 'settle'])).toThrow(/no world handlers to resolve it/);
     const eager = defineNode({ type: 'eager', version: 1, source: 'tests', needs: ['clock'], state: {}, inputs: { go: { type: 'signal', outcome: true } }, outputs: {} }).on(
-      { go: () => ({ outcome: 'done', after: [{ ms: 1, tag: 't' }] }) }, // reported at once — nothing is left pending
+      { go: () => ({ says: 'always: done, a timer set', outcome: 'done', after: [{ ms: 1, tag: 't' }] }) }, // reported at once — nothing is left pending
       { world: { timer: () => ({ outcomes: [{ port: 'go', outcome: 'done' }] }) } }
     );
     expect(() => run(eager as unknown as AnyNodeSpec, {}, [{ signal: 'go' }, { advance: 1 }, 'settle'])).toThrow(/no invocation left pending/);
@@ -560,7 +560,7 @@ describe('PICKER (NSP-014 s31) — the person at the file dialog, through the on
       outputs: {}
     }).on(
       {
-        go: (s) => ({ set: { pending: true }, outcome: 'pending', settles: s.pending ? [{ outcome: 'unchanged' }] : undefined, picker: { accept: '', capture: '' } }),
+        go: (s) => ({ says: 'always: the picker opens', set: { pending: true }, outcome: 'pending', settles: s.pending ? [{ outcome: 'unchanged' }] : undefined, picker: { accept: '', capture: '' } }),
         bad: () => ({ settles: [{ outcome: 'unchanged' }] }) as never
       },
       { world: { picker: () => ({ send: [] }) } }

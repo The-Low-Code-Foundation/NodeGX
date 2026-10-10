@@ -268,28 +268,28 @@ export const RadioButton = defineNode({
     // utils.ts :82-89
     enabled: (s, v) => {
       const enabled = !!v;
-      if (enabled === s.enabled) return NOTHING;
-      return { set: { enabled }, send: ['enabled'] };
+      if (enabled === s.enabled) return { says: 'the value it already holds: nothing', send: [] };
+      return { says: 'a change: Enabled follows; disabled, the button takes no click and no focus', set: { enabled }, send: ['enabled'] };
     },
     // react-component-node.ts `defineRegularInputProp` — stored raw; the button shows it at the next paint
-    value: (_s, v) => ({ set: { value: v }, send: [] }),
+    value: (_s, v) => ({ says: "always: what this button contributes when selected; at the next paint it shows selected when its group's Value is this and not otherwise — Checked follows, Changed does not fire", set: { value: v }, send: [] }),
     // react-component-node.ts :2310-2320
-    mounted: (_s, v) => ({ set: { mounted: !!v }, send: [] }),
+    mounted: (_s, v) => ({ says: "always: the button is put on the page (Did Mount, showing its group's choice — Checked follows without Changed), or taken off it (Will Unmount, with the keyboard and the states it held), at the next paint", set: { mounted: !!v }, send: [] }),
     // node-shared-port-definitions.ts `addLabelInputs` — a label beside the input; the input and its keyboard stay (v2, R14; row C80)
-    useLabel: () => NOTHING,
+    useLabel: () => ({ says: 'always: a label is drawn beside the button, or not; the button and its keyboard stay', send: [] }),
     // utils.ts :340-364 — on the element, as the Checkbox's
     focus: (s) => {
-      if (!s.onPage) return { send: [], outcome: 'unchanged' };
-      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { send: [], outcome: 'done' };
-      return { set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
+      if (!s.onPage) return { says: 'not on the page: nothing to focus, and the Focus is not kept', send: [], outcome: 'unchanged' };
+      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { says: 'it holds the keyboard already, or is disabled or hidden: nothing changes', send: [], outcome: 'done' };
+      return { says: 'otherwise the keyboard is put on it, and the Focused state goes true', set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
     },
     blur: (s) => {
-      if (!s.onPage || !s.elementFocused || !s.pageEnabled) return { send: [], outcome: 'done' };
-      return { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'], outcome: 'done' };
+      if (!s.onPage || !s.elementFocused || !s.pageEnabled) return { says: 'it does not hold the keyboard (or is disabled, and gives it up to nobody): nothing changes', send: [], outcome: 'done' };
+      return { says: 'it holds the keyboard: it is taken off it, and the Focused state goes false', set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'], outcome: 'done' };
     },
-    scrollIntoView: () => NOTHING,
+    scrollIntoView: () => ({ says: 'always: the page, or the scrolling Group holding it, scrolls until the button can be seen', send: [] }),
     // node-shared-port-definitions.ts :366-375 — the page follows at the next paint
-    visible: (_s, v) => ({ set: { visible: !!v }, send: [] })
+    visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, it takes no click and a Focus does not reach it', set: { visible: !!v }, send: [] })
   },
   {
     world: {

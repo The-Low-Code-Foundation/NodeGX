@@ -31,6 +31,28 @@ XML arriving from anywhere at runtime: an RSS or Atom feed, a SOAP or sitemap re
 | `text` | String | — | The XML text to parse. Wire an HTTP Request node's Response here with its Response Type set to Text, so the body reaches this node untouched whatever content-type the server claimed |
 | `trimValues` | Boolean | `true` | Strip leading and trailing whitespace from text. Untick it to keep a document's indentation |
 
+### What each input does
+
+**XML** (`text`)
+
+- always: parsed at the end of the frame (once, however many inputs moved) — Result and Changed, or Error, Error Code and Failure with Result untouched; nothing (undefined or null) is not parsed
+
+**Attribute Prefix** (`attributePrefix`)
+
+- always: the XML is parsed again at the end of the frame, once any has arrived, with attribute keys starting with this (nothing reads as @; empty is a real prefix: the bare name)
+
+**Always Array** (`alwaysArray`)
+
+- always: read as text — the XML is parsed again at the end of the frame, once any has arrived, with these comma-separated tags always arrays
+
+**Trim Values** (`trimValues`)
+
+- always: the XML is parsed again at the end of the frame, once any has arrived, with text values trimmed or kept as written
+
+**Max Bytes** (`maxBytes`)
+
+- always: the XML is parsed again at the end of the frame, once any has arrived — a text longer than this (counted in characters) is refused as xml/too-large before parsing; not a finite number above 0 reads as the default, 5 MB
+
 ## Outputs
 
 ### Values

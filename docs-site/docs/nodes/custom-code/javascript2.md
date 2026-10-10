@@ -31,6 +31,13 @@ Use Script when code needs a real lifecycle — initialize a library or subscrip
 | `scriptOutputs` | Proplist | — | Names of the values the script writes, each becoming an output port |
 | `useExternalFile` | Enum (`yes`, `no`) | `no` | Whether the code is loaded from File Path instead of being typed into Code |
 
+### What each input does
+
+**Code** (`code`)
+
+- empty text: ignored — the code before keeps running
+- new text: read at the frame's end — the code before is told it is going (its destroy), then the new code's setup and run are asked for, and every value and signal that arrived before the first read is handed to it; text that will not compile, or throws while read, leaves the code before running, after its destroy — nothing reaches the wire for that
+
 ## Dynamic ports
 
 _This node's port list changes at runtime (declared-port-groups, runtime-discovered); the tables above may be incomplete for a given instance._

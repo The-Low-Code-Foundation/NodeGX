@@ -9,7 +9,7 @@
 > and a merge prefers the spec — one catalog, two sources, the spec winning where it exists.
 
 **Opened 2026-09-29.** **Depends on NSP-011.**
-**Status: 🟡 s76 (2026-10-10): AC1, AC3, AC4, AC5 met; AC2 counting — 301 of 507 input reducers have their words (68 specs fully: the pilot five, NSP-011's 13, the most-used logic nodes, the most-placed visual, record, user and popup nodes, Slider, the dates, and the arrays and objects), the typecheck gate waits for the rest. §6 item 3 (rules on the default summary) priced and closed: kept off.**
+**Status: ✅ s77 (2026-10-10): all five ACs met. AC2 closed — 507 of 507 input reducers have their words (103 specs fully, the two factory-built relation nodes included), and `says` is REQUIRED on an input reducer's patch (`SaidPatch`, spec.ts): a branch without one fails `tsc` (planted, shown, §5.6). §6 item 2 (the factory) and item 4 (the docs pages render the rules) built the same session; item 3 kept off (§5.4). Left: the "docs" half is served, the editor's half is NSP-019's.**
 
 ## 1. The person sentence
 
@@ -295,14 +295,87 @@ The ratchet moved to 17,900 (headroom 608) with the attribution in the spec. **A
 CONFORMS with 687 / 692, the 5 left being its listed equivalents, exit 0. Not run: the full node-spec suite, the other 14 specs on
 the runtime, the editor's `tsc`, `test:main`.
 
+## 5.6 s77, 2026-10-10 — the last 206 in words, the gate flipped, the factory read, the docs pages render the rules
+
+**507 of 507, 103 specs fully** (+206 reducers, 35 specs), written in seven parallel lanes by spec file (no ranking was left, §5.4):
+Video 26 · WebSocket 18 · SSE 17 · Circle 15 · Drag 14 · Radio Button 8 · Radio Button Group 4 · Page Stack 7 and its three
+navigate nodes 10 · Filter Records 7 · Subscribe To Changes 1 · Upload File 8 · Sign File URL 2 · Cloud File 1 · Open File
+Picker 3 · Set User Properties 3 · Sign In With 2 · HTTP 3 · Visual Function 3 · Script 1 · the stream family (Stream Buffer 7,
+Text Accumulator 6, JSON Stream Parser 5, Pattern Extractor 5) · the parsers (XML 5, CSV 3, Feed 2, To CSV 4) · Hash 4 · Random
+Bytes 1 · Unique Id 1 · Add / Remove Record Relation 5 + 5. Each lane read the runtime lines the spec cites before writing,
+and ran the batch suite that plays its specs with mutants (batch-visual 372 / 372 three times, batch-records 393 / 393 and
+422 / 422, batch-navigation + batch-visual 399 / 399, batch-escape + records + world 479 / 479, batch-time by the streams
+lane): no new survivor anywhere.
+
+**Forms.** Where a patch is a diff of a working copy (`Run.patch()` in WebSocket and SSE, the Page Stack's `run`, Video's
+`waits` / `acted` and `srcObject`), the arms go through `said('words', patch)` with the SAME computed patch in every arm —
+the arm only picks the words, on the predicate the code already tests. Everything else is literal arms returning the same
+patches as before: constant returns written out, ternaries in `set` / `emit` / `outcome` split (Circle's and Video's
+Pointer Events Mode, Drag's two snap values, Stream Buffer's Add into seven cases, Hash, Open File Picker's two arms).
+Shared words are reused verbatim where the machinery is shared: Image's fifteen visual lines on Circle and Video,
+Checkbox's control lines on Radio Button, Record's and Set Object Properties' Id Source split on the relation pair.
+
+**The factory (§6 item 2).** `rules.js` `readReducers` now follows a `defineNode({ type })` whose `type` is not a literal
+up to the enclosing function, requires the type to come from that function's first parameter (`o.type` or destructured),
+and reads the `.on({})` once per same-file call whose argument gives `type` as a string literal. A factory with no such
+call stays "unread" rather than misattributed. The convention, written above the pair's `.on({})`: a factory's `says`
+must fit every node it builds — true here, since the pair's reducers are one code. `tests/rules-reader.test.ts` 17 (three
+new: a literal-typed pair, a destructured parameter beside a module-constant type that is NOT followed, the real pair as
+a control). Plant: `factoryTypes` returning `[]` → exactly the three new cases red; restored by `cp`, `cmp`-identical.
+
+**The gate (§6 item 1).** `Reducers<S, I, O>` (spec.ts) now returns `SaidPatch` / `SaidOutcomePatch` — `Patch & { says:
+string }` — for outcome, plain-signal and value reducers alike. Only `on({})` owes it: `afterInputs`, `world`, `person`
+and a dynamic port's `on` keep a plain `Patch`, because nothing reads their words yet. The flip cost 17 `tsc` errors at
+507 / 507: five specs (the four Variables share `variable-base.ts`'s `ValuePatch`, Slider its `Send` alias — both typed
+`says: string` now; the Variables' end-of-frame `SetsPatch` keeps it optional) and twelve inline fixtures in `tests/`
+(batch, batch-navigation, counter, runner, types, world — each given a one-word case). After: 0 errors. **Plant:** the
+`says` on Counter's "at Max Value" branch removed → exactly one error, `counter.ts(106,7)`, naming the branch; restored by
+`cp`, `cmp`-identical, 0 errors. The editor's `tsc` (which compiles the spec sources since NSP-019) is clean too.
+spec.ts is stranger-guarded: hashes rewritten in the same commit (spec.ts and adapter.ts moved, the latter for C155).
+
+**The docs pages (§6 item 4).** `scripts/generate-node-docs.js` `renderRulesSection`: a `### What each input does`
+subsection after the Inputs tables, one bold heading per input port (display name + code name, since three nodes have two
+inputs with one display name) and one bullet per line, absent for a node without rules. 103 pages carry it. Three cases in
+`packages/noodl-editor/tests-unit/alpha-006/docsCatalogFreshness.test.ts` (11 / 11).
+
+**The catalog.** `generate.js` → `catalog:merge` → `docs:nodes`: 34 new `rules` blocks per catalog file and nothing else
+(the sixteen deleted lines are the trailing comma after `"parameterEncoding": null`); the three `--check`s and
+`spec-ledger --check` exit 0. The census was regenerated from a clean `git archive HEAD` export: only other phases'
+committed tests moved five rows; `spec-census:check` stays red by construction while P18's and TPL-011's uncommitted
+test files sit in the tree (the check reads the working tree).
+
+**Budgets.** noodl-mcp `nodeDocBudget`, `nsp018RulesOnTheWire`, `toolDisclosure`: 38 / 38 after the regeneration. The tool
+surface read 8,279 / 8,280, up 18 from s76 — P112's `index` parameter on `add_node` (its comment says so), not a rules
+field, which rides a result and is free.
+
+**Found by writing the words** (verified against the cited lines, filed in `dev-docs/bugs/`): SSE's On Close fires
+twice for one failed stream after a Disconnect; a replayed older SSE event id moves the resume point back; a WebSocket
+Send before the first frame-end rebuild blocks Auto Connect for good, and Auto Connect turned on over a closed connection
+reopens nothing; blanking Heartbeat Reply mid-beat leaves a stale pending ping; Drag's Enabled disables on exactly
+`false` only (0 or "false" from a wire leave dragging on); Video's Restart and Reset seek to second 0, not Start Time.
+Words the source corrected as they were written are in each lane's spec header comments and the rule lines themselves
+(Restart "second 0, not Start Time"; Max Retries n = n retries; Message Type Text behaves as Auto; Snap Duration 0 lands
+at the next frame; a Navigate on a stack not mounted waits and a push first resets it; Hash's one digest per frame).
+
+**Gates (s77), after every lane landed:**
+- `tsc --noEmit` (node-spec) 0 errors with `says` required; the plant (one `says` off Counter) exactly 1; `tsc -p packages/noodl-editor` 0.
+- **The full node-spec suite, one worker, after every lane landed: 32 / 32 suites, 1,857 passed, 18 skipped, exit 0, 982 s**
+  (stranger 479 s with the rewritten hashes, batch-visual 386 s).
+- Runtime conformance at seed 20736: Video, Circle, Drag, WebSocket, SSE (and Counter) CONFORM, 10 passed, exit 0, 365 s;
+  Function + Expression with the wired arms CONFORM (C155 lane: 46 / 46 and 32 / 32 scenarios, 200 / 200 sequences each).
+- `catalog:check`, `catalog:merge:check`, `docs:nodes:check`, `spec-ledger --check` exit 0; `spec-census:check` exit 1 by
+  construction (other phases' uncommitted tests in the tree; the clean-export census is committed).
+- noodl-mcp `nodeDocBudget` + `nsp018RulesOnTheWire` + `toolDisclosure` 38 / 38 (`[surface] 8279 / 8280`, P112's 18).
+- Editor: `tests-unit/nsp-019` 32 / 32; `tests-unit/alpha-006/docsCatalogFreshness` 11 / 11; `scripts/spec-disagreements.js --check` up to date.
+- Not run: `test:main`, `test:ci`, the editor's Jasmine suite, the export package's tests (P18's uncommitted edits sit in it).
+
 ## 6. Left
 
-1. **AC2's words for the other 206 reducers** (s76; was 260 at s75), batch by batch (done: the pilot five, NSP-011's 13, the top logic nodes, the top visual and record nodes, and s75's fifteen; next by template use — re-rank first; what is left is mostly unplaced in the templates, so rank by the editor's picker use or by CMP-006 traffic). Then
-   flip `says?` to `says` in `Patch`, which is the typecheck gate. Every patch-returning function then owes one, so decide
-   first whether `afterInputs` / `world` / `person` patches get read as rules too.
-2. **The record-relation pair:** the rules reader can't see reducers written inside `relationNode`. Teach it the factory,
-   or move `says` up to the factory's call site.
+1. ~~**AC2's words**~~ — 507 / 507 and the gate is on (§5.6). What is NOT read yet: `afterInputs`, `world`, `person` and
+   dynamic-port patches. Reading them is a reader change and a second count, worth it only if an agent asks what a
+   frame's end does (the input lines already say it in words).
+2. ~~**The record-relation pair**~~ — the reader follows a same-file factory (§5.6). A factory called from a sibling file
+   is still not followed; none exists.
 3. ~~**The default summary**~~ — priced and kept off (§5.4): +30.7% of the default path's traffic. Reopen only with a replay
    that measures the benefit.
-4. **The docs pages** (`scripts/generate-node-docs.js`) could render `rules` under the port table. That's the "docs"
-   half of the person sentence.
+4. ~~**The docs pages**~~ — rendered (§5.6).

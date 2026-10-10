@@ -37,6 +37,32 @@ Dialogs, sheets, confirmations — transient UI that must sit above the page and
 |---|---|---|---|
 | `show` | Signal | — | Opens Target as a popup |
 
+### What each input does
+
+**Target** (`target`)
+
+- always: kept; the component the next Show opens
+
+**When A Popup Is Open** (`stackPolicy`)
+
+- always: kept (anything but Show On Top is Replace It); read by the next Show
+
+**Close On Escape** (`closeOnEscape`)
+
+- always: kept (only false turns it off); read by the next Show
+
+**Modal** (`modal`)
+
+- always: kept (only false turns it off); read by the next Show
+
+**Accessible Name** (`accessibleName`)
+
+- always: kept when it is text (anything else is none); read by the next Show
+
+**Show** (`show`)
+
+- always: Target opens as a popup at the frame's end; each press is answered there, Failure with Error when it cannot open
+
 ## Outputs
 
 ### Signals

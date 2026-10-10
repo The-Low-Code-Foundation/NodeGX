@@ -117,13 +117,30 @@ function relationNode(o: { type: string; source: string; op: 'addRelation' | 're
       error: RECORD_ERROR_OUTPUT
     }
   }).on(
+    // NSP-018 s77: the words are the factory's, so each `says` is written to fit BOTH nodes (the rules reader reads this
+    // `.on({})` once and gives its lines to every literal-typed call of `relationNode` — rules.js `factoryTypes`).
     {
-      idSource: (s, v) => ({ set: { idSource: v, jobs: v === 'foreach' ? [...s.jobs, 'bind' as const] : s.jobs }, send: [] }),
-      repeaterComponent: (s, v) => ({ set: { repeaterComponent: v || undefined, jobs: s.idSource === 'foreach' ? [...s.jobs, 'bind' as const] : s.jobs }, send: [] }),
-      modelId: (_s, v, _i, w) => ({ set: bindId(v, w), send: ['id'] }),
-      targetId: (_s, v) => ({ set: { targetModelId: v }, send: [] }),
+      // dbmodelcrudbase.ts :518-521 — only From repeater binds (at the frame's end, :579-583); Explicit leaves what Id bound
+      idSource: (s, v) =>
+        v === 'foreach'
+          ? { says: "From repeater: at the frame's end it binds to the record of the row it sits in", set: { idSource: v, jobs: [...s.jobs, 'bind' as const] }, send: [] }
+          : { says: 'otherwise: kept; the record stays bound until the next Id', set: { idSource: v, jobs: s.jobs }, send: [] },
+      // :533-538 — re-resolved only under From repeater
+      repeaterComponent: (s, v) =>
+        s.idSource === 'foreach'
+          ? { says: "under From repeater: at the frame's end it binds to the record of that repeater's row (blank: the nearest)", set: { repeaterComponent: v || undefined, jobs: [...s.jobs, 'bind' as const] }, send: [] }
+          : { says: 'otherwise: kept, and read only under From repeater', set: { repeaterComponent: v || undefined, jobs: s.jobs }, send: [] },
+      // :549-553 → setModelID :621-628 (record-base.ts `bindId`)
+      modelId: (_s, v, _i, w) => ({ says: 'always: the record with that id is bound now (a record handed in, by its id; an empty id binds nothing), and Id is sent again', set: bindId(v, w), send: ['id'] }),
+      // :749-751 — stored raw; read by the next Do, whose check wants the record LOADED so its class is known (:106-111)
+      targetId: (_s, v) => ({ says: 'always: kept, unchecked, for the next Do — the record at the other end of the relation; it must have been loaded (from a Query Records or Record), or the Do fails with its class unknown', set: { targetModelId: v }, send: [] }),
       // :113-123 — no check at the press
-      store: (s) => ({ set: { presses: s.presses + 1, scheduled: true, jobs: s.scheduled ? s.jobs : [...s.jobs, 'relate' as const] }, send: [], outcome: 'pending' })
+      store: (s) => ({
+        says: "always: no check at the press — it joins the frame's batch, and at the end of the frame one call answers every press: Done for each (what the backend hands back is written onto the record), or Error and Failure for each (no Class, no Relation, no Target Record Id, no record bound, a target record never loaded, no backend, or the backend refuses)",
+        set: { presses: s.presses + 1, scheduled: true, jobs: s.scheduled ? s.jobs : [...s.jobs, 'relate' as const] },
+        send: [],
+        outcome: 'pending'
+      })
     },
     {
       derived: {

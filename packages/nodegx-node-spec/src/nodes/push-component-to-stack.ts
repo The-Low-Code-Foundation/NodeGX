@@ -143,10 +143,15 @@ export const PushComponentToStack = defineNode({
   }
 }).on(
   {
-    stack: (_s, v) => ({ set: { stack: v }, send: [] }),
-    mode: (_s, v) => ({ set: { mode: v }, send: [] }),
+    stack: (_s, v) => ({ says: 'always: kept as written; the next Navigate goes to the Page Stack of this name (blank: Main)', set: { stack: v }, send: [] }),
+    mode: (_s, v) => ({ says: 'always: kept; read by the next Navigate — Push adds Target Page on top of the stack, Replace swaps it for every page showing; anything else (a wire can carry any value) fails the Navigate, Error naming the value', set: { mode: v }, send: [] }),
     // :103-110, :160-175 — every press is answered at the frame's end, or (no stack registered) never
-    navigate: (s) => ({ set: { scheduled: true, presses: s.presses + 1 }, send: [], outcome: 'pending' })
+    navigate: (s) => ({
+      says: "always: one request at the end of the frame, however many presses, from the frame's final Stack, Mode, Target Page, Transition and parameters — Done for each press when the stack shows the page (Unchanged when that page with those parameters is already on top), Error and Failure for each when it cannot (no such page, an empty Components list, a transition still running) or when Mode is neither Push nor Replace; while no Page Stack is mounted under the name the request waits, and runs when one mounts (a push: after that stack rebuilds its start page)",
+      set: { scheduled: true, presses: s.presses + 1 },
+      send: [],
+      outcome: 'pending'
+    })
   },
   {
     // :176-232 — ONE request for the frame's presses

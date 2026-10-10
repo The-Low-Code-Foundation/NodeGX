@@ -124,62 +124,68 @@ export const StreamBuffer = defineNode({
   }
 }).on(
   {
-    data: (_s, v) => ({ set: { pendingData: v, hasPendingData: true }, send: [] }), // :80-84
-    flushSize: (_s, v) => ({ set: { flushSize: Number(v) > 0 ? Number(v) : 0 }, send: [] }), // :94-96
-    maxSize: (_s, v) => ({ set: { maxSize: Number(v) >= 0 ? Number(v) : 0 }, send: [] }), // :127-129
+    data: (_s, v) => ({ says: 'always: kept as it came for the next Add, and retained after it — any write counts as data having arrived, nothing included', set: { pendingData: v, hasPendingData: true }, send: [] }), // :80-84
+    flushSize: (_s, v) => ({ says: 'always: read at the next Add — the size at which that Add flushes (not above 0: never by size); a buffer already that big waits for an Add', set: { flushSize: Number(v) > 0 ? Number(v) : 0 }, send: [] }), // :94-96
+    maxSize: (_s, v) => ({ says: 'always: read at the next Add — the cap past which the oldest are dropped (not at least 0: 0, no cap); a buffer already over it is trimmed by the next Add', set: { maxSize: Number(v) >= 0 ? Number(v) : 0 }, send: [] }), // :127-129
     // :107-115 — a different period stops the timer and re-arms it while anything is buffered
     flushInterval: (s, v) => {
       const next = Number(v) > 0 ? Number(v) : 0;
-      if (next === s.flushInterval) return { send: [] };
+      if (next === s.flushInterval) return { says: 'the period it already holds (not above 0 reads as 0): nothing', send: [] };
       const cancel = s.timer !== undefined ? [s.timer] : [];
-      if (s.buffer.length > 0 && next > 0) return { set: { flushInterval: next, timer: tagOf(s.armed + 1), armed: s.armed + 1 }, send: [], cancel, after: [{ ms: next, tag: tagOf(s.armed + 1) }] };
-      return { set: { flushInterval: next, timer: undefined }, send: [], cancel };
+      if (s.buffer.length > 0 && next > 0) return { says: 'a different period above 0 with anything buffered: a running timer stops and a new one starts, to flush after the new period', set: { flushInterval: next, timer: tagOf(s.armed + 1), armed: s.armed + 1 }, send: [], cancel, after: [{ ms: next, tag: tagOf(s.armed + 1) }] };
+      return { says: 'a different period with nothing buffered, or 0 (never by time): a running timer stops; a period above 0 is armed by the next Add', set: { flushInterval: next, timer: undefined }, send: [], cancel };
     },
 
-    // :136-139 → :271-302
+    // :136-139 → :271-302 (NSP-018: one literal arm per case — overflow or not, then flushed, timer armed, or neither)
     add: (s) => {
-      if (!s.hasPendingData) return { set: { lastError: NO_DATA }, send: ['error'], outcome: 'failure', error: NO_DATA_CODE }; // :273-278, :304-308
+      if (!s.hasPendingData) return { says: 'before anything has arrived on Data: refused — the reason on Error, which nothing later clears', set: { lastError: NO_DATA }, send: ['error'], outcome: 'failure', error: NO_DATA_CODE }; // :273-278, :304-308
 
       const buffer = s.buffer.concat([s.pendingData]); // :281
-      const set: Partial<State> = { buffer };
-      const send: Port[] = [];
-      const emit: Pulse[] = [];
+      const cancel = s.timer !== undefined ? [s.timer] : []; // :317 → :376-382 — a flush stops the timer first
+      const arm = { timer: tagOf(s.armed + 1), armed: s.armed + 1 }; // :300 → :365-374
+      const after = [{ ms: s.flushInterval, tag: tagOf(s.armed + 1) }];
       if (s.maxSize > 0 && buffer.length > s.maxSize) {
         // :283-289 — `splice(0, dropped)` (a fractional count deletes its integer part; the count grows by the fraction)
         const dropped = buffer.length - s.maxSize;
         buffer.splice(0, dropped);
-        set.droppedItems = s.droppedItems + dropped;
-        send.push('droppedItems');
-        emit.push('overflowed');
+        const droppedItems = s.droppedItems + dropped;
+        if (s.flushSize > 0 && buffer.length >= s.flushSize) {
+          // :294-298 — the Add owns the flush it triggered
+          return { says: 'Data joins, past Max Size the oldest go (counted on Dropped Items), and the buffer reaches Flush Size: it becomes Flushed Data, a fresh one starts, Flush Count grows, a running timer stops', set: { droppedItems, timer: undefined, flushedData: buffer, buffer: [], flushCount: s.flushCount + 1 }, send: ['droppedItems', 'buffer', 'bufferSize', 'flushedData', 'buffer', 'bufferSize', 'flushCount'], emit: ['overflowed', 'flushed'], cancel, outcome: 'done' };
+        }
+        if (s.flushInterval > 0 && s.timer === undefined) return { says: 'Data joins, past Max Size the oldest go (counted on Dropped Items), under Flush Size, with Flush Interval above 0 and no timer running: a timer is armed to flush after Flush Interval', set: { buffer, droppedItems, ...arm }, send: ['droppedItems', 'buffer', 'bufferSize'], emit: ['overflowed'], after, outcome: 'done' };
+        return { says: 'Data joins, past Max Size the oldest go (counted on Dropped Items), under Flush Size, with no timer to arm (Flush Interval 0, or one already running): it waits', set: { buffer, droppedItems }, send: ['droppedItems', 'buffer', 'bufferSize'], emit: ['overflowed'], outcome: 'done' };
       }
-      send.push('buffer', 'bufferSize'); // :291-292
-
       if (s.flushSize > 0 && buffer.length >= s.flushSize) {
         // :294-298 — the Add owns the flush it triggered
-        const f = flush(s, buffer);
-        return { set: { ...set, ...f.set }, send: [...send, ...f.send], emit: [...emit, ...f.emit], cancel: f.cancel, outcome: 'done' };
+        return { says: 'Data joins and the buffer reaches Flush Size: it becomes Flushed Data, a fresh one starts, Flush Count grows, a running timer stops', set: { timer: undefined, flushedData: buffer, buffer: [], flushCount: s.flushCount + 1 }, send: ['buffer', 'bufferSize', 'flushedData', 'buffer', 'bufferSize', 'flushCount'], emit: ['flushed'], cancel, outcome: 'done' };
       }
       // :300 → :365-374
-      if (s.flushInterval > 0 && s.timer === undefined) return { set: { ...set, timer: tagOf(s.armed + 1), armed: s.armed + 1 }, send, emit, after: [{ ms: s.flushInterval, tag: tagOf(s.armed + 1) }], outcome: 'done' };
-      return { set, send, emit, outcome: 'done' }; // :301
+      if (s.flushInterval > 0 && s.timer === undefined) return { says: 'Data joins, under Flush Size, with Flush Interval above 0 and no timer running: a timer is armed to flush after Flush Interval', set: { buffer, ...arm }, send: ['buffer', 'bufferSize'], emit: [], after, outcome: 'done' };
+      return { says: 'Data joins, under Flush Size, with no timer to arm (Flush Interval 0, or one already running): it waits', set: { buffer }, send: ['buffer', 'bufferSize'], emit: [], outcome: 'done' }; // :301
     },
 
-    // :146-148 → :315-339
+    // :146-148 → :315-339 (NSP-018: `flush`'s two cases as literal arms; the helper serves the timer)
     flush: (s) => {
-      const f = flush(s, s.buffer);
-      return { set: f.set, send: f.send, emit: f.emit, cancel: f.cancel, outcome: f.flushed ? 'done' : 'unchanged' };
+      // :318-325 — the timer is only ever armed while something is buffered, so an empty flush has it stopped already
+      if (s.buffer.length === 0) return { says: 'nothing buffered: nothing to hand over, and Flush Count stays', set: s.timer !== undefined ? { timer: undefined } : {}, send: [], emit: [], cancel: s.timer !== undefined ? [s.timer] : [], outcome: 'unchanged' };
+      return {
+        says: 'anything buffered: it becomes Flushed Data, a fresh buffer starts, Flush Count grows, a running timer stops',
+        set: { timer: undefined, flushedData: s.buffer, buffer: [], flushCount: s.flushCount + 1 }, // :329-331
+        send: ['flushedData', 'buffer', 'bufferSize', 'flushCount'], // :333-336
+        emit: ['flushed'], // :337
+        cancel: s.timer !== undefined ? [s.timer] : [], // :317 → :376-382
+        outcome: 'done'
+      };
     },
 
     // :155-157 → :341-363
     clear: (s) => {
       const hadSomething = s.buffer.length > 0 || s.flushedData.length > 0 || s.droppedItems > 0 || s.flushCount > 0; // :346-350
-      return {
-        set: { timer: undefined, buffer: [], flushedData: [], droppedItems: 0, flushCount: 0 }, // :343, :351-354
-        send: ['buffer', 'bufferSize', 'flushedData', 'flushCount', 'droppedItems'], // :356-360
-        emit: ['cleared'], // :361
-        cancel: s.timer !== undefined ? [s.timer] : [],
-        outcome: hadSomething ? 'done' : 'unchanged' // :362
-      };
+      const set: Partial<State> = { timer: undefined, buffer: [], flushedData: [], droppedItems: 0, flushCount: 0 }; // :343, :351-354
+      const cancel = s.timer !== undefined ? [s.timer] : [];
+      if (hadSomething) return { says: 'anything buffered, flushed or counted: the buffer, Flushed Data and both counts are emptied — not Error, not the Data retained — and a running timer stops', set, send: ['buffer', 'bufferSize', 'flushedData', 'flushCount', 'droppedItems'], emit: ['cleared'], cancel, outcome: 'done' }; // :356-362
+      return { says: 'nothing held: the same empty values are sent again', set, send: ['buffer', 'bufferSize', 'flushedData', 'flushCount', 'droppedItems'], emit: ['cleared'], cancel, outcome: 'unchanged' }; // :362
     }
   },
   {

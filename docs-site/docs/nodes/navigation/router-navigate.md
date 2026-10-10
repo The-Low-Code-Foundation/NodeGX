@@ -33,6 +33,16 @@ All URL-style page switching with a Router. For stack-style flows (push/pop with
 |---|---|---|---|
 | `navigate` | Signal | — | Navigates the Router to Target Page |
 
+### What each input does
+
+**Open in new tab** (`openInNewTab`)
+
+- always: whether the next navigation opens a new tab
+
+**Navigate** (`navigate`)
+
+- always: one navigation at the end of the frame, however many presses — Done (or Unchanged) for each when a router takes it, Error and Failure for each when none can; never answered while no router is on the page
+
 ## Outputs
 
 ### Signals

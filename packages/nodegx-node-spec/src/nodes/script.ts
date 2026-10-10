@@ -599,8 +599,12 @@ export const Script = defineNode({
   {
     // :302-316 — empty text is nothing; any other is read at the frame's end
     code: (s, v) => {
-      if (!v) return { set: {}, send: [] as never[] };
-      return { set: { callbacks: [...s.callbacks, { kind: 'read' as const, code: v as string }] }, send: [] as never[] };
+      if (!v) return { says: 'empty text: ignored — the code before keeps running', set: {}, send: [] as never[] };
+      return {
+        says: "new text: read at the frame's end — the code before is told it is going (its destroy), then the new code's setup and run are asked for, and every value and signal that arrived before the first read is handed to it; text that will not compile, or throws while read, leaves the code before running, after its destroy — nothing reaches the wire for that",
+        set: { callbacks: [...s.callbacks, { kind: 'read' as const, code: v as string }] },
+        send: [] as never[]
+      };
     }
   },
   {

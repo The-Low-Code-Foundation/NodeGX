@@ -33,6 +33,16 @@ When you need an anonymous or per-instance array instead of one fixed well-known
 |---|---|---|---|
 | `new` | Signal | — | Creates a fresh array with a generated id and copies Items into it |
 
+### What each input does
+
+**Items** (`items`)
+
+- always: kept as what the next new array starts with (empty: it starts empty)
+
+**Do** (`new`)
+
+- always: at the frame's end one new array is made from Items, Id is sent, and each press of the frame is answered Done
+
 ## Outputs
 
 ### Values

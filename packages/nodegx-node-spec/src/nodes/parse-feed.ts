@@ -147,10 +147,10 @@ export const ParseFeed = defineNode({
   }
 }).on(
   {
-    text: (_s, v) => ({ set: { text: v, textSupplied: v !== undefined && v !== null, scheduled: true }, send: [] }), // :88-90
+    text: (_s, v) => ({ says: 'always: parsed at the end of the frame (once, however many inputs moved) — Items in a fresh array, Count, the six Feed outputs and Changed, or Error, Error Code and Failure with everything else untouched; nothing (undefined or null) is not parsed', set: { text: v, textSupplied: v !== undefined && v !== null, scheduled: true }, send: [] }), // :88-90
     maxBytes: (_s, v) => {
       const n = Number(v); // :102
-      return { set: { maxBytes: isFinite(n) && n > 0 ? n : DEFAULT_MAX_BYTES, scheduled: true }, send: [] }; // :103-104
+      return { says: 'always: the Feed is parsed again at the end of the frame, once any has arrived — a text longer than this (counted in characters) is refused as xml/too-large before parsing; not a finite number above 0 reads as the default, 5 MB', set: { maxBytes: isFinite(n) && n > 0 ? n : DEFAULT_MAX_BYTES, scheduled: true }, send: [] }; // :103-104
     }
   },
   {

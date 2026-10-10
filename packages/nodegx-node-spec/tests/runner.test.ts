@@ -157,7 +157,7 @@ describe('AC3 — every mutant of the Counter spec is killed, listed by branch',
       state: { n: 0 },
       inputs: { a: { type: 'signal' }, b: { type: 'signal' } },
       outputs: { n: { type: 'number', from: (s) => s.n } }
-    }).on({ a: (s) => ({ set: { n: s.n + 1 } }), b: (s) => ({ set: { n: s.n - 1 } }) }) as unknown as AnyNodeSpec;
+    }).on({ a: (s) => ({ says: 'always: one up', set: { n: s.n + 1 } }), b: (s) => ({ says: 'always: one down', set: { n: s.n - 1 } }) }) as unknown as AnyNodeSpec;
     const onlyA: Scenario = { name: 'only a', params: {}, steps: [{ signal: 'a' }, 'settle'] };
     const report = await runConformance(Two, interpreterAdapter({ resolve: () => Two }), { sequences: 0, scenarios: [onlyA], mutants: true });
     expect(report.mutants!.unreached.map((u) => u.reducer)).toEqual(['b']);
@@ -238,7 +238,7 @@ describe('the world a target cannot be handed (NSP-007)', () => {
       state: { n: 0 },
       inputs: { go: { type: 'signal' } },
       outputs: { n: { type: 'number', from: (s) => s.n } }
-    }).on({ go: (s) => ({ set: { n: s.n + 1 } }) }) as unknown as AnyNodeSpec;
+    }).on({ go: (s) => ({ says: 'always: one up', set: { n: s.n + 1 } }) }) as unknown as AnyNodeSpec;
 
   test('a spec declaring `needs` is refused on a target with no install(), with the reason', async () => {
     const Clocked = clocked(['clock']);

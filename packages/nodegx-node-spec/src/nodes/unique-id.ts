@@ -48,5 +48,5 @@ export const UniqueId = defineNode({
   }
 }).on({
   // :34-45 — a fresh draw, flagged, `done`
-  new: (_s, _i, w) => ({ set: { guid: w.registry.guid() }, outcome: 'done' })
+  new: (_s, _i, w) => ({ says: 'always: a fresh ten-character id replaces the one on Id — never the one it held, and it cannot fail', set: { guid: w.registry.guid() }, outcome: 'done' })
 });

@@ -134,7 +134,6 @@ type Val = 'positionX' | 'positionY' | 'deltaX' | 'deltaY';
 type Pulse = 'didMount' | 'willUnmount' | 'onStart' | 'onDrag' | 'onStop';
 type Act = { set: Partial<State>; send: Val[]; emit: Pulse[]; outcomes?: Resolved[] };
 
-const NOTHING: Send = { send: [] };
 const NONE: Act = { set: {}, send: [], emit: [] };
 const WAIT_CAP = 16;
 const DROPPED = 'visual/action-dropped';
@@ -257,32 +256,46 @@ export const Drag = defineNode({
 }).on(
   {
     // drag.ts :67-78 — the callback runs at the frame's end; its outcome is decided there (`afterInputs`)
-    'snapToPositionX.do': (s) => ({ set: { scheduled: [...s.scheduled, 'x'] }, send: [], outcome: 'pending' }),
-    'snapToPositionY.do': (s) => ({ set: { scheduled: [...s.scheduled, 'y'] }, send: [], outcome: 'pending' }),
+    'snapToPositionX.do': (s) => ({
+      says: 'always: at the end of the frame the element starts moving on X from where it is to Value, over Duration, easing out, Drag X sent each frame (no Drag Moved) — Done once it has started, or at once when it is already at Value; a drag under way is moved too; before the Drag is on the page it waits for the mount (at most 16 wait, and the oldest pushed out reports Failure)',
+      set: { scheduled: [...s.scheduled, 'x'] },
+      send: [],
+      outcome: 'pending'
+    }),
+    'snapToPositionY.do': (s) => ({
+      says: 'always: at the end of the frame the element starts moving on Y from where it is to Value, over Duration, easing out, Drag Y sent each frame (no Drag Moved) — Done once it has started, or at once when it is already at Value; a drag under way is moved too; before the Drag is on the page it waits for the mount (at most 16 wait, and the oldest pushed out reports Failure)',
+      set: { scheduled: [...s.scheduled, 'y'] },
+      send: [],
+      outcome: 'pending'
+    }),
     // drag.ts :89-100 `readSnapCoordinate`: nothing, null and empty abstain; what is not a number is refused (a runtime error)
     'snapToPositionX.value': (_s, v) => {
       const c = snapCoordinate(v);
-      return c === undefined ? NOTHING : { set: { snapX: c }, send: [] };
+      return c === undefined
+        ? { says: 'nothing, null, empty, or not readable as a number: the X the snap goes to is left as it was (what cannot be read is reported as a runtime error)', send: [] }
+        : { says: 'a number, or text that reads as one: where Snap To Position X — Do takes the element', set: { snapX: c }, send: [] };
     },
     'snapToPositionY.value': (_s, v) => {
       const c = snapCoordinate(v);
-      return c === undefined ? NOTHING : { set: { snapY: c }, send: [] };
+      return c === undefined
+        ? { says: 'nothing, null, empty, or not readable as a number: the Y the snap goes to is left as it was (what cannot be read is reported as a runtime error)', send: [] }
+        : { says: 'a number, or text that reads as one: where Snap To Position Y — Do takes the element', set: { snapY: c }, send: [] };
     },
     // drag.ts :109-111 — raw
-    'snapToPositionX.duration': (_s, v) => ({ set: { durationX: v }, send: [] }),
-    'snapToPositionY.duration': (_s, v) => ({ set: { durationY: v }, send: [] }),
+    'snapToPositionX.duration': (_s, v) => ({ says: 'always: read at the next Do — how long the X snap takes, in milliseconds; nothing means 300, and 0 or less lands at Value at the next frame', set: { durationX: v }, send: [] }),
+    'snapToPositionY.duration': (_s, v) => ({ says: 'always: read at the next Do — how long the Y snap takes, in milliseconds; nothing means 300, and 0 or less lands at Value at the next frame', set: { durationY: v }, send: [] }),
     // react-component-node.ts inputProps — the prop, at the next paint
-    enabled: (_s, v) => ({ set: { enabled: v }, send: [] }),
-    axis: (_s, v) => ({ set: { axis: v }, send: [] }),
-    useParentBounds: (_s, v) => ({ set: { useParentBounds: v }, send: [] }),
-    scale: (_s, v) => ({ set: { scale: v }, send: [] }),
+    enabled: (_s, v) => ({ says: 'always: read at the next press — off (exactly false; 0 or the text "false" is not off), a press starts no drag, a drag under way carries on to its let go, and the snaps still run', set: { enabled: v }, send: [] }),
+    axis: (_s, v) => ({ says: 'always: read at the next press, move or let go, a drag under way included — X, Y or Both; on an axis it does not allow the element stays, Drag X / Y say where it is and Delta X / Y is 0; any other value moves it on neither', set: { axis: v }, send: [] }),
+    useParentBounds: (_s, v) => ({ says: "always: read at the next move, a drag under way included — on, the element is kept inside its parent's box; off, it can leave it", set: { useParentBounds: v }, send: [] }),
+    scale: (_s, v) => ({ says: "always: read at the next press, move or let go, a drag under way included — the pointer's movement is divided by it before it moves the element; nothing or 0 counts as 1", set: { scale: v }, send: [] }),
     // v3 (row C138, ruled "Read it as a number"): text is read as a number (`Number`); a number goes on as it came, NaN too
-    inputPositionX: (_s, v) => ({ set: { startX: typeof v === 'string' ? Number(v) : v }, send: [] }),
-    inputPositionY: (_s, v) => ({ set: { startY: typeof v === 'string' ? Number(v) : v }, send: [] }),
+    inputPositionX: (_s, v) => ({ says: 'always: where the element starts on X — at the next paint a change moves it there and sends Drag X and Delta X (the change from the last one; a drag under way goes on from there); text is read as a number, and a value that is not a number again is no change', set: { startX: typeof v === 'string' ? Number(v) : v }, send: [] }),
+    inputPositionY: (_s, v) => ({ says: 'always: where the element starts on Y — at the next paint a change moves it there and sends Drag Y and Delta Y (the change from the last one; a drag under way goes on from there); text is read as a number, and a value that is not a number again is no change', set: { startY: typeof v === 'string' ? Number(v) : v }, send: [] }),
     // react-component-node.ts :2310-2320
-    mounted: (_s, v) => ({ set: { mounted: !!v }, send: [] }),
+    mounted: (_s, v) => ({ says: 'always: at the next paint — off takes the Drag and its child off the page (Will Unmount; both snaps stop, and a drag under way ends with no Drag Ended); on again makes a new one at Start Drag X / Y (Did Mount, all four values sent, and the snaps that waited run from there)', set: { mounted: !!v }, send: [] }),
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire
-    scrollIntoView: () => NOTHING
+    scrollIntoView: () => ({ says: 'always: asks the page to scroll until the element it moves can be seen — nothing on the wire', send: [] })
   },
   {
     // placed on the page with its params set and its child added — the first frame's paint mounts it; Children Count at the frame's end

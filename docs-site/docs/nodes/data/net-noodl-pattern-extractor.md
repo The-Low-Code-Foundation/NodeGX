@@ -36,6 +36,30 @@ Extracting a value from text that is not structured data: a percentage out of a 
 |---|---|---|---|
 | `extract` | Signal | — | Runs Pattern over Text and reports what it found |
 
+### What each input does
+
+**Text** (`text`)
+
+- always: kept as text (nothing as empty) and read at the next Extract
+
+**Pattern** (`pattern`)
+
+- always: kept as text (nothing as empty) and read at the next Extract — a regular expression without its slashes
+
+**Flags** (`flags`)
+
+- always: kept as text (nothing as empty) and read at the next Extract — only i, m, s, u and y count; g comes from Extract All
+
+**Extract All** (`extractAll`)
+
+- always: read at the next Extract — every match into Matches, or only the first
+
+**Extract** (`extract`)
+
+- a blank Pattern, or one that is not a valid regular expression: every output is rewritten empty and Error says why → Failure; Not Found, Found stay silent
+- the Pattern ran and matched nothing (empty Text matches nothing): every output is rewritten empty, Error cleared — an ordinary result → Not Found, Done; Found stays silent
+- the Pattern ran and matched: Match, Matches, Groups, First Group, Named Groups and Match Count are rewritten, Error cleared → Found, Done; Not Found stays silent
+
 ## Outputs
 
 ### Values

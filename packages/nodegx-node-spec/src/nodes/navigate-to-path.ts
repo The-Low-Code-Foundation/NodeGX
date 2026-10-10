@@ -148,11 +148,16 @@ export const NavigateToPath = defineNode({
   }
 }).on(
   {
-    path: (_s, v) => ({ set: { path: v }, send: [] }),
-    queryNames: (_s, v) => ({ set: { queryNames: v }, send: [] }),
-    openInNewTab: (_s, v) => ({ set: { openInNewTab: !!v }, send: [] }),
+    path: (_s, v) => ({ says: 'always: kept; read by the next Navigate — each {name} in it is filled from its parameter port as written (an unset one as nothing), and a value that is not text counts as no Path', set: { path: v }, send: [] }),
+    queryNames: (_s, v) => ({ says: 'always: kept; read by the next Navigate — one name=value after a ? for each name whose port holds a value, each encoded; an unset or null one is left out', set: { queryNames: v }, send: [] }),
+    openInNewTab: (_s, v) => ({ says: 'always: whether the next Navigate opens a new tab or moves this one', set: { openInNewTab: !!v }, send: [] }),
     // :96-98, :120-141 — every press is answered at the frame's end
-    navigate: (s) => ({ set: { scheduled: true, presses: s.presses + 1 }, send: [], outcome: 'deferred' })
+    navigate: (s) => ({
+      says: "always: one navigation at the end of the frame, however many presses, from the frame's final Path, parameters and Query — no Path is Error and Failure for each press; otherwise the URL is built (after a # unless the project routes by path) and, with Open in new tab, handed to a new tab (Done; the browser blocking it is Error and Failure), else pushed into the address (Done; a push the browser refuses is Error and Failure); with no window, Unchanged",
+      set: { scheduled: true, presses: s.presses + 1 },
+      send: [],
+      outcome: 'deferred'
+    })
   },
   {
     // :143-223 — ONE navigation for the frame's presses, each answered with its outcome

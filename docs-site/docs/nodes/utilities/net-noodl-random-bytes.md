@@ -34,6 +34,14 @@ A nonce, a CSRF token, a PKCE verifier, an invite code, a one-time download key 
 |---|---|---|---|
 | `generate` | Signal | — | Generates a fresh block of random bytes |
 
+### What each input does
+
+**New** (`generate`)
+
+- Length not a whole number from 1 to 4096: nothing is drawn, the reason on Error, Value untouched → Failure
+- an Encoding not in the list (empty reads as hex): Length bytes were drawn and are thrown away, the reason on Error, Value untouched → Failure
+- Length bytes are drawn from the cryptographic source and rendered in Encoding: Value replaced, Error cleared → Done
+
 ## Outputs
 
 ### Values

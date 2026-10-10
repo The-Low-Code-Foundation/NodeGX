@@ -1,0 +1,1189 @@
+{
+  "And": [
+    {
+      "id": "P107-D1",
+      "title": "And's description promises false when nothing is connected; it publishes nothing",
+      "status": "fixed",
+      "commit": "770b01405",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the scenario's row mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts) dropped in the…"
+    }
+  ],
+  "Boolean To String": [
+    {
+      "id": "P107-D6",
+      "title": "Boolean To String's Selector description says \"not true counts as false\"; any truthy value counts as true",
+      "status": "fixed",
+      "commit": "8f31517cc",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the scenario's row mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts) dropped in the…"
+    }
+  ],
+  "Circle": [
+    {
+      "id": "P107-C91",
+      "title": "A Shape set to Custom SVG counts its own drawing as a child for Drop Index — a card dropped on it from the keyboard lands at 1, where every other shape says 0",
+      "status": "fixed",
+      "commit": "dd71d0d83",
+      "ruling": "Ruled 2026-10-07 (P109 s28, asked in one batch of four), as recommended: \"Don't count the drawing\". The Shape marks its drawing box so the drag code skips it; Drop Index is 0 on every shape."
+    },
+    {
+      "id": "P107-C92",
+      "title": "A Shape set to Polygon or Star with a huge or infinite Points builds that many vertices, and the page runs out of memory",
+      "status": "fixed",
+      "commit": "4a48f6eb7",
+      "ruling": "Ruled 2026-10-07 (P109 s28, asked in one batch of four), as recommended: \"Cap at 500\"."
+    }
+  ],
+  "Cloud File": [
+    {
+      "id": "P107-C52",
+      "title": "Cloud File's Name is the original file name only on NodeGX — on PocketBase it is the random suffix, on Directus a UUID, on Supabase the bucket path",
+      "status": "fixed",
+      "commit": "214020378",
+      "ruling": "R3 (a) — the runtime wins until Richard rules."
+    }
+  ],
+  "CloudFunction2": [
+    {
+      "id": "P107-C54",
+      "title": "Cloud Function — a success whose body is JSON null throws, and the Call is never answered",
+      "status": "fixed",
+      "commit": "307bdc69d",
+      "ruling": "R3 (a) — the runtime wins until Richard rules."
+    },
+    {
+      "id": "P107-D28",
+      "title": "Cloud Function — Error carries an object when the backend's error field is one",
+      "status": "fixed",
+      "commit": "68e0cd9a7",
+      "ruling": "R3 (a) — the runtime wins until Richard rules."
+    }
+  ],
+  "Collection2": [
+    {
+      "id": "P107-D13",
+      "title": "Array's Changed description still names the rule from before the \"Array contents\" checkbox",
+      "status": "fixed",
+      "commit": "8f31517cc",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the scenario's row mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts) dropped in the…"
+    }
+  ],
+  "CollectionNew": [
+    {
+      "id": "P107-C9",
+      "title": "Create New Array, Create New Object and Set Object Properties answer once for two Do presses in a frame",
+      "status": "fixed",
+      "commit": "86139ddbf",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the scenario's row mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts) dropped in the…"
+    }
+  ],
+  "Color Blend": [
+    {
+      "id": "P107-D8",
+      "title": "Color Blend renders \"#NaNNaNNaN\" for a non-numeric Blend Value",
+      "status": "fixed",
+      "commit": "8294bb913",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the scenario's row mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts) dropped in the…"
+    }
+  ],
+  "Date To String": [
+    {
+      "id": "P107-D14",
+      "title": "Date To String: a timestamp or null is \"Invalid Date\" without a Timezone but renders with one",
+      "status": "fixed",
+      "commit": "844f8569b",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the scenario's row mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts) dropped in the…"
+    }
+  ],
+  "DbCollection2": [
+    {
+      "id": "P107-C40",
+      "title": "A live Query Records with a Limit drops the wrong record when a new one arrives, unless it is sorted descending",
+      "status": "fixed",
+      "commit": "6593e7deb",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; the spec states it as it is."
+    },
+    {
+      "id": "P107-C41",
+      "title": "A live Query Records keeps a record in its old place when another node saves it with a different sort value",
+      "status": "fixed",
+      "commit": "6593e7deb",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; the spec states it as it is."
+    },
+    {
+      "id": "P107-D29",
+      "title": "Query Records — Realtime Status reads empty while the subscription is connecting; its description (and Subscribe To Changes) say \"connecting\"",
+      "status": "fixed",
+      "commit": "4763f5a00",
+      "ruling": "Richard, 2026-10-03: \"Yes, say connecting\". Fixed in s36: the proposed line at dbcollectionnode2.ts :714. Query Records spec v2; control red → treatment green on three seeds and at 10,000 (NSP-014 §6.46)."
+    }
+  ],
+  "DbModel2": [
+    {
+      "id": "P107-C37",
+      "title": "The Record node's \"<field> Changed\" signals have never fired",
+      "status": "fixed",
+      "commit": "b67698798",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the scenario's row mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts) dropped in the…"
+    },
+    {
+      "id": "P107-D22",
+      "title": "A Record's Fetch with a null Id asks the backend for the record \"null\"",
+      "status": "fixed",
+      "commit": "1b367e1fa",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules."
+    }
+  ],
+  "DeleteDbModelProperties": [
+    {
+      "id": "P107-C36",
+      "title": "Delete Record reports Failure for a delete that succeeded when its Id changes while the delete is out",
+      "status": "fixed",
+      "commit": "011f0a9bd",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules."
+    }
+  ],
+  "Drag": [
+    {
+      "id": "P107-C102",
+      "title": "A Drag locked to one Axis still reports movement on the other — Drag Y moves while the element stays put, then jumps back to 0 at the next drag",
+      "status": "fixed",
+      "commit": "c1623eec2"
+    },
+    {
+      "id": "P107-C105",
+      "title": "A Snap To Position that waited for the Drag to mount starts from 0 — the element jumps to the edge, then animates",
+      "status": "fixed",
+      "commit": "3049f95d5"
+    },
+    {
+      "id": "P107-C106",
+      "title": "A Start Drag X or Y of NaN blanks the page — the Drag's update compares NaN with itself and sets state until React gives up",
+      "status": "fixed",
+      "commit": "a36403e21"
+    },
+    {
+      "id": "P107-C138",
+      "title": "A Drag's Start Drag X (or Y) that arrives over a wire as text joins with the movement as text — a 10 px drag from \"50\" puts the element at \"5010\"",
+      "status": "fixed",
+      "commit": "40c9fc310",
+      "ruling": "Ruled 2026-10-08 (P107 \"Phase 107 Rulings\" page), as recommended: \"Read it as a number\". The same as Animate To Value's Delay (P107-C20). When fixed, the scenario's behaviour moves with it (a Drag spec version)."
+    }
+  ],
+  "Expression": [
+    {
+      "id": "P107-C144",
+      "title": "An Expression's Error keeps the last failure after the expression works again — a wire on Error still shows \"The expression threw …\" beside a good Result",
+      "status": "fixed",
+      "commit": "99c61cede"
+    },
+    {
+      "id": "P107-C145",
+      "title": "An Expression that reads a name called run, expression or evaluateAtLoad never gets an input for it and always throws \"run is not defined\"",
+      "status": "fixed",
+      "commit": "5ee9edda4",
+      "ruling": "Ruled 2026-10-09 (P107 s65), as recommended: \"Block the three names\"."
+    },
+    {
+      "id": "P107-C150",
+      "title": "An Expression that reads an Array (`Arrays.cart.size()`) never re-runs when the array changes — its Result stays stale; a Variable or an Object read the same way does re-run",
+      "status": "fixed",
+      "commit": "024e2ee55"
+    },
+    {
+      "id": "P107-C151",
+      "title": "An Expression with a stray input, or whose text once read more ports, reads `Variables` / `Objects` / `Arrays` as nothing — the Noodl API is handed to the wrong parameter",
+      "status": "fixed",
+      "commit": "024e2ee55"
+    }
+  ],
+  "Filter Collection": [
+    {
+      "id": "P107-C10",
+      "title": "Array Filter and Array Map crash in the setter when Items gets a number, boolean or plain object",
+      "status": "fixed",
+      "commit": "06ca94db1",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the scenario's row mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts) dropped in the…"
+    },
+    {
+      "id": "P107-C59",
+      "title": "Array Filter cannot filter a plain array of plain objects (what a Function outputs) — every filtered run fails with \"Cannot read properties of undefined\"",
+      "status": "fixed",
+      "commit": "a6f629a2e",
+      "ruling": "Richard, 2026-10-03: \"Yes, fix both\" (C59 and C60 asked as one). Fixed in s36: a record is read as before, any other row as it is (the sorter's rule)."
+    }
+  ],
+  "FilterDBModels": [
+    {
+      "id": "P107-C42",
+      "title": "Filter Records never re-filters when another node saves a record, unless its Backend picker was written — and that picker is hidden when the project has one backend",
+      "status": "fixed",
+      "commit": "8d3ebc83f",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; the spec states it as it is."
+    },
+    {
+      "id": "P107-C43",
+      "title": "Filter Records never answers a Filter press when its Sorting meets rows that are not records — no Error, no Failure",
+      "status": "fixed",
+      "commit": "83908a71e",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules. The spec states the sensible reading (the filter's failure); the runtime's is the known row."
+    },
+    {
+      "id": "P107-C44",
+      "title": "A Filter Records holding null on Items crashes inside another node's save of its Class — the saving node's Error gets the message, and a Query Records listening after it misses the save",
+      "status": "fixed",
+      "commit": "3f7c5eeb3",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules. The spec reads null as holding nothing; the runtime's is the known row."
+    }
+  ],
+  "For Each": [
+    {
+      "id": "P107-C128",
+      "title": "A Repeater that meets something it cannot build stops for good — a Template the project does not have, or Items holding a null when it rebuilds — and no later Items, Template or Refresh is ever drawn or answered",
+      "status": "fixed",
+      "commit": "e22334e0d"
+    },
+    {
+      "id": "P107-C129",
+      "title": "A Repeater's Items Rendered fires after every run of its queue, including one that built nothing — at load with no Items bound, after a Refresh that failed, after a Dynamic rebuild with no Script",
+      "status": "fixed",
+      "commit": "a5d6abb33",
+      "ruling": "Ruled 2026-10-08 (P107 \"Phase 107 Rulings\" page), as recommended: \"Fire it only when rows were added or removed\". A list cleared to empty still fires it, because rows were removed."
+    },
+    {
+      "id": "P107-C130",
+      "title": "Items holding a null keep a Repeater's old rows on screen, and a Refresh, Template or Template Type change made after it in the same frame is lost — with every later Refresh, which is never answered again",
+      "status": "fixed",
+      "commit": "009ad189b",
+      "ruling": "Ruled 2026-10-08 (P107 \"Phase 107 Rulings\" page), as leaned: \"Skip the empty entry and report it once\". Every other row is drawn."
+    },
+    {
+      "id": "P107-C131",
+      "title": "A list whose items repeat an id draws that item's row after the row that follows it, and every later copy of the same list (a Refresh) takes that row down and builds it again",
+      "status": "fixed",
+      "commit": "21107c848",
+      "ruling": "Ruled 2026-10-08 (P107 \"Phase 107 Rulings\" page), as recommended: \"One row per id, at the first item's place, kept across a Refresh\"."
+    },
+    {
+      "id": "P107-C135",
+      "title": "A Repeater Script that sets `component` to something that is not text (a number, an object, `true`) stops the Repeater for good — no later Items, Template or Refresh is drawn or answered",
+      "status": "fixed",
+      "commit": "e22334e0d",
+      "ruling": "Ruled 2026-10-08 (P107 \"Phase 107 Rulings\" page), as recommended: \"Skip that item and report an error\". The same as a Script that throws."
+    },
+    {
+      "id": "P107-C136",
+      "title": "With Template Type Explicit and no Template, a Refresh reports Done (and draws nothing) once any Script has compiled — without one it fails `repeater/no-template`",
+      "status": "fixed",
+      "commit": "4b63a1316",
+      "ruling": "Ruled 2026-10-08 (P107 \"Phase 107 Rulings\" page), as recommended: \"Fail with \"no template\" whenever Explicit has no Template\". The check reads only what Template Type uses."
+    },
+    {
+      "id": "P107-C137",
+      "title": "A Repeater Refresh pulsed while a rebuild is running is never answered — no Done, no Failure — although a rebuild runs for it",
+      "status": "fixed",
+      "commit": "cb85d2d69",
+      "ruling": "Ruled 2026-10-08 (P107 \"Phase 107 Rulings\" page), as recommended: \"Answer it when its own rebuild finishes\". What the code's comment says it meant: every Refresh gets exactly one answer, from the rebuild it asked for."
+    },
+    {
+      "id": "P107-C140",
+      "title": "A Repeater input mapping (Script under Input Mapping) that throws for a record stops the Repeater for good — that row and every later one is never drawn, and no Refresh is answered",
+      "status": "fixed",
+      "commit": "e22334e0d"
+    },
+    {
+      "id": "P107-C141",
+      "title": "A Repeater input mapping that throws when a record changes throws into whatever wrote the record — another node's Set, a backend's save, a Query — which fails there, though the fault is the Repeater's",
+      "status": "fixed",
+      "commit": "e22334e0d"
+    },
+    {
+      "id": "P107-C142",
+      "title": "A Repeater reports the signals of several rows that fire in the same update as ONE — the last row's Item Id, the first row's outputs, the last row's signal — so every row's Added after the first is lost, and a row's Leaving is reported as another row's Added",
+      "status": "fixed",
+      "commit": "0ece45228 (and 2a82213cc)"
+    },
+    {
+      "id": "P107-C143",
+      "title": "A row a Repeater adds while another row is on its way out (its Try Remove waiting, or its removal not yet run) lands one place early and stays there; a Refresh moves the leaving row to the end",
+      "status": "fixed",
+      "commit": "c4b1da028"
+    }
+  ],
+  "Group": [
+    {
+      "id": "P107-C86",
+      "title": "After a Group's Tag changes, a click on it counts as a click somewhere else — it fires Focus Lost instead of Focused, until the Group leaves the page and comes back",
+      "status": "fixed",
+      "commit": "3364b47f6"
+    },
+    {
+      "id": "P107-C87",
+      "title": "A Group whose Tag arrives empty (or null, 0, false) throws while React draws it, and the page stops drawing",
+      "status": "fixed",
+      "commit": "31c78fe6e"
+    },
+    {
+      "id": "P107-C88",
+      "title": "A Group with Enable Scroll on and Native platform scroll off reports Drop Index as if it had one child — a card dropped from the keyboard lands at 0 or 1, whatever the Group holds",
+      "status": "fixed",
+      "commit": "9e4c79935",
+      "ruling": "Ruled 2026-10-07 (P109 s28, asked in one batch of four), as recommended: \"Count the cards\"."
+    },
+    {
+      "id": "P107-C89",
+      "title": "Native platform scroll wired a truthy value that is not true (1, \"false\") starts the JavaScript scroller on children it never wrapped — Scroll To Index fails for every child, and clicks can be lost",
+      "status": "fixed",
+      "commit": "31c78fe6e"
+    },
+    {
+      "id": "P107-C90",
+      "title": "A Group with the JavaScript scroller (Enable Scroll on, Native platform scroll off) and Block Pointer Events on never fires Click — on itself or from a child",
+      "status": "fixed",
+      "commit": "9e4c79935",
+      "ruling": "Ruled 2026-10-07 (P109 s28, asked in one batch of four), as recommended: \"Let the list's taps through\"."
+    },
+    {
+      "id": "P107-C95",
+      "title": "A Focus on a Group that is not on the page reports Done and fires Focused — a field reports Unchanged there, and R16 rules the Group should too",
+      "status": "fixed",
+      "commit": "3364b47f6"
+    },
+    {
+      "id": "P107-S74-CLICKAWAY",
+      "title": "Group's conformance is red at seed 20736 — a click beside it has a twin branch that no scenario tells apart (a swap-branch mutant survives)",
+      "status": "fixed",
+      "commit": "6e78598db"
+    }
+  ],
+  "Image": [
+    {
+      "id": "P107-C94",
+      "title": "An Image placed with Source Set true fetches a picture called \"true\" — React 19 writes srcset=\"true\" on the element it creates, and none when Source Set changes to true later",
+      "status": "fixed",
+      "commit": "2dc8fd90d"
+    }
+  ],
+  "JavaScriptFunction": [
+    {
+      "id": "P107-C146",
+      "title": "A Function's Error keeps the last failure after a run that works — and a new Script empties it without sending it, so a wire on Error still shows the old message",
+      "status": "fixed",
+      "commit": "2d765dac2"
+    },
+    {
+      "id": "P107-C147",
+      "title": "A Function whose code throws null or undefined reports nothing — no Error, no Failure, and a Run is never answered",
+      "status": "fixed",
+      "commit": "cb7ea0fab"
+    }
+  ],
+  "Javascript2": [
+    {
+      "id": "P107-C148",
+      "title": "A Script whose code throws null or undefined never runs that code again — a run, or that signal's function, is dead for the session",
+      "status": "fixed",
+      "commit": "cf6b4b8f8"
+    }
+  ],
+  "Logic Builder": [
+    {
+      "id": "P107-C149",
+      "title": "A Visual Function whose blocks send a signal named like one of its own (done, failure…) pulses Failure, then Success and Done, for the same Run — and Error is emptied in the same instant",
+      "status": "fixed",
+      "commit": "dde400937"
+    }
+  ],
+  "Map Collection": [
+    {
+      "id": "P107-C60",
+      "title": "Array Map cannot map a plain array of plain objects (what a Function outputs) — a property mapping fails with \"model.get is not a function\"",
+      "status": "fixed",
+      "commit": "a6f629a2e",
+      "ruling": "Richard, 2026-10-03: \"Yes, fix both\" (C59 and C60 asked as one). Fixed in s36: a record is read as before, any other row as it is (the sorter's rule)."
+    }
+  ],
+  "Model2": [
+    {
+      "id": "P107-C11",
+      "title": "The Object node's \"<property> Changed\" signals have never fired",
+      "status": "fixed",
+      "commit": "b67698798",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the scenario's row mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts) dropped in the…"
+    }
+  ],
+  "NavigationShowPopup": [
+    {
+      "id": "P107-C30",
+      "title": "A popup that failed to open keeps its place on the popup stack — the next popup reports Dismissed for it, and Escape stops working",
+      "status": "fixed",
+      "commit": "3ce778c4f",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Give the place back\". A failed popup leaves no trace, so later popups and Escape behave normally."
+    }
+  ],
+  "Number": [
+    {
+      "id": "P107-C5",
+      "title": "Boolean, Number, String and Color variables ignore a first Value of 0",
+      "status": "fixed",
+      "commit": "e3c322aa5",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the scenario's row mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts) dropped in the…"
+    }
+  ],
+  "Open File Picker": [
+    {
+      "id": "P107-C53",
+      "title": "Open File Picker — clearing Capture after an Open that used it still opens the camera",
+      "status": "fixed",
+      "commit": "a664d36b4",
+      "ruling": "R3 (a) — the runtime wins until Richard rules."
+    },
+    {
+      "id": "P107-D27",
+      "title": "Open File Picker — with Accepted file types never set, the dialog's accept attribute is the string \"undefined\"",
+      "status": "fixed",
+      "commit": "a664d36b4",
+      "ruling": "R3 (a) — the runtime wins until Richard rules."
+    }
+  ],
+  "Page Stack": [
+    {
+      "id": "P107-C107",
+      "title": "A push, replace or Reset to a page whose component the project does not have is never answered — the caller's Navigate hangs with no Done and no Failure",
+      "status": "fixed",
+      "commit": "4b29cb7f0"
+    },
+    {
+      "id": "P107-C108",
+      "title": "A push with a transition the stack does not know (a wired Transition such as \"Fade\") is never answered, and the page it built is dropped",
+      "status": "fixed",
+      "commit": "9f3a5ad49"
+    },
+    {
+      "id": "P107-C109",
+      "title": "A Components value that is not a list blanks the stack and its Reset is never answered; a page looked up by its label whose component was never set throws the same way",
+      "status": "fixed",
+      "commit": "ed3a693cf"
+    },
+    {
+      "id": "P107-C110",
+      "title": "A Reset during a back's animation empties the stack: the animation's end takes the new start page off it, and every push after is never answered",
+      "status": "fixed",
+      "commit": "e9a35da48"
+    },
+    {
+      "id": "P107-C111",
+      "title": "A Pop whose page below is no longer in the Components list throws: the pusher hears the results and the page below comes back, but the stack never pops",
+      "status": "fixed",
+      "commit": "62b89308b"
+    },
+    {
+      "id": "P107-C112",
+      "title": "A reset that finds no components (or no start page) deletes every page but leaves Top Component Name and Stack Depth naming what was there",
+      "status": "fixed",
+      "commit": "cd5f66a1a"
+    },
+    {
+      "id": "P107-C113",
+      "title": "Writing a Component Stack's Name — even the name it already has — rebuilds it at its start page, losing every page pushed",
+      "status": "fixed",
+      "commit": "2cc6d1dd7"
+    },
+    {
+      "id": "P107-C114",
+      "title": "A Component Stack mounted again at a frame sends no Children Count in that frame — the page it builds is counted a frame late",
+      "status": "fixed",
+      "commit": "4e2d846d5"
+    },
+    {
+      "id": "P107-C119",
+      "title": "The browser's Back or Forward sends every Component Stack on the page back to its start page, Use Routes or not",
+      "status": "fixed",
+      "commit": "b5b06bcb6"
+    },
+    {
+      "id": "P107-C120",
+      "title": "With Use Routes, a Pop pushes the page below as a new history entry, so the browser's Back then shows the page just popped, as the only page, with a Pop that does nothing",
+      "status": "fixed",
+      "commit": "08d62276b",
+      "ruling": "Ruled 2026-10-08 (P107 \"Phase 107 Rulings\" page), as leaned: \"A Pop steps the browser's history back\". The app's Back and the browser's Back then agree."
+    },
+    {
+      "id": "P107-C121",
+      "title": "With Use Routes in hash mode, pushing a page with no parameters keeps the previous page's query in the address, and a reload or Back hands it those parameters",
+      "status": "fixed",
+      "commit": "437a1bfaa"
+    },
+    {
+      "id": "P107-C122",
+      "title": "With Use Routes, a page's parameters go into the URL's query unencoded: a value with &, #, + or a space comes back different, and one with % empties the stack at the next reset",
+      "status": "fixed",
+      "commit": "159d0dfaf"
+    },
+    {
+      "id": "P107-C123",
+      "title": "With Use Routes, a page pushed (or started) by its label rather than its id gets no URL: the address becomes #, and a reload or Back shows the start page",
+      "status": "fixed",
+      "commit": "52367365b"
+    },
+    {
+      "id": "P107-C124",
+      "title": "With Use Routes, a URL whose query or path parameter has a malformed escape (%zz) empties the Component Stack, and its Reset is never answered",
+      "status": "fixed",
+      "commit": "f13a3d88f"
+    },
+    {
+      "id": "P107-C125",
+      "title": "A Component Stack page whose Path is wired null empties the stack at every reset that reaches it",
+      "status": "fixed",
+      "commit": "230565982"
+    },
+    {
+      "id": "P107-C126",
+      "title": "With Use Routes, a Component Stack's Reset (and a Components edit) rebuilds the page in the URL, not the start page its Reset port promises",
+      "status": "fixed",
+      "commit": "08d62276b",
+      "ruling": "Ruled 2026-10-08 (P107 \"Phase 107 Rulings\" page), as leaned: \"Reset goes to the start page and writes its address\". As the Reset input's description says. Loading the page and the browser's Back still read the address."
+    },
+    {
+      "id": "P107-C139",
+      "title": "A Component Stack turned off with Mounted and back on comes back at its start page — the pages pushed, and anything typed on them, are gone; ruled: keep them when an option is ticked",
+      "status": "fixed",
+      "commit": "c22c9aceb",
+      "ruling": "Ruled 2026-10-08 (P107 \"Phase 107 Rulings\" page), against the lean: \"Keep them only when an option is ticked\"."
+    }
+  ],
+  "PageStackNavigate": [
+    {
+      "id": "P107-C28",
+      "title": "Push Component To Stack never answers a press when Mode is neither push nor replace",
+      "status": "fixed",
+      "commit": "e965f8241",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Fail and name the value\". The press fires Failure with an error such as \"Unknown mode 'Push'\", so the author sees what their wire sent."
+    }
+  ],
+  "PageStackNavigateToPath": [
+    {
+      "id": "P107-C24",
+      "title": "Navigate To Path never answers a press when Path is not text (null, a number) — the frame-end callback throws",
+      "status": "fixed",
+      "commit": "9af85dee9",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Treat it as no path\". Failure fires with 'No path to navigate to', the same as a missing Path today. A one-line change."
+    },
+    {
+      "id": "P107-C25",
+      "title": "Navigate To Path never answers a press when the browser refuses the push (a Path on another origin with the Path URL type)",
+      "status": "fixed",
+      "commit": "30b54e988",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Report a clear failure\"."
+    },
+    {
+      "id": "P107-D20",
+      "title": "Navigate To Path expands $&, $$ and friends inside a parameter value",
+      "status": "fixed",
+      "commit": "9404f00c4",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Insert values as written\". Any value, dollar signs included, lands in the address unchanged. One line in one place, the same fix as String Format's."
+    },
+    {
+      "id": "P107-D21",
+      "title": "Navigate To Path does not encode Query values — a value with & or # breaks the URL",
+      "status": "fixed",
+      "commit": "9404f00c4",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Encode, and skip null\". Any text travels safely and arrives unchanged, because the router already decodes what it reads."
+    }
+  ],
+  "Radio Button Group": [
+    {
+      "id": "P107-C76",
+      "title": "A Radio Button Group's Value written back in the same frame as a person's pick leaves the picked button selected under a Value that names another — picking it again raises nothing, and picking the named one raises no Changed",
+      "status": "fixed",
+      "commit": "8dbeb8f33",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Show what Value says\". The buttons read the group's Value directly, so every write redraws them and the next pick fires Changed."
+    }
+  ],
+  "Router": [
+    {
+      "id": "P107-C115",
+      "title": "A link whose query has a malformed escape (`?q=%zz`, `?off=50%`) blanks every Page Router — nothing is shown, and its Reset is never answered",
+      "status": "fixed",
+      "commit": "6096fadae"
+    },
+    {
+      "id": "P107-C116",
+      "title": "A Page Router whose Url path is null shows nothing and never answers a Reset; a Navigate to it shows the page but never pushes its URL or answers",
+      "status": "fixed",
+      "commit": "34218468a"
+    },
+    {
+      "id": "P107-C117",
+      "title": "After a Navigate, Back or Forward to the same page with other parameters keeps showing the old ones — the Page Router hands the new parameters to a page it already deleted",
+      "status": "fixed",
+      "commit": "47f987ef6"
+    },
+    {
+      "id": "P107-C118",
+      "title": "A Navigate with no Router name, pressed while no Page Router is on the page, waits for good — a router registering as Main never takes it",
+      "status": "fixed",
+      "commit": "d85e4e6d9"
+    }
+  ],
+  "SetDbModelProperties": [
+    {
+      "id": "P107-C34",
+      "title": "Update Record keeps its write on the record when the save fails — including when nothing was ever sent",
+      "status": "fixed",
+      "commit": "8a1afd591",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules. The spec (update-record.ts) states the runtime's behaviour today; a ruled fix is a spec version."
+    },
+    {
+      "id": "P107-C35",
+      "title": "An access rule set to Role with no Role named writes the ACL key `role:undefined`",
+      "status": "fixed",
+      "commit": "8ec177377",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules."
+    }
+  ],
+  "Sign File URL": [
+    {
+      "id": "P107-D26",
+      "title": "After Sign File URL mints a link with no expiry (a public link), Expires At and TTL keep the PREVIOUS link's values downstream",
+      "status": "fixed",
+      "commit": "8d15b190c",
+      "ruling": "R3 (a) — the runtime wins until Richard rules."
+    }
+  ],
+  "States": [
+    {
+      "id": "P107-C22",
+      "title": "States — a move that animates nothing, made while a move is still running, is overwritten by the old move",
+      "status": "fixed",
+      "commit": "9e1d8afa7",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Stop the running animation\". A move that sets values at once now lands where it says, and Has Reached fires once."
+    },
+    {
+      "id": "P107-D19",
+      "title": "States — a text or true/false value reads 0 in the starting state; a text a state leaves empty keeps the previous state's",
+      "status": "fixed",
+      "commit": "9e1d8afa7",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Send empty text\". Moving into A clears the label, as the empty box in the editor suggests. A small change in one place."
+    }
+  ],
+  "String Format": [
+    {
+      "id": "P107-C3",
+      "title": "String Format dies for good when Format is not text (a wired number, null, an object)",
+      "status": "fixed",
+      "commit": "350c3ec31",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the scenario's row mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts) dropped in the…"
+    },
+    {
+      "id": "P107-D2",
+      "title": "String Format: a placeholder used twice fills every time, though the description says only the first",
+      "status": "fixed",
+      "commit": "8f31517cc",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the scenario's row mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts) dropped in the…"
+    },
+    {
+      "id": "P107-D3",
+      "title": "String Format expands $&, $$ and friends inside a value",
+      "status": "fixed",
+      "commit": "2b30bc667",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the scenario's row mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts) dropped in the…"
+    }
+  ],
+  "SubscribeToChanges": [
+    {
+      "id": "P107-C55",
+      "title": "Subscribe To Changes — writing a value an input already holds tears the subscription down and opens a new one",
+      "status": "fixed",
+      "commit": "bbd4d5539",
+      "ruling": "R3 (a) — the runtime wins until Richard rules. The spec states the runtime's reading."
+    }
+  ],
+  "Substring": [
+    {
+      "id": "P107-C4",
+      "title": "Substring and String Mapper crash in the setter when a wire sends null",
+      "status": "fixed",
+      "commit": "4851100a2 f94bc681d",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the scenario's row mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts) dropped in the…"
+    },
+    {
+      "id": "P107-D7",
+      "title": "Substring's End of -1 runs to the end only as a number, not the text \"-1\"",
+      "status": "fixed",
+      "commit": "7761b440a",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the scenario's row mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts) dropped in the…"
+    }
+  ],
+  "Text": [
+    {
+      "id": "P107-C61",
+      "title": "Font Family wired a truthy value that is not text throws in its setter — the node's update dies there",
+      "status": "fixed",
+      "commit": "ccda9ef0b",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Treat it as no family\". The node falls back to its default font and the rest of the update applies. A one-line change in one shared place."
+    },
+    {
+      "id": "P107-C62",
+      "title": "A units-typed style input wired null throws in the generated setter — margins, paddings, font size, min / max size, border widths and radii",
+      "status": "fixed",
+      "commit": "ccda9ef0b",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Remove the style\". Both kinds of empty value behave the same and the update carries on. A one-line change in one shared place."
+    },
+    {
+      "id": "P107-C63",
+      "title": "A Placement input (Pos X / Pos Y / Rotation / Transform Origin X / Y) wired undefined throws in its setter",
+      "status": "fixed",
+      "commit": "ccda9ef0b",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Use the default\". Position and rotation go back to 0 and the origin to 50, both kinds of empty value included. One small guard in each of the five inputs."
+    },
+    {
+      "id": "P107-C77",
+      "title": "A Draggable element can no longer be picked up from the keyboard once its element is replaced — after Mounted goes off and on, after its Tag changes, or when it mounts more than about a second after Draggable was set",
+      "status": "fixed",
+      "commit": "167c40e9c"
+    },
+    {
+      "id": "P107-C78",
+      "title": "An element that is both Draggable and a drop zone, picked up with the keyboard, starts inside itself — Enter drops it on itself (Dropped and Landed on the same node, its own Drag Value), which the pointer can never do",
+      "status": "fixed",
+      "commit": "23d91e383"
+    },
+    {
+      "id": "P107-C79",
+      "title": "A Text at Opacity 0 catches clicks once Pointer Events Enabled or Pointer Events Mode is written after it was drawn — the style write goes straight to the DOM and the component's \"opacity 0 takes no pointer\" rule is never re-applied",
+      "status": "fixed",
+      "commit": "7496d93f0"
+    },
+    {
+      "id": "P107-C81",
+      "title": "A file drop zone stays lit (Is Dragging Over true) after the drag has left, when its element was replaced under the drag or Accept File Drops was switched off during it",
+      "status": "fixed",
+      "commit": "52fdaf088",
+      "ruling": "Ruled 2026-10-07 (P109 s29), as recommended: \"Zone tracks itself\"."
+    },
+    {
+      "id": "P107-C82",
+      "title": "A file drop is lost with nothing said when Accepted file types holds a value that is not text (a wired number, an object) — the drop handler throws before File, Files Dropped or Files Rejected",
+      "status": "fixed",
+      "commit": "f2d9d349b"
+    },
+    {
+      "id": "P107-C83",
+      "title": "A card carried from the keyboard is dropped into a drop zone that has left the page (Mounted off), and the zone stays lit while it is gone",
+      "status": "fixed",
+      "commit": "c335f5d90"
+    },
+    {
+      "id": "P107-C84",
+      "title": "A drag dies at a drop zone whose Accept Kind holds a value that is not text (a wired number, a list) — a pointer drag never ends and blocks every later drag; a keyboard pick-up starts in no zone",
+      "status": "fixed",
+      "commit": "f2d9d349b"
+    },
+    {
+      "id": "P107-C85",
+      "title": "A drop on a zone whose Zone Name holds a value that is not text fires Dropped and then never ends — the zone stays lit, the card stays lifted, and no other drag can start",
+      "status": "fixed",
+      "commit": "f2d9d349b"
+    }
+  ],
+  "Timer": [
+    {
+      "id": "P107-D10",
+      "title": "Delay reports Unchanged for Stop on a countdown started in the same frame, yet stops it",
+      "status": "fixed",
+      "commit": "375993cb3",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the scenario's row mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts) dropped in the…"
+    }
+  ],
+  "Upload File": [
+    {
+      "id": "P107-C51",
+      "title": "Upload File and Sign File URL's Error Status Code is never the HTTP status — always 0 on Directus, Supabase and PocketBase, and the Parse error code (e.g. 119) on the NodeGX / Parse wire",
+      "status": "fixed",
+      "commit": "091e86d1c",
+      "ruling": "R3 (a) — the runtime wins until Richard rules."
+    }
+  ],
+  "Value Changed": [
+    {
+      "id": "P107-C6",
+      "title": "A number arriving on a port that once held a unit value ({ value, unit }) is merged into it",
+      "status": "fixed",
+      "commit": "ebeefb060",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the scenario's row mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts) dropped in the…"
+    },
+    {
+      "id": "P107-D9",
+      "title": "Value Changed's \"including the first time it arrives\" is false for undefined",
+      "status": "fixed",
+      "commit": "dd317dbb7",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the scenario's row mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts) dropped in the…"
+    }
+  ],
+  "Video": [
+    {
+      "id": "P107-C100",
+      "title": "A Video playing a file fires no Click, Hover, Pointer Down, Pointer Up or Pointer Enter, and takes no file dropped from the desktop",
+      "status": "open"
+    },
+    {
+      "id": "P107-C96",
+      "title": "A Video showing a YouTube or Vimeo link throws when Source Object arrives — before its first draw, the throw is inside React's commit and the page goes blank",
+      "status": "open"
+    },
+    {
+      "id": "P107-C97",
+      "title": "Play or Restart on a Video whose Source changed from a video file to a YouTube or Vimeo link throws, and the action reports neither Done nor Failure",
+      "status": "open"
+    },
+    {
+      "id": "P107-C98",
+      "title": "A Video whose Volume is outside 0 to 1, or not a number, blanks the whole page — Volume 50 from a Slider is enough",
+      "status": "open"
+    },
+    {
+      "id": "P107-C99",
+      "title": "A Video's Source Object wired anything that is not a stream (text, a number, an object) throws — before the first draw, inside React's commit",
+      "status": "open"
+    }
+  ],
+  "net.noodl.DateAdd": [
+    {
+      "id": "P107-C16",
+      "title": "Date Add crashes and stays dead when Unit is a value it does not know",
+      "status": "fixed",
+      "commit": "4626b7c54",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the scenario's row mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts) dropped in the…"
+    }
+  ],
+  "net.noodl.DateDifference": [
+    {
+      "id": "P107-D15",
+      "title": "Date Difference counts an unknown Unit as years (Date Add crashes on the same value)",
+      "status": "fixed",
+      "commit": "4626b7c54",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the scenario's row mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts) dropped in the…"
+    }
+  ],
+  "net.noodl.HTTP": [
+    {
+      "id": "P107-C7",
+      "title": "HTTP Request's authentication presets never send a credential",
+      "status": "fixed",
+      "commit": "684d881f2",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the scenario's row mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts) dropped in the…"
+    },
+    {
+      "id": "P107-C8",
+      "title": "HTTP Request crashes inside the fetch on a non-text URL, Headers, Query or Body Fields, and loses the outcome",
+      "status": "fixed",
+      "commit": "283b46573",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the scenario's row mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts) dropped in the…"
+    },
+    {
+      "id": "P107-D11",
+      "title": "HTTP Request reports a JSON body that fails to parse as a network error",
+      "status": "fixed",
+      "commit": "962edf855",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the scenario's row mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts) dropped in the…"
+    },
+    {
+      "id": "P107-D12",
+      "title": "HTTP Request: two overlapping requests share one abort controller, so Cancel can miss the live one",
+      "status": "fixed",
+      "commit": "ef0632424",
+      "ruling": "P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the scenario's row mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts) dropped in the…"
+    }
+  ],
+  "net.noodl.ParseFeed": [
+    {
+      "id": "P107-D16",
+      "title": "Parse Feed's dates depend on where it runs, and a CEST or BST date is published hours wrong",
+      "status": "fixed",
+      "commit": "f6700d187",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"UTC, and no date if unknown\". A date with no timezone is read as UTC everywhere, and an unknown name such as CEST gives no date. A small change in one function."
+    },
+    {
+      "id": "P107-D17",
+      "title": "Parse Feed's Feed Updated keeps the previous feed's date when the next feed has none",
+      "status": "fixed",
+      "commit": "f6700d187",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Send empty text\". Feed Updated goes blank, as its siblings do. A one-line change."
+    },
+    {
+      "id": "P107-D18",
+      "title": "Parse Feed shows Count 2 and one item when a feed repeats a guid — and the item is the second one",
+      "status": "fixed",
+      "commit": "f6700d187",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Match Count, describe sharing\". Count says how many items Items really holds, and the Items description says each item is the shared record of its id."
+    }
+  ],
+  "net.noodl.ParseXML": [
+    {
+      "id": "P107-C18",
+      "title": "Parse XML goes silent — no Result, no Failure — while Always Array holds anything but text",
+      "status": "fixed",
+      "commit": "685ac731a",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Turn it into text\". Parsing carries on, and a list of names wired in works as the person meant. A one-line change."
+    }
+  ],
+  "net.noodl.SSE": [
+    {
+      "id": "P107-C56",
+      "title": "Server-Sent Events — Last Error, Retry Count and Duplicates Suppressed change without being sent, so the wire shows stale values",
+      "status": "fixed",
+      "commit": "af96a5310",
+      "ruling": "R3 (a) — the runtime wins until Richard rules. The spec states the runtime's reading."
+    },
+    {
+      "id": "P107-C57",
+      "title": "Server-Sent Events — Event Types or Method wired a value that is not text throws when the stream connects",
+      "status": "fixed",
+      "commit": "dc72bb806",
+      "ruling": "R3 (a) — the runtime wins until Richard rules; the throw is a known row (conformance.test.ts sseNonText)."
+    },
+    {
+      "id": "P107-C58",
+      "title": "Server-Sent Events — after a URL change with Auto Connect off, Connected stays true and Connection State \"open\" though the stream is gone",
+      "status": "fixed",
+      "commit": "5afc27a75",
+      "ruling": "R3 (a) — the runtime wins until Richard rules. The spec states the runtime's reading."
+    }
+  ],
+  "net.noodl.animatetovalue": [
+    {
+      "id": "P107-C20",
+      "title": "Animate To Value waits forever when Delay arrives as text or is disconnected",
+      "status": "fixed",
+      "commit": "dbd5b9c90",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Read it as a number\". \"100\" waits 100 ms and a missing Delay starts at once. A one-line change."
+    }
+  ],
+  "net.noodl.controls.button": [
+    {
+      "id": "P107-C64",
+      "title": "A disabled control still reports Pressed, Pointer Down and Pointer Up for a finger, and Hover for the pointer — Enabled promises it \"ignores clicks, touches and typing\"",
+      "status": "fixed",
+      "commit": "d8a9f0069",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Ignore touches, keep hover\". A finger on a disabled control reports nothing, exactly as the description promises."
+    },
+    {
+      "id": "P107-D30",
+      "title": "Focused (and Hover, Pressed) stay as they were after a control leaves the page with Mounted off — the element that comes back holds no keyboard while Focused still reads true",
+      "status": "fixed",
+      "commit": "32e1856b0",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Reset and announce\". The outputs describe the page, and logic waiting for Blurred runs. Small change in shared code, felt by every control."
+    }
+  ],
+  "net.noodl.controls.checkbox": [
+    {
+      "id": "P107-C65",
+      "title": "A Checkbox whose Label is wired an object or an array crashes the page's render — \"Objects are not valid as a React child\"",
+      "status": "fixed",
+      "commit": "ec48e0680",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Turn them into text\". The page keeps drawing and the label shows the object as text, for example '[object Object]'. That points the person to the mistake."
+    },
+    {
+      "id": "P107-C66",
+      "title": "A Checkbox loses its root element when Enable Label is turned off — Focus then reports Unchanged, Scroll Into View says it is not mounted, while the box is on the page",
+      "status": "fixed",
+      "commit": "94b83d7ea",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Fix it with the label work\". Focus and Scroll Into View keep working whatever the label does."
+    },
+    {
+      "id": "P107-C67",
+      "title": "A Check or Uncheck that reverts a person's click in the same frame does not redraw the Checkbox — the box stays as the click left it and the next click reports the opposite of what the node holds",
+      "status": "fixed",
+      "commit": "b07b2a5a4",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Draw the last word\". The box always shows what the node holds, so an app can refuse or undo a tick and the person sees it."
+    }
+  ],
+  "net.noodl.controls.options": [
+    {
+      "id": "P107-C70",
+      "title": "A Dropdown whose Items is wired a value that is not a list — the legacy string form included — or a list holding null crashes the page's render",
+      "status": "fixed",
+      "commit": "ec48e0680",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Read old text, else no options\". Text in the old format shows its options, other wrong values show an empty Dropdown, and the page keeps drawing."
+    },
+    {
+      "id": "P107-C71",
+      "title": "A Dropdown's Value written back to the value React last rendered, after a person's pick, changes the output but not the selection shown — picking the shown option again then raises nothing",
+      "status": "fixed",
+      "commit": "5d40a7aa3",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Fix it now\". Every Value from the app moves the selection, including one equal to an earlier write, so a Reset works after a pick."
+    },
+    {
+      "id": "P107-D34",
+      "title": "A Dropdown fires Changed with nobody picking — a remount, or Items written again after a person's pick, takes the author's Value back and announces it as a change",
+      "status": "fixed",
+      "commit": "5d40a7aa3",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Fix it now\". The pick survives hiding and a refreshed list, and Changed fires only for a person's pick. Small to medium change in the Dropdown's two files."
+    }
+  ],
+  "net.noodl.controls.radiobutton": [
+    {
+      "id": "P107-D37",
+      "title": "A Radio Button fires Changed when its Checked moves for any reason while its group's last selection was a person's — a sibling carrying the same Value picked, its own Value written in the frame of a pick, a remount after a pick",
+      "status": "fixed",
+      "commit": "8dbeb8f33",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Fire from the click\". Changed comes from the person's click, and a button that loses the selection to that click reports the deselect."
+    }
+  ],
+  "net.noodl.controls.range": [
+    {
+      "id": "P107-C73",
+      "title": "A Slider's Value written from the graph after a person's slide does nothing when it equals the last Value the author wrote — the handle stays where the person put it",
+      "status": "fixed",
+      "commit": "21b27462d",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Fix it now\". Every Value from the app moves the handle, so a Reset works after a slide."
+    },
+    {
+      "id": "P107-C74",
+      "title": "A Slider's Value output disagrees with the handle — it keeps a slid value past a lowered Max, holds a graph value the browser rounds to the step, and Value Percent keeps its old figure when Min or Max moves",
+      "status": "fixed",
+      "commit": "c92fa2afa",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Follow the handle\"."
+    },
+    {
+      "id": "P107-C75",
+      "title": "A Slider with Min equal to Max reports Value Percent NaN, and every report fires Changed",
+      "status": "fixed",
+      "commit": "c92fa2afa",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Percent 0, defaults for blanks\". Value Percent reads 0 when Min equals Max, where the browser draws the handle."
+    },
+    {
+      "id": "P107-D36",
+      "title": "A Slider fires Changed with nobody sliding — a Value written from the graph, a Min or Max that clamps the value, a remount after a slide, and a slider placed with Min equal to Max",
+      "status": "fixed",
+      "commit": "21b27462d",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Fix it now\". Writes from the app move the handle and report Value without Changed, and a hidden Slider keeps its place. Small to medium change in two files."
+    }
+  ],
+  "net.noodl.controls.textinput": [
+    {
+      "id": "P107-C68",
+      "title": "A mouse press on a Text Input fires no Pointer Down and never sets Pressed — the component's own onMouseDown replaces the control's; a Text Area, a finger and the release still report",
+      "status": "fixed",
+      "commit": "7a92ec4b1"
+    },
+    {
+      "id": "P107-C69",
+      "title": "Insert Text and Backspace read the field as React last drew it — one arriving in the same frame as a Value, Set, Clear or another edit works on stale text, and a Clear then a Backspace in one frame puts text back",
+      "status": "fixed",
+      "commit": "580ce9e27"
+    },
+    {
+      "id": "P107-C72",
+      "title": "A Text Input's Clear, Backspace and frame-end writes convert with the Type, and measure room with the Max length, the component LAST RENDERED — a Type turned Number with a Clear in the same frame publishes '' where the next frame says null",
+      "status": "fixed",
+      "commit": "580ce9e27"
+    },
+    {
+      "id": "P107-C80",
+      "title": "Turning Enable Label on or off while someone is typing in a Text Input takes the keyboard away from them, silently — React builds a new field under the label, and Focused still says true",
+      "status": "fixed",
+      "commit": "94b83d7ea",
+      "ruling": "Ruled 2026-10-05 (R12, NSP-023). Asked in plain words, Richard chose \"keeps the keyboard\": showing or hiding a label does not touch the field."
+    },
+    {
+      "id": "P107-D31",
+      "title": "Text Input's Set fires Value Changed and reports Done when the field already holds the Value — \"Fires whenever the Value output changes\" is not what it does",
+      "status": "fixed",
+      "commit": "a969b4b31",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), against the recommendation (\"Stay quiet, report Unchanged\"): \"Keep it, fix the description\". Nothing changes in apps."
+    },
+    {
+      "id": "P107-D32",
+      "title": "A text-type Text Input given a number publishes '5' (text) while on the page and 5 (a number) while off it — the Value output's type depends on whether the field is mounted",
+      "status": "fixed",
+      "commit": "0a6bb1d90",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Always text\". Value has one type whatever the field's visibility. One-word change on the hidden path."
+    },
+    {
+      "id": "P107-D33",
+      "title": "Clear on a Number field reports Unchanged while it empties text the field was holding — it reads the author's Value and the output, not the field",
+      "status": "fixed",
+      "commit": "70621abcc",
+      "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Check the field's text\". Clear reports Done whenever it empties something. Small change in one file."
+    },
+    {
+      "id": "P107-D35",
+      "title": "A Focus action counts as \"a caret someone placed\" — on a Text Area an Insert Text then writes at the START of the text, where the browser's resting cursor is, and a field whose Type moved from Email or Number to Text inserts at the start too",
+      "status": "fixed",
+      "commit": "7a92ec4b1"
+    }
+  ],
+  "net.noodl.user.RequestMagicLink": [
+    {
+      "id": "P107-D25",
+      "title": "Request Magic Link's Error says \"empty until one does\" fail and is cleared on a Done — but the clear never reaches a wire, so a label keeps the last failure after a success",
+      "status": "fixed",
+      "commit": "f34e59460",
+      "ruling": "R3 (a) — the runtime wins until Richard rules."
+    }
+  ],
+  "net.noodl.user.SignInWith": [
+    {
+      "id": "P107-C50",
+      "title": "A sign-in cancelled (or refused) at the provider fires Sign In With's Failure twice on the page it returns to — and raises the error twice",
+      "status": "fixed",
+      "commit": "69efd9820",
+      "ruling": "R3 (a) — the runtime wins until Richard rules."
+    }
+  ],
+  "net.noodl.user.User": [
+    {
+      "id": "P107-C45",
+      "title": "On a Directus / PocketBase project, a backend that fails the page-load session check (503, network down) fires Session Lost while the user stays signed in",
+      "status": "fixed",
+      "commit": "aead4edb8",
+      "ruling": "R3 (a) — the runtime wins until Richard rules. The world (world.ts AUTH, THE START-UP CHECK) plays the service as it is."
+    },
+    {
+      "id": "P107-C46",
+      "title": "A session the backend rejects at page load fires Session Lost twice on every User node",
+      "status": "fixed",
+      "commit": "aead4edb8",
+      "ruling": "R3 (a) — the runtime wins until Richard rules."
+    },
+    {
+      "id": "P107-C48",
+      "title": "A User node's `<field> Changed` signals never fire — the editor offers them, nothing registers them (C11 / C37's twin)",
+      "status": "fixed",
+      "commit": "b67698798",
+      "ruling": "R3 (a) — the runtime wins until Richard rules; the spec states the pulse, the runtime's silence is a known row."
+    },
+    {
+      "id": "P107-C49",
+      "title": "A signed-in user with Roles makes every User node pulse Changed on every session read — three times per Fetch — when nothing changed",
+      "status": "fixed",
+      "commit": "c6bf4e8ac",
+      "ruling": "R3 (a) — the runtime wins until Richard rules."
+    }
+  ],
+  "net.noodl.visual.columns": [
+    {
+      "id": "P107-C132",
+      "title": "A number wired into a Columns' Medium Below or Small Below is refused unless a size was typed into that port first, and a number after a var(--token) is refused on any size port",
+      "status": "fixed",
+      "commit": "11fef09c6",
+      "ruling": "Ruled 2026-10-08 (P107 \"Phase 107 Rulings\" page), as recommended: \"Read the number as pixels\". A bare number on a size input that holds no size, or last held a token, is read in the input's default unit."
+    },
+    {
+      "id": "P107-C133",
+      "title": "A Columns whose Medium Layout or Small Layout holds a number (or any value that is not a string) blanks the page when the container narrows into that band",
+      "status": "fixed",
+      "commit": "8d2fe2678",
+      "ruling": "Ruled 2026-10-08 (P107 \"Phase 107 Rulings\" page), as recommended: \"Read a number as its text, and anything else as no layout\". As Layout String already does."
+    },
+    {
+      "id": "P107-C134",
+      "title": "A Columns on Auto Fit whose Min Column Width plus Horizontal Gap is 0 (Min 16, Gap −16) blanks the page — the column count divides by zero",
+      "status": "fixed",
+      "commit": "73d7696ec",
+      "ruling": "Ruled 2026-10-08 (P107 \"Phase 107 Rulings\" page), as recommended: \"Treat it as one column, and never draw more columns than there are children\"."
+    }
+  ]
+}

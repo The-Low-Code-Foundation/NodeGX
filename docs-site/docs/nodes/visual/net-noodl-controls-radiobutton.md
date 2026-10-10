@@ -119,6 +119,44 @@ Small option sets where all choices should be visible at once. The group, not th
 | `focus` | Signal | — | Puts the keyboard on this radio button, so Enter, Space and the arrow keys go to it |
 | `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 
+### What each input does
+
+**Enabled** (`enabled`)
+
+- the value it already holds: nothing
+- a change: Enabled follows; disabled, the button takes no click and no focus
+
+**Value** (`value`)
+
+- always: what this button contributes when selected; at the next paint it shows selected when its group's Value is this and not otherwise — Checked follows, Changed does not fire
+
+**Mounted** (`mounted`)
+
+- always: the button is put on the page (Did Mount, showing its group's choice — Checked follows without Changed), or taken off it (Will Unmount, with the keyboard and the states it held), at the next paint
+
+**Enable Label** (`useLabel`)
+
+- always: a label is drawn beside the button, or not; the button and its keyboard stay
+
+**Focus** (`focus`)
+
+- not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent
+- it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent
+- otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done
+
+**Blur** (`blur`)
+
+- it does not hold the keyboard (or is disabled, and gives it up to nobody): nothing changes → Done; Blurred stays silent
+- it holds the keyboard: it is taken off it, and the Focused state goes false → Blurred, Done
+
+**Scroll Into View** (`scrollIntoView`)
+
+- always: the page, or the scrolling Group holding it, scrolls until the button can be seen
+
+**Visible** (`visible`)
+
+- always: shown or hidden at the next paint, its space kept; hidden, it takes no click and a Focus does not reach it
+
 ## Outputs
 
 ### Values

@@ -37,6 +37,27 @@ Use it to read one record's properties — a detail page, or the current item in
 |---|---|---|---|
 | `fetch` | Signal | — | Re-reads the record from the backend now, replacing the copy held in memory. This is additional to Id rebinding on change and to changes being announced; untick either under Run On Value Change to stop it |
 
+### What each input does
+
+**Id Source** (`idSource`)
+
+- From repeater: at the frame's end it binds to the record of the row it sits in
+- otherwise: kept; the record stays bound until the next Id
+
+**Repeater Component** (`repeaterComponent`)
+
+- under From repeater: at the frame's end it binds to the record of that repeater's row (blank: the nearest)
+- otherwise: kept, and read only under From repeater
+
+**Id** (`modelId`)
+
+- a new Id, ticked under Run On Value Change: bound to that record now; Id and its properties follow, and an object handed writes its keys onto the record first
+- otherwise (the same Id, or unticked): Id is sent and the binding stays; an object handed still writes its keys onto the record it names
+
+**Fetch** (`fetch`)
+
+- always: the record is re-read from the backend at the frame's end, one read for the frame's presses; each answered when it returns
+
 ## Outputs
 
 ### Values

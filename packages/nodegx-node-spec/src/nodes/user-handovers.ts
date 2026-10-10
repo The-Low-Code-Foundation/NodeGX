@@ -203,8 +203,8 @@ export const SignInWith = defineNode({
 }).on(
   {
     signIn: press,
-    provider: (_s, v) => ({ set: { provider: v }, send: [] }),
-    redirect: (_s, v) => ({ set: { redirect: v }, send: [] })
+    provider: (_s, v) => ({ says: 'always: held as handed; read when the next handover goes — none set, the handover is refused with Error and Failure', set: { provider: v }, send: [] }),
+    redirect: (_s, v) => ({ says: 'always: held as handed; read when the next handover goes', set: { redirect: v }, send: [] })
   },
   {
     // :249-264 — Signing In first, then the call

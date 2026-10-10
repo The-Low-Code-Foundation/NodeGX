@@ -20,8 +20,8 @@
  *   - ANY `in-<x>` is accepted on first write (`registerInputIfNeeded` :847-868) — its value is `Inputs.x` from then on — and any
  *     `runOnChange-<port>` as the checkbox for that port (nodedefinition.ts). `intype-` / `outtype-` are accepted and do nothing at
  *     run time (:870-892 — the type setter misses the hyphen, so it has never applied a type).
- *   - WHEN IT RUNS — once per frame at most (:493-511 `runScheduled`), at the frame's end: the Script being set to text (:386 — `Run`
- *     is never wired in a lone node); Run, always (:425-430); a value that CHANGED (`valueDidChange`, so `undefined` and every object
+ *   - WHEN IT RUNS — once per frame at most (:493-511 `runScheduled`), at the frame's end: the Script being set to text (:386 — only
+ *     while `Run` is NOT wired: a scenario wires it under `wired`, P107-C155, and the code then waits for Run or an input); Run, always (:425-430); a value that CHANGED (`valueDidChange`, so `undefined` and every object
  *     count as changed) on a ticked `in-` port (:784-799). A Script set to nothing forgets the code and asks for no run (:369-375).
  *   - WHAT THE CODE SEES (:597-640): `Inputs` is the node's own object of input values — the SAME object every run, so a write the
  *     code makes to it is what the next arrival is compared with; `this` is one object kept across runs (:310); `Noodl` is the page's
@@ -232,7 +232,7 @@ export const JavaScriptFunction = defineNode({
   version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/simplejavascript.ts',
   contract:
-    'ports from the code and the written lists; when the code runs (the Script, Run, a changed ticked input; once a frame); Inputs, this and Noodl as the code sees them; publish on change; signal outputs; Success and Done after an await; a throw, sync or async; a compile failure; no script — FUNCTION_FIXTURES, one per rule',
+    'ports from the code and the written lists; when the code runs (the Script — only while Run is not wired, P107-C155 —, Run, a changed ticked input; once a frame); Inputs, this and Noodl as the code sees them; publish on change; signal outputs; Success and Done after an await; a throw, sync or async; a compile failure; no script — FUNCTION_FIXTURES, one per rule',
 
   state: {
     script: undefined,
@@ -312,7 +312,7 @@ export const JavaScriptFunction = defineNode({
 }).on(
   {
     // :361-388 — the text: the diagnostics cleared, the code compiled (or its failure kept), a run asked for
-    functionScript: (s, v) => {
+    functionScript: (s, v, _i, w) => {
       // :771-775 clearRunDiagnostics — a message cleared to blank text and sent (v2, row C146); blank already: nothing
       const cleared: Partial<FunctionState> = s.lastError ? { lastError: '' } : {};
       if (v === undefined)
@@ -323,7 +323,14 @@ export const JavaScriptFunction = defineNode({
         };
       const text = v as string;
       const parseError = parse(text);
-      // P107-C155: the runtime asks for this run only while Run is not wired (:386); the spec has no wired port
+      // :386 `if (!this.isInputConnected('run')) this.scheduleRun()` — NDA-017 §2's one surviving guard: the code is compiled either
+      // way, and asked to run only while Run is not wired (P107-C155: `w.wired`, the port a scenario names under `wired`)
+      if (w.wired('run'))
+        return {
+          says: 'new code, with Run wired: compiled, and nothing runs until Run or a changed ticked input — a message on Error is cleared',
+          set: { ...cleared, script: text, compiled: parseError === undefined, parseError },
+          send: s.lastError ? ['error'] : []
+        };
       return {
         says: 'new code, with Run not wired: compiled and run at the end of the frame — Success, or Error and Failure if it does not compile or throws',
         set: {

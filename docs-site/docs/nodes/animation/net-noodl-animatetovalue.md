@@ -37,6 +37,37 @@ Smoothing any numeric change: positions, opacity, blend values for Color Blend. 
 |---|---|---|---|
 | `jumpTo` | Signal | — | Puts Current Value at Jump Value at once, then carries on towards Target Value; a jump is not an arrival, so At Target Value does not fire for it |
 
+### What each input does
+
+**Target Value** (`targetValue`)
+
+- not a number: ignored
+- the first number it is handed: Current Value goes there at once, with no move
+- the target it already has: nothing
+- a new target: a move under way is dropped without At Target Value, and a new one starts from where the value is, at the frame's end and Delay later
+
+**Jump Value** (`jumpValue`)
+
+- always: kept for the next Jump To; nothing moves
+
+**Jump To** (`jumpTo`)
+
+- Jump Value is not a number: nothing
+- no number yet: Current Value goes to Jump Value, which becomes the target too
+- otherwise: any move stops, Current Value goes to Jump Value, and at the frame's end it moves back to Target Value if they differ
+
+**Duration** (`duration`)
+
+- always: kept; read at every frame of a move, the move under way included
+
+**Delay** (`delay`)
+
+- always: kept as a number (what is not one is 0); read when the next move starts
+
+**Easing Curve** (`easingCurve`)
+
+- always: kept; read at every frame of a move, the move under way included
+
 ## Outputs
 
 ### Values

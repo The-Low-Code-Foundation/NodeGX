@@ -27,6 +27,13 @@ The action behind a log-out button or menu item. To react to the session ending 
 |---|---|---|---|
 | `login` | Signal | — | Signs the current user out and clears the stored session |
 
+### What each input does
+
+**Do** (`login`)
+
+- the first press this frame: the call goes to the backend at the frame's end, with the values held then
+- another press this frame: it joins that call, and is answered with it
+
 ## Outputs
 
 ### Signals

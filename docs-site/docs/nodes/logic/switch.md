@@ -35,6 +35,28 @@ The idiomatic node for anything a user toggles: expand/collapse, mute, edit mode
 | `off` | Signal | — | Switches off, or fires Unchanged if it is already off |
 | `on` | Signal | — | Switches on, or fires Unchanged if it is already on |
 
+### What each input does
+
+**On** (`on`)
+
+- already on → Unchanged; Switched To On, Switched stay silent
+- while off: it switches on → Switched To On, Switched, Done
+
+**Off** (`off`)
+
+- while on: it switches off → Switched To Off, Switched, Done
+- already off → Unchanged; Switched To Off, Switched stay silent
+
+**Flip** (`flip`)
+
+- while on: it switches off → Switched To Off, Switched, Done; Switched To On stays silent
+- while off: it switches on → Switched To On, Switched, Done; Switched To Off stays silent
+
+**State** (`onFromStart`)
+
+- true: the switch is on, announced even if it already was → Switched To On, Switched; Switched To Off stays silent
+- false: the switch is off, announced even if it already was → Switched To Off, Switched; Switched To On stays silent
+
 ## Outputs
 
 ### Values

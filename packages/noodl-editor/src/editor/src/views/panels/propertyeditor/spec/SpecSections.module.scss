@@ -1,0 +1,311 @@
+/* NSP-019 — the rules fold and the Try panel under a node's property rows. Tokens only, the
+   PortsTab's vocabulary (section titles, rows on bg-2, shy text for the quiet lines). */
+
+.Root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4) var(--spacing-6);
+  border-top: 1px solid var(--theme-color-border-subtle);
+}
+
+.Fold {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.FoldTitle {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-1-5);
+  color: var(--theme-color-fg-highlight);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  user-select: none;
+  padding: var(--spacing-1) 0;
+}
+
+.FoldCount {
+  color: var(--theme-color-fg-muted);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.FoldBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.Intro,
+.Empty {
+  color: var(--theme-color-fg-muted);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  margin: 0;
+}
+
+/* --- the rules -------------------------------------------------------------------------- */
+
+.RuleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.RulePort {
+  color: var(--theme-color-fg-default-shy);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  margin: var(--spacing-1) 0 0;
+}
+
+.RuleList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.Rule {
+  padding: var(--spacing-1-5) var(--spacing-2-5);
+  border: 1px solid var(--theme-color-border-subtle);
+  border-radius: var(--radius-md);
+  background-color: var(--theme-color-bg-2);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  overflow-wrap: anywhere;
+}
+
+.RuleWhen {
+  color: var(--theme-color-fg-default);
+}
+
+.RuleArrow {
+  color: var(--theme-color-fg-muted);
+}
+
+.RuleThen {
+  color: var(--theme-color-fg-highlight);
+}
+
+/* --- the try panel ---------------------------------------------------------------------- */
+
+.Try {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.Controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1-5);
+}
+
+.Field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-sm);
+  color: var(--theme-color-fg-default);
+}
+
+.FieldLabel {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.FieldInput,
+.ClockInput {
+  width: 120px;
+  min-width: 0;
+  padding: var(--spacing-1) var(--spacing-1-5);
+  border: 1px solid var(--theme-color-border-subtle);
+  border-radius: var(--radius-sm);
+  background-color: var(--theme-color-bg-2);
+  color: var(--theme-color-fg-highlight);
+  font-family: var(--font-family-code);
+  font-size: var(--font-size-xs);
+
+  &:focus-visible {
+    outline: 2px solid var(--theme-color-primary);
+    outline-offset: 1px;
+  }
+}
+
+.ClockInput {
+  width: 64px;
+}
+
+.Actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-1-5);
+}
+
+.Clock {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.Press,
+.Quiet {
+  padding: var(--spacing-1) var(--spacing-2-5);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--theme-color-primary);
+    outline-offset: 1px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
+.Press {
+  border: 1px solid var(--theme-color-primary);
+  background-color: transparent;
+  color: var(--theme-color-primary);
+
+  &:hover:not(:disabled) {
+    background-color: var(--theme-color-primary);
+    color: var(--theme-color-on-primary);
+  }
+}
+
+.Quiet {
+  margin-left: auto;
+  border: 1px solid var(--theme-color-border-subtle);
+  background-color: transparent;
+  color: var(--theme-color-fg-default-shy);
+}
+
+.FrameRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.SameFrame {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font-size: var(--font-size-sm);
+  color: var(--theme-color-fg-default-shy);
+}
+
+/* --- the timeline ----------------------------------------------------------------------- */
+
+.Timeline {
+  list-style: none;
+  margin: 0;
+  padding: var(--spacing-2) var(--spacing-2-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  border: 1px solid var(--theme-color-border-subtle);
+  border-radius: var(--radius-md);
+  background-color: var(--theme-color-bg-2);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+}
+
+.Timeline-start {
+  color: var(--theme-color-fg-default-shy);
+}
+
+.Timeline-you {
+  color: var(--theme-color-fg-highlight);
+  font-weight: var(--font-weight-medium);
+  margin-top: var(--spacing-1);
+}
+
+.TimelineFrame {
+  height: 1px;
+  margin: var(--spacing-0-5) 0;
+  background-color: var(--theme-color-border-subtle);
+}
+
+.Timeline-node {
+  color: var(--theme-color-fg-default);
+  padding-left: var(--spacing-3);
+}
+
+.Timeline-quiet {
+  color: var(--theme-color-fg-muted);
+  font-style: italic;
+  padding-left: var(--spacing-3);
+}
+
+.TimelineError {
+  color: var(--theme-color-danger);
+  padding-left: var(--spacing-3);
+}
+
+/* --- the disagreements note ------------------------------------------------------------- */
+
+.Disagreed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1-5);
+  padding: var(--spacing-2) var(--spacing-2-5);
+  border: 1px solid var(--theme-color-border-subtle);
+  border-left: 3px solid var(--theme-color-warning);
+  border-radius: var(--radius-md);
+  background-color: var(--theme-color-bg-2);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+}
+
+.DisagreedTitle {
+  margin: 0;
+  color: var(--theme-color-fg-highlight);
+  font-weight: var(--font-weight-medium);
+}
+
+.DisagreedList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1-5);
+}
+
+.DisagreedRow {
+  color: var(--theme-color-fg-default);
+  overflow-wrap: anywhere;
+}
+
+.DisagreedId {
+  font-family: var(--font-family-code);
+  font-size: var(--font-size-xs);
+  color: var(--theme-color-fg-default-shy);
+}
+
+.DisagreedStatus {
+  color: var(--theme-color-fg-default-shy);
+}
+
+.DisagreedRuling {
+  margin-top: var(--spacing-0-5);
+  color: var(--theme-color-fg-muted);
+  font-size: var(--font-size-xs);
+}

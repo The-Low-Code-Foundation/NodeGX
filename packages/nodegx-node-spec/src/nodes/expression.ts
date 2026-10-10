@@ -24,8 +24,8 @@
  *     (a STRAY) — its value is kept, an arrival re-runs the node like any other, and it joins the compiled function's parameters
  *     the next time the text is set.
  *   - WHEN IT RUNS — once per frame at most (:255-258), at the frame's end: a value that CHANGED (run-on-value-change.ts
- *     `valueDidChange`) on a ticked port (:215-228); Run, always (:599-603); the text being set (:587 — `Run` is never wired in a
- *     lone node). The text being set while no port it reads has ever had a value is the LOAD evaluation (:234-244): it runs over
+ *     `valueDidChange`) on a ticked port (:215-228); Run, always (:599-603); the text being set (:611 — only while `Run` is NOT
+ *     wired: a scenario wires it under `wired`, P107-C155, and the text then waits for Run or an input). The text being set while no port it reads has ever had a value is the LOAD evaluation (:234-244): it runs over
  *     the unset ports (they read `undefined`) unless Evaluate At Load is unticked, and an answer it cannot give — a compile
  *     failure, a throw, `NaN` — is no answer: nothing is sent, nothing fires, nothing is reported (:437-454, :269-277).
  *   - WHAT IT SENDS (:278-307): Result, Is True, Is False and the three typed results when the answer is not the same JavaScript
@@ -56,7 +56,7 @@
  *     the parameter after them. v4 wrote the values over one argument array in the order the text last set (never shortened) and
  *     appended the API after all of it: a stray input, or a text that once read more names, handed `Noodl` nothing or a stale value.
  *
- * Not in v5: Run wired at load (:587 — a graph rule; the lone node's Run is never wired), and a node deleted (:178-184 — the
+ * Not in v5: a node deleted (:178-184 — the
  * subscription dropped; no play deletes a node).
  */
 
@@ -382,12 +382,20 @@ export const Expression = defineNode({
       const deps = detectDependencies(text);
       for (const target of watched(s.deps)) w.unwatch(target);
       for (const target of watched(deps)) w.watch(target);
+      const compiled = { body: PREAMBLE + 'return (' + text + ');', referenced, reserved: expressionNodeInputsRead(text), scope, names: Object.keys(scope), compiledWith: undefined, unticked, deps };
+      // :611 `if (!this.isInputConnected('run')) this._scheduleLoadEvaluation()` — NDA-017 §2's one surviving guard: the ports and the
+      // text are taken either way, and the load's evaluation asked for only while Run is not wired (P107-C155: `w.wired`)
+      if (w.wired('run'))
+        return {
+          says: 'new text, with Run wired: its inputs become the names it reads, and nothing is evaluated until Run or a changed ticked input',
+          set: compiled,
+          send: []
+        };
       // :234-244 `_scheduleLoadEvaluation`
       const pendingLoad = referenced.length > 0 && !s.arrived ? true : s.pendingLoad;
-      // P107-C155: the runtime asks for this evaluation only while Run is not wired (:611); the spec has no wired port
       return {
         says: 'new text, with Run not wired: its inputs become the names it reads, and it is evaluated at the end of the frame — On True or On False; before any input has arrived, only if Evaluate At Load is ticked',
-        set: { body: PREAMBLE + 'return (' + text + ');', referenced, reserved: expressionNodeInputsRead(text), scope, names: Object.keys(scope), compiledWith: undefined, unticked, pendingLoad, deps, ...schedule },
+        set: { ...compiled, pendingLoad, ...schedule },
         send: []
       };
     },

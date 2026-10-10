@@ -205,7 +205,14 @@ export const SubscribeToChanges = defineNode({
 }).on(
   {
     // :327-330 — v2 (row C55 ruled "Ignore repeated values"): only a change reconnects
-    enabled: (s, v) => (valueDidChange(s.enabled, !!v) ? { set: { enabled: !!v, scheduled: true }, send: [] } : { send: [] })
+    enabled: (s, v) =>
+      valueDidChange(s.enabled, !!v)
+        ? {
+            says: "a change (on is anything truthy): at the frame's end the subscription held is closed — Subscribed and Realtime Status sent when one was held — and, on, with a Class and a Backend the project has, a new one is opened: Realtime Status is connecting, then whatever the backend tells",
+            set: { enabled: !!v, scheduled: true },
+            send: []
+          }
+        : { says: 'the value it already holds: nothing — the subscription stays as it is', send: [] }
   },
   {
     derived: {

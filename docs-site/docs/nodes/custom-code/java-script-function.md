@@ -36,6 +36,18 @@ Anything beyond a one-liner: data transformation, calling browser APIs or fetch,
 |---|---|---|---|
 | `run` | Signal | — | Runs the script now. This is additional to the inputs that re-run it; untick an input under Run On Value Change to stop that one triggering a run |
 
+### What each input does
+
+**Script** (`functionScript`)
+
+- no code: nothing to run, and a later Run is answered Unchanged (a message on Error is cleared)
+- new code, with Run wired: compiled, and nothing runs until Run or a changed ticked input — a message on Error is cleared
+- new code, with Run not wired: compiled and run at the end of the frame — Success, or Error and Failure if it does not compile or throws
+
+**Run** (`run`)
+
+- always: one run at the end of the frame, however many Runs arrived — Success, and Done for each Run; Error, and Failure for each Run, if the code does not compile or throws; Unchanged for each Run when there is no code
+
 ## Outputs
 
 ### Signals

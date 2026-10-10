@@ -46,7 +46,7 @@
  *     controls is not an act.
  */
 
-import { defineNode, type Patch } from '../spec';
+import { defineNode, said, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
 
 /**
@@ -462,47 +462,84 @@ export const Video = defineNode({
   }
 }).on(
   {
-    mounted: (s, v) => (!!v !== s.mounted ? { set: { mounted: !!v }, send: [] } : NOTHING),
-    scrollIntoView: () => NOTHING,
-    visible: (_s, v) => ({ set: { visible: !!v }, send: [] }),
+    // NSP-018 (s77): the words. The fifteen shared visual reducers say what the Image's say (image.ts — the agreed house style), word
+    // for word, since the Video holds the Image's pointer, keyboard, drag and drop rules (THE RULE above); only the media and playback
+    // ports are the Video's own
+    // react-component-node.ts :2283-2294 — what the node wants; the page follows at the next paint. The value it holds already: nothing
+    mounted: (s, v) =>
+      !!v !== s.mounted
+        ? { says: 'a change: the element is put on the page, or taken off it, at the next paint', set: { mounted: !!v }, send: [] }
+        : { says: 'the value it already holds: nothing', send: [] },
+    // react-component-node.ts :1380-1395 — scrolls; nothing on the wire
+    scrollIntoView: () => ({ says: 'always: the page, or the scrolling Group holding it, scrolls until the element can be seen', send: [] }),
+    visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, it takes no pointer', set: { visible: !!v }, send: [] }),
     // Video.tsx :214 — the style holds the value as written; compared with the number 0
-    opacity: (_s, v) => ({ set: { opacityZero: v === 0 }, send: [] }),
-    pointerEventsMode: (s, v) => ({ set: { peStyle: v === 'inherit' ? undefined : s.peEnabled === false ? 'none' : 'auto' }, send: [] }),
-    pointerEventsEnabled: (_s, v) => ({ set: { peEnabled: !!v, peStyle: v ? 'auto' : 'none' }, send: [] }),
+    opacity: (_s, v) => ({ says: 'always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it', set: { opacityZero: v === 0 }, send: [] }),
+    // react-component-node.ts :772-781 — `inherit` removes the style; anything else writes it from the last Enabled (`auto` before one)
+    pointerEventsMode: (s, v) =>
+      v === 'inherit'
+        ? { says: 'Inherit: its own pointer style comes off', set: { peStyle: undefined }, send: [] }
+        : { says: 'Explicit: the last Pointer Events Enabled is written back (on, before one was set)', set: { peStyle: s.peEnabled === false ? 'none' : 'auto' }, send: [] },
+    pointerEventsEnabled: (_s, v) => ({ says: 'always, whatever the mode: off, the pointer passes through to what is behind it', set: { peEnabled: !!v, peStyle: v ? 'auto' : 'none' }, send: [] }),
     // drag-drop.ts `setDraggable`, `elementChanged` — the attributes go on every element the node has while Draggable is on (a
     // remount, a new Tag, a mount however late), and come off the one on the page with it (row C77, fixed in P109 ISL-031)
-    draggable: (_s, v) => ({ set: { draggable: !!v }, send: [] }),
+    draggable: (_s, v) => ({ says: 'always: on, every element it draws can be picked up, by pointer or keyboard; off, the one on the page cannot', set: { draggable: !!v }, send: [] }),
     // read by the zone it is dropped on: this page's only zone is itself, and a drag never takes its own node (C78, fixed in P109 ISL-031)
-    dragValue: () => NOTHING,
-    dragKind: () => NOTHING,
-    holdToDrag: (_s, v) => ({ set: { holdToDrag: v }, send: [] }),
-    holdTime: (_s, v) => ({ set: { holdTime: v }, send: [] }),
+    dragValue: () => ({ says: 'always: read by the zone it is dropped on, which reports it as Dropped Value', send: [] }),
+    dragKind: () => ({ says: 'always: read by a zone with an Accept Kind as it is dragged over one', send: [] }),
+    holdToDrag: (_s, v) => ({ says: 'always: read at the next press — whether it must be held before it picks up', set: { holdToDrag: v }, send: [] }),
+    holdTime: (_s, v) => ({ says: 'always: read at the next held press — how many seconds it is held before it picks up', set: { holdTime: v }, send: [] }),
+    // drag-drop.ts :112-120 — off while the gesture is over this zone: it leaves it (`leaveZone` :489-512)
     acceptDrops: (s, v) => {
-      if (v) return { set: { acceptDrops: true }, send: [] };
-      if (s.inZone) return { set: { acceptDrops: false, inZone: false, isDropTarget: false }, send: ['isDropTarget'] };
-      return { set: { acceptDrops: false }, send: [] };
+      if (v) return { says: 'on: a Draggable can be dropped here', set: { acceptDrops: true }, send: [] };
+      if (s.inZone) return { says: 'off while a drag is over it: the drag leaves it — Is Drop Target goes false', set: { acceptDrops: false, inZone: false, isDropTarget: false }, send: ['isDropTarget'] };
+      return { says: 'off: nothing can be dropped here', set: { acceptDrops: false }, send: [] };
     },
-    acceptKind: (_s, v) => ({ set: { acceptKind: v }, send: [] }),
+    acceptKind: (_s, v) => ({ says: 'always: read as a drag comes over it — a source of another kind does not light it up', set: { acceptKind: v }, send: [] }),
     // C81 (fixed in P109 ISL-038): switched off, the zone forgets the count and goes dark — it could not hear the leave
-    acceptFileDrops: (s, v) => (v ? { set: { acceptFileDrops: true }, send: [] } : { set: { acceptFileDrops: false, dragDepth: 0, isDragOver: false }, send: s.isDragOver ? ['isDragOver'] : [] }),
-    acceptedFileTypes: (_s, v) => ({ set: { acceptedFileTypes: v }, send: [] }),
-    // video.ts :130-133 — `resolveMediaSource`; the frame's end draws it
-    src: (_s, v) => ({ set: { source: mediaSource(v) }, send: [] }),
-    // :158-231 — held by the node; the frame's end draws them
-    startTime: (_s, v) => ({ set: { startTime: v }, send: [] }),
-    endTime: (_s, v) => ({ set: { endTime: v }, send: [] }),
-    muted: (_s, v) => ({ set: { muted: v }, send: [] }),
-    autoplay: (_s, v) => ({ set: { autoplay: v }, send: [] }),
-    loop: (_s, v) => ({ set: { loop: v }, send: [] }),
-    // :35-47 — on the component, or waiting for it with the actions
+    acceptFileDrops: (s, v) =>
+      v
+        ? { says: 'on: a file dragged from the desktop can be dropped here', set: { acceptFileDrops: true }, send: [] }
+        : {
+            says: 'off: no file can be dropped here, and a drag over it is forgotten — Is Dragging Over goes false if it was true',
+            set: { acceptFileDrops: false, dragDepth: 0, isDragOver: false },
+            send: s.isDragOver ? ['isDragOver'] : []
+          },
+    acceptedFileTypes: (_s, v) => ({ says: 'always: read at a drop — which files count as accepted', set: { acceptedFileTypes: v }, send: [] }),
+    // video.ts :130-133 — `resolveMediaSource`; the frame's end draws it (`paintedElement`: a new file address loads again, one taken
+    // away loads nothing, a move between a file and an embed makes a new element)
+    src: (_s, v) => ({ says: 'always: what is drawn at the end of the frame — a project file or a URL as a video, a YouTube or Vimeo link in an embedded player, or nothing; a different file loads afresh, paused and back at the start', set: { source: mediaSource(v) }, send: [] }),
+    // :158-231 — held by the node; the frame's end draws them. Start Time and End Time go into the address the video loads from
+    // (media-fragment.ts `#t=`), so a change that moves it is a new address: a load (paused, back at the start)
+    startTime: (_s, v) => ({ says: 'always: where the video begins, put into the address it loads from (blank: the start; below 0 is 0); a change that moves it loads the video again at the next paint, paused', set: { startTime: v }, send: [] }),
+    endTime: (_s, v) => ({ says: 'always: where the first play-through stops, put into the address with Start Time (ignored unless later than Start Time; approximate on YouTube, ignored on Vimeo); a change that moves it loads the video again at the next paint, paused', set: { endTime: v }, send: [] }),
+    muted: (_s, v) => ({ says: 'always: drawn at the next paint — on, the video is silent, and Play or Autoplay may start it before a person has pressed, clicked or typed on the page', set: { muted: v }, send: [] }),
+    autoplay: (_s, v) => ({ says: 'always: drawn at the next paint, and read as a load completes — on, a video that may play (Muted, or a person has acted on the page) and that Pause or Reset has not stopped since the load began starts by itself: On Can Play, then On Play', set: { autoplay: v }, send: [] }),
+    loop: (_s, v) => ({ says: 'always: drawn at the next paint, and read as the video reaches its end — on, it goes back to the start and plays on; off, it pauses there (On Pause)', set: { loop: v }, send: [] }),
+    // :35-47 — on the component, or waiting for it with the actions (`sourceObject`: only a `<video>` takes one, and only nothing is
+    // seen to change it; C96, C99 on the runtime)
     srcObject: (s, v) => {
-      if (s.onPage) return toPatch(sourceObject(s, v));
-      return toPatch(waitFor(s, { srcObject: v }));
+      if (!s.onPage) return said('off the page: waits for the element behind the actions already waiting, in order, and is written at the paint that puts the video there (at most 16 wait, and the oldest is pushed out)', toPatch(waitFor(s, { srcObject: v })));
+      if (s.kind !== 'video' || v !== undefined) return { says: 'null (what it already has), a value that is not a stream, or anything on an embedded player: nothing changes — a live stream itself plays in place of Source, and no scenario holds one', set: {}, send: [], emit: [] };
+      return said('nothing (undefined) on a video: the browser is handed null, so it loads Source again — paused, back at the start (Playback Position 0 when it had moved) — and Play waits for the new On Can Play before it can start it', toPatch(sourceObject(s, v)));
     },
-    play: (s) => action(s, 'play'),
-    restart: (s) => action(s, 'restart'),
-    pause: (s) => action(s, 'pause'),
-    reset: (s) => action(s, 'reset')
+    // video.ts :48-117, Video.tsx :177-201 — the four actions: on the component now, or waiting for it (react-component-node.ts :2060-2101)
+    play: (s) =>
+      s.onPage
+        ? said('on the page: wants the video playing and, once it has loaded, starts it — On Play if it was paused (from the start again after its end); Error then Playback Failure if the browser refuses (not Muted and no person has acted on the page) or the load failed; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved', acted(s, 'play'))
+        : said('off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and plays at the paint that puts the video there — Done then', waits(s, 'play')),
+    restart: (s) =>
+      s.onPage
+        ? said('on the page: wants the video playing and, once it has loaded, goes back to second 0 (Playback Position 0 — not Start Time) and starts it as Play does; before the load, only the wanting; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved', acted(s, 'restart'))
+        : said('off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and restarts at the paint that puts the video there — Done then', waits(s, 'restart')),
+    pause: (s) =>
+      s.onPage
+        ? said('on the page: stops wanting the video playing, and pauses one that is playing — Playback Position, then On Pause; one already paused stays so; Autoplay no longer starts it on this load; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved', acted(s, 'pause'))
+        : said('off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and pauses at the paint that puts the video there — Done then', waits(s, 'pause')),
+    reset: (s) =>
+      s.onPage
+        ? said('on the page: stops wanting the video playing, goes back to second 0 (Playback Position 0 once loaded — not Start Time) and pauses it — On Pause if it was playing; Autoplay no longer starts it on this load; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved', acted(s, 'reset'))
+        : said('off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and resets at the paint that puts the video there — Done then', waits(s, 'reset'))
   },
   {
     world: {
@@ -798,9 +835,13 @@ function activation(s: Readonly<State>, given = true): Act {
 // THE ACTIONS — on the component, or waiting for it (react-component-node.ts :2014-2056)
 // ---------------------------------------------------------------------------------------------
 
-/** An action: on the component now — Done, after what the frame has already resolved (`ran`) — or waiting for it. */
-function action(s: Readonly<State>, op: Action) {
-  if (!s.onPage) return { ...toPatch(waitFor(s, { op })), outcome: 'pending' as const };
+/** An action before the Video is on the page: it waits for the component (`withInnerComponent`), its outcome pending until then. */
+function waits(s: Readonly<State>, op: Action) {
+  return { ...toPatch(waitFor(s, { op })), outcome: 'pending' as const };
+}
+
+/** An action on the component now: Done — after what the frame has already resolved (`ran`), when there is any. */
+function acted(s: Readonly<State>, op: Action) {
   const a = ran(s, op);
   if (s.ran.length === 0) return { ...a, outcome: 'done' as const };
   return { ...a, set: { ...a.set, ran: [...s.ran, { port: op, outcome: 'done' as const }] }, outcome: 'pending' as const };

@@ -147,6 +147,87 @@ Any free-text entry. Use `type` instead of separate nodes for email/number/passw
 | `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 | `set` | Signal | — | Writes the current Value into the field now. This is additional to Value applying as it arrives; untick Value under Run On Value Change to stop that |
 
+### What each input does
+
+**Enabled** (`enabled`)
+
+- the value it already holds: nothing
+- a change: Enabled follows; disabled, the field takes no typing, no key and no focus
+
+**Type** (`type`)
+
+- always: read at the next paint and the next write — what the field accepts, and whether Value hands on a number or text
+
+**Value** (`startValue`)
+
+- undefined: ignored
+- the value it already holds (null as empty): nothing
+- a new value, with Run On Value Change unticked: held for the next Set
+- a new value, with Run On Value Change ticked: written now — on the page the field takes it (Value, Value Changed) unless it holds the keyboard; off the page Value alone, when it differs
+
+**Value** (`runOnChange-startValue`)
+
+- always: whether a new Value is written at once, or waits for Set
+
+**Set** (`set`)
+
+- always: at the end of the frame (or a pointer act's drain before it) the Value as it stands is written, as a ticked Value writes it — Done if it wrote, else Unchanged
+
+**Text To Insert** (`textToInsert`)
+
+- always: read by the next Insert Text, as text (nothing as empty)
+
+**Insert Text** (`insert`)
+
+- always: at the end of the frame Text To Insert goes in at the caret (at the end, off the page), within Max length — Value, Value Changed on the page, and Done; Unchanged when nothing fits
+
+**Backspace** (`backspace`)
+
+- always, at once: the character before the caret goes (the last one, off the page) — Value, Value Changed on the page, and Done; Unchanged when there is none
+
+**Clear** (`clear`)
+
+- always, at once: the field and Value are emptied (Value Changed on the page, focused or not) — Done; Unchanged when they were empty already
+
+**Max length** (`maxLength`)
+
+- always: read at the next keystroke and Insert Text — above 0, no more characters than this
+
+**Mounted** (`mounted`)
+
+- always: the field is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint
+
+**Enable Label** (`useLabel`)
+
+- always: a label is drawn above the field, or not; the field and its keyboard stay
+
+**Focus** (`focus`)
+
+- not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent
+- it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent
+- otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done
+
+**Blur** (`blur`)
+
+- it does not hold the keyboard (or is disabled, and gives it up to nobody): nothing changes → Done; Blurred stays silent
+- it holds the keyboard: it is taken off it, and the Focused state goes false → Blurred, Done
+
+**Scroll Into View** (`scrollIntoView`)
+
+- always: the page, or the scrolling Group holding it, scrolls until the field can be seen
+
+**Block Pointer Events** (`blockTouch`)
+
+- always: on, a pointer act that lands here goes no further — the nodes it sits inside do not hear it
+
+**Visible** (`visible`)
+
+- always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it
+
+**Opacity** (`opacity`)
+
+- always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it
+
 ## Outputs
 
 ### Values

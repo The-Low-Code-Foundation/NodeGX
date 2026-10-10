@@ -36,6 +36,16 @@ Tracing what a cloud function actually did with a real request, and leaving a br
 |---|---|---|---|
 | `log` | Signal | — | Writes the line. Nothing is written until this fires |
 
+### What each input does
+
+**Value** (`value`)
+
+- always: passed straight through to Value; nothing is written
+
+**Log** (`log`)
+
+- always: the line is written now, from Message, Level and Data as they stand → Done
+
 ## Outputs
 
 ### Values

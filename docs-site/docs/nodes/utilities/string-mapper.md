@@ -28,6 +28,16 @@ Use it to translate machine values into display text: status codes to labels, op
 | `defaultMapping` | String | — | Published when Input String matches none of the numbered inputs |
 | `inputString` | String | — | The string to look up among the numbered inputs |
 
+### What each input does
+
+**Input String** (`inputString`)
+
+- always: looked up among the numbered inputs at the end of the frame (null counts as empty text); Mapped String follows
+
+**Default** (`defaultMapping`)
+
+- always: what Mapped String becomes at the end of the frame when nothing matches
+
 ## Outputs
 
 ### Values

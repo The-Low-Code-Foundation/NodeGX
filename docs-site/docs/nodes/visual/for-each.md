@@ -40,6 +40,28 @@ component = '/MyComponent';` | JavaScript run per item that sets `component` to 
 |---|---|---|---|
 | `refresh` | Signal | — | Rebuilds every item from the current Items, discarding any state the item components held |
 
+### What each input does
+
+**Items** (`items`)
+
+- the same list again: nothing; a new one is copied into its own list at the end of the frame — a row added for each new item and taken down for each one gone, then Items Rendered if a row came or went; anything not a list empties it
+
+**Template Type** (`templateType`)
+
+- always: a rebuild at the end of the frame — Explicit builds every row from Template, Dynamic runs Script per item
+
+**Template** (`template`)
+
+- always: a rebuild at the end of the frame, every row built again from this component
+
+**Script** (`templateScript`)
+
+- always: compiled as it arrives (code that does not compile leaves none), and a rebuild at the end of the frame
+
+**Refresh** (`refresh`)
+
+- always: a rebuild at the end of the frame, one however many Refreshes arrived — every row goes and one is built per item, then Done for each Refresh; Failure for each when Template Type has nothing to build from, or there are no Items
+
 ## Outputs
 
 ### Values

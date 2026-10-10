@@ -98,9 +98,9 @@ export const ParseCSV = defineNode({
   }
 }).on(
   {
-    text: (_s, v) => ({ set: { text: v, textSupplied: v !== undefined && v !== null, scheduled: true }, send: [] }), // :84-88
-    hasHeader: (_s, v) => ({ set: { hasHeader: v, scheduled: true }, send: [] }), // :97-100
-    delimiter: (_s, v) => ({ set: { delimiter: v || ',', scheduled: true }, send: [] }) // :108-111
+    text: (_s, v) => ({ says: 'always: parsed at the end of the frame (once, however many inputs moved) — Items, Count and Changed, or Error and Failure with Items and Count untouched; nothing (undefined or null) is not parsed, a number parses as its text', set: { text: v, textSupplied: v !== undefined && v !== null, scheduled: true }, send: [] }), // :84-88
+    hasHeader: (_s, v) => ({ says: 'always: the CSV is parsed again at the end of the frame, once any has arrived — the first row names the columns and Items holds records in a fresh array, or Items holds the rows as arrays of cells', set: { hasHeader: v, scheduled: true }, send: [] }), // :97-100
+    delimiter: (_s, v) => ({ says: 'always: the CSV is parsed again at the end of the frame, once any has arrived, split on this (cleared reads as a comma)', set: { delimiter: v || ',', scheduled: true }, send: [] }) // :108-111
   },
   {
     // :166-175 `_schedule` → :176-215 `_parse`

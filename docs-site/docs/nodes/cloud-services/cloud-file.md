@@ -27,6 +27,13 @@ Whenever a file handle needs to become a URL or filename. Note the cloudfile→i
 |---|---|---|---|
 | `file` | Cloudfile | — | Stored file to read, as an Upload File node or a record property produces it; any other value leaves the previous file in place |
 
+### What each input does
+
+**Cloud File** (`file`)
+
+- a stored file: held, and URL, Name, Content Type and Size are sent from it
+- anything else (nothing, text, a plain object): ignored — the file held before stays, nothing is sent
+
 ## Outputs
 
 ### Values

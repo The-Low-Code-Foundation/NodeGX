@@ -65,6 +65,16 @@ Decorative or informative glyphs next to text, in cards, headers and list rows. 
 |---|---|---|---|
 | `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 
+### What each input does
+
+**Mounted** (`mounted`)
+
+- always: the icon is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint
+
+**Scroll Into View** (`scrollIntoView`)
+
+- always: the page, or the scrolling Group holding it, scrolls until the icon can be seen
+
 ## Outputs
 
 ### Values

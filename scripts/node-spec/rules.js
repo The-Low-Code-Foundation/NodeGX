@@ -11,7 +11,9 @@
  * are the spec author's; everything after the arrow is the spec's structure. Read statically (the TypeScript AST), so a
  * `says` must be a string literal in the patch's own object literal, and so must a said branch's `emit` elements and
  * `outcome` (s73: a computed one throws); a branch built by a helper outside the reducer is not seen here. A patch computed
- * from a draft (For Each's `run`) is said with `said('words', patch)` (spec.ts, s74): its line is the words alone.
+ * from a draft (For Each's `run`) is said with `said('words', patch)` (spec.ts, s74): its line is the words alone. A spec built
+ * by a factory (`relationNode({ type: 'AddDbModelRelation', … })`, s77) is read through the factory's literal-typed calls in
+ * the same file: one set of lines, every call's.
  *
  *   node scripts/node-spec/rules.js [Type …]   print the rules (all said specs, or the named ones)
  */
@@ -89,6 +91,46 @@ function readReducers(dir = nodesDir) {
     return undefined;
   };
 
+  // s77 (NSP-018 §6 item 2): a spec built by a FACTORY — `function relationNode(o) { return defineNode({ type: o.type, … }).on({ … }) }`
+  // called as `relationNode({ type: 'AddDbModelRelation', … })` (record-relation.ts) — has a computed `type`, so the call was
+  // invisible and the ledger reported both nodes as unread. The reader now resolves it: the `type` must be a property of the
+  // factory's first parameter (`o.type`, or `type` destructured from it), and every call of the factory IN THE SAME FILE whose
+  // argument object gives `type` as a string literal names one spec the factory's reducers belong to. The words inside the
+  // factory are read once and are every call's lines — so they must be written to fit each node the factory builds (the
+  // reader cannot interpolate; a `says` is a literal). A factory with no literal-typed call site, or whose `type` comes from
+  // anywhere else, is not resolved (its specs stay "unread" in the ledger, as before).
+  const factoryTypes = (source, defineCall, decl) => {
+    const typeProp = decl.properties.find((p) => (ts.isPropertyAssignment(p) || ts.isShorthandPropertyAssignment(p)) && propertyName(ts, p.name) === 'type');
+    if (!typeProp) return [];
+    const typeNode = ts.isShorthandPropertyAssignment(typeProp) ? typeProp.name : typeProp.initializer;
+    // the enclosing function and its name
+    let fn = defineCall.parent;
+    while (fn && !ts.isFunctionDeclaration(fn) && !ts.isArrowFunction(fn) && !ts.isFunctionExpression(fn)) fn = fn.parent;
+    if (!fn || !fn.parameters.length) return [];
+    const fnName = ts.isFunctionDeclaration(fn) && fn.name ? fn.name.text : fn.parent && ts.isVariableDeclaration(fn.parent) && ts.isIdentifier(fn.parent.name) ? fn.parent.name.text : undefined;
+    if (!fnName) return [];
+    // `type` must come from the first parameter: `o.type`, or `type` / `type: t` destructured from it
+    const param = fn.parameters[0].name;
+    let fromParam = false;
+    if (ts.isIdentifier(param)) {
+      fromParam = ts.isPropertyAccessExpression(typeNode) && ts.isIdentifier(typeNode.expression) && typeNode.expression.text === param.text && typeNode.name.text === 'type';
+    } else if (ts.isObjectBindingPattern(param) && ts.isIdentifier(typeNode)) {
+      fromParam = param.elements.some((e) => ts.isIdentifier(e.name) && e.name.text === typeNode.text && (e.propertyName ? propertyName(ts, e.propertyName) : e.name.text) === 'type');
+    }
+    if (!fromParam) return [];
+    // every call of the factory in this file with a literal `type` in its argument object
+    const types = [];
+    const find = (n) => {
+      if (ts.isCallExpression(n) && ts.isIdentifier(n.expression) && n.expression.text === fnName && n.arguments[0] && ts.isObjectLiteralExpression(n.arguments[0])) {
+        const t = stringOf(ts, propOf(ts, n.arguments[0], 'type'));
+        if (t !== undefined && !types.includes(t)) types.push(t);
+      }
+      ts.forEachChild(n, find);
+    };
+    find(source);
+    return types;
+  };
+
   const out = {};
   for (const name of fs.readdirSync(dir).filter((f) => f.endsWith('.ts')).sort()) {
     const { source } = parse(name);
@@ -104,8 +146,11 @@ function readReducers(dir = nodesDir) {
       ) {
         const decl = node.expression.expression.arguments[0];
         const reducers = node.arguments[0];
-        const type = decl && ts.isObjectLiteralExpression(decl) ? stringOf(ts, propOf(ts, decl, 'type')) : undefined;
-        if (type && reducers && ts.isObjectLiteralExpression(reducers)) {
+        const literal = decl && ts.isObjectLiteralExpression(decl) ? stringOf(ts, propOf(ts, decl, 'type')) : undefined;
+        // a literal `type` names one spec; a factory's computed `type` names one per literal-typed call of the factory
+        const types = literal !== undefined ? [literal] : decl && ts.isObjectLiteralExpression(decl) ? factoryTypes(source, node.expression.expression, decl) : [];
+        const type = types.join(' / '); // what an error names
+        if (types.length && reducers && ts.isObjectLiteralExpression(reducers)) {
           for (const r of reducers.properties) {
             const port = r.name && propertyName(ts, r.name);
             if (!port) continue;
@@ -161,7 +206,8 @@ function readReducers(dir = nodesDir) {
               walk(named.body, named.at);
             }
             walk(r, parse(name));
-            (out[type] = out[type] || {})[port] = branches;
+            // read once; a factory's reducers are each of its specs' (the same lines, by design — see `factoryTypes`)
+            for (const t of types) (out[t] = out[t] || {})[port] = branches.slice();
           }
         }
       }
@@ -185,7 +231,8 @@ function readSaidBranches() {
 /**
  * NSP-018 AC2's count, for spec-ledger: the input reducers of the registered specs (the live `spec.on`, so a spec built by a
  * factory is counted too), how many have their words, the specs fully said, and the specs whose reducers this source read
- * cannot see (written inside a factory — Add / Remove Record Relation's `relationNode`).
+ * cannot see (a `defineNode` whose `type` is neither a literal nor a factory's parameter with a literal-typed call — none
+ * since s77, when the reader learned Add / Remove Record Relation's `relationNode`).
  */
 function saidCoverage(specs) {
   const read = readReducers();
