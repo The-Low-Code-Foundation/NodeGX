@@ -109,6 +109,14 @@ const SKIP = new Set([
 const LISTENS = /(?:\.listen\s*\(|new\s+WebSocketServer\s*\(|new\s+WebSocket\.Server\s*\()/;
 
 /**
+ * P109-S19 — the node-spec model's own event subscriptions, which share the method name and open nothing:
+ * `world.listen('resize')`, `world.viewport.listen(fn)`, `viewport.listen(fn)`, `location.listen(type, fn)`
+ * (`nodegx-node-spec/src/world.ts` and its callers). Skipped by their receivers' names rather than enrolled by file:
+ * a row keyed on `world.ts` would also hide a real socket opened in that file later.
+ */
+const MODEL_SUBSCRIPTION = /\b(?:world(?:\.viewport)?|viewport|location)\.listen\s*\(/;
+
+/**
  * ⚠️ Comment lines are excluded, and this file is the reason the exclusion is not cosmetic:
  * `serve/access.ts` explains the defect by quoting `.listen(port)` twice in its module note, and
  * a scanner that counted prose would report the fix as the thing it was fixing.
@@ -143,6 +151,7 @@ function walk(dir: string, found: Set<string>): void {
       // receiver names is what makes that true for a receiver nobody has thought of yet.
       if (/\.listen\s*\(\s*\)/.test(line)) continue;
       if (/^\s*(?:async\s+)?listen\s*\(/.test(line)) continue;
+      if (MODEL_SUBSCRIPTION.test(line) && !LISTENS.test(line.replace(MODEL_SUBSCRIPTION, ''))) continue;
       found.add(relative);
     }
   }
@@ -196,5 +205,10 @@ describe('every socket this repository opens is one somebody decided about', () 
     expect(isComment('  server.listen(port);')).toBe(false);
     expect(isComment(' * `.listen(port)` with no address binds `::`')).toBe(true);
     expect(LISTENS.test('server.listen(port, host)')).toBe(true);
+    // P109-S19: the node-spec model's subscriptions are not sockets; a server's listen on the same line still is
+    expect(MODEL_SUBSCRIPTION.test("    world.listen('resize');")).toBe(true);
+    expect(MODEL_SUBSCRIPTION.test('      inst.resizeOff = world.viewport.listen(() => handleInbound(inst));')).toBe(true);
+    expect(MODEL_SUBSCRIPTION.test('  httpServer.listen(port);')).toBe(false);
+    expect(LISTENS.test("world.listen('resize'); server.listen(8080)".replace(MODEL_SUBSCRIPTION, ''))).toBe(true);
   });
 });
