@@ -148,7 +148,7 @@ import { File as NodeFile } from 'buffer';
 import type { NodeInstance, NodeMetadata, OutcomeFailureOptions, OutcomeToken, RuntimeErrorEventLike } from '@noodl/types';
 
 import type { RuntimeNode } from '../../src/internal';
-import type { BackendCall, ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, LocationCall, RequestRecord, StackAnswer, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
+import type { BackendCall, ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, LocationCall, PortContext, RequestRecord, StackAnswer, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
 import { parseEndpoint, REPEATER_TEMPLATES, ROUTER_PAGES, specFor, type WorldLocation } from '../../../nodegx-node-spec/src';
 import { AUTH_OPS, backendEvent, canonicalise, fileError, installWorld, isFileOp, locationEvent, OUTCOME_PORTS, OWN_ELEMENT, performRegistryWrite, SELF_REFERENCE, type BackendDelivery, type RegistryTables } from '../../../nodegx-node-spec/src';
 
@@ -1404,6 +1404,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
   if (graphModel && !graphModel.componentToBundleMap) graphModel.componentToBundleMap = new Map();
   if (graphModel && !graphModel.componentIndex) graphModel.componentIndex = {};
   const states = new Map<string, State>();
+  /** NSP-020 L1 (s80) — each mounted instance's port context (the scenario's `context` + its `wired`), by handle id. */
+  const portContexts = new Map<string, Readonly<PortContext>>();
   const byNodeId = new Map<string, State>();
   let next = 0;
   /** NSP-015 s20 — the subject whose `update()` is on the stack right now (synchronously); `undefined` between updates. */
@@ -1466,7 +1468,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     const derived = specFor(s.h.type)?.derived;
     if (!derived) return false;
     const params = ((s.h.node as unknown as { model?: { parameters?: Record<string, unknown> } }).model?.parameters ?? {}) as Record<string, unknown>;
-    const decl = derived.inputs(params, {})[port] ?? derived.discover?.(port);
+    const decl = derived.inputs(params, portContexts.get(s.h.id) ?? {})[port] ?? derived.discover?.(port);
     return !!decl && decl.type === 'signal';
   }
   function isSignalOutput(s: State, port: string): boolean {
@@ -1485,7 +1487,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     const outputs = specFor(s.h.type)?.derived?.outputs;
     if (!outputs) return false;
     const params = ((s.h.node as unknown as { model?: { parameters?: Record<string, unknown> } }).model?.parameters ?? {}) as Record<string, unknown>;
-    return outputs(params)[port]?.type === 'signal';
+    return outputs(params, portContexts.get(s.h.id) ?? {})[port]?.type === 'signal';
   }
 
   function intercept(s: State): void {
@@ -1839,10 +1841,14 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     (node as unknown as { connectInput(input: string, source: unknown, sourcePort: string): void }).connectInput(port, stub, 'value');
   }
 
-  function mountIn(type: string, params: Record<string, unknown>, scope?: InstanceType<typeof NodeScope>, graphId?: string, wired?: readonly string[]): RuntimeHandle {
+  function mountIn(type: string, params: Record<string, unknown>, scope?: InstanceType<typeof NodeScope>, graphId?: string, wired?: readonly string[], portContext: Readonly<PortContext> = {}): RuntimeHandle {
     if (!context.nodeRegister.hasNode(type)) throw new Error(`runtime: no node type "${type}" is registered`);
     if (graphId !== undefined && states.has(graphId)) throw new Error(`runtime: a node "${graphId}" is still mounted — a previous play leaked it`);
     const id = graphId ?? `${type}#${next++}`;
+    // NSP-020 L1 (s80) — the spec's derived ports read the scenario's `context` (what an editor has without a viewer), with the
+    // mount's `wired` folded in exactly as the interpreter's `mount` folds it; read again by `derivedSignal` after the mount
+    const ports: Readonly<PortContext> = { ...portContext, wired: [...(portContext.wired ?? []), ...(wired ?? [])] };
+    portContexts.set(id, ports);
     const logs: LogLine[] = [];
     // NSP-016 s56 — a lone Component Stack builds its pages in its own scope (`createNode`, `createPrimitiveNode`, `deleteNode`):
     // a REAL scope, as the popup root has (`scopeFor`)
@@ -1872,14 +1878,14 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     // `createFromExportData` → `addOutputPort`); the Function reads its signal ports there (simplejavascript.ts :600-618, :843-846)
     const spec = specFor(type);
     const outputPorts: Record<string, { name: string; type: string }> = {};
-    for (const [name, decl] of Object.entries(spec?.derived?.outputs?.(params, {}) ?? {})) outputPorts[name] = { name, type: decl.type as string };
+    for (const [name, decl] of Object.entries(spec?.derived?.outputs?.(params, ports) ?? {})) outputPorts[name] = { name, type: decl.type as string };
     // NSP-017 s66 — `inputPorts` the same way: the Script tells a signal input from a value by its type there (javascript.ts :640)
     const inputPorts: Record<string, { name: string; type: string }> = {};
-    for (const [name, decl] of Object.entries(spec?.derived?.inputs?.(params, {}) ?? {})) inputPorts[name] = { name, type: decl.type as string };
+    for (const [name, decl] of Object.entries(spec?.derived?.inputs?.(params, ports) ?? {})) inputPorts[name] = { name, type: decl.type as string };
     (node as unknown as { model?: unknown }).model = { type, parameters: { ...params }, outputPorts, inputPorts, removeListenersWithRef: () => undefined };
     // the derived outputs the spec declares for these params — registered as a wire would make the runtime do
     if (spec?.derived?.outputs) {
-      for (const name of Object.keys(spec.derived.outputs(params, {}))) (node as unknown as NodeInstance).registerOutputIfNeeded(name);
+      for (const name of Object.keys(spec.derived.outputs(params, ports))) (node as unknown as NodeInstance).registerOutputIfNeeded(name);
     }
     // POPUP (world.ts, NSP-015 s20) — a Close Popup's call to the handler it resolved, recorded AS HANDED, before the call
     if (type === 'NavigationClosePopup') {
@@ -3117,8 +3123,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     types: () => Object.keys((context.nodeRegister as unknown as { _constructors: Record<string, unknown> })._constructors),
     hasType: (type) => context.nodeRegister.hasNode(type),
 
-    mount(type, params, wired) {
-      return mountIn(type, params, undefined, undefined, wired);
+    mount(type, params, wired, portContext) {
+      return mountIn(type, params, undefined, undefined, wired, portContext);
     },
 
     set(h, port, value) {

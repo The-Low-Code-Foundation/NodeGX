@@ -2,7 +2,7 @@
 
 **Opened 2026-09-30 (s1), from Richard's ruling that the editor is a target (README §1, R6).**
 **Depends on NSP-004.** Runs alongside the batches (NSP-011 to NSP-017): each batch closes its nodes' rows here.
-**Status: 🟡 s79 (2026-10-10, Fable): the design is decided and built in the format (§3.1) — `portsOf` / `drawnPorts`, `PortContext` + `derived.needs` with the needs gate, `when` and `narrow` on declared ports, `context` through the scenario, the adapter and the interpreter; the three-oracle parity drive stands with its first proofs (And with wires, String Format, Image's size-mode groups) and planted mutants. s80 (Opus): L2 done — `when` on all 448 conditioned ports, oracle (b) green and made honest (§6.2). Left: the lanes (§6 s79) — `needs` on the 22 project- and schema-dependent specs, the padding out of four specs, the module table for ~50 `setup` hooks, oracle (c), the context builder in `project-contract`, AC3 (MCP) and AC4 (ledger column).**
+**Status: 🟡 s79 (2026-10-10, Fable): the design is decided and built in the format (§3.1) — `portsOf` / `drawnPorts`, `PortContext` + `derived.needs` with the needs gate, `when` and `narrow` on declared ports, `context` through the scenario, the adapter and the interpreter; the three-oracle parity drive stands with its first proofs (And with wires, String Format, Image's size-mode groups) and planted mutants. s80 (Opus): L2 done — `when` on all 448 conditioned ports, oracle (b) green and made honest (§6.2); L1 measured, its premise wrong (the fixtures are the play's wires, not the project), a format proposal in §6.3, the runtime target takes `context` and compiles again (P107-S80-DEADTARGET). Left: the lanes (§6 s79) — `needs` on the 22 project- and schema-dependent specs, the padding out of four specs, the module table for ~50 `setup` hooks, oracle (c), the context builder in `project-contract`, AC3 (MCP) and AC4 (ledger column).**
 
 ## 1. The person sentence
 
@@ -255,3 +255,52 @@ already over its 240 KB budget, P112's call — noted on the row).
 0; node-spec jest `ports, catalog-parity, golden, types, batch-visual, page-model, page-model-plants, layout,
 layout-map, layout-check, rules-reader, schema` 1,341 / 1,341; `stranger.test.ts` 46 / 46 (+18 deep skipped); editor
 `tests-unit/nsp-020` 452 / 452; `typecheck:editor-tests` 0.
+
+### 6.3 s80 (2026-10-11, Opus) — L1 measured: the fixture constants are the play's WIRES, not the project
+
+**Built:** the runtime target takes the scenario's `context` (`TargetAdapter.mount(type, params, wired, context)` →
+`mountIn`) and hands every derived call the same context the interpreter builds (`{...context, wired: [...context.wired,
+...wired]}`), kept per handle in `portContexts` and read again by `derivedSignal` / `derivedSignalOutput`. No scenario sets
+`context` yet, so no play moves; And, Or, String Format, Color Blend, String Mapper, DbModel2 conform on the runtime at 200.
+**Fixed on the way: P107-S80-DEADTARGET** — s79 left one `outputs(params)` call without its new `context` argument, and the
+runtime target has not compiled since `9a786e0b2`: every runtime conformance, graph and target suite "failed to run" with
+`Tests: 0`. s79's runtime gate (`nsp-020-ports-parity`) does not import the target.
+
+**Not built — the lane as written rests on a premise the runtime contradicts.** §6.1 says each project-dependent spec's
+fixture constant "stands in for the project" and "becomes `context` on its scenarios". Read against the runtime, for the
+Record family (and User, and Show Popup — the same three lines in each):
+
+- **What the editor draws** (the announcement): the Class dropdown, then one `prop-<field>` + `changed-<field>` per column of
+  the selected class (`dbmodelnode2.ts` `updatePorts` :548-571 → `record-ports.ts` `recordFieldPorts` :170-201), then
+  `prop-<name>` for every name a WIRE touches — a parameter key, a wire into the node, **or a wire out of it**
+  (`recordWiredFieldPorts` :260-345, "the wire is the declaration", P77 SBR-008). That is `context.schema` ∪ the wires.
+- **What exists at play**: only what a wire registered — `registerOutputIfNeeded` mints `prop-*` and `changed-*` on connect
+  (`dbmodelnode2.ts` :474-486; `user.ts` :453; `showpopup.ts` :322) — and every send is gated on it: `if
+  (this.hasOutput('prop-' + key)) this.flagOutputDirty(...)` (`dbmodelnode2.ts` :140-142, :340, :448; `user.ts` :107, :383;
+  `showpopup.ts` :270). **The schema is never read at play.**
+
+So `RECORD_FIELDS = ['title', 'n']` is not a stand-in for a schema: it is "the graph wired `prop-title`, `changed-title`,
+`prop-n`, `changed-n`", and the reducers iterate it because the runtime sends only what is wired. Replacing it with
+`context.schema` would make the PLAY depend on the project — something the runtime never does — and the editor's list
+would still lack the wired half. `PortContext.wired` holds input names only; the Record node's wires are OUTPUTS.
+
+**Proposed (a format decision — the next session takes it or replaces it before any spec moves):**
+
+1. `PortContext.wiredOutputs` beside `wired`: the output names a wire leaves from (the runtime's `getConnectionsFrom`).
+2. `derived.discoverOutput(port)`: the output-side twin of `discover` — what `registerOutputIfNeeded` makes of a wired
+   output name (Record: `prop-*` a getter, `changed-*` a signal).
+3. **At play a node has its params and its wires, never the project.** The play registers the declared ports ∪
+   `derived.outputs(params, {wired, wiredOutputs})` (the context with ONLY its wire fields) ∪ `discoverOutput(p)` for each
+   wired output not already there. `derived.outputs(params, fullContext)` stays the editor's draw (schema ∪ wires). For the
+   params-only specs (States, Function, Script, Logic Builder — L3) nothing changes: their derived ports read no context.
+4. `WorldView.hasOutput(name)` — the reducers ask what the runtime asks (`this.hasOutput('prop-' + key)`) instead of iterating
+   a constant.
+5. The wires a GENERATED sequence plays under: a spec-level default (`derived.playWires`, the fixture renamed for what it
+   is) that a scenario's own `context` overrides.
+
+Pieces 1, 2, 4 touch `src/spec.ts` (a FORMAT file): hashes refreshed + every round re-graded in the same commit; a round
+whose specs use none of them is unaffected, and a later stranger round is owed for the new surface. Gate for each spec
+that moves: its traces byte-identical (`spec-golden:check`), conformance at 200 on both targets, the needs gate, and
+oracle (a)'s row for it (L4's table marks these `owedBy: 'L1'`) turning green. Show Popup's announcement reads the
+target component's Close Popups (`showpopup.ts` :341-416), which `ComponentInterface` cannot carry — a further
+`PortContext` field, to be measured with it.

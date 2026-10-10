@@ -299,5 +299,33 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "two close actions in one frame, then two quiet frames: one close at the first frame's end, both outcomes Done, and nothing left for a later frame's end to close again",
+    "because": "closepopup.ts :260-293 — the frame's presses are taken by the close; s80: a later settle is what tells a close that kept its presses (a seed-only mutant kill, P107 s80)",
+    "world": {
+      "popup": {
+        "inside": [
+          "Popup"
+        ]
+      }
+    },
+    "params": {
+      "closeActions": "Save,Cancel"
+    },
+    "steps": [
+      {
+        "signal": "closeAction-Cancel"
+      },
+      {
+        "signal": "closeAction-Save"
+      },
+      "settle",
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
   }
 ]
