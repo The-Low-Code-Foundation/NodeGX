@@ -155,14 +155,16 @@ type State = {
 }
 
 /** One render as the node does it (:366-367 after :344-363): the text sent, `Invalid Date` before `Date Changed` when it threw. */
-function render(s: State): { set: Partial<State>; send: Array<'currentValue'>; emit: Array<'onError' | 'inputChanged'> } {
+function render(s: State): { says: string; set: Partial<State>; send: Array<'currentValue'>; emit: Array<'onError' | 'inputChanged'> } {
   const { text, error } = formatDate(s.currentInput, s.formatString, s.timeZone, s.locale);
-  return { set: { ...s, dateString: text }, send: ['currentValue'], emit: error ? ['onError', 'inputChanged'] : ['inputChanged'] };
+  if (error) return { says: 'it cannot be written (a Date it cannot read, an unknown Timezone, or a Format that is not text): Date String goes blank', set: { ...s, dateString: text }, send: ['currentValue'], emit: ['onError', 'inputChanged'] };
+  return { says: 'it can be written: Date String is the Date written through Format, in Timezone and Locale', set: { ...s, dateString: text }, send: ['currentValue'], emit: ['inputChanged'] };
 }
 
 /** :130-134, :152-156, :174-178 — a setting stored, and a render only once a date has arrived. */
-function setting(s: State): { set: Partial<State>; send: Array<'currentValue'>; emit?: Array<'onError' | 'inputChanged'> } {
-  return s.currentInput !== undefined ? render(s) : { set: s, send: [] };
+function setting(s: State): { says: string; set: Partial<State>; send: Array<'currentValue'>; emit?: Array<'onError' | 'inputChanged'> } {
+  if (s.currentInput !== undefined) return render(s);
+  return { says: 'no Date yet: kept for when one arrives; nothing is sent', set: s, send: [] };
 }
 
 export const DateToString = defineNode({
@@ -235,20 +237,20 @@ export const DateToString = defineNode({
   }
 }).on({
   // :126-134
-  formatString: (s, v) => (s.formatString === v ? {} : setting({ ...s, formatString: v })),
+  formatString: (s, v) => (s.formatString === v ? { says: 'the value it already holds: nothing' } : setting({ ...s, formatString: v })),
   // :148-156
   timeZone: (s, v) => {
     const next = v || '';
-    return s.timeZone === next ? {} : setting({ ...s, timeZone: next });
+    return s.timeZone === next ? { says: 'the value it already holds (empty is the device\'s zone): nothing' } : setting({ ...s, timeZone: next });
   },
   // :170-178
   locale: (s, v) => {
     const next = v || '';
-    return s.locale === next ? {} : setting({ ...s, locale: next });
+    return s.locale === next ? { says: 'the value it already holds (empty is en-US): nothing' } : setting({ ...s, locale: next });
   },
   // :190-197
   input: (s, v) => {
     const value = typeof v === 'string' ? new Date(v) : v;
-    return s.currentInput === value ? {} : render({ ...s, currentInput: value });
+    return s.currentInput === value ? { says: 'the same date object it already holds: nothing' } : render({ ...s, currentInput: value });
   }
 });

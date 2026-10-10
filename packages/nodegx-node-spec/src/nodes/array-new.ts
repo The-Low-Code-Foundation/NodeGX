@@ -61,9 +61,9 @@ export const CollectionNew = defineNode({
 }).on(
   {
     // :41-43 — whatever arrived, `undefined` included (`sourceCollection = value`)
-    items: (_s, v) => ({ set: { source: v }, send: [] }),
+    items: (_s, v) => ({ says: 'always: kept as what the next new array starts with (empty: it starts empty)', set: { source: v }, send: [] }),
     // :72-76 — queued once per frame; every press owes an outcome (the contract's reading, row C9)
-    new: (s) => ({ set: { scheduled: true, news: s.news + 1 }, outcome: 'deferred', send: [] })
+    new: (s) => ({ says: 'always: at the frame\'s end one new array is made from Items, Id is sent, and each press of the frame is answered Done', set: { scheduled: true, news: s.news + 1 }, outcome: 'deferred', send: [] })
   },
   {
     // :77-88

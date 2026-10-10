@@ -75,7 +75,8 @@ export const DateParts = defineNode({
   input: (_s, v) => {
     const inputSupplied = supplied(v);
     const input = toDate(v);
-    if (!inputSupplied) return { set: { input, inputSupplied }, send: [] }; // :201
-    return { set: { input, inputSupplied }, send: [...PART_OUTPUTS], emit: [input === undefined ? 'failure' : 'changed'] }; // :203-209
+    if (!inputSupplied) return { says: 'empty: nothing is sent', set: { input, inputSupplied }, send: [] }; // :201
+    if (input === undefined) return { says: 'it cannot be read as a date: every part goes empty', set: { input, inputSupplied }, send: [...PART_OUTPUTS], emit: ['failure'] }; // :203-209
+    return { says: 'a date: every part is read from it, in this device\'s time zone', set: { input, inputSupplied }, send: [...PART_OUTPUTS], emit: ['changed'] }; // :203-209
   }
 });

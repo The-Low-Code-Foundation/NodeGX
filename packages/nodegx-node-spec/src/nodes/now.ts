@@ -44,5 +44,5 @@ export const Now = defineNode({
   }
 }).on({
   // :98-107 `_read` — the clock, all three flagged, `done`
-  read: (_s, _i, w) => ({ set: { now: w.now() }, outcome: 'done' })
+  read: (_s, _i, w) => ({ says: 'always: the clock is read, and Date, Timestamp and ISO String all say that moment', set: { now: w.now() }, outcome: 'done' })
 });

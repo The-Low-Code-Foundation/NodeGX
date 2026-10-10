@@ -210,9 +210,15 @@ export const Model2 = defineNode({
 }).on(
   {
     // :215-218
-    idSource: (s, v) => ({ set: { idSource: v, jobs: v === 'foreach' ? [...s.jobs, 'bind' as const] : s.jobs }, send: [] }),
+    idSource: (s, v) =>
+      v === 'foreach'
+        ? { says: "From repeater: at the frame's end it binds to the object of the row it sits in", set: { idSource: v, jobs: [...s.jobs, 'bind' as const] }, send: [] }
+        : { says: 'otherwise: kept; the object stays bound until the next Id', set: { idSource: v, jobs: s.jobs }, send: [] },
     // :233-238
-    repeaterComponent: (s, v) => ({ set: { repeaterComponent: v || undefined, jobs: s.idSource === 'foreach' ? [...s.jobs, 'bind' as const] : s.jobs }, send: [] }),
+    repeaterComponent: (s, v) =>
+      s.idSource === 'foreach'
+        ? { says: "under From repeater: at the frame's end it binds to the object of that repeater's row (blank: the nearest)", set: { repeaterComponent: v || undefined, jobs: [...s.jobs, 'bind' as const] }, send: [] }
+        : { says: 'otherwise: kept, and read only under From repeater', set: { repeaterComponent: v || undefined, jobs: s.jobs }, send: [] },
     // :250-272
     modelId: (s, value, i, w) => {
       let v: unknown = value;
@@ -245,14 +251,14 @@ export const Model2 = defineNode({
         const st: ObjectState = { ...s, modelId: v };
         const pulses: Pulse[] = [...own];
         setModelID(st, w, v, pulses);
-        return { set: { modelId: v, bound: st.bound, jobs: st.jobs, storeScheduled: st.storeScheduled }, send: [], pulses };
+        return { says: 'a new Id, ticked under Run On Value Change: bound to the object it names now (made if none has it) and Fetched fires — an empty Id unbinds, silently; an object handed writes its keys onto that object first', set: { modelId: v, bound: st.bound, jobs: st.jobs, storeScheduled: st.storeScheduled }, send: [], pulses };
       }
-      return { set: { modelId: v }, send: ['id'], pulses: own }; // :270
+      return { says: 'otherwise (the same Id, or unticked): Id is sent and the binding stays; an object handed still writes its keys onto the object it names', set: { modelId: v }, send: ['id'], pulses: own }; // :270
     },
     // :274-280 — `set: function () {}`
-    properties: () => ({ send: [] }),
+    properties: () => ({ says: 'always: nothing while it runs; each name makes an input, an output and its own Changed', send: [] }),
     // :289-291 → :349-354 — a token per press, one rebind per frame
-    fetch: (s) => ({ set: { fetches: s.fetches + 1, fetchScheduled: true, jobs: s.fetchScheduled ? s.jobs : [...s.jobs, 'fetch' as const] }, outcome: 'deferred', send: [] })
+    fetch: (s) => ({ says: 'always: at the frame\'s end the node rebinds to the object its Id names, one rebind for the frame\'s presses; Fetched fires, and each press is answered Done, or Failure with no Id', set: { fetches: s.fetches + 1, fetchScheduled: true, jobs: s.fetchScheduled ? s.jobs : [...s.jobs, 'fetch' as const] }, outcome: 'deferred', send: [] })
   },
   {
     derived: {

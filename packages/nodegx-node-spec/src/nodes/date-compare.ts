@@ -33,18 +33,21 @@ type Answers = Array<'before' | 'after' | 'same'>;
 const ANSWERS: Answers = ['before', 'after', 'same'];
 
 /** :153-183 `_recompute`, over the state the setter has just changed (`delta` is what it stored). */
-function recompute(s: State, delta: Partial<State>): { set: Partial<State>; send: Answers; emit?: Array<'isSame' | 'isBefore' | 'isAfter' | 'failure'> } {
+function recompute(s: State, delta: Partial<State>): { says: string; set: Partial<State>; send: Answers; emit?: Array<'isSame' | 'isBefore' | 'isAfter' | 'failure'> } {
   const n = { ...s, ...delta };
-  if (!n.aSupplied || !n.bSupplied) return { set: delta, send: [] }; // :154
-  if (n.a === undefined || n.b === undefined) return { set: { ...delta, before: undefined, after: undefined, same: undefined }, send: ANSWERS, emit: ['failure'] }; // :158-166
+  if (!n.aSupplied || !n.bSupplied) return { says: 'Date or Compare To not given yet: kept for when both are; nothing is sent', set: delta, send: [] }; // :154
+  if (n.a === undefined || n.b === undefined) return { says: 'either cannot be read as a date: Is Before, Is After and Is Same go empty', set: { ...delta, before: undefined, after: undefined, same: undefined }, send: ANSWERS, emit: ['failure'] }; // :158-166
   const granularity = (n.granularity || 'millisecond') as CompareGranularity; // :168
   const left = truncateTo(n.a, granularity);
   const right = truncateTo(n.b, granularity);
   const before = left < right;
   const after = left > right;
   const same = left === right; // :172-174
-  // :180-182 — values first, then exactly one signal
-  return { set: { ...delta, before, after, same }, send: ANSWERS, emit: [same ? 'isSame' : before ? 'isBefore' : 'isAfter'] };
+  // :180-182 — values first, then exactly one signal (NSP-018: one literal arm per signal, so each can say its case)
+  const set = { ...delta, before, after, same };
+  if (same) return { says: 'the same instant, once both are cut to Granularity (millisecond when empty): Is Same goes true, the other two false', set, send: ANSWERS, emit: ['isSame'] };
+  if (before) return { says: 'Date is earlier, at Granularity: Is Before goes true, the other two false', set, send: ANSWERS, emit: ['isBefore'] };
+  return { says: 'Date is later, at Granularity: Is After goes true, the other two false', set, send: ANSWERS, emit: ['isAfter'] };
 }
 
 export const DateCompare = defineNode({

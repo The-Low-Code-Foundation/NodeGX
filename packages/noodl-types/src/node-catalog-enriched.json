@@ -5674,6 +5674,20 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "collectionId": [
+          "a new Id, ticked under Run On Value Change: bound to the array it names now (made if none has it); Id, Items, First Item Id and Count follow",
+          "otherwise (the same Id, or unticked): Id is sent and the binding stays"
+        ],
+        "items": [
+          "empty: nothing",
+          "the bound array itself: nothing",
+          "otherwise: at the frame's end its items are copied into the bound array (a new one when none is bound and Id is ticked under Run On Value Change), and the node follows that list as it changes; Changed fires when the copy moved anything and Array contents is ticked"
+        ],
+        "fetch": [
+          "always: at the frame's end the node rebinds to the array its Id names, one rebind for the frame's presses; Fetched fires, and each press is answered Done"
+        ]
+      },
       "enrichment": {
         "typeName": "Collection2",
         "summary": "Array: binds to a shared client-side array by id — read its items and count, seed its contents, and react to changes made anywhere.",
@@ -5816,6 +5830,15 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "collectionId": [
+          "empty: no array bound, so a Do fails",
+          "otherwise: bound to the array it names (made if none has it), or to the array handed"
+        ],
+        "clear": [
+          "always: at the frame's end, once per press, the array is emptied; answered Done, Unchanged when it was empty already, Failure with no array bound"
+        ]
+      },
       "enrichment": {
         "typeName": "CollectionClear",
         "summary": "Clear Array: empties a shared array (removes all items) when Do fires.",
@@ -5954,6 +5977,18 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "collectionId": [
+          "empty: no array bound, so a Do fails",
+          "otherwise: bound to the array it names (made if none has it), or to the array handed"
+        ],
+        "modifyId": [
+          "always: kept as the object the next Do adds"
+        ],
+        "add": [
+          "always: at the frame's end, once per press, the object is added to the array (made if no object has that Id); answered Done, Unchanged when it was in it already, Failure with no Object Id or no array bound"
+        ]
+      },
       "enrichment": {
         "typeName": "CollectionInsert",
         "summary": "Insert Object Into Array: appends an existing object, referenced by its id, to a shared array when Do fires.",
@@ -6065,6 +6100,14 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "items": [
+          "always: kept as what the next new array starts with (empty: it starts empty)"
+        ],
+        "new": [
+          "always: at the frame's end one new array is made from Items, Id is sent, and each press of the frame is answered Done"
+        ]
+      },
       "enrichment": {
         "typeName": "CollectionNew",
         "summary": "Create New Array: makes a fresh array with a generated id when Do fires, optionally copying an input array's contents into it.",
@@ -6207,6 +6250,18 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "collectionId": [
+          "empty: no array bound, so a Do fails",
+          "otherwise: bound to the array it names (made if none has it), or to the array handed"
+        ],
+        "modifyId": [
+          "always: kept as the object the next Do removes"
+        ],
+        "remove": [
+          "always: at the frame's end, once per press, the object is taken out of the array; answered Done, Unchanged when it was not in it, Failure with no Object Id, no array bound, or no object with that Id"
+        ]
+      },
       "enrichment": {
         "typeName": "CollectionRemove",
         "summary": "Remove Object From Array: removes an object, referenced by its id, from a shared array when Do fires.",
@@ -7300,6 +7355,31 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "formatString": [
+          "the value it already holds: nothing → Invalid Date, Date Changed stay silent",
+          "it cannot be written (a Date it cannot read, an unknown Timezone, or a Format that is not text): Date String goes blank → Invalid Date, Date Changed",
+          "it can be written: Date String is the Date written through Format, in Timezone and Locale → Date Changed; Invalid Date stays silent",
+          "no Date yet: kept for when one arrives; nothing is sent → Invalid Date, Date Changed stay silent"
+        ],
+        "timeZone": [
+          "the value it already holds (empty is the device's zone): nothing → Invalid Date, Date Changed stay silent",
+          "it cannot be written (a Date it cannot read, an unknown Timezone, or a Format that is not text): Date String goes blank → Invalid Date, Date Changed",
+          "it can be written: Date String is the Date written through Format, in Timezone and Locale → Date Changed; Invalid Date stays silent",
+          "no Date yet: kept for when one arrives; nothing is sent → Invalid Date, Date Changed stay silent"
+        ],
+        "locale": [
+          "the value it already holds (empty is en-US): nothing → Invalid Date, Date Changed stay silent",
+          "it cannot be written (a Date it cannot read, an unknown Timezone, or a Format that is not text): Date String goes blank → Invalid Date, Date Changed",
+          "it can be written: Date String is the Date written through Format, in Timezone and Locale → Date Changed; Invalid Date stays silent",
+          "no Date yet: kept for when one arrives; nothing is sent → Invalid Date, Date Changed stay silent"
+        ],
+        "input": [
+          "the same date object it already holds: nothing → Invalid Date, Date Changed stay silent",
+          "it cannot be written (a Date it cannot read, an unknown Timezone, or a Format that is not text): Date String goes blank → Invalid Date, Date Changed",
+          "it can be written: Date String is the Date written through Format, in Timezone and Locale → Date Changed; Invalid Date stays silent"
+        ]
+      },
       "enrichment": {
         "typeName": "Date To String",
         "summary": "Formats a date into a string with {year}/{monthName}/{dayName}/{h12}-style tokens, in any language.",
@@ -20316,6 +20396,17 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "items": [
+          "always: Items and Count are re-sent as they stand, and the map runs at the frame's end (and again whenever this array reports a change)"
+        ],
+        "mapScript": [
+          "always: compiled now, and the map runs again at the frame's end; a script that does not compile fails there, on Error and Failure"
+        ],
+        "refresh": [
+          "always: the map runs at the frame's end, one run for the frame's presses; each answered Done, or Failure with no Items, Items that are not a list, or a Script that fails"
+        ]
+      },
       "enrichment": {
         "typeName": "Map Collection",
         "summary": "Array Map: transforms each element of an input array with a map script, emitting a new array and leaving the source untouched.",
@@ -20770,6 +20861,26 @@
             "valueType": "*",
             "example": "prop-Sa1"
           }
+        ]
+      },
+      "rules": {
+        "idSource": [
+          "From repeater: at the frame's end it binds to the object of the row it sits in",
+          "otherwise: kept; the object stays bound until the next Id"
+        ],
+        "repeaterComponent": [
+          "under From repeater: at the frame's end it binds to the object of that repeater's row (blank: the nearest)",
+          "otherwise: kept, and read only under From repeater"
+        ],
+        "modelId": [
+          "a new Id, ticked under Run On Value Change: bound to the object it names now (made if none has it) and Fetched fires — an empty Id unbinds, silently; an object handed writes its keys onto that object first",
+          "otherwise (the same Id, or unticked): Id is sent and the binding stays; an object handed still writes its keys onto the object it names"
+        ],
+        "properties": [
+          "always: nothing while it runs; each name makes an input, an output and its own Changed"
+        ],
+        "fetch": [
+          "always: at the frame's end the node rebinds to the object its Id names, one rebind for the frame's presses; Fetched fires, and each press is answered Done, or Failure with no Id"
         ]
       },
       "enrichment": {
@@ -21583,6 +21694,14 @@
             "valueType": "enum",
             "example": "type-Sa1"
           }
+        ]
+      },
+      "rules": {
+        "properties": [
+          "always: nothing while it runs; each name makes a value input (and a type for it)"
+        ],
+        "new": [
+          "always: at the frame's end one new object is made holding the property inputs' values, Id is sent, and each press of the frame is answered Done"
         ]
       },
       "enrichment": {
@@ -31328,6 +31447,26 @@
           }
         ]
       },
+      "rules": {
+        "idSource": [
+          "From repeater: at the frame's end it binds to the object of the row it sits in",
+          "otherwise: kept; the object stays bound until the next Id"
+        ],
+        "repeaterComponent": [
+          "under From repeater: at the frame's end it binds to the object of that repeater's row (blank: the nearest)",
+          "otherwise: kept, and read only under From repeater"
+        ],
+        "modelId": [
+          "empty: no object bound, so a Do fails; Id is sent",
+          "otherwise: bound to the object it names (made if none has it); Id is sent"
+        ],
+        "properties": [
+          "always: nothing while it runs; each name makes a value input (and a type for it)"
+        ],
+        "store": [
+          "always: at the frame's end the property inputs are written onto the bound object, one write for the frame's presses; each answered Done, or Failure with no object bound"
+        ]
+      },
       "enrichment": {
         "typeName": "SetModelProperties",
         "summary": "Set Object Properties: writes declared property values onto an existing client-side object, chosen by id or from the repeater item.",
@@ -40950,6 +41089,23 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "input": [
+          "no Date yet: kept for when one arrives; nothing is sent → Invalid Date, Changed stay silent",
+          "the Date cannot be read as a date: Result goes empty → Invalid Date; Changed stays silent",
+          "otherwise Result is the Date moved by Amount (0 when not a number) in Unit (days when not one of the eight); in months and years Amount counts whole steps only, and the day stops at the month's last → Changed; Invalid Date stays silent"
+        ],
+        "amount": [
+          "no Date yet: kept for when one arrives; nothing is sent → Invalid Date, Changed stay silent",
+          "the Date cannot be read as a date: Result goes empty → Invalid Date; Changed stays silent",
+          "otherwise Result is the Date moved by Amount (0 when not a number) in Unit (days when not one of the eight); in months and years Amount counts whole steps only, and the day stops at the month's last → Changed; Invalid Date stays silent"
+        ],
+        "unit": [
+          "no Date yet: kept for when one arrives; nothing is sent → Invalid Date, Changed stay silent",
+          "the Date cannot be read as a date: Result goes empty → Invalid Date; Changed stays silent",
+          "otherwise Result is the Date moved by Amount (0 when not a number) in Unit (days when not one of the eight); in months and years Amount counts whole steps only, and the day stops at the month's last → Changed; Invalid Date stays silent"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.DateAdd",
         "summary": "A date shifted by an amount of a unit. Months and years CLAMP: 31 January plus one month is 28 February.",
@@ -41142,6 +41298,29 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "a": [
+          "Date or Compare To not given yet: kept for when both are; nothing is sent → Invalid Date, On Same, On Before, On After stay silent",
+          "either cannot be read as a date: Is Before, Is After and Is Same go empty → Invalid Date; On Same, On Before, On After stay silent",
+          "the same instant, once both are cut to Granularity (millisecond when empty): Is Same goes true, the other two false → On Same; Invalid Date, On Before, On After stay silent",
+          "Date is earlier, at Granularity: Is Before goes true, the other two false → On Before; Invalid Date, On Same, On After stay silent",
+          "Date is later, at Granularity: Is After goes true, the other two false → On After; Invalid Date, On Same, On Before stay silent"
+        ],
+        "b": [
+          "Date or Compare To not given yet: kept for when both are; nothing is sent → Invalid Date, On Same, On Before, On After stay silent",
+          "either cannot be read as a date: Is Before, Is After and Is Same go empty → Invalid Date; On Same, On Before, On After stay silent",
+          "the same instant, once both are cut to Granularity (millisecond when empty): Is Same goes true, the other two false → On Same; Invalid Date, On Before, On After stay silent",
+          "Date is earlier, at Granularity: Is Before goes true, the other two false → On Before; Invalid Date, On Same, On After stay silent",
+          "Date is later, at Granularity: Is After goes true, the other two false → On After; Invalid Date, On Same, On Before stay silent"
+        ],
+        "granularity": [
+          "Date or Compare To not given yet: kept for when both are; nothing is sent → Invalid Date, On Same, On Before, On After stay silent",
+          "either cannot be read as a date: Is Before, Is After and Is Same go empty → Invalid Date; On Same, On Before, On After stay silent",
+          "the same instant, once both are cut to Granularity (millisecond when empty): Is Same goes true, the other two false → On Same; Invalid Date, On Before, On After stay silent",
+          "Date is earlier, at Granularity: Is Before goes true, the other two false → On Before; Invalid Date, On Same, On After stay silent",
+          "Date is later, at Granularity: Is After goes true, the other two false → On After; Invalid Date, On Same, On Before stay silent"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.DateCompare",
         "summary": "Is this date before, after or the same as that one — at a granularity you choose, including 'the same day'.",
@@ -41312,6 +41491,28 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "from": [
+          "From or To not given yet: kept for when both are; nothing is sent → Invalid Date, Changed stay silent",
+          "either cannot be read as a date: Difference goes empty → Invalid Date; Changed stays silent",
+          "otherwise Difference is To minus From in Unit (days when not one of the eight), negative when To is earlier unless Absolute is on → Changed; Invalid Date stays silent"
+        ],
+        "to": [
+          "From or To not given yet: kept for when both are; nothing is sent → Invalid Date, Changed stay silent",
+          "either cannot be read as a date: Difference goes empty → Invalid Date; Changed stays silent",
+          "otherwise Difference is To minus From in Unit (days when not one of the eight), negative when To is earlier unless Absolute is on → Changed; Invalid Date stays silent"
+        ],
+        "unit": [
+          "From or To not given yet: kept for when both are; nothing is sent → Invalid Date, Changed stay silent",
+          "either cannot be read as a date: Difference goes empty → Invalid Date; Changed stays silent",
+          "otherwise Difference is To minus From in Unit (days when not one of the eight), negative when To is earlier unless Absolute is on → Changed; Invalid Date stays silent"
+        ],
+        "absolute": [
+          "From or To not given yet: kept for when both are; nothing is sent → Invalid Date, Changed stay silent",
+          "either cannot be read as a date: Difference goes empty → Invalid Date; Changed stays silent",
+          "otherwise Difference is To minus From in Unit (days when not one of the eight), negative when To is earlier unless Absolute is on → Changed; Invalid Date stays silent"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.DateDifference",
         "summary": "How far apart two dates are, in a unit you choose. Signed, and unrounded for fixed units.",
@@ -41518,6 +41719,13 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "input": [
+          "empty: nothing is sent → Invalid Date, Changed stay silent",
+          "it cannot be read as a date: every part goes empty → Invalid Date; Changed stays silent",
+          "a date: every part is read from it, in this device's time zone → Changed; Invalid Date stays silent"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.DateParts",
         "summary": "The fields of a date — year, month, day, time, weekday and ISO week — as outputs off one node.",
@@ -42963,6 +43171,11 @@
       ],
       "dynamicPorts": null,
       "parameterEncoding": null,
+      "rules": {
+        "read": [
+          "always: the clock is read, and Date, Timestamp and ISO String all say that moment → Done"
+        ]
+      },
       "enrichment": {
         "typeName": "net.noodl.Now",
         "summary": "The current date and time, as a Date, a millisecond timestamp and an ISO string. Re-read on demand.",
@@ -59502,6 +59715,44 @@
           "dataAttributes"
         ],
         "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
+      },
+      "rules": {
+        "enabled": [
+          "the value it already holds: nothing",
+          "a change: Enabled follows; disabled, the handle takes no slide and no focus"
+        ],
+        "value": [
+          "empty: no word, and the handle stays where it is",
+          "not a number: no word (the runtime reports it), and the handle stays where it is",
+          "a number: at the next paint the handle goes there, clamped to Min and Max and rounded to the Step; Value and Value Percent follow when they move — Changed does not fire (only a person's slide fires it)"
+        ],
+        "min": [
+          "always: at the next paint the handle is held at or above it (an empty Min is 0) and on the Step; Value and Value Percent follow when they move — never Changed"
+        ],
+        "max": [
+          "always: at the next paint the handle is held at or below it (an empty Max is 100; below Min, the handle holds Min) and on the Step; Value and Value Percent follow when they move — never Changed"
+        ],
+        "step": [
+          "always: at the next paint the handle is rounded to it (one that is not above 0 is 1); Value and Value Percent follow when they move — never Changed"
+        ],
+        "mounted": [
+          "always: the slider is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint; put back, the handle is where it was left"
+        ],
+        "focus": [
+          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
+          "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
+        ],
+        "blur": [
+          "it does not hold the keyboard (or is disabled, and gives it up to nobody): nothing changes → Done; Blurred stays silent",
+          "it holds the keyboard: it is taken off it, and the Focused state goes false → Blurred, Done"
+        ],
+        "scrollIntoView": [
+          "always: the page, or the scrolling Group holding it, scrolls until the slider can be seen"
+        ],
+        "visible": [
+          "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
+        ]
       },
       "enrichment": {
         "typeName": "net.noodl.controls.range",

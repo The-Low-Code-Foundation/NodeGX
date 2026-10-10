@@ -148,15 +148,15 @@ export const MapCollection = defineNode({
     items: (s, v, _i, w) => {
       if (w.registry.isCollection(s.source)) w.unwatch({ collection: s.source.getId() });
       if (w.registry.isCollection(v)) w.watch({ collection: v.getId() });
-      return { set: { source: v, scheduled: true }, send: ['items', 'count'] };
+      return { says: 'always: Items and Count are re-sent as they stand, and the map runs at the frame\'s end (and again whenever this array reports a change)', set: { source: v, scheduled: true }, send: ['items', 'count'] };
     },
     // :129-132
     mapScript: (_s, v) => {
       const c = compile(v);
-      return { set: { mapCode: v, compiled: c.fn !== undefined, compileError: c.error, scheduled: true }, send: [] };
+      return { says: 'always: compiled now, and the map runs again at the frame\'s end; a script that does not compile fails there, on Error and Failure', set: { mapCode: v, compiled: c.fn !== undefined, compileError: c.error, scheduled: true }, send: [] };
     },
     // :144-146 → requestMap :246-253
-    refresh: (s) => ({ set: { tokens: s.tokens + 1, scheduled: true }, outcome: 'deferred', send: [] })
+    refresh: (s) => ({ says: 'always: the map runs at the frame\'s end, one run for the frame\'s presses; each answered Done, or Failure with no Items, Items that are not a list, or a Script that fails', set: { tokens: s.tokens + 1, scheduled: true }, outcome: 'deferred', send: [] })
   },
   {
     // :284-375 — the run. Three paths leave nothing on the wire — no run due, a run with no array

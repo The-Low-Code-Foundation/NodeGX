@@ -33,12 +33,12 @@ type State = {
 }
 
 /** :132-148 `_recompute`, over the state the setter has just changed (`delta` is what it stored). */
-function recompute(s: State, delta: Partial<State>): { set: Partial<State>; send: Array<'difference'>; emit?: Array<'changed' | 'failure'> } {
+function recompute(s: State, delta: Partial<State>): { says: string; set: Partial<State>; send: Array<'difference'>; emit?: Array<'changed' | 'failure'> } {
   const n = { ...s, ...delta };
-  if (!n.fromSupplied || !n.toSupplied) return { set: delta, send: [] }; // :134
-  if (n.from === undefined || n.to === undefined) return { set: { ...delta, difference: undefined }, send: ['difference'], emit: ['failure'] }; // :138-142
+  if (!n.fromSupplied || !n.toSupplied) return { says: 'From or To not given yet: kept for when both are; nothing is sent', set: delta, send: [] }; // :134
+  if (n.from === undefined || n.to === undefined) return { says: 'either cannot be read as a date: Difference goes empty', set: { ...delta, difference: undefined }, send: ['difference'], emit: ['failure'] }; // :138-142
   const value = differenceBetween(n.from, n.to, isDateUnit(n.unit) ? n.unit : 'days'); // :144, `unitOrDays` — v2 (D15)
-  return { set: { ...delta, difference: n.absolute ? Math.abs(value) : value }, send: ['difference'], emit: ['changed'] }; // :145-147
+  return { says: 'otherwise Difference is To minus From in Unit (days when not one of the eight), negative when To is earlier unless Absolute is on', set: { ...delta, difference: n.absolute ? Math.abs(value) : value }, send: ['difference'], emit: ['changed'] }; // :145-147
 }
 
 export const DateDifference = defineNode({

@@ -54,9 +54,9 @@ export const NewModel = defineNode({
   }
 }).on(
   {
-    properties: () => ({ send: [] }), // modelcrudbase.ts :449 `set: function () {}`
+    properties: () => ({ says: 'always: nothing while it runs; each name makes a value input (and a type for it)', send: [] }), // modelcrudbase.ts :449 `set: function () {}`
     // :48-55 — one mint per frame; one outcome per press (the contract's reading, row C9)
-    new: (s) => ({ set: { scheduled: true, news: s.news + 1 }, outcome: 'deferred', send: [] })
+    new: (s) => ({ says: 'always: at the frame\'s end one new object is made holding the property inputs\' values, Id is sent, and each press of the frame is answered Done', set: { scheduled: true, news: s.news + 1 }, outcome: 'deferred', send: [] })
   },
   {
     derived: {

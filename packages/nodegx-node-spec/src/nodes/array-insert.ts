@@ -59,12 +59,12 @@ export const CollectionInsert = defineNode({
 }).on(
   {
     collectionId: (_s, v, _i, w) => {
-      if (v === undefined || v === null) return { set: { bound: undefined }, send: [] };
+      if (v === undefined || v === null) return { says: 'empty: no array bound, so a Do fails', set: { bound: undefined }, send: [] };
       const name = w.registry.isCollection(v) ? v.getId() : v;
-      return { set: { bound: w.registry.collection(name).getId() }, send: [] };
+      return { says: 'otherwise: bound to the array it names (made if none has it), or to the array handed', set: { bound: w.registry.collection(name).getId() }, send: [] };
     },
-    modifyId: (_s, v) => ({ set: { modifyId: v }, send: [] }),
-    add: (s) => ({ set: { adds: s.adds + 1 }, outcome: 'deferred', send: [] })
+    modifyId: (_s, v) => ({ says: 'always: kept as the object the next Do adds', set: { modifyId: v }, send: [] }),
+    add: (s) => ({ says: 'always: at the frame\'s end, once per press, the object is added to the array (made if no object has that Id); answered Done, Unchanged when it was in it already, Failure with no Object Id or no array bound', set: { adds: s.adds + 1 }, outcome: 'deferred', send: [] })
   },
   {
     // :58-96, once per press in press order

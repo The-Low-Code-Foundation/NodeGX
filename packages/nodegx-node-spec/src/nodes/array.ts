@@ -167,18 +167,19 @@ export const Collection2 = defineNode({
         // it is sent after the patch (nothing else moves in between)
         const st = { ...s, collectionId: v };
         bind(st, w, v);
-        return { set: { collectionId: v, bound: st.bound }, send: [] };
+        return { says: 'a new Id, ticked under Run On Value Change: bound to the array it names now (made if none has it); Id, Items, First Item Id and Count follow', set: { collectionId: v, bound: st.bound }, send: [] };
       }
-      return { set: { collectionId: v }, send: ['id'] }; // :133
+      return { says: 'otherwise (the same Id, or unticked): Id is sent and the binding stays', set: { collectionId: v }, send: ['id'] }; // :133
     },
     // :145-157
     items: (s, v, _i, w) => {
-      if (v === undefined) return { send: [] }; // :150 — abstains
-      if (s.bound !== undefined && w.registry.isCollection(v) && v.getId() === s.bound) return { send: [] }; // :151 — the bound array itself
-      return { set: { jobs: [...s.jobs, { job: 'source', value: v }] }, send: [] }; // :153-156
+      if (v === undefined) return { says: 'empty: nothing', send: [] }; // :150 — abstains
+      if (s.bound !== undefined && w.registry.isCollection(v) && v.getId() === s.bound) return { says: 'the bound array itself: nothing', send: [] }; // :151 — the bound array itself
+      return { says: 'otherwise: at the frame\'s end its items are copied into the bound array (a new one when none is bound and Id is ticked under Run On Value Change), and the node follows that list as it changes; Changed fires when the copy moved anything and Array contents is ticked', set: { jobs: [...s.jobs, { job: 'source', value: v }] }, send: [] }; // :153-156
     },
     // :293-303 — a token per press, one rebind per frame
     fetch: (s) => ({
+      says: 'always: at the frame\'s end the node rebinds to the array its Id names, one rebind for the frame\'s presses; Fetched fires, and each press is answered Done',
       set: { fetches: s.fetches + 1, fetchScheduled: true, jobs: s.fetchScheduled ? s.jobs : [...s.jobs, { job: 'fetch' }] },
       outcome: 'deferred',
       send: []

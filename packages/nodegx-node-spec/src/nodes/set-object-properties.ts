@@ -111,18 +111,24 @@ export const SetModelProperties = defineNode({
 }).on(
   {
     // modelcrudbase.ts :200-203
-    idSource: (s, v) => ({ set: { idSource: v, jobs: v === 'foreach' ? [...s.jobs, 'bind' as const] : s.jobs }, send: [] }),
+    idSource: (s, v) =>
+      v === 'foreach'
+        ? { says: "From repeater: at the frame's end it binds to the object of the row it sits in", set: { idSource: v, jobs: [...s.jobs, 'bind' as const] }, send: [] }
+        : { says: 'otherwise: kept; the object stays bound until the next Id', set: { idSource: v, jobs: s.jobs }, send: [] },
     // :215-220
-    repeaterComponent: (s, v) => ({ set: { repeaterComponent: v || undefined, jobs: s.idSource === 'foreach' ? [...s.jobs, 'bind' as const] : s.jobs }, send: [] }),
+    repeaterComponent: (s, v) =>
+      s.idSource === 'foreach'
+        ? { says: "under From repeater: at the frame's end it binds to the object of that repeater's row (blank: the nearest)", set: { repeaterComponent: v || undefined, jobs: [...s.jobs, 'bind' as const] }, send: [] }
+        : { says: 'otherwise: kept, and read only under From repeater', set: { repeaterComponent: v || undefined, jobs: s.jobs }, send: [] },
     // :232-237 → setModelID :289-297 → setModel :298-301
     modelId: (_s, value, _i, w) => {
       const v = w.registry.isRecord(value) ? value.getId() : value; // :233
-      if (emptyId(v)) return { set: { modelId: v, bound: undefined }, send: ['id'] }; // :290-293
-      return { set: { modelId: v, bound: w.registry.model(v).getId() }, send: ['id'] }; // :295-296
+      if (emptyId(v)) return { says: 'empty: no object bound, so a Do fails; Id is sent', set: { modelId: v, bound: undefined }, send: ['id'] }; // :290-293
+      return { says: 'otherwise: bound to the object it names (made if none has it); Id is sent', set: { modelId: v, bound: w.registry.model(v).getId() }, send: ['id'] }; // :295-296
     },
-    properties: () => ({ send: [] }),
+    properties: () => ({ says: 'always: nothing while it runs; each name makes a value input (and a type for it)', send: [] }),
     // :34-37 → modelcrudbase.ts :537-543 — one write per frame; one outcome per press (the contract's reading, row C9)
-    store: (s) => ({ set: { stores: s.stores + 1, scheduled: true, jobs: s.scheduled ? s.jobs : [...s.jobs, 'store' as const] }, outcome: 'deferred', send: [] })
+    store: (s) => ({ says: 'always: at the frame\'s end the property inputs are written onto the bound object, one write for the frame\'s presses; each answered Done, or Failure with no object bound', set: { stores: s.stores + 1, scheduled: true, jobs: s.scheduled ? s.jobs : [...s.jobs, 'store' as const] }, outcome: 'deferred', send: [] })
   },
   {
     derived: {

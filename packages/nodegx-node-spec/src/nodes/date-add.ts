@@ -30,13 +30,13 @@ type State = {
 }
 
 /** :118-133 `_recompute`, over the state the setter has just changed (`delta` is what it stored). */
-function recompute(s: State, delta: Partial<State>): { set: Partial<State>; send: Array<'result'>; emit?: Array<'changed' | 'failure'> } {
+function recompute(s: State, delta: Partial<State>): { says: string; set: Partial<State>; send: Array<'result'>; emit?: Array<'changed' | 'failure'> } {
   const n = { ...s, ...delta };
-  if (!n.inputSupplied) return { set: delta, send: [] }; // :121
-  if (n.input === undefined) return { set: { ...delta, result: undefined }, send: ['result'], emit: ['failure'] }; // :123-128
+  if (!n.inputSupplied) return { says: 'no Date yet: kept for when one arrives; nothing is sent', set: delta, send: [] }; // :121
+  if (n.input === undefined) return { says: 'the Date cannot be read as a date: Result goes empty', set: { ...delta, result: undefined }, send: ['result'], emit: ['failure'] }; // :123-128
   const amount = Number.isFinite(n.amount) ? n.amount : 0; // :130
   const unit = isDateUnit(n.unit) ? n.unit : 'days'; // `unitOrDays` — v2 (C16)
-  return { set: { ...delta, result: addToDate(n.input, amount, unit) }, send: ['result'], emit: ['changed'] }; // :131-133
+  return { says: 'otherwise Result is the Date moved by Amount (0 when not a number) in Unit (days when not one of the eight); in months and years Amount counts whole steps only, and the day stops at the month\'s last', set: { ...delta, result: addToDate(n.input, amount, unit) }, send: ['result'], emit: ['changed'] }; // :131-133
 }
 
 export const DateAdd = defineNode({

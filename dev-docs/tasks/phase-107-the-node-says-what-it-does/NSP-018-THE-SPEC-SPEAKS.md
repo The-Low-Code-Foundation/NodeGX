@@ -9,7 +9,7 @@
 > and a merge prefers the spec — one catalog, two sources, the spec winning where it exists.
 
 **Opened 2026-09-29.** **Depends on NSP-011.**
-**Status: 🟡 s75 (2026-10-10): AC1, AC3, AC4, AC5 met; AC2 counting — 247 of 507 input reducers have their words (52 specs fully: the pilot five, NSP-011's 13, the most-used logic nodes, and the most-placed visual, record, user and popup nodes), the typecheck gate waits for the rest.**
+**Status: 🟡 s76 (2026-10-10): AC1, AC3, AC4, AC5 met; AC2 counting — 301 of 507 input reducers have their words (68 specs fully: the pilot five, NSP-011's 13, the most-used logic nodes, the most-placed visual, record, user and popup nodes, Slider, the dates, and the arrays and objects), the typecheck gate waits for the rest. §6 item 3 (rules on the default summary) priced and closed: kept off.**
 
 ## 1. The person sentence
 
@@ -256,9 +256,48 @@ that rules on the default change what an agent builds. The benefit is unmeasured
 asked for, once. Templates (s75), MCP traffic (s76): both rankings are used up. The remaining order is by cost (one spec
 file at a time), because the gate needs every reducer anyway.
 
+## 5.5 s76, 2026-10-10 — Slider, the dates, and the arrays and objects in words
+
+**301 of 507, 68 specs fully** (+54 reducers, 16 specs). No ranking was left (§5.4), so the order is by cost: Slider (the one
+remaining spec an agent asked for), then two families that share one helper each. The six date nodes (Date Add, Date
+Compare, Date Difference, Date Parts, Date To String, Now) and the nine array and object nodes (Array, Create New Array,
+Clear Array, Insert Object Into Array, Remove Object From Array, Array Map, Object, Create New Object, Set Object
+Properties). None is stranger-guarded.
+
+**Behaviour-neutral splits.** These return the same patches as before, written as literal arms:
+- Date Compare's answer: one arm per signal (`emit: [same ? … : …]`).
+- Date Parts' read: Invalid Date or Changed.
+- Date To String's render: Invalid Date or not. Its `setting` ternary became an `if`.
+- Object's and Set Object Properties' Id Source and Repeater Component: split on whether they bind, as Record's were in s75.
+
+Three helpers declare their return types (`recompute` ×3, `render`, `setting`) and now carry `says: string`. Slider's
+`NOTHING` constant had no readers left, so it is gone.
+
+**Words the source corrected as they were written.**
+- Date Add in months or years counts whole steps only (`Math.trunc`), and the day stops at the month's last.
+- A Slider Step that is not above 0 is 1, and a Step change can move Value Percent too.
+- Below Min, Max leaves the handle at Min.
+- Only Object makes an output per property; the two setters make inputs only.
+
+**Gates.** `tsc --noEmit` (node-spec) clean. The suites that play the touched specs, with the reader, ledger, parity and the page
+model's plants (batch-visual, -time, -data, -records, rules-reader, spec-ledger, catalog-parity, page-model-plants): 8 / 8,
+520 passed, exit 0, one worker. These suites kill every mutant or list it as an equivalent, and the split arms added
+swap-branch mutants that were all killed. `catalog:check`, `catalog:merge:check`, `docs:nodes:check` and `spec-ledger
+--check` exit 0. The catalog diff is sixteen `rules` blocks in each file and nothing else (every deleted line is a trailing
+comma). noodl-mcp `nodeDocBudget`, `nsp018RulesOnTheWire` and `toolDisclosure`: 38 / 38 (`[surface] 8261 / 8280`), after
+one fix:
+
+🔴 **[P107-S76-FULLBUDGET](../../bugs/p107-s76-fullbudget-group-s-rules-pushed-its-full-detail-past-the-awp-005-ratchet.md):
+`nodeDocBudget` was red on `HEAD`.** Group's full detail is 17,292 tokens against the 16,350 ratchet, and +979 of that is
+s74's Group rules. s74 and s75 never ran that spec. Group's entry is byte-identical to `HEAD`, so this is not this batch.
+The ratchet moved to 17,900 (headroom 608) with the attribution in the spec. **A field that rides on full detail owes
+`nodeDocBudget` from now on.** Runtime spot-checks at seed 20736, one worker: Date Compare CONFORMS with 87 / 87 mutants killed; Object (Model2)
+CONFORMS with 687 / 692, the 5 left being its listed equivalents, exit 0. Not run: the full node-spec suite, the other 14 specs on
+the runtime, the editor's `tsc`, `test:main`.
+
 ## 6. Left
 
-1. **AC2's words for the other 260 reducers** (s75), batch by batch (done: the pilot five, NSP-011's 13, the top logic nodes, the top visual and record nodes, and s75's fifteen; next by template use — re-rank first; what is left is mostly unplaced in the templates, so rank by the editor's picker use or by CMP-006 traffic). Then
+1. **AC2's words for the other 206 reducers** (s76; was 260 at s75), batch by batch (done: the pilot five, NSP-011's 13, the top logic nodes, the top visual and record nodes, and s75's fifteen; next by template use — re-rank first; what is left is mostly unplaced in the templates, so rank by the editor's picker use or by CMP-006 traffic). Then
    flip `says?` to `says` in `Patch`, which is the typecheck gate. Every patch-returning function then owes one, so decide
    first whether `afterInputs` / `world` / `person` patches get read as rules too.
 2. **The record-relation pair:** the rules reader can't see reducers written inside `relationNode`. Teach it the factory,

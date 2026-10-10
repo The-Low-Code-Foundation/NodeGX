@@ -63,12 +63,12 @@ export const CollectionRemove = defineNode({
 }).on(
   {
     collectionId: (_s, v, _i, w) => {
-      if (v === undefined || v === null) return { set: { bound: undefined }, send: [] };
+      if (v === undefined || v === null) return { says: 'empty: no array bound, so a Do fails', set: { bound: undefined }, send: [] };
       const name = w.registry.isCollection(v) ? v.getId() : v;
-      return { set: { bound: w.registry.collection(name).getId() }, send: [] };
+      return { says: 'otherwise: bound to the array it names (made if none has it), or to the array handed', set: { bound: w.registry.collection(name).getId() }, send: [] };
     },
-    modifyId: (_s, v) => ({ set: { modifyId: v }, send: [] }),
-    remove: (s) => ({ set: { removes: s.removes + 1 }, outcome: 'deferred', send: [] })
+    modifyId: (_s, v) => ({ says: 'always: kept as the object the next Do removes', set: { modifyId: v }, send: [] }),
+    remove: (s) => ({ says: 'always: at the frame\'s end, once per press, the object is taken out of the array; answered Done, Unchanged when it was not in it, Failure with no Object Id, no array bound, or no object with that Id', set: { removes: s.removes + 1 }, outcome: 'deferred', send: [] })
   },
   {
     // :60-104, once per press in press order

@@ -96,7 +96,6 @@ type Pulse = 'didMount' | 'willUnmount' | 'pointerDown' | 'pointerUp' | 'onFocus
 type ValueOut = 'pressedState' | 'focusState' | 'hoverState' | 'value' | 'valuePercent';
 type Act = { set?: Partial<State>; send: ValueOut[]; emit?: Pulse[] };
 
-const NOTHING: Send = { send: [] };
 const NONE: Act = { send: [] };
 
 export const Slider = defineNode({
@@ -286,32 +285,32 @@ export const Slider = defineNode({
     // utils.ts :82-89
     enabled: (s, v) => {
       const enabled = !!v;
-      if (enabled === s.enabled) return NOTHING;
-      return { set: { enabled }, send: ['enabled'] };
+      if (enabled === s.enabled) return { says: 'the value it already holds: nothing', send: [] };
+      return { says: 'a change: Enabled follows; disabled, the handle takes no slide and no focus', set: { enabled }, send: ['enabled'] };
     },
     // slider.ts `_setInputValue` — every write a word for the handle (R14); the next paint draws it (`painted`)
     value: (_s, v) => word(v),
     // the attributes (`undefined` deletes the prop): the next paint draws the handle against them (v3, C74)
-    min: (_s, v) => ({ set: { min: v }, send: [] }),
-    max: (_s, v) => ({ set: { max: v }, send: [] }),
-    step: (_s, v) => ({ set: { step: v }, send: [] }),
+    min: (_s, v) => ({ says: 'always: at the next paint the handle is held at or above it (an empty Min is 0) and on the Step; Value and Value Percent follow when they move — never Changed', set: { min: v }, send: [] }),
+    max: (_s, v) => ({ says: 'always: at the next paint the handle is held at or below it (an empty Max is 100; below Min, the handle holds Min) and on the Step; Value and Value Percent follow when they move — never Changed', set: { max: v }, send: [] }),
+    step: (_s, v) => ({ says: 'always: at the next paint the handle is rounded to it (one that is not above 0 is 1); Value and Value Percent follow when they move — never Changed', set: { step: v }, send: [] }),
     // react-component-node.ts :2310-2320
-    mounted: (_s, v) => ({ set: { mounted: !!v }, send: [] }),
+    mounted: (_s, v) => ({ says: 'always: the slider is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint; put back, the handle is where it was left', set: { mounted: !!v }, send: [] }),
     // utils.ts :370-384 — on the `<input>` (utils.ts :419-423 `_focusTarget`), as the Dropdown's
     focus: (s) => {
-      if (!s.onPage) return { send: [], outcome: 'unchanged' };
-      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { send: [], outcome: 'done' };
-      return { set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
+      if (!s.onPage) return { says: 'not on the page: nothing to focus, and the Focus is not kept', send: [], outcome: 'unchanged' };
+      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { says: 'it holds the keyboard already, or is disabled or hidden: nothing changes', send: [], outcome: 'done' };
+      return { says: 'otherwise the keyboard is put on it, and the Focused state goes true', set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
     },
     // utils.ts :385-395 — a disabled element gives the keyboard up to nobody: `blur()` on one does nothing (the focusing steps), Done regardless
     blur: (s) => {
-      if (!s.onPage || !s.elementFocused || !s.pageEnabled) return { send: [], outcome: 'done' };
-      return { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'], outcome: 'done' };
+      if (!s.onPage || !s.elementFocused || !s.pageEnabled) return { says: 'it does not hold the keyboard (or is disabled, and gives it up to nobody): nothing changes', send: [], outcome: 'done' };
+      return { says: 'it holds the keyboard: it is taken off it, and the Focused state goes false', set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'], outcome: 'done' };
     },
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire
-    scrollIntoView: () => NOTHING,
+    scrollIntoView: () => ({ says: 'always: the page, or the scrolling Group holding it, scrolls until the slider can be seen', send: [] }),
     // node-shared-port-definitions.ts :366-375 — the page follows at the next paint
-    visible: (_s, v) => ({ set: { visible: !!v }, send: [] })
+    visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it', set: { visible: !!v }, send: [] })
   },
   {
     // placed on the page with its params set — the first render: Did Mount, and the mount's effect (Slider.tsx :88-90)
@@ -357,10 +356,10 @@ export const Slider = defineNode({
  * channel); else it is the graph's word for the handle whatever it equals (R14; C73), drawn by the next paint.
  */
 function word(v: unknown): Send {
-  if (v === undefined || v === null || v === '') return NOTHING;
+  if (v === undefined || v === null || v === '') return { says: 'empty: no word, and the handle stays where it is', send: [] };
   const n = Number(v);
-  if (!Number.isFinite(n)) return NOTHING;
-  return { set: { authorValue: n, pending: true }, send: [] };
+  if (!Number.isFinite(n)) return { says: 'not a number: no word (the runtime reports it), and the handle stays where it is', send: [] };
+  return { says: 'a number: at the next paint the handle goes there, clamped to Min and Max and rounded to the Step; Value and Value Percent follow when they move — Changed does not fire (only a person\'s slide fires it)', set: { authorValue: n, pending: true }, send: [] };
 }
 
 /**

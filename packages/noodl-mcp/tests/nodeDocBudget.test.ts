@@ -163,6 +163,23 @@ describe('AWP-005 — the response budget (a ratchet: move the number, say why)'
   });
 
   /**
+   * 🔴 **Ratchet moved 16,350 → 17,900 by P107/NSP-018 (2026-10-10), P107-S76-FULLBUDGET.** It was red on `HEAD`:
+   * NSP-018 s74 gave Group's reducers their words, `rules` ride on full detail (NSP-018 AC3), and this spec was not
+   * run. Each full response measured with this spec's harness, then re-sent without its `rules` key:
+   *
+   * | type | full | without rules | rules |
+   * |---|---|---|---|
+   * | worst single (**`Group`**) | **17,292** | 16,313 | **+979** |
+   * | `net.noodl.controls.textinput` | 15,689 | 14,832 | +857 |
+   * | `Image` / `net.noodl.controls.range` | 12,008 / 12,821 | 11,375 / 12,246 | +633 / +575 |
+   *
+   * Group without its rules is 16,313: +52 since ISL-009's 16,261, not P107's and not traced here. All of Group's
+   * reducers have their words now. The specs that still owe theirs are far below this ceiling (Video 11,579, Radio
+   * Button 10,956, Circle 7,673). Rules stay OFF the summary (NSP-018 §5.4, priced against real traffic). Headroom:
+   * **608**.
+   *
+   * ---
+   *
    * 🔴 **Ratchet moved 16,200 → 16,350 by P109/ISL-009, "A data-* list" (2026-10-03).** `Group`, the
    * worst single, **16,141 → 16,261** (+120): the `dataAttributes` port entry every visual type now
    * carries (+67, its descriptions already cut to one line each and still unshown here, because port
@@ -251,11 +268,11 @@ describe('AWP-005 — the response budget (a ratchet: move the number, say why)'
    * 12,500), 601 now (12,899 of 13,500). This ceiling exists to catch growth
    * nobody noticed; this growth was measured before it was taken.
    */
-  it('keeps any single full-detail response under 16,350 tokens', async () => {
+  it('keeps any single full-detail response under 17,900 tokens', async () => {
     const over: Array<{ name: string; cost: number }> = [];
     for (const name of allTypeNames()) {
       const c = await cost([name], 'full');
-      if (c >= 16_350) over.push({ name, cost: c });
+      if (c >= 17_900) over.push({ name, cost: c });
     }
     expect(over).toEqual([]);
   });
