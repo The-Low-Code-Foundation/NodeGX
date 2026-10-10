@@ -2,7 +2,7 @@
 
 **Opened 2026-10-02.** **Depends on nothing.** P107 NSP-021 §5 names the home: *"The project file format is
 `@nodegx/project-contract`'s; do not grow a second one here."*
-**Status: 🟡 slice 1 built, s2 (2026-10-09): the format is in `@nodegx/project-contract/format` (schemas, validator, types, the store with the MCP's rules over memory or disk); AC2, AC3, AC4 met; AC1 waits on slice 2 (the MCP and `editor-deps.ts` onto the package). §6.**
+**Status: 🟢 BUILT — s5 (2026-10-10): slice 2, the MCP's `ProjectStore` writes through the package's `V2ProjectStore` and `editor-deps.ts` imports the format from the package; AC1 met once its gates read (§6.2). s2 (2026-10-09): slice 1, the format in `@nodegx/project-contract/format`; AC2, AC3, AC4 met. §6.**
 **Model:** **Fable** for the slices that rewire the editor and the MCP and carry the two shapes of the format (three consumers, one wrong boundary is costly to undo). **Opus** for the slices whose shape is already fixed: the in-memory files, the write planner, the format page. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
 ## 1. The person sentence
@@ -116,12 +116,73 @@ run-on-value-change pins, the project-level files and `ToolError` until slice 2.
 - `https://opennoodl.dev/schemas/nodes-v2.json`: `curl` got no response from this machine (status 000) within 8 s. Not
   investigated; the validator never fetches it.
 
-### 6.2 Slice 2 — next (Fable, per the Model line)
+### 6.2 Slice 2, s5 (2026-10-10, on Fable)
 
-1. The MCP's `ProjectStore` delegates its component reads and writes to `V2ProjectStore` over `diskFiles` (keep the
-   clock, the pins and the project-level files on top; map `FormatRefusal` → `ToolError` with the same codes and the
-   wording `mcpFrontDoor.js` mirrors). Its revision becomes the store's.
-2. `editor-deps.ts` imports the format names from `@nodegx/project-contract/format` directly (AC1: no moved name left).
-3. The two shapes: a `toDeployed(component)` beside the store, or a sentence in the page saying which one an editor writes
-   and where the transform lives (`nodescope.ts` reads `sourceId`/`targetId`). NEEDS.md §3.
-4. The editor's `test:ci` once, alone (`.webpack-cache` cleared, floor by name), then AC1 is graded.
+**The MCP's `ProjectStore` is the format's store with the MCP's words on top.** `packages/noodl-mcp/src/project/ProjectStore.ts`
+went from 701 lines to 533, half of them the project-level files it keeps: it constructs a `V2ProjectStore` over `diskFiles(projectDir)` (public as `store.format`), with its
+write clock as the store's `now`, and every component read, resolution, write and delete goes through it. What it keeps:
+the clock and `componentIdFor`, the project-level files (settings, tokens, cloud, `writeProjectFields`), `listComponents`,
+`findUsages`, `buildNormProject` (the semantic validator's model), and the `ToolError`s. `computeRevision` is now the
+package's `componentRevision` (cyrb53, 14 hex characters; two tests that pinned the SHA-1's 12 were updated); `sameComponentContent` is re-exported from the package.
+
+Three seams were added to the package for a caller that keeps rules on top, each with a test in `format.test.ts`:
+- **`FormatRefusal.reason`** (`drift`, `stale-revision`, `exists`, `missing`, `unregistered-files`, `unknown-component`,
+  `legacy-project`, `not-a-project`, `read-failed`, `missing-registry`) beside `code`. The MCP maps each to the wording it has
+  always used, naming the tool to call next (`get_component`, `update_component`, `create_component`) and the project-relative
+  path; the two constructor messages `mcpFrontDoor.js` mirrors are unchanged, dir prefix included. A page says the same
+  refusal in its own words from the same reason.
+- **`writeComponent(…, { prepare })`**: a hook that runs once the write is admitted (exists as `expectNew` says, no drift, no
+  stale revision) and before the unchanged check, with the stored files. The MCP's run-on-value-change pins (ISL-018) run
+  there, so a rewrite of a pinned node is still a no-op (ISL-019) and a refused write never pins. Test: a prepare that edits
+  the candidate back to the stored content yields `unchanged`; refused writes never call it; a create sees `undefined`.
+- **`filesOf(key, entry)` and `storedFiles(entry)`**: a component's files with no snapshot taken, for a walk over the registry
+  that is not a read-before-write (the MCP's usages, listing and validation model). Test: a walk after another writer's
+  change does not refresh the drift snapshot.
+
+**AC1's other half:** `editor-deps.ts` imports `SchemaValidator`, `SCHEMA_IDS`, `formatValidationErrors` and the thirteen file
+types from `@nodegx/project-contract/format`; nothing in the MCP reaches the editor's `schemas/` any more
+(`grep -rn "noodl-editor/src/editor/src/schemas" packages/noodl-mcp/src` is empty). `normalizeV2Component` and the
+component-ref helpers stay imported from `validation/loadV2Project` (§6.1: they are the semantic validator's).
+
+**The two shapes (item 3):** answered as *the transform is the editor's exporter, and the package carries no `toDeployed`
+on purpose* — `PROJECT-FORMAT-V2.md` §"Two shapes, one project" now says where it lives and why a rename is wrong (OWN-004
+s3 measured it: ports come from the node library); NEEDS.md §3's row records the answer.
+
+**P112-S2-NEWLINE fixed on both writers.** The MCP's half came with the move (`serializeV2File` keeps the replaced file's
+final newline). The editor's `ComponentSaver` now serializes every component file and the registry through the same
+`serializeV2File`, reading the file it replaces when its filesystem can read text (`readFile` is optional on
+`ProjectStructureFilesystem`; without it, or for a new file, the text has no newline as before). Regression in
+`tests/services/ProjectStructure/ComponentSaver.test.ts`, red without the fix (measured: `git show HEAD:` version of the
+saver → 1 failed, 11 passed; restored, `diff -q` clean).
+
+**Gates (2026-10-10, tree at `991457d2d` plus this slice):**
+
+| gate | reading |
+|---|---|
+| `packages/nodegx-project-contract` `format.test.ts` | **14 passed** (3 new) |
+| MCP `store`, `tools`, `isl018DoorPins`, `isl019SameBytes` | **52 passed** (2 new in `store.test.ts`: the revision is the package's and a write through the package's store is refused by the MCP in its words; the newline kept) |
+| `typecheck:mcp` | **0 errors** (the ten of s2 were fixed by P109 `fa1dc081c`) |
+| `@noodl/preview` jest | 58 passed (7 suites) |
+| editor `ComponentSaver.test.ts` under plain jest (`--testMatch` override: the editor's jest config does not match `tests/`) | 12 passed; mutant 1 failed |
+| MCP suite, whole (`--testPathIgnorePatterns tpl011`, a peer's loose files), 264 s | **3,729 passed, 11 failed** in 8 suites, none of them this slice's (below) |
+| `typecheck:editor` | **clean** |
+| editor `test:ci`, `.webpack-cache` cleared, seed 17687, results file fresh (66 s of specs) | **3,006 specs, 1 failure**: `SUB-006 rules nonexistent-port errors on a missing static port and lists available alternatives` — *"Expected 'value' to be 'onClick'"* (`tests/validation/rules.test.ts:178`, the alternatives' order from the catalog; the webpack compiled the tree at `7c6182dc9`, P107 s77's two commits that landed during this session and changed every node's words). The floor memory's eight by name (3 SUB-006, 3 SUB-011, 2 NDA-017) read **0** — those fixtures were repaired — so this one is the whole floor now and it is P107's. **The first run died in the webpack after 67 s with no spec** (P112-S2-WORLDTYPECHECK, fixed above); the second is this reading |
+
+**The eight red MCP suites, attributed (each read after the run, none reads the store):** `nodeIdAllocation` — the
+semantic validator rejects the test's own wire `title.text → sub.text` with *"Text has no output named text"* (the catalog
+the validator reads changed under P107's spec work; the store never sees it; the scratch call's full payload is in the
+session log). `isl023TemplateGate` — eight TS errors in `packages/nodegx-project-contract/world/*` (`PathCompilation`,
+`problems`), P116's, last touched `e105bb3d1`: **P112-S2-WORLDTYPECHECK, and it also killed the editor's `test:ci` in its
+webpack before any spec ran (67 s, no Jasmine line). Fixed here** — eight narrowings written as `=== false` / `=== true`,
+`typecheck:editor-tests` 8 → 0, the package's 197 world tests pass; the ISL-023 gate reads that program too. `def038SettledTemplates` — `templates/nightbook/` is an
+UNTRACKED pile (a peer's), and `digital-bricks-training-demo` has 44 unpinned boxes (handoff finding 6). `cmp004Parts` and
+`cmp004RoundTrip` — the shelf outside the repo gained `icon.png` and lost a text style; the shelf is a peer's output.
+`fld013ExportReach` — ParseCSV now exports (`packages/nodegx-export` has a peer's open edits). `sbr009ThemeEditorDrive` and
+`def018-def020-layout-drive` — red alone too (2 of 18), Chrome drives of built artefacts, neither names the store; not
+re-measured at HEAD. All eight are for their owners; none is filed here because each has an owner session open.
+
+**Not done, recorded:** the MCP's `dist/` is not rebuilt (peers' servers run it; P109-S36-STALEMCPDIST). `listComponents`,
+`findUsages` and `buildNormProject` are still the MCP's, on the package's `filesOf`: a listing is something every editor
+wants and could move with OWN-006's adapter. The editor's `ComponentSaver` still writes the project-level files
+(`nodegx.project.json`, routes, styles) through its own `atomicWrite`, now with the newline rule; moving those onto the
+store is a question for when the editor itself opens a project through the package (not this task's AC).

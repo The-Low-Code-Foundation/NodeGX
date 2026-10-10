@@ -198,3 +198,12 @@ the editor's (`packages/noodl-editor/src/editor/src/validation/`).
 This page is the shape the editor and the MCP read and write. The runtime reads a **deployed** shape made from it at
 export, in which a wire is `{ sourceId, sourcePort, targetId, targetPort }` and `children` are nested node objects rather
 than ids (`packages/noodl-runtime/src/nodescope.ts`). An editor writes the shape on this page, never the deployed one.
+
+**Where the transform lives: the editor's exporter, and nowhere else.** It is not a rename. Of the todo template's
+2,135 nodes, every port list and every component's interface come from the node library (a node's ports exist once its
+type is loaded), and the runtime reads both; a page that renamed `fromId` to `sourceId` produced a project the app could
+not run (P112 OWN-004 slice 1, 2026-10-10). So the deployed shape is made by `ProjectModel` + `Exporter` +
+`HtmlProcessor` in the editor, which `nodegx deploy` runs on disk and `@noodl/preview`'s in-page build bundles for a
+browser (1.60 MB, with a hidden boot page that loads the library from the page's own runtime). A home-made editor
+writes this page's shape and asks the preview to make the other; `@nodegx/project-contract/format` carries no
+`toDeployed` on purpose, because one without the library would be the wrong one.

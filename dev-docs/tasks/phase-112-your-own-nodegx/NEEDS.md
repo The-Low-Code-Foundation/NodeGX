@@ -84,6 +84,9 @@ having the kit, item by item.
   within a day. Logged for P107 (NSP-009's ratchet is the natural home) and cited by OWN-010's changelog.
 - **The deployed shape** (row 24): the runtime reads `sourceId / sourcePort`; the editor writes `fromId / fromProperty`.
   OWN-001's package has to carry the transform, or an editor that writes "the format" writes a file the runtime cannot load.
+  **Answered (OWN-004 s3, OWN-001 s5, 2026-10-10):** the transform is the editor's exporter, not a rename (ports come from
+  the node library); the format package carries no `toDeployed`, the preview's in-page build carries the exporter, and
+  `PROJECT-FORMAT-V2.md` §"Two shapes, one project" says so.
 
 ## 4. The editor-knowledge census
 
