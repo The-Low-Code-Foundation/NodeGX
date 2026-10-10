@@ -125,8 +125,9 @@ describe('what the comparison forgives and what it does not', () => {
     const candidate = { ...reference, [nodesFile]: JSON.stringify(nodes, null, 2) };
     const free = compareSaves(reference, candidate);
     expect(free).toEqual([]);
-    const strict = compareSaves(reference, candidate, { movedIds: new Set(['home-count']) });
-    expect(strict.map((d) => `${d.node}:${d.field}`).sort()).toEqual(['home-count:x', 'home-count:y']);
+    // home-root is a root, home-count a child: the official editor saves no position for a child (OWN-006 §6.3).
+    const strict = compareSaves(reference, candidate, { movedIds: new Set(['home-root', 'home-count']) });
+    expect(strict.map((d) => `${d.node}:${d.field}`).sort()).toEqual(['home-root:x', 'home-root:y']);
   });
 
   test('a wire with the wrong end, a missing node, an extra file: each is one sentence', async () => {

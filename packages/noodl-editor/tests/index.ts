@@ -259,3 +259,4 @@ export * from './structure';
 export * from './validation';
 export * from './versioning';
 export * from './workflow';
+export * from './editor-suite';

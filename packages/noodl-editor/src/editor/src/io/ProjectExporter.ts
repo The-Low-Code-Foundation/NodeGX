@@ -97,6 +97,12 @@ export interface LegacyComponent {
   created?: string;
   /** LEG-006 (L3) — who last wrote it ("noodl-mcp" for an agent-authored component). */
   modifiedBy?: string;
+  /**
+   * P112-S7-LOGICTYPE — the `type` its `component.json` declares, carried only when the name would
+   * not say it (`inferComponentType`). Without it the first editor save of a `logic` component wrote
+   * `visual`, while the registry kept `logic`.
+   */
+  componentType?: 'root' | 'page' | 'visual' | 'logic' | 'cloud';
   metadata?: Record<string, unknown>;
   graph: LegacyGraph;
 }
@@ -319,7 +325,7 @@ export function buildComponentV2Files(component: LegacyComponent, now: string): 
     id: component.id as string,
     name: localName,
     path: component.name, // preserve original legacy path for round-trip
-    type: inferComponentType(component.name),
+    type: component.componentType ?? inferComponentType(component.name),
     modified: now
   };
 

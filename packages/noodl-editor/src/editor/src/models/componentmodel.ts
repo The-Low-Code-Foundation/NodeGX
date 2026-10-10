@@ -24,6 +24,8 @@ export type ComponentModelArgs = {
   created?: string;
   /** LEG-006 — who last wrote it, e.g. "noodl-mcp". */
   modifiedBy?: string;
+  /** P112-S7-LOGICTYPE — the declared `type` when the name would not say it (see `LegacyComponent.componentType`). */
+  componentType?: 'root' | 'page' | 'visual' | 'logic' | 'cloud';
   metadata?: Record<string, any>;
   graph?: NodeGraphModel;
 };
@@ -48,6 +50,7 @@ export class ComponentModel extends Model {
   description?: string;
   created?: string;
   modifiedBy?: string;
+  componentType?: ComponentModelArgs['componentType'];
   metadata: ComponentModelArgs['metadata'];
   owner: ProjectModel;
 
@@ -59,6 +62,7 @@ export class ComponentModel extends Model {
     this.description = args.description;
     this.created = args.created;
     this.modifiedBy = args.modifiedBy;
+    this.componentType = args.componentType;
     this.metadata = args.metadata;
 
     if (args.graph) {
@@ -77,6 +81,7 @@ export class ComponentModel extends Model {
       description: json.description,
       created: json.created,
       modifiedBy: json.modifiedBy,
+      componentType: json.componentType,
       // Copied, not aliased — two components built from one json must not share
       // a metadata bag.
       metadata: json.metadata ? JSON.parse(JSON.stringify(json.metadata)) : undefined,
@@ -404,6 +409,7 @@ export class ComponentModel extends Model {
       description?: string;
       created?: string;
       modifiedBy?: string;
+      componentType?: ComponentModelArgs['componentType'];
     } = {
       name: this.name,
       id: this.id,
@@ -419,6 +425,7 @@ export class ComponentModel extends Model {
     if (this.description) json.description = this.description;
     if (this.created) json.created = this.created;
     if (this.modifiedBy) json.modifiedBy = this.modifiedBy;
+    if (this.componentType) json.componentType = this.componentType;
     return json;
   }
 

@@ -417,6 +417,7 @@ export class ProjectModel extends Model {
       description: component.description,
       created: component.created,
       modifiedBy: component.modifiedBy,
+      componentType: component.componentType,
       metadata: component.metadata ? JSON.parse(JSON.stringify(component.metadata)) : undefined
     });
 

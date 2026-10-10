@@ -1,6 +1,7 @@
 {
-  "$schema": "https://opennoodl.dev/schemas/connections.json",
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
   "componentId": "comp-counter",
+  "version": 1,
   "connections": [
     {
       "fromId": "limit",

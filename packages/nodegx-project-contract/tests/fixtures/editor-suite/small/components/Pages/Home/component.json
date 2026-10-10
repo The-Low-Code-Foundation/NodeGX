@@ -1,5 +1,5 @@
 {
-  "$schema": "https://opennoodl.dev/schemas/component.json",
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
   "id": "comp-home",
   "name": "Home",
   "path": "/Pages/Home",

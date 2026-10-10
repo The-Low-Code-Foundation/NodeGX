@@ -1,6 +1,7 @@
 {
-  "$schema": "https://opennoodl.dev/schemas/nodes.json",
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
   "componentId": "comp-counter",
+  "version": 1,
   "nodes": [
     {
       "id": "counter",

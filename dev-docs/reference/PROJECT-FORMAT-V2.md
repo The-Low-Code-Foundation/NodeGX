@@ -147,7 +147,9 @@ What to read in it:
 - **A wire** is `{ fromId, fromProperty, toId, toProperty }`: from one node's output port to another node's input port.
 - **A parameter can name a design token**: `"var(--radius-sm)"`. Tokens are CSS custom properties; a project's own values
   live in `nodegx.styles.json` under `tokens`.
-- **x and y are layout only.** Two editors may place the same nodes differently; nothing else may differ.
+- **x and y are layout only.** Two editors may place the same nodes differently; nothing else may differ. **A node with a
+  `parent` has no position of its own:** the canvas lays a visual tree out from its root, and the official editor's save
+  drops `x`/`y` from every child (`normalizeComponentForV2`). A writer may keep them; no reader may rely on them.
 
 ## The registry entry
 

@@ -31,6 +31,7 @@ import type {
   LegacyConnection,
   LegacyVariant
 } from './ProjectExporter';
+import { inferComponentType } from './ProjectExporter';
 
 //  Import input types 
 
@@ -283,6 +284,10 @@ export function reconstructLegacyComponent(
   }
   if (typeof componentFile.modifiedBy === 'string' && componentFile.modifiedBy.length > 0) {
     component.modifiedBy = componentFile.modifiedBy;
+  }
+  // P112-S7-LOGICTYPE — only when the name would not say it, so no other component gains a key (F46).
+  if (componentFile.type && componentFile.type !== inferComponentType(legacyName)) {
+    component.componentType = componentFile.type;
   }
 
   if (componentFile.metadata && Object.keys(componentFile.metadata).length > 0) {

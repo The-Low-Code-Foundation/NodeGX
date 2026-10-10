@@ -4,7 +4,7 @@
   { "edit": "set_parameter", "component": "Pages/Home", "id": "home-title", "name": "fontSize", "value": 32 },
   { "edit": "set_parameter", "component": "Pages/Home", "id": "home-title", "name": "text" },
   { "edit": "rename", "component": "Pages/Home", "id": "home-count", "label": "Counter readout" },
-  { "edit": "move", "component": "Pages/Home", "id": "home-count", "x": 40, "y": 480 },
+  { "edit": "move", "component": "Logic/Counter", "id": "counter", "x": 40, "y": 480 },
   { "edit": "connect", "component": "Logic/Counter", "from": { "node": "counter", "port": "count" }, "to": { "node": "limit", "port": "value" } },
   { "edit": "disconnect", "component": "Logic/Counter", "from": { "node": "limit", "port": "value" }, "to": { "node": "counter", "port": "limit" } },
   { "edit": "add_node", "component": "Pages/Home", "id": "home-box", "type": "Group", "parent": "home-root" },

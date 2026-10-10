@@ -2,7 +2,8 @@
  * P112 OWN-006 — what "the same files" means when two editors saved them.
  *
  * Ids are matched (an editor may mint its own: `idMap` maps the candidate's ids to the reference's);
- * layout is free (`x`/`y` are ignored unless the edit script moved that node); the stamps every write
+ * layout is free (`x`/`y` are ignored unless the edit script moved that node, and always on a node with a `parent`: the
+ * official editor saves no position for a child, P112 OWN-006 §6.3); the stamps every write
  * sets (`modified`, `modifiedBy`, `created`, `lastUpdated`) are ignored; everything else must be equal:
  * every node and every field on it, every wire, the children order, the visual roots, the component's
  * ports and info, the registry's entries and counts, the project-level files, and any other file
@@ -32,7 +33,7 @@ export interface Difference {
 export interface CompareOptions {
   /** candidate id → reference id, for nodes the editor minted its own ids for. */
   idMap?: Record<string, string>;
-  /** Reference node ids whose `x`/`y` the edit script set: compared on those, ignored elsewhere. */
+  /** Reference node ids whose `x`/`y` the edit script set: compared on those (when they are roots), ignored elsewhere. */
   movedIds?: Set<string>;
   /** Files ignored entirely (an editor's own sidecar, say). Project-relative paths. */
   ignoreFiles?: Set<string>;
@@ -158,7 +159,7 @@ function compareNodesFile(
     }
     compareObjects(file, r as unknown as Record<string, unknown>, c as unknown as Record<string, unknown>, out, {
       node: id,
-      skip: (f) => (f === 'x' || f === 'y') && !moved.has(id)
+      skip: (f) => (f === 'x' || f === 'y') && (!moved.has(id) || r.parent !== undefined)
     });
   }
   for (const [id, c] of candById) {

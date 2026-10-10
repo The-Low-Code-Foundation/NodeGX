@@ -1,5 +1,5 @@
 {
-  "$schema": "https://opennoodl.dev/schemas/component.json",
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
   "id": "comp-counter",
   "name": "Counter",
   "path": "/Logic/Counter",
