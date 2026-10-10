@@ -233,6 +233,32 @@ export const recordCases: readonly ConformanceCase[] = Object.freeze([
   },
 
   {
+    id: 'records/a-write-to-a-missing-row-is-not-found',
+    area: 'records',
+    pins: 'save, increment and delete of a row that is not there answer "Object not found" with no ACL too',
+    async run(ctx) {
+      // P109 ISL-039 (P99-HLT016-NOACL): with an ACL, a write that changed no row already answered
+      // "not found". With none — the admin, the master key, every cloud function — it answered
+      // success, stored nothing, and announced a change. A function saving a record somebody had
+      // just deleted reported that it worked.
+      const c = ctx.collection('Rec');
+      const made = await ctx.create(c, { title: 'deleted under it', score: 1 });
+      const id = String(made.objectId);
+      await ctx.remove(c, id);
+      const writes: Array<[string, () => Promise<unknown>]> = [
+        ['save', () => ctx.save(c, id, { title: 'saved after the delete' })],
+        ['increment', () => ctx.increment(c, id, { score: 1 })],
+        ['delete', () => ctx.remove(c, id)]
+      ];
+      for (const [verb, write] of writes) {
+        const why = await ctx.refused(write);
+        ok(/^Object not found/.test(why), `a ${verb} of a deleted row was refused for the wrong reason: ${why}`);
+      }
+      eq(await ctx.count(c), 0, 'a write to a deleted row brought it back');
+    }
+  },
+
+  {
     id: 'records/count-matches-the-visible-set',
     area: 'records',
     pins: 'count() counts what the same filter would return',

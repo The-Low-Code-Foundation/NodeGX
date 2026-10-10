@@ -35,7 +35,8 @@ export type MutationKind =
   | 'skip-checks'
   | 'path-ignores-the-start-filter'
   | 'path-ignores-hop-filters'
-  | 'path-ignores-the-depth-bound';
+  | 'path-ignores-the-depth-bound'
+  | 'missing-row-written-without-acl-succeeds';
 
 export const MUTATIONS: readonly MutationKind[] = Object.freeze([
   'drop-acl-on-reads',
@@ -49,7 +50,8 @@ export const MUTATIONS: readonly MutationKind[] = Object.freeze([
   'skip-checks',
   'path-ignores-the-start-filter',
   'path-ignores-hop-filters',
-  'path-ignores-the-depth-bound'
+  'path-ignores-the-depth-bound',
+  'missing-row-written-without-acl-succeeds'
 ]);
 
 /** What each mutation models, for the record AC3 asks for. */
@@ -77,7 +79,9 @@ export const MUTATION_DESCRIPTIONS: Readonly<Record<MutationKind, string>> = Obj
   'path-ignores-hop-filters':
     'a $path drops the where on each hop — "as holder" is forgotten, and a member reaches what only a holder should',
   'path-ignores-the-depth-bound':
-    'a $path walks a repeated hop past maxDepth — the bound the contract makes mandatory, so a tree is walked whole and a cycle walked for as long as the engine allows'
+    'a $path walks a repeated hop past maxDepth — the bound the contract makes mandatory, so a tree is walked whole and a cycle walked for as long as the engine allows',
+  'missing-row-written-without-acl-succeeds':
+    'a save, increment or delete with no ACL that changed no row answers success (P109 ISL-039, P99-HLT016-NOACL) — a cloud function saving a record somebody just deleted is told it worked, and nothing is stored'
 });
 
 /** The three path mutations, applied to a `where` before it reaches the adapter. */
@@ -125,6 +129,22 @@ function stripAcl<T extends { acl?: unknown }>(options: T): T {
  * suite reports against a mutant is attributable to that one mutation and not
  * to the wrapper.
  */
+/**
+ * `missing-row-written-without-acl-succeeds`: the answer a write with no ACL gave before P109
+ * ISL-039 — "not found" turned back into success with no row.
+ */
+function missingRowSucceeds<T extends { acl?: unknown; success: (...a: never[]) => void; error: (message: string) => void }>(
+  kind: MutationKind,
+  options: T
+): T {
+  if (kind !== 'missing-row-written-without-acl-succeeds' || options.acl) return options;
+  return {
+    ...options,
+    error: (message: string) =>
+      /^Object not found/.test(String(message)) ? (options.success as (r?: null) => void)(null) : options.error(message)
+  };
+}
+
 export function mutate(adapter: IStorageAdapter, kind: MutationKind): IStorageAdapter {
 
   const schema: IStorageSchema =
@@ -237,7 +257,7 @@ export function mutate(adapter: IStorageAdapter, kind: MutationKind): IStorageAd
         adapter.save(unguarded);
         return;
       }
-      adapter.save(options);
+      adapter.save(missingRowSucceeds(kind, options));
     },
 
     delete(options) {
@@ -245,7 +265,7 @@ export function mutate(adapter: IStorageAdapter, kind: MutationKind): IStorageAd
         adapter.delete(stripAcl(options));
         return;
       }
-      adapter.delete(options);
+      adapter.delete(missingRowSucceeds(kind, options));
     },
 
     increment(options) {
@@ -253,7 +273,7 @@ export function mutate(adapter: IStorageAdapter, kind: MutationKind): IStorageAd
         adapter.increment(stripAcl(options));
         return;
       }
-      adapter.increment(options);
+      adapter.increment(missingRowSucceeds(kind, options));
     },
 
     count(options) {

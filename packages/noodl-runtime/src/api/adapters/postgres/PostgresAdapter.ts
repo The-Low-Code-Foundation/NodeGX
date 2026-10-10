@@ -642,10 +642,12 @@ export class PostgresAdapter {
         return;
       }
 
-      // With an ACL context, 0 rows changed means not-found or forbidden —
-      // deliberately indistinguishable (the write predicate is compiled into
-      // the UPDATE itself, so there is no read-then-write race).
-      if (options.acl && changed === 0) {
+      // P109 ISL-039 (P99-HLT016-NOACL): 0 rows changed is "not found" with or without an ACL.
+      // With one it is also "forbidden", deliberately indistinguishable (the write predicate is
+      // compiled into the statement, so there is no read-then-write race). With none — the admin,
+      // the master key, a cloud function — it used to answer success, store nothing, and announce
+      // a change.
+      if (changed === 0) {
         options.error('Object not found');
         return;
       }
@@ -673,7 +675,8 @@ export class PostgresAdapter {
 
       const { sql, params } = QueryBuilder.buildDelete({ ...options, lookup: this._pathLookup() }, 'postgres');
       const changed = await this._pool().run(sql, params);
-      if (options.acl && changed === 0) {
+      // P109 ISL-039: with or without an ACL (see save).
+      if (changed === 0) {
         options.error('Object not found');
         return;
       }
@@ -734,7 +737,8 @@ export class PostgresAdapter {
       await this._ready(options.collection);
       const { sql, params } = QueryBuilder.buildIncrement({ ...options, lookup: this._pathLookup() }, 'postgres');
       const changed = await this._pool().run(sql, params);
-      if (options.acl && changed === 0) {
+      // P109 ISL-039: with or without an ACL (see save).
+      if (changed === 0) {
         options.error('Object not found');
         return;
       }

@@ -107,8 +107,11 @@ export const ADAPTER_COVERAGE: { readonly [K in keyof IStorageAdapter]-?: Covera
   query: { kind: 'cases', cases: ['records/count-matches-the-visible-set', 'acl/a-user-sees-public-plus-their-own'] },
   fetch: { kind: 'cases', cases: ['records/fetch-by-objectId', 'records/fetch-accepts-id-and-objectId'] },
   create: { kind: 'cases', cases: ['records/create-returns-the-stored-row'] },
-  save: { kind: 'cases', cases: ['records/save-updates-in-place', 'acl/a-non-owner-cannot-save'] },
-  delete: { kind: 'cases', cases: ['records/delete-removes-the-row', 'acl/a-non-owner-cannot-delete'] },
+  save: { kind: 'cases', cases: ['records/save-updates-in-place', 'acl/a-non-owner-cannot-save', 'records/a-write-to-a-missing-row-is-not-found'] },
+  delete: {
+    kind: 'cases',
+    cases: ['records/delete-removes-the-row', 'acl/a-non-owner-cannot-delete', 'records/a-write-to-a-missing-row-is-not-found']
+  },
   count: { kind: 'cases', cases: ['records/count-matches-the-visible-set', 'acl/count-counts-only-visible-rows'] },
   aggregate: {
     kind: 'cases',
@@ -120,7 +123,11 @@ export const ADAPTER_COVERAGE: { readonly [K in keyof IStorageAdapter]-?: Covera
   },
   increment: {
     kind: 'cases',
-    cases: ['records/increment-is-atomic-on-the-stored-value', 'acl/a-non-owner-cannot-increment']
+    cases: [
+      'records/increment-is-atomic-on-the-stored-value',
+      'acl/a-non-owner-cannot-increment',
+      'records/a-write-to-a-missing-row-is-not-found'
+    ]
   },
   addRelation: { kind: 'cases', cases: ['relations/add-then-read-back'] },
   removeRelation: { kind: 'cases', cases: ['relations/remove-detaches-only-the-named-target'] },

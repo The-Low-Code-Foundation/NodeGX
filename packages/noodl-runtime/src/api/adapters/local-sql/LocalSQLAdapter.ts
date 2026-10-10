@@ -1129,10 +1129,12 @@ class LocalSQLAdapter {
         return;
       }
 
-      // With an ACL context, 0 rows changed means not-found or forbidden —
-      // deliberately indistinguishable (the write predicate is compiled into
-      // the UPDATE itself, so there is no read-then-write race).
-      if (options.acl && (!result || result.changes === 0)) {
+      // P109 ISL-039 (P99-HLT016-NOACL): 0 rows changed is "not found" with or without an ACL.
+      // With one it is also "forbidden", deliberately indistinguishable (the write predicate is
+      // compiled into the statement, so there is no read-then-write race). With none — the admin,
+      // the master key, a cloud function — it used to answer success, store nothing, and announce
+      // a change.
+      if (!result || result.changes === 0) {
         options.error('Object not found');
         return;
       }
@@ -1193,7 +1195,8 @@ class LocalSQLAdapter {
       const { sql, params } = QueryBuilder.buildDelete({ ...options, lookup: this._pathLookup() });
       const result = this.db.prepare(sql).run(...params);
 
-      if (options.acl && (!result || result.changes === 0)) {
+      // P109 ISL-039: with or without an ACL (see save).
+      if (!result || result.changes === 0) {
         options.error('Object not found');
         return;
       }
@@ -1293,7 +1296,8 @@ class LocalSQLAdapter {
       const { sql, params } = QueryBuilder.buildIncrement({ ...options, lookup: this._pathLookup() });
       const result = this.db.prepare(sql).run(...params);
 
-      if (options.acl && (!result || result.changes === 0)) {
+      // P109 ISL-039: with or without an ACL (see save).
+      if (!result || result.changes === 0) {
         options.error('Object not found');
         return;
       }
