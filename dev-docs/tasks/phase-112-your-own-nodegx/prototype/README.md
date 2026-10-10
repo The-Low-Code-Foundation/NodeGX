@@ -46,3 +46,21 @@ Re-measured on 2026-10-03 after OWN-002 (built from the package's browser entry,
    a spec.
 4. **The look.** Copied by reading `CanvasTheme.ts`, `NodeGraphEditorNode.ts` and `structureLane.ts`: a third copy
    of the canvas palette, which is exactly what memory says drifts.
+
+## `real/` — Orbit as a real project (OWN-004 s4, 2026-10-10)
+
+The same timer as v2 files (`real/orbit/`), run by NodeGX's own runtime through `@noodl/preview` in the page, with
+its graph drawn in 3D around the real app or beside it in a flat window (one switch; Richard ruled *keep both*, R7).
+Nothing in it draws the screen: the app is the app. Its graph differs from `src/app.ts` in one place, on purpose:
+*Phase over* is evaluated on each tick, because the real engine showed the original wiring bounces a Skip back
+(OWN-004 §6.2); this page's own runner never did.
+
+```sh
+real/build.sh                       # bundles @nodegx/canvas-look for the page (look.js, gitignored)
+node real/serve.mjs 47812           # then open http://127.0.0.1:47812/orbit.html  (#window starts flat)
+node real/check.mjs                 # the gate: both poses, 37 / 37 wires live, real presses, a full cycle
+```
+
+Needs the deploy runtime (`npm run build:editor:_viewer`) and the preview bundle (`npm --prefix
+packages/noodl-preview run build`). `app.html` is the smallest host; `library.html` shows the runtime's ports for any
+node type. When `orbit.html` gains this page's editing and missions (OWN-004 §6.3), `page.html` retires.

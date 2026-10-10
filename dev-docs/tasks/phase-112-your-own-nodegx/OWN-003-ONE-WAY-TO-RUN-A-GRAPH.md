@@ -84,3 +84,12 @@ lacks in a page is the thing the Node test helper has: a way to set inputs, send
 viewer. Recommendation unchanged (README §8 R1): **the real engine, behind the package's own `GraphTarget` interface**
 (a browser port of the helper's `adopt` / `settle`), so every home-made editor runs the reference; the spec runner
 stays the grader.
+
+**Since, from OWN-004 s4 (2026-10-10) — evidence for R1, measured.** Orbit, the prototype's own app, rewritten as v2
+files and run by the real engine in a page (OWN-004 §6.2), has a bug the prototype's runner (`prototype/src/graphrun.ts`,
+wave-at-a-time) never showed: Skip more than five minutes into Focus went to Break and straight back, because in the
+engine the toggle's new phase length reaches *Seconds left* before the reset's new count does. Replayed on `GraphRun`
+at the same point: Break, elapsed 0 — no bounce. **An editor running its own loop showed its author a working app that
+was not.** The real engine also already runs in a page whole, viewer included, through `@noodl/preview` (the deploy
+runtime, 1.74 MB, every template); what still does not exist is setting an input or sending a signal into it from
+outside, which is this task's step 2. Not yet asked again: R1 (README §8).
