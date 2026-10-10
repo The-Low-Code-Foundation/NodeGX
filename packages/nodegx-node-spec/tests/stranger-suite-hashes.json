@@ -31,7 +31,7 @@
   "src/nodes/string-format.ts": "e770452839df57a5a19e6ffe95ebdbd77bd471afa358e18a7cee18cb49cd2b14",
   "src/nodes/switch.ts": "713a1b0480b414de81b5b0af3238a556af82bd95f8512913dbc3f3efe579cb80",
   "src/nodes/uuid.ts": "d5e2f60d7f81ca7ebee8083955d58b7534b5d4d2589bfc1716c0d0bdca03aadf",
-  "src/spec.ts": "a36d95097e3e01055a845a730577b662271b1213f614c4df4fe89e4415f74c5c",
+  "src/spec.ts": "1381fa33a30da40e77a5ba121cd4383bf93b03d7b59987750e4b9bb796ffea44",
   "src/trace.ts": "676c51cbfd0bfd30210bf2cd9eb4f76f78bbc3377ab7e6c8ff506995e3ae450c",
   "src/world.ts": "bcf659d6a57e52b4060e3915e8d1d926be0b40ee104fd87a2ffe63c0fb9da5bf",
   "tests/stranger-page.js": "b81ec9de4633acd8b3960e15fe9b461e64ca23bb520fafd6e38d2dcb25a15e35"

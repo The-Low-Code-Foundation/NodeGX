@@ -9,7 +9,7 @@
 > and a merge prefers the spec — one catalog, two sources, the spec winning where it exists.
 
 **Opened 2026-09-29.** **Depends on NSP-011.**
-**Status: 🟡 s73 (2026-10-09): AC1, AC3, AC4, AC5 met; AC2 counting — 59 of 507 input reducers have their words (24 specs fully: the pilot five, NSP-011's 13, and the most-used logic nodes), the typecheck gate waits for the rest.**
+**Status: 🟡 s74 (2026-10-10): AC1, AC3, AC4, AC5 met; AC2 counting — 186 of 507 input reducers have their words (37 specs fully: the pilot five, NSP-011's 13, the most-used logic nodes, and the most-placed visual and record nodes), the typecheck gate waits for the rest.**
 
 ## 1. The person sentence
 
@@ -173,9 +173,39 @@ tail after the arrow is the point. For Each's `run` is the one that may need the
 dozen places). Regenerated from a clean `git archive HEAD` export. With and without s73's inputs the output is
 byte-identical. `spec-census:check` is in no CI workflow.
 
+## 5.2 s74, 2026-10-10 — the most-placed visual and record nodes in words; `said` for a computed patch
+
+**186 of 507, 37 specs fully** (+127 reducers). Batch 1: Group 22, Text 16, Text Input 18, Button 6, For Each 5. Batch 2, the
+next by template use (Options and Timer skipped: stranger-guarded): Image 19, Checkbox 10, Columns 9, Update Record 8, Router 6,
+Create Record 4, Delete Record 4, Icon 2. Catalog regenerated → merged → docs: the diff is thirteen `rules` blocks, nothing
+removed, the pages unchanged (they don't render `rules`); the three `--check`s and `spec-ledger --check` exit 0.
+
+**The computed-patch question, decided both ways (§5.1's lean).** Where a branch is a constant or a spread of a computed
+listing, it is written out as literals: `NOTHING` (Group, Text, Button, Text Input) → `{ says, send: [] }`; Group's Focus,
+which spread a computed listing into `emit`, is six literal cases (off the page / already listed / listed, each with and
+without outcomes the frame has resolved and not reported); Pointer Events Mode and Accept File Drops are split on their
+ternary. Behaviour-neutral (the interpreter's visual batch, which plays all five with mutants, is 19 / 19). Where the patch
+is built from a draft of the whole state — For Each's `run`, Text Input's Value / Backspace / Clear through `setText`,
+`edit` and `clear` — a new **`said('words', patch)`** (spec.ts, beside `Patch.says`) puts the words on the computed patch.
+The reader reads it as a **`computed`** branch: its line is the words alone, with no wire after the arrow and **no
+sibling's pulse named silent** (the patch may send it). So the words carry what the wire does, as they already did for
+Condition's end-of-frame work. `said` is for a computed patch only; a literal patch's wire half is read, and that is the
+point. `tests/rules-reader.test.ts` 14 (two new). Two plants: the `said` arm off → exactly the two new cases red; the
+computed guard off → exactly the "no sibling named silent" case red; both restored by `cp`, `cmp`-identical. spec.ts is
+stranger-guarded: hashes rewritten, `tests/stranger.test.ts` re-run in the same commit.
+
+**Gates.** The interpreter's suites for every worded spec (visual, records, navigation) 465 / 465 with the reader, ledger and
+parity; the stranger 46 passed, 18 skipped; the MCP rules relay and tool budget 23 / 23. A runtime spot-check of Group found
+a seed-dependent `clickAway` survivor that the HEAD spec has too: [P107-S74-CLICKAWAY](../../bugs/p107-s74-clickaway-group-s-click-beside-it-has-a-twin-branch-no-scenario-tells-apart.md).
+
+**What the words say for a visual node.** A visual node's inputs mostly set what the next paint, act or drop reads, so most
+lines are `always: read at …` / `always: … at the next paint` — the reader's job there is the honest case, not the wire.
+The tails that do carry something are the actions (Focus, Blur, the scrolls, Set / Insert / Backspace / Clear) and the
+switches that end a gesture (Accept Drops off over a drag, Accept File Drops off over a file).
+
 ## 6. Left
 
-1. **AC2's words for the other 448 reducers** (s73), batch by batch (the pilot five, NSP-011's 13 and the top logic nodes are done; next by template use: Group, Text, Button, For Each, Text Input; see §5.1 for the computed-patch question). Then
+1. **AC2's words for the other 321 reducers** (s74), batch by batch (done: the pilot five, NSP-011's 13, the top logic nodes, the top visual and record nodes; next by template use — re-rank first: Options and Timer, which are stranger-guarded, so do them in one commit with one hashes rewrite and one stranger run). Then
    flip `says?` to `says` in `Patch`, which is the typecheck gate. Every patch-returning function then owes one, so decide
    first whether `afterInputs` / `world` / `person` patches get read as rules too.
 2. **The record-relation pair:** the rules reader can't see reducers written inside `relationNode`. Teach it the factory,

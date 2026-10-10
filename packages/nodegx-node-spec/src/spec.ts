@@ -585,6 +585,16 @@ export interface Patch<S, O> {
 }
 
 /**
+ * NSP-018 (s74) — `says` for a patch the reducer COMPUTES rather than writes: one built from a draft of the state (For Each's
+ * `run`), where no object literal exists to carry it. Read from the source like `says` (the first argument a string literal);
+ * the rules generator puts nothing after the words, since what such a patch sends is not in the source to read — the words
+ * say it. A literal patch is never wrapped: its wire half is read, and that is the point. Returns the patch with `says` on it.
+ */
+export function said<P extends object>(says: string, patch: P): P & { says: string } {
+  return { ...patch, says };
+}
+
+/**
  * NSP-016 s56 — one answer to a caller (spec.ts THE CALLERS; trace.ts `answer`). s57: a Page Router's answer to a Navigate
  * (`navigate`), and the params it hands each Page Inputs of the page it shows (`page`). And, so that what a node does between two
  * answers keeps its place, the two LOCATION calls a Page Router makes while it answers: `history` — `history.pushState(…, url)`,

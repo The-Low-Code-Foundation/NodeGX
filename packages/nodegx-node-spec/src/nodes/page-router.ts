@@ -52,7 +52,7 @@
  * late, measured there). The look reaches the element only.
  */
 
-import { defineNode, type AnswerCall, type InputDecl } from '../spec';
+import { defineNode, said, type AnswerCall, type InputDecl } from '../spec';
 import { SELF_REFERENCE } from '../trace';
 import { pushTarget } from '../world';
 import { dataAttributeInput, dataAttributeNames } from './data-attributes';
@@ -272,35 +272,48 @@ export const PageRouter = defineNode({
 }).on(
   {
     // :197-210 — off the handler under the old name; on under the new one if on the page (which resets, or replays what waited)
+    // s74 (NSP-018): a computed patch (`run`), so its words go through `said`
     name: (s, v, _i, view) =>
-      run(
-        s,
-        (w) => {
-          deregister(w);
-          w.st.name = v;
-          if (w.st.isMounted) register(w);
-        },
-        view
+      said(
+        'always: it leaves the old name and, while on the page, registers under the new one — which resets it, or hands it the navigates that waited for that name (blank is Main)',
+        run(
+          s,
+          (w) => {
+            deregister(w);
+            w.st.name = v;
+            if (w.st.isMounted) register(w);
+          },
+          view
+        )
       ),
     // :211-222
     pages: (s, v, _i, view) =>
-      run(
-        s,
-        (w) => {
-          w.st.pages = v;
-          if (w.st.isMounted) scheduleReset(w);
-        },
-        view
+      said(
+        'always: the pages it can show, the first its start page; while on the page, it resets at the end of the frame',
+        run(
+          s,
+          (w) => {
+            w.st.pages = v;
+            if (w.st.isMounted) scheduleReset(w);
+          },
+          view
+        )
       ),
     // :223-230 — stored; read by the next match and the next URL
     // a null Url path is none (row C116, fixed in P109 ISL-048: `_trimUrlPart(null)` threw at every match and every URL)
-    urlPath: (s, v, _i, view) => run(s, (w) => void (w.st.urlPath = v === null ? undefined : v), view),
+    urlPath: (s, v, _i, view) =>
+      said('always: read by the next match and the next URL — put in front of every page\'s path (null as none)', run(s, (w) => void (w.st.urlPath = v === null ? undefined : v), view)),
     // :259-268, :340-357 — every Reset of the frame is answered by the one reset at the frame's end
-    reset: (s, _i, view) => ({ ...run(s, (w) => (scheduleReset(w), void (w.st.resetTokens += 1)), view), outcome: 'pending' }),
+    reset: (s, _i, view) =>
+      said(
+        'always: one reset at the end of the frame answers every Reset — it reads the URL and shows its page: Done when it built one or moved the parameters, Unchanged when it shows that page with them already, Failure when there is no page to show',
+        { ...run(s, (w) => (scheduleReset(w), void (w.st.resetTokens += 1)), view), outcome: 'pending' }
+      ),
     // react-component-node.ts :2310-2320
-    mounted: (s, v, _i, view) => run(s, (w) => void (w.st.mounted = !!v), view),
+    mounted: (s, v, _i, view) =>
+      said('always: the router is put on the page (Did Mount, registering, a reset), or taken off it (Will Unmount), at the next paint', run(s, (w) => void (w.st.mounted = !!v), view)),
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire. The look has no reducer: stored, and read by nothing here
-    scrollIntoView: () => NOTHING
+    scrollIntoView: () => ({ says: 'always: the page, or the scrolling Group holding it, scrolls until the router can be seen', send: [] })
   },
   {
     derived: {

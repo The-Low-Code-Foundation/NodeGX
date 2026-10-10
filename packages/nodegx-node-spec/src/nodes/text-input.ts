@@ -100,7 +100,7 @@
  *     this node's outputs show.
  */
 
-import { defineNode, type Patch } from '../spec';
+import { defineNode, said, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
 import { dataAttributeInput, dataAttributeNames } from './data-attributes';
 
@@ -484,64 +484,84 @@ export const TextInput = defineNode({
     // utils.ts :82-89
     enabled: (s, v) => {
       const enabled = !!v;
-      if (enabled === s.enabled) return NOTHING;
-      return { set: { enabled }, send: ['enabled'] };
+      if (enabled === s.enabled) return { says: 'the value it already holds: nothing', send: [] };
+      return { says: 'a change: Enabled follows; disabled, the field takes no typing, no key and no focus', set: { enabled }, send: ['enabled'] };
     },
     // text-input.ts :74-91 — a prop the component reads at each render (TextInput.tsx :192, :201) and each write (textInputValue.ts)
-    type: (_s, v) => ({ set: { fieldType: v }, send: [] }),
+    type: (_s, v) => ({ says: 'always: read at the next paint and the next write — what the field accepts, and whether Value hands on a number or text', set: { fieldType: v }, send: [] }),
     // text-input.ts :212-240
     startValue: (s, v) => {
-      if (v === undefined) return NOTHING; // :222
+      if (v === undefined) return { says: 'undefined: ignored', send: [] }; // :222
       const text = v === null ? emptyFor(s.fieldType) : v; // :225
-      if (s.text === text) return NOTHING; // :226
-      if (!s.runOnChange) return { set: { text }, send: [] }; // :237 — waits for Set
+      if (s.text === text) return { says: 'the value it already holds (null as empty): nothing', send: [] }; // :226
+      if (!s.runOnChange) return { says: 'a new value, with Run On Value Change unticked: held for the next Set', set: { text }, send: [] }; // :237 — waits for Set
       const w = setText({ ...s, text }, text); // :238
-      return { set: { text, ...w.set }, send: w.send, emit: w.emit };
+      // s74 (NSP-018): the write's wire is `setText`'s, computed — said
+      return said(
+        'a new value, with Run On Value Change ticked: written now — on the page the field takes it (Value, Value Changed) unless it holds the keyboard; off the page Value alone, when it differs',
+        { set: { text, ...w.set }, send: w.send, emit: w.emit }
+      );
     },
     // run-on-value-change.ts :136-138
-    'runOnChange-startValue': (_s, v) => ({ set: { runOnChange: v !== false }, send: [] }),
+    'runOnChange-startValue': (_s, v) => ({ says: 'always: whether a new Value is written at once, or waits for Set', set: { runOnChange: v !== false }, send: [] }),
     // text-input.ts :188-196 — at the frame's end, in the order scheduled
-    set: (s) => ({ set: { queue: [...s.queue, 'set'] }, outcome: 'deferred', send: [] }),
+    set: (s) => ({
+      says: 'always: at the end of the frame (or a pointer act\'s drain before it) the Value as it stands is written, as a ticked Value writes it — Done if it wrote, else Unchanged',
+      set: { queue: [...s.queue, 'set'] },
+      outcome: 'deferred',
+      send: []
+    }),
     // text-input.ts :251-253
-    textToInsert: (_s, v) => ({ set: { textToInsert: v === undefined || v === null ? '' : String(v) }, send: [] }),
+    textToInsert: (_s, v) => ({ says: 'always: read by the next Insert Text, as text (nothing as empty)', set: { textToInsert: v === undefined || v === null ? '' : String(v) }, send: [] }),
     // text-input.ts :261-266 — at the frame's end
-    insert: (s) => ({ set: { queue: [...s.queue, 'insert'] }, outcome: 'deferred', send: [] }),
+    insert: (s) => ({
+      says: 'always: at the end of the frame Text To Insert goes in at the caret (at the end, off the page), within Max length — Value, Value Changed on the page, and Done; Unchanged when nothing fits',
+      set: { queue: [...s.queue, 'insert'] },
+      outcome: 'deferred',
+      send: []
+    }),
     // text-input.ts :273-276 — at once
     backspace: (s) => {
       const w = edit(s, 'backspace', '');
-      return { set: w.set, send: w.send, emit: w.emit, outcome: w.landed ? 'done' : 'unchanged' };
+      return said(
+        'always, at once: the character before the caret goes (the last one, off the page) — Value, Value Changed on the page, and Done; Unchanged when there is none',
+        { set: w.set, send: w.send, emit: w.emit, outcome: w.landed ? 'done' : 'unchanged' }
+      );
     },
     // text-input.ts :283-286, :485-512
     clear: (s) => {
       const w = clear(s);
-      return { set: w.set, send: w.send, emit: w.emit, outcome: w.landed ? 'done' : 'unchanged' };
+      return said(
+        'always, at once: the field and Value are emptied (Value Changed on the page, focused or not) — Done; Unchanged when they were empty already',
+        { set: w.set, send: w.send, emit: w.emit, outcome: w.landed ? 'done' : 'unchanged' }
+      );
     },
     // text-input.ts :158-164
-    maxLength: (_s, v) => ({ set: { maxLength: v }, send: [] }),
+    maxLength: (_s, v) => ({ says: 'always: read at the next keystroke and Insert Text — above 0, no more characters than this', set: { maxLength: v }, send: [] }),
     // react-component-node.ts :2310-2320 — what the node wants; the page follows at the next paint
-    mounted: (_s, v) => ({ set: { mounted: !!v }, send: [] }),
+    mounted: (_s, v) => ({ says: 'always: the field is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint', set: { mounted: !!v }, send: [] }),
     // node-shared-port-definitions.ts `addLabelInputs` — a label above the field; the field and its keyboard stay (docblock, C80)
-    useLabel: () => NOTHING,
+    useLabel: () => ({ says: 'always: a label is drawn above the field, or not; the field and its keyboard stay', send: [] }),
     // text-input.ts :293-308 → focus-tracker.ts :57-78: `_canFocus` is "the component is on the page" (:431-433); a disabled
     // element takes nothing, silently (`focus()` on it is a no-op — the focusing steps); none, Unchanged (R13)
     focus: (s) => {
-      if (!s.onPage) return { send: [], outcome: 'unchanged' };
-      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { send: [], outcome: 'done' };
-      return { set: { focused: true, elementFocused: true, hadCaret: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
+      if (!s.onPage) return { says: 'not on the page: nothing to focus, and the Focus is not kept', send: [], outcome: 'unchanged' };
+      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { says: 'it holds the keyboard already, or is disabled or hidden: nothing changes', send: [], outcome: 'done' };
+      return { says: 'otherwise the keyboard is put on it, and the Focused state goes true', set: { focused: true, elementFocused: true, hadCaret: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
     },
     // text-input.ts :315-319 → focus-tracker.ts :87-89: `blur()` on the element; Done either way
     blur: (s) => {
-      if (!s.onPage || !s.elementFocused || !s.pageEnabled) return { send: [], outcome: 'done' };
-      return { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'], outcome: 'done' };
+      if (!s.onPage || !s.elementFocused || !s.pageEnabled) return { says: 'it does not hold the keyboard (or is disabled, and gives it up to nobody): nothing changes', send: [], outcome: 'done' };
+      return { says: 'it holds the keyboard: it is taken off it, and the Focused state goes false', set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'], outcome: 'done' };
     },
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire
-    scrollIntoView: () => NOTHING,
+    scrollIntoView: () => ({ says: 'always: the page, or the scrolling Group holding it, scrolls until the field can be seen', send: [] }),
     // pointerlisteners.ts :113-133 — a blocker on every pointer event (docblock: the drain); what reaches the nodes around it is a graph's matter
-    blockTouch: (_s, v) => ({ set: { blocksPointer: !!v }, send: [] }),
+    blockTouch: (_s, v) => ({ says: 'always: on, a pointer act that lands here goes no further — the nodes it sits inside do not hear it', set: { blocksPointer: !!v }, send: [] }),
     // node-shared-port-definitions.ts :366-375, :320-328 — the page follows at the next paint (TextInput.tsx :118-120 compares the
     // Opacity the style holds with the number 0)
-    visible: (_s, v) => ({ set: { visible: !!v }, send: [] }),
-    opacity: (_s, v) => ({ set: { opacityZero: v === 0 }, send: [] })
+    visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it', set: { visible: !!v }, send: [] }),
+    opacity: (_s, v) => ({ says: 'always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it', set: { opacityZero: v === 0 }, send: [] })
   },
   {
     // react-component-node.ts :785-830 `DATA_ATTRIBUTES_RULE` — one string input per name the Data Attributes list names (the

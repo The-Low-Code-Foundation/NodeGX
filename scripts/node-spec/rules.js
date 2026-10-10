@@ -10,7 +10,8 @@
  * `emit`s, in the order a frame settles them, and the signals a sibling branch of the same reducer emits and this one does not ("stays silent"). The words
  * are the spec author's; everything after the arrow is the spec's structure. Read statically (the TypeScript AST), so a
  * `says` must be a string literal in the patch's own object literal, and so must a said branch's `emit` elements and
- * `outcome` (s73: a computed one throws); a branch built by a helper outside the reducer is not seen here.
+ * `outcome` (s73: a computed one throws); a branch built by a helper outside the reducer is not seen here. A patch computed
+ * from a draft (For Each's `run`) is said with `said('words', patch)` (spec.ts, s74): its line is the words alone.
  *
  *   node scripts/node-spec/rules.js [Type …]   print the rules (all said specs, or the named ones)
  */
@@ -134,6 +135,15 @@ function readReducers(dir = nodesDir) {
                   branches.push({ says, outcome, emit, file: at.rel, line: line + 1 });
                 }
               }
+              // s74: `said('words', patch)` (spec.ts) — the words of a computed patch. Its wire is not in the source, so the
+              // branch is `computed`: the line carries the words alone, and names no sibling's pulse as silent
+              if (ts.isCallExpression(n) && ts.isIdentifier(n.expression) && n.expression.text === 'said') {
+                const saysNode = n.arguments[0];
+                const says = stringOf(ts, saysNode);
+                const { line } = at.source.getLineAndCharacterOfPosition(n.getStart());
+                if (says === undefined) throw new Error(`${at.rel}:${line + 1}: ${type}.${port} — a \`said\` must be given its words as a string literal (the rules are read from the source)`);
+                branches.push({ says, outcome: undefined, emit: [], computed: true, file: at.rel, line: line + 1 });
+              }
               if (ts.isCallExpression(n) && ts.isIdentifier(n.expression)) {
                 const target = resolveCall(at.source, n.expression.text);
                 if (target && !followed.has(target.body)) {
@@ -209,6 +219,8 @@ function rulesInWords(reducers, nameOf) {
   for (const [port, branches] of Object.entries(reducers)) {
     const pulsed = [...new Set(branches.flatMap((b) => b.emit))];
     out[port] = branches.map((b) => {
+      // a computed patch (`said`): the words alone — its wire is not in the source, so naming a sibling's pulse silent could be false
+      if (b.computed) return b.says;
       // in the order a frame settles them (interpreter.ts): the pulses, then the outcome
       const wire = b.emit.map((e) => (OUTCOME_NAMES[e] && !nameOf('output', e, true) ? OUTCOME_NAMES[e] : nameOf('output', e)));
       // `deferred` / `pending`: the outcome comes later (afterInputs, a world answer), so the branch itself puts none on the wire

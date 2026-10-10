@@ -14,7 +14,8 @@ import * as path from 'path';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const rules = require('../../../scripts/node-spec/rules.js') as {
-  readReducers: (dir?: string) => Record<string, Record<string, Array<{ says: string; outcome?: string; emit: string[]; file: string }>>>;
+  readReducers: (dir?: string) => Record<string, Record<string, Array<{ says: string; outcome?: string; emit: string[]; computed?: boolean; file: string }>>>;
+  rulesInWords: (reducers: Record<string, unknown[]>, nameOf: (plug: string, port: string, strict?: boolean) => string | undefined) => Record<string, string[]>;
 };
 
 let dir: string;
@@ -78,6 +79,16 @@ describe('fixtures — what the reader follows', () => {
     expect(r.X.again).toHaveLength(1);
   });
 
+  it("s74: `said('words', patch)` — a computed patch's words, read as `computed`; its line is the words alone, no sibling named silent", () => {
+    const r = read({ x: spec(`  go: (s) => (s.on ? { says: 'on', emit: ['a'] } : said('computed: whatever the draft sends', run(s)))`) });
+    expect(r.X.go).toEqual([
+      expect.objectContaining({ says: 'on', emit: ['a'] }),
+      expect.objectContaining({ says: 'computed: whatever the draft sends', emit: [], computed: true })
+    ]);
+    const lines = rules.rulesInWords(r.X, (_plug: string, port: string) => port.toUpperCase());
+    expect(lines.go).toEqual(['on → A', 'computed: whatever the draft sends']);
+  });
+
   it('a reducer with no said branch reads as []', () => {
     expect(read({ x: spec(`  go: (s) => ({ set: { n: 1 } })`) }).X.go).toEqual([]);
   });
@@ -92,6 +103,10 @@ describe('fixtures — what the reader refuses (a line that would name fewer pul
     ['a computed says', `{ says: 'a' + s }`, 'string literal']
   ])('%s throws, naming the file and the reducer', (_label, branch, what) => {
     expect(() => read({ x: spec(`  go: (s) => (${branch})`) })).toThrow(new RegExp(`x\\.ts:\\d+: X\\.go — .*${what.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`));
+  });
+
+  it("a `said` whose words are not a literal throws", () => {
+    expect(() => read({ x: spec(`  go: (s) => said('a' + s, run(s))`) })).toThrow(/x\.ts:\d+: X\.go — a `said` must be given its words as a string literal/);
   });
 
   it('the same branches split into literal cases read clean (the control for the plants above)', () => {

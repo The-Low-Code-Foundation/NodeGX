@@ -238,36 +238,36 @@ export const Checkbox = defineNode({
     // utils.ts :82-89
     enabled: (s, v) => {
       const enabled = !!v;
-      if (enabled === s.enabled) return NOTHING;
-      return { set: { enabled }, send: ['enabled'] };
+      if (enabled === s.enabled) return { says: 'the value it already holds: nothing', send: [] };
+      return { says: 'a change: Enabled follows; disabled, the box takes no click and no focus', set: { enabled }, send: ['enabled'] };
     },
     // checkbox.ts :63-71 — `!!value`; a change sends Checked and nothing else
     checked: (s, v) => {
       const checked = !!v;
-      if (checked === s.checked) return NOTHING;
-      return { set: { checked }, send: ['checked'] };
+      if (checked === s.checked) return { says: 'the value it already holds: nothing', send: [] };
+      return { says: 'a change: the box shows it, and Checked follows — Changed does not fire (only a person\'s click fires it)', set: { checked }, send: ['checked'] };
     },
     // checkbox.ts :160-178 `setCheckedByAction`
-    check: (s) => (s.checked ? { send: [], outcome: 'unchanged' } : { set: { checked: true }, send: ['checked'], outcome: 'done' }),
-    uncheck: (s) => (s.checked ? { set: { checked: false }, send: ['checked'], outcome: 'done' } : { send: [], outcome: 'unchanged' }),
+    check: (s) => (s.checked ? { says: 'already checked', send: [], outcome: 'unchanged' } : { says: 'unchecked: it is checked, and Checked goes true — never Changed', set: { checked: true }, send: ['checked'], outcome: 'done' }),
+    uncheck: (s) => (s.checked ? { says: 'checked: it is unchecked, and Checked goes false — never Changed', set: { checked: false }, send: ['checked'], outcome: 'done' } : { says: 'already unchecked', send: [], outcome: 'unchanged' }),
     // react-component-node.ts :2310-2320
-    mounted: (_s, v) => ({ set: { mounted: !!v }, send: [] }),
+    mounted: (_s, v) => ({ says: 'always: the box is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint', set: { mounted: !!v }, send: [] }),
     // node-shared-port-definitions.ts `addLabelInputs` — a label beside the box; the box and its keyboard stay (v2, row C80)
-    useLabel: () => NOTHING,
+    useLabel: () => ({ says: 'always: a label is drawn beside the box, or not; the box and its keyboard stay', send: [] }),
     // utils.ts :340-364 — on the element, as the Button's
     focus: (s) => {
-      if (!s.onPage) return { send: [], outcome: 'unchanged' };
-      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { send: [], outcome: 'done' };
-      return { set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
+      if (!s.onPage) return { says: 'not on the page: nothing to focus, and the Focus is not kept', send: [], outcome: 'unchanged' };
+      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { says: 'it holds the keyboard already, or is disabled or hidden: nothing changes', send: [], outcome: 'done' };
+      return { says: 'otherwise the keyboard is put on it, and the Focused state goes true', set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
     },
     // a disabled element gives the keyboard up to nobody: `blur()` on one does nothing (the focusing steps), Done regardless
     blur: (s) => {
-      if (!s.onPage || !s.elementFocused || !s.pageEnabled) return { send: [], outcome: 'done' };
-      return { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'], outcome: 'done' };
+      if (!s.onPage || !s.elementFocused || !s.pageEnabled) return { says: 'it does not hold the keyboard (or is disabled, and gives it up to nobody): nothing changes', send: [], outcome: 'done' };
+      return { says: 'it holds the keyboard: it is taken off it, and the Focused state goes false', set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'], outcome: 'done' };
     },
-    scrollIntoView: () => NOTHING,
+    scrollIntoView: () => ({ says: 'always: the page, or the scrolling Group holding it, scrolls until the box can be seen', send: [] }),
     // node-shared-port-definitions.ts :366-375 — the page follows at the next paint
-    visible: (_s, v) => ({ set: { visible: !!v }, send: [] })
+    visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it', set: { visible: !!v }, send: [] })
   },
   {
     world: { place: (s) => painted(s) },

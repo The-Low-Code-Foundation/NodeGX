@@ -102,15 +102,20 @@ export const DeleteRecord = defineNode({
 }).on(
   {
     // dbmodelcrudbase.ts :517-521
-    idSource: (s, v) => ({ set: { idSource: v, jobs: v === 'foreach' ? [...s.jobs, 'bind' as const] : s.jobs }, send: [] }),
+    idSource: (s, v) => ({ says: 'always: From repeater binds the surrounding Repeater\'s item at the end of the frame (outside one, nothing); Explicit leaves it to Id', set: { idSource: v, jobs: v === 'foreach' ? [...s.jobs, 'bind' as const] : s.jobs }, send: [] }),
     // :532-538
-    repeaterComponent: (s, v) => ({ set: { repeaterComponent: v || undefined, jobs: s.idSource === 'foreach' ? [...s.jobs, 'bind' as const] : s.jobs }, send: [] }),
+    repeaterComponent: (s, v) => ({ says: 'always: which Repeater supplies the record (blank, the nearest); while From repeater, it is bound again at the end of the frame', set: { repeaterComponent: v || undefined, jobs: s.idSource === 'foreach' ? [...s.jobs, 'bind' as const] : s.jobs }, send: [] }),
     // :548-553
-    modelId: (_s, v, _i, w) => ({ set: bindId(v, w), send: ['id'] }),
+    modelId: (_s, v, _i, w) => ({ says: 'always: the record with that id is bound now (a record handed in, by its id; an empty id binds nothing), and Id is sent again', set: bindId(v, w), send: ['id'] }),
     // :40-44 — the pre-flight at the press, then one batch per frame
     store: (s) => {
-      if (!s.collectionId) return { set: { error: NO_CLASS_MESSAGE }, send: ['error'], outcome: 'failure', error: RECORD_FAILURE_CODE };
-      return { set: { presses: s.presses + 1, scheduled: true, jobs: s.scheduled ? s.jobs : [...s.jobs, 'delete' as const] }, send: [], outcome: 'pending' };
+      if (!s.collectionId) return { says: 'no Class: refused at once, and Error says so', set: { error: NO_CLASS_MESSAGE }, send: ['error'], outcome: 'failure', error: RECORD_FAILURE_CODE };
+      return {
+        says: 'otherwise it joins the frame\'s batch: at the end of the frame one delete answers every press — Done for each, or Error and Failure for each (no record bound, no backend, or the backend refuses)',
+        set: { presses: s.presses + 1, scheduled: true, jobs: s.scheduled ? s.jobs : [...s.jobs, 'delete' as const] },
+        send: [],
+        outcome: 'pending'
+      };
     }
   },
   {

@@ -189,24 +189,34 @@ export const UpdateRecord = defineNode({
 }).on(
   {
     // dbmodelcrudbase.ts :517-521
-    idSource: (s, v) => ({ set: { idSource: v, jobs: v === 'foreach' ? [...s.jobs, 'bind' as const] : s.jobs }, send: [] }),
+    idSource: (s, v) => ({ says: 'always: From repeater binds the surrounding Repeater\'s item at the end of the frame (outside one, nothing); Explicit leaves it to Id', set: { idSource: v, jobs: v === 'foreach' ? [...s.jobs, 'bind' as const] : s.jobs }, send: [] }),
     // :532-538
-    repeaterComponent: (s, v) => ({ set: { repeaterComponent: v || undefined, jobs: s.idSource === 'foreach' ? [...s.jobs, 'bind' as const] : s.jobs }, send: [] }),
+    repeaterComponent: (s, v) => ({ says: 'always: which Repeater supplies the record (blank, the nearest); while From repeater, it is bound again at the end of the frame', set: { repeaterComponent: v || undefined, jobs: s.idSource === 'foreach' ? [...s.jobs, 'bind' as const] : s.jobs }, send: [] }),
     // :548-553
-    modelId: (_s, v, _i, w) => ({ set: bindId(v, w), send: ['id'] }),
-    storeProperties: (_s, v) => ({ set: { storeProperties: v }, send: [] }),
-    storeType: (_s, v) => ({ set: { storeType: v }, send: [] }),
-    onlyIfUnchanged: (_s, v) => ({ set: { onlyIfUnchanged: parseNames(v) }, send: [] }),
-    accessControl: (_s, v) => ({ set: { accessControlRules: v }, send: [] }),
+    modelId: (_s, v, _i, w) => ({ says: 'always: the record with that id is bound now (a record handed in, by its id; an empty id binds nothing), and Id is sent again', set: bindId(v, w), send: ['id'] }),
+    storeProperties: (_s, v) => ({ says: 'always: read by the next save — the property inputs only, or All: the whole record', set: { storeProperties: v }, send: [] }),
+    storeType: (_s, v) => ({ says: 'always: read at the next Do — Cloud (or unset) saves to the backend, anything else writes the record here only', set: { storeType: v }, send: [] }),
+    onlyIfUnchanged: (_s, v) => ({ says: 'always: read by the next save — the fields the backend must still hold as this record holds them, or the save is refused', set: { onlyIfUnchanged: parseNames(v) }, send: [] }),
+    accessControl: (_s, v) => ({ says: 'always: read by the next call — the access rules sent with the record', set: { accessControlRules: v }, send: [] }),
     // :64-67
     store: (s) => {
       if (s.storeType === undefined || s.storeType === 'cloud') {
         // :146-148 — the pre-flight at the press, then one batch per frame
-        if (!s.collectionId) return { set: { error: NO_CLASS_MESSAGE }, send: ['error'], outcome: 'failure', error: RECORD_FAILURE_CODE };
-        return { set: { savePresses: s.savePresses + 1, saveScheduled: true, jobs: s.saveScheduled ? s.jobs : [...s.jobs, 'save' as const] }, send: [], outcome: 'pending' };
+        if (!s.collectionId) return { says: 'to the backend, with no Class: refused at once, and Error says so', set: { error: NO_CLASS_MESSAGE }, send: ['error'], outcome: 'failure', error: RECORD_FAILURE_CODE };
+        return {
+          says: 'to the backend: it joins the frame\'s batch — at the end of the frame one save answers every press, Done for each; or Error and Failure for each (no record bound, an Only If Unchanged field it cannot check, no backend, or the backend refuses), and what the write replaced is put back',
+          set: { savePresses: s.savePresses + 1, saveScheduled: true, jobs: s.saveScheduled ? s.jobs : [...s.jobs, 'save' as const] },
+          send: [],
+          outcome: 'pending'
+        };
       }
       // :227-230 — the invocation is minted before the guard
-      return { set: { storePresses: s.storePresses + 1, storeScheduled: true, jobs: s.storeScheduled ? s.jobs : [...s.jobs, 'store' as const] }, send: [], outcome: 'pending' };
+      return {
+        says: 'here only (Store to not Cloud): at the end of the frame the property inputs are written onto the record — Done for each press; Error and Failure for each with no record bound',
+        set: { storePresses: s.storePresses + 1, storeScheduled: true, jobs: s.storeScheduled ? s.jobs : [...s.jobs, 'store' as const] },
+        send: [],
+        outcome: 'pending'
+      };
     }
   },
   {

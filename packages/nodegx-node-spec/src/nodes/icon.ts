@@ -112,9 +112,9 @@ export const Icon = defineNode({
 }).on(
   {
     // react-component-node.ts :2310-2320
-    mounted: (_s, v) => ({ set: { mounted: !!v }, send: [] }),
+    mounted: (_s, v) => ({ says: 'always: the icon is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint', set: { mounted: !!v }, send: [] }),
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire
-    scrollIntoView: () => NOTHING
+    scrollIntoView: () => ({ says: 'always: the page, or the scrolling Group holding it, scrolls until the icon can be seen', send: [] })
   },
   {
     // placed on the page with its params set — the first paint: Did Mount

@@ -7868,6 +7868,21 @@
             "example": "collectionName"
           }
         ]
+      },
+      "rules": {
+        "idSource": [
+          "always: From repeater binds the surrounding Repeater's item at the end of the frame (outside one, nothing); Explicit leaves it to Id"
+        ],
+        "repeaterComponent": [
+          "always: which Repeater supplies the record (blank, the nearest); while From repeater, it is bound again at the end of the frame"
+        ],
+        "modelId": [
+          "always: the record with that id is bound now (a record handed in, by its id; an empty id binds nothing), and Id is sent again"
+        ],
+        "store": [
+          "no Class: refused at once, and Error says so → Failure",
+          "otherwise it joins the frame's batch: at the end of the frame one delete answers every press — Done for each, or Error and Failure for each (no record bound, no backend, or the backend refuses)"
+        ]
       }
     },
     {
@@ -10453,6 +10468,23 @@
       "parameterEncoding": {
         "known": false,
         "reason": "Input ports mirror the input ports of the template component chosen by the `template` parameter, name for name. They cannot be derived from this node's own parameters."
+      },
+      "rules": {
+        "items": [
+          "the same list again: nothing; a new one is copied into its own list at the end of the frame — a row added for each new item and taken down for each one gone, then Items Rendered if a row came or went; anything not a list empties it"
+        ],
+        "templateType": [
+          "always: a rebuild at the end of the frame — Explicit builds every row from Template, Dynamic runs Script per item"
+        ],
+        "template": [
+          "always: a rebuild at the end of the frame, every row built again from this component"
+        ],
+        "templateScript": [
+          "always: compiled as it arrives (code that does not compile leaves none), and a rebuild at the end of the frame"
+        ],
+        "refresh": [
+          "always: a rebuild at the end of the frame, one however many Refreshes arrived — every row goes and one is built per item, then Done for each Refresh; Failure for each when Template Type has nothing to build from, or there are no Items"
+        ]
       }
     },
     {
@@ -14358,6 +14390,84 @@
           "dataAttributes"
         ],
         "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
+      },
+      "rules": {
+        "mounted": [
+          "a change: the element is put on the page, or taken off it, at the next paint",
+          "the value it already holds: nothing"
+        ],
+        "scrollIntoView": [
+          "always: the page, or the scrolling Group holding it, scrolls until the element can be seen"
+        ],
+        "as": [
+          "always: the HTML element the next paint draws (a div when empty) — a new Tag draws a new element"
+        ],
+        "visible": [
+          "always: shown or hidden at the next paint, its space kept; hidden, it takes no pointer"
+        ],
+        "opacity": [
+          "always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it"
+        ],
+        "pointerEventsMode": [
+          "Inherit: its own pointer style comes off",
+          "Explicit: the last Pointer Events Enabled is written back (on, before one was set)"
+        ],
+        "pointerEventsEnabled": [
+          "always, whatever the mode: off, the pointer passes through to what is behind it"
+        ],
+        "blockTouch": [
+          "always: on, a pointer act that lands here goes no further — the nodes it sits inside do not hear it"
+        ],
+        "draggable": [
+          "always: on, every element it draws can be picked up, by pointer or keyboard; off, the one on the page cannot"
+        ],
+        "dragValue": [
+          "always: read by the zone it is dropped on, which reports it as Dropped Value"
+        ],
+        "dragKind": [
+          "always: read by a zone with an Accept Kind as it is dragged over one"
+        ],
+        "holdToDrag": [
+          "always: read at the next press — whether it must be held before it picks up"
+        ],
+        "holdTime": [
+          "always: read at the next held press — how many seconds it is held before it picks up"
+        ],
+        "acceptDrops": [
+          "on: a Draggable can be dropped here",
+          "off while a drag is over it: the drag leaves it — Is Drop Target goes false",
+          "off: nothing can be dropped here"
+        ],
+        "acceptKind": [
+          "always: read as a drag comes over it — a source of another kind does not light it up"
+        ],
+        "acceptFileDrops": [
+          "on: a file dragged from the desktop can be dropped here",
+          "off: no file can be dropped here, and a drag over it is forgotten — Is Dragging Over goes false if it was true"
+        ],
+        "acceptedFileTypes": [
+          "always: read at a drop — which files count as accepted"
+        ],
+        "focus": [
+          "off the page: nothing is listed → Unchanged; Focused stays silent",
+          "off the page, after outcomes this frame resolved and has not reported: nothing is listed, and Unchanged comes after them → Focused stays silent",
+          "already listed as focused → Done; Focused stays silent",
+          "already listed, after outcomes this frame has not reported: Done comes after them → Focused stays silent",
+          "on the page: listed as focused → Focused, Done",
+          "on the page, after outcomes this frame has not reported: listed as focused, and Done comes after them → Focused"
+        ],
+        "scrollToIndex.index": [
+          "always: read when Scroll To Index runs, at the end of the frame"
+        ],
+        "scrollToElement.element": [
+          "always: read when Scroll To Element runs, at the end of the frame"
+        ],
+        "scrollToIndex.do": [
+          "always: runs at the end of the frame — Done when there is a child at Index, else Failure; before the Group is on the page it waits for it (at most 16 wait, and the oldest pushed out reports Failure)"
+        ],
+        "scrollToElement.do": [
+          "always: runs at the end of the frame, waiting as Scroll To Index does — Done when Element is empty (nothing to scroll to), Failure for a value that is not an element"
+        ]
       }
     },
     {
@@ -16507,6 +16617,64 @@
           "dataAttributes"
         ],
         "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
+      },
+      "rules": {
+        "mounted": [
+          "a change: the element is put on the page, or taken off it, at the next paint",
+          "the value it already holds: nothing"
+        ],
+        "scrollIntoView": [
+          "always: the page, or the scrolling Group holding it, scrolls until the element can be seen"
+        ],
+        "visible": [
+          "always: shown or hidden at the next paint, its space kept; hidden, it takes no pointer"
+        ],
+        "opacity": [
+          "always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it"
+        ],
+        "pointerEventsMode": [
+          "Inherit: its own pointer style comes off",
+          "Explicit: the last Pointer Events Enabled is written back (on, before one was set)"
+        ],
+        "pointerEventsEnabled": [
+          "always, whatever the mode: off, the pointer passes through to what is behind it"
+        ],
+        "draggable": [
+          "always: on, every element it draws can be picked up, by pointer or keyboard; off, the one on the page cannot"
+        ],
+        "dragValue": [
+          "always: read by the zone it is dropped on, which reports it as Dropped Value"
+        ],
+        "dragKind": [
+          "always: read by a zone with an Accept Kind as it is dragged over one"
+        ],
+        "holdToDrag": [
+          "always: read at the next press — whether it must be held before it picks up"
+        ],
+        "holdTime": [
+          "always: read at the next held press — how many seconds it is held before it picks up"
+        ],
+        "acceptDrops": [
+          "on: a Draggable can be dropped here",
+          "off while a drag is over it: the drag leaves it — Is Drop Target goes false",
+          "off: nothing can be dropped here"
+        ],
+        "acceptKind": [
+          "always: read as a drag comes over it — a source of another kind does not light it up"
+        ],
+        "acceptFileDrops": [
+          "on: a file dragged from the desktop can be dropped here",
+          "off: no file can be dropped here, and a drag over it is forgotten — Is Dragging Over goes false if it was true"
+        ],
+        "acceptedFileTypes": [
+          "always: read at a drop — which files count as accepted"
+        ],
+        "src": [
+          "always: the picture drawn at the end of the frame — a project file, a URL, or nothing"
+        ],
+        "srcSet": [
+          "always: the sizes the browser may pick from instead, drawn at the end of the frame"
+        ]
       }
     },
     {
@@ -19760,6 +19928,21 @@
             "valueType": "string",
             "example": "prop-Sa1"
           }
+        ]
+      },
+      "rules": {
+        "sourceObjectId": [
+          "always: read by the next create — the record whose data the new one starts from, the property inputs written over it (a record handed in, by its id)"
+        ],
+        "upsertOn": [
+          "always: read by the next create — the field that makes it update a record already holding that value (blank, none)"
+        ],
+        "accessControl": [
+          "always: read by the next call — the access rules sent with the record"
+        ],
+        "store": [
+          "no Class: refused at once, and Error says so → Failure",
+          "otherwise it joins the frame's batch: at the end of the frame one create answers every press — Id is the new record's, and Done for each; or Error and Failure for each (no backend, or the backend refuses)"
         ]
       }
     },
@@ -27763,6 +27946,26 @@
       "parameterEncoding": {
         "known": false,
         "reason": "Ports are computed by the editor from the project's page components (RouterAdapter)."
+      },
+      "rules": {
+        "name": [
+          "always: it leaves the old name and, while on the page, registers under the new one — which resets it, or hands it the navigates that waited for that name (blank is Main)"
+        ],
+        "pages": [
+          "always: the pages it can show, the first its start page; while on the page, it resets at the end of the frame"
+        ],
+        "urlPath": [
+          "always: read by the next match and the next URL — put in front of every page's path (null as none)"
+        ],
+        "reset": [
+          "always: one reset at the end of the frame answers every Reset — it reads the URL and shows its page: Done when it built one or moved the parameters, Unchanged when it shows that page with them already, Failure when there is no page to show"
+        ],
+        "mounted": [
+          "always: the router is put on the page (Did Mount, registering, a reset), or taken off it (Will Unmount), at the next paint"
+        ],
+        "scrollIntoView": [
+          "always: the page, or the scrolling Group holding it, scrolls until the router can be seen"
+        ]
       }
     },
     {
@@ -28685,6 +28888,34 @@
             "valueType": "string",
             "example": "prop-Sa1"
           }
+        ]
+      },
+      "rules": {
+        "idSource": [
+          "always: From repeater binds the surrounding Repeater's item at the end of the frame (outside one, nothing); Explicit leaves it to Id"
+        ],
+        "repeaterComponent": [
+          "always: which Repeater supplies the record (blank, the nearest); while From repeater, it is bound again at the end of the frame"
+        ],
+        "modelId": [
+          "always: the record with that id is bound now (a record handed in, by its id; an empty id binds nothing), and Id is sent again"
+        ],
+        "storeProperties": [
+          "always: read by the next save — the property inputs only, or All: the whole record"
+        ],
+        "storeType": [
+          "always: read at the next Do — Cloud (or unset) saves to the backend, anything else writes the record here only"
+        ],
+        "onlyIfUnchanged": [
+          "always: read by the next save — the fields the backend must still hold as this record holds them, or the save is refused"
+        ],
+        "accessControl": [
+          "always: read by the next call — the access rules sent with the record"
+        ],
+        "store": [
+          "to the backend, with no Class: refused at once, and Error says so → Failure",
+          "to the backend: it joins the frame's batch — at the end of the frame one save answers every press, Done for each; or Error and Failure for each (no record bound, an Only If Unchanged field it cannot check, no backend, or the backend refuses), and what the write replaced is put back",
+          "here only (Store to not Cloud): at the end of the frame the property inputs are written onto the record — Done for each press; Error and Failure for each with no record bound"
         ]
       }
     },
@@ -32132,6 +32363,61 @@
           "dataAttributes"
         ],
         "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
+      },
+      "rules": {
+        "mounted": [
+          "a change: the element is put on the page, or taken off it, at the next paint",
+          "the value it already holds: nothing"
+        ],
+        "scrollIntoView": [
+          "always: the page, or the scrolling Group holding it, scrolls until the element can be seen"
+        ],
+        "as": [
+          "always: the HTML element the next paint draws (a div when empty) — a new Tag draws a new element"
+        ],
+        "visible": [
+          "always: shown or hidden at the next paint, its space kept; hidden, it takes no pointer"
+        ],
+        "opacity": [
+          "always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it"
+        ],
+        "pointerEventsMode": [
+          "Inherit: its own pointer style comes off",
+          "Explicit: the last Pointer Events Enabled is written back (on, before one was set)"
+        ],
+        "pointerEventsEnabled": [
+          "always, whatever the mode: off, the pointer passes through to what is behind it"
+        ],
+        "draggable": [
+          "always: on, every element it draws can be picked up, by pointer or keyboard; off, the one on the page cannot"
+        ],
+        "dragValue": [
+          "always: read by the zone it is dropped on, which reports it as Dropped Value"
+        ],
+        "dragKind": [
+          "always: read by a zone with an Accept Kind as it is dragged over one"
+        ],
+        "holdToDrag": [
+          "always: read at the next press — whether it must be held before it picks up"
+        ],
+        "holdTime": [
+          "always: read at the next held press — how many seconds it is held before it picks up"
+        ],
+        "acceptDrops": [
+          "on: a Draggable can be dropped here",
+          "off while a drag is over it: the drag leaves it — Is Drop Target goes false",
+          "off: nothing can be dropped here"
+        ],
+        "acceptKind": [
+          "always: read as a drag comes over it — a source of another kind does not light it up"
+        ],
+        "acceptFileDrops": [
+          "on: a file dragged from the desktop can be dropped here",
+          "off: no file can be dropped here, and a drag over it is forgotten — Is Dragging Over goes false if it was true"
+        ],
+        "acceptedFileTypes": [
+          "always: read at a drop — which files count as accepted"
+        ]
       }
     },
     {
@@ -45669,6 +45955,30 @@
           "dataAttributes"
         ],
         "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
+      },
+      "rules": {
+        "enabled": [
+          "the value it already holds: nothing",
+          "a change: Enabled follows; disabled, it takes no click, no mouse press and no keyboard, but still hovers and still feels a finger"
+        ],
+        "mounted": [
+          "always: the element is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint"
+        ],
+        "focus": [
+          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
+          "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
+        ],
+        "blur": [
+          "it does not hold the keyboard (or is disabled, and gives it up to nobody): nothing changes → Done; Blurred stays silent",
+          "it holds the keyboard: it is taken off it, and the Focused state goes false → Blurred, Done"
+        ],
+        "scrollIntoView": [
+          "always: the page, or the scrolling Group holding it, scrolls until the button can be seen"
+        ],
+        "visible": [
+          "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
+        ]
       }
     },
     {
@@ -47808,6 +48118,45 @@
           "dataAttributes"
         ],
         "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
+      },
+      "rules": {
+        "enabled": [
+          "the value it already holds: nothing",
+          "a change: Enabled follows; disabled, the box takes no click and no focus"
+        ],
+        "checked": [
+          "the value it already holds: nothing",
+          "a change: the box shows it, and Checked follows — Changed does not fire (only a person's click fires it)"
+        ],
+        "check": [
+          "already checked → Unchanged",
+          "unchecked: it is checked, and Checked goes true — never Changed → Done"
+        ],
+        "uncheck": [
+          "checked: it is unchecked, and Checked goes false — never Changed → Done",
+          "already unchecked → Unchanged"
+        ],
+        "mounted": [
+          "always: the box is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint"
+        ],
+        "useLabel": [
+          "always: a label is drawn beside the box, or not; the box and its keyboard stay"
+        ],
+        "focus": [
+          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
+          "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
+        ],
+        "blur": [
+          "it does not hold the keyboard (or is disabled, and gives it up to nobody): nothing changes → Done; Blurred stays silent",
+          "it holds the keyboard: it is taken off it, and the Focused state goes false → Blurred, Done"
+        ],
+        "scrollIntoView": [
+          "always: the page, or the scrolling Group holding it, scrolls until the box can be seen"
+        ],
+        "visible": [
+          "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
+        ]
       }
     },
     {
@@ -57663,6 +58012,69 @@
           "dataAttributes"
         ],
         "notes": "This node mints no port names. Its two value ports are declared `'*'` above and are republished per instance with a narrowed type — `number` when the `type` parameter is `number`, `string` otherwise — so the port list above is complete and only the `type` field moves."
+      },
+      "rules": {
+        "enabled": [
+          "the value it already holds: nothing",
+          "a change: Enabled follows; disabled, the field takes no typing, no key and no focus"
+        ],
+        "type": [
+          "always: read at the next paint and the next write — what the field accepts, and whether Value hands on a number or text"
+        ],
+        "startValue": [
+          "undefined: ignored",
+          "the value it already holds (null as empty): nothing",
+          "a new value, with Run On Value Change unticked: held for the next Set",
+          "a new value, with Run On Value Change ticked: written now — on the page the field takes it (Value, Value Changed) unless it holds the keyboard; off the page Value alone, when it differs"
+        ],
+        "runOnChange-startValue": [
+          "always: whether a new Value is written at once, or waits for Set"
+        ],
+        "set": [
+          "always: at the end of the frame (or a pointer act's drain before it) the Value as it stands is written, as a ticked Value writes it — Done if it wrote, else Unchanged"
+        ],
+        "textToInsert": [
+          "always: read by the next Insert Text, as text (nothing as empty)"
+        ],
+        "insert": [
+          "always: at the end of the frame Text To Insert goes in at the caret (at the end, off the page), within Max length — Value, Value Changed on the page, and Done; Unchanged when nothing fits"
+        ],
+        "backspace": [
+          "always, at once: the character before the caret goes (the last one, off the page) — Value, Value Changed on the page, and Done; Unchanged when there is none"
+        ],
+        "clear": [
+          "always, at once: the field and Value are emptied (Value Changed on the page, focused or not) — Done; Unchanged when they were empty already"
+        ],
+        "maxLength": [
+          "always: read at the next keystroke and Insert Text — above 0, no more characters than this"
+        ],
+        "mounted": [
+          "always: the field is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint"
+        ],
+        "useLabel": [
+          "always: a label is drawn above the field, or not; the field and its keyboard stay"
+        ],
+        "focus": [
+          "not on the page: nothing to focus, and the Focus is not kept → Unchanged; Focused stays silent",
+          "it holds the keyboard already, or is disabled or hidden: nothing changes → Done; Focused stays silent",
+          "otherwise the keyboard is put on it, and the Focused state goes true → Focused, Done"
+        ],
+        "blur": [
+          "it does not hold the keyboard (or is disabled, and gives it up to nobody): nothing changes → Done; Blurred stays silent",
+          "it holds the keyboard: it is taken off it, and the Focused state goes false → Blurred, Done"
+        ],
+        "scrollIntoView": [
+          "always: the page, or the scrolling Group holding it, scrolls until the field can be seen"
+        ],
+        "blockTouch": [
+          "always: on, a pointer act that lands here goes no further — the nodes it sits inside do not hear it"
+        ],
+        "visible": [
+          "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
+        ],
+        "opacity": [
+          "always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it"
+        ]
       }
     },
     {
@@ -59443,6 +59855,35 @@
           "dataAttributes"
         ],
         "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
+      },
+      "rules": {
+        "mounted": [
+          "always: the container is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint"
+        ],
+        "scrollIntoView": [
+          "always: the page, or the scrolling Group holding it, scrolls until the columns can be seen"
+        ],
+        "layoutString": [
+          "always: the column proportions, whatever it is handed; one that cannot be read draws the children bare, in the Default band"
+        ],
+        "sizing": [
+          "always: Layout String or Auto Fit; while Auto Fit, the band is Default"
+        ],
+        "mediumLayout": [
+          "always: the layout below Medium Below; blank makes that breakpoint inert — the band (Breakpoint, At Medium, At Small) is picked again from it at the next render"
+        ],
+        "smallLayout": [
+          "always: the layout below Small Below; blank makes that breakpoint inert — the band (Breakpoint, At Medium, At Small) is picked again from it at the next render"
+        ],
+        "marginX": [
+          "always: a size (a bare number in the unit it holds, else pixels); the container is measured again, less the gap"
+        ],
+        "mediumBreakpoint": [
+          "always: a size (a bare number in the unit it holds, else pixels); nothing, or 0, makes the Medium breakpoint inert — the band (Breakpoint, At Medium, At Small) is picked again from it at the next render"
+        ],
+        "smallBreakpoint": [
+          "always: a size (a bare number in the unit it holds, else pixels); nothing, or 0, makes the Small breakpoint inert — the band (Breakpoint, At Medium, At Small) is picked again from it at the next render"
+        ]
       }
     },
     {
@@ -60300,6 +60741,14 @@
           "dataAttributes"
         ],
         "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
+      },
+      "rules": {
+        "mounted": [
+          "always: the icon is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint"
+        ],
+        "scrollIntoView": [
+          "always: the page, or the scrolling Group holding it, scrolls until the icon can be seen"
+        ]
       }
     },
     {

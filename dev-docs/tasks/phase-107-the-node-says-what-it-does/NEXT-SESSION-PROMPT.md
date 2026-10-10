@@ -1,70 +1,55 @@
 # P107 — next session
 
-**Written 2026-10-09 (s73).** Read the [README](README.md) §2–§7 (R18 is the newest ruling) and
-[NSP-018 §5.1 and §6](NSP-018-THE-SPEC-SPEAKS.md). That is what s73 built and what is left.
+**Written 2026-10-10 (s74).** Read the [README](README.md) §2–§7 (R18 is the newest ruling) and
+[NSP-018 §5.2 and §6](NSP-018-THE-SPEC-SPEAKS.md). That is what s74 built and what is left.
 
 ## Board (from the task files)
 
 | task | built | committed |
 |---|---|---|
 | NSP-000 … NSP-015 | as s44 (NSP-013 left: AC2, the export half with no reach here, and the deep run for s11–s14; NSP-014 / NSP-015 left: AC2's export half, P18's) | s1 … s44 |
-| NSP-016 the visual nodes | ✅ s71 (all four ACs) | `aa8abb06f` … `df215ade6` |
-| **NSP-018 the spec speaks** | 🟡 **s73: AC1, AC3, AC4, AC5 met; AC2 counting — 59 of 507 input reducers in words, 24 specs fully** | s72, s73 |
+| NSP-016 the visual nodes | ✅ s71 (all four ACs); s73 SCROLLROOM | `aa8abb06f` … `fd6385beb` |
+| **NSP-018 the spec speaks** | 🟡 **s74: AC1, AC3, AC4, AC5 met; AC2 counting — 186 of 507 input reducers in words, 37 specs fully** | s72 … s74 |
 | NSP-009 the ratchet | ✅ s64; s65: a `contract` column | `6a1ed0084`, s65 |
 | NSP-017 the escape hatches | 🟡 s64–s68. Left: AC1's export half (P18's) | s64 … s68 |
 | NSP-023 the spec without React | ✅ (s50) | s45 … s57 |
-| NSP-006 the stranger | ✅ rounds 1–4 (hashes rewritten s70, s72, s73) | `649e6864d`, s70, s72, s73 |
+| NSP-006 the stranger | ✅ rounds 1–4 (hashes rewritten s70, s72, s73, s74) | `649e6864d`, s70 … s74 |
 | NSP-020 ports without a viewer | 📋 rows only (s20) | s20 |
-| NSP-010, NSP-019, NSP-021 | 📋 not started (NSP-019 depends on NSP-018 only; NSP-021 carries a P112 note, uncommitted since 2 Oct, not ours) | — |
+| NSP-010, NSP-019, NSP-021 | 📋 not started (NSP-019 depends on NSP-018 only; NSP-021 carries a P112 note, not ours) | — |
 | NSP-022 the cloud-only nodes | 📋 (needs a second runtime target) | s21 |
 
-**`node scripts/node-spec/spec-ledger.js --check` (s73): holds at 125 of 147 on the runtime · 3 as a contract · 2 on
-the export · 2 exempt · 17 owed (all NSP-022)**, unchanged since s68. **`in words: 59 of 507`** (was 4), `idioms: 18 of 108`.
+**`node scripts/node-spec/spec-ledger.js --check` (s74): holds at 125 of 147 on the runtime · 3 as a contract · 2 on
+the export · 2 exempt · 17 owed (all NSP-022)**, unchanged since s68. **`in words: 186 of 507`** (was 59), `idioms: 18 of 108`.
 
-## What s73 settled
+## What s74 settled
 
-1. **The reader dropped pulses.** `scripts/node-spec/rules.js` read only literal `emit` elements, so Switch's Flip (a
-   ternary pulse) came out one pulse short. A said branch's `emit` and `outcome` must now be literal, and a spread is
-   refused. Each throws naming file:line. Split a computed pulse into cases, each with its `says`.
-2. **The reader follows helpers.** It reads through a named call (same file, or a `./sibling` import in `src/nodes`) and
-   through a reducer given by name (`saveValue: onSet`). It reads `as const`, and skips idioms. The Variables' words
-   live once in `variable-base.ts`. Graded in `tests/rules-reader.test.ts` (12, two plants).
-3. **Words for 24 specs:** the pilot five, NSP-011's 13, then by template use Function, Set Variable, Expression,
-   Variable, Router Navigate, States, Static Data, Cloud Function. Deferred work (end of frame, a world answer) is said
-   in the words; the tail after the arrow is only what the reducer itself sends.
-4. **Two rows found by writing the words.** [P107-D38](../../bugs/p107-d38-boolean-to-string-s-selector-changed-fires-without-a-flip.md)
-   (Boolean To String's Selector Changed fires on any different value, not only a flip: a ruling for P109).
-   [P107-C155](../../bugs/p107-c155-the-spec-format-cannot-say-a-port-is-wired.md) (**ours**: the format has no wired
-   port, so Function's and Expression's "run on a new text only while Run is not wired" is graded on the unwired arm
-   only; five runtime sites).
-5. **The census was stale at HEAD** (other phases' committed tests). Regenerated from a clean export; s73's inputs
-   change nothing in it. `spec-census:check` is in no CI workflow.
+1. **The computed-patch question (§5.1), decided both ways.** A constant or a spread of a computed listing is written out
+   as literals (`NOTHING` → `{ says, send: [] }`; Group's Focus is six literal cases; ternaries split). A patch built
+   from a draft (For Each's and Router's `run`, Text Input's Value / Backspace / Clear) is said with **`said('words',
+   patch)`** (spec.ts): the reader reads it as `computed` — the words alone, no wire after the arrow, and no sibling's
+   pulse named silent. Plants: the `said` arm off, the computed guard off — each red on exactly its cases.
+2. **Words for 13 more specs** (+127 reducers): Group, Text, Text Input, Button, For Each, Image, Checkbox, Columns,
+   Update / Create / Delete Record, Router, Icon. A visual node's inputs mostly say what the next paint, act or drop
+   reads (`always: read at …`); the tails that carry something are the actions and the switches that end a gesture.
+3. **Behaviour-neutral, measured:** the interpreter's visual batch (19 / 19) after batch 1; see the gates below for batch 2.
 
-## What s74 does
+## What s75 does
 
-0. ~~P109-S37-SCROLLROOM~~ **done in s73** (NSP-016 §8.4): the layout model reads a scroll as the window unless the
-   content is longer; the 30 ROOM boxes left KNOWN.
-1. **NSP-018 AC2, the next batch by template use: Group (22), Text (16), Button (6), For Each (5), Text Input (18).**
-   First decide the computed-patch question (NSP-018 §5.1, last paragraph). Group's `NOTHING` constant and Focus's
-   `emit: [...listing.emit]` can become literals. For Each's `run(s, view, cb)` builds its patch from a draft and its
-   Refresh spreads one, so it may need a reducer-level form (`said('words', patch)`, an unknown wire). Re-rank first (unworded specs by `"type"` count in `templates/`):
+0. **[P107-S74-CLICKAWAY](../../bugs/p107-s74-clickaway-group-s-click-beside-it-has-a-twin-branch-no-scenario-tells-apart.md) (ours, small):**
+   Group's runtime conformance is red at seed 20736 — a `clickAway` twin branch no scenario tells apart. Add the sibling
+   scenario, re-run `NSP_SEED=20736 NSP_ONLY=Group … -w 1` (~4 min). It predates s74 (control on the HEAD spec).
+1. **NSP-018 AC2, the next batch.** Re-rank first (unworded specs by `"type"` count in `templates/`):
    `node -e "const fs=require('fs'),p=require('path');const {loadSpecs}=require('./scripts/node-spec/load-specs');const {readReducers}=require('./scripts/node-spec/rules');const S=loadSpecs(),R=readReducers(),c={};(function w(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const f=p.join(d,e.name);if(e.isDirectory()){if(e.name!=='node_modules')w(f)}else if(f.endsWith('.json'))for(const m of fs.readFileSync(f,'utf8').matchAll(/\"type\":\s*\"([^\"]+)\"/g))c[m[1]]=(c[m[1]]||0)+1}})('templates');console.log(Object.entries(S).map(([t,s])=>[t,Object.keys(s.on||{}),R[t]||{}]).filter(([,k,r])=>k.some(q=>!(r[q]||[]).length)).map(([t,k])=>[t,k.length,c[t]||0]).sort((a,b)=>b[2]-a[2]).slice(0,15).map(x=>x.join(' ')).join('\n'))"`
-2. **Or C155 (ours):** a wired-port notion in the format (`wired` in inputs-seen, a stub source wired by the runtime
-   target, scenarios for the wired arm of Function / Expression / Run Tasks / Page / layout). Format files are
-   stranger-guarded.
-3. **Or NSP-019** (the inspector shows a node's rules). Now 24 specs have rules to show.
+   **Options (9) and Timer (3) are stranger-guarded**: word them together in one commit, one hashes rewrite, one stranger run.
+2. **Or the default summary (§6 item 3):** 37 specs now have words — price `rules` on `get_node_type`'s default summary by
+   CMP-006's traffic weights, then keep or overturn the negative assertion in `nsp018RulesOnTheWire.test.ts`.
+3. **Or C155 (ours):** a wired-port notion in the format. **Or NSP-019** (the inspector shows a node's rules).
 4. **When the box is quiet:** NSP-013's deep run for s11–s14.
 
-**Human decisions: none open for P107.** D38 is P109's to put to Richard. **P109 holds:** D38, the Page Stack, the Router (S18). C152 and C153 are fixed (`0859bbbde`); C154 is fixed on `p109-isl052`
-(`afac7de50`); SCROLLROOM, the model's half, is done (s73). **P112 holds:** P107-SIZE.
+**Human decisions: none open for P107.** D38 is P109's to put to Richard. **P109 holds:** D38, the Page Stack, the Router (S18).
+**P112 holds:** P107-SIZE.
 
-**Gates (s73):** batch 1 (`e8955b1dd`): `tsc --noEmit` (node-spec) clean; node-spec rules-reader, stranger (hashes rewritten), spec-ledger,
-pilot, batch, catalog-parity, counter: **7 / 7 suites, 457 passed, 18 skipped, exit 0** (stranger 421 s). Runtime `NSP_ONLY=Switch`
-and `NSP_ONLY="Color Blend"` conformance `-w 1`: 6 passed each, exit 0. Batch 2: `tsc` clean; rules-reader, catalog-parity,
-batch-escape, -data, -navigation, -time, -records, spec-ledger: **8 / 8 suites, 510 passed, exit 0** (run after a peer's
-`-w 2` suite exited). Both batches: `noodl-mcp` `nsp018RulesOnTheWire` 5 / 5; `catalog:check`, `catalog:merge:check`,
-`docs:nodes:check`, `spec-ledger --check` exit 0. **Not run:** the full node-spec suite, the editor's `tsc`, the full
-`noodl-mcp` suite, `test:main`. Plants: two on the reader, each red on exactly its cases, restored by `cp` and `cmp`-checked.
+**Gates (s74):** `tsc --noEmit` (node-spec) clean. node-spec: batch-visual after batch 1 — 19 / 19, exit 0; after batch 2, batch-visual, -records, -navigation, rules-reader, spec-ledger, catalog-parity — **6 / 6 suites, 465 passed, exit 0**; stranger (hashes rewritten for spec.ts) — **46 passed, 18 skipped, exit 0** (456 s). noodl-mcp `nsp018RulesOnTheWire` + `toolDisclosure` 23 / 23 (`[surface] 8261 / 8280`, unchanged). `catalog:check`, `catalog:merge:check`, `docs:nodes:check`, `spec-ledger --check` exit 0. Plants: two on the reader (the `said` arm, the computed guard), each red on exactly its cases, restored by `cp`, `cmp`-checked. **Runtime `NSP_ONLY=Group` at seed 20736: DOES NOT CONFORM — one `person.clickAway` swap-branch survivor, identical on the HEAD spec (control run), so not s74's: [P107-S74-CLICKAWAY](../../bugs/p107-s74-clickaway-group-s-click-beside-it-has-a-twin-branch-no-scenario-tells-apart.md).** Not run: the full node-spec suite, the editor's `tsc`, the full `noodl-mcp` suite, `test:main`.
 
 ## Before you start
 
@@ -88,8 +73,9 @@ batch-escape, -data, -navigation, -time, -records, spec-ledger: **8 / 8 suites, 
   packages/nodegx-core/tests packages/nodegx-export/tests packages/noodl-mcp/tests dev-docs/tasks/phase-107-the-node-says-what-it-does
   scripts/node-spec | tar -x -C <dir>`, copy your changed census inputs in, run `node <dir>/scripts/node-spec/census.js`, copy
   census.json and CENSUS.md back. The census counts zz files: delete them first.
-- **The rules reader (s73):** `node scripts/node-spec/rules.js <Type>` prints a spec's lines. A `says` goes on the patch
-  literal; a branch reached only through a constant, a spread or a mutable draft is invisible to it (see §5.1).
+- **The rules reader (s73, s74):** `node scripts/node-spec/rules.js <Type>` prints a spec's lines. A `says` goes on the patch
+  literal; a branch reached only through a constant or a spread is invisible to it — write it out as literals. A patch built
+  from a draft goes through `said('words', patch)` (spec.ts): its line is the words alone, so the words must say the wire.
 - **The catalog pipe (s72):** a change to a spec's descriptions, `says` or the runtime's registration owes
   `node scripts/node-catalog/generate.js` → `npm run catalog:merge` → `npm run docs:nodes`, all three, then the three
   `--check`s. `generate.js` now reads the specs too; a description disagreement throws there, naming both sentences.

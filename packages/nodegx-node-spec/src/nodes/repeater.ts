@@ -121,7 +121,7 @@
  * **itemOutputSignal-Tapped** — only when the Repeater has that output. A place with no row is nothing to click.
  */
 
-import { defineNode, type Patch } from '../spec';
+import { defineNode, said, type Patch } from '../spec';
 import type { CollectionRef, RecordRef } from '../registry';
 
 /** What a row template is in the play's project: a component a target registers by name before the node is placed. */
@@ -548,27 +548,39 @@ export const Repeater = defineNode({
   {
     // :301-320 — the same value again is nothing; else it is bound (`bindCollection` :476-485: a registry array is listened to,
     // the one before is not) and copied at the frame's end
+    // s74 (NSP-018): a computed patch (`run`), so its words go through `said`
     items: (s, v, _i, view) =>
-      run(s, view, (w) => {
-        if (v === w.st.items) return;
-        if (view.registry.isCollection(w.st.items)) view.unwatch({ collection: w.st.items.getId() });
-        if (view.registry.isCollection(v)) view.watch({ collection: v.getId() });
-        w.st.items = v;
-        scheduleCopy(w);
-      }),
+      said(
+        'the same list again: nothing; a new one is copied into its own list at the end of the frame — a row added for each new item and taken down for each one gone, then Items Rendered if a row came or went; anything not a list empties it',
+        run(s, view, (w) => {
+          if (v === w.st.items) return;
+          if (view.registry.isCollection(w.st.items)) view.unwatch({ collection: w.st.items.getId() });
+          if (view.registry.isCollection(v)) view.watch({ collection: v.getId() });
+          w.st.items = v;
+          scheduleCopy(w);
+        })
+      ),
     // :333-336
-    templateType: (s, v, _i, view) => run(s, view, (w) => ((w.st.templateType = v), scheduleRefresh(w))),
+    templateType: (s, v, _i, view) =>
+      said('always: a rebuild at the end of the frame — Explicit builds every row from Template, Dynamic runs Script per item', run(s, view, (w) => ((w.st.templateType = v), scheduleRefresh(w)))),
     // :343-346
-    template: (s, v, _i, view) => run(s, view, (w) => ((w.st.template = v), scheduleRefresh(w))),
+    template: (s, v, _i, view) => said('always: a rebuild at the end of the frame, every row built again from this component', run(s, view, (w) => ((w.st.template = v), scheduleRefresh(w)))),
     // :352-376 — compiled as it arrives; what does not compile leaves no function (the one before is dropped); a rebuild either way
     templateScript: (s, v, _i, view) =>
-      run(s, view, (w) => {
-        w.st.script = v;
-        w.st.compiles = compileScript(v) !== undefined;
-        scheduleRefresh(w);
-      }),
+      said(
+        'always: compiled as it arrives (code that does not compile leaves none), and a rebuild at the end of the frame',
+        run(s, view, (w) => {
+          w.st.script = v;
+          w.st.compiles = compileScript(v) !== undefined;
+          scheduleRefresh(w);
+        })
+      ),
     // :384-390 — answered by the next rebuild
-    refresh: (s, _i, view) => ({ ...run(s, view, (w) => ((w.st.tokens += 1), scheduleRefresh(w))), outcome: 'pending' })
+    refresh: (s, _i, view) =>
+      said(
+        'always: a rebuild at the end of the frame, one however many Refreshes arrived — every row goes and one is built per item, then Done for each Refresh; Failure for each when Template Type has nothing to build from, or there are no Items',
+        { ...run(s, view, (w) => ((w.st.tokens += 1), scheduleRefresh(w))), outcome: 'pending' }
+      )
   },
   {
     derived: {

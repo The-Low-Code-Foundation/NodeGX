@@ -116,15 +116,20 @@ export const CreateRecord = defineNode({
 }).on(
   {
     // :79-82
-    sourceObjectId: (_s, v, _i, w) => ({ set: { sourceObjectId: w.registry.isRecord(v) ? v.getId() : v }, send: [] }),
+    sourceObjectId: (_s, v, _i, w) => ({ says: 'always: read by the next create — the record whose data the new one starts from, the property inputs written over it (a record handed in, by its id)', set: { sourceObjectId: w.registry.isRecord(v) ? v.getId() : v }, send: [] }),
     // :106-108
-    upsertOn: (_s, v) => ({ set: { upsertOn: typeof v === 'string' && v.trim() !== '' ? v.trim() : undefined }, send: [] }),
+    upsertOn: (_s, v) => ({ says: 'always: read by the next create — the field that makes it update a record already holding that value (blank, none)', set: { upsertOn: typeof v === 'string' && v.trim() !== '' ? v.trim() : undefined }, send: [] }),
     // dbmodelcrudbase.ts :842-844
-    accessControl: (_s, v) => ({ set: { accessControlRules: v }, send: [] }),
+    accessControl: (_s, v) => ({ says: 'always: read by the next call — the access rules sent with the record', set: { accessControlRules: v }, send: [] }),
     // :123-125 — the pre-flight at the press, then one batch per frame
     store: (s) => {
-      if (!s.collectionId) return { set: { error: NO_CLASS_MESSAGE }, send: ['error'], outcome: 'failure', error: RECORD_FAILURE_CODE };
-      return { set: { presses: s.presses + 1, scheduled: true }, send: [], outcome: 'pending' };
+      if (!s.collectionId) return { says: 'no Class: refused at once, and Error says so', set: { error: NO_CLASS_MESSAGE }, send: ['error'], outcome: 'failure', error: RECORD_FAILURE_CODE };
+      return {
+        says: 'otherwise it joins the frame\'s batch: at the end of the frame one create answers every press — Id is the new record\'s, and Done for each; or Error and Failure for each (no backend, or the backend refuses)',
+        set: { presses: s.presses + 1, scheduled: true },
+        send: [],
+        outcome: 'pending'
+      };
     }
   },
   {

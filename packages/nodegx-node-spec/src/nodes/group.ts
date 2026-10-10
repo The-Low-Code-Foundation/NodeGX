@@ -435,49 +435,82 @@ export const Group = defineNode({
   }
 }).on(
   {
-    mounted: (s, v) => (!!v !== s.mounted ? { set: { mounted: !!v }, send: [] } : NOTHING),
-    scrollIntoView: () => NOTHING,
-    as: (_s, v) => ({ set: { tag: v || 'div' }, send: [] }),
-    visible: (_s, v) => ({ set: { visible: !!v }, send: [] }),
-    opacity: (_s, v) => ({ set: { opacityZero: v === 0 }, send: [] }),
-    pointerEventsMode: (s, v) => ({ set: { peStyle: v === 'inherit' ? undefined : s.peEnabled === false ? 'none' : 'auto' }, send: [] }),
-    pointerEventsEnabled: (_s, v) => ({ set: { peEnabled: !!v, peStyle: v ? 'auto' : 'none' }, send: [] }),
+    mounted: (s, v) =>
+      !!v !== s.mounted
+        ? { says: 'a change: the element is put on the page, or taken off it, at the next paint', set: { mounted: !!v }, send: [] }
+        : { says: 'the value it already holds: nothing', send: [] },
+    scrollIntoView: () => ({ says: 'always: the page, or the scrolling Group holding it, scrolls until the element can be seen', send: [] }),
+    as: (_s, v) => ({ says: 'always: the HTML element the next paint draws (a div when empty) — a new Tag draws a new element', set: { tag: v || 'div' }, send: [] }),
+    visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, it takes no pointer', set: { visible: !!v }, send: [] }),
+    opacity: (_s, v) => ({ says: 'always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it', set: { opacityZero: v === 0 }, send: [] }),
+    pointerEventsMode: (s, v) =>
+      v === 'inherit'
+        ? { says: 'Inherit: its own pointer style comes off', set: { peStyle: undefined }, send: [] }
+        : { says: 'Explicit: the last Pointer Events Enabled is written back (on, before one was set)', set: { peStyle: s.peEnabled === false ? 'none' : 'auto' }, send: [] },
+    pointerEventsEnabled: (_s, v) => ({ says: 'always, whatever the mode: off, the pointer passes through to what is behind it', set: { peEnabled: !!v, peStyle: v ? 'auto' : 'none' }, send: [] }),
     // pointerlisteners.ts :113-133 — read at the render, and every act paints first
-    blockTouch: (_s, v) => ({ set: { blocks: !!v }, send: [] }),
+    blockTouch: (_s, v) => ({ says: 'always: on, a pointer act that lands here goes no further — the nodes it sits inside do not hear it', set: { blocks: !!v }, send: [] }),
     // drag-drop.ts `setDraggable`, `elementChanged` — the attributes go on every element the node has while Draggable is on (a
     // remount, a new Tag, a mount however late), and come off the one on the page with it (row C77, fixed in P109 ISL-031)
-    draggable: (_s, v) => ({ set: { draggable: !!v }, send: [] }),
+    draggable: (_s, v) => ({ says: 'always: on, every element it draws can be picked up, by pointer or keyboard; off, the one on the page cannot', set: { draggable: !!v }, send: [] }),
     // read by the zone it is dropped on: this page's only zone is itself, and a drag never takes its own node (C78, fixed in P109 ISL-031)
-    dragValue: () => NOTHING,
-    dragKind: () => NOTHING,
-    holdToDrag: (_s, v) => ({ set: { holdToDrag: v }, send: [] }),
-    holdTime: (_s, v) => ({ set: { holdTime: v }, send: [] }),
+    dragValue: () => ({ says: 'always: read by the zone it is dropped on, which reports it as Dropped Value', send: [] }),
+    dragKind: () => ({ says: 'always: read by a zone with an Accept Kind as it is dragged over one', send: [] }),
+    holdToDrag: (_s, v) => ({ says: 'always: read at the next press — whether it must be held before it picks up', set: { holdToDrag: v }, send: [] }),
+    holdTime: (_s, v) => ({ says: 'always: read at the next held press — how many seconds it is held before it picks up', set: { holdTime: v }, send: [] }),
     acceptDrops: (s, v) => {
-      if (v) return { set: { acceptDrops: true }, send: [] };
-      if (s.inZone) return { set: { acceptDrops: false, inZone: false, index: -1, isDropTarget: false }, send: ['isDropTarget'] };
-      return { set: { acceptDrops: false }, send: [] };
+      if (v) return { says: 'on: a Draggable can be dropped here', set: { acceptDrops: true }, send: [] };
+      if (s.inZone) return { says: 'off while a drag is over it: the drag leaves it — Is Drop Target goes false', set: { acceptDrops: false, inZone: false, index: -1, isDropTarget: false }, send: ['isDropTarget'] };
+      return { says: 'off: nothing can be dropped here', set: { acceptDrops: false }, send: [] };
     },
-    acceptKind: (_s, v) => ({ set: { acceptKind: v }, send: [] }),
+    acceptKind: (_s, v) => ({ says: 'always: read as a drag comes over it — a source of another kind does not light it up', set: { acceptKind: v }, send: [] }),
     // C81 (fixed in P109 ISL-038): switched off, the zone forgets the count and goes dark — it could not hear the leave
-    acceptFileDrops: (s, v) => (v ? { set: { acceptFileDrops: true }, send: [] } : { set: { acceptFileDrops: false, dragDepth: 0, isDragOver: false }, send: s.isDragOver ? ['isDragOver'] : [] }),
-    acceptedFileTypes: (_s, v) => ({ set: { acceptedFileTypes: v }, send: [] }),
+    acceptFileDrops: (s, v) =>
+      v
+        ? { says: 'on: a file dragged from the desktop can be dropped here', set: { acceptFileDrops: true }, send: [] }
+        : {
+            says: 'off: no file can be dropped here, and a drag over it is forgotten — Is Dragging Over goes false if it was true',
+            set: { acceptFileDrops: false, dragDepth: 0, isDragOver: false },
+            send: s.isDragOver ? ['isDragOver'] : []
+          },
+    acceptedFileTypes: (_s, v) => ({ says: 'always: read at a drop — which files count as accepted', set: { acceptedFileTypes: v }, send: [] }),
     // focus-tracker.ts :56-75 — listed, Focused only when it was not listed; off the page, Unchanged and nothing listed (R16)
     // a Focus behind outcomes the frame has resolved and not yet reported waits its turn (`ran`), as the runtime reports it after them
+    // s74 (NSP-018): the listed / not-listed cases written out, so each says what it sends (it was a spread of a computed listing)
     focus: (s) => {
       if (!s.onPage) {
-        if (s.ran.length === 0) return { send: [], outcome: 'unchanged' };
-        return { set: { ran: [...s.ran, { port: 'focus' as const, outcome: 'unchanged' as const }] }, send: [], outcome: 'pending' };
+        if (s.ran.length === 0) return { says: 'off the page: nothing is listed', send: [], outcome: 'unchanged' };
+        return {
+          says: 'off the page, after outcomes this frame resolved and has not reported: nothing is listed, and Unchanged comes after them',
+          set: { ran: [...s.ran, { port: 'focus' as const, outcome: 'unchanged' as const }] },
+          send: [],
+          outcome: 'pending'
+        };
       }
-      const listing = s.listed ? { set: {}, emit: [] as const } : { set: { listed: true }, emit: ['focused'] as const };
-      if (s.ran.length === 0) return { set: listing.set, send: [], emit: [...listing.emit], outcome: 'done' };
-      return { set: { ...listing.set, ran: [...s.ran, { port: 'focus' as const, outcome: 'done' as const }] }, send: [], emit: [...listing.emit], outcome: 'pending' };
+      const ran = [...s.ran, { port: 'focus' as const, outcome: 'done' as const }];
+      if (s.listed) {
+        if (s.ran.length === 0) return { says: 'already listed as focused', set: {}, send: [], emit: [], outcome: 'done' };
+        return { says: 'already listed, after outcomes this frame has not reported: Done comes after them', set: { ran }, send: [], emit: [], outcome: 'pending' };
+      }
+      if (s.ran.length === 0) return { says: 'on the page: listed as focused', set: { listed: true }, send: [], emit: ['focused'], outcome: 'done' };
+      return { says: 'on the page, after outcomes this frame has not reported: listed as focused, and Done comes after them', set: { listed: true, ran }, send: [], emit: ['focused'], outcome: 'pending' };
     },
     // group.ts :129-146
-    'scrollToIndex.index': (_s, v) => ({ set: { scrollIndex: v }, send: [] }),
-    'scrollToElement.element': (_s, v) => ({ set: { scrollElement: v }, send: [] }),
+    'scrollToIndex.index': (_s, v) => ({ says: 'always: read when Scroll To Index runs, at the end of the frame', set: { scrollIndex: v }, send: [] }),
+    'scrollToElement.element': (_s, v) => ({ says: 'always: read when Scroll To Element runs, at the end of the frame', set: { scrollElement: v }, send: [] }),
     // group.ts :98-122 — after the frame's inputs; the outcome is reported when it runs (docblock)
-    'scrollToIndex.do': (s) => ({ set: { scheduled: [...s.scheduled, 'scrollToIndex.do'] }, send: [], outcome: 'pending' }),
-    'scrollToElement.do': (s) => ({ set: { scheduled: [...s.scheduled, 'scrollToElement.do'] }, send: [], outcome: 'pending' })
+    'scrollToIndex.do': (s) => ({
+      says: 'always: runs at the end of the frame — Done when there is a child at Index, else Failure; before the Group is on the page it waits for it (at most 16 wait, and the oldest pushed out reports Failure)',
+      set: { scheduled: [...s.scheduled, 'scrollToIndex.do'] },
+      send: [],
+      outcome: 'pending'
+    }),
+    'scrollToElement.do': (s) => ({
+      says: 'always: runs at the end of the frame, waiting as Scroll To Index does — Done when Element is empty (nothing to scroll to), Failure for a value that is not an element',
+      set: { scheduled: [...s.scheduled, 'scrollToElement.do'] },
+      send: [],
+      outcome: 'pending'
+    })
   },
   {
     world: {

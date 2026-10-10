@@ -187,27 +187,27 @@ export const Columns = defineNode({
 }).on(
   {
     // react-component-node.ts :2310-2320
-    mounted: (_s, v) => ({ set: { mounted: !!v }, send: [] }),
+    mounted: (_s, v) => ({ says: 'always: the container is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint', set: { mounted: !!v }, send: [] }),
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire
-    scrollIntoView: () => NOTHING,
+    scrollIntoView: () => ({ says: 'always: the page, or the scrolling Group holding it, scrolls until the columns can be seen', send: [] }),
     // columns.ts :89-92 — whatever it is handed
-    layoutString: (_s, v) => ({ set: { layout: v }, send: [] }),
+    layoutString: (_s, v) => ({ says: 'always: the column proportions, whatever it is handed; one that cannot be read draws the children bare, in the Default band', set: { layout: v }, send: [] }),
     // react-component-node.ts :746-757 — the value, or nothing for `undefined`
-    sizing: (_s, v) => ({ set: { sizing: v }, send: [] }),
-    mediumLayout: (_s, v) => ({ set: { mediumLayout: v }, send: [] }),
-    smallLayout: (_s, v) => ({ set: { smallLayout: v }, send: [] }),
+    sizing: (_s, v) => ({ says: 'always: Layout String or Auto Fit; while Auto Fit, the band is Default', set: { sizing: v }, send: [] }),
+    mediumLayout: (_s, v) => ({ says: 'always: the layout below Medium Below; blank makes that breakpoint inert — the band (Breakpoint, At Medium, At Small) is picked again from it at the next render', set: { mediumLayout: v }, send: [] }),
+    smallLayout: (_s, v) => ({ says: 'always: the layout below Small Below; blank makes that breakpoint inert — the band (Breakpoint, At Medium, At Small) is picked again from it at the next render', set: { smallLayout: v }, send: [] }),
     // react-component-node.ts :698-745 — a size (WHAT REACHES THE PROPS)
     marginX: (s, v) => {
       const r = sized(s.gapHeld, s.gap, v);
-      return { set: { gapHeld: r.held, gap: r.prop }, send: [] };
+      return { says: 'always: a size (a bare number in the unit it holds, else pixels); the container is measured again, less the gap', set: { gapHeld: r.held, gap: r.prop }, send: [] };
     },
     mediumBreakpoint: (s, v) => {
       const r = sized(s.mediumHeld, s.mediumBelow, v);
-      return { set: { mediumHeld: r.held, mediumBelow: r.prop }, send: [] };
+      return { says: 'always: a size (a bare number in the unit it holds, else pixels); nothing, or 0, makes the Medium breakpoint inert — the band (Breakpoint, At Medium, At Small) is picked again from it at the next render', set: { mediumHeld: r.held, mediumBelow: r.prop }, send: [] };
     },
     smallBreakpoint: (s, v) => {
       const r = sized(s.smallHeld, s.smallBelow, v);
-      return { set: { smallHeld: r.held, smallBelow: r.prop }, send: [] };
+      return { says: 'always: a size (a bare number in the unit it holds, else pixels); nothing, or 0, makes the Small breakpoint inert — the band (Breakpoint, At Medium, At Small) is picked again from it at the next render', set: { smallHeld: r.held, smallBelow: r.prop }, send: [] };
     }
   },
   {
