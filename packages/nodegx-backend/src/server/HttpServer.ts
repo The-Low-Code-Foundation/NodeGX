@@ -1969,8 +1969,10 @@ export class HttpServer {
       body,
       principal,
       security: this.security,
-      acl: (access, collection) =>
-        this.security.aclFor(principal, access, narrowings.get(collection ?? gated?.collection ?? '')),
+      acl: (access, collection) => {
+        const named = collection ?? gated?.collection;
+        return this.security.aclFor(principal, access, narrowings.get(named ?? ''), named);
+      },
       checkData: (collection, op) => {
         const decision = this.assertDataAccess(principal, collection, op);
         if (decision?.narrow) narrowings.set(collection, { collection, where: decision.narrow });

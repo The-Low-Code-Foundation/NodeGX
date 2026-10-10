@@ -65,6 +65,24 @@ export interface StorageAclOption {
    * collection's rule.
    */
   only?: { collection: string; where: Record<string, unknown> };
+  /**
+   * P116 ONT-012 (R-b) — *"a bill changes only while it is a draft"*: a condition on the record's
+   * own values as they are BEFORE the write, from `security.json` `collections.<c>.onlyWhile`.
+   * Read by the backend's facade, never by an adapter: the facade ANDs `where` into `only` for the
+   * one write it binds, so the check and the write are one statement on every engine. Scoped to its
+   * collection like `only`.
+   */
+  onlyWhile?: { collection: string; update?: OnlyWhileRule; delete?: OnlyWhileRule };
+}
+
+/** P116 ONT-012 — one `onlyWhile` entry: the condition, the fields free of it, the refusal's words. */
+export interface OnlyWhileRule {
+  /** A Parse-wire filter on the record's own fields. */
+  where: Record<string, unknown>;
+  /** `update` only: a change to these fields alone is not held to the condition. */
+  except?: string[];
+  /** The refusal in the person's words. */
+  says?: string;
 }
 
 /**

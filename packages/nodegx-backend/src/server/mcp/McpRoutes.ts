@@ -65,6 +65,7 @@ import type { AuditLog } from '../../ops/audit';
 import type { Principal } from '../../security/model';
 import { HttpError, readJSONBody, sendJSON } from '../http-util';
 import { logger } from '../../ops/logger';
+import { NotWhileItIs } from '../../persistence/onlyWhile';
 import { AUDIT_MCP_TOOL_CALL } from '../../ops/audit-actions';
 import { buildToolSurface, type FunctionOnSurface, type McpTool, type SchemaColumn } from './toolSurface';
 
@@ -427,7 +428,9 @@ export class McpRoutes {
         if (Object.keys(data).length === 0) throw new Error('Send at least one field to change.');
         try {
           await this.deps.facade.rawSave(collection, id, data, ctx.acl('write', collection));
-        } catch {
+        } catch (e) {
+          // P116 ONT-012: a record no longer in the state its rule allows says so in the rule's words.
+          if (e instanceof NotWhileItIs) throw new Error(e.message);
           throw new Error(`No row ${id} in ${collection} that you can change.`);
         }
         return { text: `Updated ${collection} ${id}.`, structured: { objectId: id }, objectId: id };

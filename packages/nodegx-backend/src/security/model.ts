@@ -15,7 +15,7 @@
  * @module nodegx-backend/security/model
  */
 
-import { pathProblem, type PathHop } from '@noodl/backend-contract';
+import { pathProblem, type OnlyWhileRule, type PathHop } from '@noodl/backend-contract';
 import type { RateLimitPolicy } from '../ops/model';
 
 // ============================================================================
@@ -321,6 +321,76 @@ export function ruleNarrowing(rule: RuleValue, principal: Principal): Record<str
 export interface CollectionRules {
   permissions?: Partial<Record<ClpOp, RuleValue>>;
   creatorOwns?: boolean;
+  /**
+   * P116 ONT-012 (R-b) — *"a bill changes only while it is a draft"*. A condition on the record's
+   * own values before the change, for `update` and `delete`. It ANDs with the permission (it says
+   * WHEN; `permissions` says WHO) and binds every caller the row ACL binds. The facade compiles it
+   * into the write itself (`AdapterFacade.heldWhile`), and a write it stops is a 409 in `says`.
+   */
+  onlyWhile?: { update?: OnlyWhileRule; delete?: OnlyWhileRule };
+}
+
+/**
+ * Keys an `onlyWhile.where` may not use. It is a condition on the record's own values: a path or
+ * a relation is a different rule (who), and an `$or` around one would hide it from this check.
+ */
+const ONLY_WHILE_REFUSED_KEYS = new Set(['$path', '$relatedTo', '$inQuery', '$notInQuery', '$select', '$dontSelect']);
+
+function onlyWhileWhereProblem(where: unknown): string | null {
+  if (!where || typeof where !== 'object' || Array.isArray(where)) return 'where must be an object (a filter on the record\'s own fields)';
+  const keys = Object.keys(where as Record<string, unknown>);
+  if (keys.length === 0) return 'where is empty: a condition that says nothing would bind nothing';
+  const walk = (w: Record<string, unknown>): string | null => {
+    for (const [k, v] of Object.entries(w)) {
+      if (ONLY_WHILE_REFUSED_KEYS.has(k)) return `where may not use ${k}: it is a condition on the record's own values`;
+      if ((k === '$and' || k === '$or') && Array.isArray(v)) {
+        for (const sub of v) {
+          if (!sub || typeof sub !== 'object' || Array.isArray(sub)) return `${k} takes a list of filters`;
+          const p = walk(sub as Record<string, unknown>);
+          if (p) return p;
+        }
+      }
+    }
+    return null;
+  };
+  return walk(where as Record<string, unknown>);
+}
+
+/** Validate a collection's `onlyWhile`. Returns error strings, prefixed by the caller. */
+function validateOnlyWhile(value: unknown): string[] {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return ['must be an object { update?, delete? }'];
+  const errors: string[] = [];
+  const entries = Object.entries(value as Record<string, unknown>);
+  if (entries.length === 0) errors.push('is empty: name update, delete or both');
+  for (const [op, rule] of entries) {
+    if (op !== 'update' && op !== 'delete') {
+      errors.push(`"${op}": only update and delete can depend on the record's values (a record being made has none yet)`);
+      continue;
+    }
+    if (!rule || typeof rule !== 'object' || Array.isArray(rule)) {
+      errors.push(`${op} must be an object { where, except?, says? }`);
+      continue;
+    }
+    const r = rule as Record<string, unknown>;
+    for (const k of Object.keys(r)) {
+      if (k !== 'where' && k !== 'except' && k !== 'says') errors.push(`${op}: unknown key "${k}" (expected where, except, says)`);
+    }
+    const wp = onlyWhileWhereProblem(r.where);
+    if (wp) errors.push(`${op}.${wp}`);
+    if (r.except !== undefined) {
+      if (op === 'delete') errors.push('delete.except: a delete removes every field, so nothing can be excepted');
+      else if (!Array.isArray(r.except) || r.except.length === 0 || r.except.some((f) => typeof f !== 'string' || !f)) {
+        errors.push(`${op}.except must be a non-empty list of field names`);
+      }
+    }
+    if (r.says !== undefined && (typeof r.says !== 'string' || !r.says.trim())) errors.push(`${op}.says must be a sentence`);
+  }
+  return errors;
+}
+
+/** The `onlyWhile` a collection carries, or undefined. */
+export function onlyWhileFor(config: SecurityConfig, collection: string): CollectionRules['onlyWhile'] {
+  return config.collections[collection]?.onlyWhile;
 }
 
 export interface FunctionRules {
@@ -522,7 +592,12 @@ export function validateSecurityConfig(raw: unknown): string[] {
       }
       const e = entry as Record<string, unknown>;
       for (const key of Object.keys(e)) {
-        if (key !== 'permissions' && key !== 'creatorOwns') errors.push(`unknown key "${key}" in collections.${name}`);
+        if (key !== 'permissions' && key !== 'creatorOwns' && key !== 'onlyWhile') {
+          errors.push(`unknown key "${key}" in collections.${name}`);
+        }
+      }
+      if (e.onlyWhile !== undefined) {
+        for (const err of validateOnlyWhile(e.onlyWhile)) errors.push(`collections.${name}.onlyWhile: ${err}`);
       }
       if (e.permissions !== undefined) {
         if (!e.permissions || typeof e.permissions !== 'object') {

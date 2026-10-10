@@ -27,6 +27,7 @@ import { deleteKeepingLinks } from '@noodl/backend-contract';
 import type {
   IStorageAdapter,
   IStorageDataPlane,
+  OnlyWhileRule,
   IStorageFacade,
   IStorageSchema,
   StorageAclOption,
@@ -49,6 +50,8 @@ export type QueryOptions = StorageQueryOptions;
 export type SearchOptions = StorageSearchOptions;
 export type WireQueryResult = StorageQueryResult;
 export type ImportColumn = StorageImportColumn;
+
+import { heldWhile, whyRefused } from './onlyWhile';
 
 // QueryBuilder is the adapter's own SQL/serialization helper — reused here so
 // BAK-007 import writes serialize values EXACTLY as create()/save() do (JSON
@@ -278,7 +281,23 @@ export class AdapterFacade implements IStorageFacade {
   ): Promise<Record<string, unknown>> {
     // HLT-016: `expect` is only sent when there is one, so a save without a precondition
     // reaches the adapter with exactly the options it always did.
-    return this.call('save', expect ? { collection, objectId, data, acl, expect } : { collection, objectId, data, acl });
+    const held = heldWhile(collection, acl, 'update', Object.keys(data));
+    const save = (a: AclOption | undefined) =>
+      this.call<Record<string, unknown>>('save', expect ? { collection, objectId, data, acl: a, expect } : { collection, objectId, data, acl: a });
+    if (!held.rule) return save(acl);
+    return save(held.acl).catch((e) => this.whyRefused(e, collection, objectId, 'update', acl, held));
+  }
+
+  /** P116 ONT-012 — see `onlyWhile.ts` `whyRefused`. */
+  private whyRefused(
+    e: unknown,
+    collection: string,
+    objectId: string,
+    op: 'update' | 'delete',
+    acl: AclOption | undefined,
+    held: { acl: AclOption | undefined; rule?: OnlyWhileRule }
+  ): Promise<never> {
+    return whyRefused((c, w, a) => this.rawCount(c, w, a), e, collection, objectId, op, acl, held);
   }
 
   /**
@@ -291,6 +310,13 @@ export class AdapterFacade implements IStorageFacade {
    * a delete no rule and no Relation reaches is the plain one.
    */
   async rawDelete(collection: string, objectId: string, acl?: AclOption): Promise<void> {
+    // P116 ONT-012: "deleted only while a draft" is held inside the delete, like the row ACL.
+    const held = heldWhile(collection, acl, 'delete');
+    if (!held.rule) return this.deleteHeld(collection, objectId, acl);
+    return this.deleteHeld(collection, objectId, held.acl).catch((e) => this.whyRefused(e, collection, objectId, 'delete', acl, held));
+  }
+
+  private async deleteHeld(collection: string, objectId: string, acl?: AclOption): Promise<void> {
     const sm = this.schemaManager;
     if (!sm || typeof sm.listTables !== 'function') return this.call('delete', { collection, objectId, acl });
     await deleteKeepingLinks(
@@ -318,7 +344,11 @@ export class AdapterFacade implements IStorageFacade {
     properties: Record<string, number>,
     acl?: AclOption
   ): Promise<Record<string, unknown>> {
-    return this.call('increment', { collection, objectId, properties, acl });
+    const held = heldWhile(collection, acl, 'update', Object.keys(properties));
+    if (!held.rule) return this.call('increment', { collection, objectId, properties, acl });
+    return this.call<Record<string, unknown>>('increment', { collection, objectId, properties, acl: held.acl }).catch((e) =>
+      this.whyRefused(e, collection, objectId, 'update', acl, held)
+    );
   }
 
   /**

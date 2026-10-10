@@ -43,6 +43,7 @@ import {
   principalKeys,
   checkClp,
   effectiveCreatorOwns,
+  onlyWhileFor,
   AccessDecision,
   DeployedFunction,
   UnresolvedFunction,
@@ -504,12 +505,22 @@ export class SecurityState {
    * row-level checks (dev-open, admin, or an API key whose scope covers the
    * access — scoped keys are data-plane tools, not users; model doc §6).
    */
-  aclFor(principal: Principal, access: 'read' | 'write', narrow?: AclOption['only']): AclOption | undefined {
+  aclFor(
+    principal: Principal,
+    access: 'read' | 'write',
+    narrow?: AclOption['only'],
+    collection?: string
+  ): AclOption | undefined {
     const base = this.aclKeysFor(principal, access);
     // P116 ONT-004: a path rule's narrowing rides in the ACL option, scoped to
     // its collection. It arises only for a signed-in caller (or a key acting as
     // one), for whom `base` is always an option — a bypass never narrows.
-    return base && narrow ? { ...base, only: narrow } : base;
+    let acl = base && narrow ? { ...base, only: narrow } : base;
+    // P116 ONT-012 (R-b): "only while it is a draft" binds the same callers the row ACL binds, and
+    // rides beside it for the facade to compile into the one write it holds.
+    const onlyWhile = acl && access === 'write' && collection ? onlyWhileFor(this.config, collection) : undefined;
+    if (acl && onlyWhile && collection) acl = { ...acl, onlyWhile: { collection, ...onlyWhile } };
+    return acl;
   }
 
   private aclKeysFor(principal: Principal, access: 'read' | 'write'): AclOption | undefined {

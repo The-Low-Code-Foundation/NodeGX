@@ -191,6 +191,11 @@ ask it as one of the noun's questions, but nothing here says it needs a mutant o
 | R-b | **"Editable only while it's a draft": a backend rule, or a check in a function?** The backend's rules today say who, not when. | A check in a function first, with the claim that grades it. A backend rule if a second app needs it. |
 | R-c | **Settled: its own kind, or an answer on `ends`?** They differ: `ends` keeps a record that stopped, and settled freezes one that is still in force. | Its own kind, if step 1 finds rows outside lessons. **s15: 4 rows outside lessons (nightbook, planning, tirion ×2), so the condition holds.** |
 
+**Ruled 2026-10-10 (s16), Richard, asked in plain words (README §9):** R-a **per-field read rules in the backend**
+(not the recommendation); R-b **a backend rule** (not the recommendation); R-c **its own kind** (the recommendation).
+So step 4 projects secret details to a per-field read rule and *settled* to a rule on a value of the record, and
+both rules are new to the contract (step 4a below).
+
 ## 7. Watch for
 
 - **Nightbook's verifiers are a known limit, not a new bug** (TPL-011 :311, V1-8). Cite them as evidence. Do not file

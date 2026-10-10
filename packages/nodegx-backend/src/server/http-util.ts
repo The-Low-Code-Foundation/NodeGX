@@ -9,6 +9,8 @@ import type * as http from 'http';
 
 import { StillLinked, type StorageQueryResult } from '@noodl/backend-contract';
 
+import { NotWhileItIs } from '../persistence/onlyWhile';
+
 import { requestIdOf } from '../ops/request-id';
 
 // The adapter stack is plain CommonJS without type declarations (see AdapterFacade).
@@ -270,6 +272,17 @@ export function checkViolationToHttp(message: string, schema?: CheckReader): Htt
 export function stillLinkedToHttp(e: unknown): HttpError | null {
   if (!(e instanceof StillLinked)) return null;
   return new HttpError(409, e.message, 142, { reason: 'still-linked', collection: e.collection, objectId: e.objectId, linked: e.linked });
+}
+
+/**
+ * P116 ONT-012 (R-b): a write an `onlyWhile` rule refused (`NotWhileItIs`) — the record is there
+ * and the caller may write it, but not in the state it is in now. 409 with the rule's own words
+ * (`says`), so a person reads the reason and a graph can branch on `reason`. `null` for any other
+ * error: the door's own answer stands for those.
+ */
+export function notWhileToHttp(e: unknown): HttpError | null {
+  if (!(e instanceof NotWhileItIs)) return null;
+  return new HttpError(409, e.message, 142, { reason: 'not-while', collection: e.collection, objectId: e.objectId, op: e.op, where: e.rule.where });
 }
 
 /**

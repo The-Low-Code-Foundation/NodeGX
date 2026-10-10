@@ -27,6 +27,7 @@
 import type { IStorageFacade, StorageQueryOptions as QueryOptions } from '@noodl/backend-contract';
 import type { RequestContext } from './HttpServer';
 import { validateAclShape } from '../security/model';
+import { heldWhile, whyRefused } from '../persistence/onlyWhile';
 // The adapter stack is plain CommonJS without type declarations (see AdapterFacade).
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const QueryBuilder = require('@noodl/runtime/src/api/adapters/local-sql/QueryBuilder');
@@ -40,6 +41,7 @@ import {
   preconditionToHttp,
   splitCapped,
   stillLinkedToHttp,
+  notWhileToHttp,
   uniqueViolationToHttp
 } from './http-util';
 
@@ -418,6 +420,8 @@ export class ParseWireRoutes {
     try {
       updated = await this.facade.rawSave(collection, objectId, data, ctx.acl('write'));
     } catch (e) {
+      const settled = notWhileToHttp(e);
+      if (settled) throw settled;
       const message = e instanceof Error ? e.message : String(e);
       const conflict = uniqueViolationToHttp(message, data);
       if (conflict) throw conflict;
@@ -531,11 +535,18 @@ export class ParseWireRoutes {
 
     // Relation-only updates never touch the row itself, so the write predicate
     // wouldn't run — assert writability explicitly before mutating junctions.
+    // P116 ONT-012: held to the record's `onlyWhile` like a save of those fields would be.
     if ((addRelations.length > 0 || removeRelations.length > 0) && acl) {
       try {
-        await this.facade.rawFetch(collection, objectId, { ...acl, access: 'write' });
-      } catch {
-        throw new HttpError(404, 'Object not found.', 101);
+        const relationFields = [...addRelations, ...removeRelations].map((r) => r.key);
+        const fields = [...Object.keys(plain), ...Object.keys(increments), ...relationFields];
+        const held = heldWhile(collection, acl, 'update', fields);
+        const writeAcl = { ...acl, access: 'write' as const };
+        await this.facade
+          .rawFetch(collection, objectId, { ...held.acl!, access: 'write' })
+          .catch((e) => whyRefused((c, w, a) => this.facade.rawCount(c, w, a), e, collection, objectId, 'update', writeAcl, held));
+      } catch (e) {
+        throw notWhileToHttp(e) || new HttpError(404, 'Object not found.', 101);
       }
     }
 
@@ -548,6 +559,9 @@ export class ParseWireRoutes {
         updated = await this.facade.rawIncrement(collection, objectId, increments, acl);
       }
     } catch (e) {
+      // P116 ONT-012: "only while a draft" refusing is a 409 in its own words, not a 404.
+      const settled = notWhileToHttp(e);
+      if (settled) throw settled;
       // FED-002: an update refused by a unique index is a conflict, not a
       // missing row. Answering 404 here would tell a person their record had
       // vanished when what actually happened is that another one has the value.
@@ -586,7 +600,7 @@ export class ParseWireRoutes {
       await this.facade.rawDelete(ctx.params.collection, ctx.params.id, ctx.acl('write'));
     } catch (e) {
       // P116 R10: a link's `blocks` rule refusing is a 409 that says what links to it, not a 404.
-      throw stillLinkedToHttp(e) || new HttpError(404, 'Object not found.', 101);
+      throw stillLinkedToHttp(e) || notWhileToHttp(e) || new HttpError(404, 'Object not found.', 101);
     }
     sendJSON(ctx.res, 200, {});
   }

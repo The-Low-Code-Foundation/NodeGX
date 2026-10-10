@@ -186,27 +186,40 @@ export class AdminSecurityRoutes {
     const name = ctx.params.name;
     const body = await readJSONBody(ctx.req);
 
-    const KNOWN = ['permissions', 'creatorOwns'];
+    const KNOWN = ['permissions', 'creatorOwns', 'onlyWhile'];
     const unknown = Object.keys(body).filter((k) => !KNOWN.includes(k));
     if (unknown.length > 0) {
       throw new HttpError(
         400,
         `Unknown field(s) ${unknown.map((k) => `"${k}"`).join(', ')} for collection "${name}". ` +
-          `Expected { "permissions": { find, get, create, update, delete, count }, "creatorOwns": boolean }. ` +
+          `Expected { "permissions": { find, get, create, update, delete, count }, "creatorOwns": boolean, "onlyWhile": { update?, delete? } }. ` +
           `Per-operation rules go INSIDE "permissions".`
       );
     }
-    if (body.permissions === undefined && body.creatorOwns === undefined) {
+    if (body.permissions === undefined && body.creatorOwns === undefined && body.onlyWhile === undefined) {
       throw new HttpError(
         400,
-        `Nothing to set for collection "${name}". Send "permissions" and/or "creatorOwns"; ` +
+        `Nothing to set for collection "${name}". Send "permissions", "creatorOwns" and/or "onlyWhile"; ` +
           `to remove this collection's rules use DELETE.`
       );
     }
 
+    // P116 ONT-012: `onlyWhile` says WHEN, the rest WHO, and the permissions page draws only the
+    // WHO. So a body without `onlyWhile` KEEPS the collection's (measured: the page's own save
+    // dropped it, and a sent bill became editable), `null` takes it away, and a value replaces it.
+    // `permissions` and `creatorOwns` keep their old meaning: the body says all of them.
+    const kept = this.security.config.collections[name]?.onlyWhile;
     const entry: Record<string, unknown> = {};
     if (body.permissions !== undefined) entry.permissions = body.permissions;
     if (body.creatorOwns !== undefined) entry.creatorOwns = body.creatorOwns;
+    if (body.onlyWhile !== undefined && body.onlyWhile !== null) entry.onlyWhile = body.onlyWhile;
+    else if (body.onlyWhile === undefined && kept) entry.onlyWhile = kept;
+    if (body.onlyWhile !== undefined && body.permissions === undefined && body.creatorOwns === undefined) {
+      // Only the WHEN was sent: the WHO the collection had stays as it was.
+      const prior = this.security.config.collections[name];
+      if (prior?.permissions) entry.permissions = prior.permissions;
+      if (prior?.creatorOwns !== undefined) entry.creatorOwns = prior.creatorOwns;
+    }
     ctx.audit({ collection: name, rules: entry });
 
     // Validate by candidate-mutating a copy of the whole config — one
@@ -225,7 +238,11 @@ export class AdminSecurityRoutes {
   async deleteCollection(ctx: RequestContext): Promise<void> {
     const name = ctx.params.name;
     const existed = this.security.config.collections[name] !== undefined;
+    // P116 ONT-012: "revert to defaults" is about WHO; a collection's `onlyWhile` (WHEN) has no
+    // default to revert to, so it stays — taken away only by saying `onlyWhile: null`.
+    const kept = this.security.config.collections[name]?.onlyWhile;
     delete this.security.config.collections[name];
+    if (kept) this.security.config.collections[name] = { onlyWhile: kept };
     this.security.save();
     sendJSON(ctx.res, 200, { success: true, collection: name, removed: existed });
   }

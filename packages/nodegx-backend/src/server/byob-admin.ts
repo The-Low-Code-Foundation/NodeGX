@@ -75,6 +75,7 @@ import {
   sendJSON,
   splitCapped,
   stillLinkedToHttp,
+  notWhileToHttp,
   uniqueViolationToHttp
 } from './http-util';
 
@@ -318,6 +319,8 @@ export class ByobAdminRoutes {
       const record = await this.facade.rawSave(ctx.params.table, ctx.params.id, data, ctx.acl('write'));
       sendJSON(ctx.res, 200, forWire(ctx.params.table, record));
     } catch (e) {
+      const settled = notWhileToHttp(e);
+      if (settled) throw settled;
       // FED-002: an edit refused by a unique index is a conflict, not a missing
       // row — the same distinction `classPut` draws.
       const message = e instanceof Error ? e.message : String(e);
@@ -349,7 +352,7 @@ export class ByobAdminRoutes {
       await this.facade.rawDelete(ctx.params.table, ctx.params.id, ctx.acl('write'));
     } catch (e) {
       // P116 R10: a link's `blocks` rule refusing is a 409 that says what links to it, not a 404.
-      throw stillLinkedToHttp(e) || new HttpError(404, 'Record not found');
+      throw stillLinkedToHttp(e) || notWhileToHttp(e) || new HttpError(404, 'Record not found');
     }
     sendJSON(ctx.res, 200, { deleted: true, objectId: ctx.params.id });
   }
@@ -399,7 +402,8 @@ export class ByobAdminRoutes {
         }
       } catch (e) {
         // P116 R10: a refused delete says why, in the shape the single-record door answers with.
-        const linked = stillLinkedToHttp(e);
+        // P116 ONT-012: and so does a write an `onlyWhile` rule refused.
+        const linked = stillLinkedToHttp(e) || notWhileToHttp(e);
         results.push(linked ? { error: linked.message, ...linked.extra } : { error: e instanceof Error ? e.message : String(e) });
       }
     }
