@@ -1,7 +1,8 @@
 ---
 id: P109-S19-LISTENERREGEX
 title: "HLS-006's every-listener gate reads `world.listen('resize')` as a socket, and is red at HEAD"
-status: scheduled
+status: fixed
+commit: cd9d52e28
 phase: P109
 task: ISL-036
 severity: low
@@ -20,3 +21,5 @@ lists all three files as "a new socket was opened" and tells the reader to enrol
 Enrolling them would record three sockets that do not exist. The fix belongs in the gate: match a server's `listen`
 (a port or a path as the first argument, or a receiver that is a server), or exclude a model's own subscription API by
 name. The ruling sits with HLS-006's owner (P18).
+
+**Fixed 2026-10-10 (P109 s39, ISL-036, `cd9d52e28`).** Re-measured: red on the same three files. Fixed the narrower of the two proposed ways: the node-spec World's subscriptions (`world`/`viewport`/`location` `.listen(`) are skipped by receiver name, not enrolled by file, because a row keyed on `world.ts` would hide a real socket added there later. A server's `listen` on the same line still counts. 4/4. HLS-006 is P18's gate: they should know.
