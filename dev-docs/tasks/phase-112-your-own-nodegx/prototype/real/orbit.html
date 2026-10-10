@@ -250,7 +250,7 @@ input[type="text"], input[type="number"], select { width: 100%; box-sizing: bord
 <div id="err" hidden></div>
 <div id="app"></div>
 
-<script src="/preview.js"></script>
+<script src="preview.js"></script>
 <script type="importmap">
 { "imports": {
   "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.170.0/three.module.min.js",
@@ -269,13 +269,15 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const sleep = (ms) => new Promise((r) => setTimeout(r, reduce ? Math.min(ms, 80) : ms));
 const query = new URLSearchParams(location.search);
+// every path is relative to this page, so the folder runs from serve.mjs's root or from any sub-path (nodegx.io/orbit/)
+const RUNTIME = new URL('runtime/', location.href).href;
 try {
 
 /* ================= the project, held in memory; every edit is a write through the store ================= */
 // the project: a folder beside serve.mjs (?project=orbit), or — ?open=wait — files handed to window.__openProject (the editor suite's adapter)
 const source = query.get('open') === 'wait'
   ? await new Promise((resolve) => { window.__openProject = resolve; say('waiting'); })
-  : await (await fetch(`/project/${query.get('project') || 'orbit'}.json`)).json();
+  : await (await fetch(`project/${query.get('project') || 'orbit'}.json`)).json();
 const files = NodegxPreview.memoryFiles(source);
 const store = new NodegxPreview.V2ProjectStore(files);
 const KEYS = store.componentKeys();
@@ -342,7 +344,7 @@ resize();
 cssRenderer.render(scene, camera);   // the app's element is in the CSS layer BEFORE the preview writes into it (moving an iframe reloads it)
 
 /* ================= the real app ================= */
-const preview = await NodegxPreview.mountPreview($('app'), { runtimeBase: '/runtime/' });
+const preview = await NodegxPreview.mountPreview($('app'), { runtimeBase: RUNTIME });
 const first = await preview.update(files.entries());
 // a project that does not run yet is still a project to edit: the editor keeps going and says why the app is not shown
 if (first.status !== 'ok') setTimeout(() => toast(`The app is not shown: ${first.message || first.status}`), 0);
@@ -1141,7 +1143,7 @@ async function playCopy(title, set) {
   cs.writeComponent(KEY, c.files, { ifRevision: c.revision });
   $('checkapp').hidden = false;
   $('checklbl').innerHTML = `<b>${esc(title)}</b>A copy of your app, playing the check`;
-  checker ??= await NodegxPreview.mountPreview($('checkframe'), { runtimeBase: '/runtime/' });
+  checker ??= await NodegxPreview.mountPreview($('checkframe'), { runtimeBase: RUNTIME });
   const s = await checker.update(copy.entries());
   if (s.status !== 'ok') throw new Error(`the copy did not start: ${s.message || s.status}`);
   // the app on screen, read the way a person reads it: by the part each node draws

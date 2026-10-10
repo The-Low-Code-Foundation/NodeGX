@@ -22,6 +22,7 @@
  *    page projects the button to — reaches the app in the scene (posed in 3D) and in the window, and changes it.
  *
  *   node check.mjs [--shot <dir>]        exits 0 PASS, 1 FAIL, 2 when the runtime, the bundle or Chrome is missing
+ *   node check.mjs --site <url>          grades the page at <url> instead (a folder from `serve.mjs --out`, e.g. https://nodegx.io/orbit/)
  *
  * Needs the network for Three.js (cdnjs / jsdelivr), as the page does.
  */
@@ -41,14 +42,16 @@ if (!existsSync(chrome)) { console.log(`check: no Chrome at ${chrome}`); process
 if (!existsSync(join(here, 'look.js'))) { console.log('check: no look.js — run ./build.sh'); process.exit(2); }
 const shotAt = process.argv.indexOf('--shot');
 const shotDir = shotAt > 0 ? process.argv[shotAt + 1] : undefined;
+const siteAt = process.argv.indexOf('--site');
 const { connect, evaluate } = createRequire(import.meta.url)(join(repo, 'scripts/devtools/cdp.js'));
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const freePort = () => new Promise((r) => { const s = net.createServer(); s.listen(0, '127.0.0.1', () => { const { port } = s.address(); s.close(() => r(port)); }); });
 
 const sitePort = await freePort();
-const site = spawn(process.execPath, [join(here, 'serve.mjs'), String(sitePort)], { stdio: ['ignore', 'pipe', 'inherit'] });
-const up = await new Promise((r) => { site.stdout.on('data', (d) => /serve: http/.test(String(d)) && r(true)); site.once('exit', () => r(false)); });
+const site = siteAt > 0 ? undefined : spawn(process.execPath, [join(here, 'serve.mjs'), String(sitePort)], { stdio: ['ignore', 'pipe', 'inherit'] });
+const up = !site || await new Promise((r) => { site.stdout.on('data', (d) => /serve: http/.test(String(d)) && r(true)); site.once('exit', () => r(false)); });
 if (!up) { console.log('check: serve.mjs did not start'); process.exit(2); }
+const page = siteAt > 0 ? process.argv[siteAt + 1] : `http://127.0.0.1:${sitePort}/orbit.html`;
 
 const cdpPort = await freePort();
 const profile = mkdtempSync(join(tmpdir(), 'orbit-check-'));
@@ -102,7 +105,7 @@ try {
 
   {
     console.log('check: graph — editing and missions (slice 3)');
-    await client.send('Page.navigate', { url: `http://127.0.0.1:${sitePort}/orbit.html?stage=graph` });
+    await client.send('Page.navigate', { url: `${page}?stage=graph` });
     let title = 'pending';
     for (let i = 0; i < 200 && (title === 'pending' || title === ''); i++) { await wait(200); title = await evaluate(client, 'document.title').catch(() => 'pending'); }
     ok(title.startsWith('ready nodes=28 wires=37 visual=9'), `page ready in Graph (${title})`);
@@ -187,7 +190,7 @@ try {
 
   for (const pose of ['scene', 'window']) {
     console.log(`check: ${pose}`);
-    await client.send('Page.navigate', { url: `http://127.0.0.1:${sitePort}/orbit.html?stage=orbit&speed=1&set=focusLen.value=3&set=breakLen.value=2&pose=${pose}` });
+    await client.send('Page.navigate', { url: `${page}?stage=orbit&speed=1&set=focusLen.value=3&set=breakLen.value=2&pose=${pose}` });
     let title = 'pending';
     for (let i = 0; i < 200 && (title === 'pending' || title === ''); i++) { await wait(200); title = await evaluate(client, 'document.title').catch(() => 'pending'); }
     ok(title.startsWith('ready nodes=28 wires=37 visual=9'), `page ready (${title})`);
@@ -226,7 +229,7 @@ try {
   const exited = new Promise((r) => proc.once('exit', r));
   proc.kill();
   await exited;
-  site.kill();
+  site?.kill();
   try { rmSync(profile, { recursive: true, force: true, maxRetries: 5 }); } catch { /* Chrome may still hold a file */ }
 }
 console.log(fails.length ? `check: FAIL (${fails.length})` : 'check: PASS');
