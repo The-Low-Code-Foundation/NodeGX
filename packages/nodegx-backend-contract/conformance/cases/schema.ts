@@ -302,6 +302,11 @@ export const schemaCases: readonly ConformanceCase[] = Object.freeze([
         const why = thrownBy(() => ctx.schema.dropColumn!(c, 'title'));
         ok(/idx_/.test(why), `the refusal does not name the index: ${why}`);
         ok((ctx.schema.getTableSchema(c)?.columns || []).some((col) => col.name === 'title'), 'a refused drop dropped the column anyway');
+        // A field only the index's `where` reads is read by it too: PostgreSQL would take the index with the column.
+        ctx.schema.reconcileIndexes!(c, [{ fields: ['title'], unique: true, where: { score: 5 } }]);
+        const onlyWhere = thrownBy(() => ctx.schema.dropColumn!(c, 'score'));
+        ok(/idx_/.test(onlyWhere), `the refusal does not name the index whose where reads it: ${onlyWhere}`);
+        ctx.schema.reconcileIndexes!(c, []);
       }
       if (hasCheckSupport(ctx)) {
         ctx.schema.reconcileChecks!(c, [{ field: 'score', min: 0 }]);
@@ -313,6 +318,54 @@ export const schemaCases: readonly ConformanceCase[] = Object.freeze([
       }
       const after = await ctx.fetch(c, row.objectId as string);
       ok(!('score' in after) || !hasCheckSupport(ctx), 'a read still carries the second dropped column');
+    }
+  },
+  {
+    id: 'schema/rename-column-keeps-its-values-and-refuses-one-in-use',
+    area: 'schema',
+    pins:
+      'P116-ONT-007-renamecolumn: renameColumn keeps the values under the new name; a column a declared index or check ' +
+      'reads is refused by name, as dropColumn refuses it, and nothing is renamed — a rename that went through left the ' +
+      'rule naming a field that is gone, still reported built, and the same declaration pushed again was refused',
+    async run(ctx) {
+      const c = ctx.collection('Sch');
+      ctx.createTable(c, [
+        { name: 'title', type: 'String' },
+        { name: 'tier', type: 'String' }
+      ]);
+      const row = await ctx.create(c, { title: 'T', tier: 'gold' });
+      const declared = () => (ctx.schema.getTableSchema(c)?.columns || []).map((col) => col.name);
+
+      ctx.schema.renameColumn(c, 'title', 'name');
+      ok(declared().includes('name') && !declared().includes('title'), `the declaration did not follow the rename: ${declared().join(', ')}`);
+      const back = await ctx.fetch(c, row.objectId as string);
+      eq(back.name, 'T', 'the renamed column lost its value');
+      ok(!('title' in back), 'a read still carries the old name');
+
+      if (hasIndexSupport(ctx)) {
+        ctx.schema.reconcileIndexes!(c, [{ fields: ['name'], unique: true }]);
+        const why = thrownBy(() => ctx.schema.renameColumn(c, 'name', 'label'));
+        ok(/rename/.test(why) && /idx_/.test(why), `the refusal does not say rename and name the index: ${why}`);
+        ok(declared().includes('name') && !declared().includes('label'), 'a refused rename renamed the column anyway');
+        ctx.schema.reconcileIndexes!(c, [{ fields: ['name'], unique: true, where: { tier: 'gold' } }]);
+        const onlyWhere = thrownBy(() => ctx.schema.renameColumn(c, 'tier', 'level'));
+        ok(/idx_/.test(onlyWhere), `the refusal does not name the index whose where reads it: ${onlyWhere}`);
+        ctx.schema.reconcileIndexes!(c, []);
+      }
+      if (hasCheckSupport(ctx)) {
+        const rule = { field: 'tier', oneOf: ['basic', 'gold'] };
+        ctx.schema.reconcileChecks!(c, [rule]);
+        const why = thrownBy(() => ctx.schema.renameColumn(c, 'tier', 'level'));
+        ok(/rename/.test(why) && /tier is one of basic, gold/.test(why), `the refusal does not say rename and name the rule: ${why}`);
+        ok(declared().includes('tier') && !declared().includes('level'), 'a refused rename renamed the column anyway');
+        // The declaration still reads true: pushed again as it stands, it is accepted.
+        ctx.schema.reconcileChecks!(c, [rule]);
+        // With the rule taken off, the rename goes through.
+        ctx.schema.reconcileChecks!(c, []);
+        ctx.schema.renameColumn(c, 'tier', 'level');
+        const after = await ctx.fetch(c, row.objectId as string);
+        eq(after.level, 'gold', 'the rename after the rule came off lost the value');
+      }
     }
   },
   {

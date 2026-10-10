@@ -216,13 +216,7 @@ export const SCHEMA_COVERAGE: { readonly [K in keyof IStorageSchema]-?: Coverage
     why: 'Same shape as addRelation — `LocalSQLAdapter.ts:1269` calls `this.schemaManager.removeRelation(...)`.'
   },
 
-  renameColumn: {
-    kind: 'uncovered',
-    why:
-      'A migration-path member, reached from the editor schema UI rather than from anything a deployed app runs. ' +
-      'BRG-004 moves schemas across and is where a rename has to survive the crossing.',
-    owes: 'BRG-004'
-  },
+  renameColumn: { kind: 'cases', cases: ['schema/rename-column-keeps-its-values-and-refuses-one-in-use'] },
   changeColumnType: {
     kind: 'uncovered',
     why: 'Optional and feature-detected, and the type-affinity rules it depends on are exactly what diverges. Belongs to the migrator.',

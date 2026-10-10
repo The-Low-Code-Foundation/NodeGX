@@ -485,6 +485,21 @@ export class PgSchemaManager {
   }
 
   /**
+   * BMG-003 / P116-ONT-007-renamecolumn — refuse a drop or a rename while
+   * something declared reads the column (`refuseColumnInUse`).
+   */
+  private refuseIfRead(tableName: string, columnName: string, verb: 'drop' | 'rename'): void {
+    refuseColumnInUse(
+      tableName,
+      columnName,
+      this.declaredIndexes(tableName).map((i) => ({ name: this.indexName(tableName, i.fields, i.where), fields: i.fields, where: i.where })),
+      this.declaredChecks(tableName),
+      this.s.search.get(tableName)?.fields,
+      verb
+    );
+  }
+
+  /**
    * BMG-003 — drop a column. A Relation is a junction table, so that is what
    * goes; a declared index, check or search opt-in that reads the column is a
    * refusal (`code: 'COLUMN_IN_USE'`) naming it, never a cascade: the index
@@ -498,13 +513,7 @@ export class PgSchemaManager {
     const declared = ((schema && schema.columns) || []).find((c) => c.name === columnName);
     const cols = st.columns.get(tableName) || new Set<string>();
     if (!declared && !cols.has(columnName)) return false;
-    refuseColumnInUse(
-      tableName,
-      columnName,
-      this.declaredIndexes(tableName).map((i) => ({ name: this.indexName(tableName, i.fields, i.where), fields: i.fields })),
-      this.declaredChecks(tableName),
-      st.search.get(tableName)?.fields
-    );
+    this.refuseIfRead(tableName, columnName, 'drop');
 
     const relation = declared && declared.type === 'Relation';
     const junction = relation ? junctionTableName(tableName, columnName) : null;
@@ -804,6 +813,7 @@ export class PgSchemaManager {
     if (!st.tables.has(tableName)) throw new Error(`no such table: ${tableName}`);
     const cols = st.columns.get(tableName)!;
     if (!cols.has(oldName)) throw new Error(`Column "${oldName}" does not exist`);
+    this.refuseIfRead(tableName, oldName, 'rename');
 
     cols.delete(oldName);
     cols.add(newName);

@@ -581,7 +581,17 @@ export class ByobAdminRoutes {
         sendJSON(res, 200, { success: true, action: 'addColumn', table } satisfies SchemaMutationResponse);
         return;
       case 'renameColumn':
-        sm.renameColumn(table, body.oldName as string, body.newName as string);
+        // P116-ONT-007-renamecolumn: refused like a drop. A rename that went through left a rule or an
+        // index naming a field that is gone, still reported built, and the same declaration pushed again
+        // was refused. A world migration takes them off first and puts them back after.
+        this.refuseIfInUse(table, body.oldName as string, 'rename');
+        try {
+          sm.renameColumn(table, body.oldName as string, body.newName as string);
+        } catch (e) {
+          const err = e as { code?: string; message?: string };
+          if (err && err.code === 'COLUMN_IN_USE') throw new HttpError(409, String(err.message));
+          throw e;
+        }
         sendJSON(res, 200, { success: true, action: 'renameColumn', table } satisfies SchemaMutationResponse);
         return;
       case 'renameTable': {
@@ -725,8 +735,9 @@ export class ByobAdminRoutes {
   }
 
   /**
-   * BMG-003 — a column a declared index, a check or a search opt-in reads is
-   * refused for a drop or a type change, naming what reads it (AC4). The
+   * BMG-003 — a column a declared index (over it, or in its `where`), a check
+   * or a search opt-in reads is refused for a drop, a rename or a type change,
+   * naming what reads it (AC4). The
    * adapters refuse the same way; this is the sentence the page shows, and it
    * runs first so the two engines answer identically.
    *
@@ -736,7 +747,7 @@ export class ByobAdminRoutes {
     const sm = this.facade.schemaManager;
     if (!sm) return;
     const indexes = typeof sm.indexStatus === 'function' ? sm.indexStatus(table) : [];
-    const index = indexes.find((i) => i.declared !== false && (i.fields || []).includes(column));
+    const index = indexes.find((i) => i.declared !== false && ((i.fields || []).includes(column) || Object.keys(i.where || {}).includes(column)));
     if (index) {
       throw new HttpError(
         409,

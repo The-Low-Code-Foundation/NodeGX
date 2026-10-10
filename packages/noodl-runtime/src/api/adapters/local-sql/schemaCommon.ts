@@ -764,34 +764,36 @@ export class ColumnInUseError extends Error {
 }
 
 /**
- * Refuse a drop while a declared index, a declared check or a search opt-in
- * reads the column. Shared by both managers so the two engines refuse in the
- * same words — PostgreSQL would otherwise drop an index silently and SQLite
- * would refuse the DDL in its own.
+ * Refuse a drop or a rename while a declared index, a declared check or a
+ * search opt-in reads the column. Shared by both managers so the two engines
+ * refuse in the same words — PostgreSQL would otherwise drop an index silently
+ * and SQLite would refuse the DDL in its own. An index reads the fields it is
+ * over AND the ones its `where` names (s14: a drop of a field only the
+ * predicate read took the index with it on PostgreSQL). A rename that went
+ * through left the declaration naming a field that is gone, still reported
+ * built, and the same declaration pushed again was refused
+ * (P116-ONT-007-renamecolumn) — so it is taken off first and put back after,
+ * as a world migration does.
  */
 export function refuseColumnInUse(
   tableName: string,
   columnName: string,
-  indexes: Array<{ name: string; fields: string[] }>,
+  indexes: Array<{ name: string; fields: string[]; where?: Record<string, unknown> }>,
   checks: CheckDecl[],
-  searchFields?: string[]
+  searchFields?: string[],
+  verb: 'drop' | 'rename' = 'drop'
 ): void {
-  const index = indexes.find((i) => i.fields.includes(columnName));
+  const what = verb === 'drop' ? `drop "${columnName}" from "${tableName}"` : `rename "${columnName}" in "${tableName}"`;
+  const index = indexes.find((i) => i.fields.includes(columnName) || Object.keys(i.where || {}).includes(columnName));
   if (index) {
-    throw new ColumnInUseError(
-      `Cannot drop "${columnName}" from "${tableName}": the index ${index.name} (${index.fields.join(', ')}) reads it. Drop that index first.`
-    );
+    throw new ColumnInUseError(`Cannot ${what}: the index ${index.name} (${index.fields.join(', ')}) reads it. Drop that index first.`);
   }
   const check = checks.find((c) => checkFields(c).includes(columnName));
   if (check) {
-    throw new ColumnInUseError(
-      `Cannot drop "${columnName}" from "${tableName}": the rule "${describeCheck(check)}" reads it. Remove that rule first.`
-    );
+    throw new ColumnInUseError(`Cannot ${what}: the rule "${describeCheck(check)}" reads it. Remove that rule first.`);
   }
   if (searchFields && searchFields.includes(columnName)) {
-    throw new ColumnInUseError(
-      `Cannot drop "${columnName}" from "${tableName}": full-text search indexes it. Take it out of the search fields first.`
-    );
+    throw new ColumnInUseError(`Cannot ${what}: full-text search indexes it. Take it out of the search fields first.`);
   }
 }
 

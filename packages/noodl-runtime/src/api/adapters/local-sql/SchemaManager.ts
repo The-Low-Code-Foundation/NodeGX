@@ -328,6 +328,27 @@ class SchemaManager {
   }
 
   /**
+   * BMG-003 / P116-ONT-007-renamecolumn — refuse a drop or a rename while
+   * something declared reads the column (`refuseColumnInUse`). The FTS sync
+   * trigger names every indexed column (`new."col"`), so it is the honest
+   * record of the search opt-in on this engine.
+   */
+  private refuseIfRead(tableName: string, columnName: string, verb: 'drop' | 'rename'): void {
+    const fts = this.db
+      .prepare("SELECT sql FROM sqlite_master WHERE type = 'trigger' AND name = ?")
+      .get(`${tableName}_fts_ai`) as { sql?: string } | undefined;
+    const searched = fts && typeof fts.sql === 'string' && fts.sql.includes(escapeColumn(columnName)) ? [columnName] : undefined;
+    refuseColumnInUse(
+      tableName,
+      columnName,
+      this.declaredIndexes(tableName).map((i) => ({ name: this.indexName(tableName, i.fields, i.where), fields: i.fields, where: i.where })),
+      this.declaredChecks(tableName),
+      searched,
+      verb
+    );
+  }
+
+  /**
    * BMG-003 — drop a column. A Relation is a junction table, so that is what
    * goes. A declared index, check or search opt-in that reads the column is a
    * refusal (`code: 'COLUMN_IN_USE'`) naming it — SQLite's own DROP COLUMN
@@ -345,19 +366,7 @@ class SchemaManager {
     const physical = this.tableColumns(tableName).has(columnName);
     if (!declared && !physical) return false;
 
-    // The FTS sync trigger names every indexed column (`new."col"`), so it is
-    // the honest record of the search opt-in on this engine.
-    const fts = this.db
-      .prepare("SELECT sql FROM sqlite_master WHERE type = 'trigger' AND name = ?")
-      .get(`${tableName}_fts_ai`) as { sql?: string } | undefined;
-    const searched = fts && typeof fts.sql === 'string' && fts.sql.includes(escapeColumn(columnName)) ? [columnName] : undefined;
-    refuseColumnInUse(
-      tableName,
-      columnName,
-      this.declaredIndexes(tableName).map((i) => ({ name: this.indexName(tableName, i.fields, i.where), fields: i.fields })),
-      this.declaredChecks(tableName),
-      searched
-    );
+    this.refuseIfRead(tableName, columnName, 'drop');
 
     const relation = !!declared && declared.type === 'Relation';
     this.db.exec('SAVEPOINT nodegx_drop_column');
@@ -566,6 +575,7 @@ class SchemaManager {
     if (systemCols.includes(oldName)) {
       throw new Error('Cannot rename system columns');
     }
+    this.refuseIfRead(tableName, oldName, 'rename');
 
     try {
       this.db.exec(
