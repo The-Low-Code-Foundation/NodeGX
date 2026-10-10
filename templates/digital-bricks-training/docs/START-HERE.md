@@ -184,9 +184,9 @@ NodeGX's pre-restore safety snapshot of what it replaced, in `backups/`.
 **On PostgreSQL** NodeGX cannot back up at all (BRG-008: the rows are not in a file, and the backup
 route answers 409), so seal on SQLite before migrating. To go back: stop the backend, **drop and
 recreate the database yourself**, run the SQLite reset above, then `migrate` again and serve with
-`NODEGX_STORAGE_URL`. Do not migrate over a database that still holds rows. Measured: `migrate` does
-not refuse a non-empty target. It replaced the rows, and then its own verification failed on
-`_Audit` and said *do not cut over*.
+`NODEGX_STORAGE_URL`. `migrate` refuses a database that still holds rows, naming the tables, before a
+row moves (P109 ISL-039). Before 2026-10-10 it replaced the rows, and only its own verification
+noticed, on `_Audit`.
 
 ### Signing in
 

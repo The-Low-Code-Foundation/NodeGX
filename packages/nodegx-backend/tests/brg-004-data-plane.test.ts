@@ -461,12 +461,46 @@ suite('BRG-004 — the data plane (AC5, AC6, AC7)', () => {
   it('🔴 a re-run over rows that are already there leaves `updatedAt` alone', async () => {
     // The same property AC6 rests on, stated on its own so a failure says what
     // broke: the writer copies the source's values, it does not write "now".
-    const before = psqlRead(mainUrl, `SELECT "updatedAt" FROM "Note" WHERE "title"='note-000'`);
-    const again = await migrateToPostgres({ dataDir, target: mainUrl, batchSize: 7 });
-    const after = psqlRead(mainUrl, `SELECT "updatedAt" FROM "Note" WHERE "title"='note-000'`);
+    // ISL-039: a FIRST run into rows is refused now (below), so the re-run is
+    // the one a resume makes — a checkpoint that lost every batch it had
+    // committed, as a crash between a commit and its checkpoint write leaves
+    // one batch, re-applies all of them over the rows already there.
+    const url = freshDatabase('rerun');
+    const checkpointPath = path.join(dataDir, 'rerun.checkpoint.json');
+    const first = await migrateToPostgres({ dataDir, target: url, batchSize: 7, checkpointPath });
+    const before = psqlRead(url, `SELECT "updatedAt" FROM "Note" WHERE "title"='note-000'`);
+    const lost = readCheckpoint(checkpointPath)!;
+    for (const t of Object.values(lost.tables)) Object.assign(t, { copied: 0, lastRowid: 0, done: t.rows === 0 });
+    fs.writeFileSync(checkpointPath, JSON.stringify(lost));
+    const again = await migrateToPostgres({ dataDir, target: url, batchSize: 7, checkpointPath, resume: true });
+    expect(again.tables.find((t) => t.name === 'Note')?.copied).toBe(NOTE_ROWS);
+    const after = psqlRead(url, `SELECT "updatedAt" FROM "Note" WHERE "title"='note-000'`);
     expect(after).toBe(before);
-    expect((await verifyMain()).findings).toEqual([]);
-    fs.rmSync(path.dirname(path.dirname(again.snapshotPath)), { recursive: true, force: true });
+    fs.rmSync(path.dirname(path.dirname(first.snapshotPath)), { recursive: true, force: true });
+  });
+
+  it('🔴 ISL-039 (P78-DBT-MIGRATE): a first run into a database that already holds rows is refused by table, before a row moves', async () => {
+    const url = freshDatabase('occupied');
+    const checkpointPath = path.join(dataDir, 'occupied.checkpoint.json');
+    const first = await migrateToPostgres({ dataDir, target: url, batchSize: 7, checkpointPath });
+    fs.rmSync(path.dirname(path.dirname(first.snapshotPath)), { recursive: true, force: true });
+    // Somebody's work lands in the target after the move.
+    psql(url, `UPDATE "Note" SET "body" = 'written in PostgreSQL' WHERE "title" = 'note-000'`);
+    const temp = () => fs.readdirSync(os.tmpdir()).filter((d) => d.startsWith('nodegx-migrate-')).length;
+    const snapshotsBefore = temp();
+
+    await expect(migrateToPostgres({ dataDir, target: url, batchSize: 7, checkpointPath })).rejects.toThrow(
+      /already holds rows in .*"Note".* run it again with --resume/
+    );
+    expect(psqlRead(url, `SELECT "body" FROM "Note" WHERE "title" = 'note-000'`)).toBe('written in PostgreSQL');
+    // The refused run leaves no snapshot behind, though a finished run's checkpoint sits at its path.
+    expect(temp()).toBe(snapshotsBefore);
+
+    // Control: the same source into an empty database is not refused.
+    const empty = freshDatabase('occupiedcontrol');
+    const ok = await migrateToPostgres({ dataDir, target: empty, batchSize: 7, checkpointPath: path.join(dataDir, 'occupiedcontrol.checkpoint.json') });
+    expect(ok.tables.find((t) => t.name === 'Note')?.copied).toBe(NOTE_ROWS);
+    fs.rmSync(path.dirname(path.dirname(ok.snapshotPath)), { recursive: true, force: true });
   });
 
   it('🔴 a verification does not lock the door on the resume behind it', async () => {
@@ -507,11 +541,13 @@ suite('BRG-004 — the data plane (AC5, AC6, AC7)', () => {
 
   it('refuses to resume a checkpoint that belongs to a different target, by name', async () => {
     const otherUrl = freshDatabase('other');
+    // ISL-039: its own empty database — a first run into `mainUrl`'s rows is refused before a checkpoint exists.
+    const firstUrl = freshDatabase('cross');
     const checkpointPath = path.join(dataDir, 'cross.checkpoint.json');
     let stopped = false;
     await migrateToPostgres({
       dataDir,
-      target: mainUrl,
+      target: firstUrl,
       batchSize: 4,
       checkpointPath,
       onBatch: () => {
