@@ -2,6 +2,7 @@
 id: P99-HLT016-NOACL
 title: Without an ACL, a save, delete or increment that matches no row answers success
 status: fixed
+commit: f8574d6f7
 phase: P109
 task: ISL-039
 severity: medium

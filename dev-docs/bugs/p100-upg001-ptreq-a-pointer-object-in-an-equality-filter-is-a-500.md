@@ -2,6 +2,7 @@
 id: P100-UPG001-PTREQ
 title: Filtering on a Pointer written as a Parse pointer object is a 500 (cannot translate: __type)
 status: fixed
+commit: 5bfb23cf4
 phase: P109
 task: ISL-039
 severity: medium

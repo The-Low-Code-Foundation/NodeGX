@@ -1,6 +1,6 @@
 # ISL-039 — A backend never loses or changes your data behind your back
 
-**Status: ⬜ not started. Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 8 bugs
+**Status: 🟢 s41 (2026-10-11): 7 of 8 fixed — both blockers (BACKUP `dc4e0b51a`, MIGRATE `2deb380d0`), NOACL `f8574d6f7`, ARRAYEQ + PTREQ `5bfb23cf4`, ADDUNIQUE `421cfc5a6`, NUL `3e18ea4cc`; each re-measured first and graded with a control. Left: KEYORDER, a ruling (AC2). Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 8 bugs
 from the ledger (`dev-docs/bugs/`) that no phase owned: 2 blocker · 5 medium · 1 low; 1 to ask. **Side:** nodegx-backend (backups, migrate, the Parse wire, the SQLite and PostgreSQL adapters, local-sql queries)
 
 ## 1. The person sentence
@@ -53,3 +53,46 @@ The two blockers first: BACKUP and MIGRATE. Then the answers that lie: NOACL, AD
 - **AC3** — every row ruled or written "as proposed" is fixed, one commit each (or one per shared mechanism), with its
   regression green.
 - **AC4** — `node scripts/bugs.js` lists none of this task's rows as `open`, `scheduled` or `needs-ruling`.
+
+## 8. Record
+
+### s41 (2026-10-11) — 7 of 8
+
+**AC1** — all eight rows re-measured at HEAD before building. All eight still fired; none had been fixed elsewhere.
+
+**AC3** — seven fixed, one commit each or one per shared mechanism. Each fix was red first and has a control. The
+ledger files hold the detail.
+
+| row | commit | what changed | graded by |
+|---|---|---|---|
+| BACKUP (blocker) | `dc4e0b51a` | archive carries auth/search/files/ops/views + `workflow-defs/`; manifest `folders`; a running backend re-reads each | `nodegx-backend/tests/isl039-backup-keeps-every-setting.test.ts` (red 4/5 before), 2 mutants |
+| MIGRATE (blocker) | `2deb380d0` | a first run refuses a target holding rows, by table; a refused run no longer leaks its snapshot | `brg-004-data-plane` (new case red before; 20/20), 1 mutant |
+| NOACL | `f8574d6f7` | 0 rows changed is "Object not found" with or without an ACL, both engines | contract case + mutation `missing-row-written-without-acl-succeeds`; full backend suite |
+| ARRAYEQ, PTREQ | `5bfb23cf4` | equality on an Array column matches an element (an array value is the whole array); a Pointer/Date condition is a value | contract cases (both engines) + a `/classes` arm |
+| ADDUNIQUE | `421cfc5a6` | Parse array operators applied on create, refused by name on update, never stored | `/classes` arm, red on the old wire |
+| NUL | `3e18ea4cc` | on PostgreSQL a NUL in a filter value compiles to SQLite's answer | contract case, red on PostgreSQL before |
+
+**Found on the way:**
+- `views.json` (saved table views) was missing from the backup too. A census of the 29 real backends in
+  `~/.noodl/backends` found it.
+- A refused migrate leaked a whole snapshot whenever an earlier checkpoint sat at the path.
+- The admin's "list is empty" relied on comparing JSON text. It now asks `$eq: []`.
+- **Filed:** `P109-S41-SUNDAYWEEK` (a "past 7 days" filter read back on a Sunday is "this week"; `bmg-002`'s past7 case
+  is red every Sunday).
+
+**Choices made without a ruling** (say if wrong):
+- A backup leaves out the run history and the backend's identity (`config.json`). The Backups page says the first.
+- `migrate` has no `--into-non-empty` override.
+- On an update, `Add`/`AddUnique`/`Remove` are refused rather than applied (the ledger's "smaller fix").
+- NUL took "match nothing on PostgreSQL" (it breaks no working app).
+
+**Gates (2026-10-11):**
+- `nodegx-backend` full run (`-w 3`, without the hanging drive `P116-S13-AC2STALL` and a peer's two untracked P116
+  specs): 227 / 229 files. The two red files: `rel002b` (`P116-S13-REL002B`, red with the old adapters too) and
+  `bmg-002`'s past7 case (calendar, red at HEAD; filed). The `tags empty` case it also caught was mine, and is fixed.
+- Conformance: SQLite 29 / 29 (four BRG-003 files), PostgreSQL 85 / 85.
+- `noodl-runtime` `test/adapters`: 328 / 328. `tsc -p packages/nodegx-backend --noEmit`: exit 0.
+
+**AC2 — open: KEYORDER needs Richard.** Measured s41: SQLite gives an Object field's keys back in the order they were
+saved. PostgreSQL gives `{zebra, apple, mid:{y,b}, a}` back as `{a, mid:{b,y}, apple, zebra}`: `jsonb` sorts keys
+shortest first, then alphabetically, at every level.

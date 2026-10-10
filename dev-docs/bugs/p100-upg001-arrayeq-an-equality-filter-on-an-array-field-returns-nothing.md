@@ -2,6 +2,7 @@
 id: P100-UPG001-ARRAYEQ
 title: An equality filter on an Array field returns no rows, with no error
 status: fixed
+commit: 5bfb23cf4
 phase: P109
 task: ISL-039
 severity: medium

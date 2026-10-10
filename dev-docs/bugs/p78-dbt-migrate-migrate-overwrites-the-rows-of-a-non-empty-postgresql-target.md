@@ -2,6 +2,7 @@
 id: P78-DBT-MIGRATE
 title: nodegx-backend migrate overwrites the rows of a PostgreSQL database that already holds data
 status: fixed
+commit: 2deb380d0
 phase: P109
 task: ISL-039
 severity: blocker

@@ -2,6 +2,7 @@
 id: P100-UPG001-BACKUP
 title: A restored backup loses the workflow definitions, sign-in, search, files and ops settings, and the run history
 status: fixed
+commit: dc4e0b51a
 phase: P109
 task: ISL-039
 severity: blocker

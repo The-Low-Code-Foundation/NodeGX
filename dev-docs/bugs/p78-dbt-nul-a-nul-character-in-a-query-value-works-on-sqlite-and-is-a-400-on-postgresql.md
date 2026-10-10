@@ -2,6 +2,7 @@
 id: P78-DBT-NUL
 title: A NUL character in a query value works on SQLite and is a 400 on PostgreSQL
 status: fixed
+commit: 3e18ea4cc
 phase: P109
 task: ISL-039
 severity: medium
