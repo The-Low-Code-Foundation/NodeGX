@@ -2,6 +2,7 @@
 id: P99-HLT016-TYPECHANGE
 title: On SQLite, changing the type of a field that has an index or a rule fails and rolls back
 status: fixed
+commit: e9f576618
 phase: P109
 task: ISL-041
 severity: medium

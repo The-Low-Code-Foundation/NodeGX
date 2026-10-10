@@ -1,6 +1,6 @@
 # ISL-041 — A schema change does what it says, on both databases
 
-**Status: ⬜ not started. Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 4 bugs
+**Status: ✅ s41 (2026-10-11): 4 of 4 — TYPECHANGE `e9f576618`, LASTINDEX `776125dba`, DIALECTTEST `b2b956e6b`, RENAME closed against P116's `78ec0ed69`. Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 4 bugs
 from the ledger (`dev-docs/bugs/`) that no phase owned: 3 medium · 1 low. **Side:** nodegx-backend (schema: renameColumn, changeColumnType, schema-migrate promotion; the QueryBuilder dialect spec)
 
 ## 1. The person sentence
@@ -48,3 +48,16 @@ TYPECHANGE (fails and rolls back), then RENAME, then LASTINDEX. DIALECTTEST firs
 - **AC3** — every row ruled or written "as proposed" is fixed, one commit each (or one per shared mechanism), with its
   regression green.
 - **AC4** — `node scripts/bugs.js` lists none of this task's rows as `open`, `scheduled` or `needs-ruling`.
+
+## 8. Record
+
+### s41 (2026-10-11) — closed, 4 of 4
+
+Each row was re-measured at HEAD first. All four still fired except RENAME, which P116 had fixed the day before.
+
+| row | commit | what changed | graded by |
+|---|---|---|---|
+| TYPECHANGE | `e9f576618` | SQLite's retype sets aside the indexes and check triggers that read the field and re-creates them from their SQL in the same transaction; a unique index the conversion breaks rolls it all back | `noodl-runtime` `SchemaManager.changeColumnType` (3 arms red before); adapters 331/331 |
+| RENAME | P116 `78ec0ed69` | already fixed as `P116-ONT-007-renamecolumn`: a rename of a field a rule reads is refused by name | P116's conformance case, green on both engines |
+| LASTINDEX | `776125dba` | `applyIndexes` takes `applyChecks`' `whole` flag | `nodegx-backend/tests/isl041-last-index-promoted.test.ts` (red on that arm only); 55/55 with the promotion specs |
+| DIALECTTEST | `b2b956e6b` | `BrgDialect_<pid>` | two runs at once: 18/39 and 39/39 red before, 39/39 each after |

@@ -1,6 +1,6 @@
 # ISL-040 — A backend lets in only the people and the code it should
 
-**Status: ⬜ not started. Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 6 bugs
+**Status: 🟢 s41 (2026-10-11): 3 of 6 built — USERCOLS `6719e4a89` and UNRULED `89b9fd339` (both high, both measured as attacks first), LOCKOUT's safe half `f5f65a122` (its other half is a ruling). Left: DEVOPEN (buildable: a switch on the manager, P104 is not building it), SESSIONS and MCPOAUTH (rulings), LOCKOUT half 2 (a ruling). Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 6 bugs
 from the ledger (`dev-docs/bugs/`) that no phase owned: 3 high · 3 medium; 1 to ask. **Side:** nodegx-backend (the cloud runtime's data path, function permissions, auth sessions and rate limit), the backend manager, the MCP door (FED-005)
 
 ## 1. The person sentence
@@ -51,3 +51,34 @@ USERCOLS and UNRULED first (security). Then LOCKOUT and DEVOPEN. SESSIONS and MC
 - **AC3** — every row ruled or written "as proposed" is fixed, one commit each (or one per shared mechanism), with its
   regression green.
 - **AC4** — `node scripts/bugs.js` lists none of this task's rows as `open`, `scheduled` or `needs-ruling`.
+
+## 8. Record
+
+### s41 (2026-10-11) — 3 of 6 built
+
+**AC1:** USERCOLS, UNRULED and LOCKOUT were re-measured at HEAD by driving them. All three still fired. The two
+security rows were driven as attacks:
+- **USERCOLS:** a cloud function's master key wrote `adminAccess:"full"` through `/classes/_User`, and the person's
+  own session then opened `/_admin/whoami`. The control was an account granted through the Users page.
+- **UNRULED:** a deploy to a `0.0.0.0` backend loaded the Site Builder's functions with no rule. A newly signed-up
+  account with no role then got past the gate on `publishPage`.
+
+| row | commit | what changed | graded by |
+|---|---|---|---|
+| USERCOLS (high) | `6719e4a89` | `accountWriteRefusal`: `/classes/_User` and `/api/_User` refuse `adminAccess`, `disabled`, `emailVerified`, `password` and `_` columns for every principal; `username`/`email` stay writable | `nodegx-backend/tests/isl040-account-columns.test.ts` (red 6/8); 53 `_User` specs |
+| UNRULED (high) | `89b9fd339` | SB-016's check on `PUT /admin/workflows/:name` and on reload: 409 + `success:false` on a public bind, `warning` on loopback | `isl040-unruled-deploy.test.ts` (red 3/4); deploy specs 92/92; `noodl-mcp` hls013 4/4 |
+| LOCKOUT (half) | `f5f65a122` | only a request carrying a credential (4 headers, or a `takesCredential` route) is held back | `isl040-lockout.test.ts` (red on `/health` + anonymous read); `bmg-014` caught a first version |
+
+**Found on the way:**
+- `/classes/_User` stored a `password` as text. It is in USERCOLS's fix.
+- The editor's and the MCP door's deploy clients read `success`, not the status, so a plain 409 would have told an
+  agent a refused deploy worked.
+- Plain `grep` cannot read `server/HttpServer.ts` on this machine (it is treated as binary), so use `grep -a`.
+
+**Left:**
+- **DEVOPEN** is buildable: a switch on the manager's Permissions page, a route that writes `devOpen` and reloads.
+  P104 last worked on 2026-09-26 and is not building it.
+- **LOCKOUT half 2** is a ruling: let a locked-out address through when its credential is right? That tells a guesser
+  right from wrong.
+- **SESSIONS** is a ruling (do sessions expire?).
+- **MCPOAUTH** is a ruling (does OAuth on the door belong in P109 or in a FED phase?).

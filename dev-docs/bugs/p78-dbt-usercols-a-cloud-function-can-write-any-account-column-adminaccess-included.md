@@ -2,6 +2,7 @@
 id: P78-DBT-USERCOLS
 title: A cloud function can write any account column, adminAccess included
 status: fixed
+commit: 6719e4a89
 phase: P109
 task: ISL-040
 severity: high

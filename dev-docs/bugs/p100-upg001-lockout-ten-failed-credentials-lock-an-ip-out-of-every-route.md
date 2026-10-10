@@ -2,6 +2,7 @@
 id: P100-UPG001-LOCKOUT
 title: Ten failed credentials from one IP lock it out of every route for five minutes, /health and valid admin calls included
 status: needs-ruling
+commit: f5f65a122
 phase: P109
 task: ISL-040
 severity: medium

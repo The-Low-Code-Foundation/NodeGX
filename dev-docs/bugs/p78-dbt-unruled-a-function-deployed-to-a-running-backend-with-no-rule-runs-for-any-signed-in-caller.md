@@ -2,6 +2,7 @@
 id: P78-DBT-UNRULED
 title: A function deployed to a running backend with no rule runs for any signed-in caller, and nothing says so
 status: fixed
+commit: 89b9fd339
 phase: P109
 task: ISL-040
 severity: high

@@ -2,6 +2,7 @@
 id: P99-HLT016-DIALECTTEST
 title: QueryBuilder's dialect spec goes red when two runs share the PostgreSQL test database
 status: fixed
+commit: b2b956e6b
 phase: P109
 task: ISL-041
 severity: low

@@ -2,6 +2,7 @@
 id: P99-HLT016-LASTINDEX
 title: Promoting a schema whose source removed its last index leaves that index on the target, silently
 status: fixed
+commit: 776125dba
 phase: P109
 task: ISL-041
 severity: medium
