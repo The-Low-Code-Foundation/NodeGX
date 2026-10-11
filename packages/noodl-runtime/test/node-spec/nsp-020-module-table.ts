@@ -104,7 +104,7 @@ const USER_CASES: Case[] = [
  */
 const BACK = { PageStackNavigateBack: [{ backActions: 'Save,Cancel', results: 'name,ok' }, { backActions: 'Save', results: 'ok' }] };
 const CLOSE = { NavigationClosePopup: [{ closeActions: 'Save,Cancel', results: 'name,ok' }, { closeActions: 'Save', results: 'ok' }] };
-const PROJECT: PortContext = {
+export const PROJECT: PortContext = {
   stacks: [
     { name: 'Main', pages: ['home', 'detail'], components: { home: 'Home', detail: 'Detail' } },
     { name: 'Other', pages: ['solo'], components: { solo: 'Missing' } }

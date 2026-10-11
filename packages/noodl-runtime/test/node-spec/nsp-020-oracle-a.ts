@@ -25,6 +25,9 @@ import {
   type ValueInputDecl
 } from '../../../nodegx-node-spec/src';
 import { dataAttributeNames } from '../../../nodegx-node-spec/src/nodes/data-attributes';
+import * as path from 'path';
+
+import type { TableRow } from './nsp-020-module-table';
 
 /** One announced port as `EditorConnection.sendDynamicPorts` carries it (noodl-types `RuntimeDiscoveredPort`). */
 export interface Announced {
@@ -176,11 +179,29 @@ export function announcedPorts(
       }
     ])
   );
-  const gmHandlers: Record<string, Array<(n?: unknown) => void>> = {};
-  const graphModel = {
+  return announceFrom(hook, type, node, {
     components: components as Record<string, unknown>,
     getNodesWithType: (t: string) => (t === type ? [node] : [...siblings, ...stackNodes].filter((n) => n.type === t)),
-    getMetaData: (key: string) => (key in meta ? meta[key] : fromContext[key]),
+    getMetaData: (key: string) => (key in meta ? meta[key] : fromContext[key])
+  });
+}
+
+/** What a hook reads off the graph model, beside the `on` / fire pair `announceFrom` adds. */
+export interface FakeGraphModel {
+  components: Record<string, unknown>;
+  getNodesWithType(type: string): unknown[];
+  getMetaData(key: string): unknown;
+}
+
+/**
+ * NSP-020 s85 — the hook's run, over any fake graph model (a context's, above; a saved project's, nsp-020-port-context):
+ * install the hook, fire `nodeAdded.<type>` with the node and then `editorImportComplete`, and read the node's LAST
+ * announcement — what the editor holds (sendDynamicPorts replaces the list; NodeGraphNode.ts setDynamicPorts).
+ */
+export function announceFrom(hook: Hook, type: string, node: { id: string }, model: FakeGraphModel): Announced[] {
+  const gmHandlers: Record<string, Array<(n?: unknown) => void>> = {};
+  const graphModel = {
+    ...model,
     on: (name: string, cb: (n?: unknown) => void) => {
       (gmHandlers[name] = gmHandlers[name] || []).push(cb);
     },
@@ -191,7 +212,7 @@ export function announcedPorts(
     isRunningLocally: () => true,
     isConnected: () => false,
     sendDynamicPorts: (nodeId: string, ports: Announced[]) => {
-      if (nodeId === id) announcements.push(ports);
+      if (nodeId === node.id) announcements.push(ports);
     },
     sendWarning: () => undefined,
     clearWarning: () => undefined,
@@ -200,7 +221,6 @@ export function announcedPorts(
   hook({ editorConnection }, graphModel);
   graphModel.fire('nodeAdded.' + type, node);
   graphModel.fire('editorImportComplete');
-  // the LAST announcement is what the editor holds (sendDynamicPorts replaces the list; NodeGraphNode.ts setDynamicPorts)
   return announcements.length ? announcements[announcements.length - 1] : [];
 }
 
@@ -328,4 +348,60 @@ export function compareWithSpec(
     }
   }
   return diffs;
+}
+
+// ------------------------------------------------------------------------------------------------
+// NSP-020 s85 — the hook loader and the pin matchers, moved here from nsp-020-ports-parity.test.ts so the project drive
+// (nsp-020-port-context.test.ts) loads and pins the same way.
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const NodeDefinition = require('../../src/nodedefinition') as {
+  defineNode(node: unknown): { setupNumberedInputDynamicPorts?: Hook };
+};
+
+export const PACKAGES = path.resolve(__dirname, '../../..');
+
+export type NodeModuleLike = { node?: { name?: string; numberedInputs?: unknown }; setup?: Hook };
+
+export function load(module: string): unknown {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  return require(path.join(PACKAGES, module));
+}
+
+/** The node registrations a module exports: itself, its default, or any export value shaped like one. */
+export function registrationsOf(mod: unknown): NodeModuleLike[] {
+  const m = mod as Record<string, unknown> | undefined;
+  const found = new Set<NodeModuleLike>();
+  for (const v of [m, m?.default, ...Object.values(m ?? {})]) {
+    const r = v as NodeModuleLike | undefined;
+    if (
+      r &&
+      typeof r === 'object' &&
+      r.node &&
+      typeof r.node === 'object' &&
+      (typeof r.setup === 'function' || r.node.numberedInputs)
+    )
+      found.add(r);
+  }
+  return [...found];
+}
+
+export function hookOf(row: TableRow): Hook {
+  const regs = registrationsOf(load(row.module)).filter((r) => r.node?.name === row.type);
+  if (regs.length !== 1) throw new Error(`${row.module}: ${regs.length} registrations of ${row.type}`);
+  if (row.hook === 'setup') return regs[0].setup!;
+  const hook = NodeDefinition.defineNode(regs[0].node).setupNumberedInputDynamicPorts;
+  if (!hook) throw new Error(`${row.module}: no numbered-inputs hook`);
+  return hook;
+}
+
+/** A pin is the exact diff line, or `/regex/` for a line whose names follow the case's params. */
+export function matchesPin(pin: string, diff: string): boolean {
+  return pin.length > 2 && pin.startsWith('/') && pin.endsWith('/')
+    ? new RegExp(pin.slice(1, -1)).test(diff)
+    : pin === diff;
+}
+
+export function pinned(row: TableRow, diff: string): boolean {
+  return Object.keys(row.known ?? {}).some((pin) => matchesPin(pin, diff));
 }

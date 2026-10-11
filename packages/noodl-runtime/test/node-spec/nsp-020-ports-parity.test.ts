@@ -31,6 +31,12 @@ import { EXCLUDED, LIBRARIES, TABLE, type Case, type TableRow } from './nsp-020-
 import {
   announcedPorts,
   byName,
+  hookOf,
+  load,
+  matchesPin,
+  PACKAGES,
+  pinned,
+  registrationsOf,
   compareWithSpec,
   fromAnnounced,
   fromDrawn,
@@ -41,10 +47,6 @@ import {
 // The viewer's modules read the `Noodl` global at import (node-shared-port-definitions.ts); the p82 and fb-026 fixtures set it the same way.
 (globalThis as unknown as Record<string, unknown>).Noodl = { deployed: false, baseUrl: '/' };
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const NodeDefinition = require('../../src/nodedefinition') as {
-  defineNode(node: unknown): { setupNumberedInputDynamicPorts?: Hook };
-};
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const catalog = require('../../../noodl-types/src/node-catalog.json') as {
   nodes: Array<{
@@ -60,42 +62,6 @@ const catalog = require('../../../noodl-types/src/node-catalog.json') as {
     };
   }>;
 };
-
-const PACKAGES = path.resolve(__dirname, '../../..');
-
-type NodeModuleLike = { node?: { name?: string; numberedInputs?: unknown }; setup?: Hook };
-
-function load(module: string): unknown {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  return require(path.join(PACKAGES, module));
-}
-
-/** The node registrations a module exports: itself, its default, or any export value shaped like one. */
-function registrationsOf(mod: unknown): NodeModuleLike[] {
-  const m = mod as Record<string, unknown> | undefined;
-  const found = new Set<NodeModuleLike>();
-  for (const v of [m, m?.default, ...Object.values(m ?? {})]) {
-    const r = v as NodeModuleLike | undefined;
-    if (
-      r &&
-      typeof r === 'object' &&
-      r.node &&
-      typeof r.node === 'object' &&
-      (typeof r.setup === 'function' || r.node.numberedInputs)
-    )
-      found.add(r);
-  }
-  return [...found];
-}
-
-function hookOf(row: TableRow): Hook {
-  const regs = registrationsOf(load(row.module)).filter((r) => r.node?.name === row.type);
-  if (regs.length !== 1) throw new Error(`${row.module}: ${regs.length} registrations of ${row.type}`);
-  if (row.hook === 'setup') return regs[0].setup!;
-  const hook = NodeDefinition.defineNode(regs[0].node).setupNumberedInputDynamicPorts;
-  if (!hook) throw new Error(`${row.module}: no numbered-inputs hook`);
-  return hook;
-}
 
 /**
  * The catalog's `parameterEncoding` probe for a type: each pattern's `example` read back through its pattern into the
@@ -141,17 +107,6 @@ function casesOf(row: TableRow): Case[] {
 
 function rowKey(module: string, type: string, numbered: boolean): string {
   return `${module}#${type}${numbered ? ' (numbered)' : ''}`;
-}
-
-/** A pin is the exact diff line, or `/regex/` for a line whose names follow the case's params. */
-function matchesPin(pin: string, diff: string): boolean {
-  return pin.length > 2 && pin.startsWith('/') && pin.endsWith('/')
-    ? new RegExp(pin.slice(1, -1)).test(diff)
-    : pin === diff;
-}
-
-function pinned(row: TableRow, diff: string): boolean {
-  return Object.keys(row.known ?? {}).some((pin) => matchesPin(pin, diff));
 }
 
 interface Outcome {
