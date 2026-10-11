@@ -87,7 +87,16 @@ export interface PortPassArms {
   skipAdapters?: boolean;
   skipImport?: boolean;
   skipImportComplete?: boolean;
+  /** One runtime pass only, as before P78-TPL008PJ-NESTEDSIGNAL (the control arm). */
+  onePass?: boolean;
 }
+
+/**
+ * P78-TPL008PJ-NESTEDSIGNAL — the most runtime passes {@link readWireHealth} runs. A pass's ports
+ * can change the types the next one is handed, and it stops as soon as one changes nothing. The todo
+ * list (a For Each inside a component a For Each repeats) settles in three: the third changes nothing.
+ */
+const PORT_PASS_ROUNDS = 4;
 
 /**
  * D44 · GAM-024 — give the editor's nodes the ports only the runtime knows how to derive.
@@ -245,7 +254,10 @@ export interface WireHealthReading {
   uncheckedTypes: string[];
   /** Editor-side adapters driven before the runtime pass. */
   adapters: string[];
+  /** The last runtime pass's reading. */
   ports: PortPassReading;
+  /** Runtime passes run: another follows while a pass changes the components' exported port types. */
+  portRounds: number;
 }
 
 const isCloudName = (name: string) => name.startsWith('/#__cloud__/');
@@ -298,7 +310,26 @@ export async function readWireHealth(
   // the numbered-input families read their ports from.
   if (library.isModuleRegistered(project)) library.unregisterModule(project);
 
-  const ports = await registerRuntimeDiscoveredPorts(project, options.arms);
+  /**
+   * 🔴 P78-TPL008PJ-NESTEDSIGNAL: again, while a pass changes what the next one is handed. A component
+   * output fed from a For Each inside it is typed from that For Each's port, which only exists once
+   * the runtime has minted it. So in the first pass the outer For Each repeating the component read
+   * `openTask` untyped and minted `itemOutput-openTask`. Every wire from `itemOutputSignal-openTask`
+   * then read broken, and all four worked in both viewers. The editor gets there the same way: its
+   * runtime re-mints the outer ports when the component's port types are updated.
+   */
+  const exportedPorts = () =>
+    JSON.stringify(project.getComponents().map((c) => [c.name, (exportComponent(c) as { ports?: unknown }).ports]));
+  let handed = exportedPorts();
+  let ports = await registerRuntimeDiscoveredPorts(project, options.arms);
+  let portRounds = 1;
+  while (!options.arms?.onePass && portRounds < PORT_PASS_ROUNDS) {
+    const now = exportedPorts();
+    if (now === handed) break;
+    handed = now;
+    ports = await registerRuntimeDiscoveredPorts(project, options.arms);
+    portRounds++;
+  }
 
   library.registerModule(project);
 
@@ -351,7 +382,7 @@ export async function readWireHealth(
     WarningsModel.instance.clearAllWarnings();
   }
 
-  return { checked, broken, unchecked, uncheckedTypes: [...uncheckedTypes].sort(), adapters, ports };
+  return { checked, broken, unchecked, uncheckedTypes: [...uncheckedTypes].sort(), adapters, ports, portRounds };
 }
 
 /**

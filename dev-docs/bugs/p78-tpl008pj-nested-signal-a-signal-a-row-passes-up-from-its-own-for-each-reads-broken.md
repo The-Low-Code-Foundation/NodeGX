@@ -1,7 +1,7 @@
 ---
 id: P78-TPL008PJ-NESTEDSIGNAL
 title: A signal a For Each row passes up from a For Each of its own reads as a broken wire in the deploy's wire check — the wire works in both viewers
-status: scheduled
+status: fixed
 phase: P109
 task: ISL-044
 severity: low
@@ -9,7 +9,7 @@ area: editor / NodeGraphModel wire health (`NodeGraphModel.ts:933`), as the depl
 found: TPL-008-PJ s2, 2026-10-05, building the todo list's Projects tab
 evidence: dev-docs/tasks/phase-78-the-templates/TPL-008-PJ-THE-PROJECTS-TAB.md §8 s2; `nodegx-deploy.cjs templates/todo-list …` → `wires.broken`
 kit: deploy
-regression: packages/nodegx-backend/tests/tpl008-projects-drive.test.ts §3e (openTask), §3d (saveProject), §8 "a project money line opens its form" (editMoney) — the wires the check calls broken, driven working on the repo viewer and the box's viewer
+regression: packages/noodl-preview/tests/gam-023-a-deploy-publishes-every-wire-and-names-the-broken-ones.test.ts "todo-list names nothing" (the check); packages/nodegx-backend/tests/tpl008-projects-drive.test.ts §3e (openTask), §3d (saveProject), §8 "a project money line opens its form" (editMoney) — the wires the check calls broken, driven working on the repo viewer and the box's viewer
 ---
 
 **What a person sees.** `nodegx-deploy` on the todo list prints three warnings and publishes anyway:
@@ -39,3 +39,13 @@ model). Not looked at.
 row's `prLinkEach`) — the same shape, flagged the same way, and driven working in `tpl008-projects-drive` §9 on both
 viewers.
 
+
+**s4 (P109 s43, 2026-10-11): measured and fixed.** Re-measured first: `nodegx deploy` on a copy of HEAD's
+`templates/todo-list` named all four. The cause was the order, as guessed, but in the deploy's own check rather than
+in the model. `readWireHealth` ran the runtime once (`registerRuntimeDiscoveredPorts`), and that pass's input was
+exported before any For Each had minted its ports. So `Projects/Project row`'s `openTask` was still untyped when the
+list's For Each read it, and the For Each minted `itemOutput-openTask`. In the editor the runtime mints the outer
+ports again when the row's port types are updated. **Fixed:** the check runs another pass while a pass changes the
+components' exported port types (at most four). The todo list settles in three, with 2,036 wires checked and none
+named. GAM-023's todo-list row is green, and its other seven rows are unchanged, including *"the wire pass leaves the
+exported model as it was"*. The editor's canvas was not opened for this. The open question above stands.

@@ -65,6 +65,7 @@ interface Report {
     uncheckedTypes: string[];
     adapters: string[];
     ports: { types: string[] };
+    portRounds: number;
   };
 }
 
@@ -152,7 +153,8 @@ beforeAll(() => {
   );
   deploy('members-clean', 'members-area');
   deploy('pixel-clean', 'pixel-game');
-}, 120_000);
+  deploy('todo-clean', 'todo-list');
+}, 180_000);
 
 afterAll(() => {
   if (work) fs.rmSync(work, { recursive: true, force: true });
@@ -192,6 +194,16 @@ describe('GAM-023 — nodegx deploy publishes every wire and names the broken on
       forEachMinted: report.wires.ports.types.includes('For Each'),
       itemWirePublished: deployedText(outDir).includes('itemOutput-gives')
     }).toEqual({ broken: [], forEachMinted: true, itemWirePublished: true });
+  });
+
+  it('🔴 todo-list names nothing: a project row’s signals fed by a For Each inside it are signals (P78-TPL008PJ-NESTEDSIGNAL)', () => {
+    // One pass named four working wires: the row's outputs were typed before its inner For Each had
+    // minted the ports that feed them, so the list's For Each minted them as values. Each further
+    // pass is run only because the one before changed the components' exported port types.
+    const { report } = runs['todo-clean'];
+    expect({ broken: report.wires.broken.map(name), unchecked: report.wires.unchecked.length }).toEqual({ broken: [], unchecked: 0 });
+    expect(report.wires.portRounds).toBeGreaterThan(1);
+    expect(report.wires.portRounds).toBeLessThan(4);
   });
 
   it('🔴 members-area names nothing: the editor adapters minted pm- and cloud-function ports', () => {
