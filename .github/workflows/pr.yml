@@ -209,11 +209,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      # `@noodl/preview`'s suite drives the built CLI over HTTP, not source —
+      # `@nodegx/preview`'s suite drives the built CLI over HTTP, not source —
       # `assertPrerequisites()` fails fast, naming these two commands, if either
       # is missing. This job runs independently of the `build` job (no shared
       # filesystem between jobs), so it has to produce its own copies. Found
-      # 2026-08-07: this job had never actually reached `@noodl/preview:test`
+      # 2026-08-07: this job had never actually reached `@nodegx/preview:test`
       # before — Nx bailed the whole run on an earlier package's failure every
       # time — so the gap was invisible until that earlier failure was fixed.
       - name: Build noodl-preview

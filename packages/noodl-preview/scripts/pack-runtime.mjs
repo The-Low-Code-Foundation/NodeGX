@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * P112 OWN-011 — the viewer runtime an installed `@noodl/preview` renders with (P112-S9-NORUNTIME).
+ * P112 OWN-011 — the viewer runtime an installed `@nodegx/preview` renders with (P112-S9-NORUNTIME).
  *
  *   node scripts/pack-runtime.mjs            build a PRODUCTION runtime into dist/external/deploy (npm's prepack)
  *   node scripts/pack-runtime.mjs --remove   delete dist/external again (npm's postpack)
@@ -33,7 +33,7 @@ if (process.argv.includes('--remove')) {
 }
 
 if (!existsSync(path.join(VIEWER, 'webpack-configs', 'webpack.deploy.prod.js'))) {
-  console.error(`pack-runtime: no viewer package at ${VIEWER} — @noodl/preview is packed from a checkout.`);
+  console.error(`pack-runtime: no viewer package at ${VIEWER} — @nodegx/preview is packed from a checkout.`);
   process.exit(1);
 }
 

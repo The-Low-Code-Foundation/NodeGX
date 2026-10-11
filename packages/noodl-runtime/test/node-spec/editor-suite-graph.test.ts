@@ -4,7 +4,7 @@
  *
  * It lives here, not in the suite's package, because the runner under test is the runtime test helper
  * (`runtimeTarget`), which compiles only where the runtime does. Three arms:
- *   - the real engine as the runner: PASS, every scenario graded (the runner the kit ships, `@noodl/preview`'s page
+ *   - the real engine as the runner: PASS, every scenario graded (the runner the kit ships, `@nodegx/preview`'s page
  *     bundle, is this helper bundled — `graph-target-check` grades it there);
  *   - the control: the same engine with a `settle()` that runs two frames — a runner wrong in the way the task file
  *     warns of — FAILs, and the sentences name the clause;

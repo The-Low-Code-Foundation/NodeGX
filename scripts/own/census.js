@@ -113,7 +113,7 @@ function classify(type) {
 
 /**
  * OWN-003 AC4 — the same node on the chosen runner. The first three rules are the spec rule's (component, not in picker,
- * visual: a visual node runs in a page through the real app, `@noodl/preview`, R4 — not headless); then `engine` when
+ * visual: a visual node runs in a page through the real app, `@nodegx/preview`, R4 — not headless); then `engine` when
  * the page's engine registers the type (a spec or not; the escape hatches too — Function and Logic Builder are played
  * by the graph scenarios), else `unregistered`, listed by name.
  */
@@ -256,7 +256,7 @@ md.push('');
 if (engine) {
   md.push('## On the real engine (OWN-003 AC4)');
   md.push('');
-  md.push(`R1 ruled the runner is the real engine, opened up (\`@noodl/preview\`'s \`noodl-graph-target.js\`). The same nodes, counted against the **${engine.types}** node types that engine registers in a page (\`${engine.source}\`, written by \`graph-target-check --types\`): **engine** (registered: it runs headless in a page, a spec or not, the escape hatches too) · **visual** (runs in a page through the real app, R4) · **component** · **not in picker** · **unregistered** (in the population, not visual, and the engine does not register it).`);
+  md.push(`R1 ruled the runner is the real engine, opened up (\`@nodegx/preview\`'s \`noodl-graph-target.js\`). The same nodes, counted against the **${engine.types}** node types that engine registers in a page (\`${engine.source}\`, written by \`graph-target-check --types\`): **engine** (registered: it runs headless in a page, a spec or not, the escape hatches too) · **visual** (runs in a page through the real app, R4) · **component** · **not in picker** · **unregistered** (in the population, not visual, and the engine does not register it).`);
   md.push('');
   md.push('| template | nodes | engine | visual | component | not in picker | unregistered |');
   md.push('|---|---:|---:|---:|---:|---:|---:|');

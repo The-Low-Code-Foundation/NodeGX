@@ -3,7 +3,7 @@
  *
  * The preview and `nodegx-deploy` resolve the viewer runtime through one constant (`loader.ts` `EXTERNAL_DIR`) from
  * **their own `__dirname`**, so, as in EXP-017's spec, the built engine is copied into a temporary layout and run there.
- * This layout is the one npm makes — `node_modules/@noodl/preview/dist/` with no checkout around it — and the runtime
+ * This layout is the one npm makes — `node_modules/@nodegx/preview/dist/` with no checkout around it — and the runtime
  * sits in `dist/external/deploy/`, where `scripts/pack-runtime.mjs` builds it on `npm pack`.
  *
  * Before OWN-011 the engine looked only at `../../noodl-editor/src/external`, which an install never has: the control
@@ -46,7 +46,7 @@ beforeAll(() => {
   }
   // realpath: the engine reports the path its own __dirname resolved to, and macOS's tmpdir is a symlink.
   install = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'own011-install-')));
-  dist = path.join(install, 'node_modules/@noodl/preview/dist');
+  dist = path.join(install, 'node_modules/@nodegx/preview/dist');
   fs.mkdirSync(dist, { recursive: true });
   fs.cpSync(ENGINE_BUNDLE, path.join(dist, 'nodegx-deploy.cjs'));
 });
@@ -59,7 +59,7 @@ describe('OWN-011 — the runtime an installed package carries', () => {
   it('control: with nothing beside the bundle, the installed engine refuses, naming the checkout path', () => {
     const result = deploy(path.join(install, 'site-control'));
     expect(result.ok).toBe(false);
-    expect(result.message).toContain(path.join('node_modules', '@noodl', 'noodl-editor', 'src', 'external'));
+    expect(result.message).toContain(path.join('node_modules', '@nodegx', 'noodl-editor', 'src', 'external'));
   });
 
   it('with dist/external/deploy beside the bundle, it deploys, and from that copy', () => {

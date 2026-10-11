@@ -177,7 +177,7 @@ fi
 
 echo "make-worktree: verifying resolution points INSIDE the worktree"
 fail=0
-for spec in '@noodl/runtime/package.json' '@nodegx/render-measure/package.json' '@noodl/mcp/package.json'; do
+for spec in '@noodl/runtime/package.json' '@nodegx/render-measure/package.json' '@nodegx/mcp/package.json'; do
   resolved="$(node -e "try{console.log(require.resolve('$spec',{paths:['$WT']}))}catch(e){console.log('UNRESOLVED')}")"
   case "$resolved" in
     "$WT"/*) echo "  ok   $spec" ;;

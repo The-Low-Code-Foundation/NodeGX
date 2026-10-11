@@ -42,12 +42,12 @@ const { name: PKG_NAME, version: PKG_VERSION }: { name: string; version: string 
  * stdio anyway, so a registration that dropped it would look fine and leave a
  * dock icon and an event loop that never exits.
  *
- * 🔴 **Except under `npx`** (P112 OWN-011, P112-S9-NPXREG). `npx @noodl/mcp`
+ * 🔴 **Except under `npx`** (P112 OWN-011, P112-S9-NPXREG). `npx @nodegx/mcp`
  * runs the server from npm's own cache (`~/.npm/_npx/<hash>/node_modules/…`),
  * which npm may empty at any time — reproducing that launch writes a project
  * whose agent loses its server the day the cache is cleaned, with nothing to
  * say why. There the working launch IS the npx command, so that is what is
- * reproduced: `npx -y @noodl/mcp@<this version>`, pinned, so the project keeps
+ * reproduced: `npx -y @nodegx/mcp@<this version>`, pinned, so the project keeps
  * the server it was made with. ⚠️ Windows (`cmd /c npx`) is expectation, as above.
  *
  * @returns `null` when there is no entry script to name — a server started

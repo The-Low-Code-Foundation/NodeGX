@@ -131,7 +131,7 @@ jobs:
       - name: Build the backend bundle and the deploy engine
         run: |
           npm --prefix packages/nodegx-backend run build
-          npm run build --workspace @noodl/preview
+          npm run build --workspace @nodegx/preview
 
       - name: Read the model's pin
         id: pin

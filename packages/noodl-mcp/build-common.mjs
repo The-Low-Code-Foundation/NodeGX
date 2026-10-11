@@ -12,7 +12,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 /**
  * The release this bundle is shipping inside, stamped into the server's MCP handshake.
  *
- * 🔴 `@noodl/mcp`'s own version has been `0.1.0` since the package was created and has never been
+ * 🔴 `@nodegx/mcp`'s own version has been `0.1.0` since the package was created and has never been
  * bumped, so the handshake reported `0.1.0` from every release — which made "my MCP server is
  * stuck on an old version" unanswerable. The packaged directory carries no `package.json` either,
  * so there was no second place to look.

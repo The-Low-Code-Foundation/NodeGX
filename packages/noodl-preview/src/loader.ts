@@ -307,7 +307,7 @@ export async function loadPreview(dir: string, format: ProjectFormat): Promise<P
  *      contributor's preview keeps reading the runtime their own build just rewrote;
  *   2. `external/` beside this bundle — the production runtime `npm pack` builds into `dist/external/`
  *      (`scripts/pack-runtime.mjs`). This is the one an installed package has. Before OWN-011 there was no second
- *      place, and `@noodl/preview` from npm refused every project (P112-S9-NORUNTIME).
+ *      place, and `@nodegx/preview` from npm refused every project (P112-S9-NORUNTIME).
  *
  * ⚠️ `../..` from `dist/` and from `src/` both land on `packages/` in a checkout. Installed, it lands inside
  * `node_modules/@noodl/`, where nothing is, and the second place answers. With neither, the first is returned so the

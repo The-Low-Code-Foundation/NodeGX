@@ -17,7 +17,7 @@
  * path resolves in a checkout by coincidence of directory depth and is absent in the artefact.
  *
  * ⚠️ **The engine is a build artifact, so a checkout is not enough either.** It is produced by
- * `npm run build --workspace @noodl/preview` (esbuild, one command) and is gitignored, so the
+ * `npm run build --workspace @nodegx/preview` (esbuild, one command) and is gitignored, so the
  * refusal below has to distinguish "you are not in a checkout" from "you are, and have not built
  * it" — those have different fixes and a reader who is told the wrong one goes looking in the
  * wrong place.
@@ -105,7 +105,7 @@ export function describeMissingEngine(resolved: ResolvedEngine): string {
       '\n' +
       `Found ${resolved.unbuiltPackage}, but not its bundle. It is a build artifact, not\n` +
       'committed. Build it with:\n' +
-      '  npm run build --workspace @noodl/preview\n'
+      '  npm run build --workspace @nodegx/preview\n'
     );
   }
   return (
@@ -209,7 +209,7 @@ export function refreshEngine(resolved: ResolvedEngine, env: NodeJS.ProcessEnv =
         `The deploy engine is out of date (${why}) and rebuilding it failed:\n` +
         `${(run.stderr || run.stdout || String(run.error ?? '')).trim()}\n` +
         'Build it by hand with:\n' +
-        '  npm run build --workspace @noodl/preview\n'
+        '  npm run build --workspace @nodegx/preview\n'
     };
   }
   return { rebuilt: `The deploy engine was out of date (${why}); rebuilt it in ${((Date.now() - started) / 1000).toFixed(1)} s.\n` };

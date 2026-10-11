@@ -7,7 +7,7 @@
  * `nodegx serve <project> --host --token`, and the honest version of that in *this* package is
  * one step further along the pipeline. `@nodegx/export` turns a project into **React source**;
  * looking at it requires `npm install && npm run build` first. A `serve` that took a project folder
- * would either have to carry the editor's runtime — which is what `@noodl/preview` does, and it
+ * would either have to carry the editor's runtime — which is what `@nodegx/preview` does, and it
  * reaches into `noodl-editor` in eleven places to do it, so it cannot be what a published
  * package offers — or silently serve something that is not the app.
  *

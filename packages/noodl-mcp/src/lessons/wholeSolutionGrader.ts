@@ -198,7 +198,7 @@ function reason(e: unknown): string {
  *
  * ⚠️ **Who can construct it.** This one serves the **sidecar** path — UNI-010,
  * where the runner is already inside this process. `noodl-editor` does **not**
- * depend on `@noodl/mcp` (see the note on `ProjectStore`'s constructor), so the
+ * depend on `@nodegx/mcp` (see the note on `ProjectStore`'s constructor), so the
  * editor's own "check my work" button cannot call this function. That is not a
  * gap to patch by adding a dependency: the editor holds its own
  * `SemanticValidator` — this package imports the editor's, not the reverse — and

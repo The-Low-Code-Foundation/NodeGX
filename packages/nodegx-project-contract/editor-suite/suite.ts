@@ -36,7 +36,7 @@ export interface EditorAdapter {
    * that has played before answers ten of them differently (an id minted from the world's stream after a once-per-engine
    * draw, a popup's state — OWN-006 §6.4), so a shared runner would be graded against the wrong reference. Typed
    * `unknown` because this package depends on nothing of the spec package; the grader the caller hands in
-   * (`SuiteOptions.graph`) knows the type. An editor that runs the kit's own runner (`@noodl/preview`'s
+   * (`SuiteOptions.graph`) knows the type. An editor that runs the kit's own runner (`@nodegx/preview`'s
    * `NodegxGraphTarget.graphTarget()`, itself a factory) returns one of those; one that wrote its own returns its own.
    */
   graphTarget?(): unknown | Promise<unknown>;

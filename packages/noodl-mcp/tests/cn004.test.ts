@@ -53,7 +53,7 @@ let tempDir: string;
  * once, below.
  *
  * ⚠️ **This is thrift, not a fix, and the distinction cost a measurement.** The
- * `@noodl/mcp` provisioning suites (`provision.test.ts`,
+ * `@nodegx/mcp` provisioning suites (`provision.test.ts`,
  * `projectOwnsBackend.test.ts`) start real backend processes and fail
  * intermittently under machine load. Adding this suite raised the rate, and on a
  * single before/after sample that read as *caused by* it — a reading this file

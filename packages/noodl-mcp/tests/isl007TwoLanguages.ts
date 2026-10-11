@@ -39,7 +39,7 @@ const testid = (name: string) => ({ dataAttributes: 'data-testid', 'data-testid'
 
 export async function buildTwoLanguages(output: string): Promise<{ diagnostics: string[] }> {
   process.env.NODEGX_RENDER_DISABLED = '1';
-  if (!resolveKitExtractEntry().entry) throw new Error('the kit reader is not built — npm run build --workspace @noodl/mcp');
+  if (!resolveKitExtractEntry().entry) throw new Error('the kit reader is not built — npm run build --workspace @nodegx/mcp');
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'isl007-two-languages-'));
   fs.mkdirSync(path.join(dir, 'components'), { recursive: true });
   fs.writeFileSync(

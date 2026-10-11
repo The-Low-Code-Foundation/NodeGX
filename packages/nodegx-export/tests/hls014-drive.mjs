@@ -3,7 +3,7 @@
  *
  * Run it:  node packages/nodegx-export/tests/hls014-drive.mjs
  *
- * Needs Chrome and a built engine (`npm run build --workspace @noodl/preview`), which is why it is
+ * Needs Chrome and a built engine (`npm run build --workspace @nodegx/preview`), which is why it is
  * a `.mjs` drive and not a spec: `tests/**\/*.test.ts` skips this extension deliberately, and
  * calling a Chrome-dependent script a CI gate is the mistake this phase filed as C46 and C47.
  * `tests/hls014-redeploy.test.ts` is the millisecond half of the same questions.

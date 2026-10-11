@@ -1,4 +1,4 @@
-# @noodl/mcp — NodeGX MCP Server
+# @nodegx/mcp — NodeGX MCP Server
 
 A [Model Context Protocol](https://modelcontextprotocol.io) server that exposes
 NodeGX (OpenNoodl) **v2 project directories** to external AI agents: open,
@@ -265,9 +265,9 @@ and bundled by esbuild — the same single source of truth the editor uses (see
 ## Development
 
 ```bash
-npm test --workspace @noodl/mcp        # jest (29 tests, incl. end-to-end MCP client)
-npm run typecheck --workspace @noodl/mcp
-npm run build --workspace @noodl/mcp   # esbuild → dist/noodl-mcp.cjs
+npm test --workspace @nodegx/mcp        # jest (29 tests, incl. end-to-end MCP client)
+npm run typecheck --workspace @nodegx/mcp
+npm run build --workspace @nodegx/mcp   # esbuild → dist/noodl-mcp.cjs
 ```
 
 ## Current limitations

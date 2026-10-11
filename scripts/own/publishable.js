@@ -6,7 +6,7 @@
  *   node scripts/own/publishable.js packages/noodl-mcp  one or more package folders
  *
  * Inside the checkout every workspace package is linked, so a `dependencies` entry naming a PRIVATE workspace package
- * works there and nowhere else: npm asks the registry for it and gets a 404 (`@noodl/mcp` named three, all inlined in its
+ * works there and nowhere else: npm asks the registry for it and gets a 404 (`@nodegx/mcp` named three, all inlined in its
  * bundle and never loaded). A package that bundles a workspace package lists it under `devDependencies`. Exit 1 on a
  * problem. Plain Node, no dependencies.
  */

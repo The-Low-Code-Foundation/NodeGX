@@ -1,5 +1,5 @@
 {
-  "name": "@noodl/mcp",
+  "name": "@nodegx/mcp",
   "version": "0.1.0",
   "description": "Model Context Protocol server exposing NodeGX (OpenNoodl) v2 projects to external AI agents.",
   "main": "src/index.ts",

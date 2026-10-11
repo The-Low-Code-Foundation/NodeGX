@@ -1,4 +1,4 @@
-# @noodl/preview — standalone live-preview harness
+# @nodegx/preview — standalone live-preview harness
 
 Render a NodeGX (OpenNoodl) project in a browser **with no editor process**, and
 reload it automatically when the files on disk change.

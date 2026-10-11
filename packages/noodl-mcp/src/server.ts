@@ -52,7 +52,7 @@ import type { ReproducibleOutput } from './project/writeClock';
 /**
  * The version this server reports in its MCP handshake.
  *
- * 🔴 **It used to be `@noodl/mcp`'s own `package.json` version, which has read `0.1.0` in every
+ * 🔴 **It used to be `@nodegx/mcp`'s own `package.json` version, which has read `0.1.0` in every
  * release ever cut.** So the handshake said `noodl-mcp 0.1.0` whether the bundle came from 0.1.0
  * or 0.2.4, and "my MCP server is stuck on an old version" was a report nobody — user or
  * maintainer — could confirm or refute. The bundle carries no other version marker either: the

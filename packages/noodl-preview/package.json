@@ -1,5 +1,5 @@
 {
-  "name": "@noodl/preview",
+  "name": "@nodegx/preview",
   "version": "0.1.0",
   "description": "Standalone live-preview harness: renders a NodeGX (OpenNoodl) v2 project in a browser with no editor process, and reloads it when the files on disk change.",
   "main": "src/index.ts",

@@ -1,5 +1,5 @@
 /**
- * Library surface of @noodl/mcp — lets tests (and future embedders, e.g. a
+ * Library surface of @nodegx/mcp — lets tests (and future embedders, e.g. a
  * running-editor bridge) assemble the server without the stdio CLI.
  */
 

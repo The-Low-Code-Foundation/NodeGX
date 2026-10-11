@@ -89,7 +89,7 @@ describe('P109-S5 — a checkout deploys with an engine built from its own sourc
     expect(refreshed.rebuilt).toBeUndefined();
     expect(refreshed.failed).toContain('The deploy engine is out of date (src/deploy-cli.ts changed after it was built) and rebuilding it failed:');
     expect(refreshed.failed).toContain('esbuild: the source does not compile');
-    expect(refreshed.failed).toContain('npm run build --workspace @noodl/preview');
+    expect(refreshed.failed).toContain('npm run build --workspace @nodegx/preview');
   });
 
   it(`leaves an engine named by ${ENGINE_ENV} alone — choosing one is deliberate`, () => {

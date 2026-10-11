@@ -6,7 +6,7 @@
  * Measured 2026-09-09: this repo starts **three** HTTP/WebSocket listeners that a person can
  * reach — the editor's web server (`web-server.js`, port 8574, HTTP plus the project relay),
  * the editor's design-tool import socket (`design-tool-import-server.js`, 8575), and
- * `@noodl/preview` — and until this file each made its own decision. Two of them called
+ * `@nodegx/preview` — and until this file each made its own decision. Two of them called
  * `.listen(port)` with no address at all, which binds `::`: **every interface on the machine**.
  * [#31](https://github.com/The-Low-Code-Foundation/NodeGX/issues/31) is what that looks like from
  * another machine on the same LAN, with no credential asked for at any point.
