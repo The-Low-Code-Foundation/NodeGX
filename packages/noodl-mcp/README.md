@@ -9,6 +9,21 @@ The design goal (Phase 13, Gate G1): *an agent can author a correct new page
 having read only that page's parent, the relevant slice of the node catalog,
 and the validator's feedback — never the entire project.*
 
+## Install
+
+The simplest start is `npm create nodegx my-apps`. It writes one file, `my-apps/.mcp.json`. That file tells Claude Code
+to start this server when you run `claude` in the folder.
+
+Any other MCP client can start the server itself over stdio:
+
+```bash
+npx -y @nodegx/mcp --allow-writes
+```
+
+With no project folder the server starts in bootstrap mode (below). Put a project folder before `--allow-writes` to
+serve that project. The rest of this README runs the server from a checkout of the NodeGX repository, where the same
+server is `node <path-to>/noodl-mcp.cjs`.
+
 ## Quick start
 
 **The easiest way to get this right is not to type it.** NodeGX's
@@ -280,3 +295,8 @@ npm run build --workspace @nodegx/mcp   # esbuild → dist/noodl-mcp.cjs
   (~126 KB for 7 types in the SUB-010 demo, and the host's "overflow saved to a
   file" fallback is useless to a filesystem-less agent). Ask for 1–2 types per
   call until a compact/ports-only projection is added (SUB-010 friction report).
+
+## Licence
+
+The server is licensed GPL-3.0-only because it bundles code from the NodeGX editor. The source is in
+[The-Low-Code-Foundation/NodeGX](https://github.com/The-Low-Code-Foundation/NodeGX), under `packages/noodl-mcp`.
