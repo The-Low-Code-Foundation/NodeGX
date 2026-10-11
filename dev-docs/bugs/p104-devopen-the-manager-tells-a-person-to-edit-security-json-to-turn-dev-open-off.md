@@ -1,13 +1,15 @@
 ---
 id: P104-DEVOPEN
 title: The backend manager tells a person to set "devOpen": false in security.json, and no page offers the switch
-status: scheduled
+status: fixed
+commit: PENDING
 phase: P109
 task: ISL-040
 severity: medium
 area: backend / manager (security, API keys, permissions)
 found: P104 s18 (measured before Richard's BMG-013 drive), 2026-09-26; re-read at HEAD 2026-10-01
 evidence: dev-docs/tasks/phase-104-the-backend-manager/NEXT-SESSION-PROMPT.md "Do this, in order", s18 paragraph
+regression: packages/nodegx-backend/tests/admin-app/permissions-view.test.tsx "ISL-040 DEVOPEN"
 ---
 
 On a local backend the manager shows *"dev-open is enabled in security.json … Set "devOpen": false to test real
@@ -24,3 +26,15 @@ anywhere in `src/admin/app`.
 that writes `devOpen` and reloads `SecurityState` the way BMG-016's restore reload does. Then the three
 sentences point at it. A loopback-only backend may keep dev-open as the default. Small to medium (one route,
 its tally/audit lines, one control).
+
+**Built, P109 s42 (2026-10-11).** Re-measured at `84396782b`: no control in `src/admin/app` wrote `devOpen`, and the
+three sentences still sent a person to `security.json`. **The proposal's server half was already there:**
+`PUT /admin/permissions` takes `devOpen` in the whole config, refuses it on a public bind ("devOpen cannot be enabled
+while the service is bound beyond localhost"), audits it, and `devOpenActive` reads the live config on the next
+request. No reload route was needed. `GET /admin/permissions` already said `loopback`.
+- The Permissions page draws **Enforce my rules on this machine** under its notice on a backend bound to this
+  machine, and nowhere else. It writes through the page's If-Match'd whole-config save and reloads. It waits while
+  the rules have unsaved changes, because the save moves the etag and a new etag reloads the draft.
+- The three sentences (`App.tsx` `DevOpenNotice`, `views/keys.tsx`, `views/permissions.tsx` `EnforcementNotice`)
+  point at the switch, not the file.
+- Spec: red 3 of 4 on the old page; the fourth (no switch on a public bind) is the absence arm beside them.

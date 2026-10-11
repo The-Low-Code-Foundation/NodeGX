@@ -16,7 +16,7 @@
  */
 import { useEffect, useState } from 'preact/hooks';
 
-import { api, encode, useSession } from '../api';
+import { api, encode, refreshWhoami, useSession } from '../api';
 import { EmptyState, Picker } from '../composers';
 import { PointerItem, searchRecords } from '../fields';
 import { navigate } from '../router';
@@ -81,6 +81,8 @@ interface Loaded {
   config: Config;
   etag: string;
   enforced: boolean;
+  /** Bound to this machine only — the one place dev-open can be on, so the one place its switch is drawn. */
+  loopback: boolean;
   roles: string[];
   tables: string[];
 }
@@ -96,7 +98,7 @@ const FILE_OPS: FileOp[] = ['upload', 'read', 'delete'];
 
 async function loadAll(): Promise<Loaded> {
   const [perms, roles, schema] = await Promise.all([
-    api<{ config?: Config; etag?: string; enforced?: boolean }>('GET', '/admin/permissions'),
+    api<{ config?: Config; etag?: string; enforced?: boolean; loopback?: boolean }>('GET', '/admin/permissions'),
     api<{ roles?: Array<{ name: string }> }>('GET', '/admin/roles').catch(() => ({ roles: [] })),
     api<{ tables?: Array<{ name: string }> }>('GET', '/admin/schema').catch(() => ({ tables: [] }))
   ]);
@@ -104,6 +106,7 @@ async function loadAll(): Promise<Loaded> {
     config: perms.config || {},
     etag: perms.etag || '',
     enforced: perms.enforced !== false,
+    loopback: perms.loopback === true,
     roles: (roles.roles || []).map((r) => r.name),
     tables: (schema.tables || []).map((t) => t.name)
   };
@@ -132,13 +135,16 @@ export function PermissionsView({ params }: ViewProps) {
   return <DefaultsPage />;
 }
 
-function EnforcementNotice({ enforced }: { enforced: boolean }) {
+/** `switchBelow`: the page draws Enforce my rules on this machine right under this notice (ISL-040 DEVOPEN). */
+function EnforcementNotice({ enforced, switchBelow }: { enforced: boolean; switchBelow?: boolean }) {
   return enforced ? (
     <Notice>Enforcement is on. Every rule below is applied to every request.</Notice>
+  ) : switchBelow ? (
+    <Notice kind="warn">The rules below are not enforced yet. They take effect when you turn on Enforce my rules on this machine, under this notice.</Notice>
   ) : (
     <Notice kind="warn">
-      Dev-open is on: this backend enforces nothing right now, and everyone can do everything. The rules below say what will happen once it is off. It
-      is only ever on for a backend bound to this machine.
+      Dev-open is on. While it is, this backend enforces nothing and everyone can do everything. The rules below say what will happen once Enforce my
+      rules on this machine is on, at the top of the Permissions page. Dev-open only ever runs on a backend bound to this machine.
     </Notice>
   );
 }
@@ -510,6 +516,26 @@ function DefaultsPage() {
   const dirty = JSON.stringify(nextConfig()) !== baseline;
   const incomplete = (CLP_OPS as unknown as ClpOp[]).some((op) => draft.defaults[op].inherit) || FILE_OPS.some((op) => draft.files[op].inherit);
 
+  /**
+   * ISL-040 DEVOPEN: the switch writes `devOpen` through the same If-Match'd whole-config save, from the config as
+   * loaded. It waits while the rules have unsaved changes: the save moves the etag, and a new etag reloads the draft.
+   */
+  function setEnforce(on: boolean) {
+    setBusy(true);
+    saveWhole({ ...c, devOpen: !on }, loaded!.etag)
+      .then(() => {
+        toast(on ? 'Your rules are now enforced on this machine.' : 'Dev-open is on: this backend enforces nothing until you turn it off.', 'ok');
+        reload();
+        // The header's chip and the page-wide notice read `whoami`, not this page: ask it again so they agree.
+        return refreshWhoami().catch(() => undefined);
+      })
+      .catch((e) => {
+        if (e && e.status === 412) setStale(String(e.message));
+        else fail(e);
+      })
+      .then(() => setBusy(false));
+  }
+
   function save() {
     if (incomplete) {
       toast('Every row of the defaults and of Files needs an answer.', 'bad');
@@ -532,7 +558,15 @@ function DefaultsPage() {
 
   return (
     <Page title="Permissions" subtitle="Who may list, open, create, change and delete what. Tick boxes; nothing here is typed.">
-      <EnforcementNotice enforced={loaded.enforced} />
+      <EnforcementNotice enforced={loaded.enforced} switchBelow={loaded.loopback} />
+      {loaded.loopback ? (
+        <Row style="margin-top:10px">
+          <Switch id="enforce-rules" checked={loaded.enforced} disabled={readonly || busy || dirty} onChange={setEnforce}>
+            Enforce my rules on this machine
+          </Switch>
+          {dirty ? <Hint>Save or undo your changes to the rules first.</Hint> : null}
+        </Row>
+      ) : null}
       <TryAs kind="collection" targets={collections} enforced={loaded.enforced} />
       <Gap />
       {stale ? (

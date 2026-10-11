@@ -284,3 +284,103 @@ describe('BMG-006 Try as, and what is never drawn (AC5 words, AC6, AC7)', () => 
     globalThis.fetch = realFetch;
   });
 });
+
+/**
+ * P109 ISL-040 — P104-DEVOPEN: the manager told a person to set "devOpen": false in security.json, and no page
+ * had the switch. The server half already existed (`PUT /admin/permissions` takes `devOpen`, refuses it on a public
+ * bind, and applies it on the next request); the Permissions page now draws the switch on a backend bound to this
+ * machine, and writes it through the same If-Match'd whole-config save.
+ */
+describe('ISL-040 DEVOPEN: the Permissions page has the dev-open switch', () => {
+  const realFetch = globalThis.fetch;
+  let state: { devOpen: boolean; loopback: boolean };
+  let puts: Array<{ body: Record<string, unknown>; ifMatch: string | undefined }>;
+  let whoamis: number;
+  const config = () => ({
+    version: 1,
+    devOpen: state.devOpen,
+    defaults: { permissions: { find: 'authenticated', get: 'authenticated', create: 'authenticated', update: 'authenticated', delete: 'nobody' }, creatorOwns: false },
+    collections: {},
+    functions: {},
+    files: { upload: 'authenticated', read: 'public', delete: 'nobody' },
+    signup: 'public'
+  });
+  const etag = () => (state.devOpen ? '"open"' : '"shut"');
+
+  beforeEach(() => {
+    puts = [];
+    whoamis = 0;
+    globalThis.fetch = (async (url: string, init?: RequestInit) => {
+      const method = (init && init.method) || 'GET';
+      let body: unknown;
+      if (url === '/admin/permissions' && method === 'PUT') {
+        const sent = JSON.parse(String(init!.body));
+        puts.push({ body: sent, ifMatch: (init!.headers as Record<string, string>)['If-Match'] });
+        state.devOpen = sent.devOpen;
+        body = { success: true, config: config(), etag: etag() };
+      } else if (url === '/admin/permissions') {
+        body = { config: config(), etag: etag(), enforced: !(state.devOpen && state.loopback), loopback: state.loopback };
+      } else if (url === '/_admin/whoami') {
+        whoamis++;
+        body = { security: { devOpen: state.devOpen, enforced: !(state.devOpen && state.loopback), hasReadonlyTier: false } };
+      } else if (url === '/admin/roles') body = { roles: [] };
+      else if (url === '/admin/schema') body = { tables: [{ name: 'Pet' }] };
+      return { status: body ? 200 : 404, json: async () => body || { error: 'no such route in this spec' } } as Response;
+    }) as typeof fetch;
+    session.set({ credential: { kind: 'token', value: 't' }, readonly: false });
+  });
+  afterEach(() => {
+    globalThis.fetch = realFetch;
+  });
+
+  async function open(): Promise<HTMLElement> {
+    const root = mount(<PermissionsView params={[]} />);
+    for (let i = 0; i < 20 && !root.querySelector('#defaults-owns'); i++) await settle(20);
+    return root;
+  }
+
+  it('on this machine, dev-open on: the switch is off; turning it on saves devOpen false with the page’s etag, and the notice says enforcement is on', async () => {
+    state = { devOpen: true, loopback: true };
+    const root = await open();
+    const sw = q<HTMLInputElement>(root, '#enforce-rules');
+    expect(sw.checked).toBe(false);
+    expect(text(q(root, '.notice'))).toContain('not enforced yet');
+    change(sw, true);
+    for (let i = 0; i < 20 && puts.length === 0; i++) await settle(20);
+    await settle(40);
+    expect(puts).toEqual([{ body: expect.objectContaining({ devOpen: false, signup: 'public' }), ifMatch: '"open"' }]);
+    expect(q<HTMLInputElement>(root, '#enforce-rules').checked).toBe(true);
+    expect(text(q(root, '.notice'))).toContain('Enforcement is on');
+    // The header chip and the page-wide notice read `whoami`: it is asked again, and now says enforced.
+    expect(whoamis).toBe(1);
+    expect(session.get().whoami!.security).toEqual({ devOpen: false, enforced: true, hasReadonlyTier: false });
+    unmount(root);
+  });
+
+  it('turning it off again on this machine saves devOpen true', async () => {
+    state = { devOpen: false, loopback: true };
+    const root = await open();
+    const sw = q<HTMLInputElement>(root, '#enforce-rules');
+    expect(sw.checked).toBe(true);
+    change(sw, false);
+    for (let i = 0; i < 20 && puts.length === 0; i++) await settle(20);
+    expect(puts.map((p) => p.body.devOpen)).toEqual([true]);
+    unmount(root);
+  });
+
+  it('with unsaved rule changes the switch waits, so saving it cannot throw the changes away', async () => {
+    state = { devOpen: true, loopback: true };
+    const root = await open();
+    change(q<HTMLInputElement>(root, '#defaults-owns'), true);
+    await settle(20);
+    expect(q<HTMLInputElement>(root, '#enforce-rules').disabled).toBe(true);
+    unmount(root);
+  });
+
+  it('a backend bound beyond this machine draws no switch (dev-open cannot be on there)', async () => {
+    state = { devOpen: false, loopback: false };
+    const root = await open();
+    expect(root.querySelector('#enforce-rules')).toBeNull();
+    unmount(root);
+  });
+});

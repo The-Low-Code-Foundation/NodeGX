@@ -100,7 +100,7 @@ export function KeysView({ params }: ViewProps) {
       {devOpen ? (
         <>
           <Notice kind="warn">
-            This backend is <b>dev-open</b>: while it is, every key may do everything, whatever its boxes say. The boxes take effect when dev-open is switched off — a deployed backend refuses to start with it on.
+            This backend is <b>dev-open</b>: while it is, every key may do everything, whatever its boxes say. The boxes take effect once Enforce my rules on this machine is on, at the top of the <a href="#/permissions">Permissions page</a>. A deployed backend refuses to start with dev-open on.
           </Notice>
           <Gap />
         </>
