@@ -145,8 +145,11 @@ done
 # (`scripts/devtools/render-report.js` probes it beside the server). Without it every agent round run from a
 # worktree answers "The viewer bundle is missing", and two agents in a row lost their one visual check to it.
 # Its parent `src/external` is itself ignored, so the link's parent is made first.
+# ⚠️ P109 s46: `nodegx-node-spec` and `nodegx-canvas-look` gained a `dist/` build in P112 (their `main` points there), and
+# without the link every template generator in a worktree died on `Cannot find module '@nodegx/node-spec'`.
 for artifact in packages/nodegx-backend/dist packages/noodl-runtime/dist-types \
   packages/noodl-preview/dist packages/nodegx-export/dist packages/nodegx-core/dist \
+  packages/nodegx-node-spec/dist packages/nodegx-canvas-look/dist \
   packages/noodl-editor/src/external/viewer \
   dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/shell/node_modules; do
   if [ -d "$PRIMARY/$artifact" ] && [ ! -e "$WT/$artifact" ]; then
