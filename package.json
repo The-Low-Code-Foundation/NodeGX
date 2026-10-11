@@ -21,6 +21,7 @@
     "clean:all": "npm run clean:cache && npm run clean:electron",
     "health:check": "node scripts/health-check.js",
     "check:artefacts": "node scripts/check-build-artefacts.js",
+    "lockfile:check": "node scripts/check-lockfile-workspaces.js",
     "graph": "npx nx graph",
     "lint": "eslint packages/noodl-editor/src",
     "lint:ci": "node scripts/lint-ratchet.js",
