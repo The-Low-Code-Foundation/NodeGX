@@ -162,8 +162,9 @@ var id = String(Inputs.requestId || '');
 var req = null;
 for (var i = 0; i < reqs.length; i++) if (reqs[i] && reqs[i].id === id) req = reqs[i];
 var pay = { shells: 0, steps: 0, bonus: 0 }, jobLive = null;
-// P108 IW-007 (lane B): a win on her land pays nothing here and never starts the land done — it pins the robot; the
-// building rises on the island, a drop at a time (a land lap pays its steps there, D2, no bonus).
+// P108 IW-007 (lane B): a win on her land pays nothing here and never starts the land done — it pins the robot.
+// Building pays nothing at all (ruled 2026-10-11, P109 s45): since P108 s9 the Workshop writes each part as it is
+// delivered, so the island finds the building done and pays no drop for it either.
 if (req && req.job && id !== 'free' && id !== 'land') {
   var laid = islLaidOf(req);
   if (laid) {

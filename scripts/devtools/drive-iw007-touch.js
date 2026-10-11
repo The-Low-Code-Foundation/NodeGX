@@ -20,12 +20,16 @@
  *   COBBLE back on the island, a tap on Cobble's pill rings him and Go and help reads "Teach Cobble here"; the Workshop
  *          with Cobble; until [the spa's planks] is done { go to nearest tree, … }; the win card. The store: Cobble HELPS
  *          on the land with his own program, Pip still at work there.
- *   BUILD  the island: the spa at every stage, Pip seen carrying stones and Cobble planks, finished; the store 6/6 · 4/4.
+ *   BUILD  Pip seen carrying stones and Cobble planks IN THE WORKSHOP while each plays (P108 s9: the Workshop writes each
+ *          part as it is delivered, so the spa stands finished when she comes back); the island draws it finished; the
+ *          store 6/6 · 4/4. (P109 s45, P109-S18-TOUCHBUILD: it watched the island for the carrying, which ended at s9.)
  *   REST   (s7) Pip and Cobble walk to the finished spa and rest in front of it, a tile each (the page's landJob says
  *          which) — not at her land's home.
- *   PILLS  (s7, flat island) while the two build, at every settled moment (400 ms after a robot moved: its glide
- *          done), no two name pills cover each other — and the robots WERE close enough for that (one pill went over).
- *   PAY    (s7) Cobble's planks earn: his own "+N 🐚" line on the island, and the wallet holds what the lines said.
+ *   PILLS  (s7, flat island) at rest in front of the spa, Pip's and Cobble's name pills are both drawn and neither covers
+ *          the other. (s45: since P108 s9 the two no longer build on the island, so this drive never stages them close
+ *          enough for a pill to go over; that case is graded by p108s7.test's pillSides spec, both kits.)
+ *   PAY    (ruled 2026-10-11, P109 s45: "building pays nothing") neither win on her land says "+N 🐚", the island pays
+ *          no line for the spa, and the wallet is what it was before Pip was taught. (s7 read Pip +6, Cobble +4.)
  *   HERE   her land's card: "Pip works here · Cobble helps"; Cobble chosen → "Cobble helps here, …", Bring Cobble home.
  *   FEED   the refuge finished and Hazel the rabbit seeded; Cobble re-taught on her land by touch: until [her bowl] is
  *          full { go to nearest carrot patch, … } — WON while the land holds two buildings; the store: Cobble helps with
@@ -203,7 +207,6 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     const w = window.__iw7tPay = { lines: [], earned0: a.shells.earned, seen: new WeakSet() };
     const read = () => document.querySelectorAll('.bg-isle-pay').forEach((e) => { if (w.seen.has(e) || !e.innerText.trim()) return; w.seen.add(e); w.lines.push(e.innerText.trim()); });
     if (w.obs) w.obs.disconnect(); w.obs = new MutationObserver(read); w.obs.observe(document.body, { childList: true, subtree: true, characterData: true }); read(); return true; })()`);
-  const said = (lines) => lines.join(' · ').split(' · ').reduce((n, l) => n + Number((/\+(\d+)/.exec(l) || [0, 0])[1]), 0);
   const nameOf = (lang, id) => item(id).name[lang];
   const freshFamily = async (tag, lang) => {
     const origin = await evaluate('location.origin');
@@ -360,13 +363,21 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     readings[`${label}-meters`] = meters;
     check(`METERS ${label}: the Workshop's ${meters.n} meter chips over the land's things — no two cover each other`, meters.n >= 2 && meters.met.length === 0, meters);
     await shot(`iw7t-${label}-program`);
+    // s45: what the robot carries while it plays, in the Workshop (2D or 3D) — where the part is built since P108 s9.
+    await evaluate(`(() => { const L = (window.__iw7tWs = {}); clearInterval(window.__iw7tWsT);
+      const add = (n, v) => { if (!v) return; L[n] = L[n] || []; if (L[n].indexOf(v) === -1) L[n].push(v); };
+      window.__iw7tWsT = setInterval(() => { const e = document.querySelector('.bg-stage [data-gd3-world]');
+        if (e && e.gd3 && e.gd3.world && e.offsetParent !== null) { (e.gd3.world.robots || []).forEach((r) => add(r.name || '', (r.carry || [])[(r.carry || []).length - 1])); return; }
+        document.querySelectorAll('.bg-stage .gd-bot').forEach((r) => { const l = r.querySelector('.gd-load'); if (l) add(((r.querySelector('.gd-name') || {}).innerText || '').trim(), l.getAttribute('data-load')); }); }, 100);
+      return true; })()`);
     await tap(first('.bg-controls .bg-i-play'), `${label}: Play`);
     const won = await until(WON, Boolean, 150000);
+    const loads = await evaluate('(() => { clearInterval(window.__iw7tWsT); return window.__iw7tWs; })()');
     const text = won ? await evaluate(WIN_TEXT) : '';
     await shot(`iw7t-${label}-won`);
     if (won) await tap(byText('.bg-win-card button', w('en', 'winStay')), `${label}: Keep tinkering`);
     await wait(400);
-    return { who, prog, won, text };
+    return { who, prog, won, text, loads };
   };
   const shape = (prog) => JSON.stringify(prog.map(function walk(b) { return [b.t, b.slots ? Object.keys(b.slots).sort() : [], (b.body || []).map(walk)]; }));
 
@@ -401,8 +412,9 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
   await shot('iw7t-01-crew');
 
   // PIP — taught the stones in the Workshop on her land.
+  const earnedBefore = (await active()).shells.earned;
   const pip = await teachHere('pip-stones', partAt('stone'), 'rock');
-  readings.pip = { who: pip.who, won: pip.won, text: pip.text, prog: pip.prog };
+  readings.pip = { who: pip.who, won: pip.won, text: pip.text, prog: pip.prog, loads: pip.loads };
   check(`PIP ${tag}: the Workshop opens on her land with Pip`, pip.who.req === LAND_ID && pip.who.bot === 'Pip', pip.who);
   check(`PIP ${tag}: until [the spa's stones] is done { go to nearest rock, pick up, go to [the spa's stones], put down } built by taps`, shape(pip.prog) === JSON.stringify([['until', ['cond'], [['go_nearest', ['kind'], []], ['pick', [], []], ['go_to', ['thing'], []], ['put', [], []]]]]), pip.prog);
   const pw = readings['pip-stones-words'] || {};
@@ -419,7 +431,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
   check(`COBBLE ${tag}: a tap on Cobble's pill rings him; Go and help reads "${fill(w('en', 'iw7tTeach'), { b: 'Cobble' })}"; nothing written`, c.robots.some((r) => r.name === 'Cobble' && r.on) && !c.robots.some((r) => r.name === 'Pip' && r.on) && c.open === fill(w('en', 'iw7tTeach'), { b: 'Cobble' }), c);
   await shot('iw7t-02-cobble-chosen');
   const cob = await teachHere('cobble-planks', partAt('plank'), 'tree');
-  readings.cobble = { who: cob.who, won: cob.won, text: cob.text, prog: cob.prog };
+  readings.cobble = { who: cob.who, won: cob.won, text: cob.text, prog: cob.prog, loads: cob.loads };
   check(`COBBLE ${tag}: the Workshop opens on her land with Cobble`, cob.who.req === LAND_ID && cob.who.bot === 'Cobble', cob.who);
   check(`COBBLE ${tag}: the planks Played — the win card`, cob.won, cob.text);
   p = await active();
@@ -462,8 +474,8 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
   }
   readings.build = { ...rec, seconds: Math.round((Date.now() - t0) / 1000) };
   await shot('iw7t-03-built');
-  check(`BUILD ${tag}: the spa rises on the island to finished (stages ${(rec && rec.stages.join(' → ')) || 'none'}) in ${readings.build.seconds} s`, !!rec && rec.stages[rec.stages.length - 1] === '3', rec);
-  check(`BUILD ${tag}: Pip seen carrying stones, Cobble planks`, !!rec && (rec.loads.Pip || []).includes('stone') && (rec.loads.Cobble || []).includes('plank'), rec && rec.loads);
+  check(`BUILD ${tag}: the spa stands finished on the island when she comes back (stages ${(rec && rec.stages.join(' → ')) || 'none'}, ${readings.build.seconds} s)`, !!rec && rec.stages[rec.stages.length - 1] === '3', rec);
+  check(`BUILD ${tag}: in the Workshop, Pip seen carrying stones and Cobble planks while each played`, (pip.loads.Pip || []).includes('stone') && (cob.loads.Cobble || []).includes('plank'), { pip: pip.loads, cobble: cob.loads });
   await wait(2500);
   p = await active();
   const sb = p.island.land.buildings[0];
@@ -478,15 +490,18 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
   await shot('iw7t-03b-rest');
   check(`REST ${tag}: Pip and Cobble rest in front of the finished spa — island (${restAt[0].x}, ${restAt[0].y}) and (${restAt[1].x}, ${restAt[1].y}), not her land's home (${LP.x}, ${LP.y})`, atRest(resting), resting);
   if (rec && rec.pills) {
-    const P = rec.pills;
-    readings.pills = P;
-    // Known-firing: the robots came close (within 3 tiles across, 2 down) and a pill went over — the case the rule is for.
-    check(`PILLS ${tag}: while the two built, no two name pills covered each other at any of ${P.settled} settled moments — and ${P.near} times they stood close, ${P.nearUp} with a pill sent over`, P.settled > 20 && P.meets === 0 && P.near > 0 && P.nearUp > 0, P);
+    readings.pills = rec.pills;
+    // s45: read at rest (the only moment this drive now has both robots on the island together). Known-firing: both
+    // pills drawn, with a width.
+    const ps = (resting || []).map((b) => b.pill).filter((r) => r && r.r > r.l);
+    const meet = ps.length === 2 && ps[0].l < ps[1].r && ps[1].l < ps[0].r && ps[0].t < ps[1].b && ps[1].t < ps[0].b;
+    check(`PILLS ${tag}: at rest in front of the spa, both name pills drawn (${ps.length}) and neither covers the other`, ps.length === 2 && !meet, resting);
   }
   const pay = await evaluate('window.__iw7tPay');
   const nowEarned = (await active()).shells.earned;
-  readings.pay = { lines: pay.lines, earned0: pay.earned0, earned: nowEarned };
-  check(`PAY ${tag}: Cobble's planks earn — his own "Cobble +N 🐚" line on the island beside Pip's; the wallet rose by what the lines said (${said(pay.lines)})`, pay.lines.some((l) => /Cobble \+\d+/.test(l)) && pay.lines.some((l) => /Pip \+\d+/.test(l)) && nowEarned - pay.earned0 === said(pay.lines), readings.pay);
+  readings.pay = { lines: pay.lines, before: earnedBefore, earned0: pay.earned0, earned: nowEarned, wins: [pip.text, cob.text] };
+  // Ruled 2026-10-11 (P109 s45): building pays nothing — the spa is its own reward.
+  check(`PAY ${tag}: building pays nothing — neither win card says "+N 🐚", the island pays no line for the spa, the wallet ${earnedBefore} → ${nowEarned}`, !/\+\d+/.test(pip.text) && !/\+\d+/.test(cob.text) && pay.lines.length === 0 && nowEarned === earnedBefore, readings.pay);
 
   // HERE — who works her land, said on its card; the helper chosen.
   c = await openLand(tag);
