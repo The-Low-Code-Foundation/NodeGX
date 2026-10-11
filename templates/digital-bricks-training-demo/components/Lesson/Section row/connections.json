@@ -83,24 +83,6 @@
     },
     {
       "fromId": "sr_save",
-      "fromProperty": "out-conceptId",
-      "toId": "sr_call",
-      "toProperty": "in-conceptId"
-    },
-    {
-      "fromId": "sr_save",
-      "fromProperty": "out-field",
-      "toId": "sr_call",
-      "toProperty": "in-field"
-    },
-    {
-      "fromId": "sr_save",
-      "fromProperty": "out-value",
-      "toId": "sr_call",
-      "toProperty": "in-value"
-    },
-    {
-      "fromId": "sr_save",
       "fromProperty": "out-ask",
       "toId": "sr_call",
       "toProperty": "run"

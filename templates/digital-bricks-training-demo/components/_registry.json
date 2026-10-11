@@ -31,7 +31,7 @@
       "path": "Lesson/Section row",
       "type": "visual",
       "nodeCount": 8,
-      "connectionCount": 25,
+      "connectionCount": 22,
       "modified": "2026-09-30T15:30:00.000Z",
       "created": "2026-09-19T21:09:24.307Z"
     },
@@ -55,7 +55,7 @@
       "path": "Pages/Lesson",
       "type": "page",
       "nodeCount": 41,
-      "connectionCount": 46,
+      "connectionCount": 45,
       "modified": "2026-09-30T15:30:00.000Z",
       "created": "2026-09-19T21:11:05.603Z"
     },
@@ -303,6 +303,6 @@
   "stats": {
     "totalComponents": 37,
     "totalNodes": 455,
-    "totalConnections": 724
+    "totalConnections": 720
   }
 }

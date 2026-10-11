@@ -95,6 +95,9 @@ for (const [component, id] of [['Lesson/Section row', 'sr_call'], ['Pages/Lesson
   check(!/Records|fetch\(|Variables/.test(script.replace(/\/\*[\s\S]*?\*\//g, '')), `[3b] ${component}/${id} does more than answer — the demo keeps nothing`);
   const wires = JSON.parse(String(files.get(`components/${component}/connections.json`))).connections;
   check(wires.some((w) => w.fromId === id && w.fromProperty === 'out-done') && !wires.some((w) => w.fromId === id && w.fromProperty === 'failure'), `[3b] ${component}/${id} is not wired from out-done alone`);
+  // P109 ISL-046 (DEMOSTUBWIRES): the stand-in reads no input, so a wire into its `in-…` reaches a port that does not exist.
+  const intoNothing = wires.filter((w) => w.toId === id && /^in-/.test(w.toProperty)).map((w) => w.toProperty);
+  check(intoNothing.length === 0, `[3b] ${component}/${id} keeps wires into inputs it never reads: ${intoNothing.join(', ')}`);
 }
 
 // 4 + 5. The responders hold the fixtures and answer as the backend does.

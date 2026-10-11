@@ -380,6 +380,9 @@ function transformConnections(component, doc, nodeIds) {
       connections.push({ ...c, fromProperty: 'out-done' });
       continue;
     }
+    // A write stand-in reads no input (its script is `Outputs.done()`), so a wire into its `in-…` is a wire to a port
+    // that does not exist: the editor paints it missing and `validate_project` names it (P109 ISL-046, DEMOSTUBWIRES).
+    if (WRITERS[c.toId] && c.toProperty.startsWith('in-')) continue;
     if ((RESPONDERS[c.toId] || WRITERS[c.toId] || THREADERS[c.toId]) && c.toProperty === 'call') {
       connections.push({ ...c, toProperty: 'run' });
       continue;
