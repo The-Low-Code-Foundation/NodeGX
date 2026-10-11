@@ -152,6 +152,15 @@ describe('HLT-012 ORDER — the rules a naive rewrite gets wrong', () => {
     expect(PORT_TOKEN_RULES.some((r) => r.categories === null)).toBe(true);
   });
 
+  it('🔴 P103-CMG009-OGIMAGE: a Page’s og:image size is a pixel count for a link preview, not a spacing', () => {
+    // The port is named for its meta tag, and `og:image:width` ends in `width`. A `var(--space-4)`
+    // picked there is written into the tag, where it means nothing to a crawler.
+    expect(tokenCategoriesForPort('og:image:width')).toEqual([]);
+    expect(tokenCategoriesForPort('og:image:height')).toEqual([]);
+    expect(tokenCategoriesForPort('width')).toEqual(['spacing']);
+    expect(tokenCategoriesForPort('height')).toEqual(['spacing']);
+  });
+
   it('a corner radius that is not a shadow still gets the radius scale', () => {
     expect(tokenCategoriesForPort('borderRadius')).toEqual(['border-radius']);
     expect(tokenCategoriesForPort('thumbBorderTopLeftRadius')).toEqual(['border-radius']);
