@@ -11,6 +11,7 @@
 import { resolveEngine, type EngineDatabase, type ResolvedEngine } from './engine';
 import { registerSqlFunctions } from './sqlFunctions';
 import { declaredProperties, inferType, requiredWithoutDefault } from './schemaCommon';
+import { SERIES_TABLE_DDL, SERIES_TAKE_SQL, formatSeries, seriesColumns, seriesName, seriesNow, seriesPeriod } from '../series';
 import type { AclContext } from './QueryBuilder';
 
 import EventEmitter = require('../../../events');
@@ -1044,12 +1045,37 @@ class LocalSQLAdapter {
       }
 
       const recordId = hasClientId ? (requestedId as string) : generateUUID();
-      const { sql, params } = QueryBuilder.buildInsert(
-        { collection: options.collection, data, required: this.requiredToName(options.collection) },
-        recordId
-      );
+      const insert = (): void => {
+        const { sql, params } = QueryBuilder.buildInsert(
+          { collection: options.collection, data, required: this.requiredToName(options.collection) },
+          recordId
+        );
+        this.db.prepare(sql).run(...params);
+      };
 
-      this.db.prepare(sql).run(...params);
+      // P116 ONT-015: a series field the record does not carry is handed out here. A gap-free one is
+      // taken inside the insert's own transaction (a refused insert gives it back); the rest first.
+      const series = seriesColumns(this.schemaManager?.getTableSchema(options.collection)).filter((c) => {
+        const v = data[c.name];
+        return v === undefined || v === null || v === '';
+      });
+      if (!series.length) insert();
+      else {
+        this.db.exec(SERIES_TABLE_DDL);
+        const at = seriesNow();
+        const take = (c: (typeof series)[number]): void => {
+          const row = this.db.prepare(SERIES_TAKE_SQL).get(seriesName(options.collection, c.name), seriesPeriod(c.series, at)) as { issued: number | bigint };
+          data[c.name] = formatSeries(c.series, Number(row.issued), at);
+        };
+        for (const c of series) if (!c.series.gapFree) take(c);
+        const held = series.filter((c) => c.series.gapFree);
+        if (held.length)
+          this.db.transaction(() => {
+            for (const c of held) take(c);
+            insert();
+          })();
+        else insert();
+      }
 
       // Fetch the created record to get all fields
       const createdRow = this.db

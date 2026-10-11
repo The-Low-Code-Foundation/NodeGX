@@ -34,6 +34,7 @@
  */
 
 import { declaredProperties, inferType } from '../local-sql/schemaCommon';
+import { SERIES_TABLE_DDL, SERIES_TAKE_SQL, formatSeries, seriesColumns, seriesName, seriesNow, seriesPeriod } from '../series';
 import { translatePgError } from './errors';
 import { PgSchemaManager } from './PgSchemaManager';
 import { DEFAULT_DATA_POOL_MAX, PgConnectionPool, type PgPoolSaturation } from './pool';
@@ -375,6 +376,24 @@ export class PostgresAdapter {
     return this.pool;
   }
 
+  /** P116 ONT-015: `_Series`, made once per connection; a failure is retried by the next create. */
+  private _seriesReady: Promise<void> | null = null;
+  private _seriesTable(): Promise<void> {
+    if (!this._seriesReady)
+      this._seriesReady = this._pool()
+        .run(SERIES_TABLE_DDL)
+        .then(
+          () => undefined,
+          (e: unknown) => {
+            // Two backends making it at once: the loser's IF NOT EXISTS is a duplicate in pg_type, and the table is there.
+            if (/already exists|duplicate key/i.test(e instanceof Error ? e.message : String(e))) return undefined;
+            this._seriesReady = null;
+            throw e;
+          }
+        );
+    return this._seriesReady;
+  }
+
   /** Auto-create the table if allowed, then wait for every queued schema change. */
   private async _ready(collection: string): Promise<void> {
     const sm = this._sm();
@@ -599,8 +618,33 @@ export class PostgresAdapter {
       }
 
       const recordId = hasClientId ? (requestedId as string) : generateUUID();
-      const { sql, params } = QueryBuilder.buildInsert({ collection: options.collection, data }, recordId);
-      await this._pool().run(sql, params);
+      // P116 ONT-015: as on SQLite — a gap-free number is taken in the insert's transaction, where the
+      // counter row's lock makes two creates at once wait for each other; the rest are taken first.
+      const insert = async (q: { run(sql: string, params?: readonly unknown[]): Promise<number> }): Promise<void> => {
+        const { sql, params } = QueryBuilder.buildInsert({ collection: options.collection, data }, recordId);
+        await q.run(sql, params);
+      };
+      const series = seriesColumns(this._sm().getTableSchema(options.collection)).filter((c) => {
+        const v = data[c.name];
+        return v === undefined || v === null || v === '';
+      });
+      if (!series.length) await insert(this._pool());
+      else {
+        await this._seriesTable();
+        const at = seriesNow();
+        const take = async (q: { queryOne<T>(sql: string, params?: readonly unknown[]): Promise<T | undefined> }, c: (typeof series)[number]): Promise<void> => {
+          const row = await q.queryOne<{ issued: string | number }>(SERIES_TAKE_SQL, [seriesName(options.collection, c.name), seriesPeriod(c.series, at)]);
+          data[c.name] = formatSeries(c.series, Number(row!.issued), at);
+        };
+        for (const c of series) if (!c.series.gapFree) await take(this._pool(), c);
+        const held = series.filter((c) => c.series.gapFree);
+        if (held.length)
+          await this._pool().transaction(async (tx) => {
+            for (const c of held) await take(tx, c);
+            await insert(tx);
+          });
+        else await insert(this._pool());
+      }
 
       const createdRow = await this._selectById(options.collection, recordId);
       const record = this._rowToRecord(createdRow, options.collection);

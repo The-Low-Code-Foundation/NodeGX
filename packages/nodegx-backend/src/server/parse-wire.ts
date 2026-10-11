@@ -26,6 +26,7 @@
 
 import type { IStorageFacade, StorageQueryOptions as QueryOptions } from '@noodl/backend-contract';
 import type { RequestContext } from './HttpServer';
+import { assertSeriesWrite, seriesAnswer } from './series-door';
 import { validateAclShape } from '../security/model';
 import { heldWhile, whyRefused } from '../persistence/onlyWhile';
 // The adapter stack is plain CommonJS without type declarations (see AdapterFacade).
@@ -333,6 +334,7 @@ export class ParseWireRoutes {
     // over the owner the row already has.
     const upsertOn = headerValue(ctx, UPSERT_HEADER);
     assertAccountWrite(collection, body);
+    assertSeriesWrite(ctx.principal, this.facade.schemaManager, collection, body);
     normaliseParseOps(body, upsertOn ? 'upsert' : 'create');
     if (upsertOn) {
       await this.classesUpsert(ctx, collection, body, upsertOn);
@@ -353,7 +355,8 @@ export class ParseWireRoutes {
     // own data over this — returning wire-typed fields here would leak `__type`
     // envelopes into model data un-deserialized (create responses skip
     // _deserializeJSON on the client).
-    sendJSON(ctx.res, 201, { objectId: record.objectId, createdAt: record.createdAt });
+    // P116 ONT-015: …and the number the store handed out, which the client has no other way to know.
+    sendJSON(ctx.res, 201, { objectId: record.objectId, createdAt: record.createdAt, ...seriesAnswer(this.facade.schemaManager, collection, record) });
   }
 
   /**
@@ -427,7 +430,7 @@ export class ParseWireRoutes {
       await this.upsertUpdate(ctx, collection, raced, body);
       return;
     }
-    sendJSON(ctx.res, 201, { objectId: record.objectId, createdAt: record.createdAt, upsert: 'created' });
+    sendJSON(ctx.res, 201, { objectId: record.objectId, createdAt: record.createdAt, ...seriesAnswer(this.facade.schemaManager, collection, record), upsert: 'created' });
   }
 
   /**

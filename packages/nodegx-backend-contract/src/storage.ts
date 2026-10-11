@@ -307,6 +307,21 @@ export interface StorageColumn {
    * at is deleted. Kept by the backend at delete time, never a foreign key (`targetGoes.ts`).
    */
   whenTargetGoes?: 'goes-too' | 'stays-unlinked' | 'blocks';
+  /** P116 ONT-015 — a text column only: a number the store hands out on create (`conformance/cases/series.ts`). */
+  series?: StorageSeries;
+}
+
+/**
+ * P116 ONT-015 — `INV-{YYYY}-{####}`: literal text, `{YYYY}`, `{YY}`, `{MM}` and one run of `#` for the
+ * counter (its width a minimum). The store fills the field on create, going up by one, never handing a
+ * number out twice — not after a delete, not to two creates at once. `restart` keys the counter by the
+ * year or the month (UTC, the backend's clock). `gapFree` (only on the person's word, R-g): the number
+ * is taken inside the record's insert, so a refused create gives it back.
+ */
+export interface StorageSeries {
+  format: string;
+  restart?: 'never' | 'year' | 'month';
+  gapFree?: boolean;
 }
 
 /**

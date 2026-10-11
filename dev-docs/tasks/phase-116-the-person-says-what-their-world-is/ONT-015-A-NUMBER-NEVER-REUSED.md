@@ -4,7 +4,7 @@
 out at create, in a format the person gave, going up by one, never skipping if they said so, and never used twice.
 **Depends on** ONT-014 (the number is frozen after create), ONT-011 step 2 (the *read aloud* fact on a noun is the
 question that leads here), ONT-007 (a series put on a collection with records is a migration). **Feeds** ONT-013
-(the invoice sentence projects in full). **Status: 📋, unblocked s21 (§6.1: the census found 3 rows over 2 sources) — opened on Richard's sentence (`from: oral`) with a thin
+(the invoice sentence projects in full). **Status: 🟡 s21 — unblocked (§6.1: the census found 3 rows over 2 sources); the store and the doors built (§6.2: AC1, AC4, AC2's create half; both engines); the projection, the claim, the migration and the capability cell owed — opened on Richard's sentence (`from: oral`) with a thin
 warrant: ONT-011 §3.3 found one read-aloud row and no invoice-style numbering in the 8 sources. R-g ruled 2026-10-10 (§5): ask, never assume. **s19 (ONT-011 step 2):** the noun's questions exist — `readAloud`, then `looksLike`, `maySkip` (R-g's words), `restarts` — and project to a `number` field, unique and set once (held) with the series said in words; this task's build flips the `series` hold from said to held.**
 
 > **Model check (Richard, 2026-10-08 rule):** the build wants **Opus 5.5**: a counter table and an allocation inside
@@ -116,6 +116,51 @@ thin and the build is unblocked** without a ruling. What the two new rows say ab
 - **One keys the series by a type** (one run of numbers per sort of record), which §3.1's series name already covers.
 - todo-list's "next position" (the highest plus one) is a drag-sort order, not a number that names the record:
   classified neighbour, not counted.
+
+### 6.2 The store and the doors (s21, 2026-10-11, Opus 5.5) — AC1, AC2's create half, AC4
+
+- **The option** is `series: { format, restart?, gapFree? }` on a column, beside `required` and `defaultValue`
+  (`SchemaColumn` in the runtime's `schemaCommon.ts`, `StorageColumn`/`StorageSeries` in the contract). It is stored
+  with the table's declaration on both engines as written. `adapters/series.ts` holds the rest: the validator (a text
+  column, exactly one `{#…#}`, only `{YYYY}` `{YY}` `{MM}`, a yearly restart must say the year and a monthly one the
+  year and month, or two numbers would read the same), the period and format (UTC, the backend's clock;
+  `setSeriesClock` for tests), and the one statement both engines take a number with —
+  `INSERT INTO "_Series" … ON CONFLICT DO UPDATE SET "next" = "next" + 1 RETURNING "next" - 1`, so no two creates can
+  read the same `next`. Both schema managers refuse a bad series at `createTable`/`addColumn`, and
+  `POST /admin/schema` answers 400 in words.
+- **Inside the create** (`LocalSQLAdapter.create`, `PostgresAdapter.create`): a series field the record does not carry
+  is handed out. When gap-free, the take and the insert are one transaction (`db.transaction` on SQLite; the pool's
+  `transaction` on PostgreSQL, where the counter row's lock makes concurrent creates wait their turn). Otherwise the
+  counter moves first. `_Series` is made on first use. A value the record carries is kept. That is the store's half
+  of the admin's backfill, and it does not move the counter.
+- **The doors** (`server/series-door.ts`): `/classes` create and upsert, `/api/:table`, the batch and the MCP create
+  refuse a body that brings a series field with a **400** naming it (`reason: 'series'`, Parse code 142) before
+  anything is stamped, unless the caller is the admin. The create's answer carries the number (Parse's 201 is
+  `objectId` + `createdAt` only, so a screen had no other way to know it), and so does the MCP create's.
+- **AC1 — conformance area `series`** (`conformance/cases/series.ts`, 10 cases, green on SQLite and PostgreSQL): in
+  order with the padding, never after a delete, eight creates at once distinct (and gap-free, in a row), gap-free
+  gives a refused create's number back, not gap-free leaves the gap, `T-9` → `T-10`, one run per collection, a carried
+  number kept, four unkeepable series refused. **Mutant `series-counted-not-taken`** (`mutants.ts`; the census rows'
+  own mistake: the count plus one, before and outside the insert) is caught on both engines by its own set of cases.
+  The year/month roll needs the clock, so it is graded in `ont-015-series.test.ts` (24/24, both engines, over HTTP),
+  with two more mutants, each shown: **the restart ignored** (`seriesPeriod` → `''`: January carries on from
+  December) and **a gap-free number taken outside the insert** (the refused create leaves a gap). AC1's "the delete
+  decrementing" is graded by the counted mutant, whose deleted record's number comes back; no code path decrements.
+- **AC2** — the create half: a person's body with a number is a 400 at every door (and a third mutant, the door's
+  refusal taken out, stores the invented number); the admin's is kept. **Owed:** "a PUT changing it is ONT-014's 409"
+  arrives with the projection (§3.3: the projection writes `frozen` on the field), not here.
+- **AC4** — `_Series` is a `_` table with no `_Schema` row: no non-admin door reaches it (`isSystemCollection`;
+  measured: a person's `GET /classes/_Series` is refused and says nothing of the counters).
+- **Found on the way:** `brg-005-conformance-postgres` held one adapter per case open until `afterAll`, each pool
+  idle until its own timeout. The eight-at-once cases filled the pools and the run reached PostgreSQL's 100
+  connections. The last three tests could not connect. Each run's adapters are now closed when the run ends (peak
+  14 connections, 21/21).
+- **Not built (next):** §3.3's projection (`RuleHold` `series` → the field option, `looksLike` → `format`, `maySkip`
+  → `gapFree`, `restarts` → `restart`, and `frozen`); the claim `<noun>/number-never-used-again` flipped to held with
+  a mutant `dropSeries`, which moves ONT-005's pin (AC5); the migration step (AC3); the capability cell (a new
+  `CapabilityKey` every one of the six descriptors must declare, `unsupported` in words except nodegx). **Backups:** a
+  SQLite backup is the whole file, so `_Series` goes with every restore (from the backup code; no restore spec
+  graded yet). PostgreSQL takes no backup here (`BackupNotFileBackedError`), so §3.2's restore sentence does not arise on it.
 
 ## 7. Not this task
 

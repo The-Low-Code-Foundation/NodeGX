@@ -16,6 +16,8 @@
  * @module adapters/local-sql/schemaCommon
  */
 
+import type { SeriesOption } from '../series';
+
 /** One column of a collection schema, as the editor's data model persists it. */
 export interface SchemaColumn {
   name: string;
@@ -26,6 +28,8 @@ export interface SchemaColumn {
   defaultValue?: unknown;
   /** P116 R10 — a Pointer only: what happens to this record when the one it points at goes. Kept by the backend at delete time, never DDL. */
   whenTargetGoes?: 'goes-too' | 'stays-unlinked' | 'blocks';
+  /** P116 ONT-015 — a text column only: the number the store hands out on create (`adapters/series.ts`). */
+  series?: SeriesOption;
   /**
    * BMG-003 R6: `addColumn` only — the value the rows ALREADY in the table get,
    * once. It is not a default and it is never declared: a required field

@@ -96,6 +96,7 @@ import {
 } from '../local-sql/schemaCommon';
 import { checkConstraintDDL, columnToPostgres, declaredIndexDDL, junctionDDL, tableDDL } from './ddl';
 import { translatePgError, PG_UNDEFINED_TABLE, PG_UNIQUE_VIOLATION } from './errors';
+import { assertSeriesColumns } from '../series';
 import type { PgConnectionPool } from './pool';
 
 /** PostgreSQL truncates an identifier longer than this silently. Refused instead. */
@@ -399,6 +400,7 @@ export class PgSchemaManager {
   createTable(schema: TableSchema): boolean {
     const st = this.s;
     const name = schema.name;
+    assertSeriesColumns(schema.columns); // P116 ONT-015: a series that cannot be kept is refused, not stored
     if (st.tables.has(name)) return false;
 
     const stored: TableSchema = { ...schema, columns: [...(schema.columns || [])] };
@@ -464,6 +466,7 @@ export class PgSchemaManager {
   }
 
   addColumn(tableName: string, column: SchemaColumn): void {
+    assertSeriesColumns([column]);
     const st = this.s;
     if (!st.tables.has(tableName)) throw new Error(`no such table: ${tableName}`);
     if (!TYPE_MAP[column.type]) {

@@ -64,6 +64,7 @@ import type { WorkflowRunner } from '../../workflow/WorkflowRunner';
 import type { AuditLog } from '../../ops/audit';
 import type { Principal } from '../../security/model';
 import { HttpError, readJSONBody, sendJSON } from '../http-util';
+import { assertSeriesWrite, seriesAnswer } from '../series-door';
 import { logger } from '../../ops/logger';
 import { NotWhileItIs } from '../../persistence/onlyWhile';
 import { AUDIT_MCP_TOOL_CALL } from '../../ops/audit-actions';
@@ -413,10 +414,12 @@ export class McpRoutes {
         const data = { ...args };
         delete data.objectId;
         delete data.ACL;
+        assertSeriesWrite(ctx.principal, this.deps.facade.schemaManager, collection, data);
         ctx.stampCreate(collection, data);
         const created = (await this.deps.facade.rawCreate(collection, data)) as Record<string, unknown>;
         const id = String(created.objectId);
-        return { text: `Created ${collection} ${id}.`, structured: { objectId: id }, objectId: id };
+        const numbered = seriesAnswer(this.deps.facade.schemaManager, collection, created);
+        return { text: `Created ${collection} ${id}${Object.values(numbered).map((n) => ` (${String(n)})`).join('')}.`, structured: { objectId: id, ...numbered }, objectId: id };
       }
       case 'update': {
         const id = String(args.objectId || '');

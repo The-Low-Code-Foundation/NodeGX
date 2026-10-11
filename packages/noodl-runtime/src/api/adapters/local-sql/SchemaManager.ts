@@ -11,6 +11,7 @@
 import { aclPredicateSql } from '../postgres/predicates';
 import type { EngineDatabase } from './engine';
 import { escapeTable, escapeColumn } from './QueryBuilder';
+import { assertSeriesColumns } from '../series';
 import {
   builtInIndexNames as sharedBuiltInIndexNames,
   CHECK_FAILED_PREFIX,
@@ -214,6 +215,7 @@ class SchemaManager {
    */
   createTable(schema: TableSchema): boolean {
     const tableName = schema.name;
+    assertSeriesColumns(schema.columns); // P116 ONT-015: a series that cannot be kept is refused, not stored
 
     // Check if table exists
     const exists = this.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = ?").get(tableName);
@@ -282,6 +284,7 @@ class SchemaManager {
    * Add a column to an existing table
    */
   addColumn(tableName: string, column: SchemaColumn): void {
+    assertSeriesColumns([column]);
     const colDef = this._columnToSQL(column);
     if (!colDef) {
       // BMG-003: a Relation is a junction table, not a column. Before this it

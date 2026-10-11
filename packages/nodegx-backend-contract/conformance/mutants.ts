@@ -20,7 +20,7 @@
  * @module conformance/mutants
  */
 
-import type { IStorageAdapter, IStorageSchema, StorageIndexDecl } from '../src/storage';
+import type { IStorageAdapter, IStorageSchema, StorageIndexDecl, StorageSeries } from '../src/storage';
 
 /** The mutations, by name. AC3 records failures against these. */
 export type MutationKind =
@@ -36,7 +36,8 @@ export type MutationKind =
   | 'path-ignores-the-start-filter'
   | 'path-ignores-hop-filters'
   | 'path-ignores-the-depth-bound'
-  | 'missing-row-written-without-acl-succeeds';
+  | 'missing-row-written-without-acl-succeeds'
+  | 'series-counted-not-taken';
 
 export const MUTATIONS: readonly MutationKind[] = Object.freeze([
   'drop-acl-on-reads',
@@ -51,7 +52,8 @@ export const MUTATIONS: readonly MutationKind[] = Object.freeze([
   'path-ignores-the-start-filter',
   'path-ignores-hop-filters',
   'path-ignores-the-depth-bound',
-  'missing-row-written-without-acl-succeeds'
+  'missing-row-written-without-acl-succeeds',
+  'series-counted-not-taken'
 ]);
 
 /** What each mutation models, for the record AC3 asks for. */
@@ -81,8 +83,18 @@ export const MUTATION_DESCRIPTIONS: Readonly<Record<MutationKind, string>> = Obj
   'path-ignores-the-depth-bound':
     'a $path walks a repeated hop past maxDepth — the bound the contract makes mandatory, so a tree is walked whole and a cycle walked for as long as the engine allows',
   'missing-row-written-without-acl-succeeds':
-    'a save, increment or delete with no ACL that changed no row answers success (P109 ISL-039, P99-HLT016-NOACL) — a cloud function saving a record somebody just deleted is told it worked, and nothing is stored'
+    'a save, increment or delete with no ACL that changed no row answers success (P109 ISL-039, P99-HLT016-NOACL) — a cloud function saving a record somebody just deleted is told it worked, and nothing is stored',
+  'series-counted-not-taken':
+    "a series number worked out as the rows counted plus one, before the insert and outside it (P116 ONT-015) — the census's two rows exactly: a deleted record's number comes back, and two creates at once read the same count"
 });
+
+/** `series-counted-not-taken`: the number an app works out for itself — what ONT-015 exists to replace. */
+function countedNumber(series: StorageSeries, n: number): string {
+  const at = new Date();
+  return series.format.replace(/\{([^{}]*)\}/g, (_w, t: string) =>
+    t === 'YYYY' ? String(at.getUTCFullYear()) : t === 'YY' ? String(at.getUTCFullYear() % 100).padStart(2, '0') : t === 'MM' ? String(at.getUTCMonth() + 1).padStart(2, '0') : String(n).padStart(t.length, '0')
+  );
+}
 
 /** The three path mutations, applied to a `where` before it reaches the adapter. */
 function mutatePath(where: unknown, kind: MutationKind): unknown {
@@ -244,7 +256,18 @@ export function mutate(adapter: IStorageAdapter, kind: MutationKind): IStorageAd
       adapter.fetch(options);
     },
 
-    create: (options) => adapter.create(options),
+    create(options) {
+      const series = kind === 'series-counted-not-taken' ? (adapter.schemaManager.getTableSchema(options.collection)?.columns ?? []).filter((c) => c.series && (options.data[c.name] === undefined || options.data[c.name] === null)) : [];
+      if (!series.length) {
+        adapter.create(options);
+        return;
+      }
+      adapter.count({
+        collection: options.collection,
+        success: (n) => adapter.create({ ...options, data: { ...options.data, ...Object.fromEntries(series.map((c) => [c.name, countedNumber(c.series!, n + 1)])) } }),
+        error: options.error
+      });
+    },
 
     save(options) {
       if (kind === 'drop-acl-on-writes') {

@@ -37,6 +37,7 @@ import { pathCases } from './cases/paths';
 import { recordCases } from './cases/records';
 import { relationCases } from './cases/relations';
 import { schemaCases } from './cases/schema';
+import { seriesCases } from './cases/series';
 import { AdapterRefusal, makeContext, type ConformanceContext } from './context';
 
 export type { ConformanceContext, Row, ReadResult } from './context';
@@ -51,7 +52,7 @@ export type { DryRun, MigrationCheckData, MigrationContext, MigrationMove, Migra
  * it. Kept as a closed union so a case cannot invent an area that no adapter
  * author has been told about.
  */
-export type ConformanceArea = 'records' | 'filters' | 'acl' | 'relations' | 'paths' | 'schema' | 'claims';
+export type ConformanceArea = 'records' | 'filters' | 'acl' | 'relations' | 'paths' | 'schema' | 'series' | 'claims';
 
 /** One case: an id nobody else uses, the area it belongs to, and the body. */
 export interface ConformanceCase {
@@ -139,7 +140,8 @@ export const CONFORMANCE_CASES: readonly ConformanceCase[] = Object.freeze([
   ...aclCases,
   ...relationCases,
   ...pathCases,
-  ...schemaCases
+  ...schemaCases,
+  ...seriesCases
 ]);
 
 /** Case ids, asserted unique at module load — a duplicate id would silently

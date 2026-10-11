@@ -22,6 +22,8 @@ import { whenTargetGoesProblems, type IStorageFacade, type WhenTargetGoes } from
 import type { ExecutionHistory } from '../execution/ExecutionStore';
 import type { WorkflowRunner } from '../workflow/WorkflowRunner';
 import type { RequestContext } from './HttpServer';
+import { assertSeriesWrite } from './series-door';
+import { seriesProblem } from '@noodl/runtime/src/api/adapters/series';
 import type { ClpOp } from '../security/model';
 import type {
   StorageCheckDecl,
@@ -297,6 +299,7 @@ export class ByobAdminRoutes {
   async create(ctx: RequestContext): Promise<void> {
     const data = await readJSONBody(ctx.req);
     assertAccountWrite(ctx.params.table, data);
+    assertSeriesWrite(ctx.principal, this.facade.schemaManager, ctx.params.table, data);
     ctx.stampCreate(ctx.params.table, data);
     let record: Record<string, unknown>;
     try {
@@ -376,6 +379,7 @@ export class ByobAdminRoutes {
             ctx.checkData(collection, clpOp);
             const data = (op.data as Record<string, unknown>) || {};
             assertAccountWrite(collection, data);
+            assertSeriesWrite(ctx.principal, this.facade.schemaManager, collection, data);
             ctx.stampCreate(collection, data);
             results.push(forWire(collection, await this.facade.rawCreate(collection, data)));
             break;
@@ -534,6 +538,11 @@ export class ByobAdminRoutes {
         const description = describedAs(body.description).description;
         // P116 R10: a link's "when it goes" rule that could never be kept is refused, not stored.
         refuseUnkeptLinkRules(table, (body.columns as StorageColumn[] | undefined) || []);
+        // P116 ONT-015: so is a series that could not be handed out (no counter, a number column, …).
+        for (const c of (body.columns as StorageColumn[] | undefined) || []) {
+          const problem = seriesProblem(c.name, c.series, c.type);
+          if (problem) throw new HttpError(400, problem);
+        }
         const created = sm.createTable({
           name: table,
           columns: (body.columns as StorageColumn[] | undefined) || [],
