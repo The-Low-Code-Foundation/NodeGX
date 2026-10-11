@@ -2,7 +2,7 @@
 
 **Opened 2026-10-06** from [DIRECTION.md](../../DIRECTION.md) D1 (ruled by Richard: the install command lives in this
 phase). **Depends on R2 (publish at 0.x), OWN-001, OWN-002, OWN-004.**
-**Status: 🟡 s10 (2026-10-11): PUBLISHED — all six packages at 0.1.0 on npm, the chain passes from the registry (§8); AC1 and AC3 met; the editor-open half of AC2, AC4 and the stranger's run on a real account are owed.** **R2 ruled 2026-10-10 (s6): publish at 0.x**, after each package declares what it uses (node-spec → `@noodl/backend-contract`; project-contract → `ajv`, `ajv-formats`; the preview's page build → `buffer`, `@nodegx/project-contract`, `@nodegx/module-inject`). **R5 (s6): `@nodegx/canvas-look` ships with the kit, optional. R6 (s6): a package cannot publish while one of its `kit:` bugs is an open blocker; lesser ones are listed as known issues.**
+**Status: 🟡 s11 (2026-10-11): PUBLISHED at 0.1.0 (§8); AC1, AC3 and AC4 met (§9); AC2's editor half FAILS — the released editor refuses the made project and the current one writes four files on open (§9, five bugs).** **R2 ruled 2026-10-10 (s6): publish at 0.x**, after each package declares what it uses (node-spec → `@noodl/backend-contract`; project-contract → `ajv`, `ajv-formats`; the preview's page build → `buffer`, `@nodegx/project-contract`, `@nodegx/module-inject`). **R5 (s6): `@nodegx/canvas-look` ships with the kit, optional. R6 (s6): a package cannot publish while one of its `kit:` bugs is an open blocker; lesser ones are listed as known issues.**
 **Rulings s9 (2026-10-11, one round, all four as recommended):** **R8** the npm names are `@nodegx/mcp` and `@nodegx/preview`, in the repo and on npm (the `@noodl` scope belongs to the original Noodl team; the bins keep their names) — done, `749bd0a38`. **R9** the command sets the folder up and the agent makes the app: it writes ONE file, the folder's `.mcp.json`, and `create_project` stays the one writer of projects, so the scoping conversation is never skipped. AC1 therefore reads *the command plus the agent's first `create_project`*. **R10** people type `npm create nodegx` (package `create-nodegx`). **R11** Richard runs `npm login` (this Mac's token answers 401); a later session publishes, after asking him once more just before it goes out.
 **Model:** **Opus.** Packaging and one install command with a stranger's run as the test; Fable only if the publish order turns into a design question. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
@@ -158,3 +158,51 @@ homepage "Start from npm" section and the changelog's "npm packages 0.1.0", depl
 and after; `nodegx-web` `c2df94b`, `fda2887`).
 
 **Owed:** AC2's editor-open half; AC4; §4.4 on a clean account and a non-Mac machine.
+
+
+## 9. Session 11 (2026-10-11, Opus): the made project, opened
+
+**Method.** From the registry, in an empty folder with `HOME` empty: `npm create nodegx@0.1.0 my-apps` → one
+`.mcp.json`; that server (`npx -y @nodegx/mcp@0.1.0 --allow-writes`, spoken to over stdio) → `create_project`
+"Reading List" (two pages agreed, `Home` built as the skeleton, `Book` planned) → 15 files. Snapshot by checksum;
+every open below was of a copy, compared file by file against the snapshot.
+
+**AC2's editor half — FAILS, for four reasons, each filed:**
+
+| editor | route | what happened |
+|---|---|---|
+| **NodeGX 0.3.0, installed** (tag `v0.3.0`, 2026-09-27, the newest release) | launcher card | **Refused.** Modal *"saved with a newer version of Noodl"* + toast *"project.json is missing or unreadable"*. Nothing written. **P112-S11-FORMATSKEW** (high): the kit writes format 5 (ISL-018, 2026-10-02); 0.3.0 opens ≤ 4. **P112-S11-REFUSALWORDS** (medium): both messages wrong — another product's name and site, and a file v2 does not have. |
+| dev editor at `ec116ed5a` | **Open project…** (the real button; only the native folder dialog doubled) | Opened and drew "Reading List — nothing built yet…", Layers and canvas right. **Wrote 4 files** in the first second: |
+| | | **P112-S11-IDREPLACE** (high): the project's `id` replaced by a fresh one — the backend-ownership key DSG-007 made durable; `_addProject` mints it, and is also the template path, so `id ?? guid()` is not the fix. |
+| | | **P112-S11-PAGEPORTS** (medium, `kit: mcp`): Home's Page node gains `dynamicports` (title, urlPath) → `nodes.json`, `component.json`, `_registry.json` saved. Control arm with the editor's `nodes.json` already in place: no component file moved. |
+| | | **P112-S11-OPENWRITES** (medium): `nodegx.project.json` — `nodegxVersion` `0.1.0`→ literal `"1.1.0"`, `created` dropped, `metadata: {}` added; and on the 2nd and 3rd open of the same folder, with nothing done, a new `modified` **every time** (the save baseline is hashed from the importer's output, the save from `ProjectModel.toJSON()`). |
+
+The three agent files (`.mcp.json`, `CLAUDE.md`, `.gitignore`) were never touched: `create_project` already wrote
+them, and the editor writes none that exist. 🔴 **A seeded recent-projects row also stamps its own id over the
+project's** (`loadProject` :185) — the first drive's id change was that; the Open project… arms are the measurement.
+
+**AC4 — the made project is a suite fixture.** `packages/nodegx-project-contract/tests/fixtures/editor-suite/reading-list/`
+= the 15 files less `.mcp.json` (machine-specific; the project's own `.gitignore` names it), and
+`reading-list.edits.json` — an agent's first page: the placeholder renamed and restyled as the heading, a list Group, a
+Text in it, an "Add a book" button wired to a Counter, a Number wired then unwired, a move, a rename in `App`, a
+reparent, a removal (every edit kind; ports checked against the node definitions — Counter has `limitsMax`, not
+`limit`, and Number's output is `savedValue`). Reference: PASS. MCP adapter: PASS. 🔴 **Neither grades a port name**
+— a mutant with `bogusPort` passed both; the suite grades "saves what the reference saves", and a script's sense is the
+fixture author's job (the existing `todo-list` script wires Counter `limit`, which does not exist). Electron adapter
+(`FIXTURE_DIRS`): **PASS** in `test:ci` (3,012 specs, the 2 floor failures: SUB-006 and the order-dependent save
+flush; readout fresh at 21:11). **AC4 ✅** — all three adapters grade the project the one install made.
+
+🔴 **Driving traps hit:** the dev stack's renderer webpack recompiled three times under load ~20 and died of heap
+(4 GB) — the window waited on the bundle the whole time; the second launch worked. The installed app sat behind
+AppKit's *"reopen windows?"* prompt with no window (dismissed by `osascript` `click button "Don’t Reopen"`). My
+first "no file edited in 25 minutes" was a `find -newermt "-25 minutes"` that **errored** (bfs rejects the form) with
+the error sent to `/dev/null` — use `-mmin`, and run it on a folder known to have changed first.
+
+**Rulings (one round, asked with the measurements in plain words):** **R15 release the editor now** (0.4.0 from
+`cline-dev`, knowing opening still writes into the project); **R16 opening keeps the project's own id**. R16 built in
+`f2505b83f` (`idForOpenedFolder`; a copied folder whose id another row holds still mints, so no collision is made) —
+unit-graded with a calibration and a red mutant; **its in-editor drive is owed**: the dev stack died of heap a second
+time (renderer webpack at 4 GB on its second compile, load 32, swap 14.8 / 16 GB).
+
+**Owed:** R15's release (§10); PAGEPORTS and OPENWRITES, then AC2 re-driven on both routes (0.4.0 and the dev
+editor); REFUSALWORDS. §4.4 unchanged.
