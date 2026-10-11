@@ -30,6 +30,7 @@
  *   FEED   the refuge finished and Hazel the rabbit seeded; Cobble re-taught on her land by touch: until [her bowl] is
  *          full { go to nearest carrot patch, … } — WON while the land holds two buildings; the store: Cobble helps with
  *          the feeding program; on the island her bowl reaches 3/3 — and (s7) she gives her clover: its line is seen.
+ *   METERS (s43, P108-S7-METERS3D) in each Workshop on her land, no two meter chips over the land's things cover each other.
  *   FR     390 × 844: the card's robots line and "Apprendre à Pip ici" in French.
  *   0 console errors.
  *
@@ -304,6 +305,16 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     await until(`!!document.querySelector('.bg-blocks-box .gd-bk.gd-picking')`, Boolean, 2000);
     return tapTile('.bg-stage', x, y, `${label}: the tile ${x},${y}`);
   };
+  const METERS_MET = `(() => {
+    const els = Array.from(document.querySelectorAll('.bg-stage .gd3-meter, .bg-stage .gd-meter')).filter((e) => !/meter-bot/.test(e.className) && e.offsetParent !== null && getComputedStyle(e).visibility !== 'hidden');
+    const boxes = els.map((e) => { const r = e.getBoundingClientRect(); return { text: e.textContent.trim(), l: r.left, r: r.right, t: r.top, b: r.bottom, lift: e.getAttribute('data-lift') || '', cached: (e.__gdW || 0) + 'x' + (e.__gdH || 0) }; });
+    const met = [];
+    for (let i = 0; i < boxes.length; i++) for (let j = i + 1; j < boxes.length; j++) {
+      const a = boxes[i], b = boxes[j];
+      if (a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b) met.push([a.text, b.text]);
+    }
+    return { n: boxes.length, met, boxes: boxes.map((x) => x.text + ' @' + Math.round(x.l) + ',' + Math.round(x.t) + (x.lift ? ' lift ' + x.lift : '') + ' ' + Math.round(x.r - x.l) + 'x' + Math.round(x.b - x.t) + ' cached ' + x.cached) };
+  })()`;
   const PROGRAM = `(() => { const p = Noodl.Variables.gardenProgram; const l = typeof p === 'string' ? JSON.parse(p || '[]') : p; return Array.isArray(l) ? l : []; })()`;
   const WON = `(() => { const e = document.querySelector('.bg-win-card'); return !!e && e.offsetParent !== null; })()`;
   const WIN_TEXT = `(() => { const c = document.querySelector('.bg-win-card'); return c && c.offsetParent !== null ? c.innerText.replace(/\\s+/g, ' ').trim() : ''; })()`;
@@ -341,6 +352,11 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     const who = await evaluate(WS_BOT);
     const prog = await buildCarry(part, source, label);
     readings[`${label}-world`] = await drawn('.bg-stage');
+    // P108-S7-METERS3D: the spa's parts stand on neighbouring tiles; at the Workshop's camera their chips met. Read the
+    // chips over things (not a held can's, under its robot's name) as boxes on the page.
+    const meters = await evaluate(METERS_MET);
+    readings[`${label}-meters`] = meters;
+    check(`METERS ${label}: the Workshop's ${meters.n} meter chips over the land's things — no two cover each other`, meters.n >= 2 && meters.met.length === 0, meters);
     await shot(`iw7t-${label}-program`);
     await tap(first('.bg-controls .bg-i-play'), `${label}: Play`);
     const won = await until(WON, Boolean, 150000);

@@ -104,6 +104,47 @@
   var stepFacing = GARDEN.stepFacing;
   /** P108 s7: which robots' name pills go above their robot, so no two cover each other — placed in screen px every frame. */
   var pillSides = GARDEN.pillSides;
+
+  /**
+   * P108-S7-METERS3D: how far up (px) each meter chip goes so no two cover each other. A building's parts stand on
+   * neighbouring tiles (the spa's stones and planks), and at the Workshop's camera their chips met: the stones' covered the
+   * planks'. Items in screen px: { x, bottom, w, h } — x the chip's centre, bottom its bottom edge (a chip is drawn
+   * translate(-50%, -100%) from its point). Greedy, the LOWEST on screen first (then list order), as pillSides: a chip stays
+   * over its thing unless it meets one already placed; then it goes just over the highest it meets, until it meets none.
+   * No width (nothing drawn) takes no room.
+   */
+  function chipLifts(items) {
+    var list = Array.isArray(items) ? items : [], out = [], order = [], placed = [], GAP = 2;
+    for (var n = 0; n < list.length; n++) {
+      out.push(0);
+      order.push(n);
+    }
+    var bottomOf = function (k) {
+      return Number((list[k] || {}).bottom) || 0;
+    };
+    order.sort(function (a, b) {
+      return bottomOf(b) - bottomOf(a) || a - b;
+    });
+    for (var o = 0; o < order.length; o++) {
+      var i = order[o], it = list[i] || {}, w = Number(it.w) || 0, hh = Number(it.h) || 0, x = Number(it.x) || 0, b = bottomOf(i);
+      if (!(w > 0) || !(hh > 0)) continue;
+      var r = { l: x - w / 2, r: x + w / 2, t: b - hh, b: b };
+      // Each pass clears every chip it met (it only ever goes up), so one pass per placed chip is the most it can take.
+      for (var pass = 0; pass <= placed.length; pass++) {
+        var hit = null;
+        for (var k = 0; k < placed.length; k++) {
+          var q = placed[k];
+          if (r.l < q.r && q.l < r.r && r.t < q.b && q.t < r.b && (!hit || q.t < hit.t)) hit = q;
+        }
+        if (!hit) break;
+        r.b = hit.t - GAP;
+        r.t = r.b - hh;
+      }
+      placed.push(r);
+      out[i] = b - r.b;
+    }
+    return out;
+  }
   var wholeOf = GARDEN.wholeOf;
   // ── P108 IW-002 AC6 (lane D): the job model, drawn — garden-kit’s one copy of cg002Content’s table, and its meters ──────
   var JOB_LOOK = GARDEN.job;
@@ -2030,23 +2071,40 @@
       });
       // P108 IW-002: a meter over its thing (a held can's under its robot's name); a ring round a watched thing's tile,
       // its robot, or the tile itself — an ellipse sized by the tile as the camera sees it.
+      // P108-S7-METERS3D: on a plot (her land, the Workshop) a chip that would cover another goes up over it (chipLifts).
+      var small = eng.world.map.w <= 16, chips = [];
       overlayEls.meters.forEach(function (l) {
-        if (l.robot) {
-          var sb = screenOf([l.g.position.x, l.g.position.y + 0.02, l.g.position.z + 0.3]);
-          place(l.el, sb.sx, sb.sy + 48);
-          return;
-        }
+        if (l.robot) return;
         var s = screenOf([l.g.position.x, l.g.position.y + l.g.userData.lift, l.g.position.z]);
         // P108 s8: a chip over a thing on the plot's edge (her land's tree and rock) is kept inside the world, not cut by
-        // its edge (the chip is centred on its point; its width read once per text, never every frame).
+        // its edge (the chip is centred on its point; its size read once per text, never every frame).
         var sx = s.sx;
-        if (eng.world.map.w <= 16 && width > 0) {
+        if (small && width > 0) {
           var txt = l.el.textContent;
-          if (l.el.__gdText !== txt || !l.el.__gdW) { l.el.__gdText = txt; l.el.__gdW = l.el.offsetWidth || 0; }
+          if (l.el.__gdText !== txt || !l.el.__gdW) { l.el.__gdText = txt; l.el.__gdW = l.el.offsetWidth || 0; l.el.__gdH = l.el.offsetHeight || 0; }
           var half = (l.el.__gdW || 0) / 2 + 4;
           if (half * 2 < width) sx = Math.max(half, Math.min(width - half, sx));
         }
-        place(l.el, sx, s.sy);
+        chips.push({ l: l, sx: sx, sy: s.sy });
+      });
+      var lifts = small && chips.length > 1
+        ? chipLifts(chips.map(function (c) { return { x: c.sx, bottom: c.sy, w: c.l.el.__gdW || 0, h: c.l.el.__gdH || 0 }; }))
+        : [];
+      overlayEls.meters.forEach(function (l) {
+        if (!l.robot) return;
+        var sb = screenOf([l.g.position.x, l.g.position.y + 0.02, l.g.position.z + 0.3]);
+        place(l.el, sb.sx, sb.sy + 48);
+      });
+      chips.forEach(function (c, ci) {
+        var l = c.l, lift = lifts[ci] || 0;
+        place(l.el, c.sx, c.sy - lift);
+        // The lift remembered on the chip, for a drive to read: the DOM is touched only when it changes.
+        var said = lift > 0 ? lift.toFixed(1) : '';
+        if ((l.el.__gdLift || '') !== said) {
+          l.el.__gdLift = said;
+          if (said) l.el.setAttribute('data-lift', said);
+          else if (typeof l.el.removeAttribute === 'function') l.el.removeAttribute('data-lift');
+        }
         // P108 IW-003 (lane B): on the island the compact bar is at most 80 % of its tile as the camera sees it (12 px at
         // most), so two neighbours' bars never touch however far the camera stands.
         if (eng.world.map.w > 16 && l.el.className.indexOf('gd3-watch') === -1) {
@@ -2788,6 +2846,8 @@
     /** The pure parts, for the kit gate. */
     world: GARDEN,
     scene: { buildScene: buildScene, buildRobot: buildRobot, THING_BUILDERS: THING_BUILDERS, PALETTE: PALETTE, TILE_HEIGHT: TILE_HEIGHT, PICK_LIFT: PICK_LIFT },
+    /** P108-S7-METERS3D: where the overlay's meter chips go so none covers another. */
+    overlay: { chipLifts: chipLifts },
     /** P108 IW-002: the job table and the meter / watch helpers — garden-kit's (P109 ISL-013). */
     job: JOB_LOOK,
     camera: CAMERA_API,
