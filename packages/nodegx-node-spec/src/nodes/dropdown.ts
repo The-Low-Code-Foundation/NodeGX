@@ -38,7 +38,8 @@
  *   - **Items** (options.ts :158-171): `undefined` ignored; otherwise kept and drawn at the next paint. Text is the old
  *     stored form, read as the editor reads it (options.ts `readItems`); any other truthy value that is not a list offers
  *     no options, and an empty item in a list is skipped (v4, row C70 — v3 offered no options for text, and an empty
- *     item drew an empty option; the runtime's render threw on all three). An option's value is its `Value` as text (`<option value>`, :119), or its Label's text when it has none
+ *     item drew an empty option; the runtime's render threw on all three); a word in the list is an option labelled and
+ *     valued by it (v8, R21 — v7 drew it nameless, valued ''). An option's value is its `Value` as text (`<option value>`, :119), or its Label's text when it has none
  *     (HTML's fallback); an option with `Disabled` true or `'true'` cannot be picked.
  *   - **Enabled**, **the pointer, the keyboard, a click's focus** (utils.ts :157-311 on the `<select>`, Select.tsx
  *     :211), **Focus** / **Blur** (utils.ts :366-440, the target is the `<select>`), **Mounted**, **Enable Label** (it
@@ -110,7 +111,8 @@ export const Dropdown = defineNode({
   // v5 (P109 ISL-031, P107-C64 ruled "Ignore touches, keep hover"): a finger on a disabled control reports nothing — no Pressed, no Pointer Down or Up — as Enabled promises; the pointer's hover still reports
   // v6 (P109 ISL-031, P107-D30 ruled "Reset and announce"): a control leaving the page (Mounted off) takes Focused, Hover and Pressed with it — each goes false, sent if it was true, with Blurred and Hover End for the ones that were on
   // v7 (P109 ISL-045, P109-S21-DROPDOWNEMPTYRESET): the spec correcting itself — after Items offered no options the element selects nothing, and the next option to arrive is selected as it arrives
-  version: 7,
+  // v8 (P107 R21, P107-S88-OPTIONSCAST): a word in a list on Items is an option, labelled and valued by the word — v7 drew an option with no text and the value ''
+  version: 8,
   // NSP-010 — v7 is the spec correcting itself, not the runtime changing
   changes: [
     {
@@ -120,6 +122,15 @@ export const Dropdown = defineNode({
       row: 'P109-S21-DROPDOWNEMPTYRESET',
       migration: {
         none: 'The runtime did not change; only the spec stopped promising a Value and a Changed the browser never sends. A fresh dropdown offered nothing still keeps its hidden option (it carries `selected`), as v6 said'
+      }
+    },
+    {
+      version: 8,
+      says:
+        'A list of plain words wired into Items offers those words: ["Small", "Large"] draws Small and Large, and choosing Large sends "Large" — as typing them into Items does. v7 drew one empty, nameless option per word, each with the value nothing. A list of { Label, Value } rows is drawn as before',
+      row: 'P107-S88-OPTIONSCAST',
+      migration: {
+        none: 'Nothing an app relied on: a word in a wired list drew an option a person could not read, all with the same empty value. No stored project changes — typed Items were already read this way'
       }
     }
   ],
@@ -466,13 +477,15 @@ function itemRows(source: unknown): { Label: string; Value: string }[] {
 /**
  * Select.tsx :115-124 — the `<option>`s the list offers: a falsy Items offers none (:117); a truthy one that is not a list throws in
  * the render on the runtime until v4 (`props.items.map`, row C70) and offers none; text is read as the old stored list (v4,
- * options.ts `readItems`) and an empty item is skipped (v4); each item's `Value` as text (`<option value>`, :119),
+ * options.ts `readItems`) and an empty item is skipped (v4); a word in the list is an option valued by it (v8, R21); each item's `Value` as text (`<option value>`, :119),
  * or its Label's text when it has none; `Disabled` true or `'true'` disables it (:119)
  */
 function optionsOf(items: unknown): Option[] {
   if (typeof items === 'string') return optionsOf(readStoredItems(items));
   if (!items || !Array.isArray(items)) return [];
   return items.filter((item) => item !== null && item !== undefined).map((item) => {
+    // v8 (R21): a word in the list is an option labelled and valued by it (options.ts `optionItems`)
+    if (typeof item !== 'object') return { value: String(item), disabled: false };
     const o = (item !== null && typeof item === 'object' ? item : {}) as { Value?: unknown; Label?: unknown; Disabled?: unknown };
     const value = o.Value === undefined || o.Value === null || typeof o.Value === 'boolean' ? optionText(o.Label) : String(o.Value);
     return { value, disabled: o.Disabled === true || o.Disabled === 'true' };

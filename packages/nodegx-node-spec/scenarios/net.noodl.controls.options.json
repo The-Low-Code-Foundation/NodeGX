@@ -22868,6 +22868,59 @@
     ]
   },
   {
+    "name": "Items wired a list of plain words: each is offered, labelled and valued by itself, and choosing Large moves Value to Large with Changed",
+    "because": "P107 R21, ruled 2026-10-11 (v8, P107-S88-OPTIONSCAST): a word in a wired list is an option, as typing it into Items makes one; v7 and the runtime drew each as a nameless option with an empty value (Select.tsx reads Label and Value)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "items",
+        "value": [
+          "Small",
+          "Large"
+        ]
+      },
+      "settle",
+      {
+        "act": "choose",
+        "value": "Large"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Items wired a list that mixes a row, a word, a number and an empty item: the row is drawn as written, the word and the number by themselves, the empty item skipped; choosing 3 moves Value to 3",
+    "because": "P107 R21 (v8): only a word becomes an option; a { Label, Value } row beside it keeps its own Value and Disabled",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "items",
+        "value": [
+          {
+            "Label": "Off",
+            "Value": "off",
+            "Disabled": true
+          },
+          "Medium",
+          null,
+          3
+        ]
+      },
+      "settle",
+      {
+        "act": "choose",
+        "value": "3"
+      },
+      "settle",
+      {
+        "act": "choose",
+        "value": "off"
+      },
+      "settle"
+    ]
+  },
+  {
     "name": "Items written a number: no options are offered and the page keeps drawing; a list written after it is offered, and choosing its second option 'y' moves Value with Changed",
     "because": "P107-C70 (v4): anything else that is not a list offers no options; the runtime's render threw at props.items.findIndex / map, the whole page with it",
     "params": {},

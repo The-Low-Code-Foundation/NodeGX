@@ -57,7 +57,13 @@ function optionsOf(items) {
   const out = [];
   for (const item of items) {
     if (item === null || item === undefined) continue;
-    const o = typeof item === 'object' ? item : {};
+    // Not the stranger's line: Dropdown v8 (P107 R21, P107-S88-OPTIONSCAST) — a word in the list is an option labelled and
+    // valued by it; the stranger followed v4's text ("an item that is not an object is an option with no Label and no Value")
+    if (typeof item !== 'object') {
+      out.push({ value: text(item), label: text(item), disabled: false });
+      continue;
+    }
+    const o = item;
     const value = o.Value === undefined || o.Value === null || typeof o.Value === 'boolean' ? labelText(o.Label) : text(o.Value);
     const shown = o.Label === undefined || o.Label === null ? value : text(o.Label);
     out.push({ value, label: shown, disabled: o.Disabled === true || o.Disabled === 'true' });

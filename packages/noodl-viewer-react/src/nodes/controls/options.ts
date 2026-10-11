@@ -341,8 +341,8 @@ Utils.addFocusActions(OptionsNode, { noun: 'dropdown' });
 /**
  * P107-C70 (P109 ISL-026, ruled 2026-10-05 "Read old text, else no options"): what `Select` draws for whatever arrived on
  * Items. Text is the old stored form and is read the way the editor reads it (`readItems`); a list keeps its identity (a
- * live Array repaints on its own `change`) unless it holds an empty item, which is skipped; anything else that is not a
- * list offers no options. A falsy Items is passed on as it was (`Select` offers none). Handed to the render as it came,
+ * live Array repaints on its own `change`) unless it holds an empty item, which is skipped, or a word, which becomes an
+ * option labelled and valued by it (R21); anything else that is not a list offers no options. A falsy Items is passed on as it was (`Select` offers none). Handed to the render as it came,
  * a string or a record threw at `props.items.map` / `findIndex`, and a null item at `.Value` — the whole page, not one
  * Dropdown.
  */
@@ -350,7 +350,12 @@ function optionItems(items: unknown): unknown {
   if (!items) return items;
   if (typeof items === 'string') return readItems(items);
   if (!Array.isArray(items)) return [];
-  return items.some((item) => item === null || item === undefined) ? items.filter((item) => item !== null && item !== undefined) : items;
+  if (!items.some((item) => item === null || item === undefined || typeof item !== 'object')) return items;
+  // P107 R21 (2026-10-11, P107-S88-OPTIONSCAST): a word in a wired list is an option — its label and its value are the
+  // word, as typing it does; `Select` reads `Label` and `Value` off each item, so `["Small", "Large"]` drew empty options
+  return items
+    .filter((item) => item !== null && item !== undefined)
+    .map((item) => (typeof item === 'object' ? item : { Label: String(item), Value: String(item) }));
 }
 
 function readItems(stored: unknown): { Label: string; Value: string }[] {
