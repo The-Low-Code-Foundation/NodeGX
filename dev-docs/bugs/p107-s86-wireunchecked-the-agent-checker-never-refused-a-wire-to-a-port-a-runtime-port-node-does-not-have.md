@@ -8,7 +8,7 @@ found: P107 NSP-020 s85 (AC3 research, CMG Drive Looks' featured products), meas
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-020-PORTS-WITHOUT-A-RUNNING-VIEWER.md §6.9 (AC3), §6.10 (the measurement)
 kit: mcp
 regression: packages/noodl-mcp/tests/nsp020WireCheck.test.ts
-commit: (s86, this session's R19 part 2 commit)
+commit: 306c917e1
 ---
 
 For the ~50 types whose ports appear at run time (a For Each's row outputs, a Record's columns, a Function's script

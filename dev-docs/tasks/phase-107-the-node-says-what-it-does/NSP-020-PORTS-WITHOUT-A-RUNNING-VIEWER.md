@@ -750,3 +750,6 @@ first three red; the lookup ignoring the component → the fourth red. `noodl-ed
 
 **Not done — the editor.** The editor runs the same validator and passes no callback, so in the editor nothing changed.
 Whether it should is Richard's (R19 named the agent server); the false-refusal count to ask it with is above: 0 of 99.
+
+**The whole MCP suite, after the commit:** 185 / 194 files, 3866 / 3880 tests. The 9 files that fail (14 tests) fail the
+same with the check made inert (`drawnPortCheck` answering `undefined`), so none is R19's.

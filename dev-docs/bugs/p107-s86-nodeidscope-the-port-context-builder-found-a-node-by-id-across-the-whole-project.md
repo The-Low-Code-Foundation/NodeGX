@@ -8,7 +8,7 @@ found: P107 NSP-020 s86 (R19 part 2), 2026-10-11 — reading the builder before 
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-020-PORTS-WITHOUT-A-RUNNING-VIEWER.md §6.10
 kit: project-contract
 regression: packages/nodegx-project-contract/tests/port-context-node-scope.test.ts
-commit: (s86, this session's R19 part 2 commit)
+commit: 306c917e1
 ---
 
 `portContextReader(project)(nodeId)` looked the node up with `findPortNode(project, nodeId)`: the FIRST component holding
