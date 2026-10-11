@@ -1,15 +1,15 @@
 # Next session — P109 session 45
 
 **Phase:** [README](README.md) · **Audit:** [AUDIT-2026-10-01.md](AUDIT-2026-10-01.md) · scoped at `27d891bf3`.
-**Session 44 (2026-10-11, on `cline-dev`, primary tree):** the board went from 38 to **39 of 52 closed**. ISL-044
-closed (6 of 6). ISL-045 went from 0 to 4 of 5, and ISL-046 from 4 to 5 of 9. Every row was re-measured at HEAD
+**Session 44 (2026-10-11, on `cline-dev`, primary tree):** the board went from 38 to **40 of 52 closed**. ISL-044
+closed (6 of 6), and so did ISL-045 (4 fixed; VARIDS dug as ruled and closed as not reproducible). ISL-046 went from 4
+to 5 of 9. Every row was re-measured at HEAD
 first. Every fix was red on the old code in exactly its arm, and green after.
 
 ## The board (re-derived from the task files' `**Status` lines, s44)
 
 | task | state | what is left | blocked on |
 |---|---|---|---|
-| ISL-045 node inputs | 🟢 4 / 5 | VARIDS | nothing: ruled "dig into Nightbook's exact path" |
 | ISL-046 templates & kits | 🟢 5 / 9 | SECONDVISIT (buildable); MOVEARROW, INSTALLER, TPL011UNREADID | MOVEARROW a ruling (asked s42, s43; not re-asked s44); INSTALLER the tablets; TPL011UNREADID P78's untracked Nightbook pile |
 | ISL-043 export | ⬜ 8 bugs (2 high) | all | P18 is live in `nodegx-export` |
 | ISL-007, 008, 009, 010, 018, 022, 024, 025, 035, 037 | 🟡/🟢/⬜ | as in s40's list | outside this phase |
@@ -17,17 +17,9 @@ first. Every fix was red on the old code in exactly its arm, and green after.
 ## Do, in this order
 
 1. **Re-read the board yourself** (`grep -m1 '^\*\*Status' ISL-0*.md`). Do not copy the table above.
-2. **ISL-045 VARIDS (dig, as ruled).** The nearest shape does not reproduce
-   (`packages/nodegx-backend/tests/isl045-varids-drive.test.ts`: Function → Set Variable (array) → Variable → For Each
-   and a read-back; it comes back plain). Nightbook's real path is in P78's untracked pile: `tpl011Components.ts`
-   `tnFeelVar` / `tnFeelSet` / `tnFeelLoad` (about line 1520), its `savePage` payload, and the note at `tpl011Face.ts:120`.
-   Read those, without editing them, and add Nightbook's missing step to the drive (a row's item read, a strength
-   change written back, or the save). If it then reproduces, fix it there. If not, close it with the readings.
-   Candidate already fixed: ISL-003's plain rows (`collection.ts`, 2026-10-03). Bisect only if it reproduces before
-   that commit.
-3. **ISL-046 SECONDVISIT** (low): read the 3D engine on the second visit to the Workshop before choosing a fix
+2. **ISL-046 SECONDVISIT** (low): read the 3D engine on the second visit to the Workshop before choosing a fix
    (s43's notes in its bug file). The touch drive takes about 10 minutes on a quiet box.
-4. **MOVEARROW**: asked twice with no answer. Ask once more only if Richard is around, in plain words, with s43's
+3. **MOVEARROW**: asked twice with no answer. Ask once more only if Richard is around, in plain words, with s43's
    wording.
 
 ## Human decisions owed
@@ -61,6 +53,9 @@ first. Every fix was red on the old code in exactly its arm, and green after.
   was counted at 409 template fires.
 - **ISL-045 BUILTINBOUNDARY `42699d261`:** every node's element is drawn inside a boundary (`node/render-failed`).
   Cost measured first: about 2–4 ms on the largest template first page.
+- **ISL-045 VARIDS:** dug as ruled. Nightbook's s3/s4 For Each is gone (never committed), and `Collection.set` and
+  `Model.create` at `d57a11668` write nothing into the caller's objects. Closed `wontfix`, ruled "close it, with the
+  readings".
 - **Docs:** `735bf18a7` (re-measures of MOUNTED and VARIDS, as drives), plus the commit lines and this handoff.
 
 ## Gate readings (2026-10-11)

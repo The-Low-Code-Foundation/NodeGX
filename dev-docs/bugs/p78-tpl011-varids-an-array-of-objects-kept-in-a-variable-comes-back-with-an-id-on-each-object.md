@@ -1,7 +1,9 @@
 ---
 id: P78-TPL011-VARIDS
 title: An array of plain objects kept in a Variable comes back with an `id` on each object, which then gets saved
-status: scheduled
+status: wontfix
+reason: not reproducible — the path that produced it is gone (Nightbook's s3/s4 strengths list, never committed) and both mechanisms that could add an id were read at the code Nightbook ran and do not; closed as ruled 2026-10-11
+regression: packages/nodegx-backend/tests/isl045-varids-drive.test.ts (the nearest shape, read back plain)
 phase: P109
 task: ISL-045
 severity: low
@@ -34,3 +36,15 @@ is a candidate for having removed it, but it is not bisected. The question to Ri
 converted?" to "close it as not reproduced?".
 
 **Ruled (Richard, P109 s44, 2026-10-11):** Dig into Nightbook's exact path: trace its own read-back before closing.
+
+**Dug (P109 s44, as ruled) and closed as not reproducible (ruled 2026-10-11, "close it, with the readings").**
+
+- **Nightbook today has no such path.** The feelings reach `Feelings/Strengths` as three fixed slots (`PICKED_ROWS_SCRIPT`,
+  `SET_STRENGTH_SCRIPT` map the plain `{w, s}` and write a new array). In s3/s4 that list was a For Each, replaced
+  after D85. The generator is P78's untracked pile, so the s3/s4 version was never committed and cannot be rebuilt.
+- **Both runtime mechanisms that could add an `id` were read at `d57a11668`** (the runtime Nightbook ran on, before
+  ISL-003). `Collection.set` converts a plain row through `Model.create(plain)` into a record kept in a per-collection
+  `WeakMap`, and pushes the record into its own list: neither the caller's object nor its array is written. And
+  `Model.create` copies fields into the record and never writes into the object it is handed. HEAD is the same.
+- **The remaining way** is a script that read a row's record (a Model, which has an id) and wrote its JSON back into the
+  Variable. That is a record behaving as a record, and the s3/s4 graph that might have done it is gone.
