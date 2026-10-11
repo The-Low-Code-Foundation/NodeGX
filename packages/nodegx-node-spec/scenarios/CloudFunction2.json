@@ -41,6 +41,10 @@
     "name": "one call: POST to the function with the parameters as JSON, then the results and Done",
     "because": "cloudfunction2.ts :286-290, :56-78; :301-315 — the outputs first, Done last",
     "params": {},
+    "wiredOutputs": [
+      "out-message",
+      "out-sum"
+    ],
     "steps": [
       "settle",
       {
@@ -88,6 +92,10 @@
     "name": "the parameters set after the press in the same frame are the ones sent",
     "because": "cloudfunction2.ts :241 — the call is made at the frame end",
     "params": {},
+    "wiredOutputs": [
+      "out-message",
+      "out-sum"
+    ],
     "steps": [
       "settle",
       {
@@ -127,6 +135,10 @@
     "name": "two presses in a frame: ONE request, two Dones",
     "because": "cloudfunction2.ts :236-242 — a token per press before the guard; one call",
     "params": {},
+    "wiredOutputs": [
+      "out-message",
+      "out-sum"
+    ],
     "steps": [
       "settle",
       {
@@ -165,6 +177,9 @@
     "name": "a press while a call is out owns the next batch; the later call answers first",
     "because": "cloudfunction2.ts :247-250 — the tokens taken before the request goes; each answer settles its own",
     "params": {},
+    "wiredOutputs": [
+      "out-sum"
+    ],
     "steps": [
       "settle",
       {
@@ -228,6 +243,10 @@
     "name": "a deployed backend and a signed-in browser: the version and the session token travel",
     "because": "cloudfunction2.ts :61-64, :73-76",
     "params": {},
+    "wiredOutputs": [
+      "out-message",
+      "out-sum"
+    ],
     "steps": [
       "settle",
       {
@@ -265,6 +284,10 @@
     "name": "no function set: the call goes to a function named undefined; a name is URI-encoded",
     "because": "cloudfunction2.ts :286 — encodeURIComponent",
     "params": {},
+    "wiredOutputs": [
+      "out-message",
+      "out-sum"
+    ],
     "steps": [
       "settle",
       {
@@ -304,6 +327,10 @@
     "name": "a parameter set to undefined is left out, null is sent, and a parameter once set travels on every later call",
     "because": "cloudfunction2.ts :78 — JSON.stringify of the held parameters; :210-212 never cleared",
     "params": {},
+    "wiredOutputs": [
+      "out-message",
+      "out-sum"
+    ],
     "steps": [
       "settle",
       {
@@ -383,6 +410,9 @@
     "name": "201 with a result is a success",
     "because": "cloudfunction2.ts :50",
     "params": {},
+    "wiredOutputs": [
+      "out-sum"
+    ],
     "steps": [
       "settle",
       {
@@ -639,6 +669,10 @@
     "name": "results and Error are never cleared: a later call that drops a result, or succeeds, leaves them",
     "because": "cloudfunction2.ts :301-305 (only the keys returned move); :188-190 (Error set, never cleared)",
     "params": {},
+    "wiredOutputs": [
+      "out-message",
+      "out-sum"
+    ],
     "steps": [
       "settle",
       {

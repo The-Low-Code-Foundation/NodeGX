@@ -14,8 +14,12 @@
  * (the function's name, `setFunctionName` :213-215) and any `in-<name>` (a parameter, `setParamsValue` :210-212, kept in
  * one object across calls — a parameter once set is sent on every later call). The editor draws `in-<p>` for each
  * parameter the function's Request nodes name and `out-<r>` for each result its Response nodes name
- * (CloudFunctionAdapter.ts :79-121) — the PROJECT's, not the params: a play's function takes `a` and `b` and answers
- * `sum` and `message` (RESULT_FIELDS).
+ * (CloudFunctionAdapter.ts :79-121) — the PROJECT's, not the params. NSP-021 (s87): `derived` draws them from the
+ * project the way the adapter does (the Function picker too), graded by the adapter itself (oracle (c),
+ * `noodl-editor/tests-unit/nsp-020/adapter-ports.test.ts`). At play there is no project: an `out-<r>` exists when a wire
+ * leaves from it (`registerOutputIfNeeded` :219-228, from `nodescope.ts addConnection`), and a result is sent only on
+ * an output the node has (:325) — a play's function answers `sum` and `message` (RESULT_FIELDS, the wires a generated
+ * sequence may draw).
  *
  * THE PRESS — `Call` mints a token BEFORE the coalescing guard (:236-237) and schedules ONE call at the frame end however
  * many presses the frame holds (:239-242); every token of the frame is settled by that call's answer, and a press while
@@ -46,11 +50,10 @@
  *
  * NOT GRADED HERE, named:
  *   - the editor's warnings (`cloud-function-2`, :253-265) — editor-only, the play has no editor connection;
- *   - the inspector (`lastCallResult`, :131-136) — not a port;
- *   - the `function` port's picker of the project's cloud components (CloudFunctionAdapter.ts :66-77).
+ *   - the inspector (`lastCallResult`, :131-136) — not a port.
  */
 
-import type { InputDecl, OutputDecl, ValueInputDecl, WorldView } from '../spec';
+import type { InputDecl, OutputDecl, PortContext, ValueInputDecl, WorldView } from '../spec';
 import { defineNode } from '../spec';
 import type { Answer, CloudServicesScript } from '../world';
 import { dones, failures } from './user-actions';
@@ -61,7 +64,7 @@ export const CALL_ERROR_CODE = 'cloud-function/call-failed';
 /** :268 */
 const NO_CLOUD_SERVICES = 'No cloud services defined in this project.';
 
-/** The results a play's function answers — its Response nodes', in a project (HELD VALUES above). */
+/** The results a play's function answers — the `out-` names a generated sequence may wire (`outputCandidates`). */
 export const RESULT_FIELDS = ['sum', 'message'] as const;
 
 /** One call made: the tokens its answer settles, and the endpoint it went to (the failure names it, :328). */
@@ -149,7 +152,7 @@ const CLOUD_SERVICES: ReadonlyArray<CloudServicesScript | null> = [
 ];
 
 /** :41-54 + :291-337 — what an answer makes the node do, from the status and the parsed body. */
-function answered(s: CloudFunctionState, f: InFlight, status: number, json: unknown) {
+function answered(s: CloudFunctionState, f: InFlight, status: number, json: unknown, w: WorldView) {
   const n = f.tokens;
   if (status === 200 || status === 201) {
     if (json === undefined) return { set: {}, send: [] as never[], outcomes: dones('call' as const, n) }; // :292-299
@@ -160,7 +163,7 @@ function answered(s: CloudFunctionState, f: InFlight, status: number, json: unkn
     const sendDerived: string[] = [];
     for (const key in result) {
       results[key] = result[key]; // :303
-      if ((RESULT_FIELDS as readonly string[]).includes(key)) sendDerived.push('out-' + key); // :304 — only when the node has the output
+      if (w.hasOutput('out-' + key)) sendDerived.push('out-' + key); // :325 — only when the node has the output
     }
     return { set: { results }, send: [] as never[], sendDerived, outcomes: dones('call' as const, n) }; // :315
   }
@@ -172,6 +175,20 @@ function answered(s: CloudFunctionState, f: InFlight, status: number, json: unkn
   const message = raw !== null && typeof raw === 'object' ? (raw as { message?: unknown }).message : undefined;
   const error = typeof raw === 'string' ? raw : typeof message === 'string' && message !== '' ? message : raw !== null && typeof raw === 'object' ? JSON.stringify(raw) : String(raw);
   return { set: { error }, send: ['error' as const], outcomes: failures('call' as const, CALL_ERROR_CODE, n) }; // :336 → :188-196
+}
+
+/** nameListParameter.ts `parseNameList` — a string split on `,` (untrimmed, empty names kept), a list of strings as it is, anything else nothing. */
+const nameList = (v: unknown): readonly string[] => (typeof v === 'string' ? v.split(',') : Array.isArray(v) && v.every((e) => typeof e === 'string') ? (v as string[]) : []);
+
+const CLOUD_PREFIX = '/#__cloud__/';
+
+/** CloudFunctionAdapter.ts :79-121 — the distinct names the called function's nodes of a type list in their `params`, in order. */
+function functionNames(params: Readonly<Record<string, unknown>>, context: Readonly<PortContext>, type: 'noodl.cloud.request' | 'noodl.cloud.response'): string[] {
+  if (params.function === undefined) return [];
+  const fn = context.components?.[CLOUD_PREFIX + String(params.function)];
+  const names: string[] = [];
+  for (const node of fn?.nodes?.[type] ?? []) for (const n of nameList(node.params)) if (!names.includes(n)) names.push(n);
+  return names;
 }
 
 /** :43-48 — the body as JSON, or `undefined` when it will not parse (an empty body included). */
@@ -213,15 +230,30 @@ export const CloudFunction = defineNode({
   },
   {
     derived: {
-      inputs: () => ({}),
-      // :216-230 — `function` and any `in-` name, on first write; the results the play's function answers
-      outputs: () => {
+      // NSP-021 (s87) — from the PROJECT, as CloudFunctionAdapter.ts `updatePortsForNode` draws them (:56-121): Function, a
+      // picker of every component holding a Request node (:59-77, drawn whenever there is a project); then an `in-` per
+      // name the called function's Request nodes list. At play the context holds no components: nothing is drawn, and
+      // `function` and any `in-` name are registered on first write (:233-243, `discover`)
+      inputs: (params, context) => {
+        const components = context.components;
+        if (!components) return {};
+        const functions = Object.keys(components).filter((name) => (components[name].nodes?.['noodl.cloud.request'] ?? []).length > 0);
+        const ports: Record<string, InputDecl> = { function: { ...functionPort(), type: 'component', enums: functions } };
+        for (const n of functionNames(params, context, 'noodl.cloud.request')) ports['in-' + n] = paramPort(n);
+        return ports;
+      },
+      // :103-121 — an `out-` per name its Response nodes list; at play, only where a wire leaves from it (`onWire`)
+      outputs: (params, context) => {
         const out: Record<string, OutputDecl<CloudFunctionState>> = {};
-        for (const r of RESULT_FIELDS) out['out-' + r] = resultOutput(r);
+        for (const r of functionNames(params, context, 'noodl.cloud.response')) out['out-' + r] = { ...resultOutput(r), onWire: true };
         return out;
       },
+      needs: ['components'],
       discover: (port) => (port === 'function' ? functionPort() : port.startsWith('in-') ? paramPort(port.slice('in-'.length)) : undefined),
+      // :219-228 — a wire to any `out-` name registers its getter
+      discoverOutput: (port) => (port.startsWith('out-') ? resultOutput(port.slice('out-'.length)) : undefined),
       candidates: ['function', 'in-a', 'in-b'],
+      outputCandidates: RESULT_FIELDS.map((r) => 'out-' + r),
       on: (s, port, v) => (port === 'function' ? { set: { functionName: v }, send: [] } : { set: { params: { ...s.params, [port.slice('in-'.length)]: v } }, send: [] })
     },
     // :244-339 `doCall`, once at the frame end
@@ -245,13 +277,13 @@ export const CloudFunction = defineNode({
     },
     world: {
       // :41-54 — status 200 / 201 is success; a request that never reached a server is status 0 with no body
-      response: (s, _i, res) => {
+      response: (s, _i, res, w) => {
         // the call's own batch (:249 — a closure per call); an answer lands once, so nothing is taken out
         const f = s.inFlight[res.id];
         if (!f) return {};
         const status = 'status' in res ? res.status : 0;
         const json = 'status' in res ? parsed(res.body) : undefined;
-        return answered(s, f, status, json);
+        return answered(s, f, status, json, w);
       }
     }
   }

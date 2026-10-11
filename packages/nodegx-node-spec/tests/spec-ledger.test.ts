@@ -163,8 +163,10 @@ describe('NSP-020 AC4 — ports drawable without a viewer', () => {
     expect(Object.values(p.by).reduce((a, n) => a + n, 0)).toBe(p.derivable);
     expect(p.derivable + p.not.length).toBe(reading.population);
     for (const n of p.not) expect(n.why).toMatch(/no spec|the spec has no|drawn by no graded spec/);
-    // s85 — `derived` is not drawing: Cloud Function draws nothing from the project and has no oracle (a) row
-    expect(p.not.map((n) => n.type)).toContain('CloudFunction2');
+    // s85 — `derived` is not drawing: Cloud Function and Navigate drew nothing from the project and had no oracle (a) row.
+    // s87 (NSP-021) — both draw from the project now, graded by their editor adapters (oracle (c), ADAPTER_GRADED_TYPES)
+    expect(p.not.map((n) => n.type)).not.toContain('CloudFunction2');
+    expect(p.not.map((n) => n.type)).not.toContain('RouterNavigate');
     // …and the HTTP Request, whose Output Fields its spec does not draw (DRAWN_PORT_TYPES leaves it out)
     expect(p.not.map((n) => n.type)).toContain('net.noodl.HTTP');
     // known-firing on both sides: And draws its numbered inputs from the params and its wires; Component Inputs has no spec

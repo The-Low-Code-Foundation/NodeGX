@@ -63,12 +63,17 @@ jest.mock('@noodl-models/projectmodel', () => ({
 }));
 jest.mock('@noodl-models/warningsmodel', () => ({ WarningsModel: { instance: { setWarning: () => undefined } } }));
 jest.mock('@noodl-models/nodegraphmodel', () => ({}));
+// CloudFunctionAdapter reads `instanceof ComponentModel` in an event handler this oracle never fires
+jest.mock('@noodl-models/componentmodel', () => ({ ComponentModel: class {} }));
 
+// eslint-disable-next-line import/first
+import { CloudFunctionAdapter } from '../../src/editor/src/models/NodeTypeAdapters/CloudFunctionAdapter';
 // eslint-disable-next-line import/first
 import { RouterNavigateAdapter } from '../../src/editor/src/models/NodeTypeAdapters/RouterNavigateAdapter';
 
 /** The adapters this oracle runs, by type. */
 const ADAPTERS: Record<string, { updatePortsForNode(node: unknown): void }> = {
+  CloudFunction2: new CloudFunctionAdapter(),
   RouterNavigate: new RouterNavigateAdapter()
 };
 
@@ -121,7 +126,8 @@ function fromAdapter(p: AdapterPort): Row {
   if (p.group !== undefined) row.group = p.group;
   if (p.default !== undefined) row.default = p.default;
   if (t.enums) row.choices = t.enums.map((e) => e.value);
-  if (t.components) row.choices = t.components;
+  // a set, in order: CloudFunctionAdapter lists a function once per Request node it holds (:59-64)
+  if (t.components) row.choices = [...new Set(t.components)];
   return row;
 }
 
@@ -131,7 +137,7 @@ const sorted = (rows: Row[]) => [...rows].sort((a, b) => (a.plug + a.name < b.pl
 function compare(project: PortProject, label: string) {
   load(project);
   const contextOf = portContextReader(project);
-  const out: Array<{ where: string; adapter: Row[]; spec: Row[] }> = [];
+  const out: Array<{ type: string; where: string; adapter: Row[]; spec: Row[] }> = [];
   for (const c of project.components) {
     for (const saved of c.nodes) {
       const adapter = ADAPTERS[saved.type];
@@ -141,6 +147,7 @@ function compare(project: PortProject, label: string) {
       adapter.updatePortsForNode(node);
       const drawn = drawnPorts(specs[saved.type], params, contextOf(saved.id, c.name) as Parameters<typeof drawnPorts>[2]).filter((p) => p.source === 'derived');
       out.push({
+        type: saved.type,
         where: `${label} ${c.name} ${saved.id}`,
         adapter: sorted((node.announced ?? []).map(fromAdapter)),
         spec: sorted(
@@ -202,6 +209,19 @@ const SYNTHETIC: Record<string, PortProject> = {
     '/App': [node('r', 'Router', { name: 'Main', pages: { routes: ['/Pages/Home'] } }), node('n', 'RouterNavigate', { router: 'Gone', target: '/Pages/Nope' })],
     '/Pages/Home': []
   }),
+  'a cloud function: two Request nodes and two Responses, a name in both; a Response elsewhere is not its': project({
+    '/App': [node('cf', 'CloudFunction2', { function: 'grade' }), node('stray', 'noodl.cloud.response', { params: 'nope' })],
+    '/#__cloud__/grade': [
+      node('q1', 'noodl.cloud.request', { params: 'a,b' }),
+      node('q2', 'noodl.cloud.request', { params: 'b, c' }),
+      node('r1', 'noodl.cloud.response', { params: 'sum' }),
+      node('r2', 'noodl.cloud.response', { params: ['sum', 'message'] })
+    ],
+    '/#__cloud__/other': [node('q3', 'noodl.cloud.request', { params: 'x' })]
+  }),
+  'a cloud function: none named, one that does not exist, and a project with no cloud function': project({
+    '/App': [node('unset', 'CloudFunction2', {}), node('gone', 'CloudFunction2', { function: 'gone' })]
+  }),
   'a list of names saved as an array, and an empty name': project({
     '/App': [node('r', 'Router', { name: 'Main', pages: { routes: ['/Pages/Home'] } }), node('n', 'RouterNavigate', { target: '/Pages/Home' })],
     '/Pages/Home': [node('pi', 'PageInputs', { pathParams: ['id', 'slug'], queryParams: 'a,,b' })]
@@ -251,6 +271,10 @@ describe('oracle (c): an editor adapter against the spec', () => {
     expect(all.some((p) => p.name === 'pm-sort')).toBe(true); // a query parameter
     expect(all.some((p) => p.name === 'pm- tab')).toBe(true); // untrimmed
     expect(all.some((p) => p.name === 'pm-slug')).toBe(true); // an array, as the adapter reads one
+    expect(all.some((p) => p.name === 'function' && (p.choices ?? []).length === 2)).toBe(true);
+    expect(all.some((p) => p.name === 'in- c')).toBe(true);
+    expect(all.some((p) => p.name === 'out-message' && p.plug === 'output')).toBe(true);
+    expect(all.some((p) => p.name === 'out-nope')).toBe(false); // known-firing beside it: out-sum, out-message above
   });
 
   test('every saved project in the corpus: each node the same both ways, the known rows counted', () => {
@@ -258,26 +282,28 @@ describe('oracle (c): an editor adapter against the spec', () => {
     let compared = 0;
     let withParams = 0;
     let noRouter = 0;
+    const byType: Record<string, number> = {};
     const wrong: string[] = [];
     for (const dir of dirs) {
       const p = portProjectFromStore(new V2ProjectStore(diskFiles(dir)));
       const rows = compare(p, path.relative(REPO, dir));
-      if (!hasRouter(p)) {
-        noRouter += rows.length;
-        for (const r of rows) if (r.spec.length) wrong.push(`${r.where}: no Router, yet the spec drew ${r.spec.map((x) => x.name)}`);
-        continue;
-      }
       for (const r of rows) {
+        if (r.type === 'RouterNavigate' && !hasRouter(p)) {
+          noRouter++;
+          if (r.spec.length) wrong.push(`${r.where}: no Router, yet the spec drew ${r.spec.map((x) => x.name)}`);
+          continue;
+        }
         compared++;
-        if (r.adapter.some((x) => x.name.startsWith('pm-'))) withParams++;
+        byType[r.type] = (byType[r.type] ?? 0) + 1;
+        if (r.adapter.some((x) => /^(pm|in|out)-/.test(x.name))) withParams++;
         if (JSON.stringify(r.spec) !== JSON.stringify(r.adapter)) wrong.push(`${r.where}\n  adapter ${JSON.stringify(r.adapter)}\n  spec    ${JSON.stringify(r.spec)}`);
       }
     }
     // eslint-disable-next-line no-console
-    console.log(`[oracle c] ${dirs.length} projects: ${compared} nodes compared (${withParams} with page parameters), ${noRouter} pinned (no Router), ${wrong.length} different`);
+    console.log(`[oracle c] ${dirs.length} projects: ${compared} nodes compared ${JSON.stringify(byType)} (${withParams} with parameter ports), ${noRouter} pinned (a Navigate, no Router), ${wrong.length} different`);
     expect(wrong).toEqual([]);
-    // the REACH gate: a corpus that stops reaching the adapter grades nothing
-    expect(compared).toBeGreaterThan(0);
+    // the REACH gate: a corpus that stops reaching an adapter grades nothing
+    for (const t of Object.keys(ADAPTERS)) expect(byType[t] ?? 0).toBeGreaterThan(0);
     expect(withParams).toBeGreaterThan(0);
   });
 });

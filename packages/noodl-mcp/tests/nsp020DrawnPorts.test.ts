@@ -25,6 +25,25 @@ beforeEach(async () => {
   const project = JSON.parse(fs.readFileSync(projectFile, 'utf8'));
   project.metadata = { ...(project.metadata ?? {}), dbCollections: [{ name: 'Lesson', columns: [{ name: 'title', type: 'String' }, { name: 'n', type: 'Number' }] }] };
   fs.writeFileSync(projectFile, JSON.stringify(project, null, 2));
+  // NSP-021 s87 — a cloud function on disk, as ISL-042's test writes one: takes `score`, answers `grade` and `comment`
+  const cloud = path.join(projectDir, 'components', '__cloud__', 'grade');
+  fs.mkdirSync(cloud, { recursive: true });
+  const write = (file: string, json: unknown) => fs.writeFileSync(path.join(cloud, file), JSON.stringify(json, null, 2));
+  write('component.json', { $schema: 'https://opennoodl.dev/schemas/component-v2.json', id: 'c_grade', name: 'grade', path: '/#__cloud__/grade', type: 'cloud' });
+  write('nodes.json', {
+    $schema: 'https://opennoodl.dev/schemas/nodes-v2.json',
+    componentId: 'c_grade',
+    version: 1,
+    nodes: [
+      { id: 'req', type: 'noodl.cloud.request', parameters: { params: 'score' } },
+      { id: 'res', type: 'noodl.cloud.response', parameters: { params: 'grade,comment' } }
+    ]
+  });
+  write('connections.json', { $schema: 'https://opennoodl.dev/schemas/connections-v2.json', componentId: 'c_grade', version: 1, connections: [] });
+  const registryFile = path.join(projectDir, 'components', '_registry.json');
+  const registry = JSON.parse(fs.readFileSync(registryFile, 'utf8'));
+  registry.components['__cloud__/grade'] = { path: '__cloud__/grade', type: 'cloud', nodeCount: 2, connectionCount: 0 };
+  fs.writeFileSync(registryFile, JSON.stringify(registry, null, 2));
   session = await connect(projectDir);
   const res = await call(session, 'create_component', {
     path: 'Components/PortProbe',
@@ -32,7 +51,8 @@ beforeEach(async () => {
       { id: 'flag', type: 'Boolean' },
       { id: 'both', type: 'And' },
       { id: 'lesson', type: 'DbModel2', parameters: { collectionName: 'Lesson' } },
-      { id: 'cloud', type: 'CloudFunction2', parameters: { function: 'grade' } }
+      { id: 'cloud', type: 'CloudFunction2', parameters: { function: 'grade' } },
+      { id: 'http', type: 'net.noodl.HTTP' }
     ],
     connections: [{ fromId: 'flag', fromProperty: 'savedValue', toId: 'both', toProperty: 'input 1' }]
   });
@@ -82,9 +102,14 @@ describe('NSP-020 R19 — get_component draws each node\'s ports from its spec',
     expect(go.map((p) => `${p.plug} ${p.name} ${p.type}`)).toEqual(['input target component', 'input pm-id string', 'input pm-tab string']);
   });
 
-  it('draws nothing for a type whose spec is not graded against the runtime (Cloud Function) — its saved list stands', async () => {
+  it('draws a Cloud Function\'s Function picker, an `in-` per Request parameter and an `out-` per Response result', async () => {
     const { data } = await call<GetComponentResponse>(session, 'get_component', { path: 'Components/PortProbe' });
-    expect(data.drawnPorts).not.toHaveProperty('cloud');
+    expect(data.drawnPorts?.cloud?.map((p) => `${p.plug} ${p.name} ${p.type}`)).toEqual(['input function component', 'input in-score *', 'output out-grade *', 'output out-comment *']);
+  });
+
+  it('draws nothing for a type whose draw is not graded complete (the HTTP Request: its Output Fields) — its saved list stands', async () => {
+    const { data } = await call<GetComponentResponse>(session, 'get_component', { path: 'Components/PortProbe' });
+    expect(data.drawnPorts).not.toHaveProperty('http');
     // known-firing beside the absence: the same answer drew the And
     expect(data.drawnPorts).toHaveProperty('both');
   });
