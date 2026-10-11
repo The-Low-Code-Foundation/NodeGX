@@ -1885,15 +1885,23 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
   /**
    * NSP-020 s82 — THE PLACING: the derived ports for the mount's params, written onto the model as a loaded project's saved
    * `dynamicports` give it (nodemodel.ts `createFromExportData` → `addOutputPort`; the Function reads its signal kinds there,
-   * simplejavascript.ts :600-618, the Script re-registers them at each code read, javascript.ts :433) and registered as a wire
-   * would make the runtime do — minus the `onWire` outputs no wire asks for, plus the wired names `discoverOutput` mints (ports.ts
-   * `playOutputs`). Once, at mount: the model is the placing's for the whole play (NSP-017's contracts).
+   * simplejavascript.ts :600-618, the Script re-registers them at each code read, javascript.ts :433) — every drawn output, `onWire`
+   * or not (s83) — and registered as a wire would make the runtime do: minus the `onWire` outputs no wire asks for, plus the wired
+   * names `discoverOutput` mints (ports.ts `playOutputs`). Once, at mount: the model is the placing's for the whole play (NSP-017's
+   * contracts).
    */
   function placing(node: NodeInstance, model: { parameters: Record<string, unknown>; outputPorts: Record<string, { name: string; type: string }>; inputPorts: Record<string, { name: string; type: string }> }, spec: ReturnType<typeof specFor>, ports: Readonly<PlayContext>): void {
     if (!spec?.derived) return;
     for (const [name, decl] of Object.entries(spec.derived.inputs(model.parameters, ports))) {
       if (name in spec.inputs) continue;
       model.inputPorts[name] = { name, type: decl.type as string };
+    }
+    // NSP-020 s83 — the SAVED ports are every output the editor drew for these params, `onWire` or not: a Function prepares a
+    // callable for each signal port it saved (simplejavascript.ts :600-618) and sends it only when wired (:609); the Function and
+    // the Script are the only nodes that read `model.outputPorts`. What is REGISTERED is the play's list alone.
+    for (const [name, decl] of Object.entries(spec.derived.outputs?.(model.parameters, ports) ?? {})) {
+      if (name in spec.outputs) continue;
+      model.outputPorts[name] = { name, type: decl.type as string };
     }
     for (const [name, decl] of Object.entries(playOutputs(spec, model.parameters, ports))) {
       model.outputPorts[name] = { name, type: decl.type as string };

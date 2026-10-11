@@ -862,8 +862,12 @@ export interface DerivedPorts<S, O> {
    * :150 does; the interpreter also calls it when a reducer sends, pulses or `world.send`s a name the instance has no
    * output for — the node's own write minting the port (:298). `undefined` for a name the node refuses: then the send is
    * the spec error it always was.
+   * s83 — `as` says how the node's own act reaches the name: `'signal'` for a pulse (`emitDerived`, `pulses`), `'value'` for a
+   * send (`sendDerived`, `world.send`); absent for a wire. A Logic Builder's `send signal` to a name its blocks never declared
+   * registers a VALUE port (logic-builder.ts :259-277 — the kind is the placing's blocks') and `sendPulse`s on it, so the wire
+   * carries a pulse: minted at the act's kind, the trace says what the wire says.
    */
-  discoverOutput?: (port: string) => OutputDecl<S> | undefined;
+  discoverOutput?: (port: string, as?: 'signal' | 'value') => OutputDecl<S> | undefined;
   /**
    * NSP-020 (s82) — output names a GENERATED sequence may wire (`wiredOutputs`), because `discoverOutput` accepts them or
    * the params it draws derive them `onWire`: the Record's `prop-title`, `changed-n`; States' `at-A`, `reached-B`. The
@@ -1350,7 +1354,7 @@ export interface AnyNodeSpec {
     signal?: (state: never, port: string, derived: Readonly<Record<string, unknown>>, world: WorldView) => unknown;
     discover?: (port: string) => InputDecl | undefined;
     candidates?: readonly string[];
-    discoverOutput?: (port: string) => ErasedValueOutput | SignalOutputDecl | undefined;
+    discoverOutput?: (port: string, as?: 'signal' | 'value') => ErasedValueOutput | SignalOutputDecl | undefined;
     outputCandidates?: readonly string[];
     rederive?: readonly string[];
   };

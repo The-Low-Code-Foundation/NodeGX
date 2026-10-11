@@ -344,6 +344,7 @@
     "nodes": {
       "a": {
         "type": "JavaScriptFunction",
+        "wiredOutputs": ["out-ping"],
         "params": {
           "functionScript": "Outputs.o = Inputs.x;\nOutputs.ping()",
           "in-x": {

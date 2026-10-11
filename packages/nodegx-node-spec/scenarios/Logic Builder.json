@@ -438,8 +438,8 @@
     ]
   },
   {
-    "name": "code set while the app runs: a signal output from another fixture is there to send",
-    "because": "THE PLAY'S PORTS (dynamicports), :566-576",
+    "name": "code set while the app runs sends a signal the placing's blocks never declared: the send registers it, and the wire carries the pulse",
+    "because": ":601 (registerOutputIfNeeded, then sendSignalOnOutput), :259-277 (a name the placing's blocks do not declare is a value port), node.ts sendSignalOnOutput → sendPulse, :566-576 — NSP-020 §6.6 piece 4 (minted at the act's kind)",
     "params": {
       "workspace": "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_define_input\",\"fields\":{\"NAME\":\"a\",\"TYPE\":\"number\"}},{\"type\":\"noodl_define_input\",\"fields\":{\"NAME\":\"b\",\"TYPE\":\"number\"}},{\"type\":\"noodl_define_output\",\"fields\":{\"NAME\":\"sum\",\"TYPE\":\"number\"}},{\"type\":\"noodl_set_output\",\"fields\":{\"NAME\":\"sum\"}}]}}",
       "generatedCode": "__s(\"s1\");\nOutputs[\"sum\"] = __p(\"v1\", __p(\"v2\", Inputs[\"a\"]) + __p(\"v3\", Inputs[\"b\"]));\n"

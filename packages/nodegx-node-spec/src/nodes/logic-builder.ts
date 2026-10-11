@@ -46,14 +46,17 @@
  *     (v2, P109 ISL-051 row C149): the send does nothing then; after the code the values land, Error says the first such name and
  *     the run is answered `failure` — no Success, no Done. (v1: Failure pulsed at once and the run went on to Success and Done.)
  *
- * THE PLAY'S PORTS. An author edits the blocks while the app runs and the editor re-sends the ports for each edit (:822-888). A play
- * may set any fixture's code, so the node carries every fixture's OUTPUTS from the start (`derived.outputs`, below) — what a loaded
- * project's saved `dynamicports` give the model. Its INPUTS are the placing's blocks' (A PORT'S KIND, above) and any other name the
- * generator writes is a value input.
+ * THE PLAY'S PORTS (NSP-020 §6.6, s83). At play a node has its params and its wires, never the project. Its ports are what the
+ * editor drew for the PLACING's blocks (`derived.outputs`, `derived.inputs`, :849-909), and at play an output exists only once a wire
+ * asks for it (`onWire`, nodescope.ts :150) or the code writes or sends it (`registerOutputIfNeeded`, :488, :601 —
+ * `discoverOutput`). A name the placing's blocks never declared is registered as a VALUE (:259-277), and a `send signal` to it
+ * still pulses the wire (node.ts `sendSignalOnOutput` → `sendPulse`): minted at the act's kind (spec.ts `discoverOutput`'s `as`).
+ * Any other name the generator writes is a value input. LOGIC_BUILDER_FIXTURES are the blocks and code a play may set
+ * (`examples`), never the ports; what a play wires is the scenario's `wiredOutputs`, drawn from `outputCandidates`.
  */
 
-import { defineNode, type InputDecl, type OutputDecl } from '../spec';
-import { RESERVED_INPUTS, RESERVED_OUTPUTS, detectIO } from './logic-builder-io';
+import { defineNode, type InputDecl, type OutputDecl, type ValueType } from '../spec';
+import { RESERVED_INPUTS, RESERVED_OUTPUTS, detectIO, typeOfPort } from './logic-builder-io';
 
 /** :625-666 — the parameters, in order (the eleventh shadows the global console). */
 const PARAMETERS = ['Inputs', 'Outputs', 'Noodl', 'Variables', 'Objects', 'Arrays', 'sendSignalOnOutput', '__triggerSignal__', '__p', '__s', 'console'] as const;
@@ -81,7 +84,8 @@ const sendSignal = (name: string) => field('noodl_send_signal', name);
  * THE FIXTURES (NSP-017 §3, AC2) — one program per rule of the contract: the blocks (`workspace`) and the JavaScript the editor
  * writes from them (`code`, in NoodlGenerators.ts's shapes, with the probe calls every block is wrapped in). A planted break of the
  * rule a fixture names turns its scenario red (noodl-runtime/test/node-spec/logic-builder-contract.test.ts). Names keep ONE kind
- * across all of them (a value never a signal elsewhere): the play carries every fixture's outputs at once.
+ * across all of them (a value never a signal elsewhere): a generated play places one fixture's blocks and sets another's code, so a
+ * name's kind must not hang on which fixture was placed.
  */
 export const LOGIC_BUILDER_FIXTURES = {
   /** inputs arrive by name and wait for Run; the values written land after the code, then Success, then Done; `__p` hands its value back */
@@ -271,22 +275,15 @@ function blockPorts(ws: unknown) {
   };
 }
 
-/** THE PLAY'S PORTS (header): the outputs of the placing's blocks and of every fixture's — a signal wherever any of them says so. */
-function playOutputs(params: Readonly<Record<string, unknown>>): { signals: string[]; values: string[] } {
-  const signals: string[] = [];
-  const values: string[] = [];
-  for (const ws of [params.workspace, ...FIXTURES.map((f) => f.workspace)]) {
-    const p = blockPorts(ws);
-    for (const n of p.signalOutputs) if (!signals.includes(n)) signals.push(n);
-    for (const n of p.outputs) if (!values.includes(n)) values.push(n);
-  }
-  return { signals, values: values.filter((n) => !signals.includes(n)) };
-}
+/** The type a block gives a port (logic-builder-io.ts `typeOfPort`), as the editor draws it. */
+const typeOf = (ws: unknown, plug: 'input' | 'output', name: string): ValueType => typeOfPort(detectIO(typeof ws === 'string' ? ws : undefined), plug, name) as ValueType;
 
 /** A value input (:246-251) — kept, no conversion. */
 const valuePort = (): InputDecl => ({ type: '*', coerce: 'none' });
 /** A signal input (:233-241) — an action port like Run: it mints an invocation. */
 const signalPort = (): InputDecl => ({ type: 'signal', outcome: true });
+/** :271-276 — a value output reads what last landed. */
+const valueOutput = (name: string): OutputDecl<LogicBuilderState> => ({ type: '*', from: (s: Readonly<LogicBuilderState>) => s.outputs[name] });
 
 export const LogicBuilder = defineNode({
   type: 'Logic Builder',
@@ -353,22 +350,34 @@ export const LogicBuilder = defineNode({
   {
     derived: {
       // A PORT'S KIND (header) — the placing's blocks: each value input, each signal input
+      // :849-859, :886-898 — drawn under the block's own name: a value in Inputs, typed by its block; a signal in Actions
       inputs: (params) => {
         const p = blockPorts(params.workspace);
         const ports: Record<string, InputDecl> = {};
-        for (const n of p.inputs) ports[n] = valuePort();
+        for (const n of p.inputs) ports[n] = { ...valuePort(), type: typeOf(params.workspace, 'input', n), displayName: n, group: 'Inputs' };
         // :228 — a name both a value and a signal is the signal
-        for (const n of p.signalInputs) ports[n] = signalPort();
+        for (const n of p.signalInputs) ports[n] = { ...signalPort(), displayName: n, group: 'Actions' };
         return ports;
       },
-      // THE PLAY'S PORTS (header) — the value outputs read what last landed; the signals are the code's to send
+      // THE PLAY'S PORTS (header) — the placing's blocks' outputs, each at play only once wired, written or sent (:861-871, :900-909)
       outputs: (params) => {
-        const { signals, values } = playOutputs(params);
+        const p = blockPorts(params.workspace);
         const out: Record<string, OutputDecl<LogicBuilderState>> = {};
-        for (const n of values) out[n] = { type: '*', from: (s: Readonly<LogicBuilderState>) => s.outputs[n] };
-        for (const n of signals) out[n] = { type: 'signal' };
+        for (const n of p.outputs) {
+          if (p.signalOutputs.includes(n)) continue;
+          out[n] = { ...valueOutput(n), type: typeOf(params.workspace, 'output', n), displayName: n, group: 'Outputs', onWire: true } as OutputDecl<LogicBuilderState>;
+        }
+        for (const n of p.signalOutputs) out[n] = { type: 'signal', displayName: n, group: 'Events', onWire: true };
         return out;
       },
+      // :259-277, :488, :601 — a name the placing's blocks never declared: a value port, pulsed when the code sends it (header);
+      // a name the node owns never (RESERVED_OUTPUTS — the run refuses it first)
+      discoverOutput: (port, as) =>
+        RESERVED_OUTPUTS.indexOf(port) !== -1 ? undefined : as === 'signal' ? { type: 'signal' } : valueOutput(port),
+      // the fixtures' VALUE outputs a generated sequence may wire. Never a signal: a send is never gated on a wire (:601), so wiring
+      // one shows nothing — and a wire on a name the placing's blocks never declared registers a value port (:259-277) that a later
+      // send pulses, a shape the format refuses (a pulse needs a signal output)
+      outputCandidates: ['sum', 'sent', 'by'],
       // :246-251 — a value: kept, nothing runs
       on: (s, port, value) => ({ set: { inputs: { ...s.inputs, [port]: value } }, send: [] }),
       // :233-241 — a signal input: the whole program, at once

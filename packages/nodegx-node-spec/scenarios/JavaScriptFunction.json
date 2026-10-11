@@ -170,6 +170,9 @@
     "params": {
       "functionScript": "Outputs.count = Inputs.a;\nOutputs.ping()"
     },
+    "wiredOutputs": [
+      "out-ping"
+    ],
     "steps": [
       "settle",
       {
@@ -469,6 +472,9 @@
       "outtype-go": "signal",
       "functionScript": "Outputs.r = Inputs.q * 2;\nconst k = \"go\";\nOutputs[k]()"
     },
+    "wiredOutputs": [
+      "out-go"
+    ],
     "steps": [
       "settle",
       {
@@ -503,8 +509,8 @@
     ]
   },
   {
-    "name": "a signal fired by its .send, and a run that writes the same value again publishes nothing new",
-    "because": "simplejavascript.ts :611-616, :297-305",
+    "name": "Outputs.ping.send() alone names a VALUE port, so the call throws: the write before it lands, then Error and Failure — a Run answered failure",
+    "because": "simplejavascript.ts :611-616 (.send is prepared only on a SIGNAL port the model saved), function-ports.ts (`.send()` is not a signal pattern), :653-721 — FIX-016 (P66) measured the same throw",
     "params": {
       "functionScript": "Outputs.count = 1;\nOutputs.ping.send()"
     },
@@ -710,6 +716,39 @@
       "settle",
       {
         "signal": "run"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a signal the code calls with no wire on it sends nothing; the run still succeeds",
+    "because": "simplejavascript.ts :600-618 (the callable is prepared for every saved signal port), :609 (`if (this.hasOutput(key))`) — NSP-020 §6.6 piece 3",
+    "params": {
+      "functionScript": "Outputs.count = Inputs.a;\nOutputs.ping()"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "in-a",
+        "value": 5
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Script set while the app runs calls only the signals the placing saved: a new signal is not a function",
+    "because": "simplejavascript.ts :600-618 reads `model.outputPorts`, the project's saved ports for the PLACING's Script; the headless runtime never re-draws them — NSP-020 §6.6 piece 5",
+    "params": {
+      "functionScript": "Outputs.sum = Inputs.a + Inputs.b"
+    },
+    "wiredOutputs": [
+      "out-ping"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "functionScript",
+        "value": "Outputs.count = Inputs.a;\nOutputs.ping()"
       },
       "settle"
     ]

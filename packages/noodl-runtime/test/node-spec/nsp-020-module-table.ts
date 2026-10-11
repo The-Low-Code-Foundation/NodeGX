@@ -14,8 +14,8 @@
  * to NSP-020) — by its exact line; a pinned line that no case produces any more is red too, so a fix is noticed.
  *
  * `owedBy` rows are driven and their disagreements PRINTED and counted, never failed: L1 owns the project- and
- * schema-dependent specs (moving them onto `context`), L3 the four whose `derived.outputs` is padded with every
- * fixture's outputs. `reads` says what the hook reads beyond the node's params, for the lane that switches the row on.
+ * schema-dependent specs (moving them onto `context`); L3 owned the four whose `derived.outputs` was padded with every
+ * fixture's outputs — all four graded since s83 (§6.6). `reads` says what the hook reads beyond the node's params, for the lane that switches the row on.
  */
 import type { PortContext } from '../../../nodegx-node-spec/src';
 
@@ -496,7 +496,7 @@ export const TABLE: TableRow[] = [
     reads: "components (the template's Component Outputs, `graphModel.components[template]`, foreach.tsx :1168-1172)"
   },
 
-  // ---- owed by L3: `derived.outputs` padded with every fixture's outputs (task §3.1 (d), decision 4) ----
+  // ---- were owed by L3: `derived.outputs` padded with every fixture's outputs (task §3.1 (d), decision 4) — graded since s82 / s83 ----
   // NSP-020 s82 — the first L3 row switched on (§6.6): value outputs and the state ports from the params alone; at play the state
   // ports exist only when wired (`onWire`), which the editor's draw does not show and this oracle does not ask
   {
@@ -523,34 +523,71 @@ export const TABLE: TableRow[] = [
     type: 'JavaScriptFunction',
     module: R + 'simplejavascript',
     hook: 'setup',
+    // NSP-020 s83 — L3 switched on (§6.6): the outputs the PLACING's Script and lists name, never every fixture's
     cases: [
       {
         name: 'one input, one output',
         params: { scriptInputs: [{ label: 'a', type: 'number' }], scriptOutputs: [{ label: 'sum', type: 'number' }] }
+      },
+      {
+        name: 'the written lists typed: a number input, a signal output, a boolean output',
+        params: {
+          scriptInputs: [{ id: '1', label: 'q' }],
+          scriptOutputs: [{ id: '2', label: 'go' }, { id: '3', label: 'ok' }],
+          'intype-q': 'number',
+          'outtype-go': 'signal',
+          'outtype-ok': 'boolean'
+        }
+      },
+      { name: 'a Script alone: two inputs, a value, a signal', params: { functionScript: 'Outputs.sum = Inputs.a + Inputs.b;\nOutputs.ping()' } },
+      {
+        name: 'a list row the Script also names keeps the list\'s port; the Script adds the rest',
+        params: { scriptInputs: [{ id: '1', label: 'a' }], 'intype-a': 'number', functionScript: 'Outputs.r = Inputs.a * Inputs["k"];\nOutputs.done_1()' }
       }
     ],
-    owedBy: 'L3',
     reads: 'params only (and the script text, function-ports.ts)'
   },
   {
     type: 'Javascript2',
+    // NSP-020 s83 — L3 switched on (§6.6): the PLACING's code and lists, never every fixture's
     module: V + 'std-library/javascript',
     hook: 'setup',
     cases: [
       {
         name: 'one input, one output',
         params: { scriptInputs: [{ label: 'a', type: 'number' }], scriptOutputs: [{ label: 'sum', type: 'number' }] }
+      },
+      {
+        name: 'the written lists typed: a number input, a signal output',
+        params: { scriptInputs: [{ id: '1', label: 'q' }], scriptOutputs: [{ id: '2', label: 'go' }], 'intype-q': 'number', 'outtype-go': 'signal' }
+      },
+      {
+        name: 'define: typed inputs, a signal input, an object port with its own fields, a signal output',
+        params: {
+          code: "define({\n  inputs: { a: 'number', go: 'signal', b: { type: 'string', displayName: 'Bee', group: 'Mine', default: 'x' } },\n  outputs: { sum: 'number', done: 'signal' },\n  go: function () {}\n})"
+        }
+      },
+      {
+        name: 'script(): its inputs and outputs, and the names the text mentions',
+        params: { code: "script({\n  inputs: { a: '*' },\n  outputs: { twice: 'string', ping: 'signal' },\n  changed: { a: function () { this.outputs.twice = Inputs.k; Outputs.extra = 1; Outputs.fire(); } }\n})" }
+      },
+      {
+        name: 'a list row the code also declares keeps the list\'s port',
+        params: { scriptOutputs: [{ id: '1', label: 'sum' }], 'outtype-sum': 'boolean', code: "define({\n  outputs: { sum: 'number' }\n})" }
       }
     ],
-    owedBy: 'L3',
     reads: 'params only (and the script text)'
   },
   {
     type: 'Logic Builder',
     module: R + 'logic-builder',
     hook: 'setup',
-    cases: [],
-    owedBy: 'L3',
+    // NSP-020 s83 — L3 switched on (§6.6): the PLACING's blocks, never every fixture's
+    cases: [
+      { name: 'typed value inputs and a typed value output', params: { workspace: "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_define_input\",\"fields\":{\"NAME\":\"a\",\"TYPE\":\"number\"}},{\"type\":\"noodl_define_input\",\"fields\":{\"NAME\":\"b\",\"TYPE\":\"number\"}},{\"type\":\"noodl_define_output\",\"fields\":{\"NAME\":\"sum\",\"TYPE\":\"number\"}},{\"type\":\"noodl_set_output\",\"fields\":{\"NAME\":\"sum\"}}]}}" } },
+      { name: 'a hat, a declared signal input, a declared and a sent signal output, a read and a written value', params: { workspace: "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_when_signal\",\"fields\":{\"NAME\":\"go\"}},{\"type\":\"noodl_define_signal_input\",\"fields\":{\"NAME\":\"stop\"}},{\"type\":\"noodl_define_signal_output\",\"fields\":{\"NAME\":\"ping\"}},{\"type\":\"noodl_send_signal\",\"fields\":{\"NAME\":\"pong\"}},{\"type\":\"noodl_get_input\",\"fields\":{\"NAME\":\"q\"}},{\"type\":\"noodl_set_output\",\"fields\":{\"NAME\":\"r\"}}]}}" } },
+      { name: 'names the node owns are never a block\'s port', params: { workspace: "{\"blocks\":{\"languageVersion\":0,\"blocks\":[{\"type\":\"noodl_define_input\",\"fields\":{\"NAME\":\"run\"}},{\"type\":\"noodl_define_output\",\"fields\":{\"NAME\":\"done\"}},{\"type\":\"noodl_send_signal\",\"fields\":{\"NAME\":\"failure\"}},{\"type\":\"noodl_define_input\",\"fields\":{\"NAME\":\"ok\",\"TYPE\":\"string\"}}]}}" } }
+    ],
     reads: 'params only (the blocks, logic-builder-io.ts)'
   }
 ];

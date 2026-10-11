@@ -136,7 +136,7 @@
   },
   {
     "name": "setup when read, destroy when the code is replaced, and this across both — the same code set again is read again",
-    "because": "javascript.ts :307-314 (destroy, then read), :416-428 (setup, then a run)",
+    "because": "javascript.ts :307-314 (destroy, then read), :416-428 (setup, then a run); the sum code read between them writes an output the PLACING never saved, so the write sends nothing (:431-433 registers the saved ports alone — NSP-020 §6.6 piece 5)",
     "params": {
       "code": "define({\n  outputs: { log: 'string' },\n  setup: function (inputs, outputs) {\n    this.log = (this.log || '') + 's';\n    outputs.log = this.log;\n  },\n  destroy: function () {\n    this.log = (this.log || '') + 'd';\n  },\n  change: function (inputs, outputs) {\n    this.log = (this.log || '') + 'r';\n    outputs.log = this.log;\n  }\n})"
     },
@@ -389,9 +389,26 @@
     ]
   },
   {
-    "name": "no code: inputs and signals wait, and arrive when code is first read",
-    "because": "javascript.ts :651-659, :433-440",
-    "params": {},
+    "name": "no code: values wait, and arrive when code is first read — out through the ports the placing saved (the written lists)",
+    "because": "javascript.ts :651-659 (held before the first read), :433-440 (handed over after it), :431-433 (the SAVED ports registered at the read) — a placing with no code saves only its lists, and the input picker has no Signal (:735-762), so a signal cannot wait here: scenario 'a signal before the first read' grades that on a placing with code (NSP-020 §6.6 piece 5)",
+    "params": {
+      "scriptInputs": [
+        {
+          "id": "1",
+          "label": "a"
+        },
+        {
+          "id": "2",
+          "label": "b"
+        }
+      ],
+      "scriptOutputs": [
+        {
+          "id": "3",
+          "label": "sum"
+        }
+      ]
+    },
     "steps": [
       "settle",
       {
@@ -399,12 +416,13 @@
         "value": 1
       },
       {
-        "signal": "go"
+        "set": "b",
+        "value": 2
       },
       "settle",
       {
         "set": "code",
-        "value": "define({\n  inputs: { go: 'signal', a: '*' },\n  outputs: { got: 'string', done: 'signal' },\n  go: function (inputs, outputs) {\n    this.g = (this.g || 0) + 1;\n    outputs.got = this.g + ':' + inputs.a;\n    outputs.done();\n  }\n})"
+        "value": "define({\n  inputs: { a: 'number', b: 'number' },\n  outputs: { sum: 'number' },\n  change: function (inputs, outputs) {\n    outputs.sum = inputs.a + inputs.b;\n  }\n})"
       },
       "settle"
     ]

@@ -256,7 +256,7 @@ function viewOf(inst: Instance): WorldView {
     // s82 — a send of a name the instance has no output for mints it when the spec's `discoverOutput` accepts the name (the
     // Function's Outputs proxy, simplejavascript.ts :298); otherwise nothing is sent, as before
     send: (name, state) => {
-      mintOutput(inst, name);
+      mintOutput(inst, name, 'value');
       observe(inst, [name], false, state);
     },
     watch: (t) => {
@@ -600,11 +600,12 @@ function rederive(inst: Instance): void {
  * Function's Outputs proxy (simplejavascript.ts :298) and the Logic Builder's run (:488, :601) do. Returns the output, or
  * `undefined` when the spec refuses the name — then the caller's spec error stands.
  */
-function mintOutput(inst: Instance, name: string): ErasedValueOutput | SignalOutputDecl | undefined {
+function mintOutput(inst: Instance, name: string, as: 'signal' | 'value'): ErasedValueOutput | SignalOutputDecl | undefined {
   const have = inst.derivedOutputs[name];
   if (have) return have;
   if (name in inst.spec.outputs) return undefined;
-  const decl = inst.spec.derived?.discoverOutput?.(name) as ErasedValueOutput | SignalOutputDecl | undefined;
+  // s83 — the act's kind (spec.ts `discoverOutput`'s `as`): a pulse or a send
+  const decl = inst.spec.derived?.discoverOutput?.(name, as) as ErasedValueOutput | SignalOutputDecl | undefined;
   if (!decl) return undefined;
   inst.derivedOutputs = deepFreeze({ ...inst.derivedOutputs, [name]: decl });
   return decl;
@@ -807,7 +808,7 @@ function apply(inst: Instance, port: string, patchUnknown: unknown, outcomeRequi
   // derived pulses first, then declared ones — the one order the format fixes (spec.ts `emitDerived`)
   if (patch.emitDerived) {
     for (const name of patch.emitDerived) {
-      const out = mintOutput(inst, name);
+      const out = mintOutput(inst, name, 'signal');
       if (!out || out.type !== 'signal') throw new SpecError(`${spec.type}.${port}: emitDerived names no derived signal output "${name}"`);
       inst.pending.signals.push(name);
     }
@@ -831,7 +832,7 @@ function apply(inst: Instance, port: string, patchUnknown: unknown, outcomeRequi
         inst.pending.signals.push(p);
       } else {
         const name = (p as { derived: string }).derived;
-        const out = mintOutput(inst, name);
+        const out = mintOutput(inst, name, 'signal');
         if (!out || out.type !== 'signal') throw new SpecError(`${spec.type}.${port}: pulses names no derived signal output "${name}"`);
         inst.pending.signals.push(name);
       }
@@ -866,7 +867,7 @@ function apply(inst: Instance, port: string, patchUnknown: unknown, outcomeRequi
   }
   if (patch.sendDerived) {
     for (const name of patch.sendDerived) {
-      const out = mintOutput(inst, name);
+      const out = mintOutput(inst, name, 'value');
       if (!out || out.type === 'signal') throw new SpecError(`${spec.type}.${port}: sendDerived names no derived value output "${name}"`);
     }
   }

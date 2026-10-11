@@ -466,3 +466,75 @@ scenario (a bind that unbinds beside a refused Fetch to a backend named `ghost`,
 **Where s81's handoff was wrong:** nothing material; §6.5's "a `PortContext` field for the node's saved ports" is not needed
 (piece 5). **Not done:** L1's other 14 rows and L3's 3 (Function, Script, Logic Builder) move onto the format in step 3; the
 L4 field disagreements on Function (step 2) untouched.
+
+### 6.7 s83 (2026-10-11, Opus) — L3 ✅: Function, Script and Logic Builder on the decided format
+
+All four of L3's padded specs are now on §6.6's format. No spec carries a fixture list as ports. Each fixture list is
+now only the `examples` a play may set. The three nodes keep their saved ports in three different ways, and each spec
+says which:
+
+| node | the saved ports (`derived.outputs(params)`, the PLACING's) | at play | the runtime line |
+|---|---|---|---|
+| **Function** | the placing's Script and written lists; drawn typed (`outtype-`), named and grouped | a signal is SENT only when wired (`onWire`; the reducer filters `emitDerived` by `w.hasOutput`), but its callable exists for every saved signal, wired or not; a value exists when wired or once the code writes it (`discoverOutput`) | simplejavascript.ts :600-618, :609, :298, :903-920 |
+| **Script** | the placing's Code and lists | every saved output is registered at each read (not `onWire`); a write never mints a port; Code set while the app runs writes to an output the placing never saved and sends nothing | javascript.ts :431-433, :640 |
+| **Logic Builder** | the placing's blocks | values and signals both `onWire`, minted by the code's own write or send | logic-builder.ts :259-277, :488, :601 |
+
+**One format addition: `discoverOutput(port, as?)`.** `as` says how the node's own act reaches the name: `'signal'` for a
+pulse (`emitDerived`, `pulses`), `'value'` for a send (`sendDerived`, `world.send`), absent for a wire. The interpreter's
+`mintOutput` passes it. A Logic Builder `send signal` to a name the placing's blocks never declared registers a VALUE
+port (the kind is the placing's blocks') and `sendPulse`s on it, so the wire carries a pulse. Minting at the act's kind
+gives the trace the wire's shape. Logic Builder scenario 13 grades it, and ignoring the hint is planted red. Function,
+States and DbModel2 ignore the argument. **The runtime target:** `placing` writes `model.outputPorts` from EVERY drawn
+output, `onWire` or not, because a Function prepares a callable for each saved signal (:600-618). It still registers the
+play's list alone. Only Function and Script read `model.outputPorts` (grep), so no other node can see the change.
+
+**Field fixes (L4's printout):** Function's `intype-` / `outtype-` are `enum` pickers named Type with the editor's choices
+and default (`drawnDefault`). A list `in-<x>` takes `intype-<x>` (or `string`), named `<x>`, group Inputs. The checkbox
+is named `<x>`, group Run On Value Change. Outputs are typed by `outtype-`, named, group Outputs. Script's drawn fields
+(`drawnOf`) come from the lists, from `getPorts` (a declared type, or an object port's own fields) and from the names
+the text mentions, first come first kept. Its pickers' defaults are `drawnDefault` (never set at mount). Logic Builder
+draws each port under the block's name: value inputs typed and grouped Inputs, signal inputs Actions, values Outputs,
+signals Events.
+
+**Traces against HEAD:**
+- **Function:** 32 / 32 byte-identical. `wiredOutputs` was written on the two scenarios whose traces fire a signal
+  (`out-ping`, `out-go`). Two scenarios were added: an unwired `ping` sends nothing (planted: the filter removed is red),
+  and a Script set mid-play calls a signal the placing never saved, which throws "Outputs.ping is not a function".
+  Scenario 23 is RENAMED: it was "a signal fired by its .send", but its trace has always recorded the throw. The reader
+  makes `Outputs.ping.send()` a value port (P66 FIX-016 measured it), now filed as **P107-S83-SENDFORM**.
+- **Script:** 15 / 17 byte-identical, 2 moved, both explained.
+  - Scenario 6's mid-play `sum` Code writes an output the placing never saved, so nothing is sent.
+  - Scenario 16 is rescoped. It placed no Code and pulsed `go`, which no saved project can hold: the input picker has no
+    Signal (:735-762). It now places the lists and grades values waiting for the first read. Signals waiting is
+    scenario 5's, on a placing with Code.
+  - **Script → v2** with a `changes` entry: "No app does anything differently", `migration: none` (the spec stopped
+    padding; the runtime did not change). NSP-010's gate allows no other route for a moved trace.
+- **Logic Builder:** 15 / 15 byte-identical with no scenario touched. Scenario 13's name and `because` now give the
+  real reason.
+- **Graph t14:** the Function `a` that calls `ping()` carries `wiredOutputs: ['out-ping']`. Its recording expected the
+  pulse, which the padding had registered. The recordings did not move.
+
+**Oracle (a):** 26 graded rows, 137 cases, 14 owed (all L1); 0 pins on the three. Function 4 cases, Script 5, Logic
+Builder 3; a planted wrong `group` on Script is red.
+
+**Gates (s83, this tree, on `ae7db7dff`):**
+- **node-spec:** `tsc --noEmit` 0. Interpreter conformance with mutants at seeds 13 and 20728, all CONFORM with no
+  survivors and nothing unreached: Function 214 mutants, Script 32, Logic Builder 118.
+- **runtime:** `NSP_ONLY=JavaScriptFunction,Javascript2,Logic Builder,States,DbModel2` at 200, seed 20737: all CONFORM.
+  The seven runtime suites that import the target (conformance, graph, runtime-target, the three contracts, parity) ran
+  404 passed and 5 skipped, with `graph` red on t14 alone. After the t14 wire, `graph` is 96 / 96 and the node-spec graph
+  128 / 128.
+- **editor:** `tests-unit/nsp-020` 452 / 452; `typecheck:editor-tests` 0.
+- **ledgers:** `spec-golden:check` 0 (108 specs, 9,211 scenarios, 2 with a history); `spec-ledger:check` 0 (125 / 147,
+  unmoved).
+- **full suites:** the full node-spec suite ran 33 suites, 1,895 / 1,895, exit 0. The stranger hash for `src/spec.ts` was
+  refreshed, and the four rounds re-graded at 46 / 46 (+18 deep skipped), exit 0.
+
+**Where the s82 handoff was wrong:**
+- "a Function's SIGNAL outputs are `onWire`" is only half the story. Their callables exist for every saved signal, so
+  the target had to write the saved list, `onWire` included.
+- "`derived.rederive` none of the three, most likely" — confirmed none.
+- Script needed no `onWire` and no `discoverOutput`: the runtime registers every saved port at each read.
+- Logic Builder needed one thing the eight pieces did not have: the act's kind on `discoverOutput`.
+
+**Left:** L1's 14 rows, L5, oracle (c) (waits on P107-S79-ADAPTERLABEL), and the one 10,000-sequence run once L1 lands.

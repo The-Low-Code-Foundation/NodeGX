@@ -44,8 +44,12 @@
  * closures as long as that code does. The spec keeps them the only way JavaScript can — live — in a SESSION held by a function in the
  * state (`session`): the interpreter freezes what a reducer sees, and a function is not frozen. Each mount makes its own session.
  *
- * THE PLAY'S PORTS — as the Function's: the editor sends the ports of the code it reads (:831-840) and a project saves them, so the
- * node carries every fixture's ports from the placing (`model.inputPorts` / `model.outputPorts`, read at :394-414 and :640).
+ * THE PLAY'S PORTS (NSP-020 §6.6, s83) — the editor sends the ports of the code it reads (:831-840) and a project saves them; the
+ * headless runtime reads them, never re-drawn, off `model.inputPorts` / `model.outputPorts` (:394-414, :431-433, :640). So the node's
+ * ports are the PLACING's code and lists, for the whole play: every saved output is registered at each read (:431-433 — not
+ * `onWire`), a signal input is one the placing saved (:640), and code set while the app runs writes to an output the placing never
+ * saved without sending it. A write never mints a port (no `discoverOutput`). SCRIPT_FIXTURES are the Code a play may set
+ * (`examples`), never the ports.
  *
  * Not in v1: External File (a network seam — the file's load; `useExternalFile` / `externalFile` are `undriven`), `runNextFrame`
  * (a run at the NEXT frame — a settle's second drain), `createComponent` / `deleteComponent` (a graph seam), `Component` (the
@@ -53,7 +57,7 @@
  * `undefined` (the logger throws inside the catch — measured as a row, never played: it escapes the frame).
  */
 
-import { defineNode, type InputDecl, type OutputDecl } from '../spec';
+import { defineNode, type InputDecl, type OutputDecl, type ValueType } from '../spec';
 
 /** javascriptnodeparser.js :492-495 — in front of every body. */
 const CODE_PREFIX = "const Script = (typeof Node !== 'undefined')?Node:undefined;\n";
@@ -280,11 +284,64 @@ function portsOf(params: Readonly<Record<string, unknown>>, code: unknown, into:
   scanned(code, into);
 }
 
-/** THE PLAY'S PORTS (header): the params' code and lists, then every fixture's */
+/**
+ * The fields the editor DRAWS for each port (:772-840; javascriptnodeparser.js `getPorts` :390-430 and
+ * `parseAndAddPortsFromScript` :294-388), first come first kept, as `portsOf` keeps the kinds. Only the drawing: the play reads
+ * the kinds (`Ports`), and every value port is uncoerced however it is typed.
+ */
+type Drawn = { type?: ValueType | 'signal'; enums?: readonly string[]; drawnDefault?: unknown; displayName?: string; group?: string; editOnly?: true };
+/** :742-763 and :765-790 — the two pickers' choices */
+const INPUT_TYPES = ['string', 'boolean', 'number', 'object', 'array'] as const;
+const OUTPUT_TYPES = ['string', 'boolean', 'number', 'object', 'array', 'signal'] as const;
+// the default is the announcement's (`drawnDefault`): nothing reads a picker at run time, and a declared default is never set (:446-456)
+const pickerOf = (enums: readonly string[]): Drawn => ({ type: 'enum', enums, drawnDefault: 'string', displayName: 'Type', editOnly: true });
+
+/** javascriptnodeparser.js :402-411 — a declared input: a type name, or an object whose fields are the port's */
+function declaredInput(t: unknown): Drawn {
+  if (!t || typeof t !== 'object') return { type: t as ValueType, group: 'Inputs' };
+  const o = t as Record<string, unknown>;
+  const d: Drawn = { type: typeName(o.type) as ValueType };
+  const enums = (o.type as { enums?: unknown } | undefined)?.enums;
+  if (Array.isArray(enums)) d.enums = enums.map((e) => (e && typeof e === 'object' ? String((e as { value?: unknown }).value) : String(e)));
+  if (o.default !== undefined) d.drawnDefault = o.default;
+  if (typeof o.displayName === 'string') d.displayName = o.displayName;
+  if (typeof o.group === 'string') d.group = o.group;
+  return d;
+}
+
+function drawnOf(params: Readonly<Record<string, unknown>>): { inputs: Record<string, Drawn>; outputs: Record<string, Drawn> } {
+  const inputs: Record<string, Drawn> = {};
+  const outputs: Record<string, Drawn> = {};
+  const put = (into: Record<string, Drawn>, name: string, d: Drawn) => {
+    if (into[name] === undefined) into[name] = d;
+  };
+  for (const label of labelsOf(params.scriptOutputs)) {
+    put(inputs, 'outtype-' + label, pickerOf(OUTPUT_TYPES));
+    put(outputs, label, { type: ((params['outtype-' + label] as ValueType | undefined) || '*') as ValueType, group: 'Outputs' });
+  }
+  for (const label of labelsOf(params.scriptInputs)) {
+    put(inputs, 'intype-' + label, pickerOf(INPUT_TYPES));
+    put(inputs, label, { type: ((params['intype-' + label] as ValueType | undefined) || 'string') as ValueType, group: 'Inputs' });
+  }
+  const code = params.code;
+  if (typeof code !== 'string' || !code) return { inputs, outputs };
+  const p = read(code);
+  for (const [name, t] of Object.entries(p.inputs)) put(inputs, name, declaredInput(t));
+  for (const [name, t] of Object.entries(p.outputs)) put(outputs, name, { type: typeName(t) as ValueType, group: 'Outputs' });
+  for (const m of code.matchAll(/Inputs\.([A-Za-z0-9_]+)/g)) put(inputs, m[1], { type: '*', displayName: m[1], group: 'Inputs' });
+  for (const re of [/Outputs\.([A-Za-z0-9]+)\s*\(\s*\)/g, /Outputs\s*\[\s*(?:'|")(.*)(?:'|")\s*\]\(\s*\)/g]) {
+    for (const m of code.matchAll(re)) if (m[1] !== undefined) put(outputs, m[1], { type: 'signal', displayName: m[1], group: 'Outputs' });
+  }
+  for (const re of [/Outputs\.([A-Za-z0-9_]+)/g, /Outputs\s*\[\s*"([^"]*)"\s*\]/g]) {
+    for (const m of code.matchAll(re)) if (m[1] !== undefined) put(outputs, m[1], { type: '*', displayName: m[1], group: 'Outputs' });
+  }
+  return { inputs, outputs };
+}
+
+/** THE PLAY'S PORTS (header): the PLACING's code and lists — what the editor drew and the project saved */
 function playPorts(params: Readonly<Record<string, unknown>>): Ports {
   const ports: Ports = { inputs: {}, outputs: {} };
   portsOf(params, params.code, ports);
-  for (const text of FIXTURE_TEXTS) portsOf({}, text, ports);
   return ports;
 }
 
@@ -531,7 +588,19 @@ const signalPort = (): InputDecl => ({ type: 'signal' });
 
 export const Script = defineNode({
   type: 'Javascript2',
-  version: 1,
+  version: 2,
+  // NSP-010 — v2 is the spec correcting itself (NSP-020 §6.6, s83), not the runtime changing
+  changes: [
+    {
+      version: 2,
+      says:
+        "No app does anything differently. Code replaced while the app runs writes to an output the placing never saved, and that write sends nothing: the runtime registers the saved ports alone at each read (javascript.ts :431-433). v1 said it was sent, because v1 placed every node with every fixture's ports",
+      row: 'NSP-020 §6.6 — the ports at play are the placing ones',
+      migration: {
+        none: 'The runtime did not change; only the spec stopped padding the placing. A project never saw v1\'s trace: a saved Script cannot have its Code replaced without the editor re-drawing its ports'
+      }
+    }
+  ],
   source: 'packages/noodl-viewer-react/src/nodes/std-library/javascript.ts',
   contract:
     'three ways to write it (define, script, the Node object); when the code is read (the Code, at the frame end; empty ignored; a failure keeps the code before, after its destroy); what a read starts (setup, a run, the inputs held before it); once a frame; inputs and signal inputs; this kept for the node\'s life; outputs and signal outputs; a throw ends the call — SCRIPT_FIXTURES, one per rule',
@@ -622,14 +691,24 @@ export const Script = defineNode({
       // :772-840 — the written rows with their type pickers, then each port the code declares or names
       inputs: (params) => {
         const ports: Record<string, InputDecl> = {};
-        for (const [name, kind] of Object.entries(playPorts(params).inputs)) ports[name] = kind === 'signal' ? signalPort() : valuePort();
+        const drawn = drawnOf(params).inputs;
+        for (const [name, kind] of Object.entries(playPorts(params).inputs)) {
+          if (kind === 'signal') {
+            const { displayName, group } = drawn[name] ?? {};
+            ports[name] = { ...signalPort(), ...(displayName !== undefined ? { displayName } : {}), ...(group !== undefined ? { group } : {}) };
+          } else ports[name] = { ...valuePort(), ...drawn[name] } as InputDecl;
+        }
         return ports;
       },
-      // THE PLAY'S PORTS — the value outputs read what the code last wrote; the signals are the code's to fire
+      // THE PLAY'S PORTS (header) — the PLACING's, each registered at the read (:431-433); a value reads what the code last wrote
       outputs: (params) => {
         const out: Record<string, OutputDecl<ScriptState>> = {};
+        const drawn = drawnOf(params).outputs;
         for (const [name, kind] of Object.entries(playPorts(params).outputs)) {
-          out[name] = kind === 'signal' ? { type: 'signal' } : { type: '*', from: (s: Readonly<ScriptState>) => s.outs[name] };
+          const { type, displayName, group } = drawn[name] ?? {};
+          const meta = { ...(displayName !== undefined ? { displayName } : {}), ...(group !== undefined ? { group } : {}) };
+          out[name] =
+            kind === 'signal' ? { type: 'signal', ...meta } : ({ type: type ?? '*', from: (s: Readonly<ScriptState>) => s.outs[name], ...meta } as OutputDecl<ScriptState>);
         }
         return out;
       },

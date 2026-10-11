@@ -49,15 +49,19 @@
  * yield (the runtime target's settle: frame, yield, drain) — what comes before and after it lands in the same settle. So the spec
  * runs the body with its `await`s removed, synchronously: the same effects in the same order. A fixture must not await a timer.
  *
- * THE PLAY'S PORTS. An author edits the Script while the app runs and the editor re-sends the ports for each edit (:1113-1115); a
- * play may set any fixture as the Script, so the node carries every fixture's ports from the start (`outputs`, below) — what a
- * loaded project's saved `dynamicports` give the model (`model.outputPorts`, read for signals at :601-602).
+ * THE PLAY'S PORTS (NSP-020 §6.6, s83). At play a node has its params and its wires, never the project. The ports the project saved
+ * for the instance are what the editor drew for the PLACING's params — `derived.outputs(params)` — and the headless runtime reads
+ * them, never re-drawn, off `model.outputPorts`: the signal ports the code may call are the placing's (:600-618), so a Script set
+ * mid-play that calls a signal the placing's Script never named throws, as it does in a loaded project. A signal is SENT only when
+ * a wire asks for it (`hasOutput`, :609 — `onWire`); a value output is brought into being by a wire or by the code's own write
+ * (`registerOutputIfNeeded`, :298 — `discoverOutput`). What a play wires is the scenario's `wiredOutputs`, and a generated
+ * sequence draws them from `outputCandidates`. FUNCTION_FIXTURES are the Scripts a play may set (`examples`), never the ports.
  *
  * Not in v1: Uses (the project's script files — a graph seam, ISL-005), Component (the component's state objects), Noodl's globals
  * (`Noodl.Variables` …), a write to an output no fixture names (`Outputs[key]`), and the editor's warnings (not on the wire).
  */
 
-import { defineNode, type InputDecl, type OutputDecl } from '../spec';
+import { defineNode, type InputDecl, type OutputDecl, type ValueType } from '../spec';
 import { valueDidChange } from './condition';
 import { functionScriptPortNames } from './function-ports';
 
@@ -97,6 +101,10 @@ export const FUNCTION_FIXTURES = {
 
 const FIXTURE_TEXTS: readonly string[] = Object.values(FUNCTION_FIXTURES);
 
+/** :978-1009 `inputTypeEnums`, and Signal for an output (:1013-1018). */
+const INPUT_TYPES = ['string', 'boolean', 'number', 'object', 'date', 'array', 'color'] as const;
+const OUTPUT_TYPES = [...INPUT_TYPES, 'signal'] as const;
+
 type Row = { label?: unknown };
 const labelsOf = (list: unknown): string[] =>
   Array.isArray(list) ? list.map((r: Row) => r && r.label).filter((l): l is string => typeof l === 'string' && l.length > 0) : [];
@@ -122,7 +130,7 @@ export type FunctionState = {
   scheduled: boolean;
   /** :106 `pendingRunOutcomes` — Runs waiting for the frame's run. */
   tokens: number;
-  /** :600-618 — the signal ports the node has (`model.outputPorts`), fixed at the placing: THE PLAY'S PORTS. */
+  /** :600-618 — the signal ports the node has (`model.outputPorts`), the placing's for the whole play: THE PLAY'S PORTS. */
   signals: readonly string[];
 };
 
@@ -144,10 +152,18 @@ function bodyOf(text: string): (...args: unknown[]) => unknown {
 
 /** A value port the code reads (:855-868) — no conversion. */
 const valuePort = (): InputDecl => ({ type: '*', coerce: 'none' });
+/** :1062-1068, :961-968 — a value port as the editor draws it: a written row typed by its picker (`string` unset), a name in the code `*`. */
+const drawnValuePort = (label: string, type: ValueType): InputDecl => ({ type, coerce: 'none', displayName: label, group: 'Inputs' });
 /** run-on-value-change.ts — `default: true`, and only an explicit `false` unticks. */
 const checkboxPort = (): InputDecl => ({ type: 'boolean', default: true, coerce: 'not-false', editOnly: true });
+/** run-on-value-change.ts `runOnChangeDynamicPorts` — drawn under the port's label, in its own group. */
+const drawnCheckboxPort = (label: string): InputDecl => ({ ...checkboxPort(), displayName: label, group: 'Run On Value Change' });
 /** :1049-1062, :1019-1031 — a written row's type picker; nothing reads it at run time (:870-892). */
 const typePort = (): InputDecl => ({ type: 'string', default: 'string', coerce: 'none', editOnly: true });
+/** The picker as the editor draws it: an enum named Type, Signal among an output's choices. */
+const drawnTypePort = (enums: readonly string[]): InputDecl => ({ type: 'enum', enums, default: 'string', coerce: 'none', editOnly: true, displayName: 'Type' });
+/** :903-920 — a value output the code's write (or a wire) brings into being; it reads what the code last wrote. */
+const valueOutput = (name: string): OutputDecl<FunctionState> => ({ type: '*', from: (s: Readonly<FunctionState>) => s.outputs[name] });
 
 /** The signal and value outputs `params` give the node — the written list's rows, then the script's names (:1013-1042, :953-962). */
 function outputNames(params: Readonly<Record<string, unknown>>, script: unknown): { signals: string[]; values: string[] } {
@@ -163,16 +179,6 @@ function outputNames(params: Readonly<Record<string, unknown>>, script: unknown)
   return { signals, values };
 }
 
-/** THE PLAY'S PORTS (header): the outputs of the params' script and of every fixture. */
-function playOutputs(params: Readonly<Record<string, unknown>>): { signals: string[]; values: string[] } {
-  const all = outputNames(params, params.functionScript);
-  for (const text of FIXTURE_TEXTS) {
-    const more = outputNames({}, text);
-    for (const n of more.signals) if (!all.signals.includes(n) && !all.values.includes(n)) all.signals.push(n);
-    for (const n of more.values) if (!all.signals.includes(n) && !all.values.includes(n)) all.values.push(n);
-  }
-  return all;
-}
 
 type RunResult = {
   inputs: Record<string, unknown>;
@@ -247,8 +253,8 @@ export const JavaScriptFunction = defineNode({
     tokens: 0,
     signals: []
   } as FunctionState,
-  // THE PLAY'S PORTS (header) — the signal ports the model carries, from the placing's params
-  init: (_w, params) => ({ signals: playOutputs(params).signals }),
+  // THE PLAY'S PORTS (header) — the signal ports the model carries: the placing's, wired or not (:600-618)
+  init: (_w, params) => ({ signals: outputNames(params, params.functionScript).signals }),
   // :312-322
   inspect: (s) => JSON.stringify({ inputs: s.inputs, outputs: s.outputs }),
   // :468-471 (outcomeOutputs: done, unchanged) and :449-454 (Failure, pulsed on its own too)
@@ -353,7 +359,7 @@ export const JavaScriptFunction = defineNode({
   },
   {
     // :504-722 — the one run of the frame
-    afterInputs: (s) => {
+    afterInputs: (s, _i, w) => {
       if (!s.scheduled) return { set: {}, send: [] };
       const n = s.tokens;
       const done = { scheduled: false, tokens: 0 } as const;
@@ -371,6 +377,7 @@ export const JavaScriptFunction = defineNode({
         // :563-567 — no script: Unchanged for each Run, nothing otherwise
         return { set: done, send: [], outcomes: Array.from({ length: n }, () => ({ port: 'run' as const, outcome: 'unchanged' as const })) };
       }
+      // :609 — a signal the code calls is SENT only when a wire asks for it; the call itself always happens
       const r = runCode(s, s.signals);
       const set: Partial<FunctionState> = { ...done, inputs: r.inputs, outputs: r.outputs, self: r.self };
       if (r.threw !== undefined) {
@@ -379,7 +386,7 @@ export const JavaScriptFunction = defineNode({
           set: { ...set, lastError: r.threw },
           send: ['error'],
           sendDerived: r.sent,
-          emitDerived: r.fired,
+          emitDerived: r.fired.filter((name) => w.hasOutput(name)),
           emit: n === 0 ? ['failure'] : [],
           outcomes: Array.from({ length: n }, () => ({ port: 'run' as const, outcome: 'failure' as const, error: 'function/script-threw' }))
         };
@@ -389,7 +396,7 @@ export const JavaScriptFunction = defineNode({
         set: s.lastError ? { ...set, lastError: '' } : set,
         send: s.lastError ? ['error'] : [],
         sendDerived: r.sent,
-        emitDerived: r.fired,
+        emitDerived: r.fired.filter((name) => w.hasOutput(name)),
         emit: ['success'],
         outcomes: Array.from({ length: n }, () => ({ port: 'run' as const, outcome: 'done' as const }))
       };
@@ -399,24 +406,33 @@ export const JavaScriptFunction = defineNode({
       // :1013-1073, :946-962 — what the editor draws: the written rows with their type pickers, then each name the code reads
       inputs: (params) => {
         const ports: Record<string, InputDecl> = {};
-        for (const label of labelsOf(params.scriptOutputs)) ports['outtype-' + label] = typePort();
+        for (const label of labelsOf(params.scriptOutputs)) ports['outtype-' + label] = drawnTypePort(OUTPUT_TYPES);
         for (const label of labelsOf(params.scriptInputs)) {
-          ports['intype-' + label] = typePort();
-          ports['in-' + label] = valuePort();
+          ports['intype-' + label] = drawnTypePort(INPUT_TYPES);
+          ports['in-' + label] = drawnValuePort(label, ((params['intype-' + label] as string) || 'string') as ValueType);
         }
-        for (const name of functionScriptPortNames(params.functionScript).inputs) if (!ports['in-' + name]) ports['in-' + name] = valuePort();
+        for (const name of functionScriptPortNames(params.functionScript).inputs) if (!ports['in-' + name]) ports['in-' + name] = drawnValuePort(name, '*');
         // :1091-1109 — a checkbox for every value input, however it was named
-        for (const name of Object.keys(ports)) if (name.startsWith('in-')) ports[RUN_ON_CHANGE + name] = checkboxPort();
+        for (const name of Object.keys(ports)) if (name.startsWith('in-')) ports[RUN_ON_CHANGE + name] = drawnCheckboxPort(name.slice('in-'.length));
         return ports;
       },
-      // THE PLAY'S PORTS (header) — the value outputs read what the code last wrote; the signals are the code's to fire
+      // THE PLAY'S PORTS (header) — what the editor draws for the placing's params (:1033-1041, :961-968); at play each exists only
+      // when wired (`onWire`), or, for a value, once the code writes it (`discoverOutput`)
       outputs: (params) => {
-        const { signals, values } = playOutputs(params);
+        const typed = new Set(labelsOf(params.scriptOutputs));
+        const { signals, values } = outputNames(params, params.functionScript);
         const out: Record<string, OutputDecl<FunctionState>> = {};
-        for (const name of values) out['out-' + name] = { type: '*', from: (s: Readonly<FunctionState>) => s.outputs[name] };
-        for (const name of signals) out['out-' + name] = { type: 'signal' };
+        for (const name of values) {
+          const type = (typed.has(name) && (params['outtype-' + name] as OutputDecl<FunctionState>['type'])) || '*';
+          out['out-' + name] = { ...valueOutput(name), type, displayName: name, group: 'Outputs', onWire: true } as OutputDecl<FunctionState>;
+        }
+        for (const name of signals) out['out-' + name] = { type: 'signal', displayName: name, group: 'Outputs', onWire: true };
         return out;
       },
+      // :298, :903-920 — any `out-<name>`, as a value: a wire to it, or the code writing it
+      discoverOutput: (port) => (port.startsWith('out-') ? valueOutput(port.slice('out-'.length)) : undefined),
+      // the fixtures' outputs a generated sequence may wire: the signal (wired and unwired, :609), and two values
+      outputCandidates: ['out-ping', 'out-sum', 'out-count'],
       on: (s, port, value) => {
         // nodedefinition.ts — a checkbox, whether or not its port exists yet
         if (port.startsWith(RUN_ON_CHANGE)) {
