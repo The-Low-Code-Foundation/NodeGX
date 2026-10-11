@@ -37,6 +37,7 @@ import type { SecurityState } from '../security/state';
 import { isVisibleAccountColumn } from '../users/accountColumns';
 import type { RequestContext } from './HttpServer';
 import { HttpError, readJSONBody, sendJSON } from './http-util';
+import { seriesProblem } from '@noodl/runtime/src/api/adapters/series';
 
 /** The four columns every record carries (byob-admin.ts' `SYSTEM_FIELDS`). */
 const SYSTEM_FIELDS: readonly string[] = ['objectId', 'createdAt', 'updatedAt', 'ACL'];
@@ -79,6 +80,13 @@ export function planTouchesWhatTheSchemaRouteRefuses(plan: MigrationPlanData): s
       if (b.action === 'renameTable' && (own(b.newName) || b.newName === '_User')) out.push(`${at} renames a collection to "${b.newName}", a name the backend keeps`);
       if (b.table === '_User' && (b.action === 'renameTable' || b.action === 'deleteTable')) out.push(`${at} renames or deletes the accounts`);
       if (b.table === '_User' && b.action === 'describeTable') out.push(`${at} says again what the accounts are; their words are the backend's`);
+      // P116 ONT-015: a series the store could not hand out — refused by the route, so by the plan before the backup.
+      const series: Array<{ name: string; type?: string; series?: unknown }> =
+        b.action === 'createTable' ? b.columns : b.action === 'addColumn' ? [b.column] : b.action === 'setSeries' ? Object.entries(b.columns).filter(([, v]) => v !== null).map(([name, v]) => ({ name, series: v })) : [];
+      for (const c of series) {
+        const problem = seriesProblem(c.name, c.series, c.type);
+        if (problem) out.push(`${at}: ${problem}`);
+      }
       const field = b.action === 'dropColumn' ? b.column : b.action === 'renameColumn' ? b.oldName : undefined;
       if (field !== undefined) {
         if (SYSTEM_FIELDS.includes(field)) out.push(`${at}: "${field}" is set by the backend on every record`);

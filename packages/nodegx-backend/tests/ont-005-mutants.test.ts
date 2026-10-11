@@ -286,6 +286,10 @@ function honesty(engine: string, fixture: string, verdicts: Verdict[]): string {
  *
  * ONT-011 step 4 (s20): a secret detail is a per-field read rule, held (`fields.<f>.read: "nobody"`) and claimed as
  * a person signed in (`unseen`); `person/secret-unanswered` falls at that claim. 15 of 51 → 14 of 51.
+ *
+ * ONT-015 (s22): the read-aloud number is the store's series, held (`numbered`, mutant `dropSeries`). The pin does
+ * not move: `session/number-reused` (read aloud unanswered) was already killed for want of a home, and the series'
+ * own mutant is a claim mutant (`ont-003-claims`), not one of these 51. Still 14 of 51.
  */
 const SURVIVORS: Record<(typeof WORLDS)[number], string[]> = {
   world: [

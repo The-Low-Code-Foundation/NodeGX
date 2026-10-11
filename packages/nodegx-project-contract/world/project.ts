@@ -24,6 +24,7 @@ import type { FieldKind, ProjectedField, ProjectedRule } from './kind';
 import type { Noun, OnlyWhen, Relation, WorldFiles, WorldProperty } from './files';
 import { kindById, WORLD_VOCABULARY } from './vocabulary';
 import { fieldsAnswered, validateWorld } from './validate';
+import { numberSeries, type NumberSeries } from './noun';
 
 /** The storage type each of P104's eleven tiles becomes (`nodegx-backend/src/admin/app/fieldKinds.ts`, pinned by test). */
 export const STORAGE_TYPE: Readonly<Record<FieldKind, string>> = Object.freeze({
@@ -87,6 +88,12 @@ export interface WorldColumn {
   description?: string;
   /** The relation that made it, when one did (ONT-004: a path is compiled by reading these back). */
   relation?: string;
+  /**
+   * P116 ONT-015: a number the store hands out on create in this format, going up by one and never
+   * used again (`@noodl/backend-contract` `StorageSeries`). Held: the read-aloud noun's `number`,
+   * once its look is said.
+   */
+  series?: NumberSeries;
 }
 /**
  * A rule every row must satisfy, as the backend's declared checks take it: a choice's list, or
@@ -184,7 +191,12 @@ export type ClaimStep =
   /** the row is there and the field holds exactly `value` (ONT-006: what an `end` or an `update` wrote) */
   | { holds: string; row: string; field: string; value: ClaimValue }
   /** ONT-011 step 4: a person signed in with no role reads the row, and it comes back without the field */
-  | { unseen: string; row: string; field: string };
+  | { unseen: string; row: string; field: string }
+  /**
+   * ONT-015: each row holds a value in the field the store gave it, and no two hold the same. A row
+   * removed since is read as an earlier `numbered` step saw it — a number is never handed out again.
+   */
+  | { numbered: string; field: string; rows: string[] };
 
 /** What taking one held rule out of the schema means — the claim's mutant. */
 export type ClaimMutant =
@@ -198,6 +210,8 @@ export type ClaimMutant =
   | { dropWhenTargetGoes: { collection: string; field: string } }
   /** ONT-011 step 4: the field read by whoever reads the record — its read rule taken out. */
   | { dropFieldRule: { collection: string; field: string } }
+  /** ONT-015: the field is plain text again — nothing hands out its number. */
+  | { dropSeries: { collection: string; field: string } }
   /** ONT-014: the collection's `onlyWhile` without one rule — a field no longer frozen, the record editable, or deletable. */
   | {
       dropOnlyWhile:
@@ -274,7 +288,7 @@ const WHY: Record<string, string> = {
   // ONT-011 step 2, the facts about a thing and the two property answers: each names the step that keeps it.
   onlyOne: 'a rule across records (at most one) is none of the store’s checks, which are each on one row; ONT-013 step 4 measures it',
   history: 'the store keeps the history records, and does not write one on every save; a verb or a trigger does',
-  series: 'a number handed out by the store, going up by one and never used again, is ONT-015’s series; until it is built the field is text, unique and set once',
+  series: 'the store hands out a number only in a look someone said, and nobody has said what this one looks like; until then the field is text, unique and set once',
   onlyWhenIs: 'a detail that matters only for one value of another is none of the store’s checks; the screen hides it, and nothing refuses it',
   onlyWhenOptional: 'a detail allowed only once another is set, and not required then, is none of the store’s checks (all-or-none would make it required)'
 };
@@ -406,7 +420,9 @@ export function projectWorld(files: WorldFiles): WorldProjection {
     if (called) d.collection.calledBy = fieldName(called);
     if (answers.onlyOne === true) ruled.push({ src, key: n.id, d, rule: { on: 'from', says: `there is only one ${n.id}`, holds: { onlyOne: true } } });
     if (answers.readAloud === true) {
-      addColumn(d, by, { name: NUMBER_FIELD, kind: 'text', type: STORAGE_TYPE.text, description: `${a(n.id)}'s number, which people read aloud` });
+      // ONT-015: held once its look is said — the store hands it out (the column's series).
+      const handedOut = numberSeries(answers);
+      addColumn(d, by, { name: NUMBER_FIELD, kind: 'text', type: STORAGE_TYPE.text, description: `${a(n.id)}'s number, which people read aloud`, ...(handedOut ? { series: handedOut } : {}) });
       d.collection.indexes.push({ fields: [NUMBER_FIELD], unique: true });
       ruled.push({ src, key: n.id, d, rule: { on: 'from', says: `${a(n.id)}'s number is written once and never changed`, holds: { setOnce: NUMBER_FIELD } } });
       const series: Extract<ProjectedRule['holds'], { series: string }> = { series: NUMBER_FIELD };
@@ -536,7 +552,9 @@ export function projectWorld(files: WorldFiles): WorldProjection {
       // ONT-011 step 4: held — a per-field read rule (R-a), kept by the backend at every door; nobody but the admin and functions.
       (d.collection.fields ??= {})[fieldName(h.secret)] = { read: 'nobody' };
     } else if ('series' in h) {
-      notHeld.push({ collection: d.collection.name, field: fieldName(h.series), says: rule.says, why: WHY.series });
+      // ONT-015: held when the column carries the series (its look was said); claimed below either way.
+      const field = fieldName(h.series);
+      if (!d.collection.columns.find((x) => x.name === field)?.series) notHeld.push({ collection: d.collection.name, field, says: rule.says, why: WHY.series });
     } else if ('onlyOne' in h || 'history' in h) {
       notHeld.push({ collection: d.collection.name, says: rule.says, why: 'onlyOne' in h ? WHY.onlyOne : WHY.history });
     } else {
@@ -769,6 +787,24 @@ function claimsFor(
     claims.push({ id: `${key}/${f}-is-not-for-everyone`, says: rule.says, from: src, held: true, mutant: { dropFieldRule: { collection: c, field: f } }, steps: s.steps });
   }
 
+  // ONT-015: a number the store hands out (held, the column's series) — two records made without one each get
+  // one, the second goes, and the next record made does not get its number back.
+  for (const { key, src, d, rule } of ruled) {
+    const h = rule.holds;
+    if (!('series' in h)) continue;
+    const c = d.collection.name;
+    const f = fieldName(h.series);
+    if (!d.collection.columns.find((x) => x.name === f)?.series) continue;
+    const s = new Seeder(byName);
+    const first = s.row(c);
+    const second = s.row(c);
+    s.steps.push({ numbered: c, field: f, rows: [first, second] });
+    s.steps.push({ remove: c, row: second });
+    const third = s.row(c);
+    s.steps.push({ numbered: c, field: f, rows: [first, second, third] });
+    claims.push({ id: `${key}/${f}-never-used-again`, says: rule.says, from: src, held: true, mutant: { dropSeries: { collection: c, field: f } }, steps: s.steps });
+  }
+
   // Not held, measured: steps that say the rule, which no engine passes today.
   for (const { key, src, d, rule } of ruled) {
     const h = rule.holds;
@@ -859,9 +895,11 @@ function claimsFor(
       s.steps.push({ refuse: c, data: s.data(c) });
       what = 'is-the-only-one';
     } else if ('series' in h) {
-      // ONT-011 step 2: a number used again after a delete is taken today — ONT-015's series will refuse it.
+      // ONT-011 step 2: with no look said there is no series, and a number used again after a delete is taken —
+      // measured, so a world that says the look gets ONT-015's held claim above instead.
       const field = fieldName(h.series);
       const col = d.collection.columns.find((x) => x.name === field)!;
+      if (col.series) continue;
       const value = s.valueFor(d, col)!;
       const row = s.row(c, { [field]: value });
       s.steps.push({ remove: c, row });
@@ -950,6 +988,10 @@ export function applyMutant(schema: WorldSchema, mutant: ClaimMutant): WorldSche
     takesOut(c.fields?.[mutant.dropFieldRule.field] ? 1 : 0, 0);
     delete c.fields![mutant.dropFieldRule.field];
     if (!Object.keys(c.fields!).length) delete c.fields;
+  } else if ('dropSeries' in mutant) {
+    const col = column(coll(mutant.dropSeries.collection), mutant.dropSeries.field);
+    takesOut(col.series ? 1 : 0, 0);
+    delete col.series;
   } else if ('dropWhenTargetGoes' in mutant) {
     const col = column(coll(mutant.dropWhenTargetGoes.collection), mutant.dropWhenTargetGoes.field);
     takesOut(col.whenTargetGoes ? 1 : 0, 0);

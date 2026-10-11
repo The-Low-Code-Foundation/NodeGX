@@ -150,6 +150,60 @@ export const seriesCases: readonly ConformanceCase[] = Object.freeze([
   },
 
   {
+    id: 'series/put-on-records-numbers-them-in-the-order-made',
+    area: 'series',
+    pins: 'a series put on a field records already fill (ONT-015 AC3) numbers the ones without a value in the order they were made, after the highest number already held; a number in its look is kept, one in another look is kept and counts for nothing',
+    async run(ctx) {
+      const c = ctx.collection('Invoice');
+      ctx.createTable(c, [
+        { name: 'number', type: 'String' },
+        { name: 'code', type: 'String' }
+      ]);
+      const ids: Record<string, string> = {};
+      for (const [code, number] of [['a', undefined], ['b', 'T-0007'], ['c', undefined], ['d', 'OLD-99']] as const) {
+        ids[code] = String((await ctx.create(c, number ? { code, number } : { code })).objectId);
+        await new Promise((r) => setTimeout(r, 5)); // createdAt is read to the millisecond
+      }
+      ok(typeof ctx.schema.setSeries === 'function', 'setSeries is absent; a series cannot be put on records already there');
+      ctx.schema.setSeries!(c, { number: { format: 'T-{####}' } });
+      const numbers: Record<string, unknown> = {};
+      for (const code of Object.keys(ids)) numbers[code] = (await ctx.fetch(c, ids[code])).number;
+      deepEq(numbers, { a: 'T-0008', b: 'T-0007', c: 'T-0009', d: 'OLD-99' }, 'the numbers after the series was put on');
+      eq(await numberOf(ctx, c), 'T-0010', 'the next number handed out');
+    }
+  },
+
+  {
+    id: 'series/put-on-again-never-moves-the-counter-back',
+    area: 'series',
+    pins: 'a series put on again over records that were all deleted starts where the counter was, not at 1 — a number is never handed out twice, by a migration either',
+    async run(ctx) {
+      const c = await invoices(ctx, { format: 'T-{####}' });
+      const made = [await ctx.create(c, {}), await ctx.create(c, {}), await ctx.create(c, {})];
+      for (const m of made) await ctx.remove(c, String(m.objectId));
+      ok(typeof ctx.schema.setSeries === 'function', 'setSeries is absent');
+      ctx.schema.setSeries!(c, { number: { format: 'T-{####}' } });
+      eq(await numberOf(ctx, c), 'T-0004', 'the number after three were handed out and deleted');
+    }
+  },
+
+  {
+    id: 'series/taken-off-hands-out-nothing',
+    area: 'series',
+    pins: 'a series taken off a field (null) hands out nothing more, and the numbers already given stay',
+    async run(ctx) {
+      const c = await invoices(ctx, { format: 'T-{####}' });
+      const first = await numberOf(ctx, c);
+      ok(typeof ctx.schema.setSeries === 'function', 'setSeries is absent');
+      ctx.schema.setSeries!(c, { number: null });
+      const after = await ctx.create(c, { code: 'x' });
+      const stored = await ctx.fetch(c, String(after.objectId));
+      ok(stored.number === undefined || stored.number === null, `a field with no series was handed ${JSON.stringify(stored.number)}`);
+      eq(first, 'T-0001', 'the number given before');
+    }
+  },
+
+  {
     id: 'series/a-series-that-cannot-be-kept-is-refused',
     area: 'series',
     pins: 'a series on a number column, with no counter in its format, or restarting each year with no year in it, is refused when the table is declared',

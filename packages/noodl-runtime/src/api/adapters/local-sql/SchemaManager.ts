@@ -11,7 +11,7 @@
 import { aclPredicateSql } from '../postgres/predicates';
 import type { EngineDatabase } from './engine';
 import { escapeTable, escapeColumn } from './QueryBuilder';
-import { assertSeriesColumns } from '../series';
+import { assertSeriesColumns, planNumbering, seriesName, seriesProblem, SERIES_SET_SQL, SERIES_TABLE, SERIES_TABLE_DDL, type SeriesOption } from '../series';
 import {
   builtInIndexNames as sharedBuiltInIndexNames,
   CHECK_FAILED_PREFIX,
@@ -562,6 +562,47 @@ class SchemaManager {
     this.db
       .prepare(`UPDATE "_Schema" SET "schema" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "name" = ?`)
       .run(JSON.stringify(fresh), tableName);
+    this._schemaCache.set(tableName, fresh);
+    return true;
+  }
+
+  /**
+   * P116 ONT-015 §3.3 — a series put on (or, with `null`, taken off) fields a collection already has.
+   * Putting one numbers the records that hold no value, in the order they were made, and starts the
+   * counter above the highest number held (`planNumbering`): the declaration, the numbers and the
+   * counters in one transaction, so a failure leaves none of them. How many it numbers is the dry
+   * run's to say (the migration counts the empty ones first).
+   */
+  setSeries(tableName: string, columns: Record<string, SeriesOption | null>): boolean {
+    const schema = this.getTableSchema(tableName);
+    if (!schema) throw new Error(`There is no collection called "${tableName}"`);
+    const fresh = freshSchema(schema);
+    for (const [name, series] of Object.entries(columns)) {
+      const col = (fresh.columns || []).find((c) => c.name === name);
+      if (!col) throw new Error(`"${tableName}" has no field "${name}"`);
+      if (series === null) {
+        delete col.series;
+        continue;
+      }
+      const problem = seriesProblem(name, series, col.type);
+      if (problem) throw new Error(problem);
+      col.series = series;
+    }
+    this.db.transaction(() => {
+      this.ensureSchemaTable();
+      this.db.prepare(`UPDATE "_Schema" SET "schema" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "name" = ?`).run(JSON.stringify(fresh), tableName);
+      for (const [name, series] of Object.entries(columns)) {
+        if (series === null) continue;
+        this.db.exec(SERIES_TABLE_DDL);
+        const counter = seriesName(tableName, name);
+        const counters = this.db.prepare(`SELECT "period", "next" FROM "${SERIES_TABLE}" WHERE "name" = ?`).all(counter) as Array<{ period: string; next: number }>;
+        const rows = this.db.prepare(`SELECT "objectId", "createdAt", ${escapeColumn(name)} AS "value" FROM ${escapeTable(tableName)}`).all() as Array<{ objectId: string; createdAt: unknown; value: unknown }>;
+        const plan = planNumbering(series, rows, counters);
+        const write = this.db.prepare(`UPDATE ${escapeTable(tableName)} SET ${escapeColumn(name)} = ? WHERE "objectId" = ?`);
+        for (const a of plan.assign) write.run(a.value, a.objectId);
+        for (const c of plan.counters) this.db.prepare(SERIES_SET_SQL).run(counter, c.period, c.next);
+      }
+    })();
     this._schemaCache.set(tableName, fresh);
     return true;
   }

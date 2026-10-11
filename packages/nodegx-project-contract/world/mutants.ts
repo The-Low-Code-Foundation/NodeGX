@@ -284,6 +284,11 @@ function retype(
     }
     // ONT-011 step 4: a secret detail is a per-field read rule (held); the mutant reads it like the rest.
     if ('secret' in rule.holds) return { schema: applyMutant(s, { dropFieldRule: { collection: home.name, field: fieldName(rule.holds.secret) } }) };
+    // ONT-015: a read-aloud number whose look is said is the store's series (held); unsaid, nothing hands it out.
+    if ('series' in rule.holds) {
+      const field = fieldName(rule.holds.series);
+      return home.columns.find((x) => x.name === field)?.series ? { schema: applyMutant(s, { dropSeries: { collection: home.name, field } }) } : { schema: s, unchanged: 'unkept' };
+    }
     // A rule no engine keeps, or a shape: taking it out changes nothing a claim can see.
     return { schema: s, unchanged: 'shape' in rule.holds ? 'unclaimed' : 'unkept' };
   }
@@ -594,6 +599,7 @@ function missingHome(schema: WorldSchema, claim: WorldClaim): string | undefined
     else if ('there' in step) miss = need(step.there, []);
     else if ('holds' in step) miss = need(step.holds, [step.field]);
     else if ('unseen' in step) miss = need(step.unseen, [step.field]);
+    else if ('numbered' in step) miss = need(step.numbered, [step.field]);
     else miss = need(step.empty, [step.field]);
     if (miss) return miss;
   }
@@ -606,12 +612,13 @@ function differsInWhatIsHeld(x: WorldSchema, y: WorldSchema): boolean {
     JSON.stringify(
       s.collections.map((c) => ({
         name: c.name,
-        columns: c.columns.map(({ name, kind, type, targetClass, required }) => ({
+        columns: c.columns.map(({ name, kind, type, targetClass, required, series }) => ({
           name,
           kind,
           type,
           targetClass,
-          required
+          required,
+          series
         })),
         checks: c.checks,
         indexes: c.indexes,

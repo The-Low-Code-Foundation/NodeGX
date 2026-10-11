@@ -519,6 +519,14 @@ export interface IStorageSchema {
    */
   setWhenTargetGoes?(table: string, columns: Record<string, 'goes-too' | 'stays-unlinked' | 'blocks' | null>): boolean;
   /**
+   * P116 ONT-015 §3.3: put a series on fields the collection already has (`null` takes it off). The
+   * records holding no value are numbered in the order they were made, each in its own period; the
+   * ones that hold one keep it; the counter starts above the highest number held and never moves
+   * backward — the declaration, the numbers and the counter in one transaction. Throws on a field the
+   * declaration does not have or a series it cannot keep. Optional — `byob-admin.ts` answers 501 without it.
+   */
+  setSeries?(table: string, columns: Record<string, StorageSeries | null>): boolean;
+  /**
    * BMG-003: drop a column (a Relation's junction table goes with it). Throws
    * `code: 'COLUMN_IN_USE'` naming the declared index, check or search opt-in
    * that reads the column — those are dropped first, on purpose, never

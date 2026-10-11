@@ -27,7 +27,7 @@
 
 import type { PathHop } from './filter';
 import { whenTargetGoesProblems, type WhenTargetGoes } from './targetGoes';
-import type { IStorageFacade, IStorageSchema, OnlyWhileRule, StorageCheckDecl, StorageColumn, StorageIndexDecl, StorageQueryOptions } from './storage';
+import type { IStorageFacade, IStorageSchema, OnlyWhileRule, StorageCheckDecl, StorageColumn, StorageIndexDecl, StorageQueryOptions, StorageSeries } from './storage';
 
 /** A stored row, as the storage layer hands it back. */
 type Row = Record<string, unknown>;
@@ -41,6 +41,8 @@ export type MigrationSchemaBody =
   | { action: 'describeTable'; table: string; description: string; columns: Record<string, string | null> }
   /** P116 R10: a changed answer to "when what it points at goes", per link (null takes the rule away). */
   | { action: 'setWhenTargetGoes'; table: string; columns: Record<string, WhenTargetGoes | null> }
+  /** P116 ONT-015: a series put on (or taken off) a field; the store numbers the records that hold none. */
+  | { action: 'setSeries'; table: string; columns: Record<string, StorageSeries | null> }
   | { action: 'setChecks'; table: string; checks: StorageCheckDecl[] }
   | { action: 'setIndexes'; table: string; indexes: StorageIndexDecl[] }
   | { action: 'dropColumn'; table: string; column: string }
@@ -220,6 +222,15 @@ export async function dryRunMigration(ctx: MigrationContext, plan: MigrationPlan
     }
   }
   for (const s of plan.steps) {
+    // ONT-015 §3.3 (AC3): a series put on a field numbers every record holding none — counted here, as a move is.
+    if ('schema' in s && s.schema.action === 'setSeries') {
+      const put = Object.entries(s.schema.columns).filter(([, series]) => series !== null);
+      if (put.length) {
+        const rows = await allRows(ctx, s.schema.table);
+        for (const [field] of put) dry.moves.push({ says: s.says, rows: rows.filter((r) => isEmpty(r[field])).length });
+      }
+      continue;
+    }
     if (!('move' in s)) continue;
     if ('linkToRecord' in s.move) {
       const m = s.move.linkToRecord;
@@ -258,6 +269,10 @@ function applySchema(ctx: MigrationContext, body: MigrationSchemaBody): void {
     case 'setWhenTargetGoes':
       if (typeof sm.setWhenTargetGoes !== 'function') throw new Error('the schema surface cannot say what happens to a link when its record goes');
       sm.setWhenTargetGoes(body.table, body.columns);
+      return;
+    case 'setSeries':
+      if (typeof sm.setSeries !== 'function') throw new Error('the schema surface cannot hand out numbers');
+      sm.setSeries(body.table, body.columns);
       return;
     case 'setChecks':
       if (typeof sm.reconcileChecks !== 'function') throw new Error('the schema surface has no reconcileChecks');
@@ -368,6 +383,7 @@ const SCHEMA_ACTIONS: ReadonlyArray<MigrationSchemaBody['action']> = [
   'renameColumn',
   'describeTable',
   'setWhenTargetGoes',
+  'setSeries',
   'setChecks',
   'setIndexes',
   'dropColumn',
@@ -418,6 +434,10 @@ export function migrationPlanProblems(plan: unknown): string[] {
       else if (b.action === 'createTable' || b.action === 'addColumn') {
         const cols = b.action === 'createTable' ? b.columns : [b.column];
         if (Array.isArray(cols)) for (const p of whenTargetGoesProblems(String(b.table), cols.filter(isObject) as unknown as StorageColumn[])) out.push(`${at}: ${p}`);
+      } else if (b.action === 'setSeries') {
+        // ONT-015: the shape only — whether the store can keep the format is the store's (it refuses in words).
+        if (!isObject(b.columns) || Object.values(b.columns).some((v) => v !== null && (!isObject(v) || !isWords(v.format))))
+          out.push(`${at}: a series change is { columns: { <field>: { format, restart?, gapFree? } or null } }`);
       }
     }
     if ('move' in s) {

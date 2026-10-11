@@ -4,7 +4,7 @@
 out at create, in a format the person gave, going up by one, never skipping if they said so, and never used twice.
 **Depends on** ONT-014 (the number is frozen after create), ONT-011 step 2 (the *read aloud* fact on a noun is the
 question that leads here), ONT-007 (a series put on a collection with records is a migration). **Feeds** ONT-013
-(the invoice sentence projects in full). **Status: 🟡 s21 — unblocked (§6.1: the census found 3 rows over 2 sources); the store and the doors built (§6.2: AC1, AC4, AC2's create half; both engines); the projection, the claim, the migration and the capability cell owed — opened on Richard's sentence (`from: oral`) with a thin
+(the invoice sentence projects in full). **Status: 🟡 s22 — every AC built (§6.3: the projection, the held claim and its mutant, AC2's 409, AC3's migration on both engines); open: the capability cell (lands with its consumer, ONT-008 — §6.3), two defects filed (`P116-S22-SERIESCARRY`, `-SERIESMSG`); closes when Richard reads it. s21 — unblocked (§6.1: the census found 3 rows over 2 sources); the store and the doors built (§6.2: AC1, AC4, AC2's create half; both engines) — opened on Richard's sentence (`from: oral`) with a thin
 warrant: ONT-011 §3.3 found one read-aloud row and no invoice-style numbering in the 8 sources. R-g ruled 2026-10-10 (§5): ask, never assume. **s19 (ONT-011 step 2):** the noun's questions exist — `readAloud`, then `looksLike`, `maySkip` (R-g's words), `restarts` — and project to a `number` field, unique and set once (held) with the series said in words; this task's build flips the `series` hold from said to held.**
 
 > **Model check (Richard, 2026-10-08 rule):** the build wants **Opus 5.5**: a counter table and an allocation inside
@@ -155,12 +155,61 @@ thin and the build is unblocked** without a ruling. What the two new rows say ab
   idle until its own timeout. The eight-at-once cases filled the pools and the run reached PostgreSQL's 100
   connections. The last three tests could not connect. Each run's adapters are now closed when the run ends (peak
   14 connections, 21/21).
-- **Not built (next):** §3.3's projection (`RuleHold` `series` → the field option, `looksLike` → `format`, `maySkip`
+- **Not built in s21 (built s22, §6.3, but the capability cell):** §3.3's projection (`RuleHold` `series` → the field option, `looksLike` → `format`, `maySkip`
   → `gapFree`, `restarts` → `restart`, and `frozen`); the claim `<noun>/number-never-used-again` flipped to held with
   a mutant `dropSeries`, which moves ONT-005's pin (AC5); the migration step (AC3); the capability cell (a new
   `CapabilityKey` every one of the six descriptors must declare, `unsupported` in words except nodegx). **Backups:** a
   SQLite backup is the whole file, so `_Series` goes with every restore (from the backup code; no restore spec
   graded yet). PostgreSQL takes no backup here (`BackupNotFileBackedError`), so §3.2's restore sentence does not arise on it.
+
+### 6.3 The projection, the claim and the migration (s22, 2026-10-11, Opus 5.5) — AC2, AC3, AC5
+
+- **The projection** (`world/noun.ts` `numberSeries`, `project.ts`): a read-aloud noun whose look is said gets the
+  store's series on its `number` field — `looksLike` is the format, `maySkip: false` makes it `gapFree: true` (unanswered
+  or yes: a plain sequence, R-g), `restarts` `each year`/`each month` → `restart: year`/`month`. The unique index and
+  the freeze (ONT-014's `frozen`, from the set-once rule) stay. The `series` hold is **held** then, and nothing is said
+  in words. With no look said there is nothing to hand out: the field stays plain text, the rule is said with that
+  reason, and s19's not-held claim still measures the reuse.
+- **A look the store cannot hand out is refused by the world's validator**, in words (`numberLookProblem`: one run of
+  `#`, only {YYYY} {YY} {MM}, a yearly restart shows the year, a monthly one the year and the month). The store's own
+  check is `seriesProblem` in the runtime; `ont-015-projection.test.ts` grades both on one list of eleven looks, so
+  the two cannot drift.
+- **The claim** `<noun>/number-never-used-again` is held: two records made without a number, a new claim step
+  `numbered` (each row holds a value and no two the same; a row removed since is read as an earlier `numbered` saw it),
+  the second deleted, a third made, `numbered` again over all three. Its mutant `dropSeries` (the column without its
+  series) fails at the first `numbered`. Both contracts' `ClaimStep`, `runClaim`, `saysTheRule`, the reach and
+  `mutants.ts`'s `need` carry the step; `differsInWhatIsHeld` reads `series`. every-kind's `session` noun (`S-{####}`,
+  gaps allowed) is the fixture; its golden moved by exactly that.
+- **AC5**: the invoice sentence (§1) projects to `{ format: "INV-{YYYY}-{####}", restart: "year", gapFree: true }`, and
+  its three rules are held: unique (the index), never changed (frozen), handed out and never used again (the series)
+  (`project-contract/tests/series.test.ts`, 20 cases; two mutants shown red). ONT-005's pin: **it does not move, measured** — every-kind stays 14 of 51 on both engines (0 unanswered, 6 unkept, 8 unclaimed). AC5 expected it to: the only read-aloud mistake ONT-005 makes (`session/number-reused`, `readAloud` unanswered) was already killed before s22, for want of a home (no `number` field for the claims to name). What s22 adds is the held claim's own mutant (`dropSeries`), graded with every claim in `ont-003-claims` — a claim mutant, not one of ONT-005's 51. The pin's line is unchanged and its docblock says why.
+- **AC3, the migration.** A series put on a field records already fill is a schema step of its own,
+  `setSeries { table, columns: { <field>: series | null } }`, beside `setWhenTargetGoes`: on the contract's schema
+  surface, both schema managers, the executor (`applySchema`, the plan check) and `POST /admin/schema` (400 in words,
+  501 on an adapter without it). The store does the numbering, in one transaction with the declaration and the counter
+  (`planNumbering` in `adapters/series.ts`): the records without a value, in `createdAt` order (then `objectId`), each in
+  its own period (an invoice made in 2025 gets a 2025 number); the ones holding a value keep it, and `seriesParse`
+  reads each held number back in the format so each counter starts above the highest; a value in another look is kept
+  and counts for nothing; a counter never moves backward (a series put on again after every record was deleted goes on
+  from where it was). The planner writes `addColumn` without the series and then `setSeries` for a new number field,
+  only `setSeries` when the look is said later, and `setSeries: null` when it is unsaid again. **The dry run counts the
+  records it will number** (`dryRun.moves`, in the step's words). `planTouchesWhatTheSchemaRouteRefuses` refuses an
+  unkeepable series in a plan before the backup. Conformance: three cases more in area `series` (13), and
+  `setSeries` in the coverage ledger.
+- **Graded** in `nodegx-backend/tests/ont-015-projection.test.ts` over `POST /admin/world/migrate`, on SQLite and
+  PostgreSQL (13/13): three invoices numbered 0001–0003 in the order made, the dry run saying 3, the next person's
+  create 0004; with `INV-<year>-0007` and `OLD-99` held, the other two become 0008 and 0009 and the next 0010; **AC2** a
+  person's PUT of a new number 409, of the amount 200. Two mutants of `planNumbering`, each shown: the held numbers
+  ignored (0001/0002 handed out under 0007), and the counter left where it was (the next create is handed 0001 again
+  and refused by the unique rule).
+- **The capability cell is not built, on purpose.** `CapabilityKey`'s own rule is "one key per thing a node can
+  attempt, and no key for anything no node consumes", and `path` (§3.2's model) is an operator cell, which a series is
+  not. No node or panel reads a series cell yet: its consumer is the manager's field editor (ONT-008), so the cell
+  lands with it (`supported` on nodegx, `unsupported` in words on the other five). No AC names the cell.
+- **Found (filed, not fixed; neither blocks an AC):** `P116-S22-SERIESCARRY` — a number the admin types in the
+  series' own look does not move the counter, so the store later hands that number out and the person's create is a
+  409 (the fix is `planNumbering`'s rule, applied in the create); `P116-S22-SERIESMSG` — that 409 says
+  `undefined is already used`, since its words read the request body, which never carries the number.
 
 ## 7. Not this task
 

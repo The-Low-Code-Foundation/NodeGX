@@ -11,7 +11,7 @@
  */
 import type { AnswerShape } from './kind';
 import { PROPERTY_KINDS, WORLD_FILES, type WorldFileName } from './files';
-import { NOUN_QUESTIONS, NUMBER_QUESTIONS } from './noun';
+import { NOUN_QUESTIONS, NUMBER_QUESTIONS, numberLookProblem } from './noun';
 import { validateVerbs } from './verbs';
 import { WORLD_VOCABULARY_REF, type VocabularyRef } from './vocabulary';
 
@@ -184,6 +184,11 @@ export function validateWorld(
       }
       if (NUMBER_QUESTIONS.includes(qid) && n.answers.readAloud !== true)
         say('nouns', `${at}.answers.${qid}`, 'nothing: asked only of a noun whose number is read aloud', value, `${label} answers "${q.ask}", and does not say people read its number aloud (answers.readAloud is not true).`);
+    }
+    // ONT-015: the look is what the store hands out, so one it cannot is refused here, in words.
+    if (n.answers.readAloud === true && typeof n.answers.looksLike === 'string') {
+      const problem = numberLookProblem(n.answers.looksLike, n.answers.restarts);
+      if (problem) say('nouns', `${at}.answers.looksLike`, 'a number the backend can hand out, such as INV-{YYYY}-{####}', n.answers.looksLike, `${label}: ${problem}.`);
     }
     if (n.answers.secret === true && !((Array.isArray(n.properties) ? n.properties : []) as unknown[]).some((p) => isObj(p) && p.secret === true))
       say('nouns', `${at}.answers.secret`, 'a detail marked "secret": true', true, `${label} says a detail on it is not for everyone who can see it, and no detail says which: mark it "secret": true.`);

@@ -108,6 +108,84 @@ export const SERIES_TABLE_DDL = `CREATE TABLE IF NOT EXISTS "${SERIES_TABLE}" ("
  */
 export const SERIES_TAKE_SQL = `INSERT INTO "${SERIES_TABLE}" ("name", "period", "next") VALUES (?, ?, 2) ON CONFLICT ("name", "period") DO UPDATE SET "next" = "${SERIES_TABLE}"."next" + 1 RETURNING "next" - 1 AS "issued"`;
 
+/** Both engines: put a counter where the numbering left it (`setSeries`). Parameters: name, period, next. */
+export const SERIES_SET_SQL = `INSERT INTO "${SERIES_TABLE}" ("name", "period", "next") VALUES (?, ?, ?) ON CONFLICT ("name", "period") DO UPDATE SET "next" = excluded."next"`;
+
+const escapeRe = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * The period and the counter a value holds when it reads as `series.format` — or null (a number
+ * typed by hand in another look, or not a number at all). `{YY}` alone reads as this century.
+ */
+export function seriesParse(series: SeriesOption, value: unknown): { period: string; n: number } | null {
+  if (typeof value !== 'string') return null;
+  const groups: string[] = [];
+  let pattern = '';
+  let last = 0;
+  for (const m of series.format.matchAll(TOKEN_RE)) {
+    pattern += escapeRe(series.format.slice(last, m.index));
+    last = (m.index as number) + m[0].length;
+    if (COUNTER_RE.test(m[1])) pattern += `(\\d{${m[1].length},})`;
+    else pattern += m[1] === 'YYYY' ? '(\\d{4})' : '(\\d{2})';
+    groups.push(COUNTER_RE.test(m[1]) ? '#' : m[1]);
+  }
+  pattern += escapeRe(series.format.slice(last));
+  const hit = new RegExp(`^${pattern}$`).exec(value);
+  if (!hit) return null;
+  const at = (token: string): string | undefined => {
+    const i = groups.indexOf(token);
+    return i < 0 ? undefined : hit[i + 1];
+  };
+  const n = Number(at('#'));
+  const year = at('YYYY') ?? (at('YY') !== undefined ? String(2000 + Number(at('YY'))) : undefined);
+  if (series.restart === 'year') return { period: year as string, n };
+  if (series.restart === 'month') return { period: `${year}-${at('MM')}`, n };
+  return { period: '', n };
+}
+
+/** What `setSeries` writes: a number for each record that has none, and the counters after them. */
+export interface SeriesNumbering {
+  assign: Array<{ objectId: string; value: string }>;
+  counters: Array<{ period: string; next: number }>;
+}
+
+/**
+ * P116 ONT-015 §3.3 — a series put on a field records already fill. The records with no value are
+ * numbered in the order they were made (`createdAt`, then `objectId`), each in its own period (an
+ * invoice made in 2025 gets a 2025 number); the ones that hold a value keep it; each counter starts
+ * above the highest number held in its period, and never moves backward (`counters` holds only the
+ * periods whose counter moves forward).
+ */
+export function planNumbering(
+  series: SeriesOption,
+  rows: ReadonlyArray<{ objectId: string; createdAt: unknown; value: unknown }>,
+  counters: ReadonlyArray<{ period: string; next: number | string }>
+): SeriesNumbering {
+  const was = new Map(counters.map((c) => [c.period, Number(c.next)]));
+  const highest = new Map<string, number>();
+  for (const [period, next] of was) highest.set(period, next - 1);
+  const empty: Array<{ objectId: string; at: Date }> = [];
+  for (const r of rows) {
+    if (r.value !== undefined && r.value !== null && r.value !== '') {
+      const held = seriesParse(series, r.value);
+      if (held && held.n > (highest.get(held.period) ?? 0)) highest.set(held.period, held.n);
+      continue;
+    }
+    const at = new Date(r.createdAt instanceof Date ? r.createdAt.getTime() : String(r.createdAt));
+    empty.push({ objectId: r.objectId, at: Number.isNaN(at.getTime()) ? seriesNow() : at });
+  }
+  empty.sort((x, y) => x.at.getTime() - y.at.getTime() || (x.objectId < y.objectId ? -1 : x.objectId > y.objectId ? 1 : 0));
+  const assign = empty.map(({ objectId, at }) => {
+    const period = seriesPeriod(series, at);
+    const n = (highest.get(period) ?? 0) + 1;
+    highest.set(period, n);
+    return { objectId, value: formatSeries(series, n, at) };
+  });
+  const out: SeriesNumbering['counters'] = [];
+  for (const [period, n] of highest) if (n + 1 > (was.get(period) ?? 1)) out.push({ period, next: n + 1 });
+  return { assign, counters: out };
+}
+
 /**
  * The fields of `data` a create must not carry from anyone but the admin: the collection's series
  * fields the body names with a value. The doors refuse them with `seriesRefusal`.

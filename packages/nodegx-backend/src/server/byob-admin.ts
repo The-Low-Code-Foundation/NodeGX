@@ -18,7 +18,7 @@
 
 import type * as http from 'http';
 
-import { whenTargetGoesProblems, type IStorageFacade, type WhenTargetGoes } from '@noodl/backend-contract';
+import { whenTargetGoesProblems, type IStorageFacade, type StorageSeries, type WhenTargetGoes } from '@noodl/backend-contract';
 import type { ExecutionHistory } from '../execution/ExecutionStore';
 import type { WorkflowRunner } from '../workflow/WorkflowRunner';
 import type { RequestContext } from './HttpServer';
@@ -189,7 +189,7 @@ export interface TableSchemaResponse {
 /** `POST /admin/schema` — one of the five mutation actions. */
 export interface SchemaMutationResponse {
   success: boolean;
-  action: 'createTable' | 'addColumn' | 'renameColumn' | 'renameTable' | 'describeTable' | 'setWhenTargetGoes' | 'changeColumnType' | 'deleteTable' | 'setIndexes' | 'setChecks' | 'dropColumn';
+  action: 'createTable' | 'addColumn' | 'renameColumn' | 'renameTable' | 'describeTable' | 'setWhenTargetGoes' | 'setSeries' | 'changeColumnType' | 'deleteTable' | 'setIndexes' | 'setChecks' | 'dropColumn';
   table: string;
   /** Present on createTable / deleteTable: whether the DDL actually ran. */
   created?: boolean;
@@ -679,6 +679,34 @@ export class ByobAdminRoutes {
         sendJSON(res, 200, { success: true, action: 'setWhenTargetGoes', table } satisfies SchemaMutationResponse);
         return;
       }
+      case 'setSeries': {
+        // P116 ONT-015 §3.3: a series put on (or taken off) a field the collection has. Putting one numbers
+        // the records holding none, in the order they were made, above the highest number held — in the store,
+        // in one transaction (the counter must move with the numbers). A migration's step (ONT-007).
+        if (typeof sm.setSeries !== 'function') throw new HttpError(501, 'This adapter cannot hand out numbers.');
+        const columns = body.columns;
+        if (!columns || typeof columns !== 'object' || Array.isArray(columns) || !Object.values(columns).every((v) => v === null || (!!v && typeof v === 'object' && !Array.isArray(v)))) {
+          throw new HttpError(400, 'Say each field\'s series as { "<field>": { "format": "INV-{YYYY}-{####}", "restart"?, "gapFree"? } } (null takes it off).');
+        }
+        const now = sm.getTableSchema(table);
+        if (!now) throw new HttpError(404, `No such table: ${table}`);
+        const series = columns as Record<string, StorageSeries | null>;
+        for (const [field, option] of Object.entries(series)) {
+          const col = (now.columns || []).find((c) => c.name === field);
+          if (!col) throw new HttpError(400, `"${table}" has no field "${field}"`);
+          const problem = option === null ? null : seriesProblem(field, option, col.type);
+          if (problem) throw new HttpError(400, problem);
+        }
+        try {
+          sm.setSeries(table, series);
+        } catch (e) {
+          throw new HttpError(400, e instanceof Error ? e.message : String(e));
+        }
+        await this.awaitSchemaQueue(ctx, table);
+        ctx.audit({ setSeries: table, fields: Object.keys(series) });
+        sendJSON(res, 200, { success: true, action: 'setSeries', table } satisfies SchemaMutationResponse);
+        return;
+      }
       case 'changeColumnType': {
         // AAQ-002. Optional on the interface (an older adapter predates it), so
         // its absence is a 501 rather than an `is not a function` at request time.
@@ -742,7 +770,7 @@ export class ByobAdminRoutes {
         throw new HttpError(
           400,
           `Unknown schema action: ${String(body.action)}. Expected one of createTable, addColumn, ` +
-            'renameColumn, renameTable, describeTable, setWhenTargetGoes, changeColumnType, dropColumn, deleteTable, setIndexes, setChecks.'
+            'renameColumn, renameTable, describeTable, setWhenTargetGoes, setSeries, changeColumnType, dropColumn, deleteTable, setIndexes, setChecks.'
         );
     }
   }

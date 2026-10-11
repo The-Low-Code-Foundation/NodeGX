@@ -203,10 +203,8 @@
         "noun": "session"
       },
       "sentence": "A session is one meeting on one date that people sign up for and come to.",
-      "notHeld": [
-        "a session's number is handed out by the store, going up by one, and never used again; it looks like S-{####}; a save that fails may leave a gap"
-      ],
-      "description": "A session is one meeting on one date that people sign up for and come to. Not kept by the database yet: a session's number is handed out by the store, going up by one, and never used again; it looks like S-{####}; a save that fails may leave a gap.",
+      "notHeld": [],
+      "description": "A session is one meeting on one date that people sign up for and come to.",
       "columns": [
         {
           "name": "title",
@@ -222,7 +220,10 @@
           "name": "number",
           "kind": "text",
           "type": "String",
-          "description": "a session's number, which people read aloud"
+          "description": "a session's number, which people read aloud",
+          "series": {
+            "format": "S-{####}"
+          }
         },
         {
           "name": "tag",
@@ -2135,6 +2136,58 @@
       ]
     },
     {
+      "id": "session/number-never-used-again",
+      "says": "a session's number is handed out by the store, going up by one, and never used again; it looks like S-{####}; a save that fails may leave a gap",
+      "from": {
+        "noun": "session"
+      },
+      "held": true,
+      "mutant": {
+        "dropSeries": {
+          "collection": "Session",
+          "field": "number"
+        }
+      },
+      "steps": [
+        {
+          "make": "Session",
+          "as": "session1",
+          "data": {}
+        },
+        {
+          "make": "Session",
+          "as": "session2",
+          "data": {}
+        },
+        {
+          "numbered": "Session",
+          "field": "number",
+          "rows": [
+            "session1",
+            "session2"
+          ]
+        },
+        {
+          "remove": "Session",
+          "row": "session2"
+        },
+        {
+          "make": "Session",
+          "as": "session3",
+          "data": {}
+        },
+        {
+          "numbered": "Session",
+          "field": "number",
+          "rows": [
+            "session1",
+            "session2",
+            "session3"
+          ]
+        }
+      ]
+    },
+    {
       "id": "session/number-is-set-once",
       "says": "a session's number is written once and never changed",
       "from": {
@@ -2163,33 +2216,6 @@
           },
           "refused": true,
           "byPerson": true
-        }
-      ]
-    },
-    {
-      "id": "session/number-never-used-again",
-      "says": "a session's number is handed out by the store, going up by one, and never used again; it looks like S-{####}; a save that fails may leave a gap",
-      "from": {
-        "noun": "session"
-      },
-      "held": false,
-      "steps": [
-        {
-          "make": "Session",
-          "as": "session2",
-          "data": {
-            "number": "number-1"
-          }
-        },
-        {
-          "remove": "Session",
-          "row": "session2"
-        },
-        {
-          "refuse": "Session",
-          "data": {
-            "number": "number-1"
-          }
         }
       ]
     },
@@ -3006,13 +3032,6 @@
       "collection": "AccountHistory",
       "says": "every change to an account is written to its history",
       "why": "the store keeps the history records, and does not write one on every save; a verb or a trigger does"
-    },
-    {
-      "collection": "Session",
-      "field": "number",
-      "says": "a session's number is handed out by the store, going up by one, and never used again; it looks like S-{####}; a save that fails may leave a gap",
-      "why": "a number handed out by the store, going up by one and never used again, is ONT-015’s series; until it is built the field is text, unique and set once",
-      "claim": "session/number-never-used-again"
     },
     {
       "collection": "Slot",

@@ -245,6 +245,10 @@ export const SCHEMA_COVERAGE: { readonly [K in keyof IStorageSchema]-?: Coverage
     owes: 'BRG-004'
   },
   setWhenTargetGoes: { kind: 'cases', cases: ['schema/set-when-target-goes-changes-the-declaration'] },
+  setSeries: {
+    kind: 'cases',
+    cases: ['series/put-on-records-numbers-them-in-the-order-made', 'series/put-on-again-never-moves-the-counter-back', 'series/taken-off-hands-out-nothing']
+  },
   exportSchemas: {
     kind: 'uncovered',
     why: 'The read half of the export path the two generators below sit on. BRG-004 owns that path end to end.',

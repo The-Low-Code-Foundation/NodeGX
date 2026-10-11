@@ -194,6 +194,12 @@ export type SchemaBody =
   | { action: 'describeTable'; table: string; description: string; columns: Record<string, string | null> }
   /** R10: a changed answer to "when what it points at goes", per link (null takes the rule away). */
   | { action: 'setWhenTargetGoes'; table: string; columns: Record<string, NonNullable<WorldColumn['whenTargetGoes']> | null> }
+  /**
+   * ONT-015 §3.3: a series put on a field records already have (null takes it off). The store numbers
+   * the ones holding none, in the order they were made, above the highest number held; the dry run
+   * counts them.
+   */
+  | { action: 'setSeries'; table: string; columns: Record<string, NonNullable<WorldColumn['series']> | null> }
   | { action: 'setChecks'; table: string; checks: WorldCheck[] }
   | { action: 'setIndexes'; table: string; indexes: WorldIndex[] }
   | { action: 'dropColumn'; table: string; column: string }
@@ -554,6 +560,8 @@ function planBetween(before: WorldFiles, after: WorldFiles, sb: WorldSchema, sa:
   const reach: ReachRow[] = [];
   const created: MigrationStep[] = [];
   const added: MigrationStep[] = [];
+  /** ONT-015: series put on (or taken off) a kept collection's fields — after the fields are there. */
+  const numbered: MigrationStep[] = [];
   const rules: MigrationStep[] = [];
   const described: MigrationStep[] = [];
   const dropped: MigrationStep[] = [];
@@ -579,6 +587,11 @@ function planBetween(before: WorldFiles, after: WorldFiles, sb: WorldSchema, sa:
           added.push({ schema: { action: 'addColumn', table: c.name, column: optional(col) }, says: `give every ${oneOf(c)} ${article(col.name)}, filled by the move below` });
           const claim = sa.claims.find((x) => x.mutant && 'dropRequired' in x.mutant && x.mutant.dropRequired.collection === c.name && x.mutant.dropRequired.field === col.name);
           if (claim) notKept.push({ claim: claim.id, why: `the schema route cannot make a field required once records exist, except by filling every one with the same value; the ${col.name} is filled record by record instead, and new ${wordsOf(c)} are not made to have one` });
+        } else if (col.series) {
+          // ONT-015 (AC3): the field first, then the series — which numbers the records already there.
+          const { series: _series, ...plain } = pushable(col);
+          void _series;
+          added.push({ schema: { action: 'addColumn', table: c.name, column: plain }, says: `give every ${oneOf(c)} ${article(col.name)}` });
         } else {
           added.push({ schema: { action: 'addColumn', table: c.name, column: pushable(col) }, says: `give every ${oneOf(c)} ${article(col.name)}` });
           if (col.required && !filled.has(key)) checks.push({ refuse: 'rows', collection: c.name, says: `every ${oneOf(c)} must have ${article(col.name)}, and the ones already there have none` });
@@ -595,6 +608,24 @@ function planBetween(before: WorldFiles, after: WorldFiles, sb: WorldSchema, sa:
       dropped.push({ schema: { action: 'dropColumn', table: c.name, column: old.name }, says: `take the ${old.name} off ${wordsOf(c)}` });
       if (!carried.has(`${c.name}.${old.name}`)) checks.push({ loses: 'values', collection: c.name, field: old.name, says: `the ${old.name} of each ${oneOf(c)}` });
       fields.add(old.name);
+    }
+    // ONT-015 §3.3: a number the store hands out, put on a field (new or kept) or taken off one.
+    const series: Record<string, NonNullable<WorldColumn['series']> | null> = {};
+    for (const col of c.columns) {
+      const old = was.columns.find((x) => x.name === col.name);
+      if (JSON.stringify(old?.series ?? null) !== JSON.stringify(col.series ?? null)) series[col.name] = col.series ?? null;
+    }
+    if (Object.keys(series).length) {
+      const put = Object.keys(series).filter((f) => series[f]);
+      const off = Object.keys(series).filter((f) => !series[f]);
+      numbered.push({
+        schema: { action: 'setSeries', table: c.name, columns: series },
+        says: [
+          ...put.map((f) => `hand out each new ${oneOf(c)}'s ${f} as ${series[f]!.format}, and number every ${oneOf(c)} that has none, in the order they were made, after the highest one already held`),
+          ...off.map((f) => `stop handing out ${wordsOf(c)}' ${f}; the ones given stay`)
+        ].join('; ')
+      });
+      for (const f of Object.keys(series)) fields.add(f);
     }
     if (sortedText(was.checks) !== sortedText(c.checks)) {
       rules.push({ schema: { action: 'setChecks', table: c.name, checks: c.checks }, says: `${wordsOf(c)} keep the lists said now` });
@@ -674,6 +705,7 @@ function planBetween(before: WorldFiles, after: WorldFiles, sb: WorldSchema, sa:
     { backup: true, says: 'take a backup of everything first, so any of this can be undone' },
     ...created,
     ...added,
+    ...numbered,
     ...moves,
     ...rules,
     ...described,

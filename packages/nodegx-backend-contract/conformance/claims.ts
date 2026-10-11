@@ -80,7 +80,12 @@ export type ClaimStep =
   /** P116 ONT-006: the row is there and the field holds exactly `value` */
   | { holds: string; row: string; field: string; value: ClaimValue }
   /** P116 ONT-011 step 4: a person signed in with no role reads the row, and it comes back without the field */
-  | { unseen: string; row: string; field: string };
+  | { unseen: string; row: string; field: string }
+  /**
+   * P116 ONT-015: each row holds a value in the field (the store gave it one), and no two hold the
+   * same. A row removed since is read as an earlier `numbered` step saw it: a number never comes back.
+   */
+  | { numbered: string; field: string; rows: string[] };
 
 export interface Claim {
   id: string;
@@ -91,7 +96,7 @@ export interface Claim {
 
 /** Whether a step is one that says the rule, rather than one that makes the rows it needs. */
 export function saysTheRule(step: ClaimStep): boolean {
-  if ('refuse' in step || 'paired' in step || 'gone' in step || 'empty' in step || 'there' in step || 'holds' in step || 'unseen' in step) return true;
+  if ('refuse' in step || 'paired' in step || 'gone' in step || 'empty' in step || 'there' in step || 'holds' in step || 'unseen' in step || 'numbered' in step) return true;
   if ('change' in step || 'remove' in step) return step.refused === true;
   return false;
 }
@@ -113,7 +118,7 @@ function reached(schema: ClaimSchema, claim: Claim): ClaimCollection[] {
   };
   for (const step of claim.steps) {
     const s = step as Record<string, unknown>;
-    for (const key of ['make', 'refuse', 'change', 'remove', 'pair', 'paired', 'gone', 'empty', 'there', 'holds', 'unseen']) if (typeof s[key] === 'string') add(s[key] as string);
+    for (const key of ['make', 'refuse', 'change', 'remove', 'pair', 'paired', 'gone', 'empty', 'there', 'holds', 'unseen', 'numbered']) if (typeof s[key] === 'string') add(s[key] as string);
   }
   return schema.collections.filter((c) => want.has(c.name));
 }
@@ -190,6 +195,9 @@ export async function runClaim(ctx: ConformanceContext, schema: ClaimSchema, cla
     return Array.isArray(got[field]) ? (got[field] as unknown[]) : [];
   };
 
+  // ONT-015: the numbers a `numbered` step read, by row and field — what a row removed since was given.
+  const numbers = new Map<string, unknown>();
+
   for (let i = 0; i < claim.steps.length; i++) {
     const step = claim.steps[i];
     try {
@@ -238,6 +246,18 @@ export async function runClaim(ctx: ConformanceContext, schema: ClaimSchema, cla
         const got = await ctx.fetch(real(step.unseen), id(step.row), readAcl(step.unseen));
         if (String(got.objectId) !== id(step.row)) throw new ConformanceError(`the ${step.unseen} row did not come back to a person`);
         if (step.field in got) throw new ConformanceError(`${step.field} came back to a person who may not read it: ${JSON.stringify(got[step.field])}`);
+      } else if ('numbered' in step) {
+        const seen = new Map<unknown, string>();
+        for (const row of step.rows) {
+          const key = `${row}.${step.field}`;
+          const there = (await ctx.count(real(step.numbered), { objectId: id(row) })) === 1;
+          if (there) numbers.set(key, (await ctx.fetch(real(step.numbered), id(row)))[step.field]);
+          else if (!numbers.has(key)) throw new ConformanceError(`the ${step.numbered} row ${row} is gone, and no earlier step read its ${step.field}`);
+          const n = numbers.get(key);
+          if (n === undefined || n === null || n === '') throw new ConformanceError(`${row} was given no ${step.field}`);
+          if (seen.has(n)) throw new ConformanceError(`${row} and ${seen.get(n)} were both given ${step.field} ${JSON.stringify(n)}`);
+          seen.set(n, row);
+        }
       } else {
         const got = await ctx.fetch(real(step.empty), id(step.row));
         const v = idOf(got[step.field]);

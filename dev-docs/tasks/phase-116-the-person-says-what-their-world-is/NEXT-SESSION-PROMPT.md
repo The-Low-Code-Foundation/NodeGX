@@ -1,17 +1,17 @@
 # Phase 116 — next session
 
-**Written 2026-10-11, end of s21 (Opus 5.5).** ONT-000 ✅, ONT-002 ✅, ONT-003 ✅, ONT-007 ✅. 🟡: ONT-001 (AC4 →
+**Written 2026-10-11, end of s22 (Opus 5.5).** ONT-000 ✅, ONT-002 ✅, ONT-003 ✅, ONT-007 ✅. 🟡: ONT-001 (AC4 →
 ONT-008), ONT-004 (AC2 → ONT-008), ONT-005 (every-kind 14 of 51), ONT-006 (the view is ONT-008's), ONT-011 (step 5,
 the view hints, owed — ONT-008's suite), ONT-012 (reach review ✅ s18), ONT-014 (every AC built; closes when Richard
-reads it), **ONT-013 (step 4 ✅ s21; steps 1–3 and 5 owed)**, **ONT-015 (unblocked and the store built s21; the
-projection, claim, migration and capability cell owed)**. 📋: ONT-016 (opened s21, unscoped), ONT-008, ONT-009,
+reads it), **ONT-013 (step 4 ✅ s21; steps 1–3 and 5 owed)**, **ONT-015 (every AC built s22; closes when Richard
+reads it; the capability cell waits for ONT-008)**. 📋: ONT-016 (opened s21, unscoped), ONT-008, ONT-009,
 ONT-010. R1–R10, R-a to R-j are ruled (README §9); **nothing is waiting on Richard**.
 
 ## Before anything
 
-0. **Model check.** Task 1 below is an Opus build; 3 and 4 are Fable. Say which you are.
-1. **`node scripts/bugs.js --from P116`**: 6 open (NULLEQ, DOTTEDFILTER, CRONLEAK, -required, and two owned
-   elsewhere). Nothing filed s21.
+0. **Model check.** Tasks 1 and 2 below are Opus; 3–5 are Fable. Say which you are.
+1. **`node scripts/bugs.js --from P116`**: 8 open (SERIESCARRY, SERIESMSG — filed s22 — NULLEQ, DOTTEDFILTER,
+   CRONLEAK, -required, and two owned elsewhere).
 2. **One heavy job on this box:** `pgrep -fl "bin/jest|vitest"`. Wait for a peer's run.
 3. **`git diff --cached --name-only`** first; commit by pathspec through a temporary index (the memory recipe), then
    `git reset -q HEAD -- <your files>` so the real index matches HEAD.
@@ -23,53 +23,39 @@ ONT-010. R1–R10, R-a to R-j are ruled (README §9); **nothing is waiting on Ri
    below + `tsc --noEmit -p tsconfig.tests.json`. Always `--noEmit`: `tsc -p` emits in place (the untracked `.d.ts`
    files in `packages/nodegx-backend-contract/src/` are someone's emit — not P116's, leave them).
 
-## What s21 did (Opus 5.5)
+## What s22 did (Opus 5.5) — ONT-015's every AC (its §6.3)
 
-1. **The handoff was wrong about ONT-015.** It said "nothing is waiting on Richard" and put ONT-015 first. The task
-   file said the build waited on a second census row or Richard's word (§8). Measured: the read-aloud borrow held
-   **1** row. So s21 built **ONT-013 step 4** first (the Opus half of ONT-013), which is also where ONT-015 §8 said a
-   second row would come from.
-2. **ONT-013 step 4** (`ae4e61dfb`, its §9.1): `census.js` `detectAcross()`, the first detectors that read the apps'
-   code (265,639 lines over 4 templates + 3 private corpora, never tests/seeds/generators). **count 2 rows over 2
-   sources** (nightbook's 200-thing cap counted before the create; a private limit field whose own note says "not
-   enforced"), **sum 0, overlap 0**, each zero beside `ACROSS_CONTROLS` (every detector fires on its line, stays quiet
-   on its near-miss; five mutants each turn the census red). The count atom opened as **ONT-016** (stub). The same
-   pass: **read-aloud 1 → 3 rows over 2 sources**, both new ones the count-plus-one mistake → ONT-015 unblocked (§6.1).
-3. **ONT-015's store and doors** (§6.2): `series: { format, restart?, gapFree? }` on a column
-   (`noodl-runtime/src/api/adapters/series.ts`, `SchemaColumn`, contract `StorageColumn`/`StorageSeries`), taken in one
-   upsert on `_Series` inside `create` on both engines (gap-free: in the insert's transaction), validated at
-   `createTable`/`addColumn` and `POST /admin/schema` (400). The doors (`server/series-door.ts`) refuse a person's own
-   number with a 400 at `/classes` create + upsert, `/api/:table`, the batch and MCP; the admin's is kept; the 201
-   and the MCP answer carry the number. Conformance area **`series`** (10 cases) + mutant
-   **`series-counted-not-taken`**; `tests/ont-015-series.test.ts` (year/month roll on `setSeriesClock`, three
-   mutants shown).
-4. **Fixed on the way:** `brg-005-conformance-postgres` kept every per-case adapter's pool open to `afterAll`; with
-   eight creates at once it hit PostgreSQL's 100 connections. Now drained per run (peak 14).
+1. **The projection.** A read-aloud noun whose look is said gets the store's series on `number` (`noun.ts`
+   `numberSeries`: `looksLike` → format, `maySkip: false` → gap-free, `restarts` → year/month), held; unsaid look → no
+   series, said in words, s19's not-held claim. `numberLookProblem` refuses an unkeepable look in the validator.
+2. **The claim** `<noun>/number-never-used-again` held, new claim step **`numbered`** (both contracts, `runClaim`
+   remembers a deleted row's number), mutant **`dropSeries`**. The brief teaches the three answers.
+3. **AC3:** `setSeries` on the schema surface, both schema managers, the executor, `POST /admin/schema` — the store
+   numbers the records without a value in `createdAt` order, each in its period, above the highest held
+   (`planNumbering`/`seriesParse` in `adapters/series.ts`), counter never backward; the dry run counts them; the planner
+   writes `addColumn` (plain) then `setSeries`. 3 conformance cases more (`series` 13), coverage ledger.
+4. **Not built on purpose:** the capability cell — `CapabilityKey`'s rule is "no key nothing consumes"; its consumer is
+   ONT-008's field editor. No AC names it. **AC5's "the pin moves" measured false:** still 14 of 51 (the read-aloud
+   mistake was already killed for want of a home); said in the pin's docblock and §6.3.
+5. **Filed:** `P116-S22-SERIESCARRY` (an admin's in-look number does not move the counter → a later person's create
+   409s) and `-SERIESMSG` (that 409 says `undefined is already used`).
 
-## What s21 measured (2026-10-11)
+## What s22 measured (2026-10-11)
 
-- Census: `--check` green with and without the private corpora (15 kinds, 303 + 8; read-aloud 3; across count 2).
-- Backend contract 9 suites **232/232**, `tsc --noEmit` clean. Runtime `test/adapters` 17 suites **331/331**, `tsc`
-  clean. Backend `tsc --noEmit -p tsconfig.tests.json` clean, src clean.
-- `brg-003-conformance-sqlite` green (95 cases: series 10); `brg-005-conformance-postgres` **21/21**;
-  `brg-003-conformance-{mutants,gate,declared}` **27/27**; `ont-015-series` **24/24** (SQLite + PostgreSQL).
-- Backend band (every `ont-`, `brg-`, `fed-002`, `fed-005`, `bmg-003`, `bmg-017` suite, both engines): **40 suites,
-  652/653** on the first run. The one red was s21's own: `bmg-017-import-required`'s census of `buildInsert` callers
-  counted the PostgreSQL create's three copies of the insert. Folded into one closure; that suite +
-  `ont-015-series` + `brg-005` rerun **51/51**, runtime `tsc` clean.
-- Not run: the project contract (untouched), `test:ci`, the whole backend suite (229 files).
+- Project contract 14 suites **289/289**, `tsc` clean (new `tests/series.test.ts` 20, two mutants shown red).
+- Backend contract 9 suites **232/232**, `tsc` clean. Runtime `test/adapters` 17 suites **331/331**, `tsc` clean.
+- Backend band (every `ont-`, `brg-`, `fed-002`, `fed-005`, `bmg-003`, `bmg-017`, both engines) **41 suites, 666/666**,
+  incl. new `ont-015-projection` 13/13 (AC3 ×2, AC2's 409, two `planNumbering` mutants) and ONT-005 14 of 51 both engines.
+- Backend `tsc -p tsconfig.tests.json`: **one error, not P116's** — `noodl-mcp/src/specPorts.ts` imports
+  `DRAWN_PORT_TYPES` from `@nodegx/node-spec` (P107 `ed7706984`, committed during s22). Re-measure before blaming it.
+- Not run: `test:ci`, the whole backend suite.
 
 ## The next tasks, in order
 
-1. **ONT-015 §3.3, the projection** (Opus): `RuleHold` `series` → the column's `series` (`looksLike` is asked with
-   `{YYYY}`/`{MM}`/`{####}` already — `noun.ts` — so it IS the format; `maySkip: false` → `gapFree: true`; `restarts`
-   `each year`/`each month` → `year`/`month`) and `frozen` on the field (AC2's PUT 409). A `looksLike` that is not a
-   valid format is a validator refusal in words. Then the claim `<noun>/number-never-used-again` held: a new claim
-   step (the store hands out numbers in order, never one a deleted record had) in **both** contracts' `ClaimStep`,
-   `runClaim`'s branch, `mutants.ts`'s `need`, and a `ClaimMutant` `dropSeries`. ONT-005's pin must move (AC5).
-   Then the migration step (AC3: number existing records in `createdAt` order, keep held values, start above the
-   highest; the dry run says the count). The capability cell last (a `CapabilityKey` all six descriptors declare).
-2. **ONT-008** once P112 OWN-007 has started (still 📋).
+1. **SERIESCARRY + SERIESMSG** (Opus, small, both engines): apply `planNumbering`'s rule in the create — a carried
+   value `seriesParse` reads in the look raises its period's counter (never backward); then the 409 names the handed-out
+   number. A conformance case each. ONT-015 is otherwise done.
+2. **ONT-008** once P112 OWN-007 has started (still 📋) — it also takes ONT-015's capability cell.
 3. **ONT-013 steps 1–3** (Fable): the brief's two sentences, `rules.json`, the *not kept:* read-back.
 4. **ONT-016 scoping** (Fable): per-parent count; one ruling to ask (a limit lowered below today's count).
 5. Small, Fable: ONT-011 step 3's `one-of` leftover; refuse "goes with its keeper" + "never deleted" at authoring.
@@ -77,23 +63,23 @@ ONT-010. R1–R10, R-a to R-j are ruled (README §9); **nothing is waiting on Ri
 
 ## For Richard (plain words; the recommendation first)
 
-- **Nothing blocking.** New this session, for when you read ONT-015: a number the backend hands out is now real on
-  both engines — "INV-2026-0042", one more each time, never handed out twice, starting again each January if you say
-  so; a screen cannot type one in, an admin can (to fill in old ones).
-- **One design fact the census turned up, not built:** one of the private apps numbers only *some* records of a
-  collection (another sort gets no number). A second app asking for it would make it a question; until then it is
-  recorded in ONT-015 §6.1.
+- **Nothing blocking.** When you read ONT-015: a person who says "invoice numbers look like INV-2026-0042, never
+  skip, start again each January" now gets exactly that from the backend, with no code; and if they say it after
+  invoices already exist, the migration numbers the old ones in the order they were made (and tells them how many
+  first), keeping any number an invoice already had.
+- **Two small faults found, filed, not fixed:** if an admin types a number by hand in the same look (say T-0003), the
+  backend will later try to hand out T-0003 itself and the person's save fails — with a message that says "undefined"
+  instead of the number. Next session's first job.
 - Still open from s17/s20 (not blocking): who may change a field; search refused for a caller with a hidden field;
   a secret detail is unread even by the person it is about.
 
-## Traps s21 hit
+## Traps s22 hit
 
-- **A handoff's "nothing is waiting" can contradict the task file it points at** — read the task's own status line.
-- **A conformance case with N creates at once fills N connections per adapter** — and the PostgreSQL runner opens one
-  adapter per case. Drain per run.
-- **A mutant that removes one alternative of a regex is not a mutant of the detector** — the control line may hit
-  another alternative. Make the whole regex dead.
-- **A guard no control exercises survives its mutant** (`NOT_A_COUNTER` passed until a control line gave it work).
+- **A green mutant arm can hide a wrong message** — the "counter left" mutant was refused for the right reason, and
+  printing the refusal is what found SERIESMSG. Read the refusal, not only its status.
+- **An AC can predict a measurement wrong** ("the pin moves"): measure it and say so, never bump to match.
+- **`grep -c MUTANT` counted `NOUN_MUTANTS`** after a restore — `cmp` against the backup is the proof.
+- **A capability key has a rule of its own** (no key without a consumer) that a task's prose can contradict.
 
 ## Owned elsewhere
 
@@ -110,4 +96,4 @@ The private verdicts for s21's new candidates are in that folder's `borrows.json
 
 ## Memory
 
-`ontology-is-the-spec.md` (an s21 paragraph). The index is AT its 17,510-unit budget: tighten, never grow.
+`ontology-is-the-spec.md` (an s22 paragraph). The index is AT its 17,510-unit budget: tighten, never grow.

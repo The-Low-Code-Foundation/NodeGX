@@ -96,7 +96,7 @@ import {
 } from '../local-sql/schemaCommon';
 import { checkConstraintDDL, columnToPostgres, declaredIndexDDL, junctionDDL, tableDDL } from './ddl';
 import { translatePgError, PG_UNDEFINED_TABLE, PG_UNIQUE_VIOLATION } from './errors';
-import { assertSeriesColumns } from '../series';
+import { assertSeriesColumns, planNumbering, seriesName, seriesProblem, SERIES_SET_SQL, SERIES_TABLE, SERIES_TABLE_DDL, type SeriesOption } from '../series';
 import type { PgConnectionPool } from './pool';
 
 /** PostgreSQL truncates an identifier longer than this silently. Refused instead. */
@@ -829,6 +829,55 @@ export class PgSchemaManager {
       `setWhenTargetGoes("${tableName}")`,
       async () => {
         await this.pool.run(UPSERT_SCHEMA, [tableName, snapshot]);
+      },
+      () => {
+        st.schemas.set(tableName, schema);
+      }
+    );
+    return true;
+  }
+
+  /**
+   * P116 ONT-015 §3.3 — the SQLite manager's `setSeries`: the declaration, the numbers for the
+   * records without one and the counters, in one transaction behind the barrier. The rows and the
+   * counter are read `FOR UPDATE`, so a create in between waits rather than taking a number twice.
+   */
+  setSeries(tableName: string, columns: Record<string, SeriesOption | null>): boolean {
+    const st = this.s;
+    const schema = st.schemas.get(tableName);
+    if (!schema) throw new Error(`There is no collection called "${tableName}"`);
+    const fresh = freshSchema(schema);
+    for (const [name, series] of Object.entries(columns)) {
+      const col = (fresh.columns || []).find((c) => c.name === name);
+      if (!col) throw new Error(`"${tableName}" has no field "${name}"`);
+      if (series === null) {
+        delete col.series;
+        continue;
+      }
+      const problem = seriesProblem(name, series, col.type);
+      if (problem) throw new Error(problem);
+      col.series = series;
+    }
+    st.schemas.set(tableName, fresh);
+    const snapshot = JSON.stringify(fresh);
+    this.enqueue(
+      `setSeries("${tableName}")`,
+      async () => {
+        await this.pool.run(SERIES_TABLE_DDL);
+        await this.pool.transaction(async (tx) => {
+          await tx.run(UPSERT_SCHEMA, [tableName, snapshot]);
+          for (const [name, series] of Object.entries(columns)) {
+            if (series === null) continue;
+            const counter = seriesName(tableName, name);
+            const counters = await tx.query<{ period: string; next: string | number }>(`SELECT "period", "next" FROM "${SERIES_TABLE}" WHERE "name" = ? FOR UPDATE`, [counter]);
+            const rows = await tx.query<{ objectId: string; createdAt: unknown; value: unknown }>(
+              `SELECT "objectId", "createdAt", ${escapeColumn(name)} AS "value" FROM ${escapeTable(tableName)} FOR UPDATE`
+            );
+            const plan = planNumbering(series, rows, counters);
+            for (const a of plan.assign) await tx.run(`UPDATE ${escapeTable(tableName)} SET ${escapeColumn(name)} = ? WHERE "objectId" = ?`, [a.value, a.objectId]);
+            for (const c of plan.counters) await tx.run(SERIES_SET_SQL, [counter, c.period, c.next]);
+          }
+        });
       },
       () => {
         st.schemas.set(tableName, schema);
