@@ -1,6 +1,6 @@
 # ISL-025 — The island drops the workarounds
 
-**Status: 🟡 session 2 (2026-10-02): W1 (both loops on `Repeat`), W2 (every garden drive on `nodegx deploy`, gated on its exit code) and W3 (the four settle waits, on ruling 1) landed; AC1's census spec in place (22 rows, 3 removed, 19 present); W4–W22 wait on their ISL tasks and rulings.** **Source:** [AUDIT](AUDIT-2026-10-01.md), every "WA" cell;
+**Status: 🟡 s46 (2026-10-11): W18 removed (ISL-018 AC6, `38957238e`; the census reads it). Was: 🟡 session 2 (2026-10-02): W1 (both loops on `Repeat`), W2 (every garden drive on `nodegx deploy`, gated on its exit code) and W3 (the four settle waits, on ruling 1) landed; AC1's census spec in place (22 rows, 3 removed, 19 present); W4–W22 wait on their ISL tasks and rulings.** **Source:** [AUDIT](AUDIT-2026-10-01.md), every "WA" cell;
 modelled on P88's closing ruling **R28** (`phase-88-the-defects-the-games-found/README.md:116`) and its per-task clauses
 (e.g. `GAM-008…:257-263`, `GAM-015…:148-153`) · **Side:** template (`templates/bot-garden/` and its generator). This is the
 **closing task**: it removes nothing until the ISL task behind each row has landed. The two exceptions are **slice 0**

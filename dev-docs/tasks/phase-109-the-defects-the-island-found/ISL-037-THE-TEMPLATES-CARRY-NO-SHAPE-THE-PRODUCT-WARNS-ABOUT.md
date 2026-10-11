@@ -1,6 +1,6 @@
 # ISL-037 — The templates carry no shape the product warns about
 
-**Status: 🟢 s45 (2026-10-11): 4 of 7 fixed — DEF038 `f7d3bcc2b`, TOUCHBUILD `5778f4b1c` (ruled "Building pays nothing"), ARIALABELWORDS `822081831`, OLIVEDRIVE `07392a4ed`. Left: DBTPAGETITLES (blocked on P109-S45-WIREDTITLE, found s45: a wired Page title never reaches the tab), and P78's untracked Nightbook pile (NIGHTBOOKHOME; ROWWRAP's three Nightbook rows — its landing-pages row was fixed by `db086d75f`). Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 7 bugs from
+**Status: 🟢 s46 (2026-10-11): 5 of 7 fixed, plus WIREDTITLE (found s45) — s46: WIREDTITLE `edda6427b` (a wired Page title names the tab), DBTPAGETITLES `e215a0452` (the eleven title relays became wires). s45: DEF038 `f7d3bcc2b`, TOUCHBUILD `5778f4b1c` (ruled "Building pays nothing"), ARIALABELWORDS `822081831`, OLIVEDRIVE `07392a4ed`. Left: P78's untracked Nightbook pile (NIGHTBOOKHOME; ROWWRAP's three Nightbook rows — its landing-pages row was fixed by `db086d75f`). Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 7 bugs from
 the ledger (`dev-docs/bugs/`) that had no task: 4 medium · 3 low. **Side:** templates (nightbook, landing-pages, digital-bricks-training (+ demo), bot-garden) and the island drives
 
 ## 1. The person sentence
@@ -28,8 +28,8 @@ to ask. This table is generated from the ledger headers. **The ledger file is th
 | [P109-S18-TOUCHBUILD](../../bugs/p109-s18-touchbuild-the-touch-drive-never-sees-pip-and-cobble-build-on-her-land.md) | medium | fixed | "`drive-iw007-touch.js` never sees Pip and Cobble build on her land at 1368 (BUILD, PILLS, PAY red on HEAD's garden too)" |
 | [P109-S4-ROWWRAP](../../bugs/p109-s4-rowwrap-four-template-rows-cannot-wrap-and-no-css-rescues-them.md) | low | open | Four template rows are set to wrap and cannot — nightbook's three text-tool rows and landing-pages' nav, with no CSS rescuing them |
 | [P109-S7-OLIVEDRIVE](../../bugs/p109-s7-olivedrive-three-ig006-clauses-walk-the-old-can.md) | low | fixed | The Olive pages drive is red in three IG-006 clauses — its programs walk to where the can was before P108's R7 |
-| [P109-S11-DBTPAGETITLES](../../bugs/p109-s11-dbtpagetitles-the-training-apps-tab-titles-stay-english-in-french.md) | low | open | The Digital Bricks Training app's browser-tab titles stay in English when the app is in French |
-| [P109-S45-WIREDTITLE](../../bugs/p109-s45-wiredtitle-a-page-title-from-a-wire-never-reaches-the-browser-tab.md) | medium | open | A Page's Title set by a wire never reaches the browser tab — the Router always uses the typed one (found s45; blocks DBTPAGETITLES) |
+| [P109-S11-DBTPAGETITLES](../../bugs/p109-s11-dbtpagetitles-the-training-apps-tab-titles-stay-english-in-french.md) | low | ✅ fixed `e215a0452` | The Digital Bricks Training app's browser-tab titles stay in English when the app is in French |
+| [P109-S45-WIREDTITLE](../../bugs/p109-s45-wiredtitle-a-page-title-from-a-wire-never-reaches-the-browser-tab.md) | medium | ✅ fixed `edda6427b` | A Page's Title set by a wire never reaches the browser tab — the Router always uses the typed one (found s45; blocks DBTPAGETITLES) |
 
 ## 4. Order of work
 
@@ -63,6 +63,17 @@ S13-NIGHTBOOKHOME and S6-DEF038 first (product-visible on open), then the words 
 
 ## 8. Record
 
+### s46 (2026-10-11) — 5 of 7, WIREDTITLE fixed under it
+
+| row | state | what happened |
+|---|---|---|
+| WIREDTITLE (medium, found s45) | ✅ `edda6427b` | Driven first: red as filed (a wired title and a live change never reached the tab). The Page node calls back on every Title; the Router names the tab from the page's current Title while that page is showing, the typed one as fallback. A 7-arm browser drive (`p109WiredPageTitle`): HEAD 3 red, fixed 7/7, two mutants each red in their own arms. 🔴 Its first "left page" arm left by a CDP navigation (a reload), so it passed with the guard removed; it now leaves a kept page in the app. Built in a worktree with its own viewer folder; viewer 1845/1845 |
+| DBTPAGETITLES (low) | ✅ `e215a0452` | 🔴 The tab was already translated: each page relayed its title Translation through a JavaScript `Noodl.SEO.setTitle` node, the template's own workaround for WIREDTITLE. The eleven relays became wires into the Page nodes; the editor census reads `{}` (was 11). A four-arm browser reading on the demo with four titles marked `[fr] ` (scratch copies): relays and wires read the same on the fixed bundle; wires on the old bundle read the typed English |
+
+Found beside them: **P109-S46-SITETITLERELAY** (the site builder carries the same relay, and `assertSeoSplit` forbids
+the wire) and **P109-S46-MERGECAST** (`catalog:merge` refuses P107's new `array→optionslist` cast since `813657773`, so
+the enriched catalog, and the PR gate, cannot pass; this session's Router enrichment line waits on it).
+
 ### s45 (2026-10-11) — 4 of 7
 
 IW-010 has not started (P108's last commit 2026-10-04), so §6 keeps the island rows here.
@@ -74,6 +85,6 @@ IW-010 has not started (P108's last commit 2026-10-04), so §6 keeps the island 
 | ARIALABELWORDS (medium) | ✅ `822081831` | The words drive gained ARIA: red on HEAD (8 English), green after (L’île, Le jardin, the divider, Mon robot, and each robot card by its own name). `isl037AriaLabels` with an arm |
 | OLIVEDRIVE (low) | ✅ `07392a4ed` | 19/3 at HEAD, as filed. Both requests' `referenceProgram` now begin by picking the can up (R7); the drive's programs gain those blocks: 22/22 |
 | ROWWRAP (low) | ⏸ P78 | Its landing-pages row was fixed on 2026-10-02 by ISL-022 (`db086d75f`); the three Nightbook rows wait on P78's pile |
-| DBTPAGETITLES (low) | ⏸ WIREDTITLE | The app ships English only, so nobody reads an English tab in French today; the editor warns on 11 titles. The proposed wire would do nothing: the Router never reads a wired title. Filed P109-S45-WIREDTITLE (read, not driven) |
+| DBTPAGETITLES (low) | ⏸ WIREDTITLE → ✅ s46 | The app ships English only, so nobody reads an English tab in French today; the editor warns on 11 titles. The proposed wire would do nothing: the Router never reads a wired title. Filed P109-S45-WIREDTITLE (read, not driven) |
 | NIGHTBOOKHOME (medium) | ⏸ P78 | Nightbook's generator is untracked (P78) |
 

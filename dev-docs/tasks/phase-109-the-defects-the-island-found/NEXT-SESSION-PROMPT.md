@@ -1,93 +1,106 @@
-# Next session — P109 session 46
+# Next session — P109 session 47
 
 **Phase:** [README](README.md) · **Audit:** [AUDIT-2026-10-01.md](AUDIT-2026-10-01.md) · scoped at `27d891bf3`.
-**Session 45 (2026-10-11, on `cline-dev`, primary tree):** the board stays at **40 of 52 closed**, but two tasks moved.
-ISL-046 went from 5 to 7 of 9 (SECONDVISIT, MOVEARROW). ISL-037 was started (the s44 handoff called it "outside this
-phase"; it is not) and reached 4 of 7. Richard ruled twice, both times in one round.
+**Session 46 (2026-10-11, on `cline-dev`, primary tree plus worktree `p109-wiredtitle`):** the board moved from
+**40 to 41 of 52** (ISL-018 closed). ISL-037 reached 5 of 7 (both of its buildable rows are done). ISL-024's AC1 was read,
+and its move now waits on one human decision. No rulings were asked.
 
-## The board (re-derived from the task files' `**Status` lines, s45)
+## The board (re-derived from the task files' `**Status` lines, s46)
 
 | task | state | what is left | blocked on |
 |---|---|---|---|
-| ISL-037 templates carry no warned shape | 🟢 4 / 7 | DBTPAGETITLES; NIGHTBOOKHOME; ROWWRAP's 3 Nightbook rows | DBTPAGETITLES on **P109-S45-WIREDTITLE** (buildable); the rest on P78's untracked Nightbook pile |
+| ISL-025 the island drops the workarounds | 🟡 | W4–W12, W14, W16, W17, W19, W20, W22 still `present` in `isl025Census.test.ts` | **check each row:** see "Do" 2 |
+| ISL-024 a template lives in its own folder | 🟢 AC1 read | the `git mv` + import commits | **the `package-lock.json` decision** (below) |
+| ISL-037 templates carry no warned shape | 🟢 5 / 7 | NIGHTBOOKHOME; ROWWRAP's 3 Nightbook rows | P78's untracked Nightbook pile |
 | ISL-046 templates & kits | 🟢 7 / 9 | INSTALLER, TPL011UNREADID | the tablets; P78's Nightbook pile |
-| ISL-043 export | ⬜ 8 bugs | all | P18 is live in `nodegx-export` (26 files open there in s45) |
-| ISL-007, 008, 009, 010, 018, 022, 024, 025, 035 | 🟡/🟢/⬜ | read each one's §8 | **check, do not copy:** ISL-024 waited for "a gap with no P108 lane open", and P108 has had no commit since 2026-10-04 |
+| ISL-043 export (8 bugs), ISL-035 (2) | ⬜ | all | P18 is live in `nodegx-export` |
+| ISL-007 AC4, ISL-008 AC7, ISL-009 export, ISL-010 AC4, ISL-022 AC6 | 🟡/🟢 | one AC each | IW-010 (P108); P18; P18; Richard (llama.cpp); `dist/noodl-mcp.cjs` rebuild (Richard) |
 
 ## Do, in this order
 
-1. **Re-read the board yourself** (`grep -m1 '^\*\*Status' ISL-0*.md`). Do not copy the table above.
-2. **P109-S45-WIREDTITLE** (medium, found s45, read but not driven): drive it first. Two pages, one Title typed and
-   one wired from a String; read `document.title` on each. If it is red, fix it so the Router sets the tab from the
-   Page node's current title (`getTitle()`), on mount and when the Title changes while the page shows, with the typed
-   title as the fallback. Its file has the line numbers.
-3. **ISL-037 DBTPAGETITLES** on top of it: a `t_<page>_title` Translation per page in
-   `templates/digital-bricks-training` (keys beside each page's namespace in `Data/Strings` `str_graph`; the pattern
-   and its comment are on every other Translation there). Then `node tools/build-demo.mjs` and `tools/check-demo.mjs`.
-   The template is in production: run HEAD's builder first as the control, as s42 and s45 did.
-4. **ISL-024**: read its §8 and decide whether "no P108 lane open" now holds. If it does, it is ruled and buildable.
+1. **Re-read the board yourself** (`grep -m1 '^\*\*Status' ISL-0*.md`), and read each open task's AC table, not only
+   its status line: 🔴 ISL-018's AC6 sat unbuilt for ten sessions because its status line named only AC7.
+2. **ISL-025, row by row.** These rows still read `present`, but the task each waited on has since closed: **W4**
+   (ISL-002), **W5** (ISL-003), **W6** (ISL-004), **W16** (ISL-014), **W17** (ISL-016/017), **W19** (ISL-019),
+   **W20** (ISL-021). For each one, read ISL-025's §3 row (file:line and its "proof it is gone" column) and its §8.
+   W7–W9 were handed to P108 IW-010 by ISL-005's ruling "Native nodes first", so check that before touching them.
+   Build each removable row as s46 built W18: a control (the generator unchanged leaves `git status` empty), the
+   removal, a byte-identical regen, an arm that shows the gate grades it, the census row flipped (and its old state red).
+   Do it in a worktree (`scripts/devtools/make-worktree.sh <name> HEAD <abs-parent>`): now that `832c05ca2` links
+   node-spec's `dist/`, generators run there.
+3. **ISL-024** only if Richard has ruled on the lockfile. The move (§5 R3) is a `git mv` commit for the garden alone,
+   then an import/config commit carrying the new workspace's lock entry, the `test:packages` scope and the `pr.yml`
+   typecheck twin. AC1's table is in §8 s46.
 
 ## Human decisions owed
 
-- 🔴 **The working copy's `package-lock.json`** is still the stale 2026-09-24 file that removes `@nodegx/node-spec`'s
-  entries. s45 left it alone.
-- **`templates/nightbook/` is untracked** (P78's pile). Four P109 rows now wait on it: TPL011UNREADID, NIGHTBOOKHOME,
-  ROWWRAP's three rows, and DEF038's gate, which reads it red from the working tree.
-- **`planning-demo` on nodegx.io** carries MOVEARROW's bug until it is republished. s45 regenerated it but did not
-  publish (outward-facing).
-- **Still owed:** `P109-S36-STALEMCPDIST`, the `nodegx` bin rebuild, the viewer runtime build
-  (`npm run build:editor:_viewer`, for BUILTINBOUNDARY), and s38/s39's list.
+- 🔴 **The working copy's `package-lock.json`** is the stale file that removes `@nodegx/node-spec`'s entries (−51 lines
+  against HEAD; mtime 2026-10-11 14:08). **It now blocks ISL-024:** the ruled package (`packages/nodegx-templates/`) is a
+  workspace and needs lock entries in the same commit. Ask: "restore HEAD's lockfile, or is someone's install mid-way?"
+- **The live demo's engine.** The training demo's publish recipe swaps in the live site's `noodl.deploy.js`. That
+  engine must carry `edda6427b` before the demo is republished, or its tabs show the typed titles (measured: the same
+  English words today, since the app ships one language).
+- **`templates/nightbook/` is untracked** (P78). Four P109 rows wait on it.
+- **`planning-demo` on nodegx.io** carries MOVEARROW's bug until it is republished (s45 regenerated it).
+- **Still owed:** `P109-S36-STALEMCPDIST`, the `nodegx` bin rebuild, the viewer runtime build, s38/s39's list.
 
-## What s45 built (commits)
+## What s46 built (commits)
 
-- **ISL-046 SECONDVISIT `eafa1b4af`:** the diagnosis was wrong. A probe on the second visit found no Garden 3D on the
-  page: under software GL the island falls back to the flat Garden and keeps that choice. The flat Garden never kept
-  chips apart. `chipLifts` moved into garden-kit (one copy), and the Garden node lifts a plot chip that would cover
-  another. Touch drive: 3D mode 29/31, flat 28/31 at the time (the rest were TOUCHBUILD's).
-- **ISL-046 MOVEARROW `96059a380`:** asked a third time with the cost, **ruled "fix the old planner now"**. Run on the
-  runtime's own Model and Collection for the first time: `→ → Offer the add-on`. Every planner list gives a row its own
-  id (card, day columns, carry list, and the block sheet's next actions, found by a census). The guard strips prefixes
-  on save. No store clean-up, because TPL-008-PJ's carry-over empties `Project.move`. 101/101 with arms.
-- **ISL-037 DEF038 `f7d3bcc2b`:** the demo's responders pin run-on-change `true` (`build-demo.mjs`).
-- **ISL-037 TOUCHBUILD `5778f4b1c`:** the drive watched the island for building that P108 s9 moved into the Workshop.
-  Underneath, building had paid nothing since 3 Oct. **Ruled "Building pays nothing".** The drive reads the product as
-  it is: **31/31**, its first green since 2026-10-01.
-- **ISL-037 ARIALABELWORDS `822081831`:** the eight screen-reader names are in her language (four `a11y*` words; each
-  robot card named by its robot). The words drive gained ARIA, red on HEAD.
-- **ISL-037 OLIVEDRIVE `07392a4ed`:** the Olive drive picks the can up first, as since R7: 19/3 → 22/22.
-- **Docs:** `2aa39864c`, plus this handoff's commit.
+- **WIREDTITLE `edda6427b`:** a Page's Title set by a wire names the browser tab. The Page node calls back on every
+  Title; the Router names the tab from the page's current Title while that page is showing, with the typed one as the
+  fallback. Driven first (red as filed). A 7-arm browser drive, `packages/noodl-mcp/tests/p109WiredPageTitle.test.ts`:
+  HEAD's bundle 3 red, fixed 7/7, mutant A (no "still showing" guard) red in exactly its arm, mutant B (no callback) red
+  in two. Built in a worktree with its own viewer folder, because a peer had the runtime open.
+- **DBTPAGETITLES `e215a0452`:** 🔴 the tab was already translated. Each page relayed its title Translation through a
+  JavaScript `Noodl.SEO.setTitle` node, the template's own workaround for WIREDTITLE. The eleven relays became wires.
+  The census reads `{}` (was 11). A four-arm browser reading on the demo with four titles marked `[fr] `: relays and
+  wires read the same on the fixed bundle, and wires on the old bundle fall back to the typed English.
+- **ISL-018 AC6 `38957238e`:** the garden and members-area generators drop the raw settle, which wrote 0 of 187 and 0
+  of 108. Byte-identical. Members graded by switching the door's ticking off (57 `true`s lost in 18 files). Garden
+  graded by AC6's mutant (one deleted `false` comes back `true`). ISL-025 W18 → `removed`. **ISL-018 closed.**
+- **`832c05ca2`:** `make-worktree.sh` links `nodegx-node-spec/dist` and `nodegx-canvas-look/dist` (no generator could
+  run in a worktree).
+- **Filed:** `P109-S46-SITETITLERELAY` (the site builder carries the same relay, and `assertSeoSplit` forbids the
+  wire; the site builder's phase), `P109-S46-MERGECAST` (🔴 `catalog:merge` refuses P107's new `array→optionslist`
+  cast since `813657773`, so the PR gate's `catalog:merge:check` cannot pass; s46's Router enrichment line lands at the
+  next good merge). Told to nobody yet: P107 should see MERGECAST.
 
-## Gate readings (2026-10-11)
+## Gate readings (2026-10-11, s46)
 
-- `drive-iw007-touch.js` flat **31/31** (garden at `822081831`'s tree). `drive-isl007-words.js` all passed (ARIA:
-  8 read). `drive-cg005-olive.js pages` **22/22**.
-- noodl-mcp: `tpl010Template` 101/101, `editorSuite` + `tpl008Template` green; `isl046Meters3d`, `ig007Garden3d`,
-  `p108s7`, `cg001GardenKit` 144/144; `cg003Template` + `isl037AriaLabels` green; `def038SettledTemplates` 30/31 (the
-  1 is Nightbook); nodegx-project-contract template checks 29/29.
-- Not run in s45: the editor's `test:ci` / `test:main` (nothing in the editor changed).
+- Worktree `p109-wiredtitle` (HEAD `25b6f66cf` + the fix, later `e51bb99b4`): viewer jest **1845/1845**, viewer tsc
+  clean, runtime conformance `NSP_ONLY=Router,RouterNavigate` green, runtime `graph.test.ts` 96/96,
+  `p109WiredPageTitle` 7/7 (HEAD bundle in primary: 3 red), `tpl001Template` 82/82, `cg003Template` 150/150,
+  `isl025Census` 25/25, `def038SettledTemplates` 29/29.
+- Primary: `typedWordNotTranslated` 16/16; DBT `check-strings.py`, `check-demo.mjs`, `check-learner-page.mjs` pass;
+  `catalog:generate --check` green; `catalog:merge` red (MERGECAST, not this session's).
+- Not run: the editor's `test:ci` / `test:main` (no editor source changed; one editor spec file did, and it ran).
 
-## What s45 learned
+## What s46 learned
 
-- **A probe that lists the engines on the page beats reading the engine you expect.** SECONDVISIT's s43 diagnosis read a
-  3D-only field off 2D chips. The first probe found no 3D root at all.
-- **A drive that goes red after a ruled product change can hide a second change nobody ruled.** TOUCHBUILD looked like
-  a stale drive, and it was, but PAY had silently dropped to zero with it. Richard ruled it once it was put in plain words.
-- **Before building a "wire it" fix, read whether the wire is read.** DBTPAGETITLES' proposal wires a Page's Title,
-  and the Router never reads a wired title (WIREDTITLE).
-- **A rename made in the fix sinks a naive arm.** MOVEARROW's arm reverted the id but not `move` → `moveText`, so it
-  wrote `moveText` and looked green. The fixed arm reverts both, and a second arm reverts the id only.
-- 🔴 **`pgrep -f <pattern>` inside a waiting loop matches the loop itself.** Anchor on the binary's path:
-  `ps -Ao command | grep -c '^/Applications/Google Chrome.app/…--headless'`.
-- A drive killed with exit 144 and no error, mid-run, while a peer was tearing down. Re-run alone: green.
+- **A drive's `navigate` is a page load.** `withRenderedPage`'s `navigate` is a CDP navigation: everything rebuilds, no
+  page is ever kept, nothing is ever "left". An arm about leaving a page has to move inside the app
+  (`Noodl.Navigation.navigateToPath`). The first version passed with the guard deleted.
+- **When the fallback equals the value, the reading grades nothing.** The training app's English titles equal their
+  typed fallbacks, so four arms read the same whether the wire worked or not. Mark the words in a scratch copy (`[fr] `)
+  so the two paths read differently.
+- **Before building a template fix, open the workaround the template already carries.** DBTPAGETITLES' title was
+  wrong for nine sessions: the relays were the template's answer to the very defect found under it.
+- **A status line is not the AC list.** ISL-018 named one owed AC; the table held two.
+- A peer's open edit in a package you need to build means a worktree. `make-worktree.sh` links the viewer folder to
+  primary's, so replace the link with a real copy before building into it.
 
 ## Recipes
 
-- **Commit through a temporary index**, then `git reset -q -- <paths>` so the real index matches the new HEAD.
-- **Before a regen**, run the generator unchanged and confirm `git status` shows nothing (planning, garden and the
-  training demo all held in s45).
-- **The touch drive needs a deploy:** `drive-cg003-pages.js assemble <dir>/project`, then
-  `nodegx deploy <dir>/project <dir>/deploy --allow-development-engine`.
+- **Commit through a temporary index**, then `git reset -q -- <paths>`. 🔴 In zsh, pass paths as an array
+  (`P=(a b); git add -- "${P[@]}"`). A `$PATHS` string is one argument, and the first try this session committed
+  nothing.
+- **Build the viewer into a worktree only:** `OUT_PATH=<wt>/packages/noodl-editor/src/external npx webpack --config
+  webpack-configs/webpack.viewer.prod.js` from `<wt>/packages/noodl-viewer-react`, after replacing the viewer symlink
+  with a copy. `render-report.js` in that worktree then renders with it.
+- **Runtime conformance for one node:** `NSP_ONLY=<Type>,<Type> npx jest test/node-spec/conformance.test.ts` (seconds).
+  `-t` does not narrow it: the run took 25 minutes and was stopped.
 
 ## Worktrees
 
-`p109-isl049` (branch `p109-isl052`) is unchanged. The older ones are spent.
+`p109-wiredtitle` (branch `p109-wiredtitle`, at `e51bb99b4`, holds a real viewer folder and node-spec/canvas-look
+`dist` links): reusable for ISL-025, or remove it with `git worktree remove`. `p109-isl049` is unchanged.

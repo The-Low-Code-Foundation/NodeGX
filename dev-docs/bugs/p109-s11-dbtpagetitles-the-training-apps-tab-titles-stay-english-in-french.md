@@ -1,7 +1,8 @@
 ---
 id: P109-S11-DBTPAGETITLES
 title: The Digital Bricks Training app's browser-tab titles stay in English when the app is in French
-status: scheduled
+status: fixed
+commit: e215a0452
 phase: P109
 task: ISL-037
 severity: low
@@ -31,3 +32,22 @@ editor's warning on each title. Building it as proposed would not work: the Rout
 index's typed title and never reads a wired one ([P109-S45-WIREDTITLE](p109-s45-wiredtitle-a-page-title-from-a-wire-never-reaches-the-browser-tab.md)).
 Fix that first, then wire `t_<page>_title` Translations (keys beside each page's namespace in `str_graph`) and
 regenerate the demo.
+
+## Fixed s46 (2026-10-11, `e215a0452`): the tab was already translated; the warning was the defect a person met
+
+🔴 **The title above was never true of the tab.** Every page already translated it: a `Translation` (or, on `/learner`
+and `/preview`, a computed value) fed a JavaScript node that called `Noodl.SEO.setTitle`, built in the source repo's
+TASK-L161 precisely because the Router ignored a wired Title (CONVENTIONS said so). s45's re-measure counted the 11
+typed titles and did not open the relays. What a person met was the editor's warning on each typed fallback.
+
+With P109-S45-WIREDTITLE fixed (`edda6427b`), the eleven title sources are wired into the Page nodes and the eleven
+relays are deleted; the typed Title stays as the fallback. The census in the spec above now reads `{}` (was 11);
+`docs/CONVENTIONS.md` and `tools/check-strings.py` say how titles work now; the demo was regenerated (HEAD's builder
+first, clean, as the control) and `check-demo.mjs`, `check-strings.py`, `check-learner-page.mjs` pass.
+
+**Measured on the demo in a browser**, four arms, with four titles marked `[fr] ` in scratch copies so a wire and a
+typed fallback read differently: HEAD's bundle with the relays (production today), the fixed bundle with the relays,
+and the fixed bundle with the wires all read `[fr] Your course`, `[fr] Lesson`, `[fr] People`, `[fr] The lesson kit`;
+the wires on HEAD's bundle read the typed English. So a site built on an engine older than `edda6427b` shows the typed
+titles: the live demo's publish recipe swaps in the live site's `noodl.deploy.js`, which must carry the fix before the
+demo is republished. `/learner`'s computed title did not fire in any arm (not graded).

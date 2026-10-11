@@ -1,6 +1,6 @@
 # ISL-018 — What the door writes is what the editor saves
 
-**Status: 🟢 s36 (2026-10-09): AC5 met over the real protocol — an agent's Run-driven Function in a format-4 project, the editor's clean-up 0 writes (control: 2 written and logged), the rows drawn in the preview; the door now says which boxes it ticked (`ticked`, P109-S36-PINUNREPORTED); the people's door (`dist/noodl-mcp.cjs`) predates the pin (P109-S36-STALEMCPDIST). Owed: AC7 on the DBT demo (its owner's). Was: 🟢 s17 (2026-10-05): the open case ruled ("Agent writes 'ticked'") and built — the door pins its own nodes, 12 test projects settled, the `noodl-mcp` suite read and attributed (§8 s17); owed: AC5 (an agent round, then the editor's clean-up log), AC7 on the DBT demo (its owner's, `P109-S6-DEF038`); three repo projects left with their owners.** Was: 🟡 s3 (2026-10-02): AC2 measured, ruled ("a format step, 4→5" — neither of §5's options) and built (`b2ba0320a`); driven in the editor. `test:ci` 2,998 / 0 failures at `9a2972ec2`. Owed: the door writing into a project still at 4 (below). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F25](AUDIT-2026-10-01.md) · P80
+**Status: ✅ CLOSED s46 (2026-10-11) — AC6 built `38957238e` (the garden and members-area generators drop the raw settle: it wrote 0 of 187 / 0 of 108; byte-identical; members graded by switching the door's ticking off, 57 `true`s lost in 18 files; the garden by AC6's mutant, one deleted `false` comes back `true`) and AC7 read (`def038SettledTemplates` 29/29 over every committed artefact in a clean worktree, each artefact's "unsettle one parameter" arm red-capable). Was: 🟢 s36 (2026-10-09): AC5 met over the real protocol — an agent's Run-driven Function in a format-4 project, the editor's clean-up 0 writes (control: 2 written and logged), the rows drawn in the preview; the door now says which boxes it ticked (`ticked`, P109-S36-PINUNREPORTED); the people's door (`dist/noodl-mcp.cjs`) predates the pin (P109-S36-STALEMCPDIST). Owed: AC7 on the DBT demo (its owner's). Was: 🟢 s17 (2026-10-05): the open case ruled ("Agent writes 'ticked'") and built — the door pins its own nodes, 12 test projects settled, the `noodl-mcp` suite read and attributed (§8 s17); owed: AC5 (an agent round, then the editor's clean-up log), AC7 on the DBT demo (its owner's, `P109-S6-DEF038`); three repo projects left with their owners.** Was: 🟡 s3 (2026-10-02): AC2 measured, ruled ("a format step, 4→5" — neither of §5's options) and built (`b2ba0320a`); driven in the editor. `test:ci` 2,998 / 0 failures at `9a2972ec2`. Owed: the door writing into a project still at 4 (below). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F25](AUDIT-2026-10-01.md) · P80
 [DEF-038](../phase-80-the-defects-the-templates-found/DEF-038-THE-OTHER-GENERATOR-DISAGREES.md) (✅ built 2026-09-03, in
 the generators only) · **Side:** product (MCP door, `noodl-mcp`; the load-time migration in `@nodegx/project-contract`)
 
@@ -289,3 +289,23 @@ the response read on every row: ticked on create and on the update that wires Ru
 label-only update, on the no-op rewrite or on a caller's `false`; and a new apply_plan row naming the component.
 **Reverted arms** (each restored by `cp`, `cmp` clean): no payload → the 3 ticking rows red; the payload on an
 unchanged write → the ISL-019 row red.
+
+### Session 46 (2026-10-11) — AC6 built, AC7 read: closed
+
+🔴 **AC6 was never on the status line.** s36's status named only "AC7 on the DBT demo (its owner's)"; AC6 (the generators
+drop the raw step) sat unbuilt in the AC table. Found by reading the ACs, not the status.
+
+- **AC6, `38957238e`.** In a `make-worktree.sh` worktree at `e51bb99b4` (clean). Controls first: `template:members` and
+  `template:garden` unchanged left `git status` empty. Probed the step's own return: members `{"writes":0,"familyNodes":108}`,
+  garden `{"writes":0,"familyNodes":187}` (non-zero families on the same reading, the trap §7 names). Removed from
+  `tpl001Template.ts` and `cg003Template.ts`; both regenerate byte-identical. **Members grades:** with the door's ticking
+  switched off (`ProjectStore.ts:519`, worktree only) regenerating loses 57 `true`s across 18 files, which the old step
+  would have silently put back. **The garden** (241 authored `false`, no `true`) by AC6's mutant: the first Function with
+  signal-only inputs loses one authored `false`, and the regenerated `Logic/New run` reads `"runOnChange-in-lang": true`,
+  written by the door. Gates: `tpl001Template` 82/82, `cg003Template` 150/150 (AC2: two builds agree byte for byte),
+  `isl025Census` 25/25 with W18 now `removed` (control: `present` reds exactly W18).
+- **AC7.** `def038SettledTemplates` 29/29 in the clean worktree, the training template's s46 re-wire included; s45's
+  30/31 counted P78's untracked Nightbook (2 tests), which is not a committed artefact.
+- The other six generators (`tpl003/005/006/007/008/010`) still call the step; AC6 named only these two. Each is the same
+  no-op by the same argument, left for whoever next touches each one (ISL-024's rule: never as a sweep).
+- Met on the way: a worktree could not run any generator (`@nodegx/node-spec`'s `dist/` unlinked): `832c05ca2`.
