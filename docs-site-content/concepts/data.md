@@ -41,6 +41,11 @@ A query's results come back as an Array of Objects — which is why the two halv
 page aren't really separate systems: a Record is how an Array of Objects gets in and out of
 permanent storage.
 
+An Object field does not keep the order of its names. A backend on PostgreSQL gives
+the names back in another order from the one they were saved in (shorter names first). A page
+that lists them in an order should sort them itself. To check whether two read-back Objects are
+the same, compare them name by name rather than with `JSON.stringify`, which reads the order.
+
 ## Choosing between them
 
 - Need to hold a value only while this page is open, or pass data between a few nodes on one

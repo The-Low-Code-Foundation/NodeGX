@@ -8048,7 +8048,8 @@
           "Re-querying on a timer to feel 'live' — results already update from cloud events; explicit re-fetch is only needed when the server changed outside those events.",
           "Treating `Changed Record` as the full record on a delete — delete events carry only primary keys, so it is null and only `Changed Record Id` is populated.",
           "Polling with a Timer while Subscribe To Changes is available on this backend. Subscribe and re-fetch on `Changed` instead.",
-          "Assuming `Subscribed` distinguishes 'reconnecting' from 'never connected' — it does not. Read `Realtime Status` for that."
+          "Assuming `Subscribed` distinguishes 'reconnecting' from 'never connected' — it does not. Read `Realtime Status` for that.",
+          "Comparing a read-back Object field with `JSON.stringify` — an Object field does not keep the order of its names (a backend on PostgreSQL gives them back with shorter names first), so two equal objects can give different text. Compare them name by name, and sort the names yourself where a page shows them in an order."
         ],
         "relatedNodes": [
           "For Each",
@@ -8618,7 +8619,8 @@
           "`prop-<name>` → a Text Input's `startValue`, edited text → Update Record `prop-<name>`: prefill an edit form and save it back."
         ],
         "antiPatterns": [
-          "Connecting `fetch` just to 'refresh' — while `fetch` is connected the node stops following local record changes, so only do it when you explicitly want server-fetch-driven updates."
+          "Connecting `fetch` just to 'refresh' — while `fetch` is connected the node stops following local record changes, so only do it when you explicitly want server-fetch-driven updates.",
+          "Comparing a read-back Object field with `JSON.stringify` — an Object field does not keep the order of its names (a backend on PostgreSQL gives them back with shorter names first), so two equal objects can give different text. Compare them name by name, and sort the names yourself where a page shows them in an order."
         ],
         "relatedNodes": [
           "DbCollection2",

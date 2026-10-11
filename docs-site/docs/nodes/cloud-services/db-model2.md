@@ -105,6 +105,7 @@ Property ports are runtime-determined from the cloud database class selected via
 ## Watch out for
 
 - Connecting `fetch` just to 'refresh' — while `fetch` is connected the node stops following local record changes, so only do it when you explicitly want server-fetch-driven updates.
+- Comparing a read-back Object field with `JSON.stringify` — an Object field does not keep the order of its names (a backend on PostgreSQL gives them back with shorter names first), so two equal objects can give different text. Compare them name by name, and sort the names yourself where a page shows them in an order.
 
 ## Examples
 

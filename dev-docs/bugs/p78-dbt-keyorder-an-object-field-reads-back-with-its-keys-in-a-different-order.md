@@ -1,7 +1,8 @@
 ---
 id: P78-DBT-KEYORDER
 title: An Object field reads back with its keys in a different order from the one saved
-status: scheduled
+status: fixed
+commit: PENDING
 phase: P109
 task: ISL-039
 severity: low
@@ -37,3 +38,9 @@ Measured s41 on both engines through the facade: `{zebra, apple, mid:{y,b}, a}` 
 
 **To build (ISL-039 AC3):** say it where a person reads it: the Records docs page, and the node reference for the nodes
 that read an Object field. Then warn that comparing a read-back object with `JSON.stringify` is unreliable.
+
+**Written, P109 s42 (2026-10-11), as ruled.** The data concept page's Records section (`docs-site-content/concepts/data.md`
+and its published copy `docs-site/docs/concepts/data.md`) says an Object field does not keep the order of its names,
+that a page sorts them itself, and to compare name by name rather than with `JSON.stringify`. The same warning is an
+anti-pattern on Query Records (`DbCollection2`) and Record (`DbModel2`) in the node reference, regenerated into
+`node-catalog-enriched.json` and the two node pages. No code changed: the order is not promised.
