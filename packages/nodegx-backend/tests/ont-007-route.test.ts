@@ -67,6 +67,16 @@ function plan(before: WorldFiles, after: WorldFiles): MigrationPlan {
 }
 const BOMBSHELL = plan(ONE, MANY);
 const RENAME = plan(TIERED, SUBSCRIBED);
+/** ONT-014: "a member's account is set once" — the same world, the move answered no. */
+const SETTLED: WorldFiles = (() => {
+  const w: WorldFiles = JSON.parse(JSON.stringify(ONE));
+  w.relations.relations[0].answers!.moves = false;
+  return w;
+})();
+const SETTLE = plan(ONE, SETTLED);
+const UNSETTLE = plan(SETTLED, ONE);
+/** A rule the person said in the manager, not the world: it must outlive every world rule step. */
+const HAND = { where: { name: { $ne: 'Locked' } }, says: 'A locked person is not changed.' };
 
 /** "A person sees the people on their account": login → the person → their account → everyone on it. */
 const SAME_ACCOUNT = { path: { hops: [{ from: 'Person', by: 'login' }, { follow: 'account' }, { from: 'Person', by: 'account' }], maxDepth: 3 } };
@@ -351,6 +361,78 @@ for (const engine of ['sqlite', 'postgres'] as const) {
         expect(await seenBy('ann')).toEqual(['ann', 'bob']);
         expect(await seenBy('cy')).toEqual(['cy']);
         expect((await b.req('POST', '/classes/Subscription', { _method: 'GET' }, session.ann)).status).toBe(403);
+      });
+    });
+
+    describe('ONT-014 — set once, through the route: the world writes its half of `onlyWhile`, and keeps the person’s', () => {
+      let b: Backend;
+      let token = '';
+      let ada = '';
+      let locked = '';
+      let contoso = '';
+      let north = '';
+      const rulesOnPerson = async () =>
+        (await b.req<{ config: { collections: Record<string, { onlyWhile?: unknown }> } }>('GET', '/admin/permissions')).json.config.collections.Person?.onlyWhile;
+      const asEve = (method: string, p: string, body?: unknown) => b.req<{ error?: string }>(method, p, body, { 'x-parse-session-token': token });
+      beforeAll(async () => {
+        b = await startBackend(engine, {
+          version: 1,
+          devOpen: false,
+          defaults: { permissions: { find: 'authenticated', get: 'authenticated', create: 'authenticated', update: 'authenticated', delete: 'nobody' }, creatorOwns: false },
+          collections: { Person: { onlyWhile: { update: HAND } } },
+          functions: {},
+          files: { upload: 'authenticated', read: 'public', delete: 'nobody' },
+          signup: 'public'
+        });
+        await pushWorld(b, SETTLE.before);
+        north = await make(b, 'Account', { name: 'Northwind' });
+        contoso = await make(b, 'Account', { name: 'Contoso' });
+        ada = await make(b, 'Person', { name: 'Ada', account: ptr('Account', north) });
+        locked = await make(b, 'Person', { name: 'Locked', account: ptr('Account', north) });
+        token = (await b.req<{ sessionToken: string }>('POST', '/users', { username: 'eve', password: 'pw-eve' }, {})).json.sessionToken;
+      });
+      afterAll(() => b.stop());
+
+      it('the plan says it in words, last, as a step of its own', () => {
+        const last = SETTLE.steps[SETTLE.steps.length - 1];
+        expect(last).toEqual({ rules: { collection: 'Person', onlyWhile: { update: { frozen: { fields: ['account'] } } } }, says: 'keep, for people: account is set once' });
+        expect(UNSETTLE.steps[UNSETTLE.steps.length - 1]).toEqual({ rules: { collection: 'Person', onlyWhile: null }, says: 'people keep no rule on what they were' });
+      });
+
+      it('before: a member moves account freely', async () => {
+        expect((await asEve('PUT', `/classes/Person/${ada}`, { account: ptr('Account', contoso) })).status).toBe(200);
+      });
+
+      it('the run writes the world’s clause beside the person’s rule, on disk too; the account is then set once, at the door', async () => {
+        const r = await migrate(b, { plan: SETTLE, run: true, backupTakenElsewhere: 'snapshot' });
+        expect(r.status).toBe(200);
+        expect(r.json.ran).toBe(true);
+        const want = { update: { ...HAND, frozen: { fields: ['account'] } } };
+        expect(await rulesOnPerson()).toEqual(want);
+        expect(JSON.parse(fs.readFileSync(path.join(b.dataDir, 'security.json'), 'utf8')).collections.Person.onlyWhile).toEqual(want);
+        // Ada is on Contoso since the case before; back to Northwind is a change.
+        const moved = await asEve('PUT', `/classes/Person/${ada}`, { account: ptr('Account', north) });
+        expect(moved.status).toBe(409);
+        expect(moved.json.error).toBe('"account" on this "Person" record does not change. Nothing was changed.');
+        expect((await asEve('PUT', `/classes/Person/${ada}`, { name: 'Ada L.' })).status).toBe(200);
+        // The person's own rule still answers in its own words.
+        const hand = await asEve('PUT', `/classes/Person/${locked}`, { name: 'Unlocked' });
+        expect(hand.status).toBe(409);
+        expect(hand.json.error).toBe(HAND.says);
+      });
+
+      it('said back: the world’s clause goes, the person’s stays, and the member moves again', async () => {
+        const r = await migrate(b, { plan: UNSETTLE, run: true, backupTakenElsewhere: 'snapshot' });
+        expect(r.status).toBe(200);
+        expect(await rulesOnPerson()).toEqual({ update: HAND });
+        expect((await asEve('PUT', `/classes/Person/${ada}`, { account: ptr('Account', north) })).status).toBe(200);
+      });
+
+      it('a plan that puts rules on one of the backend’s own collections is 400, and nothing changes', async () => {
+        const steps = [{ backup: true, says: 'b' }, { rules: { collection: '_Session', onlyWhile: { delete: 'never' } }, says: 'never sign anyone out' }];
+        const r = await migrate(b, { plan: { steps, checks: [], refused: [] }, run: true, backupTakenElsewhere: 'yes' });
+        expect(r.status).toBe(400);
+        expect(r.json.error).toContain('puts rules on "_Session"');
       });
     });
   });

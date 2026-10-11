@@ -27,7 +27,7 @@
 
 import type { PathHop } from './filter';
 import { whenTargetGoesProblems, type WhenTargetGoes } from './targetGoes';
-import type { IStorageFacade, IStorageSchema, StorageCheckDecl, StorageColumn, StorageIndexDecl, StorageQueryOptions } from './storage';
+import type { IStorageFacade, IStorageSchema, OnlyWhileRule, StorageCheckDecl, StorageColumn, StorageIndexDecl, StorageQueryOptions } from './storage';
 
 /** A stored row, as the storage layer hands it back. */
 type Row = Record<string, unknown>;
@@ -51,10 +51,18 @@ export type MigrationMove =
   | { recordToLink: { record: string; fromField: string; toField: string; into: string; field: string } }
   | { fieldAcross: { from: string; link: string; field: string; to: string; back?: true } };
 
+/**
+ * P116 ONT-014 — a collection's rules on a record's OLD values (`security.json` `onlyWhile`: set
+ * once, never edited, never deleted), as the world says them now; `null` = it says none. Not the
+ * schema's: the backend keeps them inside a person's write, so the context's `rules` writes them.
+ */
+export type MigrationRulesBody = { collection: string; onlyWhile: { update?: OnlyWhileRule; delete?: OnlyWhileRule | 'never' } | null };
+
 export type MigrationStepData =
   | { backup: true; says: string }
   | { schema: MigrationSchemaBody; says: string }
-  | { move: MigrationMove; says: string };
+  | { move: MigrationMove; says: string }
+  | { rules: MigrationRulesBody; says: string };
 
 export type MigrationCheckData =
   | { refuse: 'more-than-one'; record: string; by: string; says: string }
@@ -82,6 +90,11 @@ export interface MigrationContext {
   query(collection: string, options?: StorageQueryOptions): Promise<{ results: Row[] }>;
   count(collection: string, where?: Row): Promise<number>;
   fetch(collection: string, objectId: string): Promise<Row>;
+  /**
+   * P116 ONT-014 — writes a `rules` step. The backend's route gives one (it owns `security.json`);
+   * a context without it refuses the step by name, never counts it done.
+   */
+  rules?(body: MigrationRulesBody): void | Promise<void>;
 }
 
 /** The context the backend runs a migration on: its facade, as the master key (an admin route). */
@@ -321,6 +334,10 @@ export async function runMigration(
         const barrier = (ctx.schema as { barrier?: () => Promise<void> }).barrier;
         if (typeof barrier === 'function') await barrier.call(ctx.schema);
       } else if ('move' in s) await applyMove(ctx, s.move);
+      else if ('rules' in s) {
+        if (typeof ctx.rules !== 'function') throw new Error('this context cannot keep rules on records’ old values (set once, never edited, never deleted)');
+        await ctx.rules(s.rules);
+      }
       done += 1;
     } catch (err) {
       return { ran: 'partly', dryRun, backup, steps: done, failed: { step: i, says: s.says, message: err instanceof Error ? err.message : String(err) } };
@@ -365,8 +382,13 @@ export function migrationPlanProblems(plan: unknown): string[] {
     const at = `step ${i + 1}`;
     if (!isObject(s)) return void out.push(`${at} is not a step`);
     if (!isWords(s.says)) out.push(`${at} does not say what it does`);
-    const kinds = ['backup', 'schema', 'move'].filter((k) => k in s);
-    if (kinds.length !== 1) return void out.push(`${at} is one of a backup, a schema change or a move`);
+    const kinds = ['backup', 'schema', 'move', 'rules'].filter((k) => k in s);
+    if (kinds.length !== 1) return void out.push(`${at} is one of a backup, a schema change, a move or the rules on old values`);
+    if ('rules' in s) {
+      const r = s.rules;
+      if (!isObject(r) || !isWords(r.collection)) out.push(`${at}: the rules name their collection`);
+      else if (r.onlyWhile !== null && !isObject(r.onlyWhile)) out.push(`${at}: the rules are { update?, delete? }, or null for none`);
+    }
     if ('backup' in s && s.backup !== true) out.push(`${at}: a backup step is { backup: true }`);
     if ('schema' in s) {
       const b = s.schema;

@@ -22,7 +22,7 @@
  */
 import type { Noun, Relation, VerbsFile, WorldFiles, WorldProperty } from './files';
 import { plural } from './mutants';
-import { fieldName, projectWorld, type WorldCheck, type WorldCollection, type WorldColumn, type WorldIndex, type WorldSchema } from './project';
+import { fieldName, projectWorld, type WorldCheck, type WorldCollection, type WorldColumn, type WorldIndex, type WorldOnlyWhile, type WorldSchema } from './project';
 import { endField, functionRef } from './verb-project';
 import { verbSubjects } from './verbs';
 
@@ -206,7 +206,13 @@ export type DataMove =
 export type MigrationStep =
   | { backup: true; says: string }
   | { schema: SchemaBody; says: string }
-  | { move: DataMove; says: string };
+  | { move: DataMove; says: string }
+  /**
+   * P116 ONT-014: a collection's rules on records' old values (set once, never edited, never
+   * deleted) as the world says them now; `null` = none. The backend's route writes them into
+   * `security.json` — the world's half of `onlyWhile` (`frozen`, `delete: "never"`).
+   */
+  | { rules: { collection: string; onlyWhile: WorldOnlyWhile | null }; says: string };
 
 /** What a dry run reads off the records before anything moves. A failed `refuse` stops the migration; a `loses` is shown and must be accepted. */
 export type MigrationCheck =
@@ -630,6 +636,14 @@ function planBetween(before: WorldFiles, after: WorldFiles, sb: WorldSchema, sa:
     reach.push({ collection: c.name, words: wordsOf(c), fields: [], how: 'removed' });
   }
 
+  // ONT-014: what the backend keeps inside a person's write. Last: no data move is a person's write.
+  const kept: MigrationStep[] = [];
+  for (const c of sa.collections) {
+    const old = sb.collections.find((x) => x.name === c.name);
+    if (JSON.stringify(old?.onlyWhile ?? null) === JSON.stringify(c.onlyWhile ?? null)) continue;
+    kept.push({ rules: { collection: c.name, onlyWhile: c.onlyWhile ?? null }, says: keptWords(c) });
+  }
+
   // A dropped field an index or a check on a surviving collection reads goes after the rule changes.
   const steps: MigrationStep[] = [
     { backup: true, says: 'take a backup of everything first, so any of this can be undone' },
@@ -639,9 +653,22 @@ function planBetween(before: WorldFiles, after: WorldFiles, sb: WorldSchema, sa:
     ...rules,
     ...described,
     ...dropped,
-    ...deleted
+    ...deleted,
+    ...kept
   ];
   return { changes, reach, steps, checks, notKept, refused, before: sb, after: sa };
+}
+
+/** ONT-014 — a `rules` step in words: what nobody but the backend's own key may do to these records now. */
+function keptWords(c: WorldCollection): string {
+  const ow = c.onlyWhile;
+  if (!ow) return `${wordsOf(c)} keep no rule on what they were`;
+  const parts: string[] = [];
+  const frozen = ow.update?.frozen.fields;
+  if (frozen === '*') parts.push('nobody edits one once it is made');
+  else if (frozen) parts.push(`${frozen.join(', ')} ${frozen.length > 1 ? 'are' : 'is'} set once`);
+  if (ow.delete === 'never') parts.push('nobody deletes one');
+  return `keep, for ${wordsOf(c)}: ${parts.join('; ')}`;
 }
 
 /** The plan as a person reads it: what changed, what it reaches, then each step. */

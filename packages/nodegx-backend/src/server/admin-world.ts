@@ -26,12 +26,12 @@
  * @module nodegx-backend/server/admin-world
  */
 
-import type { IStorageFacade, MigrationPlanData, MigrationRun } from '@noodl/backend-contract';
+import type { IStorageFacade, MigrationPlanData, MigrationRulesBody, MigrationRun } from '@noodl/backend-contract';
 import { dryRunMigration, migrationContextOf, migrationPlanProblems, rulesAfterMigration, runMigration } from '@noodl/backend-contract';
 
 import type { BackupSubsystem } from '../backup/BackupSubsystem';
 import { BackupNotFileBackedError } from '../backup/BackupManager';
-import type { SecurityConfig } from '../security/model';
+import type { CollectionRules, SecurityConfig } from '../security/model';
 import { validateSecurityConfig } from '../security/model';
 import type { SecurityState } from '../security/state';
 import { isVisibleAccountColumn } from '../users/accountColumns';
@@ -85,6 +85,8 @@ export function planTouchesWhatTheSchemaRouteRefuses(plan: MigrationPlanData): s
         else if (b.table === '_User' && (!isVisibleAccountColumn(field) || field === 'username' || field === 'email'))
           out.push(`${at}: "${field}" is one of the backend's own account fields`);
       }
+    } else if ('rules' in s) {
+      if (s.rules.collection.startsWith('_')) out.push(`${at} puts rules on "${s.rules.collection}", one of the backend's own collections`);
     } else if ('move' in s) {
       const m = s.move;
       const writes = 'linkToRecord' in m ? [m.linkToRecord.record] : 'recordToLink' in m ? [m.recordToLink.into] : [m.fieldAcross.back ? m.fieldAcross.from : m.fieldAcross.to];
@@ -101,6 +103,32 @@ export function planTouchesWhatTheSchemaRouteRefuses(plan: MigrationPlanData): s
 
 const isWords = (v: unknown): v is string => typeof v === 'string' && v.trim() !== '';
 
+/**
+ * P116 ONT-014 — `collections` with a world's `rules` steps applied. The world owns the two clauses
+ * it projects on a collection it makes: `update.frozen` (set once, never edited) and
+ * `delete: "never"`. Everything else in `onlyWhile` (`where`, `except`, `moves`, a `delete`
+ * condition) is the person's, said in the manager or `security.json`, and stays. Pure.
+ */
+export function withWorldRules(collections: SecurityConfig['collections'], bodies: MigrationRulesBody[]): SecurityConfig['collections'] {
+  const out: SecurityConfig['collections'] = JSON.parse(JSON.stringify(collections));
+  for (const { collection, onlyWhile } of bodies) {
+    const entry: CollectionRules = out[collection] ?? {};
+    const ow: NonNullable<CollectionRules['onlyWhile']> = { ...(entry.onlyWhile ?? {}) };
+    const update = { ...(ow.update ?? {}) };
+    delete update.frozen;
+    if (onlyWhile?.update?.frozen) update.frozen = onlyWhile.update.frozen;
+    if (Object.keys(update).length) ow.update = update;
+    else delete ow.update;
+    if (onlyWhile?.delete === 'never') ow.delete = 'never';
+    else if (ow.delete === 'never') delete ow.delete;
+    if (ow.update || ow.delete) entry.onlyWhile = ow;
+    else delete entry.onlyWhile;
+    if (Object.keys(entry).length) out[collection] = entry;
+    else delete out[collection];
+  }
+  return out;
+}
+
 export class AdminWorldRoutes {
   constructor(private readonly deps: AdminWorldDeps) {}
 
@@ -115,7 +143,11 @@ export class AdminWorldRoutes {
     const { facade, security } = this.deps;
     const sm = facade.schemaManager;
     if (!sm) throw new HttpError(500, 'Schema manager not available');
-    const mctx = migrationContextOf(facade);
+    // ONT-014: a `rules` step is recorded during the run and written after it, once the rules of a
+    // renamed collection have moved to its new name — written during, the move would overwrite it.
+    const kept: MigrationRulesBody[] = [];
+    const mctx = { ...migrationContextOf(facade), rules: (body: MigrationRulesBody) => void kept.push(body) };
+    const worldRules = plan.steps.flatMap((s) => ('rules' in s ? [s.rules] : []));
     // Read before the run, by the names the schema has now: a hop's landing collection is a link's target.
     const targetOf = (collection: string, field: string): string | undefined =>
       sm.getTableSchema(collection)?.columns?.find((c) => c.name === field)?.targetClass;
@@ -139,7 +171,7 @@ export class AdminWorldRoutes {
     // The rules the full run leaves must be a config the backend would start with — checked before
     // anything moves, so a run never ends with rules the validator refuses and nothing saved.
     if (after.problems.length) throw new HttpError(409, `The permission rules cannot be carried, so nothing was changed:\n${after.problems.map((p) => `- ${p}`).join('\n')}`);
-    const invalid = validateSecurityConfig({ ...security.config, collections: after.collections } as SecurityConfig);
+    const invalid = validateSecurityConfig({ ...security.config, collections: withWorldRules(after.collections, worldRules) } as SecurityConfig);
     if (invalid.length) throw new HttpError(409, `The permission rules after this migration would be refused:\n${invalid.map((e) => `- ${e}`).join('\n')}`);
 
     const elsewhere = isWords(body.backupTakenElsewhere) ? body.backupTakenElsewhere.trim() : undefined;
@@ -168,6 +200,14 @@ export class AdminWorldRoutes {
     if (moved && (moved.moved.length || moved.rewritten.length)) {
       for (const { from } of moved.moved) delete security.config.collections[from];
       Object.assign(security.config.collections, moved.collections);
+      security.save();
+    }
+    if (kept.length) {
+      // In place, as the move above writes: the config object is the one every reader holds.
+      const collections = security.config.collections;
+      const next = withWorldRules(collections, kept);
+      for (const name of Object.keys(collections)) if (!(name in next)) delete collections[name];
+      Object.assign(collections, next);
       security.save();
     }
     const backup = run.ran === false ? undefined : (run.backup as WorldMigrateResponse['backup']);
