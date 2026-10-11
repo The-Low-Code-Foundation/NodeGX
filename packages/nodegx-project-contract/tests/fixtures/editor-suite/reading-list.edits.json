@@ -1,0 +1,17 @@
+[
+  { "edit": "rename", "component": "Pages/Home", "id": "7de3c0e2-3ff0-4d97-949f-5b1ca2a9f10e", "label": "Heading" },
+  { "edit": "set_parameter", "component": "Pages/Home", "id": "7de3c0e2-3ff0-4d97-949f-5b1ca2a9f10e", "name": "text", "value": "Reading List" },
+  { "edit": "set_parameter", "component": "Pages/Home", "id": "7de3c0e2-3ff0-4d97-949f-5b1ca2a9f10e", "name": "fontSize", "value": 28 },
+  { "edit": "add_node", "component": "Pages/Home", "id": "book-list", "type": "Group", "parent": "35214cb8-02c0-4388-a097-a1ce93b6fee7", "label": "Book list" },
+  { "edit": "add_node", "component": "Pages/Home", "type": "Text", "parent": "book-list", "label": "Empty", "parameters": { "text": "No books yet" } },
+  { "edit": "add_node", "component": "Pages/Home", "id": "add-book", "type": "net.noodl.controls.button", "parent": "35214cb8-02c0-4388-a097-a1ce93b6fee7", "parameters": { "label": "Add a book" } },
+  { "edit": "add_node", "component": "Pages/Home", "id": "book-count", "type": "Counter", "x": 600, "y": 40 },
+  { "edit": "add_node", "component": "Pages/Home", "id": "book-limit", "type": "Number", "parameters": { "value": 100 }, "x": 600, "y": 200 },
+  { "edit": "connect", "component": "Pages/Home", "from": { "node": "book-limit", "port": "savedValue" }, "to": { "node": "book-count", "port": "limitsMax" } },
+  { "edit": "connect", "component": "Pages/Home", "from": { "node": "add-book", "port": "onClick" }, "to": { "node": "book-count", "port": "increase" } },
+  { "edit": "disconnect", "component": "Pages/Home", "from": { "node": "book-limit", "port": "savedValue" }, "to": { "node": "book-count", "port": "limitsMax" } },
+  { "edit": "move", "component": "Pages/Home", "id": "book-count", "x": 640, "y": 80 },
+  { "edit": "rename", "component": "App", "id": "8cc8efa7-8112-472d-83b7-34b9d7afca57", "label": "Pages" },
+  { "edit": "add_child", "component": "Pages/Home", "id": "7de3c0e2-3ff0-4d97-949f-5b1ca2a9f10e", "parent": "book-list", "index": 0 },
+  { "edit": "remove_node", "component": "Pages/Home", "id": "book-limit" }
+]

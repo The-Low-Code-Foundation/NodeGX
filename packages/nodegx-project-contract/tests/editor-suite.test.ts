@@ -225,6 +225,19 @@ describe('AC4 — the templates, in time', () => {
   });
 });
 
+describe('OWN-011 AC4 — a project the one install made', () => {
+  // `reading-list` is what `npm create nodegx@0.1.0` plus the agent's first `create_project` (through
+  // `npx -y @nodegx/mcp@0.1.0`) wrote, byte for byte, less the machine-specific `.mcp.json` its own `.gitignore` names.
+  // Its script is an agent's first page: the placeholder becomes the heading, a list, a button counting books.
+  test('reading-list: the reference passes', async () => {
+    const f = fixture('reading-list', path.join(FIXTURES, 'reading-list'));
+    expect(f.files['nodegx.project.json']).toMatch(/"nodegxVersion": "0\.1\.0"/);
+    const report = await runSuite(referenceAdapter(), f);
+    expect(report.sentences).toEqual([]);
+    expect(report.fixtureFault).toBeUndefined();
+  });
+});
+
 describe('the command', () => {
   test('runs an adapter module on a folder and an edit script, PASS exits 0, a broken one exits 1', async () => {
     const dir = fs.mkdtempSync(path.join(require('os').tmpdir(), 'editor-suite-'));

@@ -126,9 +126,12 @@ export function mcpAdapter(): EditorAdapter & { dir(): string; dispose(): void }
 }
 
 describe('OWN-006 AC3 — the MCP as an adapter', () => {
-  test.each(['small', 'todo-list', 'planning'])('%s: the MCP saves what the reference saves', async (name) => {
+  // `reading-list` is the project the one install made (OWN-011 AC4): a fixture, like `small`.
+  test.each(['small', 'todo-list', 'planning', 'reading-list'])('%s: the MCP saves what the reference saves', async (name) => {
     const f =
-      name === 'small' ? fixture(name, path.join(FIXTURES, 'small')) : fixture(name, path.join(TEMPLATES, name));
+      name === 'small' || name === 'reading-list'
+        ? fixture(name, path.join(FIXTURES, name))
+        : fixture(name, path.join(TEMPLATES, name));
     const adapter = mcpAdapter();
     try {
       const report = await runSuite(adapter, f);

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/project-v2.json",
+  "name": "Reading List",
+  "id": "95de5bf2-d00c-48ea-9d7e-142c074c1ba7",
+  "version": "5",
+  "nodegxVersion": "0.1.0",
+  "runtimeVersion": "react19",
+  "created": "2026-10-11T18:30:51.841Z",
+  "modified": "2026-10-11T18:30:51.841Z",
+  "settings": {
+    "htmlTitle": "Reading List",
+    "navigationPathType": "path",
+    "bodyScroll": true
+  },
+  "structure": {
+    "componentsDir": "components",
+    "assetsDir": "assets"
+  },
+  "rootNodeId": "8cc8efa7-8112-472d-83b7-34b9d7afca57"
+}

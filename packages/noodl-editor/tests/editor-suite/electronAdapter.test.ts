@@ -280,7 +280,9 @@ const CHECKS: Record<string, SavedFilesCheck> = {
 const FIXTURE_DIRS: Record<string, string> = {
   small: path.join(FIXTURES, 'small'),
   'todo-list': path.join(TEMPLATES, 'todo-list'),
-  planning: path.join(TEMPLATES, 'planning')
+  planning: path.join(TEMPLATES, 'planning'),
+  // OWN-011 AC4: the project `npm create nodegx` plus the agent's first `create_project` made.
+  'reading-list': path.join(FIXTURES, 'reading-list')
 };
 
 describe('P112 OWN-006 AC3 — the Electron editor as an adapter of the editor suite', () => {

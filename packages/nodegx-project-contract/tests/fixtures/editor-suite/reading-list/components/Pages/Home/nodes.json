@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7cea2a66-9c0a-56c5-83b7-92c8a4d7817b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "35214cb8-02c0-4388-a097-a1ce93b6fee7",
+      "type": "Page",
+      "label": "Home",
+      "parameters": {
+        "title": "Home",
+        "urlPath": "home"
+      },
+      "children": [
+        "7de3c0e2-3ff0-4d97-949f-5b1ca2a9f10e"
+      ]
+    },
+    {
+      "id": "7de3c0e2-3ff0-4d97-949f-5b1ca2a9f10e",
+      "type": "Text",
+      "label": "Placeholder",
+      "parent": "35214cb8-02c0-4388-a097-a1ce93b6fee7",
+      "parameters": {
+        "text": "Reading List — nothing built yet. Review the plan in docs/ and start when you are ready."
+      }
+    }
+  ],
+  "visualRoots": [
+    "35214cb8-02c0-4388-a097-a1ce93b6fee7"
+  ]
+}
