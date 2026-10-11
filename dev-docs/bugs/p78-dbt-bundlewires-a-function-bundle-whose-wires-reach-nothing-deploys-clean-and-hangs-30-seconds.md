@@ -2,7 +2,7 @@
 id: P78-DBT-BUNDLEWIRES
 title: A function bundle whose wires reach nothing deploys and loads clean, and every call hangs 30 seconds
 status: fixed
-commit: PENDING
+commit: 65394174a
 phase: P109
 task: ISL-042
 severity: medium

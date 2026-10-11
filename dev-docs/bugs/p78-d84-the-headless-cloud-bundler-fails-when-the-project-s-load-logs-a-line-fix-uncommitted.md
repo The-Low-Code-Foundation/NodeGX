@@ -2,7 +2,7 @@
 id: P78-D84
 title: The headless cloud-function bundler fails when loading the project logs a line (the fix is uncommitted)
 status: fixed
-commit: PENDING
+commit: ba530fd11
 phase: P109
 task: ISL-042
 severity: high

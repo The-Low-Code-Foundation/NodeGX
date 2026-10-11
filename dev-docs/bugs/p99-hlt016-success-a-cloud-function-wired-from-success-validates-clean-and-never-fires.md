@@ -2,7 +2,7 @@
 id: P99-HLT016-SUCCESS
 title: A Cloud Function wired from `success` passes validation with 0 errors and never fires
 status: fixed
-commit: PENDING
+commit: b978cf353
 phase: P109
 task: ISL-042
 severity: high

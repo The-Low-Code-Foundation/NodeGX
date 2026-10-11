@@ -2,7 +2,7 @@
 id: P78-DBT-SECRETSCAN
 title: package-deploy's secret scan refuses every backend build because of the backend's own error-message placeholder
 status: fixed
-commit: PENDING
+commit: ac78efb4b
 phase: P109
 task: ISL-042
 severity: high

@@ -2,7 +2,7 @@
 id: P96-FED005-R10
 title: A cloud component's description never reaches its MCP tool, so every tool says "Run the cloud function X"
 status: fixed
-commit: PENDING
+commit: 535bd63d0
 phase: P109
 task: ISL-042
 severity: medium
