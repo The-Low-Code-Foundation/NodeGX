@@ -22,3 +22,12 @@ rule (warnings `typed-word-not-translated` on `Page.title`).
 **Proposed:** a key per page title in each bundle, a Translation per page wired into the Page's Title, made
 where the template is generated. Its generator is not under `packages/noodl-mcp/tests` (searched 2026-10-03): find
 the owner before editing the template's files by hand.
+
+## s45 (2026-10-11): blocked on P109-S45-WIREDTITLE
+
+Re-measured: the template still ships 11 typed titles; it ships one locale (English), and `Data/Strings`'
+`str_locales` is an empty seam, so no learner reads an English tab in a French app today. What a person meets is the
+editor's warning on each title. Building it as proposed would not work: the Router sets the tab from the router
+index's typed title and never reads a wired one ([P109-S45-WIREDTITLE](p109-s45-wiredtitle-a-page-title-from-a-wire-never-reaches-the-browser-tab.md)).
+Fix that first, then wire `t_<page>_title` Translations (keys beside each page's namespace in `str_graph`) and
+regenerate the demo.

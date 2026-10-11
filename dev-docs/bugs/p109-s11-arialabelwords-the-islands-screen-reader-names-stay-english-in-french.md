@@ -2,6 +2,7 @@
 id: P109-S11-ARIALABELWORDS
 title: Eight screen-reader names on Olive's Island stay in English when the page is in French
 status: fixed
+commit: 822081831
 phase: P109
 task: ISL-037
 severity: medium

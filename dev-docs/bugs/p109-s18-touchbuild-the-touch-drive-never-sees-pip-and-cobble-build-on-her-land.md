@@ -2,6 +2,7 @@
 id: P109-S18-TOUCHBUILD
 title: "`drive-iw007-touch.js` never sees Pip and Cobble build on her land at 1368 (BUILD, PILLS, PAY red on HEAD's garden too)"
 status: fixed
+commit: 5778f4b1c
 phase: P109
 task: ISL-037
 severity: medium

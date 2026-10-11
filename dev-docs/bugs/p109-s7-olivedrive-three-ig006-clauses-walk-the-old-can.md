@@ -2,6 +2,7 @@
 id: P109-S7-OLIVEDRIVE
 title: The Olive pages drive is red in three IG-006 clauses — its programs walk to where the can was before P108's R7
 status: fixed
+commit: 07392a4ed
 phase: P109
 task: ISL-037
 severity: low

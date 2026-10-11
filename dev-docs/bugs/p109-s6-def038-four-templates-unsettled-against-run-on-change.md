@@ -2,6 +2,7 @@
 id: P109-S6-DEF038
 title: The DBT demo template would be rewritten by an editor load — 6 Function inputs lose their run-on-change (DEF-038's settled gate)
 status: fixed
+commit: f7d3bcc2b
 phase: P109
 task: ISL-037
 severity: medium
