@@ -153,6 +153,8 @@ renders in 10 ms and Chrome draws the page in 274 ms, no page errors; `npm insta
 @nodegx/canvas-look @nodegx/project-contract` (11 packages, 2 s) validates the project, refuses a broken `nodes.json`
 and finds 85 graph scenarios.
 
-**Owed:** nodegx.io deployed so CHANGELOG.md's "npm packages 0.1.0" section shows (asked, not done: the box serves
-four other sites and `nodegx-web` holds two untracked folders); AC2's editor-open half; AC4; §4.4 on a clean account
-and a non-Mac machine.
+**Announced (Richard: "publish everything … focus on what has been done and what's coming soon"):** nodegx.io's
+homepage "Start from npm" section and the changelog's "npm packages 0.1.0", deployed 2026-10-11 (neighbours 200 before
+and after; `nodegx-web` `c2df94b`, `fda2887`).
+
+**Owed:** AC2's editor-open half; AC4; §4.4 on a clean account and a non-Mac machine.

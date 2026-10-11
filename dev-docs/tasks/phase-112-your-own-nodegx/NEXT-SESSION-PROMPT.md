@@ -62,10 +62,12 @@ should switch** (README §0.2). Do not wait for an answer.
 4. OWN-011 §4.4: the stranger's run on a clean account and a non-Mac machine, in a real Claude Code.
 5. OWN-004 §6.3 items 2–5.
 
-**Human decisions:**
-- **Deploy nodegx.io** so CHANGELOG.md's "npm packages 0.1.0" section (with R6's 25 known issues) shows at
-  nodegx.io/changelog/. Not done: `ops/deploy.sh` reaches a box serving four other sites, and `nodegx-web` holds two
-  untracked folders (`site/orbit/`, `site/templates/`) a deploy would publish.
+**Human decisions / done since asking:**
+- ✅ **nodegx.io deployed (s10, Richard: "publish everything"):** the homepage has a "Start from npm" section (the three
+  commands, the six packages linking to npm, the editor guide "coming soon"; the hero's second button points to it),
+  Orbit's card names the packages, and nodegx.io/changelog/ shows "npm packages 0.1.0". Richard's steer for the site:
+  **what has been done and what is coming soon — not the bugs** (the changelog points at `dev-docs/bugs/` instead of
+  listing 25 known issues). `cline-dev` pushed to GitHub at `28639c48b`.
 - The next release of any of the six: who bumps, and whether OWN-010's generated changelog must exist first (AC3 of
   OWN-010 is still open; this release's section was generated from the gate, not from the ledger since a last release).
 - Still worth asking when it matters: *should a node an agent adds wear the same look as one a person drops from the
