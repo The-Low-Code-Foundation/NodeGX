@@ -51,7 +51,7 @@ export type SearchOptions = StorageSearchOptions;
 export type WireQueryResult = StorageQueryResult;
 export type ImportColumn = StorageImportColumn;
 
-import { refuseHiddenNamed, stripHidden, type NamedFields } from './fieldRules';
+import { reachOf, refuseHiddenNamed, stripHidden, type NamedFields } from './fieldRules';
 import { heldWhile, whyRefused } from './onlyWhile';
 
 // QueryBuilder is the adapter's own SQL/serialization helper — reused here so
@@ -545,12 +545,16 @@ export class AdapterFacade implements IStorageFacade {
       const col = types.get(key);
       if (col && col.type === 'Pointer' && typeof value === 'string') {
         const className = col.targetClass || 'Unknown';
-        if (include.includes(key)) {
+        // Bug INCLUDECLP: the target's own `get` rule decides as well as its row ACL. A collection
+        // the caller may not get is never expanded; a narrowed one is read with its narrowing.
+        const reach = include.includes(key) ? reachOf(acl, 'get', className) : 'none';
+        if (reach !== 'none') {
           try {
             // The caller's read ACL applies to the TARGET row too — without
             // this, include= is a one-hop ACL bypass. An unreadable target
             // degrades to the unexpanded envelope, same as a dangling pointer.
-            const target = await this.rawFetch(className, value, acl && { ...acl, access: 'read' });
+            const readAcl: AclOption | undefined = acl && { ...acl, access: 'read', only: reach === 'all' ? undefined : { collection: className, where: reach.where } };
+            const target = await this.rawFetch(className, value, readAcl);
             const expanded = await this.toWire(className, target, [], acl);
             out[key] = { __type: 'Object', className, ...expanded };
           } catch {

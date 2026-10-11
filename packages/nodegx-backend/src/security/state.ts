@@ -24,7 +24,7 @@ import type * as http from 'http';
 import type { IStorageFacade } from '@noodl/backend-contract';
 import type { AclOption } from '../persistence/AdapterFacade';
 import { HttpError } from '../server/http-util';
-import { adminAccessOf, isAccountDisabled } from '../users/accountColumns';
+import { ACCOUNT_DETAILS, adminAccessOf, isAccountDisabled } from '../users/accountColumns';
 import {
   ADMIN_TOKEN_ENV,
   describeMissingSecret,
@@ -45,6 +45,7 @@ import {
   effectiveCreatorOwns,
   onlyWhileFor,
   fieldMask,
+  collectionReach,
   HiddenField,
   AccessDecision,
   DeployedFunction,
@@ -170,6 +171,9 @@ export function undeclaredFunctionDeployMessage(unresolved: UnresolvedFunction[]
     `changes nothing until you tighten it:\n\n${functionsBlock}`
   );
 }
+
+/** Every collection open: the half of `reach` a caller's rules do not narrow. */
+const ALL = Object.freeze({ by: {}, otherwise: 'all' as const });
 
 /**
  * P109 ISL-040 (P100-UPG001-LOCKOUT): the headers `resolvePrincipal` reads a credential from. BAK-005's
@@ -572,8 +576,13 @@ export class SecurityState {
     // P116 ONT-012 (R-a): the fields this caller may not read, for every collection, on read and
     // write alike (a write answers with the record). The same callers the row ACL binds.
     if (acl) {
-      const hidden = fieldMask(this.config, principal);
-      if (Object.keys(hidden).length) acl = { ...acl, hidden };
+      // R-h: another person's account details are never read through a record (bug INCLUDECLP).
+      const hidden = { ...fieldMask(this.config, principal), _User: ACCOUNT_DETAILS.map((field) => ({ field })) };
+      acl = { ...acl, hidden };
+      // Bug INCLUDECLP: the other collections an `include` or a `$path` reaches, by their own rules.
+      const get = collectionReach(this.config, principal, 'get');
+      const find = collectionReach(this.config, principal, 'find');
+      if (get || find) acl = { ...acl, reach: { get: get ?? ALL, find: find ?? ALL } };
     }
     return acl;
   }

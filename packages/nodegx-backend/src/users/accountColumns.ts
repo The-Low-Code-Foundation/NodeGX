@@ -45,6 +45,16 @@ export const ACCOUNT_COLUMNS: Readonly<Record<string, string>> = Object.freeze({
 });
 
 /**
+ * P116 R-h (Richard, 2026-10-11): *"someone reads a message that links to its author — what do
+ * they get?"* → **the name, not the account.** Every account column except the username is
+ * hidden from every reader the row ACL binds (`SecurityState.aclFor` puts it in the `hidden`
+ * mask), so an `include` of an author carries the username and the fields the app added, and a
+ * filter on these is refused by name. The person's own details reach them through `/users/me`
+ * and sign-in, which read the account without a reader's ACL.
+ */
+export const ACCOUNT_DETAILS: readonly string[] = Object.freeze(Object.keys(ACCOUNT_COLUMNS).filter((c) => c !== 'username'));
+
+/**
  * BMG-014 — what a person may do in the backend manager, stored on their
  * `_User` row as `adminAccess`. Absent (or anything else) is "no access".
  *

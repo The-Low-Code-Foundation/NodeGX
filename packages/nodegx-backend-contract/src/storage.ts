@@ -81,7 +81,26 @@ export interface StorageAclOption {
    * reaches; absent = hidden on every row.
    */
   hidden?: Record<string, Array<{ field: string; shownWhere?: Record<string, unknown> }>>;
+  /**
+   * P116 bug INCLUDECLP — what this caller may read of the OTHER collections a request reaches,
+   * by each one's own collection rule: an `include` reads its target by `get`, a `$path` walks a
+   * collection by `find`. Without it, both read a collection under the row ACL alone, and a
+   * collection closed to the caller came back embedded. Read by the backend's facade, never by
+   * an adapter. Absent when every collection answers `'all'`.
+   */
+  reach?: { get: CollectionReach; find: CollectionReach };
 }
+
+/** P116 bug INCLUDECLP — one rule's answer for one caller, per collection. */
+export interface CollectionReach {
+  /** Collections the rules name. */
+  by: Record<string, Reach>;
+  /** Every other collection (the defaults). */
+  otherwise: Reach;
+}
+
+/** Every row the row ACL lets through; none; or only the rows a path rule reaches (`where` is a `$path`). */
+export type Reach = 'all' | 'none' | { where: Record<string, unknown> };
 
 /** P116 ONT-012 — one `onlyWhile` entry: the condition, the fields free of it, the refusal's words. */
 export interface OnlyWhileRule {

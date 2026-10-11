@@ -15,7 +15,7 @@
  * @module nodegx-backend/security/model
  */
 
-import { pathProblem, type OnlyWhileRule, type PathHop } from '@noodl/backend-contract';
+import { pathProblem, type CollectionReach, type OnlyWhileRule, type PathHop, type Reach } from '@noodl/backend-contract';
 import type { RateLimitPolicy } from '../ops/model';
 
 // ============================================================================
@@ -345,6 +345,26 @@ export interface CollectionRules {
 export interface HiddenField {
   field: string;
   shownWhere?: Record<string, unknown>;
+}
+
+/**
+ * P116 bug INCLUDECLP — what one collection rule (`get` or `find`) lets this caller read, for every
+ * collection the rules name and for the rest (the defaults). {@link checkClp} is the one decider,
+ * so an `include` and a `$path` answer exactly what a direct request would. System collections
+ * are not here: the facade decides those (`_User` by its name, the rest refused).
+ * `undefined` when every collection answers `'all'`, so most callers' ACL option is unchanged.
+ */
+export function collectionReach(config: SecurityConfig, principal: Principal, op: 'get' | 'find'): CollectionReach | undefined {
+  const reachOf = (decision: AccessDecision): Reach =>
+    !decision.allowed ? 'none' : decision.narrow ? { where: decision.narrow } : 'all';
+  const by: Record<string, Reach> = {};
+  for (const name of Object.keys(config.collections)) {
+    if (!isSystemCollection(name)) by[name] = reachOf(checkClp(config, principal, name, op));
+  }
+  // The defaults, asked the same way: a collection no entry names falls through to them.
+  const otherwise = reachOf(checkClp({ ...config, collections: {} }, principal, 'any', op));
+  const open = (r: Reach) => r === 'all';
+  return open(otherwise) && Object.values(by).every(open) ? undefined : { by, otherwise };
 }
 
 /**

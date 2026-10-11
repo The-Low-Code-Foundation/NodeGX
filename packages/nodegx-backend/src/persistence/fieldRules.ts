@@ -20,7 +20,7 @@
  * @module nodegx-backend/persistence/fieldRules
  */
 
-import type { StorageAclOption } from '@noodl/backend-contract';
+import type { Reach, StorageAclOption } from '@noodl/backend-contract';
 
 import { HttpError } from '../server/http-util';
 
@@ -43,6 +43,41 @@ export class HiddenFieldNamed extends HttpError {
   }
 }
 
+/**
+ * P116 bug INCLUDECLP — a request reached a collection its caller may not read by that collection's
+ * own rule: a `$path` through it, or a `$relatedTo` on one of its records.
+ */
+export class UnreadableCollection extends HttpError {
+  constructor(
+    readonly collection: string,
+    how: string,
+    narrowed: boolean
+  ) {
+    super(
+      403,
+      narrowed
+        ? `You may read only some records of "${collection}", so a request may not ${how} it: it would answer for the others too. Nothing was read.`
+        : `You may not read "${collection}", so a request may not ${how} it. Nothing was read.`,
+      119,
+      { reason: 'collection-rule', collection }
+    );
+    this.name = 'UnreadableCollection';
+  }
+}
+
+/**
+ * P116 bug INCLUDECLP — what `acl` lets its caller read of `collection` by the collection's `op`
+ * rule. No ACL is a bypass (admin, dev-open, an unbound key): `'all'`. A system collection is not
+ * in the rules: `_User` is read by its name only (R-h, the account details are in `hidden`), every
+ * other one is refused, as it is at its own door.
+ */
+export function reachOf(acl: StorageAclOption | undefined, op: 'get' | 'find', collection: string): Reach {
+  if (!acl) return 'all';
+  if (collection.startsWith('_')) return collection === '_User' ? 'all' : 'none';
+  const reach = acl.reach?.[op];
+  return reach ? reach.by[collection] ?? reach.otherwise : 'all';
+}
+
 /** What a read or write asks for, in the facade's own terms. */
 export interface NamedFields {
   where?: Record<string, unknown>;
@@ -61,7 +96,8 @@ const list = (v: string[] | string | undefined): string[] =>
 const fieldOf = (name: string): string => name.replace(/^-/, '').split('.')[0];
 
 /**
- * Throws {@link HiddenFieldNamed} when `request` names a field `acl.hidden` hides.
+ * Throws {@link HiddenFieldNamed} when `request` names a field `acl.hidden` hides, and
+ * {@link UnreadableCollection} when it walks or names another collection its caller may not read.
  *
  * @param targetOf the collection a Link field names, for a `$path` hop that does not say `to`.
  */
@@ -71,8 +107,8 @@ export function refuseHiddenNamed(
   acl: StorageAclOption | undefined,
   targetOf: (collection: string, field: string) => string | undefined
 ): void {
-  const hidden = acl?.hidden;
-  if (!hidden || Object.keys(hidden).length === 0) return;
+  if (!acl) return;
+  const hidden = acl.hidden ?? {};
   const hiddenIn = (c: string | undefined, field: string): boolean =>
     c === undefined
       ? Object.values(hidden).some((h) => h.some((x) => x.field === field))
@@ -80,6 +116,15 @@ export function refuseHiddenNamed(
   const check = (c: string | undefined, name: string, how: string): void => {
     const field = fieldOf(name);
     if (hiddenIn(c, field)) throw new HiddenFieldNamed(c ?? collection, field, how);
+  };
+
+  // Bug INCLUDECLP: a collection the request walks or names, other than the one it reads (the
+  // route gated that one), is held to its own rule. A narrowed one is refused too: a `$path` hop
+  // cannot carry the narrowing (a path inside a path), and a filter over it answers for every row.
+  const mayRead = (c: string | undefined, op: 'get' | 'find', how: string): void => {
+    if (c === undefined || c === collection) return;
+    const reach = reachOf(acl, op, c);
+    if (reach !== 'all') throw new UnreadableCollection(c, how, reach !== 'none');
   };
 
   const walkWhere = (c: string | undefined, where: unknown): void => {
@@ -95,6 +140,7 @@ export function refuseHiddenNamed(
       }
       if (key === '$relatedTo') {
         const r = value as { object?: { className?: string }; key?: string } | undefined;
+        mayRead(r?.object?.className, 'get', 'filter by a relation of');
         if (r?.key) check(r.object?.className, r.key, 'filter by');
         continue;
       }
@@ -115,6 +161,7 @@ export function refuseHiddenNamed(
     const p = raw as { from?: { collection?: string; where?: unknown }; hops?: Array<Record<string, unknown>> } | undefined;
     if (!p || typeof p !== 'object') return;
     let at: string | undefined = p.from?.collection;
+    mayRead(at, 'find', 'follow a path through');
     walkWhere(at, p.from?.where);
     for (const hop of Array.isArray(p.hops) ? p.hops : []) {
       if (typeof hop.from === 'string') {
@@ -124,6 +171,7 @@ export function refuseHiddenNamed(
         check(at, hop.follow, 'follow a path through');
         at = typeof hop.to === 'string' ? hop.to : at === undefined ? undefined : targetOf(at, hop.follow);
       }
+      mayRead(at, 'find', 'follow a path through');
       walkWhere(at, hop.where);
     }
   };
