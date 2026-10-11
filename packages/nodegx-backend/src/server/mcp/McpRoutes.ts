@@ -264,7 +264,8 @@ export class McpRoutes {
       ? runner.getAvailableFunctions().map((fn) => ({
           name: fn.name,
           allowNoAuth: runner.functionAllowsNoAuth(fn.name),
-          params: requestParamSpecs(runner.getRequestNodeParameters(fn.name))
+          params: requestParamSpecs(runner.getRequestNodeParameters(fn.name)),
+          description: runner.getFunctionDescription(fn.name)
         }))
       : [];
     return buildToolSurface({

@@ -92,6 +92,8 @@ export interface FunctionOnSurface {
    * every function written before that task — see {@link functionInputSchema}.
    */
   params: { name: string; type: string; required: boolean; default?: unknown }[];
+  /** P109 ISL-042 (R10): what the author wrote on the cloud component, when the bundle carries it. */
+  description?: string;
 }
 
 export interface SurfaceInputs {
@@ -344,22 +346,18 @@ export function buildToolSurface(inputs: SurfaceInputs): ToolSurface {
 /**
  * A function's description.
  *
- * 🔴 **FED-005 §3.2 asks for "the component's description" and a deployed
- * bundle does not carry one.** Measured 2026-09-19 at
- * `noodl-editor/.../exporter/util.ts` — `exportComponent` builds
- * `{name, nodes, connections, ports, roots, metadata}` and drops
- * `ComponentModel.description` on the floor, so the sentence an author writes
- * in the editor never reaches a backend. Carrying it would be an EDITOR change,
- * which ruling R4 puts outside this phase (register R10).
+ * FED-005 §3.2 asks for "the component's description". Until P109 ISL-042 (register R10) a deployed bundle did not
+ * carry one: the editor's `exportComponent` dropped `ComponentModel.description`. It carries it now, and this leads
+ * with it, because it is the sentence the author wrote for the model that will choose this tool.
  *
- * So the description is built from what the bundle DOES carry — the name and
- * the declared contract — rather than left blank. A model choosing between
- * tools reads this string, and "no description" is the one answer guaranteed to
- * be useless.
+ * A function with none (every bundle deployed before that change) is described from what the bundle does carry, the
+ * name and the declared contract, rather than left blank: a model choosing between tools reads this string, and "no
+ * description" is the one answer guaranteed to be useless.
  */
 function describeFunction(fn: FunctionOnSurface): string {
   const named = fn.params.filter((p) => p.name).map((p) => (p.required && p.default === undefined ? `${p.name} (required)` : p.name));
   const takes = named.length > 0 ? ` Takes: ${named.join(', ')}.` : '';
+  if (fn.description) return `${/[.!?]$/.test(fn.description) ? fn.description : fn.description + '.'}${takes}`;
   return `Run the cloud function "${fn.name}" on this NodeGX backend.${takes}`;
 }
 

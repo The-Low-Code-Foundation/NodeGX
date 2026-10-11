@@ -142,6 +142,8 @@ for (const root of componentDirs(CLOUD)) {
 
   components.push({
     name: meta.path,
+    /* The sentence the backend's MCP tool tells the model choosing this function (P109 ISL-042, NodeGX R10). */
+    ...(meta.description ? { description: meta.description } : {}),
     nodes: nodes.map((n) => ({
       id: n.id,
       type: n.type,

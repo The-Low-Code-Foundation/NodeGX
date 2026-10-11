@@ -319,6 +319,10 @@ export function buildCloudBundleParts(project: ProjectModel): CloudBundleParts {
     try {
       const json = exportComponent(component);
       json.nodes.forEach(withScriptPorts);
+      // P109 ISL-042 (P96-FED005-R10): the description an author writes on a cloud function is what the backend's
+      // MCP tool tells the model choosing it. Carried here and not in `exportComponent`, so a page component's notes
+      // never reach the public frontend bundle.
+      if (component.description) json.description = component.description;
       exported.push(json);
       shipped.push(component.name);
     } catch (e) {

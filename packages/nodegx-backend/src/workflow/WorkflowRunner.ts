@@ -937,6 +937,22 @@ export class WorkflowRunner {
     return null;
   }
 
+  /**
+   * P109 ISL-042 (P96-FED005-R10): the description its author wrote on the cloud component, as the editor's exporter
+   * now carries it into the bundle. `undefined` for a function with none, or one this runner has not loaded.
+   */
+  getFunctionDescription(functionName: string): string | undefined {
+    const fullName = `${CLOUD_COMPONENT_PREFIX}${functionName}`;
+    for (const exportData of this.loadedWorkflows.values()) {
+      const components = (exportData.components as { name: string; description?: unknown }[] | undefined) || [];
+      for (const component of components) {
+        if (component.name !== fullName) continue;
+        if (typeof component.description === 'string' && component.description.trim()) return component.description.trim();
+      }
+    }
+    return undefined;
+  }
+
   hasFunction(functionName: string): boolean {
     return this.findRequestNodeForFunction(functionName) !== null;
   }
