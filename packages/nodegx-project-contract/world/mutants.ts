@@ -282,6 +282,8 @@ function retype(
         return { schema: s, unchanged: 'unkept' };
       }
     }
+    // ONT-011 step 4: a secret detail is a per-field read rule (held); the mutant reads it like the rest.
+    if ('secret' in rule.holds) return { schema: applyMutant(s, { dropFieldRule: { collection: home.name, field: fieldName(rule.holds.secret) } }) };
     // A rule no engine keeps, or a shape: taking it out changes nothing a claim can see.
     return { schema: s, unchanged: 'shape' in rule.holds ? 'unclaimed' : 'unkept' };
   }
@@ -591,6 +593,7 @@ function missingHome(schema: WorldSchema, claim: WorldClaim): string | undefined
     else if ('gone' in step) miss = need(step.gone, []);
     else if ('there' in step) miss = need(step.there, []);
     else if ('holds' in step) miss = need(step.holds, [step.field]);
+    else if ('unseen' in step) miss = need(step.unseen, [step.field]);
     else miss = need(step.empty, [step.field]);
     if (miss) return miss;
   }
@@ -612,7 +615,8 @@ function differsInWhatIsHeld(x: WorldSchema, y: WorldSchema): boolean {
         })),
         checks: c.checks,
         indexes: c.indexes,
-        onlyWhile: c.onlyWhile
+        onlyWhile: c.onlyWhile,
+        fields: c.fields
       }))
     );
   return held(x) !== held(y);

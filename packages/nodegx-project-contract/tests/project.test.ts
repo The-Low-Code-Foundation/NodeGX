@@ -11,7 +11,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { applyMutant, collectionName, fieldName, projectWorld, schemaText, WORLD_FILES, WORLD_KINDS, type WorldFiles, type WorldSchema } from '../world';
+import { applyMutant, collectionName, fieldName, nextQuestions, projectWorld, schemaText, WORLD_FILES, WORLD_KINDS, type WorldFiles, type WorldSchema } from '../world';
 
 const FIXTURES = path.join(__dirname, 'fixtures');
 const WORLDS = ['world', 'world-every-kind', 'world-membership', 'world-categories', 'world-categories-unanswered'] as const;
@@ -227,5 +227,47 @@ describe('AC4 — nothing in the package reaches an adapter', () => {
     const ENGINES = /sqlite|postgres|mongo|mysql|neo4j|cypher|gremlin|sparql|arangodb|dgraph|janusgraph|\brdf\b|\bowl\b|\bgql\b/i;
     const files = walk(path.join(FIXTURES, 'world-every-kind')).concat(golden('world'));
     expect(files.filter((f) => ENGINES.test(fs.readFileSync(f, 'utf8')))).toEqual([]);
+  });
+});
+
+describe('ONT-011 AC3 — Nightbook’s Profile, re-said: asked whether a detail is not for everyone, the three verifiers go from every reader', () => {
+  /** TPL-011's `Profile` (`noodl-mcp/tests/tpl011Cloud.ts` `PROFILE_FIELDS`), said as a noun beside a world that projects. */
+  const VERIFIERS = ['codeV', 'answerV', 'rescueV'];
+  const withProfile = (secret?: boolean): WorldFiles => {
+    const w = clone(readWorld('world'));
+    const text = (name: string) => ({ name, kind: 'text' as const, ...(secret && VERIFIERS.includes(name) ? { secret: true as const } : {}) });
+    w.nouns.nouns.push({
+      id: 'profile',
+      name: 'Profile',
+      sentence: 'The book’s one profile: who keeps it, the question only they can answer, and how their code, answer and rescue code are checked.',
+      properties: ['name', 'question', ...VERIFIERS, 'gender', 'lang', 'country', 'theme'].map(text),
+      answers: { onlyOne: true, calledBy: 'name', history: false, readAloud: false, ...(secret === undefined ? {} : { secret }) }
+    });
+    return w;
+  };
+
+  it('unanswered, the runner asks it of the profile, in words', () => {
+    const report = nextQuestions(withProfile(), { limit: 50 });
+    if (!report.ok) throw new Error(JSON.stringify(report.problems));
+    const asked = report.ask.find((q) => q.question === 'secret');
+    expect(asked?.about).toEqual({ nouns: ['profile'], question: 'secret' });
+    expect(asked?.ask).toBe('Is any detail on a profile not for everyone who can see the profile? If so, mark each one "secret": true.');
+  });
+
+  it('answered yes for the three verifiers: each is read by nobody but the backend’s own key, held and claimed; the rest of the profile is not touched', () => {
+    const profile = project(withProfile(true)).collections.find((c) => c.name === 'Profile')!;
+    expect(profile.fields).toEqual({ codeV: { read: 'nobody' }, answerV: { read: 'nobody' }, rescueV: { read: 'nobody' } });
+    expect(profile.notHeld.some((n) => /not for everyone/.test(n))).toBe(false);
+    const claims = project(withProfile(true)).claims.filter((c) => c.from && 'noun' in c.from && c.from.noun === 'profile' && c.held);
+    expect(claims.map((c) => c.id).filter((id) => id.endsWith('-is-not-for-everyone'))).toEqual(VERIFIERS.map((f) => `profile/${f}-is-not-for-everyone`));
+    for (const f of VERIFIERS) {
+      const claim = claims.find((c) => c.id === `profile/${f}-is-not-for-everyone`)!;
+      expect(claim.steps.slice(-1)).toEqual([{ unseen: 'Profile', row: expect.any(String), field: f }]);
+      expect(applyMutant(project(withProfile(true)), claim.mutant!).collections.find((c) => c.name === 'Profile')!.fields?.[f]).toBeUndefined();
+    }
+  });
+
+  it('the control: answered no, nothing on the profile is hidden from its readers', () => {
+    expect(project(withProfile(false)).collections.find((c) => c.name === 'Profile')!.fields).toBeUndefined();
   });
 });

@@ -218,9 +218,19 @@ export type MigrationStep =
   /**
    * P116 ONT-014: a collection's rules on records' old values (set once, never edited, never
    * deleted) as the world says them now; `null` = none. The backend's route writes them into
-   * `security.json` — the world's half of `onlyWhile` (`frozen`, `delete: "never"`).
+   * `security.json` — the world's half of `onlyWhile` (`frozen`, `delete: "never"`). ONT-011 step 4:
+   * and who reads one field (`fields`, a secret detail), with what the world said before (`wasFields`).
    */
-  | { rules: { collection: string; onlyWhile: WorldOnlyWhile | null; was?: WorldOnlyWhile | null }; says: string };
+  | {
+      rules: {
+        collection: string;
+        onlyWhile: WorldOnlyWhile | null;
+        was?: WorldOnlyWhile | null;
+        fields?: WorldCollection['fields'] | null;
+        wasFields?: WorldCollection['fields'] | null;
+      };
+      says: string;
+    };
 
 /** What a dry run reads off the records before anything moves. A failed `refuse` stops the migration; a `loses` is shown and must be accepted. */
 export type MigrationCheck =
@@ -649,10 +659,14 @@ function planBetween(before: WorldFiles, after: WorldFiles, sb: WorldSchema, sa:
   const kept: MigrationStep[] = [];
   for (const c of sa.collections) {
     const old = sb.collections.find((x) => x.name === c.name);
-    if (JSON.stringify(old?.onlyWhile ?? null) === JSON.stringify(c.onlyWhile ?? null)) continue;
+    const same = (a: unknown, b: unknown): boolean => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+    if (same(old?.onlyWhile, c.onlyWhile) && same(old?.fields, c.fields)) continue;
     // `was` (s18): what the world said before, so the route can tell its own earlier writing from a rule a
-    // person wrote by hand on the same collection, and keep the hand one or say it would be lost.
-    kept.push({ rules: { collection: c.name, onlyWhile: c.onlyWhile ?? null, was: old?.onlyWhile ?? null }, says: keptWords(c) });
+    // person wrote by hand on the same collection, and keep the hand one or say it would be lost. The
+    // fields (ONT-011 step 4) ride the same step, with their own `wasFields`.
+    // A world with no secret on either side says nothing about the fields: the step is the one s18 wrote.
+    const fields = c.fields || old?.fields ? { fields: c.fields ?? null, wasFields: old?.fields ?? null } : {};
+    kept.push({ rules: { collection: c.name, onlyWhile: c.onlyWhile ?? null, was: old?.onlyWhile ?? null, ...fields }, says: keptWords(c, old) });
   }
 
   // A dropped field an index or a check on a surviving collection reads goes after the rule changes.
@@ -671,18 +685,25 @@ function planBetween(before: WorldFiles, after: WorldFiles, sb: WorldSchema, sa:
 }
 
 /** ONT-014 — a `rules` step in words: what nobody but the backend's own key may do to these records now. */
-function keptWords(c: WorldCollection): string {
+function keptWords(c: WorldCollection, was?: WorldCollection): string {
   const ow = c.onlyWhile;
-  if (!ow) return `${wordsOf(c)} keep no rule on what they were`;
+  const secret = Object.keys(c.fields ?? {});
+  const isAre = (fields: string[]): string => `${fields.join(', ')} ${fields.length > 1 ? 'are' : 'is'}`;
+  // ONT-011 step 4: a detail no longer secret is said going, or the step reads as if nothing about it changed.
+  const opened = Object.keys(was?.fields ?? {}).filter((f) => !secret.includes(f));
+  const openedWords = opened.length ? `${isAre(opened)} read by whoever reads one again` : '';
+  if (!ow && !secret.length) return `${wordsOf(c)} keep no rule on what they were${openedWords ? `; ${openedWords}` : ''}`;
   const parts: string[] = [];
-  const frozen = ow.update?.frozen?.fields;
-  const unless = ow.update?.frozen?.unless ? ' once it is agreed' : '';
-  const except = ow.update?.except?.length ? ` but ${ow.update.except.join(', ')}` : '';
+  const frozen = ow?.update?.frozen?.fields;
+  const unless = ow?.update?.frozen?.unless ? ' once it is agreed' : '';
+  const except = ow?.update?.except?.length ? ` but ${ow.update.except.join(', ')}` : '';
   if (frozen === '*') parts.push(unless ? `nothing on one changes${unless}${except}` : 'nobody edits one once it is made');
   else if (frozen) parts.push(`${frozen.join(', ')} ${frozen.length > 1 ? 'are' : 'is'} set once`);
-  for (const [field, byOld] of Object.entries(ow.update?.moves ?? {})) parts.push(`${field} moves ${Object.entries(byOld).map(([old, m]) => `from ${old} to ${m.to.length ? m.to.join(' or ') : 'nowhere'}`).join(', ')}`);
-  if (ow.delete === 'never') parts.push('nobody deletes one');
-  else if (ow.delete) parts.push('an agreed one is never deleted');
+  for (const [field, byOld] of Object.entries(ow?.update?.moves ?? {})) parts.push(`${field} moves ${Object.entries(byOld).map(([old, m]) => `from ${old} to ${m.to.length ? m.to.join(' or ') : 'nowhere'}`).join(', ')}`);
+  if (ow?.delete === 'never') parts.push('nobody deletes one');
+  else if (ow?.delete) parts.push('an agreed one is never deleted');
+  if (secret.length) parts.push(`${isAre(secret)} read by nobody but the backend's own key`);
+  if (openedWords) parts.push(openedWords);
   return `keep, for ${wordsOf(c)}: ${parts.join('; ')}`;
 }
 

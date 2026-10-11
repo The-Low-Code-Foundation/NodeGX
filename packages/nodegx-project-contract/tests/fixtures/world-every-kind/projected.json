@@ -11,10 +11,9 @@
       },
       "sentence": "A person is anyone we know: a member, someone who came to a session, someone we wrote to.",
       "notHeld": [
-        "a person's email is not for everyone who can see the person",
         "every exchange with the course platform is logged, and a skipped one says why"
       ],
-      "description": "A person is anyone we know: a member, someone who came to a session, someone we wrote to. Not kept by the database yet: a person's email is not for everyone who can see the person; every exchange with the course platform is logged, and a skipped one says why.",
+      "description": "A person is anyone we know: a member, someone who came to a session, someone we wrote to. Not kept by the database yet: every exchange with the course platform is logged, and a skipped one says why.",
       "columns": [
         {
           "name": "name",
@@ -74,6 +73,11 @@
         }
       ],
       "calledBy": "name",
+      "fields": {
+        "email": {
+          "read": "nobody"
+        }
+      },
       "onlyWhile": {
         "delete": "never"
       }
@@ -2097,6 +2101,40 @@
       ]
     },
     {
+      "id": "person/email-is-not-for-everyone",
+      "says": "a person's email is not for everyone who can see the person",
+      "from": {
+        "noun": "person"
+      },
+      "held": true,
+      "mutant": {
+        "dropFieldRule": {
+          "collection": "Person",
+          "field": "email"
+        }
+      },
+      "steps": [
+        {
+          "make": "Person",
+          "as": "person2",
+          "data": {
+            "email": "email-1"
+          }
+        },
+        {
+          "holds": "Person",
+          "row": "person2",
+          "field": "email",
+          "value": "email-1"
+        },
+        {
+          "unseen": "Person",
+          "row": "person2",
+          "field": "email"
+        }
+      ]
+    },
+    {
       "id": "session/number-is-set-once",
       "says": "a session's number is written once and never changed",
       "from": {
@@ -2964,12 +3002,6 @@
     }
   ],
   "notHeld": [
-    {
-      "collection": "Person",
-      "field": "email",
-      "says": "a person's email is not for everyone who can see the person",
-      "why": "who may read one field is a per-field read rule in the permissions (R-a); ONT-011 step 4 writes it from this answer"
-    },
     {
       "collection": "AccountHistory",
       "says": "every change to an account is written to its history",

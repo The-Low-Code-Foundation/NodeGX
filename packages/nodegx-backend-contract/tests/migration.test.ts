@@ -79,11 +79,22 @@ describe('a plan from a request body', () => {
   it.each([
     ['not an object', 'drop everything', 'the plan is { steps, checks, refused }'],
     ['an unknown schema action', { ...BOMBSHELL, steps: [{ schema: { action: 'truncate', table: 'Person' }, says: 'Empty it' }] }, 'step 1: no schema action "truncate"'],
-    ['a step that is two things', { ...BOMBSHELL, steps: [{ backup: true, schema: { action: 'deleteTable', table: 'Person' }, says: 'x' }] }, 'step 1 is one of a backup, a schema change or a move'],
+    ['a step that is two things', { ...BOMBSHELL, steps: [{ backup: true, schema: { action: 'deleteTable', table: 'Person' }, says: 'x' }] }, 'step 1 is one of a backup, a schema change, a move or the rules on old values'],
     ['a step with no words', { ...BOMBSHELL, steps: [{ backup: true }] }, 'step 1 does not say what it does'],
     ['an unknown move', { ...BOMBSHELL, steps: [{ move: { teleport: {} }, says: 'x' }] }, 'step 1: a move is one of linkToRecord, recordToLink, fieldAcross'],
     ['an unknown check', { ...BOMBSHELL, checks: [{ refuse: 'mood', says: 'x' }] }, 'check 1: no check "mood"'],
-    ['refused not words', { ...BOMBSHELL, refused: [3] }, 'the plan\'s "refused" is a list of sentences']
+    ['refused not words', { ...BOMBSHELL, refused: [3] }, 'the plan\'s "refused" is a list of sentences'],
+    // P116 ONT-011 step 4: a world writes one field rule, "nobody" — a plan that opens a field wider is not the world's.
+    [
+      'a field rule a world never writes',
+      { ...BOMBSHELL, steps: [{ rules: { collection: 'Person', onlyWhile: null, fields: { email: { read: 'public' } } }, says: 'x' }] },
+      'step 1: the field rules are { <field>: { "read": "nobody" } }, or null for none'
+    ],
+    [
+      'an earlier field rule in another shape',
+      { ...BOMBSHELL, steps: [{ rules: { collection: 'Person', onlyWhile: null, fields: null, wasFields: ['email'] }, says: 'x' }] },
+      'step 1: the earlier field rules are { <field>: { "read": "nobody" } }, or null for none'
+    ]
   ])('%s is refused in words', (_, plan, says) => {
     expect(migrationPlanProblems(plan)).toContain(says);
   });

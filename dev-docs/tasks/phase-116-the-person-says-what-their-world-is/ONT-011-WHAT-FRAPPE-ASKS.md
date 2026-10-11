@@ -4,7 +4,7 @@
 *"let's borrow 1 to 4"*. **Depends on ONT-001** (the kinds), **ONT-003** (the projection), **ONT-005** (the mutants);
 **feeds ONT-008** (the view hints). **Status: 🟡 step 1 ✅ (P116 s15, 2026-10-10, Opus 5.5): the detectors are in
 `census.js`, every candidate in all 8 sources is classified by meaning, and all four borrows keep rows (§3.5). AC1 ✅.
-**Step 2's *settled* half ✅ (s18, 2026-10-11, Fable 5.1, §9): the fifteenth kind, its five questions, its projection onto ONT-014's two new holds, four mutants all killed, 8 rows over 4 sources. Step 2's other three borrows ✅ (s19, 2026-10-11, Fable 5.1, §10): the noun's eight questions (`noun.ts`), `secret` and `onlyWhen` on a property, the `ends` kind's two questions, each projected and graded.** Step 3's remaining mutants are §10's; step 4 (secret → `fields.<f>.read`) and step 5 (the view hints) are owed. R-a, R-b and R-c ruled s16 (§6); step 4's two targets are built in ONT-012 (`fields.<f>.read`, `onlyWhile`).** §3.1–§3.4 were read by hand before the
+**Step 2's *settled* half ✅ (s18, 2026-10-11, Fable 5.1, §9): the fifteenth kind, its five questions, its projection onto ONT-014's two new holds, four mutants all killed, 8 rows over 4 sources. Step 2's other three borrows ✅ (s19, 2026-10-11, Fable 5.1, §10): the noun's eight questions (`noun.ts`), `secret` and `onlyWhen` on a property, the `ends` kind's two questions, each projected and graded.** **Step 4 ✅ (s20, 2026-10-11, Opus 5.5, §11): a secret detail is a per-field read rule written by the migration route and claimed as a person; AC3 ✅ (Nightbook's `Profile`).** Step 3's remaining mutants are §10's; step 5 (the view hints) is owed. R-a, R-b and R-c ruled s16 (§6); step 4's two targets are built in ONT-012 (`fields.<f>.read`, `onlyWhile`).** §3.1–§3.4 were read by hand before the
 census; §3.5 is what the census counted.
 
 > **Model check, before anything (Richard, 2026-10-08 rule):** steps 2 and 4 want **Fable 5.1**. They change the
@@ -180,7 +180,7 @@ ask it as one of the noun's questions, but nothing here says it needs a mutant o
    was made on this machine, with the rows kept outside the repo.*
 2. Each borrow that is kept has its questions as data, its projection graded on both adapters (ONT-003), and each of
    its mutants killed or naming its missing question (ONT-005).
-3. Nightbook's `Profile` re-said in the vocabulary asks *"is any detail on it not for everyone who can see it?"*.
+3. ✅ (s20, §11) Nightbook's `Profile` re-said in the vocabulary asks *"is any detail on it not for everyone who can see it?"*.
    Answered *yes* for the three verifiers, it projects them away from the public read.
 4. `world.test.ts` and `npm run ontology-census:check` are green, with the kinds still pinned to the hand file.
 
@@ -303,3 +303,43 @@ step. Both fixed here (the test learned the five `onlyWhile` shapes; the goldens
 `ONT003_WRITE_GOLDEN=1` and read).
 
 **Measured (s19, 2026-10-11):** project contract `npx jest` 13 suites, 263/263, `tsc` clean for the package and its tests; MCP `ont002WorldTools` 12/12; backend `tsc` clean; `ontology-census:check` green. ONT-005 every-kind: **51 mutants, 15 survive** (0 unanswered, 7 unkept, 8 unclaimed), identical on SQLite and PostgreSQL — 14 of 45 → 15 of 51: `account/history-unanswered` killed for want of a home, `leaves/endNote-` and `endNoteNeeded-unanswered` and the seed `note-always-optional` killed at the held all-or-none claim (which also kills `leaves/end-by-delete`, unsaid, so `endedAt` has no home), `settings/onlyOne-unanswered` and `person/secret-unanswered` surviving unkept by design, each naming the step that keeps it; `world` and `world-membership` gain `leaves/endNote-unanswered (unanswered)` — neither answers it. The backend band (ont-003-write, ont-003-claims, ont-005-mutants, ont-007-route, ont-004-world, ont-006-verbs, ont-002-through, ont-014-reach-review): **8 suites, 138/138, exit 0** on both engines (ont-003-write, ont-003-claims and ont-005-mutants rerun after the `who` rename and the pin, 51/51 at 15:22 CEST; the other five green in the 14:56 band); ONT-003 claims on every-kind: 46 of 46 (43 held, 3 measured not held — only one, the number never used again, and the pair said twice).
+
+## 11. Step 4, secret → `fields.<f>.read` (s20, 2026-10-11, Opus 5.5)
+
+**Who reads it.** A detail the person marked `secret: true` (on a noun that answered `secret: yes`) is read by
+nobody but the admin and functions: `security.json` `collections.<c>.fields.<f>.read: "nobody"`. A world names no
+role, and the question asks *whether* a detail is not for everyone, not *who* it is for — so the projection fails
+closed. A follow-up question ("who may read it — the person it is about? an office?") would need a role or a path the
+world can say; not asked until a row needs it.
+
+**The projection** (`project.ts`): `WorldCollection.fields`, beside `onlyWhile`; the secret rule is held (it left
+`notHeld` and the description). **The claim** `<noun>/<field>-is-not-for-everyone`: the record is made with the
+detail, the store's own key reads it back (`holds`), and a person signed in with no role reads the record without it
+— `unseen`, a new claim step in both contracts (`@noodl/backend-contract` `conformance/claims.ts` and the
+projection's copy). `unseen` hands the field rule over as data in the read ACL (`StorageAclOption.hidden`), as s17's
+`byPerson` hands `onlyWhile` over in the write ACL; only the backend's facade strips it, so the claim specs' adapter
+routes a fetch with an ACL through `AdapterFacade.rawFetch` (`tests/helpers/facade-deletes.ts`). The mutant
+`dropFieldRule`; `mutants.ts` maps a held secret to it and counts `fields` as something a store holds.
+
+**The write** (`migrate.ts` → `POST /admin/world/migrate`): the `rules` step carries `fields` and `wasFields` (what
+the world said before), only when either side has a secret — every other plan is byte-identical to s18's.
+`withWorldRules` merges per field: the world's earlier rule (equal to `wasFields`) goes, the world's new one is set, a
+rule the person wrote on another field stays; a hand rule on the same field is a loss (`worldRuleLosses`), named in
+the dry run and waited for (`acceptLosses`). `migrationPlanProblems` refuses any field rule but `"nobody"` in a step.
+The words: *"keep, for people: nobody deletes one; email is read by nobody but the backend's own key"*, and said back
+*"… email is read by whoever reads one again"*.
+
+**Graded:** contract `migrate.test.ts` (the step, said back, the control), `project.test.ts` (the every-kind golden;
+**AC3** — Nightbook's `Profile` with `codeV`, `answerV`, `rescueV` from `tpl011Cloud.ts`: unanswered the runner asks
+it of the profile; answered yes the three are read by nobody, each held, claimed and with its mutant; answered no,
+nothing hidden); backend `ont-007-route.test.ts` on SQLite and PostgreSQL — the run writes the rule beside a hand rule
+on `name`, a person's GET comes back without `email` and the admin's with it, a filter on `email` is 403; said back
+the world's rule goes and the hand rule stays; a hand rule on `email` is a loss until accepted (all three red with
+the route's merge disabled, measured); `ont-003-claims` / `ont-005-mutants` on both engines — the new claim held and
+failing on its mutant, **ONT-005 every-kind 15 of 51 → 14 of 51**.
+
+**Measured (s20, 2026-10-11):** project contract 13 suites 269/269, `tsc` clean (package and tests); backend
+contract 9 suites 232/232 (one spec red since s17 found and fixed: `P116-S20-STALEMSG`); backend band 13 suites
+347/347 exit 0 on both engines, `tsc` clean for `src` and the tests; MCP `ont002WorldTools` 12/12;
+`ontology-census:check` green.
+

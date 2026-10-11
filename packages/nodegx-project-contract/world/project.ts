@@ -130,6 +130,13 @@ export interface WorldCollection {
    * `delete: "never"`. Absent when the world says none.
    */
   onlyWhile?: WorldOnlyWhile;
+  /**
+   * P116 ONT-011 step 4 — who reads one field, as `security.json` takes it under the collection's
+   * `fields` (R-a), kept by the backend at every door that returns a record: a detail the person
+   * marked secret is read by nobody but the admin and functions (a world names no role). Absent when
+   * nothing on it is secret.
+   */
+  fields?: Record<string, { read: 'nobody' }>;
 }
 
 /** P116 ONT-014 — the part of a collection's `onlyWhile` a world says (`@noodl/backend-contract` `OnlyWhileRule`, restated). */
@@ -175,7 +182,9 @@ export type ClaimStep =
   /** the row is still there (P116 ONT-006: a verb's `keep` and `end` rows) */
   | { there: string; row: string }
   /** the row is there and the field holds exactly `value` (ONT-006: what an `end` or an `update` wrote) */
-  | { holds: string; row: string; field: string; value: ClaimValue };
+  | { holds: string; row: string; field: string; value: ClaimValue }
+  /** ONT-011 step 4: a person signed in with no role reads the row, and it comes back without the field */
+  | { unseen: string; row: string; field: string };
 
 /** What taking one held rule out of the schema means — the claim's mutant. */
 export type ClaimMutant =
@@ -187,6 +196,8 @@ export type ClaimMutant =
   | { linksAsList: { collection: string; field: string } }
   /** R10: the link says nothing about when its record goes. */
   | { dropWhenTargetGoes: { collection: string; field: string } }
+  /** ONT-011 step 4: the field read by whoever reads the record — its read rule taken out. */
+  | { dropFieldRule: { collection: string; field: string } }
   /** ONT-014: the collection's `onlyWhile` without one rule — a field no longer frozen, the record editable, or deletable. */
   | {
       dropOnlyWhile:
@@ -262,7 +273,6 @@ const WHY: Record<string, string> = {
   pairTwice: 'a Links field keeps a pair once; a pair made twice needs a record of its own (an is-on)',
   // ONT-011 step 2, the facts about a thing and the two property answers: each names the step that keeps it.
   onlyOne: 'a rule across records (at most one) is none of the store’s checks, which are each on one row; ONT-013 step 4 measures it',
-  secret: 'who may read one field is a per-field read rule in the permissions (R-a); ONT-011 step 4 writes it from this answer',
   history: 'the store keeps the history records, and does not write one on every save; a verb or a trigger does',
   series: 'a number handed out by the store, going up by one and never used again, is ONT-015’s series; until it is built the field is text, unique and set once',
   onlyWhenIs: 'a detail that matters only for one value of another is none of the store’s checks; the screen hides it, and nothing refuses it',
@@ -523,7 +533,8 @@ export function projectWorld(files: WorldFiles): WorldProjection {
       if (h.required && h.is === undefined) d.collection.checks.push({ allOrNone: [fieldName(h.onlyWhen), fieldName(h.when)] });
       else notHeld.push({ collection: d.collection.name, field: fieldName(h.onlyWhen), says: rule.says, why: h.is !== undefined ? WHY.onlyWhenIs : WHY.onlyWhenOptional });
     } else if ('secret' in h) {
-      notHeld.push({ collection: d.collection.name, field: fieldName(h.secret), says: rule.says, why: WHY.secret });
+      // ONT-011 step 4: held — a per-field read rule (R-a), kept by the backend at every door; nobody but the admin and functions.
+      (d.collection.fields ??= {})[fieldName(h.secret)] = { read: 'nobody' };
     } else if ('series' in h) {
       notHeld.push({ collection: d.collection.name, field: fieldName(h.series), says: rule.says, why: WHY.series });
     } else if ('onlyOne' in h || 'history' in h) {
@@ -741,6 +752,23 @@ function claimsFor(
     claims.push({ id: `${key}/${f}-with-${w}`, says: rule.says, from: src, held: true, mutant: { dropAllOrNone: { collection: c, fields: [f, w] } }, steps: s.steps });
   }
 
+  // ONT-011 step 4: a secret detail (held, a per-field read rule) — the record is made with it, the store's
+  // own key reads it back, and a person signed in reads the record without it.
+  for (const { key, src, d, rule } of ruled) {
+    const h = rule.holds;
+    if (!('secret' in h)) continue;
+    const c = d.collection.name;
+    const f = fieldName(h.secret);
+    const col = d.collection.columns.find((x) => x.name === f);
+    const s = new Seeder(byName);
+    const v = col && s.valueFor(d, col);
+    if (v === undefined || typeof v === 'object') continue;
+    const row = s.row(c, { [f]: v });
+    s.steps.push({ holds: c, row, field: f, value: v });
+    s.steps.push({ unseen: c, row, field: f });
+    claims.push({ id: `${key}/${f}-is-not-for-everyone`, says: rule.says, from: src, held: true, mutant: { dropFieldRule: { collection: c, field: f } }, steps: s.steps });
+  }
+
   // Not held, measured: steps that say the rule, which no engine passes today.
   for (const { key, src, d, rule } of ruled) {
     const h = rule.holds;
@@ -917,6 +945,11 @@ export function applyMutant(schema: WorldSchema, mutant: ClaimMutant): WorldSche
     const fields = [...mutant.dropAllOrNone.fields].sort().join();
     c.checks = c.checks.filter((k) => !('allOrNone' in k) || [...k.allOrNone].sort().join() !== fields);
     takesOut(before, c.checks.length);
+  } else if ('dropFieldRule' in mutant) {
+    const c = coll(mutant.dropFieldRule.collection);
+    takesOut(c.fields?.[mutant.dropFieldRule.field] ? 1 : 0, 0);
+    delete c.fields![mutant.dropFieldRule.field];
+    if (!Object.keys(c.fields!).length) delete c.fields;
   } else if ('dropWhenTargetGoes' in mutant) {
     const col = column(coll(mutant.dropWhenTargetGoes.collection), mutant.dropWhenTargetGoes.field);
     takesOut(col.whenTargetGoes ? 1 : 0, 0);

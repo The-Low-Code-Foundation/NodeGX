@@ -49,6 +49,14 @@ export interface ClaimCollection {
    * the claim then fails, which is the truth about that adapter.
    */
   onlyWhile?: { update?: OnlyWhileRule; delete?: OnlyWhileRule | 'never' };
+  /**
+   * P116 ONT-011 step 4 — who reads one field (`security.json` `collections.<c>.fields`, R-a). Kept
+   * by the backend's facade, like `onlyWhile`: a claim's `unseen` step reads as a person signed in
+   * with no role, and hands the fields such a person may not read over as DATA in the read ACL
+   * (`StorageAclOption.hidden`). A rule that names a role or a path hides the field too — the
+   * claim's reader holds no role and reaches no row.
+   */
+  fields?: Record<string, { read: unknown }>;
 }
 
 export interface ClaimSchema {
@@ -70,7 +78,9 @@ export type ClaimStep =
   /** P116 ONT-006: the row is still there */
   | { there: string; row: string }
   /** P116 ONT-006: the row is there and the field holds exactly `value` */
-  | { holds: string; row: string; field: string; value: ClaimValue };
+  | { holds: string; row: string; field: string; value: ClaimValue }
+  /** P116 ONT-011 step 4: a person signed in with no role reads the row, and it comes back without the field */
+  | { unseen: string; row: string; field: string };
 
 export interface Claim {
   id: string;
@@ -81,7 +91,7 @@ export interface Claim {
 
 /** Whether a step is one that says the rule, rather than one that makes the rows it needs. */
 export function saysTheRule(step: ClaimStep): boolean {
-  if ('refuse' in step || 'paired' in step || 'gone' in step || 'empty' in step || 'there' in step || 'holds' in step) return true;
+  if ('refuse' in step || 'paired' in step || 'gone' in step || 'empty' in step || 'there' in step || 'holds' in step || 'unseen' in step) return true;
   if ('change' in step || 'remove' in step) return step.refused === true;
   return false;
 }
@@ -103,7 +113,7 @@ function reached(schema: ClaimSchema, claim: Claim): ClaimCollection[] {
   };
   for (const step of claim.steps) {
     const s = step as Record<string, unknown>;
-    for (const key of ['make', 'refuse', 'change', 'remove', 'pair', 'paired', 'gone', 'empty', 'there', 'holds']) if (typeof s[key] === 'string') add(s[key] as string);
+    for (const key of ['make', 'refuse', 'change', 'remove', 'pair', 'paired', 'gone', 'empty', 'there', 'holds', 'unseen']) if (typeof s[key] === 'string') add(s[key] as string);
   }
   return schema.collections.filter((c) => want.has(c.name));
 }
@@ -128,6 +138,14 @@ export async function runClaim(ctx: ConformanceContext, schema: ClaimSchema, cla
   const writeAcl = (name: string): StorageAclOption | undefined => {
     const ow = byName.get(name)?.onlyWhile;
     return ow ? { access: 'write', keys: ['*'], onlyWhile: { collection: real(name), ...ow } } : undefined;
+  };
+  // ONT-011 step 4: a read as that person — the row ACL's public key, and the fields they may not read.
+  const anyoneSignedIn = (read: unknown): boolean => (Array.isArray(read) ? read : [read]).some((atom) => atom === 'public' || atom === 'authenticated');
+  const readAcl = (name: string): StorageAclOption => {
+    const hidden = Object.entries(byName.get(name)?.fields ?? {})
+      .filter(([, rule]) => !anyoneSignedIn(rule.read))
+      .map(([field]) => ({ field }));
+    return { access: 'read', keys: ['*'], ...(hidden.length ? { hidden: { [real(name)]: hidden } } : {}) };
   };
 
   for (const c of options.apply === false ? [] : collections) {
@@ -216,6 +234,10 @@ export async function runClaim(ctx: ConformanceContext, schema: ClaimSchema, cla
               : idOf(held) === (want as Row).objectId
             : held === want;
         if (!same) throw new ConformanceError(`${step.field} holds ${JSON.stringify(held)}, not ${JSON.stringify(want)}`);
+      } else if ('unseen' in step) {
+        const got = await ctx.fetch(real(step.unseen), id(step.row), readAcl(step.unseen));
+        if (String(got.objectId) !== id(step.row)) throw new ConformanceError(`the ${step.unseen} row did not come back to a person`);
+        if (step.field in got) throw new ConformanceError(`${step.field} came back to a person who may not read it: ${JSON.stringify(got[step.field])}`);
       } else {
         const got = await ctx.fetch(real(step.empty), id(step.row));
         const v = idOf(got[step.field]);

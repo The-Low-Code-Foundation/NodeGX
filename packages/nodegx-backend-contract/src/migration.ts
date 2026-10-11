@@ -61,6 +61,14 @@ export type MigrationRulesBody = {
   onlyWhile: { update?: OnlyWhileRule; delete?: OnlyWhileRule | 'never' } | null;
   /** s18: what the world said for this collection before this migration (absent on a plan written by hand). */
   was?: { update?: OnlyWhileRule; delete?: OnlyWhileRule | 'never' } | null;
+  /**
+   * P116 ONT-011 step 4 — who reads one field (`security.json` `collections.<c>.fields`, R-a), as the
+   * world says it now: a secret detail is `{ read: "nobody" }` (the admin and functions are not bound).
+   * Absent: this step says nothing about the fields (a plan from before step 4); `null`: the world
+   * says none. `wasFields` is what the world said before, as `was` is for `onlyWhile`.
+   */
+  fields?: Record<string, { read: 'nobody' }> | null;
+  wasFields?: Record<string, { read: 'nobody' }> | null;
 };
 
 export type MigrationStepData =
@@ -393,6 +401,12 @@ export function migrationPlanProblems(plan: unknown): string[] {
       const r = s.rules;
       if (!isObject(r) || !isWords(r.collection)) out.push(`${at}: the rules name their collection`);
       else if (r.onlyWhile !== null && !isObject(r.onlyWhile)) out.push(`${at}: the rules are { update?, delete? }, or null for none`);
+      for (const key of ['fields', 'wasFields'] as const) {
+        const f = isObject(r) ? r[key] : undefined;
+        if (f === undefined || f === null) continue;
+        if (!isObject(f) || Object.values(f).some((rule) => !isObject(rule) || rule.read !== 'nobody'))
+          out.push(`${at}: the ${key === 'fields' ? '' : 'earlier '}field rules are { <field>: { "read": "nobody" } }, or null for none`);
+      }
     }
     if ('backup' in s && s.backup !== true) out.push(`${at}: a backup step is { backup: true }`);
     if ('schema' in s) {

@@ -20,8 +20,9 @@
  * - **readAloud** → a `number` field, unique and set once (held), and the series ONT-015 builds
  *   said in words with the three follow-ups (`looksLike`, `maySkip` — R-g, asked never assumed —
  *   and `restarts`); a claim measured to fail (a number used again after a delete).
- * - **secret** → said, not held, per detail the person marked `secret: true`; step 4 projects it to
- *   the per-field read rule R-a ruled for.
+ * - **secret** → held (ONT-011 step 4): each detail the person marked `secret: true` is a per-field
+ *   read rule (R-a, `security.json` `fields.<f>.read: "nobody"`) — read by the admin and functions
+ *   only, since a world names no role — written by the migration route and claimed as a person.
  */
 import type { MutantSeed, Question } from './kind';
 

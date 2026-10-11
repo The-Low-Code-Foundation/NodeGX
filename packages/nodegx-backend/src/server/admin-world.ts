@@ -122,8 +122,18 @@ const same = (a: unknown, b: unknown): boolean => JSON.stringify(a ?? null) === 
  */
 export function withWorldRules(collections: SecurityConfig['collections'], bodies: MigrationRulesBody[]): SecurityConfig['collections'] {
   const out: SecurityConfig['collections'] = JSON.parse(JSON.stringify(collections));
-  for (const { collection, onlyWhile, was } of bodies) {
+  for (const { collection, onlyWhile, was, fields, wasFields } of bodies) {
     const entry: CollectionRules = out[collection] ?? {};
+    // ONT-011 step 4: who reads one field, per field. The world's earlier rule (equal to `wasFields`)
+    // goes; one that differs is the person's and stays, unless the world now says that field too
+    // ({@link worldRuleLosses} names it). Without `wasFields` the world's fields are set, nothing removed.
+    if (fields !== undefined) {
+      const have: Record<string, unknown> = { ...(entry.fields ?? {}) };
+      for (const [f, rule] of Object.entries(wasFields ?? {})) if (same(have[f], rule)) delete have[f];
+      for (const [f, rule] of Object.entries(fields ?? {})) have[f] = rule;
+      if (Object.keys(have).length) entry.fields = have as CollectionRules['fields'];
+      else delete entry.fields;
+    }
     const ow: NonNullable<CollectionRules['onlyWhile']> = { ...(entry.onlyWhile ?? {}) };
     const update: Record<string, unknown> = { ...(ow.update ?? {}) };
     const worldUpdate = (onlyWhile?.update ?? {}) as Record<string, unknown>;
@@ -161,6 +171,14 @@ export function withWorldRules(collections: SecurityConfig['collections'], bodie
 export function worldRuleLosses(collections: SecurityConfig['collections'], bodies: MigrationRulesBody[]): string[] {
   const out: string[] = [];
   const words = (v: unknown): string => JSON.stringify(v);
+  // ONT-011 step 4: a field rule the person wrote, on a field the world now says is secret.
+  for (const { collection, fields, wasFields } of bodies) {
+    const have = (collections[collection]?.fields ?? {}) as Record<string, unknown>;
+    for (const [f, rule] of Object.entries(fields ?? {})) {
+      if (!(f in have) || same(have[f], rule) || same(have[f], wasFields?.[f])) continue;
+      out.push(`"${collection}": who reads "${f}", written by hand (${words(have[f])}), would be replaced by the world's (nobody but the backend's own key: ${words(rule)}) — say it in the world, take it out by hand, or accept the loss`);
+    }
+  }
   for (const { collection, onlyWhile, was } of bodies) {
     const have = collections[collection]?.onlyWhile;
     if (!have) continue;

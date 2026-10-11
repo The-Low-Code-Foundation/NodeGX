@@ -615,3 +615,47 @@ describe('s13 — the verbs a plan reaches: an end, by the field it marks', () =
     ]);
   });
 });
+
+describe('ONT-011 step 4 — a secret detail rides the rules step, as `fields`, with what the world said before', () => {
+  const secretEmail = (w: WorldFiles): WorldFiles => {
+    const out = clone(w);
+    const person = out.nouns.nouns.find((n) => n.id === 'person')!;
+    person.properties = [...(person.properties || []), { name: 'email', kind: 'text', secret: true }];
+    person.answers = { ...(person.answers || {}), secret: true };
+    return out;
+  };
+  const before = readWorld('world-membership');
+  const withEmail = (w: WorldFiles): WorldFiles => {
+    const out = clone(w);
+    out.nouns.nouns.find((n) => n.id === 'person')!.properties!.push({ name: 'email', kind: 'text' });
+    return out;
+  };
+  const rulesOn = (p: MigrationPlan, collection: string) =>
+    p.steps.flatMap((s) => ('rules' in s && s.rules.collection === collection ? [s] : []));
+
+  it('saying a detail is secret is one rules step: the field read by nobody, nothing before; the onlyWhile unchanged', () => {
+    const plain = withEmail(before);
+    const p = plan(plain, secretEmail(before));
+    const steps = rulesOn(p, 'Person');
+    expect(steps).toHaveLength(1);
+    const [step] = steps;
+    expect(step.rules.fields).toEqual({ email: { read: 'nobody' } });
+    expect(step.rules.wasFields).toBeNull();
+    expect(step.rules.onlyWhile).toEqual(step.rules.was);
+    expect(step.says).toContain("email is read by nobody but the backend's own key");
+    expect(shape(p)[shape(p).length - 1]).toBe('rules:Person');
+  });
+
+  it('said back: the rule is taken away (null), and the step says what it had', () => {
+    const p = plan(secretEmail(before), withEmail(before));
+    const [step] = rulesOn(p, 'Person');
+    expect(step.rules.fields).toBeNull();
+    expect(step.rules.wasFields).toEqual({ email: { read: 'nobody' } });
+    expect(step.says).toBe('keep, for people: nobody deletes one; email is read by whoever reads one again');
+  });
+
+  it('the control: a world whose secrets do not change writes no fields step', () => {
+    expect(rulesOn(plan(secretEmail(before), secretEmail(before)), 'Person')).toEqual([]);
+    expect(rulesOn(plan(withEmail(before), withEmail(before)), 'Person')).toEqual([]);
+  });
+});

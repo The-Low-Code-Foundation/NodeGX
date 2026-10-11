@@ -75,6 +75,17 @@ const SETTLED: WorldFiles = (() => {
 })();
 const SETTLE = plan(ONE, SETTLED);
 const UNSETTLE = plan(SETTLED, ONE);
+/** ONT-011 step 4: "a person's email is not for everyone who can see the person" — and the same email, said back as plain. */
+const withEmail = (secret: boolean): WorldFiles => {
+  const w: WorldFiles = JSON.parse(JSON.stringify(ONE));
+  const person = w.nouns.nouns.find((n) => n.id === 'person')!;
+  person.properties = [...(person.properties || []), secret ? { name: 'email', kind: 'text', secret: true } : { name: 'email', kind: 'text' }];
+  person.answers = { ...(person.answers || {}), secret };
+  return w;
+};
+const SECRET = plan(ONE, withEmail(true));
+const UNSECRET = plan(withEmail(true), withEmail(false));
+const RESECRET = plan(withEmail(false), withEmail(true));
 /** A rule the person said in the manager, not the world: it must outlive every world rule step. */
 const HAND = { where: { name: { $ne: 'Locked' } }, says: 'A locked person is not changed.' };
 
@@ -434,6 +445,56 @@ for (const engine of ['sqlite', 'postgres'] as const) {
         const r = await migrate(b, { plan: { steps, checks: [], refused: [] }, run: true, backupTakenElsewhere: 'yes' });
         expect(r.status).toBe(400);
         expect(r.json.error).toContain('puts rules on "_Session"');
+      });
+
+      describe('ONT-011 step 4 — a secret detail, through the route: who reads it, kept at every door', () => {
+        type Fields = Record<string, { read: unknown }> | undefined;
+        const personRules = async () =>
+          (await b.req<{ config: { collections: Record<string, { onlyWhile?: unknown; fields?: Fields }> } }>('GET', '/admin/permissions')).json.config.collections.Person;
+        const asAdmin = (p: string) => b.req<Record<string, unknown>>('GET', p);
+
+        it('the run writes the world’s field rule beside the person’s own on another field; a person reads the record without it, the admin with it, and a filter on it is refused', async () => {
+          expect((await b.req('PUT', '/admin/permissions/collections/Person', { fields: { name: { read: 'authenticated' } } })).status).toBe(200);
+          const r = await migrate(b, { plan: SECRET, run: true, backupTakenElsewhere: 'snapshot' });
+          expect(r.status).toBe(200);
+          expect(SECRET.steps[SECRET.steps.length - 1]).toMatchObject({ rules: { collection: 'Person', fields: { email: { read: 'nobody' } }, wasFields: null } });
+          const rules = await personRules();
+          expect(rules?.fields).toEqual({ name: { read: 'authenticated' }, email: { read: 'nobody' } });
+          expect(rules?.onlyWhile).toEqual({ update: HAND });
+          expect(JSON.parse(fs.readFileSync(path.join(b.dataDir, 'security.json'), 'utf8')).collections.Person.fields).toEqual(rules?.fields);
+
+          expect((await b.req('PUT', `/classes/Person/${ada}`, { email: 'ada@example.com' })).status).toBe(200);
+          const seen = await asEve('GET', `/classes/Person/${ada}`);
+          expect(seen.status).toBe(200);
+          expect(seen.json).toMatchObject({ objectId: ada, name: 'Ada L.' });
+          expect(seen.json).not.toHaveProperty('email');
+          expect((await asAdmin(`/classes/Person/${ada}`)).json.email).toBe('ada@example.com');
+          const guess = await asEve('POST', '/classes/Person', { _method: 'GET', where: { email: 'ada@example.com' } });
+          expect(guess.status).toBe(403);
+        });
+
+        it('said back: the world’s rule goes, the person’s rule on name stays, and the email is read again', async () => {
+          expect(UNSECRET.steps[UNSECRET.steps.length - 1]).toMatchObject({ rules: { collection: 'Person', fields: null, wasFields: { email: { read: 'nobody' } } } });
+          const r = await migrate(b, { plan: UNSECRET, run: true, backupTakenElsewhere: 'snapshot' });
+          expect(r.status).toBe(200);
+          expect((await personRules())?.fields).toEqual({ name: { read: 'authenticated' } });
+          expect((await asEve('GET', `/classes/Person/${ada}`)).json).toMatchObject({ email: 'ada@example.com' });
+        });
+
+        it('a person’s own rule on the same field is a loss: the dry run says it, the run waits for acceptLosses, then the world’s rule stands', async () => {
+          expect((await b.req('PUT', '/admin/permissions/collections/Person', { fields: { name: { read: 'authenticated' }, email: { read: 'role:office' } } })).status).toBe(200);
+          const words = 'who reads "email", written by hand ({"read":"role:office"}), would be replaced by the world\'s';
+          const dry = await migrate(b, { plan: RESECRET });
+          expect(dry.json.why).toContain(words);
+          const refused = await migrate(b, { plan: RESECRET, run: true, backupTakenElsewhere: 'snapshot' });
+          expect(refused.status).toBe(409);
+          expect(refused.json.error).toContain(words);
+          expect((await personRules())?.fields?.email).toEqual({ read: 'role:office' });
+          const ok = await migrate(b, { plan: RESECRET, run: true, backupTakenElsewhere: 'snapshot', acceptLosses: true });
+          expect(ok.status).toBe(200);
+          expect((await personRules())?.fields).toEqual({ name: { read: 'authenticated' }, email: { read: 'nobody' } });
+          expect((await asEve('GET', `/classes/Person/${ada}`)).json).not.toHaveProperty('email');
+        });
       });
 
       it('🔴 AC3’s schema half — a move the plan writes is read against the choices the plan leaves: to a value outside them, the dry run says so and the run is 409 before anything moves', async () => {

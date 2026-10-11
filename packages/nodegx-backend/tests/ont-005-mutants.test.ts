@@ -283,6 +283,9 @@ function honesty(engine: string, fixture: string, verdicts: Verdict[]): string {
  * `endedAt` is gone and the claim has no home). Two survive by design, unkept, each naming the step that keeps it:
  * `settings/onlyOne-unanswered` (across records, ONT-013 step 4) and `person/secret-unanswered` (the per-field read
  * rule, step 4). 14 of 45 → 15 of 51. `world` and `membership` never answer `leaves/endNote`: +1 unanswered each.
+ *
+ * ONT-011 step 4 (s20): a secret detail is a per-field read rule, held (`fields.<f>.read: "nobody"`) and claimed as
+ * a person signed in (`unseen`); `person/secret-unanswered` falls at that claim. 15 of 51 → 14 of 51.
  */
 const SURVIVORS: Record<(typeof WORLDS)[number], string[]> = {
   world: [
@@ -309,7 +312,6 @@ const SURVIVORS: Record<(typeof WORLDS)[number], string[]> = {
     'person-profile/sort-key-copied (unclaimed)',
     'invite-for/the-text-itself (unclaimed)',
     'note-about/whenTargetGoes-unanswered (unkept)',
-    'person/secret-unanswered (unkept)',
     'settings/onlyOne-unanswered (unkept)',
     'session/heldOn-as-text (unclaimed)',
     'slot/starts-as-text (unclaimed)',

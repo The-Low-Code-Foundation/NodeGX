@@ -133,6 +133,10 @@ engines, every mutant**:
 > `world-membership` never answer `leaves/endNote`: one more unanswered survivor each (12 and 5). A `without`-rule seed
 > whose question is unanswered on a world now rides that question's mutant, or is not applicable in words, never
 > "cannot" — the static spec crashed on it.
+>
+> **ONT-011 step 4, 2026-10-11 (P116 s20, Opus): now 14 of 51** (6 unkept, 8 unclaimed), identical on both engines. A
+> secret detail is a per-field read rule, held (`fields.<f>.read: "nobody"`), and its claim reads the record as a
+> person signed in (the new `unseen` step): `person/secret-unanswered` falls at `person/email-is-not-for-everyone`.
 
 **The honesty number on the fully answered world is 18 of 38.** Read by class, because the classes say different things:
 
