@@ -62,6 +62,26 @@ describe('NSP-020 R19 — get_component draws each node\'s ports from its spec',
     expect(lesson).toEqual(expect.arrayContaining(['output prop-title string', 'output prop-n number', 'output changed-title signal']));
   });
 
+  // NSP-021 s87 — a type an editor adapter draws (no runtime hook announces it), graded by oracle (c)
+  it('draws a Navigate\'s Target from the Router\'s pages and a `pm-` input per parameter of the target page', async () => {
+    const page = await call(session, 'create_component', {
+      path: 'Pages/Detail',
+      nodes: [
+        { id: 'page', type: 'Page' },
+        { id: 'in', type: 'PageInputs', parameters: { pathParams: 'id', queryParams: 'tab' } }
+      ]
+    });
+    expect(page.isError).toBe(false);
+    const nav = await call(session, 'create_component', {
+      path: 'Components/GoDetail',
+      nodes: [{ id: 'go', type: 'RouterNavigate', parameters: { target: '/Pages/Detail' } }]
+    });
+    expect(nav.isError).toBe(false);
+    const { data } = await call<GetComponentResponse>(session, 'get_component', { path: 'Components/GoDetail' });
+    const go = data.drawnPorts?.go ?? [];
+    expect(go.map((p) => `${p.plug} ${p.name} ${p.type}`)).toEqual(['input target component', 'input pm-id string', 'input pm-tab string']);
+  });
+
   it('draws nothing for a type whose spec is not graded against the runtime (Cloud Function) — its saved list stands', async () => {
     const { data } = await call<GetComponentResponse>(session, 'get_component', { path: 'Components/PortProbe' });
     expect(data.drawnPorts).not.toHaveProperty('cloud');

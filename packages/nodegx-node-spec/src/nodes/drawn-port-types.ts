@@ -10,8 +10,14 @@
  *
  * Read by the MCP server (`get_component`'s drawn ports and the wire check, R19) and the ledger's AC4 column. Held to
  * the table both ways by `nsp-020-ports-parity.test.ts`: a graded row whose names are complete and is missing here, or a
- * type here with no such row, is red.
+ * type here with no such row, is red — except the types in `ADAPTER_GRADED_TYPES`, below.
+ *
+ * NSP-021 (s87) — a type whose ports no runtime hook announces, and an EDITOR ADAPTER draws instead, is graded by oracle
+ * (c): the adapter itself, run over a fake project model, against `drawnPorts` (`noodl-editor/tests-unit/nsp-020/
+ * adapter-ports.test.ts`, which holds `ADAPTER_GRADED_TYPES` to its own cases both ways).
  */
+export const ADAPTER_GRADED_TYPES: readonly string[] = Object.freeze(['RouterNavigate']);
+
 export const DRAWN_PORT_TYPES: readonly string[] = Object.freeze([
   'AddDbModelRelation',
   'And',
@@ -37,6 +43,7 @@ export const DRAWN_PORT_TYPES: readonly string[] = Object.freeze([
   'PageStackNavigate',
   'PageStackNavigateBack',
   'PageStackNavigateToPath',
+  'RouterNavigate',
   'RemoveDbModelRelation',
   'Set Variable',
   'SetDbModelProperties',

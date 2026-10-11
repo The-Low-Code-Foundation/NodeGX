@@ -21,8 +21,10 @@
  * message — nothing clears it.
  * The ports: `router` (an enum of the project's Routers, drawn only when there are two or more), `target`
  * (the Router's pages) and `pm-<name>` (the target page's Page Inputs) come from the PROJECT (the editor's
- * RouterNavigateAdapter), not from this node's params — so they are registered on first write here
- * (:158-176), as the runtime registers them. NSP-020's case, as Push Component To Stack's.
+ * RouterNavigateAdapter), not from this node's params — so at play they are registered on first write
+ * (:158-176), as the runtime registers them. NSP-021 (s87): `derived.inputs` draws them from the project the way
+ * the adapter does, for an editor with no viewer; no runtime hook announces them, so the ADAPTER is the oracle
+ * (oracle (c), `noodl-editor/tests-unit/nsp-020/adapter-ports.test.ts`).
  *
  * READ, NOT GRADED HERE (the stand-in router answers by script; NSP-015 §6.2):
  *   - row C29 (fixed, P109 ISL-028): `params` was the node's LIVE object, which the Router keeps as
@@ -31,7 +33,7 @@
  *     (`isl-028-a-second-press-with-new-parameters.test.ts`).
  */
 
-import { defineNode, type InputDecl, type ValueInputDecl } from '../spec';
+import { defineNode, type InputDecl, type PortContext, type ValueInputDecl } from '../spec';
 
 type Rec = Readonly<Record<string, unknown>>;
 
@@ -63,6 +65,34 @@ type State = {
 const targetPort = (): ValueInputDecl => ({ type: 'component', coerce: 'none', displayName: 'Target Page', group: 'General', examples: ['/Home', '/Detail', '', null, '/Nope'] });
 const routerPort = (): ValueInputDecl => ({ type: 'enum', enums: [], coerce: 'none', displayName: 'Router', group: 'General', examples: ['Main', 'Other', '', null] });
 const pageParamPort = (): ValueInputDecl => ({ type: '*', coerce: 'none', group: 'Parameters', examples: [1, 2, 'a', '', null] });
+
+/** nameListParameter.ts `parseNameList` — a string split on `,` (untrimmed, empty names kept), a list of strings as it is, anything else nothing. */
+const nameList = (v: unknown): readonly string[] => (typeof v === 'string' ? v.split(',') : Array.isArray(v) && v.every((e) => typeof e === 'string') ? (v as string[]) : []);
+
+/**
+ * NSP-021 (s87) — RouterNavigateAdapter.ts `updatePortsForNode` :25-93, from the project with no viewer: Router, an enum
+ * of the Routers' names, when there are two or more (:28-42); the Router read is the node's, else the first one's (:44-49
+ * — the adapter WRITES it); Target Page, the pages of every Router under that name, each once (:52-68); then a `pm-` input
+ * typed `string` for each distinct name in the Target's Page Inputs' Path and Query Parameters, in order (:70-91). The
+ * context's Routers are named as the runtime names them (blank is `Main`); the adapter skips a Router with no name —
+ * 0 of 125 Routers in Richard's projects have none. Without Routers (the play's context, or a project with none) nothing
+ * is drawn: the adapter would still draw an empty Target picker (1 project of 44 with a Navigate).
+ */
+function drawnInputs(params: Rec, context: Readonly<PortContext>): Record<string, InputDecl> {
+  const routers = context.routers;
+  if (!routers || routers.length === 0) return {};
+  const ports: Record<string, InputDecl> = {};
+  if (routers.length > 1) ports.router = { ...routerPort(), enums: routers.map((r) => r.name) };
+  const routerName = params.router === undefined ? routers[0].name : params.router;
+  const pages: string[] = [];
+  for (const r of routers) if (r.name === routerName) for (const p of r.pages) if (!pages.includes(p)) pages.push(p);
+  ports.target = { ...targetPort(), enums: pages };
+  const target = typeof params.target === 'string' ? context.components?.[params.target] : undefined;
+  const names: string[] = [];
+  for (const pi of target?.nodes?.PageInputs ?? []) for (const n of [...nameList(pi.pathParams), ...nameList(pi.queryParams)]) if (!names.includes(n)) names.push(n);
+  for (const n of names) ports['pm-' + n] = { ...pageParamPort(), type: 'string', displayName: n };
+  return ports;
+}
 
 function discover(port: string): InputDecl | undefined {
   if (port === 'target') return targetPort();
@@ -149,7 +179,8 @@ export const RouterNavigate = defineNode({
       };
     },
     derived: {
-      inputs: () => ({}),
+      inputs: drawnInputs,
+      needs: ['routers', 'components'],
       // :149-157 — target, router and `pm-` stored raw
       on: (s, port, value) => {
         if (port === 'target') return { set: { target: value }, send: [] };

@@ -244,7 +244,8 @@ export interface GetComponentResponse {
   usages?: Usage[];
   /**
    * NSP-020 R19 — by node id, the ports each node's spec draws NOW from its settings and the project (name, plug, type),
-   * for the node types whose spec is graded against the runtime (`DRAWN_PORT_TYPES`). A node's saved `dynamicports` is
+   * for the node types whose spec is graded against the runtime or, where no runtime hook draws them, the editor's adapter
+   * (`DRAWN_PORT_TYPES`). A node's saved `dynamicports` is
    * the last list a running editor saved and can be out of date; where the two differ, this one is the node's ports.
    */
   drawnPorts?: Record<string, DrawnPort[]>;

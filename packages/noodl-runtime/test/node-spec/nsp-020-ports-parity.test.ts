@@ -21,6 +21,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import {
+  ADAPTER_GRADED_TYPES,
   DRAWN_PORT_TYPES,
   drawnPorts,
   specs,
@@ -427,7 +428,12 @@ describe('DRAWN_PORT_TYPES is the graded table, less the rows whose names are in
     const incomplete = (row: TableRow) => Object.keys(row.known ?? {}).some((pin) => pin.includes('announced; the spec does not draw it'));
     const graded = [...new Set(TABLE.filter((row) => specs[row.type] && !row.owedBy).map((row) => row.type))];
     const complete = graded.filter((t) => !TABLE.filter((row) => row.type === t).some(incomplete)).sort();
-    expect([...DRAWN_PORT_TYPES].sort()).toEqual(complete);
+    // NSP-021 s87 — a type an editor adapter draws, with no runtime hook, is graded by oracle (c) in the editor's suite
+    expect([...DRAWN_PORT_TYPES].filter((t) => !ADAPTER_GRADED_TYPES.includes(t)).sort()).toEqual(complete);
+    for (const t of ADAPTER_GRADED_TYPES) {
+      expect(DRAWN_PORT_TYPES).toContain(t);
+      expect(graded).not.toContain(t); // a runtime hook grades it here instead: take it off the adapter list
+    }
     // known-firing on both sides: the HTTP Request is graded and left out (its Output Fields), the Record is in
     expect(graded).toContain('net.noodl.HTTP');
     expect(DRAWN_PORT_TYPES).not.toContain('net.noodl.HTTP');

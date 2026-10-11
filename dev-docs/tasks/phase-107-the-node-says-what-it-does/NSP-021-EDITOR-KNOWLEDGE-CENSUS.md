@@ -93,3 +93,59 @@ for the editor. The order NSP-018 → NSP-020 → NSP-021 is the order of this t
 ports second, the rules (typecasts, allowAsChild, inspect) last. For P112, the rows a home-made editor hits first are the
 picker list, the display names, the ports and the typecasts; OWN-001 and OWN-002 give it the format and the spec, and this
 table says what it still has to take from the catalog until P107's three tasks land.
+
+## 5. The source after — NSP-021 §3.2, row by row (P107 s87, 2026-10-11)
+
+**Written on `c3fa9d3f5` + s87's commit.** §1's sentence *"`@nodegx/node-spec` is read by nothing in the editor or the MCP
+server"* stopped being true at NSP-018 (s72–s77: the catalog takes descriptions and rules from the spec, gated) and
+NSP-020 R19 (s85–s86: the MCP draws ports from the spec and checks wires with them). For each row of §2: the spec field
+that answers it for a specced node (108 specs over 127 spec files), what the MCP server reads for it NOW, and what is
+left. "Editor-only" is a row the spec should not answer, with the reason.
+
+| §2 row | the spec's answer (specced nodes) | the MCP reads now | left |
+|---|---|---|---|
+| node types for the picker | none — `specs` lists the specced types, not the picker's | catalog `inNodePicker` (`catalog.ts:329`) | **editor-only**: the picker is a hand-curated presentation list (`nodelibraryexport.ts:597ff`), not behaviour |
+| deprecated / creatable | none | catalog `isDeprecated` | owed: a `deprecated` field, or editor-only; not asked yet |
+| display name | none at node level (each port has `displayName`) | catalog `displayName` | owed — a `displayName` on `NodeDecl`, gated like NSP-018's descriptions |
+| category | none | catalog `category` | **editor-only**: the picker's sections |
+| colour | none | — | **editor-only** (P112 OWN-005 projects it) |
+| description / docs | port `description` + every reducer's `says` (NSP-018: the catalog takes both from the spec, a gate fails on drift) | catalog — generated FROM the spec for specced nodes | node-level prose stays catalog-enriched |
+| visual-ness | none (NSP-016's `layout` role on 392 ports says how a visual node lays out, not THAT it is one) | catalog `isVisual` (`describe.ts:64`) | owed (with allowAsChild, below) |
+| allowed as child / children | none | catalog (its hand mirror of the rule, `build-catalog.js:239-253`) | **owed — NSP-021's own field** (`allowAsChild`) |
+| singleton | none | catalog `singleton` | owed; the editor's warning cannot fire anyway (§3) |
+| static ports | `inputs` / `outputs` (name, type, displayName, group, default); `outcomes` mint `done`/`failure`/…; the catalog-parity gate grades the spec against the catalog | catalog ports (`get_node_type`, the validator's `hasPort`) | the MCP could read the spec for specced nodes; the parity gate makes the two equal, so nothing a person sees changes |
+| enum labels | `enums` — values only; the format has no labels (NSP-020 §6.9: "the format's enums are values only") | catalog `type.enums` | labels owed if an editor shows them from the spec |
+| port descriptions | `description` (NSP-018, gated) | catalog (generated from the spec) | ✅ |
+| tooltip (rich HTML) | none | — | **editor-only**: presentation |
+| display name, units | `displayName`; units no | catalog | units owed |
+| a parameter's default | `default`; `drawnDefault` where the editor shows another (NSP-020 s82) | catalog `default` | ✅ for specced nodes (parity-gated) |
+| the widget | none | — | **editor-only**: the shape → widget table (`widgets.ts`) is the editor's |
+| hidden / conditional ports | `when(params)` on 448 ports (NSP-020 L2), equal to the catalog's conditions by oracle (b) | the validator's evaluator over the CATALOG's conditions (`portConditions.ts`) | **reach 17,772 nodes of 41 types in 128 projects — but oracle (b) proves both give one answer**, so moving the source changes no output; do it when the catalog stops carrying conditions |
+| ports that exist only once the node runs | `derived.inputs/outputs(params, context)` + `PortContext` → `drawnPorts` (NSP-020); the context from `@nodegx/project-contract` `portContextFor` | **the spec**, for `DRAWN_PORT_TYPES` (40 types): `get_component`'s `drawnPorts` and the wire check (R19). **s87 added Navigate** (below) | Cloud Function (oracle (c), its `out-*` padding is L1 work); the HTTP Request's Output Fields; NSP-022's 17 |
+| a component instance's ports | none (not a node type) — `@nodegx/project-contract` `portContextFor`'s `components` (s85) types them from the wires as the editor does | the validator's `componentInterface` | ✅ in the contract package, which AC4 allows |
+| may these two ports connect (typecasts) | none | `CatalogIndex.isTypeCompatible` — which **differs** from the editor's table (§2) | **owed — NSP-021's own field**, and the first place two editors disagree today |
+| inspect / preview text | `inspect(state, world)` on 28 specs | — (no running node) | needs a running instance; a second editor shows it only with a runtime |
+| runtime sub-label | none | — | **editor-only with a viewer** (a running node's value) |
+| "unknown node type" | `specs[type]` answers it for the specced set only | catalog `hasType` + the kit overlay | catalog stays the full list until every type has a spec (19 do not) |
+| project-settings ports | none | — | not a node |
+| which runtimes a type runs in | none | catalog `availableIn` | owed with NSP-022 (a second runtime target) |
+| kit provenance | none | catalog `module` / `providedBy` | **editor-only**: packaging, not behaviour |
+
+**What the MCP still asks an editor adapter, measured (s87, 128 of Richard's projects + the templates):**
+
+| adapter knowledge the MCP uses | nodes | wires to its minted ports | the spec |
+|---|---|---|---|
+| Navigate (`RouterNavigateAdapter`): Router, Target Page, `pm-*` | 468 in 44 projects | 74 `pm-*` | **✅ s87** — `derived.inputs` draws them from `routers` + `components`; graded by oracle (c) |
+| Cloud Function (`CloudFunctionAdapter`): Function, `in-*`, `out-*` | 153 in 24 | 266 `in-*`, 27 `out-*` | owed — its `out-*` outputs are padded with `RESULT_FIELDS` (a fixture); the L1 recipe |
+| Page Inputs (`PageInputsAdapter`): `pm-*` outputs | 60 in 28 | 65 | ✅ already drawn (oracle (a): the runtime's hook announces the same) |
+| `derivedPortTargets.ts` (the validator's DEF-002 check, built on the adapters' `parseNameList`) | — | the 74 + 266 + 27 above | still the adapters' reader; the spec's draw now says the same for Navigate (oracle (c)) |
+
+**s87's build — the first question moved: "what ports does this Navigate node have?"** `router-navigate.ts`
+`derived.inputs` = the adapter's `updatePortsForNode` over the context (`needs: ['routers', 'components']`); at play the
+context has no Routers and nothing is drawn, so no trace moved. `ADAPTER_GRADED_TYPES` (`drawn-port-types.ts`) names the
+types oracle (c) grades; `DRAWN_PORT_TYPES` holds them, and the runtime parity test excludes them from its own table.
+Oracle (c) — `noodl-editor/tests-unit/nsp-020/adapter-ports.test.ts` — runs the REAL adapter over a fake project model
+made from each saved project and lays its `setDynamicPorts` over `drawnPorts` with `portContextFor`'s context: 5
+synthetic projects, the committed corpus (86 projects, 140 nodes, 24 with page parameters) and Richard's (201 projects,
+**463 nodes, 94 with page parameters, 0 different**; 14 nodes pinned: a project with no Router, where the adapter draws an
+empty Target picker and the spec nothing).
