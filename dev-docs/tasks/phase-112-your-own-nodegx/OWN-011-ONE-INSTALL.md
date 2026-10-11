@@ -2,7 +2,7 @@
 
 **Opened 2026-10-06** from [DIRECTION.md](../../DIRECTION.md) D1 (ruled by Richard: the install command lives in this
 phase). **Depends on R2 (publish at 0.x), OWN-001, OWN-002, OWN-004.**
-**Status: 🟡 s9 (2026-10-11): built and driven from packed tarballs (§7); AC1 and AC2's first half measured; the publish (AC3), the editor-open half of AC2, AC4 and the stranger's run on a real account are owed.** **R2 ruled 2026-10-10 (s6): publish at 0.x**, after each package declares what it uses (node-spec → `@noodl/backend-contract`; project-contract → `ajv`, `ajv-formats`; the preview's page build → `buffer`, `@nodegx/project-contract`, `@nodegx/module-inject`). **R5 (s6): `@nodegx/canvas-look` ships with the kit, optional. R6 (s6): a package cannot publish while one of its `kit:` bugs is an open blocker; lesser ones are listed as known issues.**
+**Status: 🟡 s10 (2026-10-11): PUBLISHED — all six packages at 0.1.0 on npm, the chain passes from the registry (§8); AC1 and AC3 met; the editor-open half of AC2, AC4 and the stranger's run on a real account are owed.** **R2 ruled 2026-10-10 (s6): publish at 0.x**, after each package declares what it uses (node-spec → `@noodl/backend-contract`; project-contract → `ajv`, `ajv-formats`; the preview's page build → `buffer`, `@nodegx/project-contract`, `@nodegx/module-inject`). **R5 (s6): `@nodegx/canvas-look` ships with the kit, optional. R6 (s6): a package cannot publish while one of its `kit:` bugs is an open blocker; lesser ones are listed as known issues.**
 **Rulings s9 (2026-10-11, one round, all four as recommended):** **R8** the npm names are `@nodegx/mcp` and `@nodegx/preview`, in the repo and on npm (the `@noodl` scope belongs to the original Noodl team; the bins keep their names) — done, `749bd0a38`. **R9** the command sets the folder up and the agent makes the app: it writes ONE file, the folder's `.mcp.json`, and `create_project` stays the one writer of projects, so the scoping conversation is never skipped. AC1 therefore reads *the command plus the agent's first `create_project`*. **R10** people type `npm create nodegx` (package `create-nodegx`). **R11** Richard runs `npm login` (this Mac's token answers 401); a later session publishes, after asking him once more just before it goes out.
 **Model:** **Opus.** Packaging and one install command with a stranger's run as the test; Fable only if the publish order turns into a design question. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
@@ -99,3 +99,60 @@ Tarballs: `@nodegx/mcp` 3.4 MB (19 MB unpacked), `@nodegx/preview` 4.3 MB (20.9 
    project `.mcp.json`.
 5. The server reports itself as `noodl-mcp 0.3.0` while the package is `0.1.0` — deliberate (`server.ts:55` explains
    the server version), but a stranger reading both will ask.
+
+
+## 8. Session 10 (2026-10-11, Opus): the publish
+
+**Rulings (one round, asked just before anything went out, R11):** R12 push the branch, then publish; R13 the three
+packages a home-made editor builds on go in the same release; R14 `create-nodegx` is GPL-3.0-only (README §8).
+
+**Found before the publish, each fixed and filed:**
+
+| bug | what would have gone out | fix |
+|---|---|---|
+| P112-S10-UNLICENSED (blocker, mcp) | `@nodegx/mcp` and `@nodegx/preview` with no `license`, no licence text, no `publishConfig.access` (a scoped name publishes restricted), and the MCP tarball carrying a gitignored 767 KB `nodegx-observe.cjs` from 2026-08-02 | GPL-3.0-only + LICENSE + repository/homepage + public access; the MCP's `files` names its five build outputs; READMEs start from `npx`; `publishable.js` gates access, licence and the GPL text (4 problems on s9's manifests, 0 now) |
+| P112-S10-CLASSICTYPES (high, node-spec) | a TypeScript consumer on classic `node` resolution: no types for `@nodegx/node-spec/node` (`exports` only), and `project-contract/format.d.ts` re-exporting its schemas from JSON (forces `resolveJsonModule`) | node-spec `typesVersions`; the publish build declares the eight schemas as objects; `scripts/own/stranger-kit.mjs` (red on the mutant tarballs, green on the fixed) |
+
+**🔴 The shared checkout is not a publish source.** The MCP tarball first packed in the primary checkout inlined six of a
+peer's UNCOMMITTED files (P18's open `nodegx-export` edits, one untracked), read off esbuild's module comments in
+`dist/noodl-mcp.cjs`; a GPL bundle whose source is in no commit cannot point at its source. So every tarball was packed
+in a clean worktree at the pushed commit (`make-worktree.sh own011-publish 6b3910215`), and every first-party input of
+every bundle was checked to resolve inside that worktree (MCP 424, preview 559, deploy 573; 0 outside). 🔴 That script
+links the MCP's `dist/*` files and the preview's whole `dist` folder INTO the primary checkout: a build there writes
+through them. Remove the links (plain `rm` of the link, `find -type l -delete`) before building.
+
+**The kit's three packages (R13):** `@nodegx/node-spec` gained a `prepack` (its `dist` was stale: tsc typed
+project-contract against a node-spec without `gradeGraphScenario`); `@nodegx/canvas-look` builds to `dist` (CJS, ESM,
+types); `@nodegx/project-contract` publishes from `dist/publish`, written by `build-publish.mjs`, because the repo
+imports its TypeScript by name from its root (12 subpaths, 100+ sites) — its own manifest stays `private`, and the
+published one keeps the flat shape compiled, imports `@nodegx/node-spec/node` (declared) where the source reaches it by
+relative path, and depends on `ajv` + `ajv-formats`. In an empty folder: 16 CommonJS + 2 ESM entries load, the
+consumer typechecks under `node`, `bundler` and `node16`, the format validates the made project and refuses a broken
+`nodes.json`, and node-spec's `/node` entry finds its 85 graph scenarios.
+
+**The tested tarballs (from `6b3910215`):** the §7 chain again — `npm create nodegx` → one `.mcp.json`; the server as
+it says: six bootstrap tools, `create_project` → Reading List; day two lists it; `validate_project` 0 errors, 1
+warning (FRESHFONT); the installed preview renders in 19 ms and Chrome draws the page in 426 ms, no page errors.
+Gates: `publishable.js` 6 / 0; `bugs.js gate` 0 blockers on all five kit values. R6's known issues (1 preview, 22
+node-spec, 2 project-contract) are in CHANGELOG.md's "npm packages 0.1.0" section, generated from the gate's output.
+
+**The publish (AC3 ✅).** `npm publish` here stopped on `EOTP` (2FA), so Richard ran `publish-all.sh` (the six tested
+tarballs in dependency order, skipping any already up) in his own terminal. All six are live at 0.1.0, `latest`, each
+registry `dist.shasum` equal to the tested tarball's: `create-nodegx` 13:23:50 UTC, project-contract 13:24:43,
+node-spec 13:25:06, preview 13:26:00, canvas-look 13:26:39, mcp 13:26:55. 🔴 **A first publish of a new name is not
+visible at once:** npm first creates a public placeholder version `0.0.0-stage` (its description: "Temporary package
+placeholder for staged publishing"), and the registry document answered 404 / "no 0.1.0" for one to three minutes
+after the publish — read at 13:23 as "nothing published" and wrongly put to Richard as an approval waiting on
+npmjs.com; there was nothing to approve (`npm stage list` empty; his org page showed them published). Poll the
+registry, do not conclude from one read.
+
+**From the registry (AC1, AC3):** empty folder, `HOME` empty: `npm create nodegx@0.1.0 my-apps` → one `.mcp.json`
+(`npx -y @nodegx/mcp@0.1.0 --allow-writes`); that server: `create_project` → Reading List; day two lists it; the
+project's server: `validate_project` 0 errors, 1 warning (FRESHFONT); `npx -y @nodegx/preview my-apps/reading-list`
+renders in 10 ms and Chrome draws the page in 274 ms, no page errors; `npm install @nodegx/node-spec
+@nodegx/canvas-look @nodegx/project-contract` (11 packages, 2 s) validates the project, refuses a broken `nodes.json`
+and finds 85 graph scenarios.
+
+**Owed:** nodegx.io deployed so CHANGELOG.md's "npm packages 0.1.0" section shows (asked, not done: the box serves
+four other sites and `nodegx-web` holds two untracked folders); AC2's editor-open half; AC4; §4.4 on a clean account
+and a non-Mac machine.
