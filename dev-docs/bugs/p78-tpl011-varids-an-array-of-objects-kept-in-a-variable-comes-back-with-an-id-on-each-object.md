@@ -1,7 +1,7 @@
 ---
 id: P78-TPL011-VARIDS
 title: An array of plain objects kept in a Variable comes back with an `id` on each object, which then gets saved
-status: needs-ruling
+status: scheduled
 phase: P109
 task: ISL-045
 severity: low
@@ -32,3 +32,5 @@ object (both rows drew). Read back through a Function wired to the same value, a
 does not have: a read through a row's item, or the save. ISL-003's change to plain rows (`collection.ts`, 2026-10-03)
 is a candidate for having removed it, but it is not bisected. The question to Richard changes from "plain or
 converted?" to "close it as not reproduced?".
+
+**Ruled (Richard, P109 s44, 2026-10-11):** Dig into Nightbook's exact path: trace its own read-back before closing.

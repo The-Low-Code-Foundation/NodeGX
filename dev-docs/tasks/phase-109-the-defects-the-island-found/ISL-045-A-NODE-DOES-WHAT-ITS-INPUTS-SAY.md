@@ -1,6 +1,6 @@
 # ISL-045 — A node does what its inputs say, and one node's failure stays its own
 
-**Status: 🟢 s44 (2026-10-11): 2 of 5 fixed — DROPDOWNEMPTYRESET `d08eada79` (Dropdown v7), INSTANCEROOT `dad3a9c33` (isolated: the deploy's export, not the runtime). AC1 done for four rows: MOUNTED still fires; VARIDS does not reproduce in its nearest shape; BUILTINBOUNDARY not re-measured (no built-in is known to throw while drawing today). The three rulings asked s44. Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 5 bugs
+**Status: 🟢 s44 (2026-10-11): 4 of 5 fixed — DROPDOWNEMPTYRESET `d08eada79` (Dropdown v7), INSTANCEROOT `dad3a9c33` (isolated to the deploy's export), MOUNTED `64ceb2746` (ruled a quiet note + Mounted's help, after the warning was counted at 409 template fires), BUILTINBOUNDARY `42699d261` (ruled "same as kit parts"; cost measured first). Left: VARIDS, ruled "dig into Nightbook's exact path" (it does not reproduce in its nearest shape). Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 5 bugs
 from the ledger (`dev-docs/bugs/`) that no phase owned: 2 medium · 3 low; 3 to ask. **Side:** noodl-viewer-react (Mounted, a component instance as a root, the error boundary), noodl-runtime (Variable), nodegx-node-spec (Dropdown)
 
 ## 1. The person sentence
@@ -19,9 +19,9 @@ generated from the ledger headers. **The ledger file is the source**, so read it
 | bug | severity | status | what a person sees |
 |---|---|---|---|
 | [P78-TPL011-INSTANCEROOT](../../bugs/p78-tpl011-instanceroot-a-component-whose-only-visual-node-is-another-component-s-instance-draws-nothing.md) | medium | fixed | A component whose only visual node is another component's instance draws nothing (cause not isolated) |
-| [P78-TPL011-MOUNTED](../../bugs/p78-tpl011-mounted-a-wired-mounted-input-with-no-value-yet-leaves-the-node-mounted.md) | medium | needs-ruling | A wired Mounted input that has no value yet leaves the node mounted, so a gated screen flashes |
-| [P78-TPL011-VARIDS](../../bugs/p78-tpl011-varids-an-array-of-objects-kept-in-a-variable-comes-back-with-an-id-on-each-object.md) | low | needs-ruling | An array of plain objects kept in a Variable comes back with an `id` on each object, which then gets saved |
-| [P109-S22-BUILTINBOUNDARY](../../bugs/p109-s22-builtinboundary-a-built-in-node-that-throws-while-drawing-still-blanks-the-page.md) | low | needs-ruling | A built-in node that throws while it draws still blanks the whole page (kit nodes no longer do) |
+| [P78-TPL011-MOUNTED](../../bugs/p78-tpl011-mounted-a-wired-mounted-input-with-no-value-yet-leaves-the-node-mounted.md) | medium | fixed | A wired Mounted input that has no value yet leaves the node mounted, so a gated screen flashes |
+| [P78-TPL011-VARIDS](../../bugs/p78-tpl011-varids-an-array-of-objects-kept-in-a-variable-comes-back-with-an-id-on-each-object.md) | low | scheduled | An array of plain objects kept in a Variable comes back with an `id` on each object, which then gets saved |
+| [P109-S22-BUILTINBOUNDARY](../../bugs/p109-s22-builtinboundary-a-built-in-node-that-throws-while-drawing-still-blanks-the-page.md) | low | fixed | A built-in node that throws while it draws still blanks the whole page (kit nodes no longer do) |
 | [P109-S21-DROPDOWNEMPTYRESET](../../bugs/p109-s21-dropdownemptyreset-the-dropdown-spec-keeps-the-hidden-option-selected-after-an-empty-list.md) | low | fixed | The Dropdown spec thinks the hidden option is still selected after Items offered no options, so a person choosing the first option of the next list reads as a change the browser never raises |
 
 ## 4. Order of work
@@ -61,3 +61,11 @@ INSTANCEROOT first (isolate the cause), DROPDOWNEMPTYRESET with it (a spec fix, 
 | MOUNTED (medium) | ⏸ ruling | Re-measured: still fires. A Group gated by a Variable nobody sets is drawn; controls false/true/no wire as expected (`isl045-mounted-drive`) |
 | VARIDS (low) | ⏸ ruling | Re-measured: does not reproduce in its nearest shape (Function → Set Variable array → Variable → For Each + read-back): plain both ways, no `id` (`isl045-varids-drive`). The question becomes "close it as not reproduced?" |
 | BUILTINBOUNDARY (low) | ⏸ ruling | Not re-measured: the two built-ins known to throw while drawing (C65, C70) are fixed, and no other is known. The question is a design one and stands as s22 wrote it |
+
+**s44, after the rulings (asked in one round):**
+
+| row | state | what happened |
+|---|---|---|
+| MOUNTED | ✅ `64ceb2746` | Ruled "warn when building". Counted before building, the warning would fire 409 times on the templates. Re-asked with the number and ruled "a quiet note and Mounted's help": the info `gate-starts-shown`, and the description, in 17 spec copies, the catalogs and 26 docs pages. Nothing that runs changes |
+| BUILTINBOUNDARY | ✅ `42699d261` | Ruled "same as kit parts". `withNodeBoundary` in `NoodlReactComponent.render()`; `node/render-failed`. ISL-026's spec now grades a built-in; red with the line put back. Cost measured first: about 5–10 µs per node at mount, about 2–4 ms on the largest template first page (409 elements). Reaches apps with the next viewer runtime build |
+| VARIDS | ⏸ ruled: dig | "Dig into Nightbook's exact path". Its generator is in P78's untracked pile (`tpl011Components.ts` `tnFeelVar` / `tnFeelSet` / `tnFeelLoad`, and `tpl011Face.ts:120`). Next: drive Nightbook's own Tonight page and read the feelings payload `savePage` sends |

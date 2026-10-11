@@ -2,6 +2,7 @@
 id: P78-TPL011-MOUNTED
 title: A wired Mounted input that has no value yet leaves the node mounted, so a gated screen flashes
 status: fixed
+commit: 64ceb2746
 phase: P109
 task: ISL-045
 severity: medium

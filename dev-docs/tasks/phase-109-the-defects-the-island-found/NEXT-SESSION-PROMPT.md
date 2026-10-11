@@ -1,109 +1,110 @@
-# Next session — P109 session 44
+# Next session — P109 session 45
 
 **Phase:** [README](README.md) · **Audit:** [AUDIT-2026-10-01.md](AUDIT-2026-10-01.md) · scoped at `27d891bf3`.
-**Session 43 (2026-10-11, on `cline-dev`, primary tree):** the board stays **38 of 52 closed**. ISL-044 went to 5 of 6
-and ISL-046 to 4 of 9 (two rows found and filed). Every row was re-measured at HEAD first. Each fix was red on the old
-code and green after.
+**Session 44 (2026-10-11, on `cline-dev`, primary tree):** the board went from 38 to **39 of 52 closed**. ISL-044
+closed (6 of 6). ISL-045 went from 0 to 4 of 5, and ISL-046 from 4 to 5 of 9. Every row was re-measured at HEAD
+first. Every fix was red on the old code in exactly its arm, and green after.
 
-## The board (re-derived from the task files' `**Status` lines, s43)
+## The board (re-derived from the task files' `**Status` lines, s44)
 
 | task | state | what is left | blocked on |
 |---|---|---|---|
-| ISL-044 editor reads right | 🟢 5 / 6 | LISTDEFAULTTYPE | Richard's ruling (asked s43, below) |
-| ISL-046 templates & kits | 🟢 4 / 9 | ROUTINEREFUSAL, SECONDVISIT (buildable); MOVEARROW, INSTALLER, TPL011UNREADID | MOVEARROW a ruling; INSTALLER the tablets; TPL011UNREADID P78's untracked Nightbook pile |
-| ISL-045 node inputs | ⬜ 5 bugs | INSTANCEROOT, DROPDOWNEMPTYRESET (buildable); MOUNTED, VARIDS, BUILTINBOUNDARY | 3 rulings inside |
+| ISL-045 node inputs | 🟢 4 / 5 | VARIDS | nothing: ruled "dig into Nightbook's exact path" |
+| ISL-046 templates & kits | 🟢 5 / 9 | SECONDVISIT (buildable); MOVEARROW, INSTALLER, TPL011UNREADID | MOVEARROW a ruling (asked s42, s43; not re-asked s44); INSTALLER the tablets; TPL011UNREADID P78's untracked Nightbook pile |
 | ISL-043 export | ⬜ 8 bugs (2 high) | all | P18 is live in `nodegx-export` |
 | ISL-007, 008, 009, 010, 018, 022, 024, 025, 035, 037 | 🟡/🟢/⬜ | as in s40's list | outside this phase |
 
 ## Do, in this order
 
 1. **Re-read the board yourself** (`grep -m1 '^\*\*Status' ISL-0*.md`). Do not copy the table above.
-2. **The rulings first, if Richard answered** (MOVEARROW, LISTDEFAULTTYPE): build what he chose.
-3. **ISL-046 ROUTINEREFUSAL** (medium). The proposal is in its ledger file. Not the constant-false Condition: a
-   second refusal would publish `hasError: true` again, which is no change, so it would stay hidden. The D81 drive
-   (`packages/nodegx-backend/tests/isl046-d81-routine-dates-drive.test.ts`) already logs the reading. Make it an
-   assertion.
-4. **ISL-045 INSTANCEROOT and DROPDOWNEMPTYRESET.** Check P107 first: `packages/nodegx-node-spec` had a peer's open
-   edits all of s43 (`query-records.ts` was rewritten mid-session, and a build failed on it once).
-5. **ISL-046 SECONDVISIT** (low): read the 3D engine on the second visit to the Workshop before choosing a fix.
-6. Ask ISL-045's three rulings at the end, in plain words, with what you built beside them.
+2. **ISL-045 VARIDS (dig, as ruled).** The nearest shape does not reproduce
+   (`packages/nodegx-backend/tests/isl045-varids-drive.test.ts`: Function → Set Variable (array) → Variable → For Each
+   and a read-back; it comes back plain). Nightbook's real path is in P78's untracked pile: `tpl011Components.ts`
+   `tnFeelVar` / `tnFeelSet` / `tnFeelLoad` (about line 1520), its `savePage` payload, and the note at `tpl011Face.ts:120`.
+   Read those, without editing them, and add Nightbook's missing step to the drive (a row's item read, a strength
+   change written back, or the save). If it then reproduces, fix it there. If not, close it with the readings.
+   Candidate already fixed: ISL-003's plain rows (`collection.ts`, 2026-10-03). Bisect only if it reproduces before
+   that commit.
+3. **ISL-046 SECONDVISIT** (low): read the 3D engine on the second visit to the Workshop before choosing a fix
+   (s43's notes in its bug file). The touch drive takes about 10 minutes on a quiet box.
+4. **MOVEARROW**: asked twice with no answer. Ask once more only if Richard is around, in plain words, with s43's
+   wording.
 
 ## Human decisions owed
 
 - **MOVEARROW (asked s42 and s43).** Planning is set aside. Opening a project in it adds a "→ " to the project's
   stored next move every time. Fix the shelved planner now (half a day), or close the bug until Planning comes back?
-- **LISTDEFAULTTYPE (asked s43).** A Function output added to its list shows Type "String", but the port is untyped
-  until another type is picked. Make it really String (every existing untouched output changes type), or have the
-  panel say "Any" until one is picked (nothing saved changes)? Recommended: "Any".
-- 🔴 **The working copy's `package-lock.json`** is still the stale 2026-09-24 file that removes
-  `@nodegx/node-spec`'s entries. s43 left it alone too.
-- **`templates/nightbook/` is untracked** (P78's pile, with its kit and 14 `tpl011*` specs). s43 changed the Date
-  picker's source (`Reset`). Nightbook's copy will change the next time its generator runs, and its byte gate will
-  then differ in `Coming/Date picker`.
-- **Still owed:** `P109-S36-STALEMCPDIST`, the `nodegx` bin rebuild, and s38/s39's list.
+- 🔴 **The working copy's `package-lock.json`** is still the stale 2026-09-24 file that removes `@nodegx/node-spec`'s
+  entries. s44 left it alone.
+- **`templates/nightbook/` is untracked** (P78's pile). Its Date picker copy and its two Group wraps (INSTANCEROOT's
+  workaround, no longer needed) change the next time its generator runs.
+- **Still owed:** `P109-S36-STALEMCPDIST`, the `nodegx` bin rebuild, and s38/s39's list. Add to it: **the viewer
+  runtime build** (`npm run build:editor:_viewer`). BUILTINBOUNDARY reaches a running app only through it, and s44
+  did not rebuild it (shared, gitignored).
 
-## What s43 built (commits)
+## What s44 built (commits)
 
-- **ISL-046:**
-  - D81 `37f35c8c4`: the Date picker's `Reset` signal. TPL-008's routine pane sends it when another routine opens.
-    The prefab and four templates were regenerated.
-  - METERS3D `050ca561b`: `chipLifts`, so the 3D Workshop's chips never cover each other on the first visit.
-    `drive-iw007-touch.js` gains METERS.
-- **ISL-044:**
-  - OGIMAGE `eba414b90`: og:image width and height offer no spacing tokens.
-  - NESTEDSIGNAL `c3d6b2f66`: the deploy's wire check runs the runtime port pass to a fixed point.
-  - ICONBTN `e76db56b4` and `9b3d1f3a8`: every editor button has an accessible name. A typed `ariaLabel` was added
-    and 45 caller files named; the narrow top bar's three buttons were fixed after the editor reading.
-  - LONGTOAST `12a971c32`: a toast keeps its title on screen and scrolls its message.
-  - SHIFTTAB: re-measured, not a trap. Closed `wontfix` with the reading (`9b3d1f3a8`).
-- **Found and filed:**
-  - `P109-S43-ROUTINEREFUSAL`: a routine's refusal sentence follows the person to the next routine.
-  - `P109-S43-SECONDVISIT`: on the second visit, the 3D Workshop's chips are never measured.
+- **ISL-046 ROUTINEREFUSAL `9cb99b205`:** a refusal is said only while the record it was about is open. There were
+  three commands, not one (routine dates, Add time, task deadline). `command()` gains `refusalAbout`: the guard
+  publishes each verdict as a new object `{about, error}`, and `SAY_REFUSAL_SCRIPT` says it. A mutant that compares
+  verdicts by value turns exactly the "said again" arm red.
+- **ISL-045 DROPDOWNEMPTYRESET `d08eada79`:** Dropdown v7. Spec only: `domSelected: null` means the element selects
+  nothing, which HTML treats differently from the hidden option being selected. Stranger round 4's engine was given
+  the same rule, marked not the stranger's line.
+- **ISL-045 INSTANCEROOT `dad3a9c33`:** isolated to the deploy's export. The project is never registered there, so a
+  component's instance root is unresolved, and with no `visualRoots` recorded it shipped `roots: []`. Now an
+  unresolved root that names a project component answers from that component. All 13 templates deploy byte-identical
+  under both engines. `dist/nodegx-deploy.cjs` was rebuilt with `--deploy-only`; its inputs carry no peer files.
+- **ISL-044 LISTDEFAULTTYPE `e6a124176`:** an output's Type select starts on Any, in both the Function and the
+  Script node, and the spec twins follow. ISL-044 is closed.
+- **ISL-045 MOUNTED `64ceb2746`:** an info `gate-starts-shown`, and Mounted's description. Re-ruled once the warning
+  was counted at 409 template fires.
+- **ISL-045 BUILTINBOUNDARY `42699d261`:** every node's element is drawn inside a boundary (`node/render-failed`).
+  Cost measured first: about 2–4 ms on the largest template first page.
+- **Docs:** `735bf18a7` (re-measures of MOUNTED and VARIDS, as drives), plus the commit lines and this handoff.
 
 ## Gate readings (2026-10-11)
 
-- **Drives (each red on HEAD, green on the fix):**
-  - Prefab date picker drive: 34/34.
-  - `isl046-d81-routine-dates-drive`: 4/4.
-  - `drive-iw007-touch --mode 3d`: 28/31 against HEAD's 27/31. Pip's METERS turned green; BUILD and PAY are red on
-    both (`P109-S18-TOUCHBUILD`); Cobble's METERS is SECONDVISIT.
-- **noodl-mcp:**
-  - TPL-008/010 and settle specs: 262/264. The 2 reds are `cmp004Parts`, red in a clean worktree since P102.
-  - `def038SettledTemplates`: 29/31. The 2 reds are Nightbook (untracked) and the training demo (`P109-S6-DEF038`).
-  - Kit specs: 143/143.
-- **noodl-preview:** GAM-023 8/8, deploy 25/25, on the rebuilt `dist/nodegx-deploy.cjs` (gitignored, rebuilt
-  14:32).
-- **noodl-editor:** HLT-012/006 36/36, `isl-044` census 3/3.
-- **Typecheck:** editor `tsc --noEmit` 0 errors. Core-ui's program has 45 errors that were there before
-  (execution-history, graphDiff and the like); none was added.
+- `isl046-d81-routine-dates-drive` 7/7, red on HEAD in 2 arms. `isl045-instanceroot-drive` 12/12, red on the pre-fix
+  engine in 1 arm.
+- noodl-mcp TPL-008 specs 103/103. `def038` + editorSuite 32/34: the 2 reds are Nightbook and the training demo, as in
+  s43.
+- Dropdown on the runtime 63/63, mutants 653/658 as before. Stranger round 4 63/63. Golden check holds. Catalog and
+  docs checks clean.
+- noodl-preview 63/63 (GAM-014 5/5). Viewer 1845/1845. Editor `tsc` 0. `typecheck:mcp` 0.
+- **Editor `test:ci`: 3011 specs, 1 failure** (SUB-006's port-suggestion order, the floor P112 recorded before s44).
+- **Editor `test:main`: 6 suites red, none attributed to s44.** CHR-007 (`keepPagesWhenUnmounted`'s class),
+  DEF-007/HLS-003 (`noodl-mcp` `ProjectStore.ts` not registered), EL-009 (renders through the built viewer bundle;
+  the same red with the boundary line removed), HLT-013 (library docs), VFN-011 (drift gate), exp-013 (the live
+  ledger's contents).
 
-## What s43 learned
+## What s44 learned
 
-- **A Function never re-runs on an identical value** (DEF-046's `shouldRunOnValueChanged`). A pulse wired into one of
-  its inputs lands as `true` then `false` in one pass, so the script cannot see it. Count pulses in a run-wired
-  Function (the Date picker's `mounted` and `Reset`).
-- **A headless port pass must run to a fixed point.** One pass types a component's outputs before the For Each inside
-  it has minted the ports that feed them. In the editor, the runtime re-mints when port types update.
-- **A typed prop is the census.** Making `ariaLabel` required when no `label` is drawn made the compiler list all 69
-  callers. A spec then covers the one `.jsx` file outside it.
-- **Restore HEAD's CSS with an injected style.** On the same page, that is the control for a CSS fix.
-- **The 3D overlay caches chip sizes per text,** and on a second visit to the Workshop every chip cached 0 × 0. A
-  `ResizeObserver` asking for a frame changed nothing, so it was taken out unproven.
-- **An orphaned headless Chrome (a "toy-" profile, no tool in this repo makes one) ran at 300–500% for 25 minutes**
-  and pushed the load to 71. A drive died under it on a tap. Read `uptime` and the top processes before trusting a
-  red tap.
+- **Count a warning's reach before building it.** The ruled warning would have fired 409 times on our own templates.
+  Asked again with the number, Richard chose a note. A ruling made on "unmeasured" wording is owed a re-ask once the
+  number exists.
+- **A deploy's export never registers its project.** Any check that resolves a type there sees `UnknownNodeType` for
+  every component instance. Probe a patched copy of the engine placed beside the original (it resolves the runtime
+  relative to itself), and delete it after.
+- **A stranger's frozen engine follows the spec's text**, so a spec correction makes it stale in exactly the corrected
+  scenario. Give it the same rule, marked not the stranger's line (ISL-031's precedent).
+- 🔴 **A hash refresh can record a peer's open edit.** The helper hashes the working tree. P107 had uncommitted
+  scenarios in the Dropdown's file, and the refresh took them in. Check `git diff` of the hashes file and put
+  anything you did not change back to HEAD's hash.
+- **A boundary around the element, not the component,** keeps every identity and ref. One line in
+  `NoodlReactComponent.render()` covers every built-in.
+- **Time a benchmark in CPU (`process.cpuUsage`) with the arms interleaved** when peers are loading the box (load 25
+  this session). Wall-clock readings were noise.
 
 ## Recipes
 
-- **A toast from the page:** `webpackChunknoodl_editor.push([[Symbol()], {}, (r) => { req = r; }])`, then find
-  `ToastLayer` in `req.c`. The same reaches `ProjectModel` and `WarningsModel`.
-- **Real Tab keys in the editor:** the scratch probe used one CDP WebSocket, `Emulation.setFocusEmulationEnabled`,
-  then `Input.dispatchKeyEvent` `rawKeyDown`/`keyUp` with `modifiers: 8` for Shift. Read `document.activeElement`
-  after each.
-- **The 3D touch drive by hand:** `drive-cg003-pages.js assemble <dir>/project`, `nodegx deploy … --allow-development-engine`,
-  `drive-iw007-touch.js <dir>/deploy --project <dir>/project --mode 3d`. About 10 minutes on a quiet box.
-- Commit through a temporary index, as before (`GIT_INDEX_FILE`, `read-tree HEAD`, add, commit, then
-  `git reset -q -- <exact paths>`).
+- **A spec's announced ports without the editor:** call the module's `setup(context, graphModel)` with a fake graph
+  whose `on('editorImportComplete')` you fire, and read `sendDynamicPorts` (`isl044-listdefaulttype` specs).
+- **Commit one hunk of a file that holds two changes:** build the file from `git show HEAD:<f>` plus that hunk, then
+  `git hash-object -w` and `git update-index --cacheinfo` into the temporary index.
+- **Deploy-time roots:** `readDeployedRoots(outDir)` (`noodl-preview/src/deployReading.ts`), or read
+  `noodl_bundles/*.json` for `roots`.
+- Commit through a temporary index, as before.
 
 ## Worktrees
 

@@ -2,6 +2,7 @@
 id: P109-S22-BUILTINBOUNDARY
 title: A built-in node that throws while it draws still blanks the whole page (kit nodes no longer do)
 status: fixed
+commit: 42699d261
 phase: P109
 task: ISL-045
 severity: low

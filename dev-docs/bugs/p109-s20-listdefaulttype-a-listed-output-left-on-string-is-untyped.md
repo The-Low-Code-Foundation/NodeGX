@@ -2,6 +2,7 @@
 id: P109-S20-LISTDEFAULTTYPE
 title: A Function output added to the list shows Type "String" in the panel, but its port is untyped until another type is picked
 status: fixed
+commit: e6a124176
 phase: P109
 task: ISL-044
 severity: low

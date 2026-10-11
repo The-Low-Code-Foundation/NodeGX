@@ -1,6 +1,6 @@
 # ISL-044 — The editor reads right to a keyboard, a screen reader and an eye
 
-**Status: 🟢 s43 (2026-10-11): 5 of 6 — ICONBTN `e76db56b4` + `9b3d1f3a8`, NESTEDSIGNAL `c3d6b2f66`, OGIMAGE `eba414b90`, LONGTOAST `12a971c32` fixed; SHIFTTAB re-measured and closed (not a trap, `9b3d1f3a8`); LISTDEFAULTTYPE waits on Richard's ruling (asked s43). Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 6 bugs
+**Status: ✅ s44 (2026-10-11): closed — 6 of 6. LISTDEFAULTTYPE ruled "the panel says Any" and fixed `e6a124176` (the Function and the Script node). s43: ICONBTN `e76db56b4` + `9b3d1f3a8`, NESTEDSIGNAL `c3d6b2f66`, OGIMAGE `eba414b90`, LONGTOAST `12a971c32` fixed; SHIFTTAB re-measured and closed (not a trap, `9b3d1f3a8`). Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 6 bugs
 from the ledger (`dev-docs/bugs/`) that no phase owned: 3 medium · 3 low; 1 to ask. **Side:** noodl-core-ui (IconButton), the editor (keyboard focus around the preview, ToastLayer, the token picker, wire health, the Function panel)
 
 ## 1. The person sentence
@@ -23,7 +23,7 @@ generated from the ledger headers. **The ledger file is the source**, so read it
 | [P109-S20-LONGTOAST](../../bugs/p109-s20-longtoast-a-long-toast-pushes-its-title-off-the-window.md) | medium | fixed | A long toast grows past the top of the window, so its title and first sentences cannot be read |
 | [P103-CMG009-OGIMAGE](../../bugs/p103-cmg009-ogimage-og-image-width-and-height-offer-the-spacing-scale.md) | low | fixed | Page's og:image:width / og:image:height fields offer spacing tokens |
 | [P78-TPL008PJ-NESTEDSIGNAL](../../bugs/p78-tpl008pj-nested-signal-a-signal-a-row-passes-up-from-its-own-for-each-reads-broken.md) | low | fixed | A signal a For Each row passes up from a For Each of its own reads as a broken wire in the deploy's wire check — the wire works in both viewers |
-| [P109-S20-LISTDEFAULTTYPE](../../bugs/p109-s20-listdefaulttype-a-listed-output-left-on-string-is-untyped.md) | low | needs-ruling | A Function output added to the list shows Type "String" in the panel, but its port is untyped until another type is picked |
+| [P109-S20-LISTDEFAULTTYPE](../../bugs/p109-s20-listdefaulttype-a-listed-output-left-on-string-is-untyped.md) | low | fixed | A Function output added to the list shows Type "String" in the panel, but its port is untyped until another type is picked |
 
 ## 4. Order of work
 
@@ -63,3 +63,9 @@ SHIFTTAB and ICONBTN first (a keyboard or screen-reader user cannot work). Then 
 | LONGTOAST (medium) | ✅ `12a971c32` | The card is at most `100vh − 90px` and its message scrolls. In the editor, with a 3,500-character warning: the title at y 46 and the message scrolling. An injected style restoring HEAD's card put the title at y −974 |
 | SHIFTTAB (medium) | ✅ closed, not a trap (`9b3d1f3a8`) | Re-measured with P101's recipe: 30 Shift+Tabs from a canvas node walk the preview's controls (1–5), then the editor's chrome and left panel (6–30). The guest hands focus back. Closed `wontfix` with the measurement |
 | LISTDEFAULTTYPE (low) | ❓ asked | In plain words at the end of s43 |
+
+### s44 (2026-10-11) — LISTDEFAULTTYPE ruled and fixed; closed
+
+| row | state | what happened |
+|---|---|---|
+| LISTDEFAULTTYPE (low) | ✅ `e6a124176` | Ruled "the panel says Any until one is picked". The Function's and the Script node's output Type select gain Any (`*`) as first choice and default; the spec twins follow. Two new specs read each module's announced ports: red on HEAD in exactly the "shows Any" arm, controls green; P107's ports-parity oracle 325/325 after (7 red before the twins moved) |
