@@ -2,8 +2,8 @@
 
 **Opened 2026-09-30 (s1), from Richard's ruling that the editor is a target (README §1, R6).**
 **Depends on NSP-018, NSP-020.** The phase's last thesis test, beside NSP-006.
-**Status: 🟡 s87 — AC1 written (the census's §5 "source after"); §3.2 begun: Navigate and Cloud Function draw their ports
-from the spec, graded by their editor adapters (oracle (c)).**
+**Status: 🟡 s88 — AC1 written (the census's §5 "source after"); §3.2: Navigate and Cloud Function draw their ports
+from the spec, graded by their editor adapters (oracle (c), s87); `typecasts` has one table and one rule (s88, R21 + R22).**
 **Shared with phase 112 (2026-10-02):** OWN-000 builds §3.1's census here, in this folder, and OWN-006 runs §3.3's
 round trip as two adapters in its editor suite. Build each once; both phases cite it.
 
@@ -110,3 +110,45 @@ already draws; the "runtime-discovered" label comes from a source-text heuristic
 validator's `derivedPortTargets` reading the spec's draw instead of the adapters' reader (the refusal of an undeclared
 prefixed name); then NSP-021's own fields (`typecasts` first: the MCP and the editor disagree today); §3.3's round trip
 is P112 OWN-006's.
+
+### 6.2 s88 (2026-10-11, Opus) — `typecasts`: one table, one rule, measured before designed
+
+**Measured first** ([[count-the-reach-first]]), over Richard's 201 projects and the committed corpus: 42,466 wires;
+31,026 typed at both ends (by the spec's drawn ports, else the catalog's, else the node's saved `ports` /
+`dynamicports`); 11,140 touch a component instance (not typed by the rule); 300 untyped. Two predicates over each:
+the **canvas** (the table, plus `ConnectionBar.tsx` :251-255: a signal output reaches only a signal or `*` input) and the
+**validator** (`CatalogIndex.isTypeCompatible`: the table, but a signal on either end is fine).
+
+- **They differ on 0 wires.** Every signal-to-value wire in the corpus goes through a `*` port (171), which both allow.
+  Control beside it: a planted pair (`string → signal`) does differ, and both predicates refuse wires (next line).
+- **They refuse the same 34**, and 30 are one defect: a list wired into a Dropdown's Items (site builder
+  `/Pages/PageEditor` ×19, `/Form Fields/Labelled Select` ×11). Items became an `optionslist` on 2026-09-05
+  (`0ce92adc7`) and the table was not told — the canvas has refused the wire since, and the Problems panel and the agent
+  server warn on every one. Filed **P107-S88-OPTIONSCAST**. The other 4 are component ports saved with a type that is not
+  a type (`image URL`, `text`) or a `string` component input into a `font` port (nightbook).
+
+**Ruled (README §7):** R21 "Allow it, and fix bare labels"; R22 "The canvas's rule".
+
+**Built (`813657773`).** The table and the rule live in **`@nodegx/project-contract/typecasts`**, not in the spec package:
+the runtime already depends on project-contract (and not on the spec), so it now IMPORTS the table — one table, not a
+graded copy. `TYPECASTS` (with `array → optionslist`, R21), `canCastPortType` (the table: what the editor asks when it
+types a component port from its wires, `findCompatiblePortType`) and `canConnectPortTypes` (the table plus the
+signal-output rule: what a person may draw). The canvas (`NodeLibrary.canCastPortTypes`, keeping "two untyped ports
+connect"), the Ports tab (`portTypes.ts`, its "byte-equivalent twin" gone) and the validator (R22) call them. The
+catalog regenerated from the runtime moved by exactly that one row. `ConnectionBar`'s own signal check stays: it is what
+labels the refusal `signal-rule` for the popup's sentence. `cloud-node-library.json` keeps its snapshot table (the cloud
+runtime has no Dropdown). `tests-unit/nsp-021/typecasts`: the catalog's table is project-contract's row for row; the
+validator, the Ports tab and the shared rule answer every pair alike (planted: the old signal leniency → red).
+
+**R21's second half (Dropdown v8).** A wired list of bare words reached the runtime unchanged, and `Select` reads `Label`
+and `Value` off each item — `["Small", "Large"]` drew two empty, nameless options. `options.ts` `optionItems` now makes a
+word an option labelled and valued by it (a list of `{ Label, Value }` rows still keeps its identity, its Value and its
+Disabled); the spec is v8 (`fecab7823`; `changes`: migration none) with two scenarios (a list of words; a list mixing a row, a word,
+a number and an empty item). Stranger round 4's plain-DOM engine gets the same rule, marked not the stranger's line.
+**Trap found while planting:** a plant guarded by `Date.now() > 0` never fires on the runtime target — the play's
+clock is the world's and reads 0 — so the first plant "stayed green" for the wrong reason; planted with a guard that
+reads no clock, the runtime fails exactly the two new scenarios.
+
+**Left (s89 on):** the R20 drive and this one in the running editor (a Static Data's Items onto a Dropdown connects;
+s88's editor port was held by a peer again); `allowAsChild` / visual-ness (census §2: the catalog mirrors the rule by
+hand three times); display name / deprecation at node level; Router's labels only if a reason appears.

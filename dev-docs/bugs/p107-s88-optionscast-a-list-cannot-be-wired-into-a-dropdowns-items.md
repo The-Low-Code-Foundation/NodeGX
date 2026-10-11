@@ -1,8 +1,11 @@
 ---
 id: P107-S88-OPTIONSCAST
 title: A list cannot be wired into a Dropdown's Items since Items became an `optionslist` — the canvas refuses the wire and the Problems panel and the agent server warn "Type mismatch" on the 30 that exist
-status: open
+status: fixed
+commit: 813657773, fecab7823
 task: NSP-021
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/net.noodl.controls.options.json "Items wired a list of plain words: each is offered, labelled and valued by itself, and choosing Large moves Value to Large with Changed"; packages/noodl-editor/tests-unit/nsp-021/typecasts.test.ts
 severity: medium
 area: runtime / node library typecasts (`noodl-runtime/src/nodelibraryexport.ts` :222-298, copied into `noodl-types/src/node-catalog.json` `typecasts`); read by the editor canvas (`nodelibrary.ts` `canCastPortTypes` :382-397, via `NodeGraphModel.getConnectionStatus` :691) and the validator (`validation/CatalogIndex.ts` `isTypeCompatible` :350, rule `typeIncompatibleConnection`)
 found: P107 NSP-021 s88 (the typecasts census over Richard's 201 local projects), 2026-10-11
@@ -47,6 +50,9 @@ Function only to step around this; it can go back to a Static Data once the fix 
 a Dropdown's Items again?"* — a list may be wired in (one row in the table), and a wired list of plain words becomes real
 options at run time, as typed text already does.
 
-**Half fixed (s88):** the table moved to `@nodegx/project-contract/typecasts` (the runtime imports it) and `array` now
+**Fixed (s88), both halves.** First (`813657773`): the table moved to `@nodegx/project-contract/typecasts` (the runtime imports it) and `array` now
 reaches `optionslist`, so the canvas, the Ports tab, the Problems panel and the agent server all let the wire through.
-Left: the bare-label half (the Dropdown's runtime, its spec, the export).
+Then (`fecab7823`, Dropdown v8): runtime `options.ts` `optionItems` makes a word in a wired list an option labelled and valued by
+it — a list of `{ Label, Value }` rows still keeps its identity, its Value and its Disabled — with the spec, two
+scenarios and stranger round 4 to match (runtime planted red on exactly those two). The export draws a stored Items only
+and skips a bare item (P18's, not graded for Dropdown). Not yet driven in the running editor (NSP-021 §6.2).
