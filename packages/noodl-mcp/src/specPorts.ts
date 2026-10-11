@@ -19,10 +19,11 @@
  * @module noodl-mcp/specPorts
  */
 import { DRAWN_PORT_TYPES, drawnPorts, specs } from '@nodegx/node-spec';
-import { portContextReader, portProjectFromStore, type PortTypeOf } from '@nodegx/project-contract/port-context';
+import { findPortNode, portContextReader, portProjectFromStore, type PortProject, type PortTypeOf } from '@nodegx/project-contract/port-context';
 
 import { catalogIndex } from './catalog';
-import { CatalogIndex } from './editor-deps';
+import { CatalogIndex, type DrawnPortsLookup } from './editor-deps';
+import type { ComponentFiles } from './graph';
 import type { ProjectStore } from './project/ProjectStore';
 
 export interface DrawnPort {
@@ -37,18 +38,33 @@ const DRAWN = new Set(DRAWN_PORT_TYPES);
 const catalogPortType: PortTypeOf = (node, port, plug) => CatalogIndex.portTypeName(catalogIndex().getPort(node.type, plug, port));
 
 /**
- * The spec-drawn ports of every node in `nodeIds` whose type is in `DRAWN_PORT_TYPES`, by node id. A node the spec draws
- * no derived port for is left out; a spec that throws on a node's saved params leaves that node out (the saved list is
- * still in `nodes`).
+ * The project as the builder reads it, with `overlay`'s components (keyed by legacy name, as `authoredProjectViews` takes
+ * them) in place of the saved ones — the candidate a write, or a plan's staged writes, would leave. A name the project
+ * does not hold is a component being created, added.
  */
-export function drawnPortsFor(store: ProjectStore, nodes: readonly { id: string; type: string; parameters?: Record<string, unknown> }[]): Record<string, DrawnPort[]> {
+function portProject(store: ProjectStore, overlay: ReadonlyMap<string, ComponentFiles> = new Map()): PortProject {
+  const project = portProjectFromStore(store.format);
+  if (overlay.size === 0) return project;
+  const staged = (name: string, files: ComponentFiles) => ({ name, nodes: files.nodes.nodes ?? [], connections: files.connections.connections ?? [] });
+  const components = project.components.map((c) => (overlay.has(c.name) ? staged(c.name, overlay.get(c.name)!) : c));
+  for (const [name, files] of overlay) if (!project.components.some((c) => c.name === name)) components.push(staged(name, files));
+  return { ...project, components };
+}
+
+/**
+ * The spec-drawn ports of every node of the component `component` (its legacy name) whose type is in
+ * `DRAWN_PORT_TYPES`, by node id. A node the spec draws no derived port for is left out; a spec that throws on a node's
+ * saved params leaves that node out (the saved list is still in `nodes`). The node is found in its component: a node id
+ * is unique within a component only (P107 s86).
+ */
+export function drawnPortsFor(store: ProjectStore, component: string, nodes: readonly { id: string; type: string; parameters?: Record<string, unknown> }[]): Record<string, DrawnPort[]> {
   const wanted = nodes.filter((n) => DRAWN.has(n.type) && specs[n.type]);
   if (wanted.length === 0) return {};
-  const contextOf = portContextReader(portProjectFromStore(store.format), { portType: catalogPortType });
+  const contextOf = portContextReader(portProject(store), { portType: catalogPortType });
   const out: Record<string, DrawnPort[]> = {};
   for (const n of wanted) {
     try {
-      const ports = drawnPorts(specs[n.type], n.parameters ?? {}, contextOf(n.id) as Parameters<typeof drawnPorts>[2])
+      const ports = drawnPorts(specs[n.type], n.parameters ?? {}, contextOf(n.id, component) as Parameters<typeof drawnPorts>[2])
         .filter((p) => p.source === 'derived')
         .map((p) => ({ name: p.name, plug: p.plug, type: p.type as string }));
       if (ports.length) out[n.id] = ports;
@@ -57,4 +73,43 @@ export function drawnPortsFor(store: ProjectStore, nodes: readonly { id: string;
     }
   }
   return out;
+}
+
+/**
+ * NSP-020 R19 part 2 — the validator's `drawnPorts` callback (`ValidatorOptions.drawnPorts`): every port, static and
+ * derived, the spec draws for one node of the candidate project, and every wired name the runtime registers on the wire
+ * (`derived.discover` / `discoverOutput`), by plug. `undefined` for a type outside
+ * `DRAWN_PORT_TYPES`, a node the project does not hold, or a spec that throws on its params — the validator then says the
+ * port was not checked, as it did before. The project is read once, on the first node asked about: most writes have no
+ * wire to a port the catalog and the saved lists do not name, and pay nothing.
+ */
+export function drawnPortCheck(store: ProjectStore, overlay?: ReadonlyMap<string, ComponentFiles>): DrawnPortsLookup {
+  let read: { project: PortProject; contextOf: ReturnType<typeof portContextReader> } | undefined;
+  return (component, nodeId, nodeType) => {
+    if (!DRAWN.has(nodeType) || !specs[nodeType]) return undefined;
+    if (!read) {
+      const project = portProject(store, overlay);
+      read = { project, contextOf: portContextReader(project, { portType: catalogPortType }) };
+    }
+    // the validator names a component `path ?? key`, the builder `path ?? '/' + key`
+    const name = read.project.components.some((c) => c.name === component) ? component : '/' + component;
+    const found = findPortNode(read.project, nodeId, name);
+    if (!found) return undefined;
+    try {
+      const spec = specs[nodeType];
+      const context = read.contextOf(nodeId, name);
+      const ports = drawnPorts(spec, found.node.parameters ?? {}, context as Parameters<typeof drawnPorts>[2]);
+      const input = new Set(ports.filter((p) => p.plug === 'input').map((p) => p.name));
+      const output = new Set(ports.filter((p) => p.plug === 'output').map((p) => p.name));
+      // What the node HAS is more than what an editor draws: a wired name the runtime registers when the wire is made
+      // (nodescope.ts :150 → `registerInputIfNeeded` / `registerOutputIfNeeded`) is a port. A For Each's
+      // `itemOutputSignal-x` for a row output nothing typed is wired into is drawn `itemOutput-x`, and the wire registers
+      // it (foreach.tsx :1081-1096): 22 such wires in Richard's projects (P107 s86).
+      for (const port of context.wired ?? []) if (!input.has(port) && spec.derived?.discover?.(port)) input.add(port);
+      for (const port of context.wiredOutputs ?? []) if (!output.has(port) && spec.derived?.discoverOutput?.(port)) output.add(port);
+      return { input, output };
+    } catch {
+      return undefined;
+    }
+  };
 }

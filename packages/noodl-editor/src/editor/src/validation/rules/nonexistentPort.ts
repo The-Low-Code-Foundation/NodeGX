@@ -14,6 +14,13 @@
  *   - not found, and the node really mints ports at runtime      → skip (optional info)
  *   - not found, and every port the node can have is enumerable  → error
  *
+ * 🔴 P107 NSP-020 R19 — the middle row has a door now. Where the caller can draw a
+ * node's ports from its spec (`ValidatorOptions.drawnPorts`: the agent server does,
+ * for the types `DRAWN_PORT_TYPES` lists), the ports drawn from its settings and the
+ * project ARE enumerable, and a port outside them is an error that names the near
+ * one. Where it cannot (no callback, or a type the spec does not draw), it is the
+ * skip it always was.
+ *
  * 🔴 GAM-019 (P78 D66) — the middle row used to read "the node has ANY dynamic
  * ports" (`isDynamicNode`), and that is how `name0 → text` on a Text Input went
  * through the door silently. 88 of the 176 shipped types carry a `dynamicPorts`
@@ -28,7 +35,7 @@
  */
 
 import { tierForGroup } from '../../views/panels/propertyeditor/propertyPanelTiers';
-import { CatalogIndex, Plug, PortKind, portKindOfTypeName } from '../CatalogIndex';
+import { CatalogIndex, Plug, PortKind, nearest, portKindOfTypeName } from '../CatalogIndex';
 import { CLOUD_FUNCTION_TYPE, cloudFunctionCanMint } from '../derivedPortTargets';
 import { Diagnostic, DiagnosticCode } from '../diagnostics';
 import { NormConnection, NormNode, isComponentRef } from '../model';
@@ -92,6 +99,49 @@ function otherEndKind(
   return portKindOfTypeName(other.instancePortTypes?.[port]);
 }
 
+/**
+ * P107 NSP-020 R19 — a wire to a port the node's spec does not draw now. The suggestion is a drawn port with the same
+ * name after its prefix first (a For Each's `addToBasket` is `itemOutputSignal-addToBasket`, a Function's `items` is
+ * `in-items`, an untyped row output's `itemOutputSignal-x` is `itemOutput-x`: too far apart for `nearest`), else the
+ * nearest drawn name; the alternatives lead with the ports drawn from
+ * the settings and the project, then the catalog's in its usual order.
+ */
+function missingDrawnPort(
+  catalog: CatalogIndex,
+  nodeById: { get(id: string): NormNode | undefined },
+  conn: NormConnection,
+  component: string,
+  node: NormNode,
+  port: string,
+  plug: Plug,
+  drawn: ReadonlySet<string>
+): Diagnostic {
+  const names = [...drawn];
+  // the name after its prefix (`itemOutputSignal-`, `prop-`, `in-`); the whole name when it has none
+  const tail = (name: string) => name.slice(name.indexOf('-') + 1).toLowerCase();
+  const suffixed = names.filter((name) => tail(name) === port.toLowerCase() || tail(name) === tail(port));
+  const suggestion = suffixed.length > 0 ? nearest(port, suffixed) ?? suffixed[0] : nearest(port, names);
+  const wireKind = otherEndKind(catalog, nodeById, conn, plug);
+  const fromProject = names.filter((name) => !catalog.hasPort(node.type, plug, name)).sort();
+  const alternatives = [...new Set([...fromProject, ...availableAlternatives(catalog, node.type, plug, wireKind).filter((name) => drawn.has(name))])].slice(0, MAX_ALTERNATIVES);
+  return {
+    code: DiagnosticCode.NonexistentPort,
+    severity: 'error',
+    message: `${node.type} has no ${plug} named "${port}" with its settings in this project.`,
+    location: {
+      component,
+      nodeId: node.id,
+      nodeType: node.type,
+      nodeLabel: node.label,
+      port,
+      plug,
+      connection: { fromId: conn.fromId, fromProperty: conn.fromProperty, toId: conn.toId, toProperty: conn.toProperty }
+    },
+    suggestion,
+    alternatives
+  };
+}
+
 export const nonexistentPort: Rule = {
   code: DiagnosticCode.NonexistentPort,
   description: 'Every connection endpoint names a port that exists on its node.',
@@ -149,7 +199,15 @@ export const nonexistentPort: Rule = {
           const cloudFunctionCannotMint = node.type === CLOUD_FUNCTION_TYPE && !cloudFunctionCanMint(port, plug);
 
           if (catalog.hasRuntimeDynamicPorts(node.type) && !cloudFunctionCannotMint) {
-            // (3) — runtime/adapter/numbered/component ports. Never an error.
+            // (3a) P107 NSP-020 R19 — the ports the node's spec draws now from its settings and the project, where the
+            // caller supplies them (the agent server does): a port it does not draw is an error, as on a static node.
+            const drawn = ctx.options.drawnPorts?.(component.name, node.id, node.type);
+            if (drawn) {
+              if (drawn[plug].has(port)) continue;
+              out.push(missingDrawnPort(catalog, nodeById, conn, component.name, node, port, plug, drawn[plug]));
+              continue;
+            }
+            // (3) — runtime/adapter/numbered/component ports the caller cannot draw. Never an error.
             if (ctx.options.emitDynamicPortInfo) {
               out.push({
                 code: DiagnosticCode.DynamicPortSkipped,

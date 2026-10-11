@@ -680,3 +680,73 @@ plug and type, **+20% / +64%** with every field. **Ruled R19 (README §7): "Chec
 not, on mutants alone: Dropdown 7 swap-branches on unmount branches, For Each 1 (`world.resume` drop-set), Record 1
 (`modelId` drop-set on the unticked object-Id branch, only a later Fetch reads it). Handed to s86 with the trap s85 met
 closing the Record's (a hand scenario arms a neighbour swap-branch with its own example value).
+
+### 6.10 s86 (2026-10-11, Opus) — the 10,000 run's survivors closed; R19 part 2, the wire check, built and measured
+
+**The survivors, closed (three hand scenarios + two for the Record; nothing in a spec moved).** Reproduced first on the
+interpreter at the deep run's own seed (20737, 10,000 sequences — mutants are interpreter-side, so this is the run that
+found them; 5 min for the Dropdown, 30 s for each of the others), then each scenario checked at seeds 13 and 20728, again
+at 20737, and on the runtime (200, the three specs).
+
+| spec | what was alive | the scenario that kills it | at 20737 after |
+|---|---|---|---|
+| Dropdown v7 | 7 swap-branches: an act whose paint finds Mounted written off **while the element holds the keyboard** (`focused`, Blurred) **or a finger** (`pressed`, no keyboard), handed the empty branch | "Mounted written off in the frame of an act while the element holds the keyboard, a finger, or both" — every act × the three holds, each followed by a Focus action, which reads whether the element is still there (Unchanged vs Done) | 0 survivors (1133 / 1160; 27 declared) |
+| For Each v10 | `world.resume` drop-set on the yield that fails a Refresh (`no-items`) and fires Items Rendered | "Items emptied (null) and a Refresh in one frame, rows on the page …" — then a new list and a tap on its row: a yield that left the queue "running" builds nothing | 445 / 445 |
+| Record v4 | `modelId` drop-set on `{set:[modelId], emit:[changed, fetched]}` | "ticked again after an Id was stored unticked: an object on Id naming the record still bound …" + a Fetch | 236 / 238 (2 declared) |
+
+The deep run reached the For Each branch in 2 of 10,000 sequences (found by playing them on a branch-recording copy of the
+spec, `discoverBranches`), both ENDING at that yield — nothing after it read what it left. **Where the handoff was wrong:**
+the Record's branch is the TICKED one (`fetched` is pulsed only by a binding, `setModel`), not "the unticked Id". The
+unticked twin (`emit:[changed]`) was unreached too and has its own scenario now. **The s85 trap came back with distinct
+ids:** the neighbour `{set:[], emit:[changed]}` handed the new example writes `r7` where its play held `r1`, and none of
+the three scenarios reaching that neighbour read the stored Id after it — distinct values are necessary, not sufficient;
+the neighbour needs a READER. A fourth scenario gives it one (the bound record's own object on Id, then a Fetch).
+Golden: four scenarios appended to three files, no trace moved, `spec-golden:check` holds, no version.
+
+**R19 part 2 — the wire check.** As s85 designed it, with two corrections the measurement forced:
+- **The validator** (`rules/nonexistentPort.ts` (3a), the editor's `validation/`): `ValidatorOptions.drawnPorts(component,
+  nodeId, nodeType)`; asked only for a wire that the catalog (1), the saved lists (2) and the derived-port rule (2b) do not
+  name, on a runtime-port type. A set → the port is in it or it is an ERROR (`<Type> has no <plug> named "<port>" with its
+  settings in this project.`); `undefined` → today's info. The suggestion is the drawn name with the same name after its
+  prefix first (`addToBasket` → `itemOutputSignal-addToBasket`, `items` → `in-items`, `id` → `p-id` — all too far for
+  `nearest`), else `nearest`.
+- **The MCP** (`specPorts.ts` `drawnPortCheck`) supplies it on all three doors: a write (`validateCandidate`: the candidate
+  and the baseline, each its own project, so a wrong wire already on disk does not block an unrelated edit), a plan
+  (`validateStaged`: the plan's staged overlay) and the validate tools (`validateOnDisk`, so a check before a write says
+  what the write will). The project is read once, on the first node asked about.
+- **Correction 1 — "has the port" is drawn ∪ minted.** The first measurement refused 125; reading them, two classes were
+  ports the runtime HAS: a For Each's `itemOutputSignal-x` for a row output typed `*` (drawn `itemOutput-x`; the wire
+  registers it, 22) and a Function's `in-reload` wired from a counter so its script runs again (4). A wired name the spec's
+  `derived.discover` / `discoverOutput` accepts is now a port. (The Function's are refused anyway at the MCP's door by
+  FIX-007's own `unknown-function-port` rule: "the editor paints this wire Target missing" — an existing ruling, left.)
+- **Correction 2 — a node is found in its component.** `findPortNode` read the first node with the id anywhere in the
+  project; 27 of 117 local projects reuse an id across components. **P107-S86-NODEIDSCOPE** (fixed): the builder takes
+  the component's legacy name; `get_component`'s drawn ports and the drive pass it. The drive had looked both sides up the
+  same way, so it agreed with itself on the wrong node.
+
+**Measured over Richard's 117 local projects** (the shipped path: the MCP's `ProjectStore` + the validator, with and without
+the callback; connection notices only — the parameter checker's skip notices share the code):
+
+| wire endpoints | |
+|---|---|
+| "could not be statically verified … Skipped" before | 575 |
+| now checked and OK | 471 |
+| **now refused** | **99** |
+| still skipped (types the spec does not draw: Cloud Function, HTTP …) | 5 |
+| still skipped on a `DRAWN_PORT_TYPES` type | 0 |
+
+**Every refusal read, by class — all dead wires:** For Each `addToBasket` and `browse` (46: the CMG copies; the port is
+`itemOutputSignal-…`), For Each `item` (8; no such output), Set Object Properties `stored` (22: renamed `done` in ERG-001,
+**P107-S86-STOREDWIRE** filed — the copies of the Multi Choice prefab made before it), a Function's `items` / `text` (22: its
+ports are `in-` / `out-`; FIX-007 already refuses these at a write), Navigate To Path `id` (1: `p-id`). **0 false refusals
+after correction 1.** The check's cost: 2.5 s for the 117 whole projects. **P107-S86-WIREUNCHECKED** (fixed) records what
+R19 part 2 closes.
+
+**Graded:** `noodl-mcp/tests/nsp020WireCheck.test.ts` 4 / 4 through the tools (For Each refused + suggested, its right wire
+taken; `stored` refused, `done` taken; a wrong wire on disk reported by `validate_component` and not blocking an unrelated
+`update_component`; a reused node id drawn from its own component). **Planted:** the callback answering nothing → the
+first three red; the lookup ignoring the component → the fourth red. `noodl-editor/tests-unit/nsp-020/wire-check.test.ts`
+4 / 4 (the rule's half, with a callback of its own). `nodegx-project-contract/tests/port-context-node-scope.test.ts` 3 / 3.
+
+**Not done — the editor.** The editor runs the same validator and passes no callback, so in the editor nothing changed.
+Whether it should is Richard's (R19 named the agent server); the false-refusal count to ask it with is above: 0 of 99.

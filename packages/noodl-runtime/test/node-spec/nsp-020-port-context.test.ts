@@ -98,7 +98,7 @@ function corpus(): string[] {
 function projectGraph(
   project: PortProject,
   interfaces: PortContext['components']
-): (nodeId: string) => { node: { id: string }; model: FakeGraphModel } {
+): (nodeId: string, componentName: string) => { node: { id: string }; model: FakeGraphModel } {
   type FakeNode = {
     id: string;
     type: string;
@@ -122,7 +122,7 @@ function projectGraph(
     component,
     on: () => undefined
   });
-  const all: Array<{ saved: NodeV2; component: unknown }> = [];
+  const all: Array<{ saved: NodeV2; component: unknown; in: string }> = [];
   for (const c of project.components) {
     const wires = c.connections.map((w) => ({ sourceId: w.fromId, sourcePort: w.fromProperty, targetId: w.toId, targetPort: w.toProperty }));
     const component = {
@@ -132,7 +132,7 @@ function projectGraph(
       getNodesWithType: (t: string) => c.nodes.filter((n) => n.type === t).map((n) => fake(n)),
       on: () => undefined
     };
-    for (const n of c.nodes) all.push({ saved: n, component });
+    for (const n of c.nodes) all.push({ saved: n, component, in: c.name });
   }
   const components = Object.fromEntries(
     project.components.map((c) => [
@@ -147,9 +147,10 @@ function projectGraph(
     ])
   );
   // fresh fakes per drive: a hook may write onto the node it is handed, and no drive should see another's writes
-  return (nodeId) => {
-    const hit = all.find((x) => x.saved.id === nodeId);
-    if (!hit) throw new Error(`no node ${nodeId}`);
+  // by component and id: a node id is unique within a component only (P107 s86 — 27 of 117 local projects reuse one)
+  return (nodeId, componentName) => {
+    const hit = all.find((x) => x.saved.id === nodeId && x.in === componentName);
+    if (!hit) throw new Error(`no node ${nodeId} in ${componentName}`);
     const node = fake(hit.saved, hit.component);
     return {
       node,
@@ -226,12 +227,12 @@ function drive(label: string, project: PortProject, rows: Map<string, TableRow[]
       const r: NodeResult = { project: label, type: n.type, id: n.id, hookDiffs: [] };
       const started = Date.now();
       try {
-        const context = contextOf(n.id) as PortContext;
+        const context = contextOf(n.id, c.name) as PortContext;
         graphOf = graphOf ?? projectGraph(project, context.components);
         // a type with a setup hook AND numbered inputs announces from both; the editor holds the last of each — compare the union
         const announced: Announced[] = [];
         for (const row of typeRows) {
-          const { node, model } = graphOf(n.id);
+          const { node, model } = graphOf(n.id, c.name);
           for (const a of announceFrom(hookOf(row), n.type, node, model)) if (!announced.some((x) => x.name === a.name && x.plug === a.plug)) announced.push(a);
         }
         // a line oracle (a)'s table pins (a bug row or a format GAP) is the spec's, measured there — not the builder's

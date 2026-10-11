@@ -88,9 +88,14 @@ export interface PortContextOptions {
 
 // ─── The builder ───────────────────────────────────────────────────────────────────────────────────────────────────
 
-/** The node and its component, by node id. `undefined` when no component holds it. */
-export function findPortNode(project: PortProject, nodeId: string): { component: PortProjectComponent; node: NodeV2 } | undefined {
+/**
+ * The node and its component, by node id — in the named component when one is named. `undefined` when no component holds
+ * it. A node id is unique within a component, not across a project: 27 of 117 of Richard's local projects reuse one in a
+ * second component (P107 s86), and without the component the first one found is read.
+ */
+export function findPortNode(project: PortProject, nodeId: string, componentName?: string): { component: PortProjectComponent; node: NodeV2 } | undefined {
   for (const component of project.components) {
+    if (componentName !== undefined && component.name !== componentName) continue;
     const node = component.nodes.find((n) => n.id === nodeId);
     if (node) return { component, node };
   }
@@ -101,23 +106,24 @@ export function findPortNode(project: PortProject, nodeId: string): { component:
  * The `PortContext` for one node of a saved project. Every field the project can say is filled; a field with nothing
  * in it is left out (an empty list and an absent one draw the same ports).
  */
-export function portContextFor(project: PortProject, nodeId: string, options: PortContextOptions = {}): ProjectPortContext {
-  return portContextReader(project, options)(nodeId);
+export function portContextFor(project: PortProject, nodeId: string, options: PortContextOptions = {}, componentName?: string): ProjectPortContext {
+  return portContextReader(project, options)(nodeId, componentName);
 }
 
 /**
  * `portContextFor` for many nodes of one project: the project-wide fields (backends, stacks, routers, every component's
- * interface) are read once, and each call adds the node's own wires and the schema its Backend param selects.
+ * interface) are read once, and each call adds the node's own wires and the schema its Backend param selects. Name the
+ * node's component (its legacy name) wherever it is known (`findPortNode`).
  */
-export function portContextReader(project: PortProject, options: PortContextOptions = {}): (nodeId: string) => ProjectPortContext {
+export function portContextReader(project: PortProject, options: PortContextOptions = {}): (nodeId: string, componentName?: string) => ProjectPortContext {
   const backends = backendEntries(project.metadata).map((b) => ({ id: b.id, name: b.name }));
   const stacks = pagesOf(project, 'Page Stack', stackPages);
   const routers = pagesOf(project, 'Router', routerPages);
   let components: Record<string, PortContextComponent> | undefined;
 
-  return (nodeId) => {
-    const found = findPortNode(project, nodeId);
-    if (!found) throw new Error(`portContextFor: no node ${nodeId} in the project`);
+  return (nodeId, componentName) => {
+    const found = findPortNode(project, nodeId, componentName);
+    if (!found) throw new Error(`portContextFor: no node ${nodeId} in ${componentName ?? 'the project'}`);
     const { component, node } = found;
     const context: ProjectPortContext = {};
 

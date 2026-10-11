@@ -79,6 +79,7 @@ import type { ProjectBinding } from '../project/ProjectBinding';
 import type { ProjectStore } from '../project/ProjectStore';
 import { authoredProjectViews, preconditionDiagnostics } from '../validate';
 import type { WriteValidation } from '../validate';
+import { drawnPortCheck } from '../specPorts';
 import type { WriteValidationSummary } from './responses';
 import type { NodeInput } from './author';
 import { assembleCreateFiles, assembleSetFiles, nodeIdsOf, normalizeAuthoredNodes, projectVisualPredicate } from './author';
@@ -473,7 +474,8 @@ function validateStaged(
   const legacyName = pathToLegacyName(operation.target);
   const project = overlayProject(store, plan, { opId: operation.id, files: candidate });
   const validatorOptions = { strict: !options.allowUnknownTypes };
-  const report = validator().validateComponent(project, legacyName, validatorOptions);
+  // NSP-020 R19 — a wire to a port the node's spec does not draw is refused, judged on the project the plan leaves
+  const report = validator().validateComponent(project, legacyName, { ...validatorOptions, drawnPorts: drawnPortCheck(store, stagedOverlay(plan, { opId: operation.id, files: candidate })) });
 
   const views = authoredProjectViews(store, stagedOverlay(plan, { opId: operation.id, files: candidate }));
   // Deduped for the reason `dedupeDiagnostics` records: since D13 the validator
@@ -507,7 +509,7 @@ function validateStaged(
     const baselineReport = validator().validateComponent(
       store.buildNormProject({ replace: { key: stored.key, files: baseline } }),
       legacyName,
-      validatorOptions
+      { ...validatorOptions, drawnPorts: drawnPortCheck(store, new Map([[legacyName, baseline]])) }
     );
     const baselineViews = authoredProjectViews(store, stagedOverlay(plan, { opId: operation.id, files: baseline }));
     const baselineDiagnostics = [

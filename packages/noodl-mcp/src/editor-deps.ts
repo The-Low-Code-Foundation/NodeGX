@@ -153,6 +153,7 @@ export type {
   Diagnostic,
   ValidationReport,
   ValidatorOptions,
+  DrawnPortsLookup,
   NormProject,
   NormComponent,
   NodeCatalog,

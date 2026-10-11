@@ -57,6 +57,7 @@ import {
 } from './editor-deps';
 import type { ComponentFiles } from './graph';
 import type { ProjectStore } from './project/ProjectStore';
+import { drawnPortCheck } from './specPorts';
 import { listScriptPaths } from './tools/scriptTools';
 
 let semanticValidator: SemanticValidator | undefined;
@@ -265,6 +266,11 @@ function structuralCheck(files: ComponentFiles): StructuralFailure[] {
   return failures;
 }
 
+/** A component's legacy name, as `listComponents` and the port builder spell it. */
+export function legacyNameOf(key: string, files: ComponentFiles): string {
+  return files.component.path ?? '/' + key;
+}
+
 /**
  * Validate a candidate create/update for `key`. `baseline` is the on-disk
  * files before the change (undefined for creates).
@@ -288,10 +294,11 @@ export function validateCandidate(
     };
   }
 
-  const validatorOptions = { strict: !options.allowUnknownTypes };
+  const strict = !options.allowUnknownTypes;
   const name = candidate.component.path ?? key;
   const candidateProject = store.buildNormProject({ replace: { key, files: candidate } });
-  const report = validator().validateComponent(candidateProject, name, validatorOptions);
+  // NSP-020 R19 — a wire to a port the node's spec does not draw is refused, judged on the project this write leaves
+  const report = validator().validateComponent(candidateProject, name, { strict, drawnPorts: drawnPortCheck(store, new Map([[legacyNameOf(key, candidate), candidate]])) });
 
   const views = authoredProjectViews(store, new Map([[name, candidate]]));
   const diagnostics = dedupeDiagnostics([
@@ -303,7 +310,7 @@ export function validateCandidate(
   if (baseline) {
     const baselineName = baseline.component.path ?? key;
     const baselineProject = store.buildNormProject({ replace: { key, files: baseline } });
-    const baselineReport = validator().validateComponent(baselineProject, baselineName, validatorOptions);
+    const baselineReport = validator().validateComponent(baselineProject, baselineName, { strict, drawnPorts: drawnPortCheck(store, new Map([[legacyNameOf(key, baseline), baseline]])) });
     // Exempted on **blocking** identity, not on `severity === 'error'`, and
     // over the same four preconditions the candidate is judged by — the editor's
     // rule, and the correction AAQ-005 made to it after this package's own
@@ -461,7 +468,8 @@ export function validateOnDisk(
   options: { component?: string; strict?: boolean; emitSkipNotes?: boolean }
 ): { report: ValidationReport; target?: string } {
   const project = store.buildNormProject();
-  const validatorOptions = { strict: options.strict ?? false };
+  // NSP-020 R19 — the same wire check a write meets, so a check before a write says what the write will
+  const validatorOptions = { strict: options.strict ?? false, drawnPorts: drawnPortCheck(store) };
   const views = authoredProjectViews(store, new Map());
   const emitSkipNotes = options.emitSkipNotes === true;
 

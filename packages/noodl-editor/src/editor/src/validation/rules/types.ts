@@ -26,11 +26,26 @@ export interface ValidatorOptions {
    * notes. Turn on when explaining *why* a port was not checked.
    */
   emitDynamicPortInfo?: boolean;
+  /**
+   * P107 NSP-020 R19 — the ports a node has NOW, drawn from its spec over the project (its settings, its wires, the
+   * schema, the components). `nonexistentPort` asks it only for a wire to a port that neither the catalog nor the node's
+   * saved lists name, on a type whose ports appear at run time: a port in the answer is OK; one not in it is an error
+   * that names the near one; `undefined` (a type the spec does not draw) leaves the port unchecked, as before. The
+   * validator stays free of the specs and the project files: the caller (the agent server) supplies it.
+   */
+  drawnPorts?: DrawnPortsLookup;
   /** When set, only these rules run. */
   only?: Set<DiagnosticCode>;
   /** Rules to skip. */
   disabled?: Set<DiagnosticCode>;
 }
+
+/** `ValidatorOptions.drawnPorts`: one node's ports by plug, by its component's name and its id. */
+export type DrawnPortsLookup = (
+  component: string,
+  nodeId: string,
+  nodeType: string
+) => { input: ReadonlySet<string>; output: ReadonlySet<string> } | undefined;
 
 /** Per-component view precomputed once and shared across rules. */
 export interface ComponentContext {

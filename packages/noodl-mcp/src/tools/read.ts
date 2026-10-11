@@ -345,7 +345,7 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
         ...(args.include_usages ? { usages: store.findUsages(stored.key) } : {})
       };
       // NSP-020 R19 — the ports the specs draw now, beside the saved lists (a result field: no tool-surface cost)
-      const drawn = drawnPortsFor(store, stored.files.nodes.nodes);
+      const drawn = drawnPortsFor(store, stored.files.component.path ?? '/' + stored.key, stored.files.nodes.nodes);
       if (Object.keys(drawn).length) payload.drawnPorts = drawn;
       return jsonResult(payload);
     })
