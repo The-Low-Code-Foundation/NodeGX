@@ -491,6 +491,7 @@ export function EditorTopbar({
               <button
                 className={classNames(css.ModeSegmentedButton, !previewMode && css['is-active'])}
                 aria-pressed={!previewMode}
+                aria-label={isSmall ? 'Design' : undefined}
                 onClick={() => onPreviewModeChanged(false)}
               >
                 {isSmall ? <Icon icon={IconName.Pencil} size={IconSize.Small} /> : 'Design'}
@@ -500,6 +501,7 @@ export function EditorTopbar({
               <button
                 className={classNames(css.ModeSegmentedButton, previewMode && css['is-active'])}
                 aria-pressed={previewMode}
+                aria-label={isSmall ? 'Preview' : undefined}
                 onClick={() => onPreviewModeChanged(true)}
               >
                 {isSmall ? <Icon icon={IconName.PlayCircle} size={IconSize.Small} /> : 'Preview'}
@@ -511,6 +513,7 @@ export function EditorTopbar({
         <span ref={deployButtonRef}>
           <PrimaryButton
             label={isSmall ? '' : 'Deploy'}
+            ariaLabel={isSmall ? 'Deploy' : undefined}
             icon={IconName.Deploy}
             isDisabled={deployIsDisabled}
             onClick={() => setIsDeployVisible(true)}

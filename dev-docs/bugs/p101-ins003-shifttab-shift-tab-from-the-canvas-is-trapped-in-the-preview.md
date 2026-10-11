@@ -1,7 +1,8 @@
 ---
 id: P101-INS003-SHIFTTAB
 title: Shift+Tab from the canvas goes into the embedded preview and stays there
-status: scheduled
+status: wontfix
+reason: not a trap at HEAD — Shift+Tab walks through the preview's own controls and then leaves it (measured s43)
 phase: P109
 task: ISL-044
 severity: medium
@@ -27,3 +28,11 @@ only defined), so the order is the DOM's.
 **Proposed:** catch focus leaving the webview's first element on Shift+Tab (the guest page sends a message, or a
 focus sentinel sits before and after the webview in the host) and move it to the previous host stop. Or take
 the webview out of the Tab order unless the person clicks into it. Measure first. Small to medium.
+
+**Re-measured (P109 s43, 2026-10-11): not a trap.** The same recipe: one CDP connection, focus emulation, a trusted
+click on a canvas node (focus stays on `<body>`), real Shift+Tab presses. On a copy of `templates/todo-list`,
+whose preview shows the sign-in form: presses 1–5 are inside the `<webview>` (its page's own controls), press 6 is
+the preview chrome's scope chip, then Deploy, the mode buttons and the top bar, the side bar, and at 23–30 the left
+panel. Thirty presses, no cycle. The guest hands focus back to the editor after its first stop. P101's project
+previewed a site (a `Wordmark` node), so its page likely had many links, and a walk through them reads like being
+held. Not built: a sentinel would take a keyboard user's way into their own app out of the order.

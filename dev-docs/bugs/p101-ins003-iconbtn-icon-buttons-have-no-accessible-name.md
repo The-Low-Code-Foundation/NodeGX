@@ -29,3 +29,9 @@ the editor's). Every caller is named, 45 files, reusing a Tooltip's or title's w
 `.jsx` caller (the colour style picker) is outside the compiler, so a spec reads every `<IconButton` in source. It
 was red on HEAD's files (about 76 unnamed). Not done: `Tooltip` still does not reuse the name, and three disclosure
 carets (CollapsableSection, NodeReferencesPanel, GitStashCard) are focusable buttons whose row does the toggling.
+
+**Read in the running editor (s43, same day):** with the project view open, all 22 `IconButton`s on screen have a
+name, and every one of them gets it only from `aria-label`: none has text or a `title`, so all 22 were nameless on
+HEAD. The same reading found three nameless buttons that are not `IconButton`s, all drawn icon-only in a narrow
+window: the top bar's Design and Preview, and its Deploy `PrimaryButton`. Named in the follow-up commit, with an
+optional `ariaLabel` on `PrimaryButton`. After it, no button on screen is nameless.
