@@ -412,7 +412,8 @@ export class LocalProjectsModel extends Model {
       return;
     }
 
-    // Load the newly created project
+    // Load the newly created project. It was a template a moment ago: no copy before its format
+    // update (P112 R17), which `toDirectory` below then saves.
     projectFromDirectory(dirEntry, (project) => {
       if (!project) {
         console.error('Failed to create project from template');
@@ -437,7 +438,7 @@ export class LocalProjectsModel extends Model {
           fn(project);
         });
       });
-    });
+    }, { copyBeforeFormatUpdate: false });
   }
 
   /**
