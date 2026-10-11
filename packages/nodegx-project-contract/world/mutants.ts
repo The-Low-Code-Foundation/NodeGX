@@ -29,6 +29,7 @@
 import type { Relation, WorldFiles } from './files';
 import type { FieldKind, Kind, MutantShape, Question } from './kind';
 import {
+  applyMutant,
   collectionName,
   fieldName,
   projectWorld,
@@ -246,6 +247,17 @@ function retype(
       col.type = 'Array';
       delete col.targetClass;
       return { schema: s };
+    }
+    // ONT-014: kept by the backend inside the write — the mutant is the collection's `onlyWhile` without it.
+    if ('setOnce' in rule.holds || 'neverEdited' in rule.holds || 'neverDeleted' in rule.holds) {
+      const h = rule.holds;
+      const drop = 'setOnce' in h ? { collection: home.name, setOnce: fieldName(h.setOnce) } : 'neverEdited' in h ? { collection: home.name, neverEdited: true as const } : { collection: home.name, neverDeleted: true as const };
+      try {
+        return { schema: applyMutant(s, { dropOnlyWhile: drop }) };
+      } catch {
+        // Nothing to take out: a field set once on a record never edited is kept by the record's rule.
+        return { schema: s, unchanged: 'unclaimed' };
+      }
     }
     // A rule no engine keeps, or a shape: taking it out changes nothing a claim can see.
     return { schema: s, unchanged: 'shape' in rule.holds ? 'unclaimed' : 'unkept' };
@@ -529,7 +541,8 @@ function differsInWhatIsHeld(x: WorldSchema, y: WorldSchema): boolean {
           required
         })),
         checks: c.checks,
-        indexes: c.indexes
+        indexes: c.indexes,
+        onlyWhile: c.onlyWhile
       }))
     );
   return held(x) !== held(y);

@@ -99,6 +99,19 @@ export interface WorldCollection {
   columns: WorldColumn[];
   checks: WorldCheck[];
   indexes: WorldIndex[];
+  /**
+   * P116 ONT-014 — the rules on a record's OLD values, as `security.json` takes them under the
+   * collection's `onlyWhile`, kept by the backend inside every write a person makes: *set once*
+   * and *never edited* are frozen fields (`"*"` = the whole record), *never deleted* is
+   * `delete: "never"`. Absent when the world says none.
+   */
+  onlyWhile?: WorldOnlyWhile;
+}
+
+/** P116 ONT-014 — the part of a collection's `onlyWhile` a world says (`@noodl/backend-contract` `OnlyWhileRule`, restated). */
+export interface WorldOnlyWhile {
+  update?: { frozen: { fields: string[] | '*' } };
+  delete?: 'never';
 }
 
 /** A value a claim step writes. `ref` is the id of a row an earlier step made; `date` an ISO date. */
@@ -111,10 +124,14 @@ export type ClaimStep =
   | { make: string; as: string; data: ClaimData }
   /** create; the store must refuse it */
   | { refuse: string; data: ClaimData }
-  /** save; must succeed, or with `refused` the store must refuse it */
-  | { change: string; row: string; data: ClaimData; refused?: true }
-  /** delete; must succeed, or with `refused` the store must refuse it */
-  | { remove: string; row: string; refused?: true }
+  /**
+   * save; must succeed, or with `refused` the store must refuse it. `byPerson` (ONT-014): made by a
+   * person the collection's `onlyWhile` binds — every other step is the store's own key, which no
+   * `onlyWhile` binds (the admin, a function: how an amend or an erasure is made).
+   */
+  | { change: string; row: string; data: ClaimData; refused?: true; byPerson?: true }
+  /** delete; must succeed, or with `refused` the store must refuse it. `byPerson` as for `change`. */
+  | { remove: string; row: string; refused?: true; byPerson?: true }
   /** add `with` to a `links` field (or append it, if the field is a list) */
   | { pair: string; row: string; field: string; with: string }
   /** the field holds exactly `count` entries */
@@ -135,7 +152,9 @@ export type ClaimMutant =
   | { dropCheck: { collection: string; field: string } }
   | { linksAsList: { collection: string; field: string } }
   /** R10: the link says nothing about when its record goes. */
-  | { dropWhenTargetGoes: { collection: string; field: string } };
+  | { dropWhenTargetGoes: { collection: string; field: string } }
+  /** ONT-014: the collection's `onlyWhile` without one rule — a field no longer frozen, the record editable, or deletable. */
+  | { dropOnlyWhile: { collection: string; setOnce: string } | { collection: string; neverEdited: true } | { collection: string; neverDeleted: true } };
 
 export interface WorldClaim {
   /** `<relation or noun id>/<what>`, unique in the schema. */
@@ -194,9 +213,6 @@ export function fieldName(word: string): string {
 const WHY: Record<string, string> = {
   // R10: a link to a noun keeps it (held). What is left is an id that names no one collection.
   whenTargetGoes: 'the id is text beside a kind, not a link to one collection, so the backend cannot tell which records point at the one that goes',
-  setOnce: 'the schema has no rule against changing a field once the record is made',
-  neverEdited: 'the schema cannot say it; who may change a record is its collection’s permissions (BMG-006), which the projection does not write yet',
-  neverDeleted: 'the schema cannot say it; who may delete a record is its collection’s permissions (BMG-006), which the projection does not write yet',
   notUnderItself: 'the schema has no rule that follows a link from record to record',
   onlyThrough: 'who may see a record is its collection’s permissions (BMG-006), not the schema; a rule through a chain is ONT-004’s',
   logged: 'an exchange with another system is a workflow’s to keep, not the schema’s',
@@ -377,9 +393,19 @@ export function projectWorld(files: WorldFiles): WorldProjection {
       d.collection.indexes.push(h.whileEmpty ? { fields, unique: true, where: { [fieldName(h.whileEmpty)]: { exists: false } } } : { fields, unique: true });
     } else if ('pairOnce' in h || 'shape' in h) {
       // pairOnce: held by the Links field itself, and claimed below. shape: a fact, not a rule.
+    } else if ('setOnce' in h || 'neverEdited' in h || 'neverDeleted' in h) {
+      // ONT-014: kept by the backend inside the write (`onlyWhile`), and claimed below.
+      const ow = (d.collection.onlyWhile ??= {});
+      if ('neverDeleted' in h) ow.delete = 'never';
+      else if ('neverEdited' in h) ow.update = { frozen: { fields: '*' } };
+      else if (ow.update?.frozen.fields !== '*') {
+        const fields = ow.update?.frozen.fields ?? [];
+        const field = fieldName(h.setOnce);
+        ow.update = { frozen: { fields: fields.includes(field) ? fields : [...fields, field] } };
+      }
     } else {
       const key = Object.keys(h)[0];
-      const field = 'setOnce' in h ? fieldName(h.setOnce) : 'notUnderItself' in h ? fieldName(h.notUnderItself) : undefined;
+      const field = 'notUnderItself' in h ? fieldName(h.notUnderItself) : undefined;
       notHeld.push({ collection: d.collection.name, ...(field ? { field } : {}), says: rule.says, why: WHY[key] });
     }
   }
@@ -430,6 +456,14 @@ class Seeder {
     if (col.type === 'Date') return { date: `2026-01-${String(1 + (k % 28)).padStart(2, '0')}T00:00:00.000Z` };
     if (col.type === 'Pointer' && col.targetClass && col.targetClass !== USERS_COLLECTION) return { ref: this.row(col.targetClass) };
     return undefined;
+  }
+
+  /** A value for `col` that is not `than` — what a claim writes to show a value changing. Undefined when the field has only one. */
+  other(d: Draft, col: WorldColumn, than: ClaimValue | undefined): ClaimValue | undefined {
+    const choices = d.choices.get(col.name);
+    if (choices && choices.length) return choices.find((c) => c !== than);
+    if (col.type === 'Boolean') return than === true ? false : true;
+    return this.valueFor(d, col);
   }
 
   /** Makes a valid row of `collection` (and what it links to), and returns its name. */
@@ -564,22 +598,35 @@ function claimsFor(
     const c = d.collection.name;
     const s = new Seeder(byName);
     let what = '';
+    // ONT-014: held — the backend keeps these inside the write (`onlyWhile`), on every engine.
+    const frozen = d.collection.onlyWhile?.update?.frozen.fields;
     if ('setOnce' in h) {
       const field = fieldName(h.setOnce);
+      if (frozen === '*') continue; // the whole record is never edited: that claim says it
       const col = d.collection.columns.find((x) => x.name === field)!;
-      const row = s.row(c);
-      s.steps.push({ change: c, row, data: { [field]: s.valueFor(d, col)! }, refused: true });
-      what = `${field}-is-set-once`;
+      const first = s.valueFor(d, col);
+      const then = s.other(d, col, first);
+      if (first === undefined || then === undefined) continue;
+      const row = s.row(c, { [field]: first });
+      s.steps.push({ change: c, row, data: { [field]: then }, refused: true, byPerson: true });
+      claims.push({ id: `${r.id}/${field}-is-set-once`, says: rule.says, from: { relation: r.id }, held: true, mutant: { dropOnlyWhile: { collection: c, setOnce: field } }, steps: s.steps });
+      continue;
     } else if ('neverEdited' in h) {
-      const row = s.row(c);
       const col = d.collection.columns.find((x) => x.type === 'String' || x.type === 'Date' || x.type === 'Boolean' || x.type === 'Number');
       if (!col) continue;
-      s.steps.push({ change: c, row, data: { [col.name]: s.valueFor(d, col)! }, refused: true });
-      what = 'is-never-edited';
+      const first = col.required ? undefined : s.valueFor(d, col);
+      const row = s.row(c, first === undefined ? {} : { [col.name]: first });
+      const made = s.steps.find((x) => 'make' in x && x.as === row) as { data: ClaimData } | undefined;
+      const then = s.other(d, col, made?.data[col.name]);
+      if (then === undefined) continue;
+      s.steps.push({ change: c, row, data: { [col.name]: then }, refused: true, byPerson: true });
+      claims.push({ id: `${r.id}/is-never-edited`, says: rule.says, from: { relation: r.id }, held: true, mutant: { dropOnlyWhile: { collection: c, neverEdited: true } }, steps: s.steps });
+      continue;
     } else if ('neverDeleted' in h) {
       const row = s.row(c);
-      s.steps.push({ remove: c, row, refused: true });
-      what = 'is-never-deleted';
+      s.steps.push({ remove: c, row, refused: true, byPerson: true });
+      claims.push({ id: `${r.id}/is-never-deleted`, says: rule.says, from: { relation: r.id }, held: true, mutant: { dropOnlyWhile: { collection: c, neverDeleted: true } }, steps: s.steps });
+      continue;
     } else if ('notUnderItself' in h) {
       const field = fieldName(h.notUnderItself);
       const row = s.row(c);
@@ -661,6 +708,25 @@ export function applyMutant(schema: WorldSchema, mutant: ClaimMutant): WorldSche
     const col = column(coll(mutant.dropWhenTargetGoes.collection), mutant.dropWhenTargetGoes.field);
     takesOut(col.whenTargetGoes ? 1 : 0, 0);
     delete col.whenTargetGoes;
+  } else if ('dropOnlyWhile' in mutant) {
+    const m = mutant.dropOnlyWhile;
+    const c = coll(m.collection);
+    const ow = c.onlyWhile ?? {};
+    if ('neverDeleted' in m) {
+      takesOut(ow.delete ? 1 : 0, 0);
+      delete ow.delete;
+    } else if ('neverEdited' in m) {
+      takesOut(ow.update?.frozen.fields === '*' ? 1 : 0, 0);
+      delete ow.update;
+    } else {
+      const fields = ow.update?.frozen.fields;
+      const left = Array.isArray(fields) ? fields.filter((f) => f !== m.setOnce) : [];
+      takesOut(Array.isArray(fields) ? fields.length : 0, left.length);
+      if (left.length) ow.update = { frozen: { fields: left } };
+      else delete ow.update;
+    }
+    if (ow.update || ow.delete) c.onlyWhile = ow;
+    else delete c.onlyWhile;
   } else {
     const col = column(coll(mutant.linksAsList.collection), mutant.linksAsList.field);
     takesOut(col.type === 'Relation' ? 1 : 0, 0);

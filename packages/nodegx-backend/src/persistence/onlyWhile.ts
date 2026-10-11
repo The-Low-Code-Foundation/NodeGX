@@ -81,7 +81,13 @@ const q = (v: unknown) => JSON.stringify(v);
  * `{ field: null }` to `= NULL`, which matches nothing (bug P116-S17-NULLEQ).
  */
 const eq = (field: string, value: unknown): Record<string, unknown> => (value === null ? { [field]: { $exists: false } } : { [field]: value });
-const isScalar = (v: unknown) => v === null || typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean';
+/** A value as storage compares it: a link is its id (the wire sends a Pointer envelope, the store keeps the id). */
+const stored = (v: unknown): unknown =>
+  v && typeof v === 'object' && (v as { __type?: unknown }).__type === 'Pointer' ? (v as { objectId?: unknown }).objectId : v;
+const isScalar = (v: unknown) => {
+  const s = stored(v);
+  return s === null || typeof s === 'string' || typeof s === 'number' || typeof s === 'boolean';
+};
 
 /** `acl` with `where` ANDed into its `only` for `collection`. */
 function narrowed(acl: StorageAclOption, collection: string, where: Record<string, unknown>): StorageAclOption {
@@ -144,7 +150,7 @@ function frozenClause(collection: string, rule: OnlyWhileRule, fields: string[],
   const setOnce = !frozen.unless && frozen.fields !== '*';
   const same =
     values && touched.every((f) => f in values && isScalar(values[f]))
-      ? touched.map((f) => (setOnce ? { $or: [eq(f, values[f]), eq(f, null)] } : eq(f, values[f])))
+      ? touched.map((f) => (setOnce ? { $or: [eq(f, stored(values[f])), eq(f, null)] } : eq(f, stored(values[f]))))
       : undefined;
   const sameWhere = same ? (same.length === 1 ? same[0] : { $and: same }) : undefined;
   const where = frozen.unless ? (sameWhere ? { $or: [frozen.unless, sameWhere] } : frozen.unless) : sameWhere ?? NEVER;

@@ -25,7 +25,7 @@
  * @module conformance/claims
  */
 
-import type { StorageCheckDecl, StorageColumn, StorageIndexDecl } from '../src/storage';
+import type { OnlyWhileRule, StorageAclOption, StorageCheckDecl, StorageColumn, StorageIndexDecl } from '../src/storage';
 
 import { AdapterRefusal, ConformanceError, type ConformanceContext, type Row } from './context';
 import type { ConformanceCase } from './index';
@@ -41,6 +41,14 @@ export interface ClaimCollection {
   columns: ClaimColumn[];
   checks: StorageCheckDecl[];
   indexes: StorageIndexDecl[];
+  /**
+   * P116 ONT-014 — the collection's rules on a record's old values (`security.json` `onlyWhile`).
+   * Not the adapter's to keep: the backend's facade keeps them, for a caller the row ACL binds. So
+   * a claim's `byPerson` change and remove steps on this collection carry them as DATA in a write ACL
+   * (`StorageAclOption.onlyWhile`), and an adapter that is not behind the facade ignores them —
+   * the claim then fails, which is the truth about that adapter.
+   */
+  onlyWhile?: { update?: OnlyWhileRule; delete?: OnlyWhileRule | 'never' };
 }
 
 export interface ClaimSchema {
@@ -53,8 +61,8 @@ export type ClaimData = Record<string, ClaimValue>;
 export type ClaimStep =
   | { make: string; as: string; data: ClaimData }
   | { refuse: string; data: ClaimData }
-  | { change: string; row: string; data: ClaimData; refused?: true }
-  | { remove: string; row: string; refused?: true }
+  | { change: string; row: string; data: ClaimData; refused?: true; byPerson?: true }
+  | { remove: string; row: string; refused?: true; byPerson?: true }
   | { pair: string; row: string; field: string; with: string }
   | { paired: string; row: string; field: string; count: number }
   | { gone: string; row: string }
@@ -116,6 +124,11 @@ export async function runClaim(ctx: ConformanceContext, schema: ClaimSchema, cla
   for (const c of collections) names.set(c.name, ctx.collection(c.name));
   const real = (name: string): string => names.get(name) ?? name;
   const byName = new Map(collections.map((c) => [c.name, c]));
+  // ONT-014: a write as a person makes it — the row ACL's public key, and the collection's rules.
+  const writeAcl = (name: string): StorageAclOption | undefined => {
+    const ow = byName.get(name)?.onlyWhile;
+    return ow ? { access: 'write', keys: ['*'], onlyWhile: { collection: real(name), ...ow } } : undefined;
+  };
 
   for (const c of options.apply === false ? [] : collections) {
     const columns = c.columns.map((col) => (col.targetClass ? { ...col, targetClass: real(col.targetClass) } : { ...col }));
@@ -168,11 +181,11 @@ export async function runClaim(ctx: ConformanceContext, schema: ClaimSchema, cla
       } else if ('refuse' in step) {
         await ctx.refused(() => ctx.create(real(step.refuse), data(step.refuse, step.data)));
       } else if ('change' in step) {
-        const save = () => ctx.save(real(step.change), id(step.row), data(step.change, step.data));
+        const save = () => ctx.save(real(step.change), id(step.row), data(step.change, step.data), step.byPerson ? writeAcl(step.change) : undefined);
         if (step.refused) await ctx.refused(save);
         else await save();
       } else if ('remove' in step) {
-        const remove = () => ctx.remove(real(step.remove), id(step.row));
+        const remove = () => ctx.remove(real(step.remove), id(step.row), step.byPerson ? writeAcl(step.remove) : undefined);
         if (step.refused) await ctx.refused(remove);
         else await remove();
       } else if ('pair' in step) {

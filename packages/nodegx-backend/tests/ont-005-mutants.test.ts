@@ -264,18 +264,21 @@ function honesty(engine: string, fixture: string, verdicts: Verdict[]): string {
  * world two fell — the link with that question unanswered, and the link stored as text (the held
  * `…-blocks` claim now fails on it). every-kind 18 → 16 of 38. A text id beside a kind
  * (`note-about`, points-at-one-of) names no one collection and still survives, as it must.
+ *
+ * ONT-014 (2026-10-11): *set once*, *never edited* and *never deleted* are kept by the backend inside
+ * the write (`onlyWhile`), so their mistakes fall at the claim that says them: a link that moves
+ * (`moves-unanswered`), a log anyone may edit (`editable-history`), ending or merging by deleting
+ * (`merge-by-delete`; `end-by-delete` in world and membership — every-kind's survives, unclaimed).
+ * every-kind 16 → 13 of 38; world 14 → 11; membership 8 → 4.
  */
 const SURVIVORS: Record<(typeof WORLDS)[number], string[]> = {
   world: [
     'membership/sameTime-unanswered (unanswered)',
     'membership/startsEnds-unanswered (unclaimed)',
-    'account-company/moves-unanswered (unkept)',
     'plan-size/retires-unanswered (unanswered)',
     'on-the-course-platform/silent-skip (unkept)',
-    'leaves/end-by-delete (unclaimed)',
     'attended/undo-unanswered (unanswered)',
     'attended/who-unanswered (unclaimed)',
-    'attended/editable-history (unkept)',
     'note-about/whenTargetGoes-unanswered (unanswered)',
     'note-author/path-unanswered (unanswered)',
     'note-author/visible-to-all (unkept)',
@@ -283,14 +286,11 @@ const SURVIVORS: Record<(typeof WORLDS)[number], string[]> = {
     'session/on-as-text (unclaimed)'
   ],
   'world-every-kind': [
-    'account-company/moves-unanswered (unkept)',
     'plan-size/retires-unanswered (unkept)',
     'topic-tree/ownAncestor-unanswered (unkept)',
     'on-the-course-platform/silent-skip (unkept)',
-    'same-person/merge-by-delete (unkept)',
     'leaves/end-by-delete (unclaimed)',
     'attended/who-unanswered (unclaimed)',
-    'attended/editable-history (unkept)',
     'note-author/visible-to-all (unkept)',
     'person-profile/filter-field-split-off (unclaimed)',
     'person-profile/sort-key-copied (unclaimed)',
@@ -301,14 +301,10 @@ const SURVIVORS: Record<(typeof WORLDS)[number], string[]> = {
     'slot/open-as-text (unclaimed)'
   ],
   'world-membership': [
-    'account-company/moves-unanswered (unkept)',
     'membership/startsEnds-unanswered (unclaimed)',
     'employment/startsEnds-unanswered (unclaimed)',
-    'attended/editable-history (unkept)',
     'topic-tree/ownAncestor-unanswered (unkept)',
-    'signed-up/who-unanswered (unclaimed)',
-    'signed-up/editable-history (unkept)',
-    'leaves/end-by-delete (unclaimed)'
+    'signed-up/who-unanswered (unclaimed)'
   ],
   'world-categories': [
     'subcategory-category/retires-unanswered (unkept)',
