@@ -22,6 +22,7 @@ day could land.
 | `Min` / `Max` | string | The earliest / latest date that can be picked, `YYYY-MM-DD` |
 | `Disabled` | boolean | Show the date without letting it change |
 | `First Day Of Week` | number | `0` Sunday … `6` Saturday. Empty follows the browser's locale |
+| `Reset` | signal | Show `Value` again, over anything picked or typed since. Send it when the field is reused for another record (an edit sheet, a new item after the last): a `Value` that has not changed is not sent again, so without it the last pick stays. `Changed` does not fire |
 | `Width`, `Align X/Y`, `Margin Top/Right/Bottom/Left`, `Position` | | Placement, as on the other shelf parts |
 
 ## Outputs

@@ -34,6 +34,7 @@ const POSITION: Record<string, [number, number]> = {
   In: [-420, -60],
   Root: [0, 0],
   Mounts: [360, -60],
+  Resets: [360, -180],
   Script: [360, 120],
   Out: [760, 120]
 };

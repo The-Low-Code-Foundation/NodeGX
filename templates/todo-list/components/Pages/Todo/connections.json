@@ -1554,6 +1554,12 @@
     {
       "fromId": "tdSelected",
       "fromProperty": "value",
+      "toId": "tdRoutineSummary",
+      "toProperty": "routineId"
+    },
+    {
+      "fromId": "tdSelected",
+      "fromProperty": "value",
       "toId": "cmdStart",
       "toProperty": "routineId"
     },

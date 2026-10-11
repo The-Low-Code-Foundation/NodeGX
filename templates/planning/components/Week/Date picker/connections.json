@@ -23,6 +23,18 @@
     },
     {
       "fromId": "wdpIn",
+      "fromProperty": "Reset",
+      "toId": "wdpResets",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "wdpResets",
+      "fromProperty": "out-resets",
+      "toId": "wdpScript",
+      "toProperty": "in-resets"
+    },
+    {
+      "fromId": "wdpIn",
       "fromProperty": "Value",
       "toId": "wdpScript",
       "toProperty": "in-value"

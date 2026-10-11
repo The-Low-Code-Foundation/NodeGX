@@ -318,8 +318,8 @@
     "Todo/Date picker": {
       "path": "Todo/Date picker",
       "type": "visual",
-      "nodeCount": 7,
-      "connectionCount": 22,
+      "nodeCount": 8,
+      "connectionCount": 24,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -478,8 +478,8 @@
     "Todo/Routine summary": {
       "path": "Todo/Routine summary",
       "type": "visual",
-      "nodeCount": 42,
-      "connectionCount": 45,
+      "nodeCount": 43,
+      "connectionCount": 48,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -631,7 +631,7 @@
       "path": "Pages/Todo",
       "type": "page",
       "nodeCount": 104,
-      "connectionCount": 392,
+      "connectionCount": 393,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -646,7 +646,7 @@
   },
   "stats": {
     "totalComponents": 80,
-    "totalNodes": 883,
-    "totalConnections": 2030
+    "totalNodes": 885,
+    "totalConnections": 2036
   }
 }

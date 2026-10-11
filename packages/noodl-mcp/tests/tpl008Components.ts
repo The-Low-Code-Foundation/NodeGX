@@ -1984,6 +1984,7 @@ const ROUTINE_SUMMARY_INS: Array<[string, string]> = [
   ['addHint', 'string'],
   ['timeError', 'string'],
   ['hasTimeError', 'boolean'],
+  ['routineId', 'string'],
   ['startDate', 'string'],
   ['endDate', 'string'],
   ['startError', 'string'],
@@ -2101,6 +2102,7 @@ const ROUTINE_SUMMARY: Tpl008Component = {
     text('rsDatesHint', 'What the end date does', 'rsDates', 'Leave the end empty and it keeps going.', wide(T_META)),
     text('rsStartError', 'A start date it cannot have', 'rsDates', '', { ...wide(T_ERROR), mounted: false }),
     text('rsEndError', 'An end date it cannot have', 'rsDates', '', { ...wide(T_ERROR), mounted: false }),
+    logic('rsAnother', 'Value Changed', 'Another routine: its dates over any pick'),
 
     group('rsButtons', 'Buttons', 'rsRoot', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
     place('rsStop', BUTTON, 'Stop it', 'rsButtons', { ...BTN_OUTLINE, label: 'Stop it', mounted: false }),
@@ -2127,6 +2129,13 @@ const ROUTINE_SUMMARY: Tpl008Component = {
     wire('rsIn', 'clearTime', 'rsTime', 'clear'),
     wire('rsIn', 'startDate', 'rsStart', 'Value'),
     wire('rsIn', 'endDate', 'rsEnd', 'Value'),
+    // P78-D81. The pane stays drawn when another routine is picked, so the two fields are reused for
+    // it. A refused end date stays in the field (beside its sentence) while the record keeps its empty
+    // one, and the next routine's empty end is no change, so it showed the refused day. Another
+    // routine is a Reset.
+    wire('rsIn', 'routineId', 'rsAnother', 'value'),
+    wire('rsAnother', 'valueChanged', 'rsStart', 'Reset'),
+    wire('rsAnother', 'valueChanged', 'rsEnd', 'Reset'),
     wire('rsIn', 'startError', 'rsStartError', 'text'),
     wire('rsIn', 'hasStartError', 'rsStartError', 'mounted'),
     wire('rsIn', 'endError', 'rsEndError', 'text'),
@@ -4534,6 +4543,7 @@ const PAGE_TODO: Tpl008Component = {
     ...['cmdDaily', 'cmdWeekly', 'cmdMonthly', 'cmdAddTime'].map((cmd) => wire(cmd, 'done', 'tdClearDays', 'do')),
 
     wire('tdData', 'routines', 'cmdStart', 'routines'),
+    wire('tdSelected', 'value', 'tdRoutineSummary', 'routineId'),
     wire('tdSelected', 'value', 'cmdStart', 'routineId'),
     wire('tdRoutineSummary', 'startText', 'cmdStart', 'text'),
     wire('tdRoutineSummary', 'setStart', 'cmdStart', 'do'),

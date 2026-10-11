@@ -69,6 +69,11 @@
           "type": "boolean"
         },
         {
+          "name": "routineId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
           "name": "startDate",
           "plug": "output",
           "type": "string"
@@ -942,6 +947,13 @@
       },
       "x": 160,
       "y": 4000
+    },
+    {
+      "id": "rsAnother",
+      "type": "Value Changed",
+      "label": "Another routine: its dates over any pick",
+      "x": 530,
+      "y": 3280
     },
     {
       "id": "rsButtons",

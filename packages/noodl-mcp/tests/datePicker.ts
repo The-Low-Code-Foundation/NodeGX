@@ -126,11 +126,24 @@ export const DATE_PICKER_CSS = String.raw`.ndg-dp { position: relative; display:
  */
 export const DATE_PICKER_MOUNT_SCRIPT = 'this.mounts = (this.mounts || 0) + 1;\nOutputs.mounts = this.mounts;';
 
+/**
+ * P78-D81 — `Reset`, counted the same way. A form reused for the next record sets `Value` to that
+ * record's day, and when it is the day already given (two empty days, most often) the Function is not
+ * re-run at all (DEF-046: an unchanged value re-runs nothing), so a pick made on the first record stayed
+ * on the second. Comparing with the committed day instead would wipe a pick every time another input
+ * re-ran the script. A signal cannot reach the script either: a pulse lands on a Function input as
+ * `true` then `false` in one pass. So the form says "this is another record" with `Reset`, and the count
+ * moving is what the script reads.
+ */
+export const DATE_PICKER_RESET_SCRIPT = 'this.resets = (this.resets || 0) + 1;\nOutputs.resets = this.resets;';
+
 export const DATE_PICKER_SCRIPT =
   `var CSS_ID = ${JSON.stringify(DATE_PICKER_CSS_ID)};\nvar CSS = ${JSON.stringify(DATE_PICKER_CSS)};\n` +
   String.raw`var S = this.datePicker || (this.datePicker = {});
 S.Outputs = Outputs;
 S.mounts = Inputs.mounted;
+var reset = Inputs.resets !== undefined && Inputs.resets !== S.resets;
+S.resets = Inputs.resets;
 S.label = String(Inputs.label || 'Date');
 S.min = normal(Inputs.min);
 S.max = normal(Inputs.max);
@@ -157,10 +170,12 @@ S.button.disabled = S.disabled;
 S.input.setAttribute('aria-label', S.label);
 
 var incoming = normal(Inputs.value);
-if (incoming !== S.lastIncoming) {
+if (incoming !== S.lastIncoming || reset) {
   S.lastIncoming = incoming;
-  var busy = document.activeElement === S.input && S.typed;
+  // A Reset is another record: what is half-typed belongs to the last one.
+  var busy = !reset && document.activeElement === S.input && S.typed;
   if (!busy) {
+    if (reset) S.typed = false;
     S.input.value = incoming;
     S.committed = incoming;
     publish(incoming);
@@ -500,7 +515,13 @@ export const DATE_PICKER_INPUTS: DatePickerPort[] = [
   { name: 'Margin Right', type: '*', description: 'Space to the right.' },
   { name: 'Margin Bottom', type: '*', description: 'Space below.' },
   { name: 'Margin Left', type: '*', description: 'Space to the left.' },
-  { name: 'Position', type: '*', description: 'Layout position (in layout, absolute, …).' }
+  { name: 'Position', type: '*', description: 'Layout position (in layout, absolute, …).' },
+  {
+    name: 'Reset',
+    type: 'signal',
+    description:
+      'Show Value again, over anything picked or typed since. Send it when the field is reused for another record: a Value that has not changed is not sent again, so without it the last pick stays. Changed does not fire.'
+  }
 ];
 
 export const DATE_PICKER_OUTPUTS: DatePickerPort[] = [
@@ -512,7 +533,8 @@ export const DATE_PICKER_OUTPUTS: DatePickerPort[] = [
 export const DATE_PICKER_DESCRIPTION =
   'A date field with a calendar. Value is YYYY-MM-DD; Changed fires when a person picks, types or clears a date. ' +
   'On a phone or tablet the device’s own date picker opens; on a computer a keyboard-friendly calendar drops down, ' +
-  'and if it cannot draw, the browser’s own date picker is used instead.';
+  'and if it cannot draw, the browser’s own date picker is used instead. Reused for another record (an edit sheet, ' +
+  'a new item after the last), send Reset so the field shows that record’s day rather than the last one picked.';
 
 /** Wires from the interface into the Function, by component port → Function input. */
 const TO_SCRIPT: Array<[string, string]> = [
@@ -617,7 +639,7 @@ export function datePickerGraph(p: string): { nodes: FlatNode[]; connections: Fl
       // output port the saved node says is a signal. A prefab that has never been opened and re-saved
       // in the editor carries exactly these, and without them `Changed` throws "not a function".
       ports: [
-        ...['host', 'mounted', ...TO_SCRIPT.map(([, to]) => to)].map((n) => ({
+        ...['host', 'mounted', 'resets', ...TO_SCRIPT.map(([, to]) => to)].map((n) => ({
           name: `in-${n}`,
           displayName: n,
           plug: 'input' as const,
@@ -637,12 +659,21 @@ export function datePickerGraph(p: string): { nodes: FlatNode[]; connections: Fl
       label: 'Count mounts (a remount is a new element to draw into)',
       parameters: { functionScript: DATE_PICKER_MOUNT_SCRIPT },
       ports: [{ name: 'out-mounts', displayName: 'mounts', plug: 'output', type: '*', group: 'Outputs' }]
+    },
+    {
+      id: id('Resets'),
+      type: 'JavaScriptFunction',
+      label: 'Count resets (another record: show its Value again)',
+      parameters: { functionScript: DATE_PICKER_RESET_SCRIPT },
+      ports: [{ name: 'out-resets', displayName: 'resets', plug: 'output', type: '*', group: 'Outputs' }]
     }
   ];
   const connections: FlatWire[] = [
     wire(id('Field'), 'this', id('Script'), 'in-host'),
     wire(id('Field'), 'didMount', id('Mounts'), 'run'),
     wire(id('Mounts'), 'out-mounts', id('Script'), 'in-mounted'),
+    wire(id('In'), 'Reset', id('Resets'), 'run'),
+    wire(id('Resets'), 'out-resets', id('Script'), 'in-resets'),
     ...TO_SCRIPT.map(([from, to]) => wire(id('In'), from, id('Script'), `in-${to}`)),
     ...TO_ROOT.map(([from, to]) => wire(id('In'), from, id('Root'), to)),
     wire(id('In'), 'Label', id('Label'), 'text'),

@@ -113,6 +113,24 @@
     },
     {
       "fromId": "rsIn",
+      "fromProperty": "routineId",
+      "toId": "rsAnother",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rsAnother",
+      "fromProperty": "valueChanged",
+      "toId": "rsStart",
+      "toProperty": "Reset"
+    },
+    {
+      "fromId": "rsAnother",
+      "fromProperty": "valueChanged",
+      "toId": "rsEnd",
+      "toProperty": "Reset"
+    },
+    {
+      "fromId": "rsIn",
       "fromProperty": "startError",
       "toId": "rsStartError",
       "toProperty": "text"

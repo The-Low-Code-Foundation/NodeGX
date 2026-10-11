@@ -446,8 +446,8 @@
     "Week/Date picker": {
       "path": "Week/Date picker",
       "type": "visual",
-      "nodeCount": 7,
-      "connectionCount": 22,
+      "nodeCount": 8,
+      "connectionCount": 24,
       "modified": "2026-09-20T00:00:00.000Z",
       "created": "2026-09-20T00:00:00.000Z"
     },
@@ -598,7 +598,7 @@
   },
   "stats": {
     "totalComponents": 74,
-    "totalNodes": 939,
-    "totalConnections": 2715
+    "totalNodes": 940,
+    "totalConnections": 2717
   }
 }
