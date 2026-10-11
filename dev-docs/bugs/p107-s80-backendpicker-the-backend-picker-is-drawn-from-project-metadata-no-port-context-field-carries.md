@@ -8,7 +8,7 @@ found: P107 NSP-020 s80 (L4, the module table), 2026-10-11 — oracle (a) drove 
 evidence: packages/noodl-runtime/test/node-spec/nsp-020-module-table.ts (the `Sign File URL` and `Upload File` rows, case "a project with two backends"); NSP-020 §6.3
 kit: node-spec
 commit: 27aa07374
-regression: packages/noodl-runtime/test/node-spec/nsp-020-module-table.ts (the DbModel2 row, case "a project with two backends" — the picker drawn from `context.backends`; and "a project with one backend draws no picker")
+regression: packages/noodl-runtime/test/node-spec/nsp-020-module-table.ts
 ---
 
 With two or more backends in the project (`backendServices` metadata), every node that reads a backend announces a
@@ -36,5 +36,5 @@ two pins in the module table go stale and are removed. L1 should know before it 
 `backendPickerPort(context)` in `record-base.ts` — an enum of `_active_` then each backend's id, default `_active_`, group
 General, drawn only with two or more backends (record-ports.ts :119-121). DbModel2 spreads it into `derived.inputs` with
 `needs: [... 'backends' ...]`; oracle (a)'s fake graph model answers `backendServices` from `context.backends`, and the
-DbModel2 row grades both cases. The two pins on Sign File URL and Upload File stay until those specs spread the same
+DbModel2 row grades both cases (`regression:` above — the cases "a project with two backends" and "a project with one backend draws no picker"). The two pins on Sign File URL and Upload File stay until those specs spread the same
 helper (L1's remaining rows); L5's `portContextFor` fills the field from `backendServices`.
