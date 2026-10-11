@@ -1,17 +1,21 @@
 # Tchac-Boum — the prototype, on the real app
 
 A chain-reaction machine on a wall, which is a NodeGX graph seen from the front. Built 2026-10-11 (s1, Fable) in one
-morning on P112's kit; the page is [`tchac-boum.html`](tchac-boum.html), the project is [`tchac/`](tchac/) (v2 files,
+morning on P112's kit, and made three-dimensional the same afternoon (s2, TBM-008); the page is
+[`tchac-boum.html`](tchac-boum.html), the room is [`mur3d.js`](mur3d.js), the project is [`tchac/`](tchac/) (v2 files,
 one component, 18 nodes, 15 wires), and [`check.mjs`](check.mjs) is the gate.
 
 **It is evidence, not a product.** [The phase README](../README.md) §1 says what was measured first and §4 what it proves.
 
 ## What it does
 
-- **Le mur.** Sixteen parts in costume (a red button, a turnstile with a drum, a ramp a marble rolls down, a balloon, two
-  sleeping cats, chalkboards, signs, screens), strings between them, marbles rolling along the strings when the running
-  app's trace reports a signal on that wire, a glow when it reports a value. Press the button's costume and the real
-  button in the app is pressed.
+- **Le mur.** A brick wall in WebGL (three), a wooden floor, shadows. Sixteen parts, each a wooden plank with a
+  low-poly costume built from primitives (a red dome button, a four-armed turnstile with a digit housing, a slanted
+  ramp with rails a marble rolls down, a balloon on a string, two sleeping cats, chalkboards, signs, screens), rails
+  between them, marbles that roll along a rail as a bead under gravity when the running app's trace reports a signal
+  on that wire, a glow that slides when it reports a value; the balloon bursts into shards that bounce on the floor.
+  The part's DOM element (the text, the lamp, the button) is pinned onto its plank by the CSS3D renderer. Press the
+  button's costume and the real button in the app is pressed.
 - **Le circuit.** One press turns every part over in place: the editor's card (type, wired ports, live values, the
   canvas colours from `@nodegx/canvas-look`), the wires in the editor's signal / data colours. Same elements, same files.
 - **L'étagère.** Eight parts with a costume and one French sentence; the runtime's whole library (118 types) behind a
@@ -29,7 +33,7 @@ one component, 18 nodes, 15 wires), and [`check.mjs`](check.mjs) is the gate.
   mission, *La machine se souvient*, is shown locked (TBM-001 / TBM-002).
 
 ```sh
-./build.sh                          # bundles look.js (@nodegx/canvas-look) and specs.js (@nodegx/node-spec), both gitignored
+./build.sh                          # bundles look.js (@nodegx/canvas-look), specs.js (@nodegx/node-spec) and three.js (three 0.177, fetched into .deps/ by npm on the first run), all gitignored
 node serve.mjs 47911                # then open http://127.0.0.1:47911/tchac-boum.html
                                     #   ?face=mur|circuit   ?demo (presses the button, plays the three missions, flips)   ?set=node.param=value
 node check.mjs [--shot <dir>]       # the gate (below); exits 0 PASS, 1 FAIL, 2 when the runtime, the bundle or Chrome is missing
@@ -60,4 +64,5 @@ waits), run 2 FAIL 3 (same race on the move; a trace read once; an assertion the
   (parent / children) is not editable here; Orbit does that.
 - **Positions are the files' editor pixels, 1:1.** The official editor opens the project with the parts where the wall
   left them; a part added by the wall lands at the view's centre, which is a sensible canvas position too.
-- **No sound, no 3D.** By design (Surface Pro, 2017).
+- **No sound.** A kit, P114's. **The 3D has not been measured on the Surface Pro (2017)** — TBM-003's sitting does
+  that; the knobs are in `mur3d.js` (pixel ratio, shadow map size, the floor).

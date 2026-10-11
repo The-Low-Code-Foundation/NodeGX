@@ -3,10 +3,12 @@
 **Scoped:** 2026-10-11, at HEAD `84396782b`, from a conversation with Richard that began as "a demo like Orbit for
 preteens in a French collège, the game pure fun, the editor the educational part" and ended with a working prototype on
 the real engine: [`prototype/tchac-boum.html`](prototype/README.md), built the same morning on P112's kit, its gate green.
-**Status: 🟡 IN PROGRESS — s1 (2026-10-11, Fable): TBM-000 built and gated (the wall, the flip, the shelf, three
-missions, every edit a write through the store, every Vérifier a copy in a second real app; `prototype/check.mjs` 29 / 29,
-three runs). Rulings R1–R4 open (§8). Next: TBM-001, the browser backend (Richard's ask, §4.6).** **Prefix: `TBM`.**
-Task files: [TBM-000](TBM-000-THE-PROTOTYPE-MEASURED.md) … [TBM-007](TBM-007-THE-WALL-PASSES-THE-EDITOR-SUITE.md). The board is §6.
+**Status: 🟡 IN PROGRESS — s2 (2026-10-11, Fable): TBM-008 built and gated — the wall is now three-dimensional (a
+brick wall, low-poly costumes on planks, rails, marbles under gravity, a balloon that bursts into shards; `mur3d.js`),
+Richard's ask after reading s1 ("the game display is rubbish so far"); `prototype/check.mjs` PASS ×3 unchanged. s1 built
+TBM-000 (the wall, the flip, the shelf, three missions, every edit a write through the store, every Vérifier a copy in a
+second real app). Rulings R1–R4 open (§8). Next: TBM-001, the browser backend (Richard's ask, §4.6).** **Prefix: `TBM`.**
+Task files: [TBM-000](TBM-000-THE-PROTOTYPE-MEASURED.md) … [TBM-008](TBM-008-THE-WALL-IN-THREE-DIMENSIONS.md). The board is §6.
 Parent: [Phase 112](../phase-112-your-own-nodegx/README.md) (the kit this is built from; this phase is its "big-block
 editor for children" made real). Cousins: [Phase 114](../phase-114-the-groovebox/README.md) (the groovebox: the other
 "your own editor"), [Phase 108](../phase-108-the-island-works/README.md) (Olive's Island: the kids' Blockly world).
@@ -44,7 +46,7 @@ Read on 2026-10-11 at `84396782b`, before a line was written.
 | 5 | **Rocket School does not use the record nodes**: TPL-007 §"storage" is `Global Store` with `Persist: true` (localStorage) and a `Keep Storage` kit node. | Richard's ask (records in browser storage) is new, not a copy. |
 | 6 | **Every record node leaves the runtime through one seam**, `IDataAdapter` in `@noodl/backend-contract` (`query`, `count`, `distinct`, `aggregate`, `fetch`, `create`, `save`, `delete`, …). `CloudStore` builds a `RestDataAdapter` or a `ParseWireAdapter` from the resolved backend (`cloudstore.js:61-84`); the spec's World answers the same seam in memory (world.ts BACKEND). The preview export keeps `backendServices` metadata verbatim (`exporter/json.ts:25-26`); only `cloudservices` is blanked. | A browser backend is one new `IDataAdapter` over IndexedDB, chosen for a `backendServices` entry the project carries, graded by the contract's own conformance suite (`nodegx-backend-contract/conformance/`). TBM-001. |
 | 7 | **The one local adapter is Node-only**: `api/adapters/local-sql/LocalSQLAdapter.ts` resolves `node:sqlite` or `better-sqlite3` (`engine.ts:18-23`); the `AdapterRegistry` knows `local`, `parse`, `external`. | Nothing to switch on; the browser adapter is written, not configured. |
-| 8 | **The audience, from memory:** Ellie (11) and Saoirse (8) use old Surface Pros (Core m3, 4 GB, Windows 10, Chrome); Ellie "doesn't at all like being under time pressure", wants no negative feedback, and customisation is the motivation. | 2D, DOM and SVG, no Three.js; no timer, no score, no "you missed"; costumes and names are free; the fail message of a mission says what happened and never "wrong". |
+| 8 | **The audience, from memory:** Ellie (11) and Saoirse (8) use old Surface Pros (Core m3, 4 GB, Windows 10, Chrome); Ellie "doesn't at all like being under time pressure", wants no negative feedback, and customisation is the motivation. | No timer, no score, no "you missed"; costumes and names are free; the fail message of a mission says what happened and never "wrong". s1 chose 2D (DOM and SVG) for the Surface Pro; **s2 overturned that on Richard's reading** ("3D polygon stuff on a real wall with some basic physics", TBM-008): the HD 615 does WebGL 2 in Chrome, the pixel ratio is capped and the shadow map halved on ≤ 4 cores, and the frame time there is TBM-003's to measure. |
 
 ## 2. The person sentences
 
@@ -78,9 +80,13 @@ verdict. The rules that follow from the audience:
 
 ## 4. The design, in brief
 
-1. **The wall** (`prototype/tchac-boum.html`): parts at the files' `x`/`y`, strings as SVG curves from a part's handle
-   to the next part's inlet, marbles that roll along a string when the trace reports a signal on that wire, a glow when
-   it reports a value. Pan, pinch, wheel; *Tout voir* fits the wall around the app's window.
+1. **The wall** (`prototype/tchac-boum.html` + `prototype/mur3d.js`, since s2): a brick wall in WebGL with a floor
+   and shadows; every part a wooden plank at the files' `x`/`y` with a low-poly costume on it; strings as rails (tubes
+   along a sagging curve) from a part's handle to the next part's inlet; a marble that rolls along the rail as a bead
+   under gravity when the trace reports a signal on that wire, a glow that slides when it reports a value; a balloon
+   that bursts into shards that bounce on the floor. The part's DOM element is pinned onto its plank (CSS3D), so the
+   gate, the drags and the flip see the same element as before. Pan, pinch, wheel; *Tout voir* fits the wall around
+   the app's window.
 2. **The flip**: `body.circuit` turns every `.part` by `rotateY(180deg)` in place; the back face is the editor's card
    (header colour from `nodeScheme`, wired ports with live values). Same elements, same files — the gate asserts no
    element is re-made.
@@ -121,6 +127,7 @@ verdict. The rules that follow from the audience:
 | [TBM-005](TBM-005-AN-UNWIRED-OUTPUT-HAS-A-VALUE.md) | **An unwired output has a value.** The kit finding P117-S1-UNWIREDOUT: the trace carries wires; a costume cannot read a lone output. Fix in `@noodl/preview` (a node-value event or a read), used by the wall. | 📋 kit | a Switch from the shelf lights with nothing wired |
 | [TBM-006](TBM-006-THE-WORDS.md) | **The words.** A teacher reads every French string against the cycle 4 vocabulary; the `FR` dictionary covers every shelf part's ports. | 📋 Richard's / a teacher's | the read, recorded |
 | [TBM-007](TBM-007-THE-WALL-PASSES-THE-EDITOR-SUITE.md) | **The wall passes the editor suite.** A `suite-adapter.mjs` like Orbit's: open, the eight edits, save, round trip; done means done (P112). | 📋 | the suite green on small, todo-list, planning |
+| [TBM-008](TBM-008-THE-WALL-IN-THREE-DIMENSIONS.md) | **The wall in three dimensions.** Richard's ask on reading s1: a brick wall, low-poly costumes on planks, rails, marbles under gravity, shards; the part's DOM pinned onto its plank so nothing the gate reads changes. | 🟢 built s2 | `prototype/check.mjs` PASS ×3 (29 checks), unchanged |
 
 ## 7. Acceptance criteria for the phase
 
@@ -156,6 +163,9 @@ verdict. The rules that follow from the audience:
   the kit; until then the shelf's sentence for a Switch says "attache une ficelle à sa sortie pour la voir s'allumer".
 - **Expression is JavaScript**: `n % 2 === 0` is readable at 12, `===` is not maths. TBM-006 may want `n % 2 == 0`
   in the mission texts and a note that both work.
-- **A Surface Pro (2017) with no WebGL** was the reason for DOM + SVG; it has not been measured there yet (TBM-003).
+- **The Surface Pro (2017)** was s1's reason for DOM + SVG; s2 made the wall WebGL at Richard's ask (TBM-008). Its HD
+  615 does WebGL 2 in Chrome, but a 4 GB, two-core machine drawing shadows and sixteen costumes has not been measured;
+  TBM-003's sitting measures it, and `mur3d.js` already caps the pixel ratio and halves the shadow map on ≤ 4 cores.
+  If it is slow there, the knobs are: shadows off, `flatShading` only, no floor.
 - **The peer on P112 `real/`**: this page re-types Orbit's plumbing rather than importing it, so a fix in one must be
   carried to the other by hand until OWN-007's brief names the shared pieces.
