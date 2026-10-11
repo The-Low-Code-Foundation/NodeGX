@@ -1327,3 +1327,27 @@ describe('P108 IW-007 lane B — garden-kit draws her land: the spa and the refu
     expect(one(land([spa(6, 4, 'never')]), /data-puff=/)).toBe(0);
   });
 });
+
+/**
+ * P109 ISL-046 — P108-S9-BKFONT: the Blocks node's line and zoom buttons said `font:800 14px inherit` and
+ * `font:800 20px/40px inherit`. `inherit` is not a family inside the `font` shorthand, so Chrome dropped both
+ * declarations: measured 2026-10-11, the buttons computed `400 13.3333px` (the browser's default), and with the rule
+ * written longhand `800 14px` and `800 20px / 40px`. This reads every `font` shorthand the shipped kit carries, so the
+ * next one cannot slip in the same way: `inherit` (or `initial`, `unset`) is a whole value or nothing.
+ */
+describe('P109 ISL-046 BKFONT — every font shorthand in the shipped kit is one a browser keeps', () => {
+  const shorthands = (text: string) =>
+    [...text.matchAll(/(?:^|[;{'"\s])font\s*:\s*([^;}'"\\]+)/g)].map((m) => m[1].trim()).filter((v) => v.length > 0);
+  const broken = (value: string) => /\b(?:inherit|initial|unset)\b/.test(value) && !/^(?:inherit|initial|unset)(?:\s*!important)?$/.test(value);
+
+  it('known-firing: the rule finds the shape this row shipped with', () => {
+    expect(shorthands(".x button{color:#fff;font:800 14px inherit;padding:0}").filter(broken)).toEqual(['800 14px inherit']);
+    expect(shorthands('.y{font:inherit;font-weight:700}').filter(broken)).toEqual([]);
+  });
+
+  it('the built garden-kit/index.js carries none', () => {
+    const all = shorthands(fs.readFileSync(BUILT, 'utf8'));
+    expect(all.length).toBeGreaterThan(0);
+    expect(all.filter(broken)).toEqual([]);
+  });
+});
