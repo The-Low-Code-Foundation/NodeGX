@@ -2,6 +2,7 @@
 id: P109-S20-LONGTOAST
 title: A long toast grows past the top of the window, so its title and first sentences cannot be read
 status: fixed
+commit: 12a971c32
 phase: P109
 task: ISL-044
 severity: medium

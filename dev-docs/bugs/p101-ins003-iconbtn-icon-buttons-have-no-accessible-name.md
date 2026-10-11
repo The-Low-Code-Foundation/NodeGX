@@ -2,6 +2,7 @@
 id: P101-INS003-ICONBTN
 title: Icon-only buttons across the editor have no accessible name (the inspector's collapse button among them)
 status: fixed
+commit: e76db56b4 (callers), 9b3d1f3a8 (the top bar)
 phase: P109
 task: ISL-044
 severity: medium

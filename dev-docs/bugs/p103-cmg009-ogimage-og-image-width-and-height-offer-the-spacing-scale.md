@@ -2,6 +2,7 @@
 id: P103-CMG009-OGIMAGE
 title: Page's og:image:width / og:image:height fields offer spacing tokens
 status: fixed
+commit: eba414b90
 phase: P109
 task: ISL-044
 severity: low

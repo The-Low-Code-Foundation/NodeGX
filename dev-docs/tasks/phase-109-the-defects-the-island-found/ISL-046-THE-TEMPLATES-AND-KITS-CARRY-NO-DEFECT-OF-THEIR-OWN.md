@@ -1,6 +1,6 @@
 # ISL-046 — The templates and the garden kits carry no defect of their own
 
-**Status: 🟢 s42 (2026-10-11): 2 of 7 fixed — BKFONT `4af47a07a`, DEMOSTUBWIRES `6d8323ef4`. The other five each wait on something named in §8: MOVEARROW a ruling (Planning is set aside), INSTALLER the tablets, TPL011UNREADID P78's untracked Nightbook pile, D81 a design read and P78's open publish work, METERS3D a 3D drive. Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 7 bugs
+**Status: 🟢 s43 (2026-10-11): 4 of 9 fixed — BKFONT `4af47a07a`, DEMOSTUBWIRES `6d8323ef4` (s42), D81 `37f35c8c4`, METERS3D `050ca561b` (s43); two found in s43 and filed here (ROUTINEREFUSAL, SECONDVISIT). Still waiting: MOVEARROW a ruling, INSTALLER the tablets, TPL011UNREADID P78's untracked Nightbook pile. Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 7 bugs
 from the ledger (`dev-docs/bugs/`) that no phase owned: 2 high · 1 medium · 4 low. **Side:** templates (planning, Nightbook and its desktop installer, the training demo), the library Date picker, the garden kits
 
 ## 1. The person sentence
@@ -20,11 +20,13 @@ generated from the ledger headers. **The ledger file is the source**, so read it
 |---|---|---|---|
 | [P78-TPL010-MOVEARROW](../../bugs/p78-tpl010-movearrow-opening-a-project-writes-the-chip-arrow-into-its-stored-move.md) | high | scheduled | Opening a project in the planner adds another "→ " (or "✓ Wed 30 · ") to its stored next move, every time |
 | [P78-TPL011-INSTALLER](../../bugs/p78-tpl011-installer-nightbook-0-0-4-will-not-install-over-0-0-3-on-the-tablets.md) | high | scheduled | Nightbook 0.0.4 will not install over 0.0.3 on either tablet ("Nightbook cannot be closed") |
-| [P78-D81](../../bugs/p78-d81-the-library-date-picker-keeps-a-picked-day-when-the-next-record-s-day-is-empty-too.md) | medium | scheduled | The library Date picker keeps a picked day when the next record's day is empty too |
+| [P78-D81](../../bugs/p78-d81-the-library-date-picker-keeps-a-picked-day-when-the-next-record-s-day-is-empty-too.md) | medium | fixed | The library Date picker keeps a picked day when the next record's day is empty too |
 | [P109-S19-TPL011UNREADID](../../bugs/p109-s19-tpl011unreadid-nightbooks-openenvelope-wires-an-id-its-script-never-reads.md) | low | scheduled | Nightbook's generator wires the envelope id into a Function that never reads it, and the door now refuses the build |
+| [P109-S43-ROUTINEREFUSAL](../../bugs/p109-s43-routinerefusal-a-refused-routine-date-s-sentence-stays-on-the-next-routine.md) | medium | scheduled | Pick an end date before a routine's start and open another routine: the refusal sentence is still there |
 | [P109-S19-DEMOSTUBWIRES](../../bugs/p109-s19-demostubwires-the-training-demos-stubbed-functions-keep-wires-to-inputs-they-never-read.md) | low | scheduled | The training demo's stubbed Functions keep wires into inputs they no longer read |
+| [P109-S43-SECONDVISIT](../../bugs/p109-s43-secondvisit-on-a-second-visit-to-the-3d-workshop-its-meter-chips-are-never-measured.md) | low | scheduled | On the second visit to the 3D Workshop, the meter chips still cover each other |
 | [P108-S9-BKFONT](../../bugs/p108-s9-bkfont-the-blocks-css-font-shorthand-with-inherit-is-dropped.md) | low | scheduled | The Blocks node's line and zoom buttons use `font:800 14px inherit` — an invalid shorthand the browser drops, so they render at the default weight and size |
-| [P108-S7-METERS3D](../../bugs/p108-s7-meters3d-two-parts-meter-chips-overlap-in-the-3d-workshop.md) | low | scheduled | In the 3D Workshop on her land, the spa's two parts' meter chips are drawn on top of each other |
+| [P108-S7-METERS3D](../../bugs/p108-s7-meters3d-two-parts-meter-chips-overlap-in-the-3d-workshop.md) | low | fixed | In the 3D Workshop on her land, the spa's two parts' meter chips are drawn on top of each other |
 
 ## 4. Order of work
 
@@ -65,3 +67,12 @@ MOVEARROW and INSTALLER first (high: data damage, and a family that cannot updat
 | TPL011UNREADID (low) | ⏸ P78's pile | Its generator is in the same untracked Nightbook pile. Not touched |
 | D81 (medium) | ⏸ design + P78 | The ledger's one line (compare with `S.committed`) would wipe a person's pick whenever any other input re-runs the script, so the fix needs a read of whether a Function re-runs on an identical `Value`, or a `Clear` signal the templates wire. The picker ships in five templates and a library prefab, and republishing them runs through P78's uncommitted publish script. Not built |
 | METERS3D (low) | ⏸ 3D drive | Needs the Workshop in Garden 3D driven before and after (`drive-iw007-touch.js --mode 3d`). Not built unseen |
+
+### s43 (2026-10-11) — D81 fixed, ROUTINEREFUSAL found
+
+| row | state | what happened |
+|---|---|---|
+| D81 (medium) | ✅ `37f35c8c4` | Measured first, the first time it was driven: an identical `Value` re-runs no Function (DEF-046), so the ledger's one line could never have worked. A pulse wired into a Function input reaches the script as `true` then `false` in one pass. Built: a `Reset` signal on the picker, counted like `mounted`. Red on HEAD in two places: the prefab drive's new §11, and a new drive on `todo-list-demo` (Pilates' refused end date showed on the tablets). Both green after. Regenerated: the prefab, `todo-list`, `todo-list-demo`, `planning` and `planning-demo`. Nightbook's copy is in P78's untracked pile and was left alone |
+| ROUTINEREFUSAL (medium, new) | ⏸ scheduled | Found by D81's drive: the routine pane's refusal sentence follows the person to the next routine. Not a one-wire fix (the sign-in form's constant-false Condition would silence a second refusal). Filed with the proposal |
+| METERS3D (low) | ✅ `050ca561b` | `chipLifts` (garden-3d-kit): chips placed lowest first, and a chip that meets one already placed goes just over it. The touch drive gains METERS, red on HEAD in both Workshops. After: Pip's (the row's shot) green; every other clause as on HEAD (28/31 against 27/31; BUILD and PAY are `P109-S18-TOUCHBUILD`) |
+| SECONDVISIT (low, new) | ⏸ scheduled | Cobble's Workshop, the second visit, stayed red: every chip cached `0 × 0` though drawn at a real size, so they were measured before layout and never again. A `ResizeObserver` that asked for a frame changed nothing and was taken out. Filed with what to read next |

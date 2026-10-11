@@ -2,6 +2,7 @@
 id: P108-S7-METERS3D
 title: In the 3D Workshop on her land, the spa's two parts' meter chips are drawn on top of each other
 status: fixed
+commit: 050ca561b
 phase: P109
 task: ISL-046
 severity: low

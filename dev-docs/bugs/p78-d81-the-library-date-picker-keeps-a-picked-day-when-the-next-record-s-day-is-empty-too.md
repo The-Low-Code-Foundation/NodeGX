@@ -2,6 +2,7 @@
 id: P78-D81
 title: The library Date picker keeps a picked day when the next record's day is empty too
 status: fixed
+commit: 37f35c8c4
 phase: P109
 task: ISL-046
 severity: medium

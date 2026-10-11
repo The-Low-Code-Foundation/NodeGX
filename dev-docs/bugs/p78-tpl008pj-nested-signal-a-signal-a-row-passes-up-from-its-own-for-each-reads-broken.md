@@ -2,6 +2,7 @@
 id: P78-TPL008PJ-NESTEDSIGNAL
 title: A signal a For Each row passes up from a For Each of its own reads as a broken wire in the deploy's wire check — the wire works in both viewers
 status: fixed
+commit: c3d6b2f66
 phase: P109
 task: ISL-044
 severity: low
@@ -48,4 +49,4 @@ list's For Each read it, and the For Each minted `itemOutput-openTask`. In the e
 ports again when the row's port types are updated. **Fixed:** the check runs another pass while a pass changes the
 components' exported port types (at most four). The todo list settles in three, with 2,036 wires checked and none
 named. GAM-023's todo-list row is green, and its other seven rows are unchanged, including *"the wire pass leaves the
-exported model as it was"*. The editor's canvas was not opened for this. The open question above stands.
+exported model as it was"*. The editor's canvas was not opened for this. The open question above, answered the same day in the running editor (a copy of the todo list, the preview live): its warnings model holds no warning on any of the four wires. Only the deploy's headless check ever called them broken.
