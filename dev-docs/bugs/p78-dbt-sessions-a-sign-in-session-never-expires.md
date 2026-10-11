@@ -1,13 +1,15 @@
 ---
 id: P78-DBT-SESSIONS
 title: A sign-in session never expires, by any door
-status: scheduled
+status: fixed
+commit: PENDING
 phase: P109
 task: ISL-040
 severity: medium
 area: backend / auth sessions
 found: P78 Digital Bricks Training template, TASK-L185, 2026-10-01; re-read at HEAD 2026-10-01
 evidence: digital-bricks-training repo dev-docs/sprints/sprint-53-the-first-real-client/TASK-L185-the-privacy-floor.md ("Found in NodeGX, not fixed here")
+regression: packages/nodegx-backend/tests/isl040-sessions.test.ts
 ---
 
 Somebody signs in to a NodeGX app on a shared or lost device and never signs out. That session works for
@@ -41,3 +43,18 @@ reader are already there, so the fix is the writer.
   `oauth-routes.ts`, `AdminDashboardRoutes.ts`), writing `expiresAt`.
 - Each use moves it on. `findSession` already honours `expiresAt`.
 - Rewrite `service.ts`'s "a session that lives until it is revoked" comment.
+
+**Built, P109 s42 (2026-10-11).** Re-measured first at `84396782b`: `tests/isl040-sessions.test.ts` red 9 of 11 on the
+old code (the two green arms are the known-firing control and the fixed-end row, which old code also left alone).
+- `auth/sessions.ts` `Sessions`: `mint()` writes `expiresAt` = now + the window and `renews: true`. `resolve()`
+  refuses an ended row and moves a renewing row's end on, at most once a day. `settle()` gives an end to every row
+  minted before this change, and pulls in ends past a window made shorter.
+- All five doors mint through it: `POST /login`, `POST /users`, the provider and magic-link exchange, and the
+  manager's `/_admin/login` and `/_admin/setup`. A source census in the spec allows only `auth/sessions.ts` and the
+  MCP door's one-minute session to create a `_Session` row.
+- All three readers resolve through it. Two of them never read `expiresAt` before, filed as `P109-S42-ENDEDREADS`.
+- `auth.json` `sessions.idleDays` (default 30, 1 to 3650), set through `PUT /admin/auth` and the Sign-in page's
+  "Staying signed in" card. A smaller number settles the sessions already out.
+- A row with a fixed end (impersonation, the MCP door) is not moved on by use.
+
+For DBT: the privacy notice can now say a sign-in ends after 30 days unused.

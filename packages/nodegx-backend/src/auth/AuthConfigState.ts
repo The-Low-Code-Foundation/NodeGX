@@ -91,7 +91,8 @@ export class AuthConfigState {
       providers: Array.isArray(p.providers) ? p.providers.map((provider) => ({ ...provider })) : [],
       magicLink: { ...base.magicLink, ...(p.magicLink || {}) },
       redirectAllowList: Array.isArray(p.redirectAllowList) ? [...p.redirectAllowList] : [],
-      linking: { ...base.linking, ...(p.linking || {}) }
+      linking: { ...base.linking, ...(p.linking || {}) },
+      sessions: { ...base.sessions, ...(p.sessions || {}) }
     };
   }
 

@@ -64,6 +64,7 @@ import { Mailer, SendEmailResult } from './email/Mailer';
 import { EmailTokenStore } from './email/tokens';
 import { isTemplateId, renderTemplate } from './email/templates';
 import { AuthConfigState } from './auth/AuthConfigState';
+import { DEFAULT_SESSION_IDLE_DAYS } from './auth/model';
 import { ensureIdentityTable } from './auth/identities';
 import { clearDiscoveryCache } from './auth/oidc';
 
@@ -255,7 +256,10 @@ export class BackendService {
       // PRD-005: never mint under the production stance.
       requireSecrets: this.options.requireSecrets,
       deployedFunctions,
-      facade: this.facade
+      facade: this.facade,
+      // ISL-040: read per session, so the Sign-in page's number holds from the next request.
+      // `auth` is built later in start(); until then (and on a service without one) the default.
+      sessionIdleDays: () => (this.auth ? this.auth.config.sessions.idleDays : DEFAULT_SESSION_IDLE_DAYS)
     });
 
     // DEF-009 AC4. Deliberately OUTSIDE the non-loopback block above: those
@@ -328,6 +332,7 @@ export class BackendService {
     //      so the dashboard's filter list has them without a second vocabulary.
     this.systemUsers = new SystemUsers({
       facade: this.facade,
+      sessions: this.security.sessions,
       onAudit: ({ action, outcome, target }) => {
         void this.audit?.record({
           action,
@@ -517,6 +522,10 @@ export class BackendService {
     //     provider's key rotation without waiting out the TTL.
     this.auth = new AuthConfigState(this.options.dataDir);
     clearDiscoveryCache();
+    // ISL-040: a session minted before sign-ins ended has no end; it gets one, the window from now,
+    // so it ends like every other after 30 days unused rather than never.
+    const settled = await this.security.sessions.settle();
+    if (settled > 0) logger.info('auth.sessions-settled', { rows: settled });
     for (const provider of this.auth.config.providers) {
       if (!provider.enabled) continue;
       const reason = this.auth.notConfiguredReason(provider);
@@ -960,13 +969,10 @@ export class BackendService {
       columns: [
         { name: 'sessionToken', type: 'String' },
         { name: 'userId', type: 'String' },
-        // CWF-015: an optional expiry instant. Nothing this server mints sets
-        // it — `POST /login` and `POST /users` write a session that lives until
-        // it is revoked, and that is still the contract. It exists because
-        // something else does write it: the cloud runtime's
-        // `Users.impersonate()` creates a `_Session` with a duration, and until
-        // `findSession` learned to read this column that "expiring" session
-        // never expired.
+        // When the session ends (CWF-015 read it; ISL-040 writes it). A sign-in
+        // ends after the Sign-in page's idle days unused, and each use moves it
+        // on (`auth/sessions.ts`). The cloud runtime's `Users.impersonate()`
+        // writes a fixed end, which use does not move.
         { name: 'expiresAt', type: 'Date' }
       ]
     });
@@ -976,6 +982,9 @@ export class BackendService {
     // `addColumn` swallows "duplicate column name", so this is the idempotent
     // half of the same statement rather than a second policy.
     sm.addColumn('_Session', { name: 'expiresAt', type: 'Date' });
+    // ISL-040: true on a sign-in session, whose end each use moves on. Absent on
+    // a session minted with a fixed end (an impersonation, the MCP door's minute).
+    sm.addColumn('_Session', { name: 'renews', type: 'Boolean' });
     // BMG-004 (R3): an account that may not sign in. The same idempotent ALTER
     // as the line above, for the same reason — and without it a
     // `where: { disabled: true }` on an older data dir is a SQL error rather

@@ -22,6 +22,7 @@ import * as path from 'path';
 import type * as http from 'http';
 
 import type { IStorageFacade } from '@noodl/backend-contract';
+import { Sessions } from '../auth/sessions';
 import type { AclOption } from '../persistence/AdapterFacade';
 import { HttpError } from '../server/http-util';
 import { ACCOUNT_DETAILS, adminAccessOf, isAccountDisabled } from '../users/accountColumns';
@@ -213,6 +214,11 @@ export interface SecurityDeps {
   deployedFunctions: DeployedFunction[];
   facade: IStorageFacade;
   /**
+   * ISL-040: the Sign-in page's "a sign-in ends after N days unused" (`auth.json`
+   * `sessions.idleDays`), read on every session. Absent means the ruled default, 30.
+   */
+  sessionIdleDays?: () => number;
+  /**
    * PRD-005: refuse to start rather than mint a missing admin credential. The credential may
    * still arrive by `--token`, by `NODEGX_ADMIN_TOKEN` / `NODEGX_ADMIN_TOKEN_FILE`, or from an
    * existing `secrets.json`; only the mint is refused.
@@ -232,9 +238,12 @@ export class SecurityState {
   /** PRD-005: where each admin credential came from. Sources only — never a value. */
   readonly secretProvenance: { adminToken: SecretProvenance; adminReadonlyToken: SecretProvenance };
   private readonly deps: SecurityDeps;
+  /** ISL-040: every session minted and read on this backend goes through this one. */
+  readonly sessions: Sessions;
 
   constructor(deps: SecurityDeps) {
     this.deps = deps;
+    this.sessions = new Sessions(deps.facade, deps.sessionIdleDays);
 
     // --- security.json ------------------------------------------------------
     const configPath = path.join(deps.dataDir, SECURITY_FILE);
@@ -503,11 +512,8 @@ export class SecurityState {
     //    client stringifies an absent token into the header; treat as absent.
     const token = h['x-parse-session-token'];
     if (typeof token === 'string' && token.length > 0 && token !== 'undefined' && token !== 'null') {
-      const { results } = await this.deps.facade.rawQuery('_Session', {
-        where: { sessionToken: token },
-        limit: 1
-      });
-      const session = results[0];
+      // ISL-040: the one reader, so an ended session is refused here as on `/users/me`.
+      const session = await this.sessions.resolve(token);
       if (!session) throw new HttpError(400, 'Invalid session token', 209);
       let user: Record<string, unknown>;
       try {

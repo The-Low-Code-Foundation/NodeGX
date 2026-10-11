@@ -27,6 +27,7 @@ import * as crypto from 'crypto';
 import type * as http from 'http';
 
 import type { IStorageFacade } from '@noodl/backend-contract';
+import { Sessions } from '../auth/sessions';
 import type { SecurityState } from '../security/state';
 import type { EmailConfigState } from '../email/EmailConfigState';
 import type { EmailRoutes } from './email-routes';
@@ -62,58 +63,8 @@ export function verifyPassword(password: string, stored: string): boolean {
   }
 }
 
-export function newSessionToken(): string {
-  return 'r:' + crypto.randomBytes(24).toString('hex');
-}
-
-/**
- * When does this `_Session` row stop being valid? `null` = never.
- *
- * CWF-015 filed this as "`impersonate()` writes `expiresAt` and `findSession`
- * never reads it", and that was exactly true: an impersonation session minted
- * with a one-hour duration outlived the process. This is the read half.
- *
- * It is deliberately liberal about the stored shape, because the writers do not
- * agree and never did. `POST /login` and `POST /users` write no `expiresAt` at
- * all. The cloud runtime's `Users.impersonate()` writes a real `Date` through
- * `Records.create`, which reaches the adapter as an ISO string, and a
- * Parse-wire client can send `{__type: 'Date', iso}`. A hand-written admin row
- * may carry epoch milliseconds. All four are legible here.
- *
- * ⚠️ **An unreadable value means "no expiry", not "expired".** Every session
- * this backend has ever minted has a null `expiresAt`, and the whole point of
- * making expiry real is that it must not log those users out. The failure mode
- * of guessing wrong in the other direction is every account on every existing
- * backend signed out at once by a deploy — so an absent, null, empty or
- * unparseable value keeps the session alive and only a value we can genuinely
- * read as a past instant kills it.
- */
-export function sessionExpiryMs(value: unknown): number | null {
-  if (value === null || value === undefined || value === '') return null;
-  if (value instanceof Date) {
-    const t = value.getTime();
-    return Number.isFinite(t) ? t : null;
-  }
-  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
-  if (typeof value === 'string') {
-    const t = Date.parse(value);
-    return Number.isNaN(t) ? null : t;
-  }
-  if (typeof value === 'object') {
-    const iso = (value as Record<string, unknown>).iso;
-    if (typeof iso === 'string') {
-      const t = Date.parse(iso);
-      return Number.isNaN(t) ? null : t;
-    }
-  }
-  return null;
-}
-
-/** True only when the row carries a readable `expiresAt` that has passed. */
-export function isSessionExpired(session: Record<string, unknown>, now: number = Date.now()): boolean {
-  const expiry = sessionExpiryMs(session.expiresAt);
-  return expiry !== null && expiry <= now;
-}
+// P109 ISL-040: the session helpers live with the one minter and reader (`auth/sessions.ts`).
+export { isSessionExpired, newSessionToken, sessionExpiryMs } from '../auth/sessions';
 
 export class UserRoutes {
   private readonly facade: IStorageFacade;
@@ -125,10 +76,13 @@ export class UserRoutes {
   // test harness) just runs with no email policy at all.
   private readonly emailConfig: EmailConfigState | null;
   private readonly emailRoutes: EmailRoutes | null;
+  // ISL-040: the security state's, so the access check and these routes read one rule.
+  private readonly sessions: Sessions;
 
   constructor(facade: IStorageFacade, security?: SecurityState, emailConfig?: EmailConfigState, emailRoutes?: EmailRoutes) {
     this.facade = facade;
     this.security = security || null;
+    this.sessions = security ? security.sessions : new Sessions(facade);
     this.emailConfig = emailConfig || null;
     this.emailRoutes = emailRoutes || null;
   }
@@ -138,31 +92,11 @@ export class UserRoutes {
   // ==========================================================================
 
   /**
-   * Resolve a session token to its `_Session` row, or null.
-   *
-   * The expiry check is done on the ROW, not in the `where` — a predicate on
-   * `expiresAt` would be a SQL error on every backend created before that
-   * column existed, and would exclude the null-`expiresAt` rows that are, today,
-   * every session this backend has ever issued. Reading the value back and
-   * judging it here is the only version that is safe on an existing data dir.
+   * Resolve a session token to its `_Session` row, or null — through `Sessions.resolve`, the
+   * reader the access check uses too, so an ended session is refused by both (ISL-040).
    */
   private async findSession(token: string | undefined): Promise<Record<string, unknown> | null> {
-    if (!token) return null;
-    const { results } = await this.facade.rawQuery('_Session', { where: { sessionToken: token }, limit: 1 });
-    const session = results[0] || null;
-    if (!session) return null;
-    if (isSessionExpired(session)) {
-      // Best-effort tidy: an expired row is dead weight and keeping it around
-      // only invites a future reader to resolve it. A failed delete must not
-      // turn "your session expired" into a 500.
-      try {
-        await this.facade.rawDelete('_Session', session.objectId as string);
-      } catch {
-        /* the row stays; it is still refused above */
-      }
-      return null;
-    }
-    return session;
+    return this.sessions.resolve(token);
   }
 
   /** Resolve the request's session token header to a user record, or throw 209. */
@@ -246,8 +180,7 @@ export class UserRoutes {
       throw new HttpError(403, 'Please verify your email address before logging in.', 205);
     }
 
-    const sessionToken = newSessionToken();
-    await this.facade.rawCreate('_Session', { sessionToken, userId: user.objectId });
+    const sessionToken = await this.sessions.mint(user.objectId as string);
 
     const wire = await this.facade.wireRecord('_User', user);
     // ⚠️ The resolved roles go AFTER the spread, deliberately. If a `_User` row
@@ -315,8 +248,7 @@ export class UserRoutes {
       _hashed_password: hashPassword(password)
     });
 
-    const sessionToken = newSessionToken();
-    await this.facade.rawCreate('_Session', { sessionToken, userId: user.objectId });
+    const sessionToken = await this.sessions.mint(user.objectId as string);
 
     // BAK-002: opt-in verification email on signup. Best-effort and NEVER
     // fails the signup itself — an operator who enabled sendOnSignup without

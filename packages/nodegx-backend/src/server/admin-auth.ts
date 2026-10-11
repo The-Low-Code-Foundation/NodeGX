@@ -2,7 +2,7 @@
  * Admin auth surface (BAK-004): configuring who can sign in.
  *
  *   GET    /admin/auth                    providers (redacted), policy, callback URLs, presets
- *   PUT    /admin/auth                    magic-link policy, redirect allow-list, linking toggle
+ *   PUT    /admin/auth                    magic-link policy, redirect allow-list, linking toggle, session idle days
  *   PUT    /admin/auth/providers/:id      add or update one provider (+ its client secret)
  *   DELETE /admin/auth/providers/:id      remove a provider and forget its secret
  *
@@ -25,6 +25,7 @@
  */
 
 import type { AuthConfigState } from '../auth/AuthConfigState';
+import type { Sessions } from '../auth/sessions';
 import type { EmailConfigState } from '../email/EmailConfigState';
 import {
   applyPreset,
@@ -40,6 +41,8 @@ import { HttpError, readJSONBody, sendJSON } from './http-util';
 
 export interface AdminAuthDeps {
   auth: AuthConfigState;
+  /** ISL-040: settled after the session idle days change, so the sessions already out obey it. */
+  sessions: Sessions;
   emailConfig: EmailConfigState;
   /** How the OAuth routes compute a provider's callback URL — reused verbatim so the two cannot disagree. */
   callbackUrl: (providerId: string) => string;
@@ -122,7 +125,7 @@ export class AdminAuthRoutes {
    */
   async putConfig(ctx: RequestContext): Promise<void> {
     const body = await readJSONBody(ctx.req);
-    const known = ['magicLink', 'redirectAllowList', 'linking'];
+    const known = ['magicLink', 'redirectAllowList', 'linking', 'sessions'];
     const given = Object.keys(body).filter((k) => k !== 'version');
     if (given.length === 0 || given.some((k) => !known.includes(k))) {
       throw new HttpError(
@@ -141,7 +144,8 @@ export class AdminAuthRoutes {
       ...this.deps.auth.config,
       ...(body.magicLink ? { magicLink: { ...this.deps.auth.config.magicLink, ...(body.magicLink as object) } } : {}),
       ...(allowList ? { redirectAllowList: allowList } : {}),
-      ...(body.linking ? { linking: { ...this.deps.auth.config.linking, ...(body.linking as object) } } : {})
+      ...(body.linking ? { linking: { ...this.deps.auth.config.linking, ...(body.linking as object) } } : {}),
+      ...(body.sessions ? { sessions: { ...this.deps.auth.config.sessions, ...(body.sessions as object) } } : {})
     };
     const errors = validateAuthConfig(candidate);
     if (errors.length > 0) {
@@ -151,7 +155,10 @@ export class AdminAuthRoutes {
     if (body.magicLink) Object.assign(this.deps.auth.config.magicLink, body.magicLink);
     if (allowList) this.deps.auth.config.redirectAllowList = candidate.redirectAllowList;
     if (body.linking) Object.assign(this.deps.auth.config.linking, body.linking);
+    if (body.sessions) Object.assign(this.deps.auth.config.sessions, body.sessions);
     this.deps.auth.save();
+    // ISL-040: a shorter number reaches the sessions already out, not only the next sign-in.
+    if (body.sessions) await this.deps.sessions.settle();
 
     ctx.audit({ sections: given });
     this.getConfig(ctx);

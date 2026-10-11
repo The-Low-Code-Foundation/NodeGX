@@ -70,7 +70,7 @@ import { RoleStore } from '../roles/RoleStore';
 import type { SecurityState } from '../security/state';
 import type { RequestContext } from '../server/HttpServer';
 import { HttpError, readJSONBody, sendJSON } from '../server/http-util';
-import { newSessionToken, verifyPassword } from '../server/users';
+import { verifyPassword } from '../server/users';
 import { applyAdminSecurityHeaders } from '../ops/headers';
 import { SystemUsers } from '../users/SystemUsers';
 import { ACCOUNT_COLUMNS, ADMIN_ROLE_NAME, adminAccessOf, isAccountDisabled } from '../users/accountColumns';
@@ -344,8 +344,7 @@ export class AdminDashboardRoutes {
     if (!access) return refuse();
 
     const userId = user.objectId as string;
-    const sessionToken = newSessionToken();
-    await this.deps.facade.rawCreate('_Session', { sessionToken, userId });
+    const sessionToken = await this.deps.security.sessions.mint(userId);
     ctx.audit({ actor: userId, access });
     sendJSON(ctx.res, 200, { sessionToken, access, person: this.person(user, access), roles: await this.deps.rolesForUser(userId) });
   }
@@ -389,8 +388,7 @@ export class AdminDashboardRoutes {
     }
     await this.roles.addMember(ensured.role, userId);
 
-    const sessionToken = newSessionToken();
-    await this.deps.facade.rawCreate('_Session', { sessionToken, userId });
+    const sessionToken = await this.deps.security.sessions.mint(userId);
     ctx.audit({ userId, username, role: ADMIN_ROLE_NAME });
     const user = await this.deps.facade.rawFetch('_User', userId);
     sendJSON(ctx.res, 201, { sessionToken, access: 'full', person: this.person(user, 'full'), roles: await this.deps.rolesForUser(userId) });

@@ -486,6 +486,7 @@ export class HttpServer {
     this.oauth = new OAuthRoutes({
       facade: deps.facade,
       auth: deps.auth,
+      sessions: deps.security.sessions,
       emailConfig: deps.emailConfig,
       mailer: deps.mailer,
       tokens: deps.emailTokens,
@@ -503,6 +504,7 @@ export class HttpServer {
     });
     this.adminAuth = new AdminAuthRoutes({
       auth: deps.auth,
+      sessions: deps.security.sessions,
       emailConfig: deps.emailConfig,
       callbackUrl: (providerId) => this.oauth.callbackUrl(providerId),
       getLocalUrl: () => this.localUrl()
