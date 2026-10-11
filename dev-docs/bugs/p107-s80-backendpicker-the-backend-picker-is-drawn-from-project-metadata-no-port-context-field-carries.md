@@ -1,11 +1,14 @@
 ---
 id: P107-S80-BACKENDPICKER
 title: The Backend picker is drawn from the project's backend list, which no PortContext field carries — no spec can draw it
-status: open
+status: fixed
 severity: medium
 area: nodegx-node-spec/src/spec.ts `PortContext` (:730-767) against noodl-runtime/src/nodes/std-library/data/record-ports.ts `recordBackendPickerPorts` (:119-121) / schema-ports.ts `backendPickerPorts` (:546-571)
 found: P107 NSP-020 s80 (L4, the module table), 2026-10-11 — oracle (a) drove Sign File URL and Upload File with a project holding two backends
 evidence: packages/noodl-runtime/test/node-spec/nsp-020-module-table.ts (the `Sign File URL` and `Upload File` rows, case "a project with two backends"); NSP-020 §6.3
+kit: node-spec
+commit: 27aa07374
+regression: packages/noodl-runtime/test/node-spec/nsp-020-module-table.ts (the DbModel2 row, case "a project with two backends" — the picker drawn from `context.backends`; and "a project with one backend draws no picker")
 ---
 
 With two or more backends in the project (`backendServices` metadata), every node that reads a backend announces a
@@ -28,3 +31,10 @@ cannot pick a backend on a Record node it builds.
 on `PortContext` (with `PORT_CONTEXT_FIELDS`), filled by L5's `portContextFor(project, nodeId)` from `backendServices`,
 and a shared `backendPicker(context)` the affected specs spread into `derived.inputs` with `needs: ['backends']`. Then the
 two pins in the module table go stale and are removed. L1 should know before it settles the Record family's `needs`.
+
+**Fixed in NSP-020 s82 (§6.6, piece 1):** `PortContext.backends` (`{ id, name }[]`, in `PORT_CONTEXT_FIELDS`) and
+`backendPickerPort(context)` in `record-base.ts` — an enum of `_active_` then each backend's id, default `_active_`, group
+General, drawn only with two or more backends (record-ports.ts :119-121). DbModel2 spreads it into `derived.inputs` with
+`needs: [... 'backends' ...]`; oracle (a)'s fake graph model answers `backendServices` from `context.backends`, and the
+DbModel2 row grades both cases. The two pins on Sign File URL and Upload File stay until those specs spread the same
+helper (L1's remaining rows); L5's `portContextFor` fills the field from `backendServices`.

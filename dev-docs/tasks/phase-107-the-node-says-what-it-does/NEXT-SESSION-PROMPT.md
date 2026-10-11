@@ -1,20 +1,23 @@
 # P107 — next session
 
-**Written 2026-10-11 (s81, Opus; s80's handoff carried forward below with s81's correction).** Read the [README](README.md)
-§2–§7 (R18 is the newest ruling), then [NSP-020 §3.1, §6.1–§6.5](NSP-020-PORTS-WITHOUT-A-RUNNING-VIEWER.md) — the design,
-the lanes, what s80 did, and what s81 measured — and [NSP-019 §5.1](NSP-019-RICHARD-READS-IT.md) (Richard's drive, still owed).
+**Written 2026-10-11 (s82, Fable).** Read the [README](README.md) §2–§7 (R18 is the newest ruling), then
+[NSP-020 §3.1 and §6.6](NSP-020-PORTS-WITHOUT-A-RUNNING-VIEWER.md) — the design and THE FORMAT DECISION, with its eight
+pieces and the two proofs — and [NSP-019 §5.1](NSP-019-RICHARD-READS-IT.md) (Richard's drive, still owed).
 
-**Model: Fable for step 1 (Richard's choice, s81).** s81 (Opus) found that L3 is NOT independent of L1. Asked whether
-Opus should take the format decision, Richard said hand it to Fable. Step 1 is now ONE format decision covering L1 and
-L3. The lanes after it are Opus work.
+**Model: Opus from here.** s82 (Fable) took the L1 + L3 format decision Richard handed to Fable in s81. What is left on
+NSP-020 is lanes on a decided format: moving specs onto it, the field fixes L4 printed, and L5.
 
-**s81 in one paragraph.** No code changed. L3 was measured before it was built (§6.5). s79's decision 4 ("re-derive
-after each param write") describes only States' value outputs. States' `at-`/`reached-` and Function's signals exist
-only when WIRED (`nodescope.ts` :150). Function's and Logic Builder's values exist when the CODE WRITES them
-(`simplejavascript.ts` :298, `logic-builder.ts` :488, :601). Script's ports are the project's SAVED ports
-(`javascript.ts` :433, fed by `editormodeleventshandler.ts` :120/:250). The runtime target's mount registers the padding
-"as a wire would" and as "saved `dynamicports`" (`node-spec-target.ts` :1877-1888). So the fixture lists in those four
-specs are what `RECORD_FIELDS` is in L1.
+**s82 in one paragraph.** At play a node has its params and its wires, never the project. `derived.outputs(params,
+context)` is ONE pure function with two readers: an editor hands it the project (`schema`, `backends`, `components` …)
+and draws the list; a target hands it the play's context (`PlayContext` = `wired` + `wiredOutputs`, nothing else) and
+registers the list — at mount, and again only after a write to a `derived.rederive` param (States' `values`, whose setter
+registers at run time; every other node's ports are the PLACING's, as NSP-017's contracts pin) — minus the `onWire`
+outputs no wire asks for, plus the wired names `discoverOutput` mints. Reducers ask `world.hasOutput(name)` where the runtime asks
+`hasOutput`. A scenario names `wiredOutputs` (its s79 `context` field is refused); a generated sequence draws them from
+`derived.outputCandidates`. §6.4's gaps 1–4 are settled in the same change (`narrow` reads RAW params; outcome ports
+drawn; `ValueOutputDecl.narrow`; `drawnDefault`). DbModel2 and States are on it: 52 hand traces byte-identical to the
+goldens before the change, both targets at 200, both L4 rows graded. The padding that came out hid a runtime crash
+(P107-S82-STATESVALUEPORT) — the first thing the honest format found.
 
 ## Board (from the task files)
 
@@ -28,76 +31,74 @@ specs are what `RECORD_FIELDS` is in L1.
 | NSP-010 a change is a version | ✅ s78 | `36e08e29e`, `64f9576d9` |
 | NSP-017 the escape hatches | 🟡 s64–s68. Left: AC1's export half (P18's) | s64 … s68 |
 | NSP-023 the spec without React | ✅ (s50) | s45 … s57 |
-| NSP-006 the stranger | ✅ rounds 1–4 (hashes refreshed s80 — s79 had left three stale) | `649e6864d`, s70 … s80 |
-| **NSP-020 ports without a viewer** | 🟡 s79 design + format; **s80: L2 ✅, L4 ✅, L1 measured (premise wrong, proposal §6.3); s81: L3 measured (premise wrong for 3 of 4 and for half of States, §6.5) — L1+L3 are one format decision; L5 not started** | s79, `00be10df0`, `f5fcd704a`, `84198b4bf` |
-| NSP-021 the second editor | 📋 not started (depends on NSP-020) | — |
+| NSP-006 the stranger | ✅ rounds 1–4 (hashes refreshed s82 for spec.ts, adapter.ts, dropdown.ts; all four rounds re-graded — the reading is in the s82 commit message) | `649e6864d`, s70 … s82 |
+| **NSP-020 ports without a viewer** | 🟡 s79 design; s80 L2 ✅, L4 ✅; **s82: the L1 + L3 FORMAT DECIDED AND BUILT (§6.6), DbModel2 and States on it; left: L1's other 14 specs, L3's other 3 (Function, Script, Logic Builder), oracle (c), L5** | s79, `00be10df0`, `f5fcd704a`, `84198b4bf`, s82 |
+| NSP-021 the second editor | 📋 not started (depends on NSP-020 L5) | — |
 | NSP-022 the cloud-only nodes | 📋 (needs a second runtime target) | s21 |
 
-`spec-ledger --check` (s80, before the lanes): exit 0 — 125 of 147 on the runtime · 3 contract · 2 export · 2 exempt ·
-17 owed, all NSP-022. s80 moved no spec's conformance.
+`spec-ledger --check` (s82): exit 0 — 125 of 147 on the runtime · 3 contract · 2 export · 2 exempt · 17 owed, all NSP-022.
+s82 moved no spec's conformance.
 
-## What s80 did (all committed and measured)
+## What s83 does (in order)
 
-- **L2 ✅** (`00be10df0`): `when` on all 448 conditioned ports (439 sites, 21 files), generated from the catalog's
-  conditions. Oracle (b) now falls back to the CATALOG's defaults (a drifted spec default is red, planted) and grades the
-  nine `#js` conditions. `WHEN_FLOOR = 448`. Browser entry +6.2 KB gzipped (noted on P107-SIZE, P112's).
-- **L4 ✅** (lane agent in a worktree, merged `84198b4bf`): oracle (a) over all **70** runtime hooks (the handoff said
-  ~50). Census-checked; 21 graded (106 cases), 15 owed to L1, 4 to L3, 30 excluded with a reason. Spec fixes: Or /
-  String Mapper / Color Blend count wires; Expression, Close Popup, Pop Component Stack, Navigate To Path labels and
-  groups; Array Filter's value type; `narrow` on Dropdown `value` and Text Input `startValue`. Rows HTTPANNOUNCE,
-  BACKENDPICKER. Five format gaps pinned (§6.4): no outcome ports in `drawnPorts`, no output `narrow`, `narrow` can't
-  tell set-to-default from unset, no editor-only default, `dataAttributes` ungraded.
-- **L1 measured, NOT built** (§6.3): the fixture constants (`RECORD_FIELDS`, `USER_FIELDS`, Show Popup's
-  `RESULTS`/`ACTIONS`) are **the play's wires, not the project**. The runtime announces schema ∪ wires to the editor, but
-  at play a `prop-`/`changed-`/`closeResult-` port exists only when a wire registered it, and every send is gated on
-  `hasOutput` (cited lines in §6.3). A five-piece format proposal is written there.
-- **P107-S80-DEADTARGET (high, fixed in `f5fcd704a`)**: the runtime target had not COMPILED since s79 (`9a786e0b2`) —
-  every runtime conformance / graph / target suite "failed to run" with `Tests: 0`. The target now takes the scenario's
-  `context` and folds `wired` the way the interpreter does.
-- The first full runtime batch since s79 then showed **3 mutant survivors that only the rotated seed exposed** (pre-s79
-  too, measured on a control worktree): closed with hand scenarios (a remount grid on Checkbox and Radio Button; two
-  quiet frames after Close Popup's closes). A fourth, Radio Button's pick swap, is **P107-S80-PICKSWAP** (open; fails on
-  20733 and 20738, green on 9 of 11 seeds incl. today's 20736).
-
-**Where the s79 handoff was wrong:** the stranger hashes were stale at its HEAD (spec.ts, adapter.ts, and.ts); the runtime
-target did not compile; "~50 setup callers" was 70; L1's "each fixture constant becomes `context`" contradicts the
-runtime; Event Receiver and Cloud Function have no spec under the runtime's type names; Page Inputs reads only its own
-params (graded, not owed).
-
-## What s82 does
-
-1. **Decide the format for L1 AND L3 together** (Fable): §6.3's five pieces (`PortContext.wiredOutputs`,
-   `derived.discoverOutput`, "at play: params and wires, never the project", `WorldView.hasOutput`, a spec-level default
-   for a generated sequence's wires), plus §6.5's three: an output the node makes by its own WRITE (Function, Logic
-   Builder — `discoverOutput` called on a write too?), the node's SAVED ports (Script; Function's signal types — a
-   `PortContext` field, or one default shared with §6.3 piece 5), and States' values keeping decision 4. Read §6.4's
-   five format gaps and P107-S80-BACKENDPICKER first and settle them in the same change. Prove it on DbModel2 AND
-   States: traces byte-identical (`spec-golden:check`), conformance at 200 on both targets, the needs gate, and both L4
-   rows turning from `owedBy` to graded. `spec.ts` is a FORMAT file: refresh the stranger hashes and re-grade every
-   round in the same commit.
-2. **Independent of step 1, small (Opus can take it any time):** L4's printed field disagreements on Function —
-   `intype-`/`outtype-` should be `enum`, `in-*` `string`, labels and groups — with `spec-golden:check` and oracle (a)
-   beside it.
-3. Then the rest of L1's 15 rows and L3's 4 on the decided format, then **L5** (`portContextFor` in
-   `@nodegx/project-contract`, the cache drive, AC3, AC4). Oracle (c) waits on P107-S79-ADAPTERLABEL.
+1. **L3's other three onto the format — Function (`JavaScriptFunction`), Script (`Javascript2`), Logic Builder.** Each
+   has a fixture list (`FUNCTION_FIXTURES`, `SCRIPT_FIXTURES`, `LOGIC_BUILDER_FIXTURES`) that pads `derived.outputs`.
+   On the decided format (§6.6, "What the four padded specs' fixtures were"): the saved ports ARE `derived.outputs(params)`
+   at the PLACING (piece 5 — the runtime target writes `model.outputPorts` once at mount from `playOutputs`; a `set code`
+   mid-play moves no saved port, and NSP-017's contracts pin that); an output the code WRITES is `discoverOutput` (piece 4
+   — the interpreter mints it on `world.send` / `sendDerived` of an unknown name); a Function's SIGNAL outputs are `onWire`
+   (piece 3, simplejavascript.ts :609); `outputCandidates` names what a generated sequence may wire; `derived.rederive`
+   only where a run-time SETTER registers (States' `values`) — none of the three, most likely. Recipe that worked on
+   DbModel2 and States: (a) write each hand scenario's `wiredOutputs` from the output names its HEAD golden trace
+   mentions (a script; the plan file is `scratchpad/wire-plan.json`'s shape), (b) move the spec, (c) regenerate the
+   golden and diff every trace against HEAD's — **byte-identical or explain**, (d) the interpreter batch suite for the
+   node at seeds 13 and 20728 (mutants), (e) `NSP_ONLY=<type>` runtime conformance at the day's seed, (f) the node's
+   oracle (a) row from `owedBy: 'L3'` to graded with cases — fix the printed field disagreements while there
+   (Function: `intype-` / `outtype-` are `enum`, `in-*` `string`, labels and groups). A seed-only mutant survivor is a
+   hand scenario, as s82's DbModel2 one (its `because` says how to make the dropped set observable).
+2. **L1's other 14 onto the format** — the Record write family (5), DbCollection2, FilterDBModels, SubscribeToChanges,
+   User / Set User Properties / Sign Up, Push Component To Stack, Show Popup, For Each. Same recipe. `record-base.ts`
+   already has `classPickerPort`, `backendPickerPort`, `recordWiredFieldNames`, `changedSignal`; the User family's
+   `USER_FIELDS` is `RECORD_FIELDS`'s twin. Show Popup's announcement reads the popup's Close Popups (showpopup.ts
+   :341-416) — `ComponentInterface` cannot carry that; "a new field is a row" (measure first). Sign File URL and Upload
+   File spread `backendPickerPort` and drop their two BACKENDPICKER pins in the module table.
+3. **L5** (`portContextFor(project, nodeId)` in `@nodegx/project-contract`: `wired`, `wiredOutputs`, `backends` from
+   `backendServices`, `schema`, the rest; the cache drive over the templates (§5); AC3 the MCP's per-instance ports —
+   `drawnPorts` draws the outcome ports now; AC4 the ledger column from `portsDerivability`). Oracle (c) waits on
+   P107-S79-ADAPTERLABEL.
 4. ONE 10,000-sequence run on the primary when L1 and L3 have landed.
 
 **Human decisions:** NSP-019 AC3 and its three choices; C160; C161; C162. The Frappe note in NSP-010 §4 is owed to
 Richard **before the first `changes` entry answers `project`** — none does yet. NSP-010's and NSP-017's uncommitted
-notes (not this phase's sessions') were left out of s80's commits again.
-**P109 holds:** D38, the Page Stack, the Router, LIBRARYDOCS, CHR007SNAPSHOT. **P112 holds:** P107-SIZE (now 308.2 KB
-gzipped against 240).
+notes (not this phase's sessions') were left out again.
+**P109 holds:** D38, the Page Stack, the Router, LIBRARYDOCS, CHR007SNAPSHOT, and now **P107-S82-STATESVALUEPORT**
+(states.ts :534-541 — `hasOutput` before the flag; when fixed, drop `KNOWN_ROWS.States` in the runtime's
+`conformance.test.ts` and the `row` on the States scenario in the same commit) and **P107-S82-STATESLOADGATE**
+(states.ts :1248 — drop the `states` guard at load; then the two pins on the States row in `nsp-020-module-table.ts`
+go stale and come out). **P112 holds:** P107-SIZE (308.2 KB gzipped against 240).
 
-## Gates (s80, on the merged tree `84198b4bf` unless said; s81 ran none — it changed no code)
+**Checkout hazards seen in s82 (not this phase's to fix):** a peer's temp-index commit (`74a73de91`, P112 s8) left the
+REAL index holding its files as staged deletions (`git diff --cached --stat`: 24 files, 1,518 deletions) — a plain
+`git commit` from that index reverts P112's slice. s82 committed through its own temporary index and reset only its own
+paths. `src/runner/graph.ts` and `node-spec-target.ts` carry a peer's live unstaged edits beside s82's.
 
-- `spec-golden:check` 0 (108 specs, 9,207 scenarios) and `spec-ledger:check` 0 (125/147, measured before the lanes).
-- node-spec `tsc --noEmit` 0. node-spec jest at L2: `ports, catalog-parity, golden, types, batch-visual, page-model,
-  page-model-plants, layout, layout-map, layout-check, rules-reader, schema` 1,341 / 1,341; `stranger.test.ts` all four
-  rounds 46 / 46 (+18 deep skipped). After the merge: Dropdown's round (`NSP_ONLY=net.noodl.controls.options`) 12 / 12.
-- runtime: the whole batch `conformance + graph + runtime-target` at seed 20736 BEFORE the survivor fixes and the merge
-  — graph and runtime-target PASS, conformance 221 passed / 3 failed (the 3 survivors, closed since). After: the 3 specs
-  at seeds 20730–20740 (Checkbox, Close Popup 11/11; Radio Button 9/11 = PICKSWAP); after the merge the 12 specs either
-  side changed at 20736, 12 / 12. `nsp-020-ports-parity` 183 / 183.
-- editor `tests-unit/nsp-020` 452 / 452; `typecheck:editor-tests` 0 (at L2).
-- **Not run:** the whole runtime batch on the merged tree (the 12 changed specs were), `test:main`, `test:ci`, any 10,000
-  run. `node scripts/bugs.js check`: 0 problems in P107's s80 rows; the ledger as a whole carries others' problems.
+## Gates (s82, this tree; the code commit is `27aa07374` on `61694bc27`)
+
+- 52 hand traces byte-identical to HEAD's goldens before any scenario was added (DbModel2 29 / 29, States 23 / 23);
+  then one scenario added to each (a mutant-killer; a `row` scenario). Graph scenarios s07 and t11 carry `wiredOutputs`
+  on their Record / States nodes; their recordings did not move (`graph.test.ts` green).
+- node-spec `tsc --noEmit` 0; `ports` 62 / 62 (9 new, on probe specs: the two readers, `playOutputs`, `onWire`,
+  `discoverOutput` on a write, re-derive after a write, raw `narrow`, the refused `context` field, DbModel2 / States
+  pinned); `golden, runner, pilot, adapter, catalog-parity, types, schema` green; `batch-records` DbModel2 and
+  `batch-time` States at seeds 13 and 20728 — every mutant killed or declared.
+- runtime: `NSP_ONLY=DbModel2,States,net.noodl.controls.options` conformance at 200, seed 20737 — all CONFORM; States'
+  4 known attributed to STATESVALUEPORT and its `row` scenario known. `nsp-020-ports-parity` 199 / 199 — 23 graded rows,
+  120 cases, 17 owed.
+- editor `tests-unit/nsp-020` 452 / 452; `typecheck:editor-tests` 0. `spec-golden:check` 0 (108 specs, 9,209 scenarios
+  with the two added); `spec-ledger:check` 0; `node scripts/bugs.js check` — 0 problems in the s82 rows (the ledger as a
+  whole carries 12 of others').
+- Full node-spec suite (every file but the stranger rounds): 33 suites, 1,886 / 1,886, 515 s, exit 0. Runtime suites that
+  import the target — `runtime-target`, `graph` (96 / 96), `function-contract`, `script-contract`, `logic-builder-contract`
+  — green after the rederive narrowing (the first draft re-derived the target's model after every write and the Logic
+  Builder contract's control went red: the kinds are the placing's). Stranger rounds 45 / 45 (+18 deep skipped), 432 s, graded on this tree.
+- Not run: the whole runtime batch, `test:main`, `test:ci`, any 10,000 run.

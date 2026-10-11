@@ -2,7 +2,7 @@
 
 **Opened 2026-09-30 (s1), from Richard's ruling that the editor is a target (README §1, R6).**
 **Depends on NSP-004.** Runs alongside the batches (NSP-011 to NSP-017): each batch closes its nodes' rows here.
-**Status: 🟡 s79 (2026-10-10, Fable): the design is decided and built in the format (§3.1) — `portsOf` / `drawnPorts`, `PortContext` + `derived.needs` with the needs gate, `when` and `narrow` on declared ports, `context` through the scenario, the adapter and the interpreter; the three-oracle parity drive stands with its first proofs (And with wires, String Format, Image's size-mode groups) and planted mutants. s80 (Opus): L2 done — `when` on all 448 conditioned ports, oracle (b) green and made honest (§6.2); L1 measured, its premise wrong (the fixtures are the play's wires, not the project), a format proposal in §6.3, the runtime target takes `context` and compiles again (P107-S80-DEADTARGET); L4 done — oracle (a)'s module table over all 70 hooks (§6.4). s81 (Opus): L3 measured, NOT built — decision 4 holds only for States' value outputs; the rest of the padding is the play's wires, the code's writes, or the project's saved ports, so L3 joins L1's format decision (§6.5). Left: the lanes (§6 s79) — `needs` on the 22 project- and schema-dependent specs, the padding out of four specs, oracle (c), the context builder in `project-contract`, AC3 (MCP) and AC4 (ledger column).**
+**Status: 🟡 s79 (2026-10-10, Fable): the design is decided and built in the format (§3.1) — `portsOf` / `drawnPorts`, `PortContext` + `derived.needs` with the needs gate, `when` and `narrow` on declared ports, `context` through the scenario, the adapter and the interpreter; the three-oracle parity drive stands with its first proofs (And with wires, String Format, Image's size-mode groups) and planted mutants. s80 (Opus): L2 done — `when` on all 448 conditioned ports, oracle (b) green and made honest (§6.2); L1 measured, its premise wrong (the fixtures are the play's wires, not the project), a format proposal in §6.3, the runtime target takes `context` and compiles again (P107-S80-DEADTARGET); L4 done — oracle (a)'s module table over all 70 hooks (§6.4). s81 (Opus): L3 measured, NOT built — decision 4 holds only for States' value outputs; the rest of the padding is the play's wires, the code's writes, or the project's saved ports, so L3 joins L1's format decision (§6.5). **s82 (Fable): the format decided and built (§6.6) — at play a node has its params and its wires, never the project: `PlayContext`, `wiredOutputs` + `backends`, `onWire`, `discoverOutput`, `outputCandidates`, `hasOutput`, re-derive after each write; proved on DbModel2 and States (traces byte-identical, both targets at 200, both L4 rows graded).** Left: L1's other 14 specs and L3's 3 onto the format, oracle (c), the context builder in `project-contract`, AC3 (MCP) and AC4 (ledger column).**
 
 ## 1. The person sentence
 
@@ -406,3 +406,63 @@ Each spec's L4 row stays `owedBy: 'L3'` until the format lands. The field disagr
 on their own, with `spec-golden:check` and oracle (a) beside them.
 
 **Gates:** none run; this session changed no code.
+
+### 6.6 s82 (2026-10-11, Fable) — THE FORMAT DECISION for L1 and L3, proved on DbModel2 and States
+
+**The decision in one sentence: at play a node has its params and its wires, never the project — so one pure
+`derived.outputs(params, context)` is both the editor's draw (the project in the context) and the play's registration
+(the wires only), and no spec pads anything.** Decided and built in the format (`src/spec.ts`, `src/ports.ts`,
+`src/interpreter.ts`, the runner, the runtime target), eight pieces, each read from the runtime:
+
+| # | piece | where | the runtime line it says |
+|---|---|---|---|
+| 1 | `PortContext.wiredOutputs` — the outputs a wire leaves from; `PortContext.backends` — the project's backend list (P107-S80-BACKENDPICKER, closed) | spec.ts | record-ports.ts :305-308 `getConnectionsFrom`; schema-ports.ts :546-571 the picker |
+| 2 | **`PlayContext = Pick<PortContext, 'wired' \| 'wiredOutputs'>`** — the interpreter and the runtime target hand `derived.*` exactly this (`playContextOf`); a scenario names `wired` and `wiredOutputs`, and its s79 `context` field is REFUSED by the loader | spec.ts, scenario.ts, adapter.ts (`mount`'s fourth argument retyped), interpreter.ts `mount`, node-spec-target.ts `mountIn` | dbmodelnode2.ts :140-142, :340, :448 — every `prop-` send gated on `hasOutput`; the schema is never read at play |
+| 3 | **`onWire: true` on a derived output** — exists at play only when `wiredOutputs` names it; drawn from the params regardless | spec.ts `ValueOutputDecl` / `SignalOutputDecl`; ports.ts `playOutputs` | nodescope.ts :150 `registerOutputIfNeeded(sourcePort)`; states.ts :290, :918, :936 gated sends (`at-` / `reached-`); simplejavascript.ts :609 (a Function's signals) |
+| 4 | **`derived.discoverOutput(port)`** — the output-side `discover`: called for each `wiredOutputs` name nothing derived, by `connect` for a late wire, and by the interpreter when a reducer `sendDerived`s / `emitDerived`s / `pulses` / `world.send`s a name the instance has no output for (the node's own write minting the port) | spec.ts, interpreter.ts `mintOutput`, ports.ts | dbmodelnode2.ts :474-486; simplejavascript.ts :298 (the Outputs proxy); logic-builder.ts :488, :601 |
+| 5 | **Decision 4 narrowed to what the runtime does: `derived.rederive` names the params whose RUN-TIME setter registers ports** (States' `values`); a write to one re-derives on the interpreter — new ports registered, nothing removed or re-shaped (a shadow of a declared name is skipped there; at mount it is still the spec error). Every other node's ports are the PLACING's: the runtime target writes `model.outputPorts` / `inputPorts` ONCE at mount from `playOutputs` and never again — the headless runtime reads the model as the project saved it, and NSP-017's contracts pin it ("the kinds are the placing's"; the first draft of this piece re-derived the target's model after every write and the Logic Builder contract's control went red — so this is measured, not assumed) | spec.ts `DerivedPorts.rederive`; interpreter.ts `written` + `rederive`; node-spec-target.ts `placing` | states.ts :338-358 the `values` setter registers; javascript.ts :433-435 re-registers the SAVED `model.outputPorts` at each code read; simplejavascript.ts :600-618 reads the signal kinds there |
+| 6 | **`WorldView.hasOutput(name)`** — a reducer asks what the runtime asks | spec.ts, interpreter.ts `viewOf` | node.ts `hasOutput`, every gated send above |
+| 7 | **`derived.outputCandidates`** — the outputs a GENERATED sequence may wire; the generator wires each with an even chance (drawn after every other draw, so a spec naming none generates what it did); `wiredOutputs` rides through `Sequence`, `Divergence`, the shrinker and the replay; the golden hashes it only when present, so every scenario without one keeps its hash | spec.ts, generate.ts, conformance.ts, shrink.ts, golden.ts | — (this is where `RECORD_FIELDS` / `STATE_LISTS` belonged) |
+| 8 | **§6.4's gaps settled in the same change:** (1) `drawnPorts` draws the outcome ports (`outcomePorts(spec)`: `done` + `completed`, `unchanged` / `failure` when listed; oracle (a) compares them on type alone, as before — a node may group them its own way); (2) `narrow` on a VALUE OUTPUT (`ValueOutputDecl.narrow`, type only — Text Input's `onTextChanged` is a lane's); (3) **`narrow` reads RAW params** — a Dropdown Value SET to `'Option 1'` outside the list is offered back exactly as options.ts :428-432 offers it; the Dropdown says the hook's own `DEFAULT_ITEMS` fallback (:418) itself, and L4's `GAP` pin is gone; (4) `ValueInputDecl.drawnDefault` — the default the announcement shows when it is not the value at mount (Component Stack's `startPage`, a lane's); (5) `dataAttributes` stays an editor rule, not a format gap. Also `'curve'` joins `ValueType` (States' transition ports announce it; the generator's pool falls back to `*`) | ports.ts, spec.ts, dropdown.ts, nsp-020-oracle-a.ts | outcome.ts :148-190; options.ts :417-447; text-input.ts :616-637; states.ts :1030 |
+
+**What the four padded specs' fixtures were, said in the format:** `RECORD_FIELDS` → `outputCandidates: prop-title, changed-title, prop-n, changed-n`
+and `derived.outputs` reading `context.schema` ∪ the wire names; `STATE_LISTS` / `VALUE_LISTS` → the generator's `examples`
+(unchanged) + `outputCandidates: at-A … reached-C`, the value outputs re-derived from `values`, the state ports `onWire`;
+`FUNCTION_FIXTURES`, `SCRIPT_FIXTURES`, `LOGIC_BUILDER_FIXTURES` (not moved this session, step 3's) → the saved ports ARE
+`derived.outputs(params)` at the PLACING (piece 5 — no `savedPorts` field is needed: what the project saved is what the editor
+drew for the saved params; a `set code` mid-play moves no saved port, as javascript.ts :433 shows), the written outputs
+`discoverOutput` (piece 4), a Function's signal outputs `onWire` (piece 3). **Graph scenarios** say the same thing per node:
+`GraphNodeDecl.wiredOutputs` (graph.ts) — the outputs a wire leaves from to nodes outside the scenario; s07 (four Records) and
+t11 (a States) carry theirs, written from the ports their recorded traces mention, and the recordings did not move.
+
+**Proved on DbModel2** (`record.ts`, `record-base.ts`): `derived.inputs` draws the Class dropdown from the schema (the two Parse
+system classes first, record-ports.ts :124-140) and the Backend picker with two or more backends; `derived.outputs` draws one
+`prop-` + `changed-` per column of the selected class and `prop-` alone per wired or parameter-named field
+(`recordWiredFieldNames`); `discoverOutput` mints `prop-*` / `changed-*`; `needs: ['schema', 'backends', 'wired', 'wiredOutputs']`;
+every `isField` became `w.hasOutput(...)`, `prop-` and `changed-` gated separately as :140-142 gates them. **Proved on States**
+(`states.ts`): `derivedOutputs` reads the two lists alone (no universe), value outputs without a display name (the hook announces
+none, :980-988), `at-` / `reached-` `onWire`; the `outputs` state key and `init` are gone, `flag` / `reached` ask `hasOutput`; the
+curve ports type `curve`, a value's own transition defaults to the state's Default as set (:1030).
+
+**Gates (s82, this tree):** 52 hand scenarios' traces **byte-identical** to HEAD's goldens (DbModel2 29 / 29, States 23 / 23 —
+`wiredOutputs` written on 47 of them from the output names their HEAD traces mention; only the input hashes moved); then two
+scenarios added (below). Interpreter: `batch-records` DbModel2 and `batch-time` States at seeds 13 and 20728 — every mutant
+killed or declared. Runtime: `NSP_ONLY=DbModel2,States,net.noodl.controls.options` conformance at 200, seed 20737 — all three
+CONFORM, States' 4 known attributed. Oracle (a) `nsp-020-ports-parity` 199 / 199 — **23 graded rows, 120 cases** (DbModel2 and
+States turned from `owedBy` to graded: DbModel2 six cases incl. two backends, a wire out of `prop-zz`, a wire into `prop-n`;
+States five cases), 17 owed. Oracle (b) `tests-unit/nsp-020` 452 / 452; `typecheck:editor-tests` 0; node-spec `tsc --noEmit`
+0; node-spec `ports, golden, runner, pilot, adapter, catalog-parity, types, schema` 491 / 491; `spec-golden:check` 0 (108 specs,
+9,209 scenarios); `spec-ledger:check` 0 (125 / 147, unmoved — the column is AC4's). Full node-spec suite and the stranger rounds:
+see the handoff for the readings taken after this paragraph was written.
+
+**Found, filed:** **P107-S82-STATESVALUEPORT** (runtime, low) — a `value-<state>-<v>` written while in that state flags `v`
+without `hasOutput` and THROWS when `v` is not in Values (states.ts :534-541); the padding had registered every `v` at mount, so
+no play reached it before. Known on the runtime (`KNOWN_ROWS.States`, a `row` scenario). **P107-S82-STATESLOADGATE** (runtime
+announcement, low) — at load the hook announces nothing until States is set, while any later edit announces Values' outputs
+regardless (:1248-1260); pinned on the States row. **Closed:** P107-S80-BACKENDPICKER (piece 1; the two L4 pins stay until Sign
+File URL and Upload File spread `backendPickerPort`). A DbModel2 swap mutant that survived seed 20737 alone is killed by a hand
+scenario (a bind that unbinds beside a refused Fetch to a backend named `ghost`, then a Fetch that reveals the binding).
+
+**Where s81's handoff was wrong:** nothing material; §6.5's "a `PortContext` field for the node's saved ports" is not needed
+(piece 5). **Not done:** L1's other 14 rows and L3's 3 (Function, Script, Logic Builder) move onto the format in step 3; the
+L4 field disagreements on Function (step 2) untouched.
