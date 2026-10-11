@@ -4,7 +4,7 @@
 *"let's borrow 1 to 4"*. **Depends on ONT-001** (the kinds), **ONT-003** (the projection), **ONT-005** (the mutants);
 **feeds ONT-008** (the view hints). **Status: 🟡 step 1 ✅ (P116 s15, 2026-10-10, Opus 5.5): the detectors are in
 `census.js`, every candidate in all 8 sources is classified by meaning, and all four borrows keep rows (§3.5). AC1 ✅.
-Steps 2 and 4 are Fable's. R-a, R-b and R-c ruled s16 (§6); step 4's two targets are built in ONT-012 (`fields.<f>.read`, `onlyWhile`).** §3.1–§3.4 were read by hand before the
+**Step 2's *settled* half ✅ (s18, 2026-10-11, Fable 5.1, §9): the fifteenth kind, its five questions, its projection onto ONT-014's two new holds, four mutants all killed, 8 rows over 4 sources.** Step 2's other three borrows (facts about a thing, secret details, only sometimes) are still owed. R-a, R-b and R-c ruled s16 (§6); step 4's two targets are built in ONT-012 (`fields.<f>.read`, `onlyWhile`).** §3.1–§3.4 were read by hand before the
 census; §3.5 is what the census counted.
 
 > **Model check, before anything (Richard, 2026-10-08 rule):** steps 2 and 4 want **Fable 5.1**. They change the
@@ -145,7 +145,7 @@ ask it as one of the noun's questions, but nothing here says it needs a mutant o
    an unclassified candidate and on a verdict that names no candidate. Mutants: a secret detector that never
    matches (5 verdicts name nothing → red); a verdict removed (`Assignment.status` unclassified → red).
 2. **The vocabulary** (Fable). Only the borrows that have rows.
-   - **Settled** becomes a kind in `kinds.hand.json` and `kinds.ts`, with `target: 'none'` and `self` for the amend
+   - ✅ (s18, §9) **Settled** becomes a kind in `kinds.hand.json` and `kinds.ts`, with `target: 'none'` and `self` for the amend
      link. Questions: *what makes it agreed, and who agrees it? After that, may anything still change (a note, a
      status)? To correct it, withdraw it or replace it, and does the replacement name the one it replaces? May a
      draft be deleted? May an agreed one?* It projects to a status Choice, an agreed-at Date and an `amends` Link to
@@ -211,3 +211,45 @@ both rules are new to the contract (step 4a below).
 
 Frappe's Desk (P104 rejected that look), its Python document hooks (logic in free code works against restraint), many
 sites from one codebase, and its naming-series machinery beyond the question it asks.
+
+## 9. Step 2, the *settled* half (s18, 2026-10-11, Fable 5.1)
+
+**The kind.** `settled` is the fifteenth entry of `kinds.hand.json` and `WORLD_KINDS` (`world/kinds.ts`), `target:
+'none'`, sentence *"a {from} is agreed at some point, and after that it stays as it was agreed"*. Its rows are not
+relations the harvest sees (a status, a sent-on date, an attempt number), so `census.js` learned one thing: a kind
+with a `borrow` draws its rows from that borrow's candidates judged **yes** in step 1. That gives 8 rows over 4
+sources (lessons 4, nightbook 1, planning 1, tirion 2 — `KINDS.md`), the private two counted on this machine with the
+private paths. The relation-row count stays 303; `world.test.ts` pins the kinds' total at 311.
+
+**Five questions**, in the order a person is asked: who agrees it and what that is called (`agreedBy`, words);
+which details may still change afterwards (`stillChanges`, a new answer shape **`fields`** — names of the noun's own
+details or "nothing", checked by the validator against the noun); how a mistake is put right (`putRight`: withdraw
+it / replace it with a new one / either); may a draft be thrown away (`deleteDraft`); may an agreed one ever be
+deleted (`deleteAgreed`).
+
+**The projection** (`kinds.ts` → `project.ts` → `security.json` through the migration route): a `status` Choice
+(draft / agreed / withdrawn), an `agreedAt` Date, an `amends` link to itself unless mistakes are only withdrawn; and
+three rules, each **held** by ONT-014's seam — `moves` on `status` (draft → agreed → withdrawn, never back; no
+`by`, since a world names no role), `frozen: "*"` `unless` the record is still a draft (or has no status yet) with
+`except` for `status`, `agreedAt` and the `stillChanges` answer, and, when an agreed one may not be deleted,
+`delete: "never"` or `delete: { where: draft }`. These are ONT-014 §3.3's two new `RuleHold` shapes (`frozen` with
+`unless`/`except`, `moves`) plus `neverDeleted` with `unless`; each carries `heldOn`/`freeOn`, the row values a
+claim uses to make a bound row and a free one without evaluating the condition. `WorldOnlyWhile` grew to carry them,
+and the migration's `rules` step now carries **`was`** (what the world said before) so the route can tell its own
+earlier writing from a person's hand rule (ONT-014 §6.5 #4; `withWorldRules` merges by provenance when `was` is
+there, and keeps s17's slot rule for a plan written by hand).
+
+**Graded.** `world-every-kind` gained a `quote` noun and the relation `quote-sent` (settled; `stillChanges: "note"`,
+`putRight: replace`, drafts deletable, agreed ones not). Three claims, each held with a mutant on both engines:
+*status never goes back* (draft → agreed goes through, back is refused), *frozen once agreed* (an amount refused on
+an agreed quote, every excepted field still changes, the same amount changes on a draft), *never deleted* (an agreed
+quote refused, a draft removed). Settled's four seeds — edited in place, goes back, agreed deleted, amend loses its
+link — are all **killed**. ONT-005's every-kind honesty number: 13 of 38 → **14 of 45** on both engines — settled's six mutants (four seeds, two unanswered questions that change the schema) all killed, the one survivor added being the quote's own number stored as text (the noun's property mutant, unclaimed like the slot's date). The pin is `ont-005-mutants.test.ts`'s. The brief and `KINDS.md` regenerate from the
+kinds; `ont002WorldTools` 12/12.
+
+**Not this half:** the other three borrows of step 2 (facts about a thing on `Noun`; `secret` and `onlyWhen` on a
+property), step 3's remaining mutants (a settings collection with three records, a number reused, a last-editor
+field), step 4's projection of secret details to `fields.<f>.read` (the target exists; the kind-side answer
+`secret` does not yet), and step 5. **A limit said:** one `frozen` per collection — a noun that is both *settled*
+and has a `setOnce` field gets the union of fields under settled's `unless`, so the set-once field is editable while
+the record is a draft (`project.ts` step 4 says so in its comment).

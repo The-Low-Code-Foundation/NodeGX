@@ -56,7 +56,9 @@ export type KindTarget =
 export type AnswerShape =
   | { type: 'yes-no' }
   | { type: 'one-of'; values: readonly string[] }
-  | { type: 'words' };
+  | { type: 'words' }
+  /** P116 ONT-011 step 2: names of the {from}'s own details, comma-separated, or "nothing" — what a projection can read back as fields. */
+  | { type: 'fields' };
 
 export interface Question {
   /** The answer's key in `relations.json` → `answers`. */
@@ -133,6 +135,13 @@ export interface ProjectedField {
  * What a rule asks of the records, in a shape ONT-003 can hand to a store or say plainly that
  * it cannot. Field names are the projected fields' `name`s, on the record the rule is `on`.
  */
+/**
+ * For a hold with an `unless`: the values of a row the rule binds (`heldOn`, outside `unless`) and
+ * of one it frees (`freeOn`, inside it), so the claim that grades it can make each without
+ * evaluating the condition itself. Field names as projected.
+ */
+export type RowHint = Readonly<Record<string, string | number | boolean>>;
+
 export type RuleHold =
   /** No two records share these values; with `whileEmpty`, only among those where that field is empty (still running). */
   | { unique: readonly string[]; whileEmpty?: string }
@@ -144,8 +153,19 @@ export type RuleHold =
   | { setOnce: string }
   /** A record of it is never changed once made. */
   | { neverEdited: true }
-  /** A record of it is never deleted. */
-  | { neverDeleted: true }
+  /** A record of it is never deleted; with `unless`, only while the old record matches (a draft may go). */
+  | { neverDeleted: true; unless?: Readonly<Record<string, unknown>>; heldOn?: RowHint; freeOn?: RowHint }
+  /**
+   * P116 ONT-011 step 2 / ONT-014 §3.3: these fields (`'*'` = every field but `except`) do not
+   * change, `unless` a condition on the OLD record holds. `security.json` `onlyWhile.update.frozen`.
+   */
+  | { frozen: readonly string[] | '*'; unless?: Readonly<Record<string, unknown>>; except?: readonly string[]; heldOn?: RowHint; freeOn?: RowHint }
+  /**
+   * P116 ONT-011 step 2 / ONT-014 §3.3: a value's allowed moves, per old value (`to: []` = none;
+   * an old value not named moves freely). `security.json` `onlyWhile.update.moves`, with no `by`:
+   * a world cannot name a role.
+   */
+  | { moves: string; from: Readonly<Record<string, { to: readonly string[] }>> }
   /** Following this link never leads back to the record it starts from. */
   | { notUnderItself: string }
   /** Only the record this link names may see and change it; `path` when that is through a chain. */

@@ -830,7 +830,10 @@ function main() {
     oral: hand.oral || { status: 'not yet taken down', rows: [] }
   };
   for (const k of kindIds) {
-    const mine = rows.all().filter((r) => r.kind === k);
+    // ONT-011 step 2: a kind with a `borrow` (settled) is read off that borrow's candidates judged yes —
+    // the second row set — because its rows are statuses and dates, not relations the harvest sees.
+    const borrowed = kinds[k].borrow ? cands.all().filter((c) => c.family === kinds[k].borrow && c.verdict === 'yes').map((c) => ({ id: c.id, source: c.source, to: '(its own status)', how: c.how, evidence: c.evidence, note: c.why || c.note || '', seen: 1 })) : [];
+    const mine = [...rows.all().filter((r) => r.kind === k), ...borrowed];
     const bySource = {};
     for (const r of mine) bySource[r.source] = (bySource[r.source] || 0) + 1;
     // private counts not regenerable here come from the committed file

@@ -395,8 +395,9 @@ for (const engine of ['sqlite', 'postgres'] as const) {
 
       it('the plan says it in words, last, as a step of its own', () => {
         const last = SETTLE.steps[SETTLE.steps.length - 1];
-        expect(last).toEqual({ rules: { collection: 'Person', onlyWhile: { update: { frozen: { fields: ['account'] } } } }, says: 'keep, for people: account is set once' });
-        expect(UNSETTLE.steps[UNSETTLE.steps.length - 1]).toEqual({ rules: { collection: 'Person', onlyWhile: null }, says: 'people keep no rule on what they were' });
+        // s18: the step carries `was`, what the world said before, so the route can tell its own writing from a hand rule.
+        expect(last).toEqual({ rules: { collection: 'Person', onlyWhile: { update: { frozen: { fields: ['account'] } } }, was: null }, says: 'keep, for people: account is set once' });
+        expect(UNSETTLE.steps[UNSETTLE.steps.length - 1]).toEqual({ rules: { collection: 'Person', onlyWhile: null, was: { update: { frozen: { fields: ['account'] } } } }, says: 'people keep no rule on what they were' });
       });
 
       it('before: a member moves account freely', async () => {

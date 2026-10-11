@@ -1,6 +1,6 @@
 # The relation kinds, read off the apps on this machine
 
-**Counts are about these 8 sources and no others** (ONT-000 §5): `template:members-area`, `template:nightbook`, `template:planning`, `template:todo-list`, `lessons`, `acme`, `tirion`, `sentinel`. Generated 2026-10-10 by `scripts/ontology/census.js` — do not edit by hand; edit `kinds.hand.json` and regenerate. Every source was present.
+**Counts are about these 8 sources and no others** (ONT-000 §5): `template:members-area`, `template:nightbook`, `template:planning`, `template:todo-list`, `lessons`, `acme`, `tirion`, `sentinel`. Generated 2026-10-11 by `scripts/ontology/census.js` — do not edit by hand; edit `kinds.hand.json` and regenerate. Every source was present.
 
 A kind enters this list only with an evidence row that names a file and a line, or a document and a heading; a kind with one row is marked **(1)**; a kind with none makes the script fail. A row is one (collection, field) pair, so a junction contributes one row per end and a relation seen in several places is one row with its sightings counted. The private sources' rows (the membership business and the two prototypes) are held outside the repository (README R6); only their counts are here. The sentence is written per kind and read per row with the row's names in it.
 
@@ -35,6 +35,7 @@ A kind enters this list only with an evidence row that names a file and a line, 
 | **extends** | a {from} is extra detail about one {to}, at most one each | 11 | · | · | · | · | 2 | 1 | 1 | 7 |
 | **by-name** | a {from} names its {to} by something a person could retype (an email, a code) | 6 | · | · | · | · | 6 | · | · | · |
 | **points-at-one-of** | a {from} points at one thing that may be any of several kinds, and says which | 2 | · | · | · | · | 2 | · | · | · |
+| **settled** | a {from} is agreed at some point, and after that it stays as it was agreed | 8 | · | 1 | 1 | · | 4 | · | 2 | · |
 
 ### belongs-to
 
@@ -299,6 +300,25 @@ A kind enters this list only with an evidence row that names a file and a line, 
   |---|---|---|---|
   | `lessons|CoachNote.anchorId` | (one of several, named by anchorKind) | polymorphic-pair | `templates/digital-bricks-training/backend/schema.json:221` |
   | `lessons|Conversation.anchorId` | (one of several, named by anchorKind) | polymorphic-pair | `templates/digital-bricks-training/backend/schema.json:411` |
+
+### settled
+
+*a {from} is agreed at some point, and after that it stays as it was agreed*
+
+- **The question it asks:** Who agrees it, and what is it called when they do (issued, sent, sealed, published)? After that, which of its details may still change? To put a mistake right, is it withdrawn, or replaced by a new one that says which it replaces? May a draft be thrown away, and may an agreed one ever be deleted?
+- **Told apart from its neighbours by:** a draft that becomes agreed (issued, sent, sealed, published) and is then frozen while still in force; 'ends' keeps a record that stopped, 'happened-to' was never editable
+- **Projects to (P104's tiles / the contract):** a status Choice (draft / agreed / withdrawn), an agreed-at Date and an 'amends' Link to itself; the moves and the freeze kept inside the write (onlyWhile), and no deleting an agreed one if said
+- **Private rows, held outside the repo:** tirion 2
+- **Evidence in this repo:**
+
+  | row | → | found by | evidence |
+  |---|---|---|---|
+  | `lessons|ArtifactSubmission.attempt@settled` | (its own status) | new-record-amends — a new attempt is a new record and the old one stays (unique with learner, concept and section): amend by a new record | `templates/digital-bricks-training/backend/schema.json:22` |
+  | `lessons|Assignment.status@settled` | (its own status) | status-values-not-read — draft / issued / withdrawn, Frappe's draft / submitted / cancelled under other words | `templates/digital-bricks-training/backend/schema.json:112` |
+  | `lessons|AssignmentSubmission.attempt@settled` | (its own status) | new-record-amends — a new attempt is a new record and the old one stays: amend by a new record | `templates/digital-bricks-training/backend/schema.json:147` |
+  | `lessons|LessonDraft.publishedVersion@settled` | (its own status) | settled-field — a draft kept beside the version that was published | `templates/digital-bricks-training/backend/schema.json:789` |
+  | `template:nightbook|Envelope.sealed@settled` | (its own status) | settled-field — sealed until a day; sealEnvelope refuses a day that is not still to come | `templates/nightbook/components/__cloud__/sealEnvelope/nodes.json:177` |
+  | `template:planning|MoneyMark.sentOn@settled` | (its own status) | settled-field — a bill that is sent, then paid or lost; whether its amount may change after it is sent is the unasked question | `templates/planning/components/Commands/Add mark/nodes.json:274` |
 
 ## The three notes, read as answers (ONT-000 step 3)
 

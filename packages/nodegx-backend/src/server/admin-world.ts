@@ -103,24 +103,44 @@ export function planTouchesWhatTheSchemaRouteRefuses(plan: MigrationPlanData): s
 
 const isWords = (v: unknown): v is string => typeof v === 'string' && v.trim() !== '';
 
+/** The keys of `onlyWhile` a world writes (ONT-014, ONT-011 step 2): the rest is a person's. */
+const WORLD_UPDATE_KEYS = ['frozen', 'except', 'moves'] as const;
+const same = (a: unknown, b: unknown): boolean => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+
 /**
- * P116 ONT-014 — `collections` with a world's `rules` steps applied. The world owns the two clauses
- * it projects on a collection it makes: `update.frozen` (set once, never edited) and
- * `delete: "never"`. Everything else in `onlyWhile` (`where`, `except`, `moves`, a `delete`
- * condition) is the person's, said in the manager or `security.json`, and stays. Pure.
+ * P116 ONT-014 — `collections` with a world's `rules` steps applied. The world owns the clauses it
+ * projects on a collection it makes: `update.frozen` (with `unless`), `update.except`, `update.moves`
+ * and `delete` (`"never"`, or a condition). `where`, `except`-less conditions and `says` are the
+ * person's, said in the manager or `security.json`, and stay. Pure.
+ *
+ * **Provenance (s18, the reach review):** a step that carries `was` (what the world said before)
+ * lets the route tell the world's own earlier writing from a rule a person wrote by hand on the
+ * same collection: a clause equal to `was` is the world's and is replaced; one that differs is the
+ * person's and is KEPT, unless the world now says that clause too — then {@link worldRuleLosses}
+ * names it and the run waits for `acceptLosses`. A step without `was` (a plan written by hand) is
+ * the slot rule: the world's clauses replace what is there.
  */
 export function withWorldRules(collections: SecurityConfig['collections'], bodies: MigrationRulesBody[]): SecurityConfig['collections'] {
   const out: SecurityConfig['collections'] = JSON.parse(JSON.stringify(collections));
-  for (const { collection, onlyWhile } of bodies) {
+  for (const { collection, onlyWhile, was } of bodies) {
     const entry: CollectionRules = out[collection] ?? {};
     const ow: NonNullable<CollectionRules['onlyWhile']> = { ...(entry.onlyWhile ?? {}) };
-    const update = { ...(ow.update ?? {}) };
-    delete update.frozen;
-    if (onlyWhile?.update?.frozen) update.frozen = onlyWhile.update.frozen;
-    if (Object.keys(update).length) ow.update = update;
+    const update: Record<string, unknown> = { ...(ow.update ?? {}) };
+    const worldUpdate = (onlyWhile?.update ?? {}) as Record<string, unknown>;
+    const wasUpdate = (was?.update ?? {}) as Record<string, unknown>;
+    // Without `was` (a plan written by hand), the slot rule as s17 built it: `frozen` and "never" only.
+    const owned: readonly string[] = was === undefined ? ['frozen'] : WORLD_UPDATE_KEYS;
+    for (const key of owned) {
+      const hand = was !== undefined && key in update && !same(update[key], wasUpdate[key]);
+      if (hand && !(key in worldUpdate)) continue; // the person's, and the world says nothing: kept
+      delete update[key];
+      if (key in worldUpdate) update[key] = worldUpdate[key];
+    }
+    if (Object.keys(update).length) ow.update = update as NonNullable<CollectionRules['onlyWhile']>['update'];
     else delete ow.update;
-    if (onlyWhile?.delete === 'never') ow.delete = 'never';
-    else if (ow.delete === 'never') delete ow.delete;
+    const handDelete = was !== undefined && ow.delete !== undefined && !same(ow.delete, was?.delete);
+    if (onlyWhile?.delete !== undefined) ow.delete = onlyWhile.delete;
+    else if (!handDelete && (ow.delete === 'never' || (was !== undefined && ow.delete !== undefined))) delete ow.delete;
     if (ow.update || ow.delete) entry.onlyWhile = ow;
     else delete entry.onlyWhile;
     if (Object.keys(entry).length) out[collection] = entry;
@@ -131,26 +151,39 @@ export function withWorldRules(collections: SecurityConfig['collections'], bodie
 
 /**
  * The reach review (ONT-014 AC6): what a world's `rules` steps would take away that a PERSON wrote,
- * said in words. The world writes only `frozen: { fields }` and `delete: "never"`, so a `frozen`
- * with `unless` or `says` on a world collection was written by hand (the manager, `security.json`),
- * and {@link withWorldRules} would replace it without a word. The route lists these in a dry run and
- * refuses a run that has not accepted them (`acceptLosses`, as for a dropped column's values). A
- * plain field list and a bare "never" cannot be told from the world's own earlier writing, so the
- * world's slot stands for those (ONT-014 §6.3); telling them apart needs the step to carry what the
- * world said before (`was`), which is owed.
+ * said in words. With `was` on the step, a clause is the person's when it differs from what the
+ * world said before; it is lost when the world now says that clause differently. Without `was` (a
+ * plan written by hand), a `frozen` with `unless` or `says` on a world collection is taken as
+ * hand-written, since the hand plans of ONT-007's spec never write those. The route lists these in
+ * a dry run and refuses a run that has not accepted them (`acceptLosses`, as for a dropped column's
+ * values).
  */
 export function worldRuleLosses(collections: SecurityConfig['collections'], bodies: MigrationRulesBody[]): string[] {
   const out: string[] = [];
-  const words = (f: { fields: string[] | '*'; unless?: Record<string, unknown>; says?: string }): string =>
-    `${f.fields === '*' ? 'the whole record' : f.fields.map((x) => `"${x}"`).join(', ')}${f.unless ? ` unless ${JSON.stringify(f.unless)}` : ''}${f.says ? ` ("${f.says}")` : ''}`;
-  for (const { collection, onlyWhile } of bodies) {
-    const hand = collections[collection]?.onlyWhile?.update?.frozen;
+  const words = (v: unknown): string => JSON.stringify(v);
+  for (const { collection, onlyWhile, was } of bodies) {
+    const have = collections[collection]?.onlyWhile;
+    if (!have) continue;
+    if (was !== undefined) {
+      const update = (have.update ?? {}) as Record<string, unknown>;
+      const worldUpdate = (onlyWhile?.update ?? {}) as Record<string, unknown>;
+      const wasUpdate = (was?.update ?? {}) as Record<string, unknown>;
+      for (const key of WORLD_UPDATE_KEYS) {
+        if (!(key in update) || same(update[key], wasUpdate[key])) continue; // absent, or the world's own
+        if (!(key in worldUpdate) || same(update[key], worldUpdate[key])) continue; // kept, or the same
+        out.push(`"${collection}": "${key}" written by hand (${words(update[key])}) would be replaced by the world's (${words(worldUpdate[key])}) — say it in the world, take it out by hand, or accept the loss`);
+      }
+      if (have.delete !== undefined && !same(have.delete, was?.delete) && onlyWhile?.delete !== undefined && !same(have.delete, onlyWhile.delete))
+        out.push(`"${collection}": "delete" written by hand (${words(have.delete)}) would be replaced by the world's (${words(onlyWhile.delete)}) — say it in the world, take it out by hand, or accept the loss`);
+      continue;
+    }
+    const hand = have.update?.frozen;
     if (!hand || (!hand.unless && !hand.says)) continue;
     const world = onlyWhile?.update?.frozen;
-    if (world && JSON.stringify(world) === JSON.stringify(hand)) continue;
-    out.push(
-      `"${collection}": the frozen rule written by hand (${words(hand)}) would be replaced by the world's (${world ? words(world) : 'none'}) — say it in the world, take it out by hand, or accept the loss`
-    );
+    if (world && same(world, hand)) continue;
+    const say = (f: { fields: string[] | '*'; unless?: Record<string, unknown>; says?: string }): string =>
+      `${f.fields === '*' ? 'the whole record' : f.fields.map((x) => `"${x}"`).join(', ')}${f.unless ? ` unless ${JSON.stringify(f.unless)}` : ''}${f.says ? ` ("${f.says}")` : ''}`;
+    out.push(`"${collection}": the frozen rule written by hand (${say(hand)}) would be replaced by the world's (${world ? say(world) : 'none'}) — say it in the world, take it out by hand, or accept the loss`);
   }
   return out;
 }

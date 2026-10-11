@@ -72,7 +72,7 @@ describe('the kinds are what ONT-000 measured', () => {
       const thin = Object.keys(c.bySource).length === 1 || c.single;
       expect({ id: k.id, thin: Boolean(k.evidence.thin) }).toEqual({ id: c.id, thin });
     }
-    expect(total).toBe(303);
+    expect(total).toBe(311); // 303 relation rows (ONT-000) + settled's 8 borrow-backed rows (ONT-011 step 2)
     expect(WORLD_KINDS.filter((k) => k.evidence.sources.length === 1).length).toBe(6);
     expect(WORLD_KINDS.filter((k) => k.evidence.rows === 1).map((k) => k.id)).toEqual(['part-of-tree']);
   });

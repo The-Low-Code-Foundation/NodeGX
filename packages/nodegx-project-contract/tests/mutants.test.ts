@@ -156,13 +156,15 @@ describe('what is decided before any engine', () => {
       as: 'unkept',
       why: expect.stringContaining('"onlyThrough"')
     });
+    // ONT-014 (s17): never deleted and never edited are HELD (`onlyWhile`), so taking the rule out changes
+    // what is held and the engine runs the claim; both fall there (ONT-005 §6.3). Red since s17, read s18.
     expect(gradeStatically(right, by('same-person/merge-by-delete'))).toMatchObject({
-      verdict: 'survives',
-      as: 'unkept'
+      verdict: 'run',
+      as: 'unclaimed'
     });
     expect(gradeStatically(right, by('attended/editable-history'))).toMatchObject({
-      verdict: 'survives',
-      as: 'unkept'
+      verdict: 'run',
+      as: 'unclaimed'
     });
     expect(gradeStatically(right, by('on-the-course-platform/silent-skip'))).toMatchObject({
       verdict: 'survives',

@@ -5,7 +5,7 @@ have — a rule that reads **the record before the change, the record after it, 
 write. ONT-012's `onlyWhile` is the special case that reads the old record only. **Depends on** ONT-012 (the seam:
 `heldWhile()` in `persistence/onlyWhile.ts`, the `StorageAclOption.onlyWhile` ride, the 409 mapping per door), R10 (the
 facade as the one door). **Feeds** ONT-013 (three unkept shapes flip to held), ONT-011 step 4 (*settled* projects to
-this and nothing else), ONT-008 (the view shows a value's allowed moves). **Status: 🟡 s18 (2026-10-11, Fable 5.1) — built: AC1, AC2, AC3's shape half, AC4 for the three flips, AC5, **AC6 (the reach review, §6.5: 7 findings, 5 fixed, 1 filed as `P116-S18-CASCADEHOLD`, 1 a ruling)**. Owed: AC3's schema half, AC4's two new `RuleHold` shapes (with ONT-011 step 2), the cascade (the bug), and the `was` on a `rules` step (§6.5 #4).**
+this and nothing else), ONT-008 (the view shows a value's allowed moves). **Status: 🟡 s18 (2026-10-11, Fable 5.1) — built: AC1, AC2, AC3's shape half, AC4 for the three flips, AC5, **AC6 (the reach review, §6.5: 7 findings, 5 fixed, 1 filed as `P116-S18-CASCADEHOLD`, 1 a ruling)**. **AC4's two new `RuleHold` shapes built with ONT-011 step 2 (s18, its §9), and `was` on a `rules` step (§6.5 #4) built.** Owed: AC3's schema half and the cascade (the bug).**
 
 > **Model check (Richard, 2026-10-08 rule):** the build wants **Opus 5.5** — fixed-shape enforcement on a seam that
 > exists and a grading suite that exists (`ont-012-only-while.test.ts`'s shape). **A reach review on Fable 5.1**
@@ -239,15 +239,18 @@ the world's.
 - **AC3's schema half:** "a `moves` entry on a field that is not a choice or text; a `to` naming a value the choice
   does not hold". The validator is schema-less. It belongs where `security.json` is written with the schema at hand:
   the permissions PUT, and the migration's `rules` step.
-- **AC4's two new `RuleHold` shapes** (`frozen` with `unless`, `moves`): a vocabulary change (`kind.ts`, the
-  validator, the brief). It goes with ONT-011 step 2 (*settled*), which is their first user.
+- ~~**AC4's two new `RuleHold` shapes** (`frozen` with `unless`, `moves`)~~ Built s18 with ONT-011 step 2 (its §9):
+  `{ frozen, unless?, except?, heldOn?, freeOn? }`, `{ moves, from }`, and `neverDeleted` with `unless`; projected
+  to `WorldOnlyWhile`, claimed with a mutant each on both engines, dropped by `applyMutant` and `without: { rule }`.
 - ~~**AC6: the reach review (Fable).**~~ Done, §6.5.
 - Bug **`P116-S17-NULLEQ`** (medium, runtime), **`P116-S17-CRONLEAK`** (low, tests): filed, not fixed.
 - **The cascade** (bug `P116-S18-CASCADEHOLD`, high): a bound caller's delete reaches, through `goes-too` and
   `stays-unlinked`, records whose own rule says never / frozen, and the rule is not asked. Needs a ruling (§6.5 #5)
   and a per-collection `onlyWhile` in the ACL option. An Opus build on this seam.
-- **`was` on a `rules` step** (§6.5 #4): so the route can tell a world's withdrawal from a person's hand rule, and
-  merge instead of replace.
+- ~~**`was` on a `rules` step** (§6.5 #4)~~ Built s18: `planMigration` writes `was` (the world's previous
+  `onlyWhile`) on every `rules` step; `withWorldRules` keeps a clause that differs from `was` (the person's) unless
+  the world now says that clause too, which `worldRuleLosses` names for `acceptLosses`. A plan without `was` keeps
+  s17's slot rule.
 
 ### 6.5 The reach review (s18, 2026-10-11, Fable 5.1) — AC6
 

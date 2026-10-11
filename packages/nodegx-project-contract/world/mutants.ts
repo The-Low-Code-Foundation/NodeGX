@@ -249,9 +249,18 @@ function retype(
       return { schema: s };
     }
     // ONT-014: kept by the backend inside the write — the mutant is the collection's `onlyWhile` without it.
-    if ('setOnce' in rule.holds || 'neverEdited' in rule.holds || 'neverDeleted' in rule.holds) {
+    if ('setOnce' in rule.holds || 'neverEdited' in rule.holds || 'neverDeleted' in rule.holds || 'frozen' in rule.holds || 'moves' in rule.holds) {
       const h = rule.holds;
-      const drop = 'setOnce' in h ? { collection: home.name, setOnce: fieldName(h.setOnce) } : 'neverEdited' in h ? { collection: home.name, neverEdited: true as const } : { collection: home.name, neverDeleted: true as const };
+      const drop =
+        'setOnce' in h
+          ? { collection: home.name, setOnce: fieldName(h.setOnce) }
+          : 'neverEdited' in h
+            ? { collection: home.name, neverEdited: true as const }
+            : 'frozen' in h
+              ? { collection: home.name, frozen: true as const }
+              : 'moves' in h
+                ? { collection: home.name, moves: fieldName(h.moves) }
+                : { collection: home.name, neverDeleted: true as const };
       try {
         return { schema: applyMutant(s, { dropOnlyWhile: drop }) };
       } catch {

@@ -1,5 +1,5 @@
 {
-  "_about": "Hand-kept input of scripts/ontology/census.js (ONT-000). kinds: id → the person's sentence, the question the kind asks before any schema, what tells it from its neighbours, what it projects to. classification: row id (source|from.field, or source|*.field for every collection's field of that name) → kind, for the in-repo sources only; the private rows are classified in the private folder. notes: the three notes attributed to kinds. depthSentences: the deepest path per source in words. oral: Richard's list. A kind is added here only after a row was read off an app; the script refuses one with no row.",
+  "_about": "Hand-kept input of scripts/ontology/census.js (ONT-000). kinds: id → the person's sentence, the question the kind asks before any schema, what tells it from its neighbours, what it projects to. classification: row id (source|from.field, or source|*.field for every collection's field of that name) → kind, for the in-repo sources only; the private rows are classified in the private folder. notes: the three notes attributed to kinds. depthSentences: the deepest path per source in words. oral: Richard's list. A kind is added here only after a row was read off an app; the script refuses one with no row. ONT-011 step 2: a kind with a `borrow` draws its rows from that borrow's candidates judged yes (the second row set), since those rows are not relations the harvest sees.",
   "kinds": {
     "belongs-to": {
       "sentence": "each {from} is attached to one {to}",
@@ -84,6 +84,13 @@
       "question": "Which kinds can it point at, exactly? What happens when the thing it points at goes? Can it be re-pointed?",
       "distinguishes": "an id beside a kind field; no single target collection",
       "projectsTo": "a kind Choice plus a Text id; the mutant is an id with no kind beside it"
+    },
+    "settled": {
+      "sentence": "a {from} is agreed at some point, and after that it stays as it was agreed",
+      "question": "Who agrees it, and what is it called when they do (issued, sent, sealed, published)? After that, which of its details may still change? To put a mistake right, is it withdrawn, or replaced by a new one that says which it replaces? May a draft be thrown away, and may an agreed one ever be deleted?",
+      "distinguishes": "a draft that becomes agreed (issued, sent, sealed, published) and is then frozen while still in force; 'ends' keeps a record that stopped, 'happened-to' was never editable",
+      "projectsTo": "a status Choice (draft / agreed / withdrawn), an agreed-at Date and an 'amends' Link to itself; the moves and the freeze kept inside the write (onlyWhile), and no deleting an agreed one if said",
+      "borrow": "settled"
     }
   },
   "classification": {

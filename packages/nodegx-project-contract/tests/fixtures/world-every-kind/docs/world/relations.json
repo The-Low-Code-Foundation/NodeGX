@@ -32,7 +32,10 @@
         {
           "name": "role",
           "kind": "choice",
-          "values": ["holder", "member"]
+          "values": [
+            "holder",
+            "member"
+          ]
         }
       ]
     },
@@ -197,13 +200,29 @@
     {
       "id": "note-about",
       "from": "note",
-      "to": ["person", "account"],
+      "to": [
+        "person",
+        "account"
+      ],
       "kind": "points-at-one-of",
       "sentence": "A note is about a person or about an account.",
       "answers": {
         "more": false,
         "whenTargetGoes": "stays-unlinked",
         "repoint": false
+      }
+    },
+    {
+      "id": "quote-sent",
+      "from": "quote",
+      "kind": "settled",
+      "sentence": "A quote is a draft until we send it; a sent quote stands as sent, and a mistake means a new quote that says which one it replaces.",
+      "answers": {
+        "agreedBy": "whoever runs the office sends it; a sent quote is agreed",
+        "stillChanges": "note",
+        "putRight": "replace it with a new one",
+        "deleteDraft": true,
+        "deleteAgreed": false
       }
     }
   ]

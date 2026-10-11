@@ -25,7 +25,11 @@
         {
           "name": "plan",
           "kind": "choice",
-          "values": ["small", "medium", "large"],
+          "values": [
+            "small",
+            "medium",
+            "large"
+          ],
           "sentence": "The size of membership they pay for."
         }
       ]
@@ -124,6 +128,22 @@
           "name": "open",
           "kind": "yesno",
           "sentence": "Off days, breaks and public holidays are slots that are not open."
+        }
+      ]
+    },
+    {
+      "id": "quote",
+      "name": "Quote",
+      "sentence": "A quote is a price we offer a company for a season; once it is sent it stands.",
+      "properties": [
+        {
+          "name": "amount",
+          "kind": "number"
+        },
+        {
+          "name": "note",
+          "kind": "text",
+          "sentence": "A line for ourselves; it can change after the quote is sent."
         }
       ]
     }

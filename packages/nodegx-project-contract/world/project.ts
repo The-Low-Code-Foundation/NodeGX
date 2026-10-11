@@ -110,8 +110,16 @@ export interface WorldCollection {
 
 /** P116 ONT-014 — the part of a collection's `onlyWhile` a world says (`@noodl/backend-contract` `OnlyWhileRule`, restated). */
 export interface WorldOnlyWhile {
-  update?: { frozen: { fields: string[] | '*' } };
-  delete?: 'never';
+  update?: {
+    /** Fields that do not change; `unless` (ONT-011 step 2, *settled*) a condition on the old record holds. */
+    frozen?: { fields: string[] | '*'; unless?: Record<string, unknown> };
+    /** With `frozen: "*"`: the fields that still change (a status, a note). */
+    except?: string[];
+    /** A value's allowed moves per old value (*settled*: draft → agreed → withdrawn, never back). No `by`: a world names no role. */
+    moves?: Record<string, Record<string, { to: string[] }>>;
+  };
+  /** `"never"`, or (*settled*) only while the old record matches (a draft may go). */
+  delete?: 'never' | { where: Record<string, unknown> };
 }
 
 /** A value a claim step writes. `ref` is the id of a row an earlier step made; `date` an ISO date. */
@@ -154,7 +162,15 @@ export type ClaimMutant =
   /** R10: the link says nothing about when its record goes. */
   | { dropWhenTargetGoes: { collection: string; field: string } }
   /** ONT-014: the collection's `onlyWhile` without one rule — a field no longer frozen, the record editable, or deletable. */
-  | { dropOnlyWhile: { collection: string; setOnce: string } | { collection: string; neverEdited: true } | { collection: string; neverDeleted: true } };
+  | {
+      dropOnlyWhile:
+        | { collection: string; setOnce: string }
+        | { collection: string; neverEdited: true }
+        | { collection: string; neverDeleted: true }
+        /** ONT-011 step 2: the status moves freely / the freeze is off. */
+        | { collection: string; moves: string }
+        | { collection: string; frozen: true };
+    };
 
 export interface WorldClaim {
   /** `<relation or noun id>/<what>`, unique in the schema. */
@@ -393,16 +409,30 @@ export function projectWorld(files: WorldFiles): WorldProjection {
       d.collection.indexes.push(h.whileEmpty ? { fields, unique: true, where: { [fieldName(h.whileEmpty)]: { exists: false } } } : { fields, unique: true });
     } else if ('pairOnce' in h || 'shape' in h) {
       // pairOnce: held by the Links field itself, and claimed below. shape: a fact, not a rule.
-    } else if ('setOnce' in h || 'neverEdited' in h || 'neverDeleted' in h) {
-      // ONT-014: kept by the backend inside the write (`onlyWhile`), and claimed below.
+    } else if ('setOnce' in h || 'neverEdited' in h || 'neverDeleted' in h || 'frozen' in h || 'moves' in h) {
+      // ONT-014: kept by the backend inside the write (`onlyWhile`), and claimed below. One
+      // `frozen` per collection: `"*"` wins over a list, a list is the union, and an `unless` is
+      // the one a rule said (two rules with different conditions cannot both be exact — said in §7).
       const ow = (d.collection.onlyWhile ??= {});
-      if ('neverDeleted' in h) ow.delete = 'never';
-      else if ('neverEdited' in h) ow.update = { frozen: { fields: '*' } };
-      else if (ow.update?.frozen.fields !== '*') {
-        const fields = ow.update?.frozen.fields ?? [];
-        const field = fieldName(h.setOnce);
-        ow.update = { frozen: { fields: fields.includes(field) ? fields : [...fields, field] } };
+      const update = (ow.update ??= {});
+      const freeze = (fields: string[] | '*', unless?: Record<string, unknown>, except?: string[]) => {
+        const have = update.frozen;
+        const all = fields === '*' || have?.fields === '*';
+        const merged = all ? ('*' as const) : [...new Set([...(have?.fields ?? []), ...(fields as string[])])];
+        update.frozen = { fields: merged, ...((unless ?? have?.unless) ? { unless: unless ?? have?.unless } : {}) };
+        if (except?.length) update.except = [...new Set([...(update.except ?? []), ...except])];
+      };
+      if ('neverDeleted' in h) {
+        if (h.unless && ow.delete !== 'never') ow.delete = { where: h.unless };
+        else ow.delete = 'never';
+      } else if ('neverEdited' in h) freeze('*');
+      else if ('setOnce' in h) freeze([fieldName(h.setOnce)]);
+      else if ('frozen' in h) freeze(h.frozen === '*' ? '*' : h.frozen.map(fieldName), h.unless as Record<string, unknown> | undefined, h.except?.map(fieldName));
+      else {
+        const moves = (update.moves ??= {});
+        moves[fieldName(h.moves)] = Object.fromEntries(Object.entries(h.from).map(([old, m]) => [old, { to: [...m.to] }]));
       }
+      if (!Object.keys(update).length) delete ow.update;
     } else {
       const key = Object.keys(h)[0];
       const field = 'notUnderItself' in h ? fieldName(h.notUnderItself) : undefined;
@@ -599,10 +629,47 @@ function claimsFor(
     const s = new Seeder(byName);
     let what = '';
     // ONT-014: held — the backend keeps these inside the write (`onlyWhile`), on every engine.
-    const frozen = d.collection.onlyWhile?.update?.frozen.fields;
-    if ('setOnce' in h) {
+    const frozen = d.collection.onlyWhile?.update?.frozen?.fields;
+    const hint = (row: Record<string, string | number | boolean> | undefined): ClaimData => ({ ...(row ?? {}) });
+    if ('moves' in h) {
+      // ONT-011 step 2: a move the rule allows goes through; the move back is refused.
+      const field = fieldName(h.moves);
+      const step = Object.entries(h.from).find(([old, m]) => m.to.length > 0 && h.from[m.to[0]] !== undefined && !h.from[m.to[0]].to.includes(old));
+      if (!step) continue;
+      const [old, m] = step;
+      const row = s.row(c, { [field]: old });
+      s.steps.push({ change: c, row, data: { [field]: m.to[0] }, byPerson: true });
+      s.steps.push({ change: c, row, data: { [field]: old }, refused: true, byPerson: true });
+      s.steps.push({ holds: c, row, field, value: m.to[0] });
+      claims.push({ id: `${r.id}/${field}-never-goes-back`, says: rule.says, from: { relation: r.id }, held: true, mutant: { dropOnlyWhile: { collection: c, moves: field } }, steps: s.steps });
+      continue;
+    } else if ('frozen' in h) {
+      // ONT-011 step 2: on a row the rule binds, a frozen field is refused and an excepted one changes; on a row it frees, the field changes.
+      const own = new Set([...(h.except ?? []).map(fieldName), ...Object.keys(h.heldOn ?? {})]);
+      const col = d.collection.columns.find((x) => !own.has(x.name) && (h.frozen === '*' || h.frozen.map(fieldName).includes(x.name)) && (x.type === 'String' || x.type === 'Number' || x.type === 'Boolean' || x.type === 'Date'));
+      if (!col) continue;
+      const first = s.valueFor(d, col);
+      const then = s.other(d, col, first);
+      if (first === undefined || then === undefined) continue;
+      const bound = s.row(c, { ...hint(h.heldOn), [col.name]: first });
+      s.steps.push({ change: c, row: bound, data: { [col.name]: then }, refused: true, byPerson: true });
+      // Every excepted field still changes on the bound row — the person's answer ("note may still change")
+      // as much as the kind's own (`agreedAt`), so the mutant that forgets the answer is caught by it.
+      for (const free of (h.except ?? []).map(fieldName)) {
+        if (Object.keys(h.heldOn ?? {}).includes(free)) continue;
+        const fc = d.collection.columns.find((x) => x.name === free && (x.type === 'String' || x.type === 'Number' || x.type === 'Boolean' || x.type === 'Date'));
+        const v = fc && s.valueFor(d, fc);
+        if (v !== undefined) s.steps.push({ change: c, row: bound, data: { [free]: v }, byPerson: true });
+      }
+      if (h.unless && h.freeOn) {
+        const loose = s.row(c, { ...hint(h.freeOn), [col.name]: first });
+        s.steps.push({ change: c, row: loose, data: { [col.name]: then }, byPerson: true });
+      }
+      claims.push({ id: `${r.id}/frozen-once-${Object.values(h.heldOn ?? { on: 'made' })[0]}`, says: rule.says, from: { relation: r.id }, held: true, mutant: { dropOnlyWhile: { collection: c, frozen: true } }, steps: s.steps });
+      continue;
+    } else if ('setOnce' in h) {
       const field = fieldName(h.setOnce);
-      if (frozen === '*') continue; // the whole record is never edited: that claim says it
+      if (frozen === '*' && !d.collection.onlyWhile?.update?.frozen?.unless) continue; // the whole record is never edited: that claim says it
       const col = d.collection.columns.find((x) => x.name === field)!;
       const first = s.valueFor(d, col);
       const then = s.other(d, col, first);
@@ -623,8 +690,13 @@ function claimsFor(
       claims.push({ id: `${r.id}/is-never-edited`, says: rule.says, from: { relation: r.id }, held: true, mutant: { dropOnlyWhile: { collection: c, neverEdited: true } }, steps: s.steps });
       continue;
     } else if ('neverDeleted' in h) {
-      const row = s.row(c);
+      const row = s.row(c, hint(h.heldOn));
       s.steps.push({ remove: c, row, refused: true, byPerson: true });
+      if (h.unless && h.freeOn) {
+        const loose = s.row(c, hint(h.freeOn));
+        s.steps.push({ remove: c, row: loose, byPerson: true });
+        s.steps.push({ gone: c, row: loose });
+      }
       claims.push({ id: `${r.id}/is-never-deleted`, says: rule.says, from: { relation: r.id }, held: true, mutant: { dropOnlyWhile: { collection: c, neverDeleted: true } }, steps: s.steps });
       continue;
     } else if ('notUnderItself' in h) {
@@ -716,15 +788,27 @@ export function applyMutant(schema: WorldSchema, mutant: ClaimMutant): WorldSche
       takesOut(ow.delete ? 1 : 0, 0);
       delete ow.delete;
     } else if ('neverEdited' in m) {
-      takesOut(ow.update?.frozen.fields === '*' ? 1 : 0, 0);
+      takesOut(ow.update?.frozen?.fields === '*' ? 1 : 0, 0);
       delete ow.update;
+    } else if ('moves' in m) {
+      const moves = ow.update?.moves ?? {};
+      takesOut(moves[m.moves] ? 1 : 0, 0);
+      delete moves[m.moves];
+      if (ow.update && !Object.keys(moves).length) delete ow.update.moves;
+    } else if ('frozen' in m) {
+      takesOut(ow.update?.frozen ? 1 : 0, 0);
+      if (ow.update) {
+        delete ow.update.frozen;
+        delete ow.update.except;
+      }
     } else {
-      const fields = ow.update?.frozen.fields;
+      const fields = ow.update?.frozen?.fields;
       const left = Array.isArray(fields) ? fields.filter((f) => f !== m.setOnce) : [];
       takesOut(Array.isArray(fields) ? fields.length : 0, left.length);
-      if (left.length) ow.update = { frozen: { fields: left } };
-      else delete ow.update;
+      if (left.length) ow.update = { ...(ow.update ?? {}), frozen: { ...(ow.update?.frozen ?? {}), fields: left } };
+      else if (ow.update) delete ow.update.frozen;
     }
+    if (ow.update && !Object.keys(ow.update).length) delete ow.update;
     if (ow.update || ow.delete) c.onlyWhile = ow;
     else delete c.onlyWhile;
   } else {

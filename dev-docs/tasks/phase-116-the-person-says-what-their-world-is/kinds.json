@@ -945,6 +945,65 @@
           "evidence": "templates/digital-bricks-training/backend/schema.json:411"
         }
       ]
+    },
+    {
+      "id": "settled",
+      "sentence": "a {from} is agreed at some point, and after that it stays as it was agreed",
+      "question": "Who agrees it, and what is it called when they do (issued, sent, sealed, published)? After that, which of its details may still change? To put a mistake right, is it withdrawn, or replaced by a new one that says which it replaces? May a draft be thrown away, and may an agreed one ever be deleted?",
+      "distinguishes": "a draft that becomes agreed (issued, sent, sealed, published) and is then frozen while still in force; 'ends' keeps a record that stopped, 'happened-to' was never editable",
+      "projectsTo": "a status Choice (draft / agreed / withdrawn), an agreed-at Date and an 'amends' Link to itself; the moves and the freeze kept inside the write (onlyWhile), and no deleting an agreed one if said",
+      "rows": 8,
+      "single": false,
+      "bySource": {
+        "template:nightbook": 1,
+        "template:planning": 1,
+        "lessons": 4,
+        "tirion": 2
+      },
+      "evidence": [
+        {
+          "id": "lessons|ArtifactSubmission.attempt@settled",
+          "to": "(its own status)",
+          "how": "new-record-amends",
+          "evidence": "templates/digital-bricks-training/backend/schema.json:22",
+          "note": "a new attempt is a new record and the old one stays (unique with learner, concept and section): amend by a new record"
+        },
+        {
+          "id": "lessons|Assignment.status@settled",
+          "to": "(its own status)",
+          "how": "status-values-not-read",
+          "evidence": "templates/digital-bricks-training/backend/schema.json:112",
+          "note": "draft / issued / withdrawn, Frappe's draft / submitted / cancelled under other words"
+        },
+        {
+          "id": "lessons|AssignmentSubmission.attempt@settled",
+          "to": "(its own status)",
+          "how": "new-record-amends",
+          "evidence": "templates/digital-bricks-training/backend/schema.json:147",
+          "note": "a new attempt is a new record and the old one stays: amend by a new record"
+        },
+        {
+          "id": "lessons|LessonDraft.publishedVersion@settled",
+          "to": "(its own status)",
+          "how": "settled-field",
+          "evidence": "templates/digital-bricks-training/backend/schema.json:789",
+          "note": "a draft kept beside the version that was published"
+        },
+        {
+          "id": "template:nightbook|Envelope.sealed@settled",
+          "to": "(its own status)",
+          "how": "settled-field",
+          "evidence": "templates/nightbook/components/__cloud__/sealEnvelope/nodes.json:177",
+          "note": "sealed until a day; sealEnvelope refuses a day that is not still to come"
+        },
+        {
+          "id": "template:planning|MoneyMark.sentOn@settled",
+          "to": "(its own status)",
+          "how": "settled-field",
+          "evidence": "templates/planning/components/Commands/Add mark/nodes.json:274",
+          "note": "a bill that is sent, then paid or lost; whether its amount may change after it is sent is the unasked question"
+        }
+      ]
     }
   ],
   "notes": [

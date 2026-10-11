@@ -1,6 +1,6 @@
 # ONT-005 — The mistakes are mutants
 
-**Opened 2026-10-08.** **Depends on ONT-003.** **Status: 🟡 s5 — built 2026-10-09 (Fable 5.1); §6. R10 (s12): 16 of 38 survive on the fully answered world (§6.3). ONT-014 (s17): 13 of 38 — set once, never edited and never deleted are held (ONT-014 §6.2).**
+**Opened 2026-10-08.** **Depends on ONT-003.** **Status: 🟡 s5 — built 2026-10-09 (Fable 5.1); §6. R10 (s12): 16 of 38 survive on the fully answered world (§6.3). ONT-014 (s17): 13 of 38 — set once, never edited and never deleted are held (ONT-014 §6.2). ONT-011 step 2 (s18): 14 of 45 — the *settled* kind's six mutants all killed; the one new survivor is the new noun's number as text (ONT-011 §9).**
 
 > **Model check, before anything (Richard, 2026-10-08):** this task wants **Fable 5.1** — the judgement task of the phase: a mutant the claims already kill is not a mutant, and the survivors are the vocabulary's honesty number. Your system prompt says which model you are. If it is not the one named here, stop before any work and say so in one line ("this task is marked for Fable 5.1; you are on <model> — switch with /model, or say go"), and wait for Richard's word. Do not start on the wrong model because the check felt like a formality.
 
@@ -110,6 +110,16 @@ engines, every mutant**:
 > as text (`…/id-as-text`, unclaimed — it loses the rule, and the held `…-blocks` claim kills it). world 16 → 14,
 > membership 10 → 8, categories 4 → 2. The text id beside a kind (`note-about`) still survives, as it must. The table
 > above and the paragraphs below are s5's reading.
+>
+> **ONT-011 step 2, 2026-10-11 (P116 s18, Fable): now 14 of 45** (5 unkept, 9 unclaimed), identical on both engines.
+> `world-every-kind` gained a `quote` noun and `quote-sent`, the fifteenth kind (*settled*): 7 mutants more. Its
+> four seeds (edited in place, goes back, agreed deleted, amend loses its link) and its two schema-changing
+> unanswered questions (`stillChanges`, `deleteAgreed`) are killed at its three held claims (`frozen-once-agreed`,
+> `status-never-goes-back`, `is-never-deleted`) or for want of a home; `putRight` and `deleteDraft` unanswered are
+> not applicable. The one survivor added is `quote/amount-as-text`, the noun's own property mutant, unclaimed like
+> `slot/starts-as-text`. **Also read s18:** `tests/mutants.test.ts`'s static expectations for `merge-by-delete` and
+> `editable-history` had said *survives unkept* since s13; since s17 both are held and the engine runs the claim
+> (*run*, then killed) — the spec had been red since s17 and now says so.
 
 **The honesty number on the fully answered world is 18 of 38.** Read by class, because the classes say different things:
 

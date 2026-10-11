@@ -1,5 +1,6 @@
 /**
- * P116 ONT-001 — the fourteen relation kinds ONT-000 read off eight apps.
+ * P116 ONT-001 — the fourteen relation kinds ONT-000 read off eight apps, and (ONT-011 step 2) the
+ * fifteenth, *settled*, read off step 1's borrow candidates.
  *
  * `sentence`, `distinguishes` and `projectsTo` are the census's words, verbatim; `evidence` is
  * its count. A test pins both against `kinds.hand.json` and `kinds.json`, so this file cannot
@@ -956,6 +957,127 @@ export const pointsAtOneOf = defineKind({
   evidence: { rows: 2, sources: ['lessons'], thin: 'one source: two fields of one backend' }
 });
 
+/**
+ * P116 ONT-011 step 2 (R-c, ruled 2026-10-10): the fifteenth kind, Frappe's *submittable* in the
+ * person's words. ONT-000 harvested relations; this kind's rows are ONT-011 step 1's *settled*
+ * candidates judged **yes** (census.js counts them for it), 8 over 4 sources. Its rules are the
+ * first users of ONT-014's two new holds: `moves` on the status and `frozen` `unless` a draft.
+ */
+export const settled = defineKind({
+  id: 'settled',
+  version: 1,
+  source: SOURCE,
+  sentence: 'a {from} is agreed at some point, and after that it stays as it was agreed',
+  distinguishes: "a draft that becomes agreed (issued, sent, sealed, published) and is then frozen while still in force; 'ends' keeps a record that stopped, 'happened-to' was never editable",
+  projectsTo: "a status Choice (draft / agreed / withdrawn), an agreed-at Date and an 'amends' Link to itself; the moves and the freeze kept inside the write (onlyWhile), and no deleting an agreed one if said",
+  target: 'none',
+  carriesDetails: false,
+  tile: { label: 'Settled once agreed', line: 'a draft, then agreed and frozen', icon: '◆' },
+  questions: [
+    {
+      id: 'agreedBy',
+      ask: 'Who agrees a {from}, and what is it called when they do (issued, sent, sealed, published)?',
+      prevents: 'a bill whose amount changed after it was sent, because nothing said that sending settled it',
+      answer: { type: 'words' },
+      from: 'census'
+    },
+    {
+      id: 'stillChanges',
+      ask: 'After a {from} is agreed, which of its details may still change (a note, whether it was paid) — name them, or "nothing"?',
+      prevents: 'a sent bill that could not be marked paid, or one whose amount still could be',
+      answer: { type: 'fields' },
+      from: 'census'
+    },
+    {
+      id: 'putRight',
+      ask: 'To put a mistake in an agreed {from} right, is it withdrawn, or replaced by a new one that says which it replaces?',
+      prevents: 'an agreed assignment edited in place, so nobody could tell what the learner had been given',
+      answer: { type: 'one-of', values: ['withdraw it', 'replace it with a new one', 'either'] },
+      from: 'census'
+    },
+    {
+      id: 'deleteDraft',
+      ask: 'May a draft {from} be thrown away?',
+      prevents: 'a draft nobody could delete, kept beside the agreed ones for ever',
+      answer: { type: 'yes-no' },
+      from: 'census'
+    },
+    {
+      id: 'deleteAgreed',
+      ask: 'May an agreed {from} ever be deleted?',
+      prevents: 'an agreed record deleted, and with it the proof of what was agreed',
+      answer: { type: 'yes-no' },
+      from: 'census'
+    }
+  ],
+  projection: ({ from, answers }) => {
+    const STATUS = ['draft', 'agreed', 'withdrawn'] as const;
+    // A row made before the status was asked for has none yet: it is a draft for the rules below.
+    const draftish = { $or: [{ status: 'draft' }, { status: { $exists: false } }] };
+    const still = typeof answers.stillChanges === 'string' ? answers.stillChanges.split(',').map((w) => w.trim()).filter((w) => w && !/^nothing$/i.test(w)) : [];
+    const fields: ProjectedField[] = [
+      { on: 'from', name: 'status', kind: 'choice', values: STATUS },
+      { on: 'from', name: 'agreedAt', kind: 'date' }
+    ];
+    if (answers.putRight !== 'withdraw it') fields.push({ on: 'from', name: 'amends', kind: 'link', points: from, whenTargetGoes: 'stays-unlinked' });
+    const rules: ProjectedRule[] = [
+      {
+        on: 'from',
+        says: `${a(from)} goes from draft to agreed to withdrawn, and never back`,
+        holds: { moves: 'status', from: { draft: { to: ['agreed'] }, agreed: { to: ['withdrawn'] }, withdrawn: { to: [] } } }
+      },
+      {
+        on: 'from',
+        says: still.length ? `once ${a(from)} is agreed, nothing on it changes but ${still.join(', ')}` : `once ${a(from)} is agreed, nothing on it changes`,
+        holds: { frozen: '*', unless: draftish, except: ['status', 'agreedAt', ...still], heldOn: { status: 'agreed' }, freeOn: { status: 'draft' } }
+      }
+    ];
+    if (answers.deleteAgreed === false) {
+      rules.push(
+        answers.deleteDraft === false
+          ? { on: 'from', says: `nobody deletes ${a(from)}`, holds: { neverDeleted: true } }
+          : { on: 'from', says: `an agreed ${from} is never deleted; a draft may be`, holds: { neverDeleted: true, unless: draftish, heldOn: { status: 'agreed' }, freeOn: { status: 'draft' } } }
+      );
+    }
+    return { fields, rules };
+  },
+  mutants: [
+    {
+      id: 'edited-in-place',
+      mistake: 'an agreed thing edited in place',
+      why: 'nobody can tell afterwards what was agreed',
+      from: 'census',
+      kills: 'stillChanges',
+      shape: { without: { rule: 'frozen' } }
+    },
+    {
+      id: 'goes-back',
+      mistake: 'an agreed thing put back to draft, changed, and agreed again',
+      why: 'the freeze means nothing if the status can walk around it',
+      from: 'census',
+      kills: 'putRight',
+      shape: { without: { rule: 'moves' } }
+    },
+    {
+      id: 'agreed-deleted',
+      mistake: 'an agreed thing deleted',
+      why: 'the proof of what was agreed goes with it',
+      from: 'census',
+      kills: 'deleteAgreed',
+      shape: { without: { rule: 'neverDeleted' } }
+    },
+    {
+      id: 'amend-loses-link',
+      mistake: 'a replacement that does not say which one it replaces',
+      why: 'two agreed records, and nothing says the second supersedes the first',
+      from: 'census',
+      kills: 'putRight',
+      shape: { without: { field: 'amends' } }
+    }
+  ],
+  evidence: { rows: 8, sources: ['lessons', 'template:nightbook', 'template:planning', 'tirion'] }
+});
+
 /** In the census's order. */
 export const WORLD_KINDS: readonly Kind[] = Object.freeze([
   belongsTo,
@@ -971,5 +1093,6 @@ export const WORLD_KINDS: readonly Kind[] = Object.freeze([
   ownedBy,
   extendsKind,
   byName,
-  pointsAtOneOf
+  pointsAtOneOf,
+  settled
 ]);

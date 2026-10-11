@@ -212,7 +212,7 @@ export type MigrationStep =
    * deleted) as the world says them now; `null` = none. The backend's route writes them into
    * `security.json` — the world's half of `onlyWhile` (`frozen`, `delete: "never"`).
    */
-  | { rules: { collection: string; onlyWhile: WorldOnlyWhile | null }; says: string };
+  | { rules: { collection: string; onlyWhile: WorldOnlyWhile | null; was?: WorldOnlyWhile | null }; says: string };
 
 /** What a dry run reads off the records before anything moves. A failed `refuse` stops the migration; a `loses` is shown and must be accepted. */
 export type MigrationCheck =
@@ -641,7 +641,9 @@ function planBetween(before: WorldFiles, after: WorldFiles, sb: WorldSchema, sa:
   for (const c of sa.collections) {
     const old = sb.collections.find((x) => x.name === c.name);
     if (JSON.stringify(old?.onlyWhile ?? null) === JSON.stringify(c.onlyWhile ?? null)) continue;
-    kept.push({ rules: { collection: c.name, onlyWhile: c.onlyWhile ?? null }, says: keptWords(c) });
+    // `was` (s18): what the world said before, so the route can tell its own earlier writing from a rule a
+    // person wrote by hand on the same collection, and keep the hand one or say it would be lost.
+    kept.push({ rules: { collection: c.name, onlyWhile: c.onlyWhile ?? null, was: old?.onlyWhile ?? null }, says: keptWords(c) });
   }
 
   // A dropped field an index or a check on a surviving collection reads goes after the rule changes.
@@ -664,10 +666,14 @@ function keptWords(c: WorldCollection): string {
   const ow = c.onlyWhile;
   if (!ow) return `${wordsOf(c)} keep no rule on what they were`;
   const parts: string[] = [];
-  const frozen = ow.update?.frozen.fields;
-  if (frozen === '*') parts.push('nobody edits one once it is made');
+  const frozen = ow.update?.frozen?.fields;
+  const unless = ow.update?.frozen?.unless ? ' once it is agreed' : '';
+  const except = ow.update?.except?.length ? ` but ${ow.update.except.join(', ')}` : '';
+  if (frozen === '*') parts.push(unless ? `nothing on one changes${unless}${except}` : 'nobody edits one once it is made');
   else if (frozen) parts.push(`${frozen.join(', ')} ${frozen.length > 1 ? 'are' : 'is'} set once`);
+  for (const [field, byOld] of Object.entries(ow.update?.moves ?? {})) parts.push(`${field} moves ${Object.entries(byOld).map(([old, m]) => `from ${old} to ${m.to.length ? m.to.join(' or ') : 'nowhere'}`).join(', ')}`);
   if (ow.delete === 'never') parts.push('nobody deletes one');
+  else if (ow.delete) parts.push('an agreed one is never deleted');
   return `keep, for ${wordsOf(c)}: ${parts.join('; ')}`;
 }
 

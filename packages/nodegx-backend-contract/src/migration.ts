@@ -56,7 +56,12 @@ export type MigrationMove =
  * once, never edited, never deleted), as the world says them now; `null` = it says none. Not the
  * schema's: the backend keeps them inside a person's write, so the context's `rules` writes them.
  */
-export type MigrationRulesBody = { collection: string; onlyWhile: { update?: OnlyWhileRule; delete?: OnlyWhileRule | 'never' } | null };
+export type MigrationRulesBody = {
+  collection: string;
+  onlyWhile: { update?: OnlyWhileRule; delete?: OnlyWhileRule | 'never' } | null;
+  /** s18: what the world said for this collection before this migration (absent on a plan written by hand). */
+  was?: { update?: OnlyWhileRule; delete?: OnlyWhileRule | 'never' } | null;
+};
 
 export type MigrationStepData =
   | { backup: true; says: string }

@@ -270,6 +270,11 @@ function honesty(engine: string, fixture: string, verdicts: Verdict[]): string {
  * (`moves-unanswered`), a log anyone may edit (`editable-history`), ending or merging by deleting
  * (`merge-by-delete`; `end-by-delete` in world and membership — every-kind's survives, unclaimed).
  * every-kind 16 → 13 of 38; world 14 → 11; membership 8 → 4.
+ *
+ * ONT-011 step 2 (s18): every-kind gained a `quote` noun and `quote-sent` (settled): 7 mutants more, 45 in all;
+ * settled's six (four seeds, two unanswered questions that change the schema) are all killed at its three held
+ * claims or for want of a home; the one survivor added is the quote's number stored as text, the noun's own
+ * property mutant, unclaimed like the slot's. 13 of 38 → 14 of 45.
  */
 const SURVIVORS: Record<(typeof WORLDS)[number], string[]> = {
   world: [
@@ -298,7 +303,8 @@ const SURVIVORS: Record<(typeof WORLDS)[number], string[]> = {
     'note-about/whenTargetGoes-unanswered (unkept)',
     'session/heldOn-as-text (unclaimed)',
     'slot/starts-as-text (unclaimed)',
-    'slot/open-as-text (unclaimed)'
+    'slot/open-as-text (unclaimed)',
+    'quote/amount-as-text (unclaimed)'
   ],
   'world-membership': [
     'membership/startsEnds-unanswered (unclaimed)',

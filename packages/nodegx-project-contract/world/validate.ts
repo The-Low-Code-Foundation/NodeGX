@@ -43,7 +43,18 @@ function answerFits(shape: AnswerShape, value: unknown): boolean {
 function answerWords(shape: AnswerShape): string {
   if (shape.type === 'yes-no') return 'true or false';
   if (shape.type === 'one-of') return `one of ${shape.values.map((v) => JSON.stringify(v)).join(', ')}`;
+  if (shape.type === 'fields') return 'the names of its own details, comma-separated, or "nothing"';
   return 'the person\'s words';
+}
+/** P116 ONT-011 step 2: a `fields` answer, as names: `"note, paid on"` → `['note', 'paid on']`; `"nothing"` → `[]`. */
+export function fieldsAnswered(value: unknown): string[] {
+  if (typeof value !== 'string') return [];
+  const words = value.trim();
+  if (!words || /^nothing$/i.test(words)) return [];
+  return words
+    .split(',')
+    .map((w) => w.trim())
+    .filter(Boolean);
 }
 
 /**
@@ -235,6 +246,14 @@ export function validateWorld(
             if (!answerFits(q.answer, value)) {
               say('relations', `${at}.answers.${qid}`, answerWords(q.answer), value, `${at} ("${String(r.id)}"): the answer to "${q.ask}" must be ${answerWords(q.answer)}; it is ${show(value)}.`);
               continue;
+            }
+            if (q.answer.type === 'fields') {
+              // Each name is a detail of the noun the relation starts from: a projection reads them back as fields.
+              const owner = typeof r.from === 'string' ? nounIds.get(r.from) : undefined;
+              const names = new Set(((owner && Array.isArray(owner.properties) ? owner.properties : []) as unknown[]).map((p) => (isObj(p) ? String(p.name) : '')));
+              for (const name of fieldsAnswered(value)) {
+                if (!names.has(name)) say('relations', `${at}.answers.${qid}`, `details of "${String(r.from)}"`, name, `${at} ("${String(r.id)}") answers "${q.ask}" with "${name}", which is not a detail of "${String(r.from)}".`);
+              }
             }
             if (q.changesKind && value === q.changesKind.when) {
               say('relations', `${at}.kind`, q.changesKind.to, kind.id, `${at} ("${String(r.id)}") answers ${show(value)} to "${q.ask}" — then it is a ${q.changesKind.to}, not a ${kind.id}.`);

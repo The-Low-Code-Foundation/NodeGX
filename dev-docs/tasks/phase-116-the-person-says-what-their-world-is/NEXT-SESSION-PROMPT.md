@@ -1,87 +1,109 @@
 # Phase 116 — next session
 
-**Written 2026-10-11, end of s17 (Opus 5.5).** ONT-000 ✅, ONT-002 ✅, ONT-003 ✅, ONT-007 ✅. 🟡: ONT-001 (AC4 →
-ONT-008), ONT-004 (AC2 → ONT-008), ONT-005 (now **13 of 38**), ONT-006 (the view is ONT-008's), ONT-011 (step 1 ✅),
-ONT-012 (reach review owed), **ONT-014 (built s17; §6.4 owed)**. 📋: ONT-013, ONT-015, ONT-008, ONT-009, ONT-010.
-R1–R10, R-a to R-g and **R-h** (s17) are ruled (README §9). **No ruling is waiting on Richard.**
+**Written 2026-10-11, end of s18 (Fable 5.1).** ONT-000 ✅, ONT-002 ✅, ONT-003 ✅, ONT-007 ✅. 🟡: ONT-001 (AC4 →
+ONT-008), ONT-004 (AC2 → ONT-008), ONT-005 (now **14 of 45** on every-kind), ONT-006 (the view is ONT-008's),
+**ONT-011 (step 1 ✅; step 2's *settled* half ✅ s18, its §9; the other three borrows owed)**, **ONT-012 (reach review
+✅ s18, §6.4)**, **ONT-014 (reach review ✅ s18, §6.5; AC4's two shapes and `was` built; AC3's schema half and the
+cascade owed)**. 📋: ONT-013, ONT-015, ONT-008, ONT-009, ONT-010. R1–R10, R-a to R-h are ruled (README §9).
+**Two rulings are waiting on Richard** (below, "For Richard").
 
 ## Before anything
 
-0. **Model check.** The next two tasks are reach reviews and a vocabulary step, all marked **Fable 5.1**. On Opus,
-   take task 3 or 4 below instead, and say so.
-1. **`node scripts/bugs.js --from P116`**: 6 open (NULLEQ, DOTTEDFILTER, CRONLEAK, -required, and two owned
-   elsewhere).
-2. **One heavy job on this box:** `pgrep -fl bin/jest`. Peers (P107, P109, P112) ran node-spec and backend suites all
-   through s17. s17 once started a 53-spec run beside two of theirs; wait instead.
-3. **`git diff --cached --name-only`** first. P112 had 24 files staged all afternoon, so commit by pathspec.
+0. **Model check.** Task 1 below is a vocabulary step (**Fable 5.1**); tasks 2–4 are fixed-shape builds on existing
+   seams (**Opus 5.5**). Say which you are and take the matching task.
+1. **`node scripts/bugs.js --from P116`**: 7 open (**CASCADEHOLD** new, high; NULLEQ, DOTTEDFILTER, CRONLEAK,
+   -required, and two owned elsewhere).
+2. **One heavy job on this box:** `pgrep -fl bin/jest`. P112's node-spec suite ran twice during s18 (once for ~15 min);
+   s18 waited each time. Wait.
+3. **`git diff --cached --name-only`** first; commit by pathspec through a temporary index (the memory recipe). s18's
+   two commits went that way.
+4. **`grep` is ugrep with `-I` here and silently skipped `HttpServer.ts` as binary.** Use `command grep -a`.
 
-## What s17 did (Opus 5.5)
+## What s18 did (Fable 5.1)
 
-1. **Committed the Fable chat's ONT-013/014/015 and s16's handoff** (`baa70f788`). They had sat untracked for 10 hours.
-2. **Bug `P116-S16-INCLUDECLP` fixed** (`e06ebbd2a`, `740f67ffa`). An `include` and a `$path` now read another
-   collection by that collection's own `get`/`find` rule (`StorageAclOption.reach`, from `checkClp`; the facade reads
-   it via `fieldRules.reachOf`). A closed target is a bare link, a narrowed one is embedded only where it reaches, and
-   a path through either is a 403. Measured red first over every door with a probe. 22/22 on both engines.
-3. **R-h ruled by Richard (the recommendation):** an included author carries their name, not their account.
-   Measured: anyone signed in got another person's email and admin access through `include`. Every account column
-   but the username is now in the `hidden` mask, which ONT-012's strip and naming refusal already keep.
-4. **ONT-014 built** (`04a51c5eb`): `moves` (who may move a value where, `by` decided per caller as `admits`),
-   `frozen` (`unless`; set once; `"*"`), `delete: "never"`. Each is a condition on the OLD record ANDed into the
-   write's `only`, so it is still one statement. The 409 carries the clause's words, for a move the old value's.
-   54/54 on both engines, every door, three mutants.
-5. **ONT-014 AC4** (`e06f4259d`): set once, never edited and never deleted are **held** in the projection
-   (`WorldCollection.onlyWhile`). Claims carry the rule as data on `byPerson` steps, and the facade keeps it.
-   ONT-005: every-kind 16 → 13 of 38, world 14 → 11, membership 8 → 4.
-6. **The write** (`9bc713ada`): a migration's `rules` step, recorded during the run and written by the route after
-   the renames, beside the person's own `onlyWhile` (`withWorldRules`: the world owns `frozen` and `delete: "never"`).
-7. **Filed:** `P116-S17-DOTTEDFILTER` (a filter on a linked record's field answers nothing, even to the admin),
-   `P116-S17-NULLEQ` (`{ f: null }` matches nothing; `$eq: null` works — a one-line fix in `QueryBuilder`),
-   `P116-S17-CRONLEAK` (a 53-spec run exits 1 with every test green: `fed-004-overlap-drive`'s cron outlives its suite).
+1. **The reach reviews, ONT-012 + ONT-014 (AC6)** — commit `441673335`. Nine probes written as the behaviour that
+   SHOULD hold (`packages/nodegx-backend/tests/ont-014-reach-review.test.ts`), seven red on both engines at HEAD:
+   - **A write is a read.** A field R-a hides from the caller answered through the write's success: ONT-014's
+     "staying is not a move" and "the same value is not a change" compared the body with the hidden value (PUT of a
+     guess: 200 when right, 409 when wrong), and a move's 409 named the hidden old value. Fixed in
+     `persistence/onlyWhile.ts`: for a field in the caller's `hidden` mask every write is a change and the words name
+     the field; shown-on-some-rows fields are compared only where the rule reaches.
+   - **A Date frozen field** was never "the same value" (an echo and the first write of an empty one were 409s; the
+     s17 spec used a String column). `stored()` unwraps a Date; arms are per field, so an Object's first write passes.
+     Known limit, graded: an Object's echo is a change.
+   - **A `$path` through the narrowed queried collection** walked rows outside the caller's narrowing (INCLUDECLP's
+     "not covered"). `fieldRules.ts` refuses it (403, `collection-rule`).
+   - **`withWorldRules` replaced a hand-written `unless` freeze in silence.** `worldRuleLosses` names it in the dry
+     run's `why` and the run is 409 until `acceptLosses`.
+   - **The cascade** (`goes-too` into `delete: "never"`, `stays-unlinked` into a frozen link): a learner's DELETE of a
+     keeper took the sealed envelope and emptied the issued invoice's customer. **Filed `P116-S18-CASCADEHOLD`**
+     (high), `it.failing` ×2. Not fixed: needs the ruling and a per-collection `onlyWhile` in the ACL option.
+   - Dotted filters/accessors through a link onto a hidden or closed field: **green** (nothing returned), graded.
+   - The ACL of a never-edited record: a bound writer rewrote it (200) — a ruling, not asserted.
+2. **ONT-011 step 2, the *settled* half** — uncommitted at the time of writing (see "Measured"). The fifteenth kind in
+   `kinds.hand.json` (with `borrow: 'settled'`: `census.js` counts a borrow-backed kind from step 1's yes verdicts;
+   8 rows over 4 sources, the relation-row count still 303, `world.test.ts` pins 311) and `kinds.ts`; five questions,
+   one with a new **`fields`** answer shape (names of the noun's own details, validated against the noun); the
+   projection onto ONT-014's two new `RuleHold` shapes — `{ frozen, unless?, except?, heldOn?, freeOn? }`, `{ moves,
+   from }` — and `neverDeleted` with `unless`; `WorldOnlyWhile` grew to carry `frozen.unless`, `except`, `moves` and a
+   `delete: { where }`; three held claims with mutants; `applyMutant`/`without: { rule }` drop them. The migration's
+   `rules` step carries **`was`** (the world's previous `onlyWhile`), and `withWorldRules` merges by provenance (a
+   clause that differs from `was` is the person's and is kept, unless the world now says it — then a loss);
+   a plan without `was` keeps s17's slot rule. `world-every-kind` gained a `quote` noun and `quote-sent`.
+3. **Read s18:** `nodegx-project-contract/tests/mutants.test.ts` had been red since s17 (`merge-by-delete` and
+   `editable-history` are held now, so the static verdict is `run`); it now says so. The handoff before this one had
+   not run it.
 
-## What s17 measured (2026-10-11, 09:39 → ~11:30 CEST)
+## What s18 measured (2026-10-11, 13:30 → 14:45 CEST)
 
-- `p116-s16-include-clp` 22/22, `ont-014-old-and-new` 54/54, `ont-007-route` 33/33, `ont-012-only-while` 32/32: each on
-  SQLite and PostgreSQL (`postgres:///nodegx_brg005`).
-- Every backend ONT and P116 spec plus the ONT-003 card, in band: **354/354, exit 0**. The project contract's
-  `world.test.ts`: 36/36. The MCP's `ont002WorldTools`: 12/12.
-- Neighbours in band after the ONT-014 build (53 specs: security, facade, realtime, search, FED, BRG, ONT): **797/797,
-  exit 1**. The 1 is CRONLEAK; that spec exits 0 alone.
-- `tsc --noEmit` clean for backend src, backend tests, the admin app, the backend contract and the project contract.
-  The full backend suite and `test:ci` were **not** run.
+- `ont-014-reach-review` 26/26 on SQLite and PostgreSQL (two `it.failing` for CASCADEHOLD); the P116 backend band
+  before the review's commit: **18 suites, 403/403, exit 0**.
+- After step 2: project contract `world.test.ts` 36/36, `mutants.test.ts` 21/21; MCP `ont002WorldTools` 12/12;
+  `npm run ontology-census:check` green with the private paths; `tsc --noEmit` clean for the project contract, the
+  backend contract and the backend. The backend band for step 2 (ont-005, ont-007-route, ont-003-claims,
+  ont-014-reach-review) was running when this was written — its result is in the s18 commit message for step 2, or,
+  if there is no such commit, the next session runs it first.
+- ONT-005 every-kind: **45 mutants, 14 survive** (5 unkept, 9 unclaimed) on both engines; settled's six killed.
 
 ## The next tasks, in order
 
-1. **Reach reviews, ONT-012 then ONT-014** (Fable; ONT-014 AC6). Start from the INCLUDECLP bug's "Not covered" list
-   and ONT-014 §6.4: a function's Update Record runs as admin; a hidden status in a move's 409 words; a Date frozen
-   field; `withWorldRules` against a person's own hand-written `frozen`; a `repeat` hop through the queried
-   collection.
-2. **ONT-011 step 2** (Fable): *settled* becomes the fifteenth kind (R-c), with ONT-014's two new `RuleHold` shapes
-   (`frozen` with `unless`, `moves`). That closes ONT-014's AC4 rest, and ONT-011 step 4 projects onto them.
-3. **ONT-014 AC3's schema half** (Opus): a `moves` entry on a field that is not a choice or text, and a `to` value
-   not in the choice. Refuse it where `security.json` is written with the schema at hand: the permissions PUT and
-   the route's `rules` step.
-4. **ONT-015 (a number never reused) or ONT-013 (`rules.json`)** (Opus build), both on ONT-014's seam.
-5. **ONT-008** once P112 OWN-007 has started (still 📋 at s17's start).
-6. If all of that is blocked: NULLEQ is a one-liner whose owner is the runtime query builder (ask, or fix with a
-   both-engine spec); then `-required`.
+1. **ONT-011 step 2, the other three borrows** (Fable): facts about a thing on `Noun` (`files.ts`, `world.schema.json`:
+   only one, a number read aloud, what you call one, who changed what — each a question and a mutant); `secret` and
+   `onlyWhen` as answers on a property (the kinds whose target is a property, and `ends`). Step 4 then projects
+   `secret` to `fields.<f>.read` (the target exists, ONT-012 §6.2).
+2. **The cascade, `P116-S18-CASCADEHOLD`** (Opus, after the ruling): `StorageAclOption.onlyWhile` per collection (as
+   `hidden` and `reach` are), `aclFor` fills every collection that has one, `heldWhile` indexes by collection,
+   `DeleteContext` gains a `held` hook that `deleteKeepingLinks` asks for every gone and unlinked row BEFORE anything
+   is deleted (as `blocks` is asked). The probe's cases 5a/5b are the regression; flip them from `it.failing`.
+3. **ONT-014 AC3's schema half** (Opus): a `moves` entry on a field that is not a choice or text, and a `to` value not
+   in the choice, refused where `security.json` is written with the schema at hand (the permissions PUT, the route's
+   `rules` step).
+4. **ONT-015 or ONT-013** (Opus build), both on ONT-014's seam. ONT-008 once P112 OWN-007 has started (still 📋).
+5. If blocked: NULLEQ (one line in `QueryBuilder`, both-engine spec), then `-required`.
 
-## For Richard (not blocking; ask only when the work reaches them)
+## For Richard (plain words; the recommendation first)
 
-- **Who may change a field** (a per-field `update` rule): not ruled.
-- **Search** is refused outright for a caller with any hidden field on the collection.
-- A person's **own** row embedded through a link is stripped of their account details too (R-h, uniform). Their
-  details come from `/users/me`. Say so if Richard asks why their own email is missing from an embed.
+- **When someone deletes a keeper, and the keeper's envelope "is never deleted" — does the delete stop, in the
+  envelope's words, or does the envelope go with the keeper?** Recommendation: it stops; only the admin (or a
+  function) can delete the keeper then. The same for a frozen link: the delete stops rather than emptying a field
+  the person may not change. (CASCADEHOLD; measured: today the envelope goes, 200.)
+- **"A sealed envelope is never edited" — may its owner still change who can read it (its ACL)?** Today they can
+  (measured 200 on both engines). Recommendation: no — `frozen: "*"` freezes the ACL too; a PUT that echoes an
+  unchanged ACL would then be refused, which only matters for a client that sends the whole record back.
+- Still open from s17 (not blocking): who may change a field (a per-field `update` rule); search refused outright
+  for a caller with any hidden field; a person's own row embedded through a link is stripped of their account
+  details (R-h, uniform).
 
-## Traps s17 hit
+## Traps s18 hit
 
-- **A spy cannot reach a call inside its own module.** `reachOf`, called by `refuseHiddenNamed` in the same file,
-  ignored `jest.spyOn`, and the mutant "passed". Mutate at a module boundary (`model.collectionReach`).
-- **`{ field: null }` matches nothing on the built-in backend** (NULLEQ). Write empty as `$exists: false`.
-- **Binding every claim step to a rule broke claims about something else**: "nobody deletes a person" refused every
-  cascade claim's delete. Bind only the steps a person makes (`byPerson`).
-- **A rule written during a migration is overwritten by the rename move after it.** Record during, write after.
-- **A peer (P109) edited `state.ts` while s17 did.** The commit went through a temporary index (HEAD + s17's hunks),
-  with `update-ref` as compare-and-swap.
+- **A write's success is a read of whatever the write is compared against.** Grade a hidden field at every door
+  that COMPARES it, not only the ones that return it.
+- **A spec's column type is a fixture choice.** The s17 spec said "date of birth" and used a String; a Date column
+  broke the rule. When a sentence names a type, the fixture should carry it.
+- **The static mutant spec was red for a session and nobody ran it.** `world.test.ts` green is not the package green.
+- **One `frozen` per collection.** A noun that is both *settled* and has a `setOnce` field gets the union under
+  settled's `unless` (the set-once field is editable while a draft). Said in ONT-011 §9; a second clause would need
+  the backend shape to grow.
 
 ## Owned elsewhere
 
@@ -91,9 +113,9 @@ P77/SBR-007). The untracked `.d.ts` emits in `packages/nodegx-backend-contract/s
 ## Not yet
 
 The "mandatory project-docs folder" (R1) is only a DIRECTION.md candidate. Don't read the lessons backend's live schema
-without its admin token. The brief is read only through `validate_world` (R5). A borrow candidate is never a kind until
-step 2 says so.
+without its admin token. The brief is read only through `validate_world` (R5). The private corpora are sibling folders
+of this checkout; their names and paths stay out of the repo (R6) — the census command takes them as flags.
 
 ## Memory
 
-`ontology-is-the-spec.md` (an s17 paragraph). The index is AT its 17,510-unit budget: tighten, never grow.
+`ontology-is-the-spec.md` (an s18 paragraph). The index is AT its 17,510-unit budget: tighten, never grow.
