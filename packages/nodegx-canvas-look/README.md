@@ -22,4 +22,4 @@ look.lane.eyebrowLabel;             // 'STRUCTURE'
 
 Not projected: the glyph inside the header chip is drawn with strokes by the painter (code, not data). An editor
 that wants its own look ignores this package; one that wants NodeGX's reads it and draws nothing from memory.
-Private until phase 112's R2 ruling; `npm run canvas-look` regenerates, `npm run canvas-look:check` grades.
+In this repository, `npm run canvas-look` regenerates, `npm run canvas-look:check` grades.

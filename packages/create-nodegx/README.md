@@ -24,3 +24,8 @@ over stdio.
 
 You can open the app in the NodeGX visual editor whenever you like. It is the same project, and nothing needs
 converting.
+
+## Licence
+
+GPL-3.0-only. The source is in [The-Low-Code-Foundation/NodeGX](https://github.com/The-Low-Code-Foundation/NodeGX),
+under `packages/create-nodegx`.

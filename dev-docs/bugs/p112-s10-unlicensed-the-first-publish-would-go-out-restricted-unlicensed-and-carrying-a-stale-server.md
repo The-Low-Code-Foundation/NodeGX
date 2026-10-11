@@ -8,7 +8,7 @@ kit: mcp
 found: P112 OWN-011 s10, 2026-10-11
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/OWN-011-ONE-INSTALL.md §8
 regression: scripts/own/publishable.js
-commit: see OWN-011 §8
+commit: a4ac921d5
 ---
 
 s9's gates all passed (`publishable.js` 3 packages, 0 problems), yet the two scoped packages were not publishable as

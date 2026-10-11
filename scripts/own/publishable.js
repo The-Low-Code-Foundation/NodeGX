@@ -18,8 +18,18 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..', '..');
-/** The packages OWN-011's one install publishes (R2: at 0.x). */
-const KIT = ['packages/noodl-mcp', 'packages/noodl-preview', 'packages/create-nodegx'];
+/**
+ * The packages R2 publishes at 0.x: OWN-011's one install, then what a home-made editor builds on (ruled 2026-10-11).
+ * `@nodegx/project-contract` is published from the folder its `build:publish` writes; its own manifest stays private.
+ */
+const KIT = [
+  'packages/noodl-mcp',
+  'packages/noodl-preview',
+  'packages/create-nodegx',
+  'packages/nodegx-node-spec',
+  'packages/nodegx-canvas-look',
+  'packages/nodegx-project-contract/dist/publish'
+];
 
 const workspace = new Map();
 for (const dir of fs.readdirSync(path.join(ROOT, 'packages'))) {
@@ -32,6 +42,10 @@ for (const dir of fs.readdirSync(path.join(ROOT, 'packages'))) {
 const problems = [];
 const dirs = process.argv.slice(2).length ? process.argv.slice(2) : KIT;
 for (const dir of dirs) {
+  if (!fs.existsSync(path.join(ROOT, dir, 'package.json'))) {
+    problems.push(`${dir} has no package.json${dir.includes('dist/publish') ? ': run its build:publish first' : ''}`);
+    continue;
+  }
   const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, dir, 'package.json'), 'utf8'));
   if (pkg.private) problems.push(`${pkg.name} (${dir}) is private: npm will not publish it`);
   if (pkg.name.startsWith('@') && (pkg.publishConfig || {}).access !== 'public') {
