@@ -225,6 +225,7 @@ export function SidePanel() {
       <span className={css['ModeControl']}>
         <Tooltip content={layout.mode === 'wide' ? 'Narrow panel' : 'Widen panel'} fineType="⌘\" showAfterMs={300}>
           <IconButton
+            ariaLabel={layout.mode === 'wide' ? 'Narrow panel' : 'Widen panel'}
             variant={IconButtonVariant.Transparent}
             icon={layout.mode === 'wide' ? IconName.FoldHorizontal : IconName.UnfoldHorizontal}
             size={IconSize.Large}
@@ -242,6 +243,7 @@ export function SidePanel() {
       <span className={css['ModeControl']} data-panel-chrome="secondary">
         <Tooltip content={canDetach ? floatLabel : legacyReason} showAfterMs={300}>
           <IconButton
+            ariaLabel={floatLabel}
             variant={IconButtonVariant.Transparent}
             icon={IconName.Cards}
             isDisabled={!canDetach}
@@ -254,6 +256,7 @@ export function SidePanel() {
       <span className={css['ModeControl']} data-panel-chrome="secondary">
         <Tooltip content={canDetach ? fullLabel : legacyReason} showAfterMs={300}>
           <IconButton
+            ariaLabel={fullLabel}
             variant={IconButtonVariant.Transparent}
             icon={IconName.ViewportDiagonalArrow}
             isDisabled={!canDetach}
@@ -266,6 +269,7 @@ export function SidePanel() {
       <span className={css['ModeOverflow']}>
         <Tooltip content="Float, full and panel options" showAfterMs={300}>
           <IconButton
+            ariaLabel="Float, full and panel options"
             ref={overflowButtonRef}
             variant={IconButtonVariant.Transparent}
             icon={IconName.DotsThreeHorizontal}
@@ -286,6 +290,7 @@ export function SidePanel() {
       <span className={css['HideControl']}>
         <Tooltip content="Hide panel" fineType="⌘B" showAfterMs={300}>
           <IconButton
+            ariaLabel="Hide panel"
             variant={IconButtonVariant.Transparent}
             icon={IconName.ArrowLineLeft}
             size={IconSize.Large}
@@ -424,6 +429,7 @@ export function SidePanel() {
             >
               <span className={css['DetachedTitle']}>{activePanelName}</span>
               <IconButton
+                ariaLabel="Dock panel"
                 variant={IconButtonVariant.Transparent}
                 icon={IconName.Close}
                 testId="side-panel-dock-button"

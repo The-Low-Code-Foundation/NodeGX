@@ -94,6 +94,7 @@ export function CollapsableSection({
               section: the click stops at the actions slot. */}
           {Boolean(actions) && <div onClick={(e) => e.stopPropagation()}>{actions}</div>}
           <IconButton
+            ariaLabel={isCollapsed ? 'Expand' : 'Collapse'}
             icon={IconName.CaretUp}
             variant={IconButtonVariant.Transparent}
             state={isCollapsed ? IconButtonState.Rotated : null}

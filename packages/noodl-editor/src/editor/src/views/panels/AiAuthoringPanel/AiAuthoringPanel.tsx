@@ -1842,6 +1842,7 @@ export function AiAuthoringPanel({ width = 'panel' }: AiAuthoringPanelProps = {}
         host === 'document' ? undefined : (
           <Tooltip content={EXPAND_LABEL} showAfterMs={400}>
             <IconButton
+              ariaLabel={EXPAND_LABEL}
               icon={IconName.Columns}
               size={IconSize.Default}
               variant={IconButtonVariant.Transparent}

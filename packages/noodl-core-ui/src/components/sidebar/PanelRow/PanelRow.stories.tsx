@@ -196,7 +196,9 @@ export const WithFxSlot = () => (
   <PanelBody width={380}>
     <PanelRow
       label="Cover image"
-      fxSlot={<IconButton icon={IconName.FolderOpen} size={IconSize.Small} onClick={noop} />}
+      fxSlot={
+        <IconButton ariaLabel="Choose a file" icon={IconName.FolderOpen} size={IconSize.Small} onClick={noop} />
+      }
     >
       <PropertyPanelTextInput value="assets/cover.png" onChange={noop} />
     </PanelRow>

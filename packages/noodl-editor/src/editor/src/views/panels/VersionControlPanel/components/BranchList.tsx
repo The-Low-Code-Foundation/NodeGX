@@ -257,7 +257,12 @@ function CreateBranchButton({ onBranchCreated }: CreateBranchButtonProps) {
   return (
     <>
       <div ref={addButtonRef}>
-        <IconButton size={IconSize.Small} icon={IconName.Plus} onClick={() => setOpen(true)} />
+        <IconButton
+          ariaLabel="Create branch"
+          size={IconSize.Small}
+          icon={IconName.Plus}
+          onClick={() => setOpen(true)}
+        />
       </div>
       <BaseDialog
         isVisible={open}

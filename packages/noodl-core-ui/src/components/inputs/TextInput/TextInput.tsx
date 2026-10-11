@@ -344,6 +344,7 @@ export function TextInput({
         {isCopyable && (
           <div className={css['ButtonContainer']}>
             <IconButton
+              ariaLabel="Copy"
               icon={IconName.Copy}
               size={IconSize.Small}
               variant={IconButtonVariant.SemiTransparent}

@@ -217,6 +217,7 @@ function Item({ entry }: ItemProps) {
           <HStack UNSAFE_style={{ justifyContent: 'space-between', alignItems: 'center' }}>
             <Label>{entry.referenaces.length} references</Label>
             <IconButton
+              ariaLabel={isOpen ? 'Collapse' : 'Expand'}
               variant={IconButtonVariant.Transparent}
               icon={IconName.CaretDown}
               size={IconSize.Tiny}

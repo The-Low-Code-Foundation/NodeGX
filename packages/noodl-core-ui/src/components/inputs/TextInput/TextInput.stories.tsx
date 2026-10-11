@@ -60,7 +60,7 @@ export const SuffixSlotAfter: Story = {
   value: 'example',
   suffix: '.noodl.net',
   isCopyable: true,
-  slotAfterInput: <IconButton icon={IconName.Bug} />
+  slotAfterInput: <IconButton ariaLabel="Debug" icon={IconName.Bug} />
 },
 };
 
@@ -79,7 +79,7 @@ const StyleTestTemplate: Story = (args) => (
         {...args}
         slotAfterInput={
           <Box hasLeftSpacing={1}>
-            <IconButton icon={IconName.Bug} size={IconSize.Small} />
+            <IconButton ariaLabel="Debug" icon={IconName.Bug} size={IconSize.Small} />
           </Box>
         }
       />
@@ -88,7 +88,7 @@ const StyleTestTemplate: Story = (args) => (
         {...args}
         slotAfterInput={
           <Box hasLeftSpacing={1}>
-            <IconButton icon={IconName.Bug} size={IconSize.Small} />
+            <IconButton ariaLabel="Debug" icon={IconName.Bug} size={IconSize.Small} />
           </Box>
         }
         isCopyable

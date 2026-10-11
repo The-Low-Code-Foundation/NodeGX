@@ -69,6 +69,7 @@ export function ExpressionToggle({
       <Tooltip content={tooltipContent}>
         <div className={css['Root']} style={UNSAFE_style}>
           <IconButton
+            ariaLabel={tooltipContent}
             icon={IconName.TextInBox}
             size={IconSize.Tiny}
             variant={IconButtonVariant.Default}

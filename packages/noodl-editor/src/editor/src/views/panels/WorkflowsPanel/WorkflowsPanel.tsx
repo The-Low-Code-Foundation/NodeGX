@@ -285,6 +285,7 @@ export function WorkflowsPanel() {
                 one being up. A running-but-unreachable backend cannot serve a
                 step-kind catalog, and offering the create only defers the error. */}
             <IconButton
+              ariaLabel="New workflow"
               icon={IconName.Plus}
               variant={IconButtonVariant.Transparent}
               onClick={() => setCreating((c) => !c)}
@@ -294,6 +295,7 @@ export function WorkflowsPanel() {
           </Tooltip>
           <Tooltip content="Refresh" showAfterMs={300}>
             <IconButton
+              ariaLabel="Refresh"
               icon={IconName.Refresh}
               variant={IconButtonVariant.Transparent}
               onClick={refresh}

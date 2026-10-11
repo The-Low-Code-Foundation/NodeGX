@@ -63,7 +63,7 @@ export const VariantInModal: Story = {
 export const WithAction: Story = {
   args: {
   title: 'Title',
-  actions: <IconButton icon={IconName.Plus} />
+  actions: <IconButton ariaLabel="Add" icon={IconName.Plus} />
 },
 };
 

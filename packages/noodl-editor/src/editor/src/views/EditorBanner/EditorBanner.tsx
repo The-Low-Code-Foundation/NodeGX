@@ -71,7 +71,12 @@ export function EditorBanner({ onDismiss }: EditorBannerProps) {
 
       {/* Close Button */}
       <div className={css['CloseButton']}>
-        <IconButton icon={IconName.Close} onClick={handleDismiss} variant={IconButtonVariant.Transparent} />
+        <IconButton
+          ariaLabel="Dismiss"
+          icon={IconName.Close}
+          onClick={handleDismiss}
+          variant={IconButtonVariant.Transparent}
+        />
       </div>
     </div>
   );

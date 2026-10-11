@@ -283,6 +283,7 @@ export function FilterGroup({
 
           {!isRoot && onDelete && (
             <IconButton
+              ariaLabel="Remove group"
               icon={IconName.Close}
               size={IconSize.Small}
               variant={IconButtonVariant.Transparent}

@@ -528,6 +528,7 @@ export function BackendServicesPanel() {
           variant={SectionVariant.Panel}
           actions={
             <IconButton
+              ariaLabel="Add backend"
               icon={IconName.Plus}
               size={IconSize.Small}
               onClick={() => setIsAddDialogVisible(true)}

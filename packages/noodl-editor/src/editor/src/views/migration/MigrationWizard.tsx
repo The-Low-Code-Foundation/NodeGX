@@ -509,7 +509,12 @@ export function MigrationWizard({ sourcePath, projectName, onComplete, onCancel 
       <div className={css['WizardContainer']}>
         {/* Close Button */}
         <div className={css['CloseButton']}>
-          <IconButton icon={IconName.Close} onClick={onCancel} variant={IconButtonVariant.Transparent} />
+          <IconButton
+            ariaLabel="Close"
+            icon={IconName.Close}
+            onClick={onCancel}
+            variant={IconButtonVariant.Transparent}
+          />
         </div>
 
         {/* Header */}

@@ -205,6 +205,7 @@ export function BackendCard({
         </div>
         <div className={css.MoreAction}>
           <IconButton
+            ariaLabel="More options"
             icon={IconName.DotsThreeHorizontal}
             size={IconSize.Small}
             onClick={handleShowMore}

@@ -397,6 +397,7 @@ export function NodeLabel({ model, showHelp = true }: NodeLabelProps) {
             <div className="property-header-icon-button">
               <Tooltip content="Save the node label" fineType="Enter">
                 <IconButton
+                  ariaLabel="Save the node label"
                   icon={IconName.Check}
                   size={IconSize.Tiny}
                   variant={IconButtonVariant.OpaqueOnHover}
@@ -416,7 +417,12 @@ export function NodeLabel({ model, showHelp = true }: NodeLabelProps) {
               }}
             >
               <Tooltip content="Cancel" fineType="Esc">
-                <IconButton icon={IconName.Close} size={IconSize.Tiny} variant={IconButtonVariant.OpaqueOnHover} />
+                <IconButton
+                  ariaLabel="Cancel"
+                  icon={IconName.Close}
+                  size={IconSize.Tiny}
+                  variant={IconButtonVariant.OpaqueOnHover}
+                />
               </Tooltip>
             </div>
           </div>
@@ -444,6 +450,7 @@ export function NodeLabel({ model, showHelp = true }: NodeLabelProps) {
                   UNSAFE_tooltipMaxWidth="320px"
                 >
                   <IconButton
+                    ariaLabel="Open Node Docs"
                     icon={IconName.Question}
                     size={IconSize.Tiny}
                     variant={IconButtonVariant.OpaqueOnHover}
@@ -456,6 +463,7 @@ export function NodeLabel({ model, showHelp = true }: NodeLabelProps) {
             <div className="property-header-icon-button">
               <Tooltip content="Edit the node label" fineType={Keybindings.PROPERTY_PANEL_EDIT_LABEL.label}>
                 <IconButton
+                  ariaLabel="Edit the node label"
                   icon={IconName.Pencil}
                   size={IconSize.Tiny}
                   variant={IconButtonVariant.OpaqueOnHover}
@@ -467,6 +475,7 @@ export function NodeLabel({ model, showHelp = true }: NodeLabelProps) {
             <div className="property-header-icon-button">
               <Tooltip content="Delete the node" fineType={Keybindings.PROPERTY_PANEL_DELETE.label}>
                 <IconButton
+                  ariaLabel="Delete the node"
                   icon={IconName.Trash}
                   size={IconSize.Tiny}
                   variant={IconButtonVariant.OpaqueOnHover}

@@ -85,6 +85,7 @@ export function LauncherSidebarExample() {
               <UserBadge email="john@noodl.net" id="20" name="John Doe" size={UserBadgeSize.Small} hasRightSpacing />
               <UserBadge email="john@noodl.net" id="20" name="John Doe" size={UserBadgeSize.Small} hasRightSpacing />
               <IconButton
+                ariaLabel="More options"
                 icon={IconName.DotsThreeHorizontal}
                 variant={IconButtonVariant.Transparent}
                 size={IconSize.Small}

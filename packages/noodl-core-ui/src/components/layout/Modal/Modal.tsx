@@ -52,7 +52,12 @@ export function Modal({
         }}
       >
         <div className={css['CloseButtonContainer']} data-test="close-modal-button">
-          <IconButton icon={IconName.Close} onClick={onClose} variant={IconButtonVariant.Transparent} />
+          <IconButton
+            ariaLabel="Close"
+            icon={IconName.Close}
+            onClick={onClose}
+            variant={IconButtonVariant.Transparent}
+          />
         </div>
 
         <header className={classNames(css['Header'], hasHeaderDivider && css['has-divider'])}>

@@ -62,6 +62,7 @@ export function ContextMenu({
     >
       <div ref={toggleRef}>
         <IconButton
+          ariaLabel="More options"
           icon={icon || IconName.DotsThreeHorizontal}
           onClick={(e) => {
             setIsContextMenuVisible(true);

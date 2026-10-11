@@ -188,6 +188,7 @@ export function ExecutionHistoryPanel() {
       headerSlot={
         <Tooltip content="Refresh" showAfterMs={300}>
           <IconButton
+            ariaLabel="Refresh"
             variant={IconButtonVariant.Transparent}
             icon={IconName.Refresh}
             onClick={() => {

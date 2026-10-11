@@ -53,6 +53,7 @@ function CreateNewPage(props) {
       <div className="variants-header variants-add-header">
         <span>Create new page</span>
         <IconButton
+          ariaLabel="Create new page"
           icon={IconName.Plus}
           size={IconSize.Small}
           UNSAFE_className="add-button"

@@ -58,7 +58,12 @@ export function HelpCenter() {
   return (
     <Portal portalRoot={portalRoot}>
       <div className={css['Root']} ref={rootRef} onClick={() => setIsDialogVisible(true)}>
-        <IconButton icon={IconName.QuestionFree} variant={IconButtonVariant.OpaqueOnHover} size={IconSize.Large} />
+        <IconButton
+          ariaLabel="Open help"
+          icon={IconName.QuestionFree}
+          variant={IconButtonVariant.OpaqueOnHover}
+          size={IconSize.Large}
+        />
       </div>
 
       <MenuDialog

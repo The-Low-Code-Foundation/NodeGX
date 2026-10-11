@@ -74,6 +74,7 @@ export function SideNavigationButton({
           showAfterMs={300}
         >
           <IconButton
+            ariaLabel={label}
             variant={IconButtonVariant.Transparent}
             state={isActive ? IconButtonState.Active : IconButtonState.Default}
             icon={icon}

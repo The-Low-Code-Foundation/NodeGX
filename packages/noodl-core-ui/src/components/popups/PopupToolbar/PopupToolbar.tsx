@@ -30,6 +30,7 @@ export function PopupToolbar({ menuItems, contextMenuItems }: PopupToolbarProps)
         {menuItems.map((item) => (
           <Tooltip content={item.tooltip} showAfterMs={300}>
             <IconButton
+              ariaLabel={item.tooltip}
               variant={IconButtonVariant.SemiTransparent}
               icon={item.icon}
               onClick={item.onClick}

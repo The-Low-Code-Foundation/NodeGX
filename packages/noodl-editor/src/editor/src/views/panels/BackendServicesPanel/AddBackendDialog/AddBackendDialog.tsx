@@ -62,7 +62,7 @@ function HelpPopup({ content, onClose }: HelpPopupProps) {
       <div className={css.HelpPopup} onClick={(e) => e.stopPropagation()}>
         <div className={css.HelpPopupHeader}>
           <Text textType={TextType.DefaultContrast}>Setup Instructions</Text>
-          <IconButton icon={IconName.Close} size={IconSize.Small} onClick={onClose} />
+          <IconButton ariaLabel="Close" icon={IconName.Close} size={IconSize.Small} onClick={onClose} />
         </div>
         <div className={css.HelpPopupContent}>
           {content.split('\n').map((line, i) => {
@@ -317,6 +317,7 @@ export function AddBackendDialog({
               Admin API Key (Required)
             </Text>
             <IconButton
+              ariaLabel="Admin API key help"
               icon={IconName.Question}
               size={IconSize.Small}
               onClick={() => setShowAdminHelp(true)}
@@ -344,6 +345,7 @@ export function AddBackendDialog({
               Public API Key (Optional)
             </Text>
             <IconButton
+              ariaLabel="Public API key help"
               icon={IconName.Question}
               size={IconSize.Small}
               onClick={() => setShowPublicHelp(true)}

@@ -587,6 +587,7 @@ function CreateNewStyle(props) {
         <span>Create new color style</span>
 
         <IconButton
+          ariaLabel="Create new color style"
           icon={IconName.Plus}
           size={IconSize.Small}
           UNSAFE_className="add-button"

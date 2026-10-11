@@ -107,6 +107,7 @@ export function ThreadSwitcher({
         */}
         <Tooltip content="Start a new thread" showAfterMs={400}>
           <IconButton
+            ariaLabel="Start a new thread"
             icon={IconName.Plus}
             size={IconSize.Tiny}
             variant={IconButtonVariant.Transparent}
