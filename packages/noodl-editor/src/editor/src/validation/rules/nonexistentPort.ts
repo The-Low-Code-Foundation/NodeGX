@@ -29,6 +29,7 @@
 
 import { tierForGroup } from '../../views/panels/propertyeditor/propertyPanelTiers';
 import { CatalogIndex, Plug, PortKind, portKindOfTypeName } from '../CatalogIndex';
+import { CLOUD_FUNCTION_TYPE, cloudFunctionCanMint } from '../derivedPortTargets';
 import { Diagnostic, DiagnosticCode } from '../diagnostics';
 import { NormConnection, NormNode, isComponentRef } from '../model';
 import { SkippedCheck, unknownTypeSkip } from '../unknownTypeSkip';
@@ -142,7 +143,12 @@ export const nonexistentPort: Rule = {
           // (2b) P109 ISL-009 — minted by the type's derived-port rule from this node's own list.
           if (catalog.derivedPortNames(node.type, plug, node.parameters).includes(port)) continue;
 
-          if (catalog.hasRuntimeDynamicPorts(node.type)) {
+          // (2c) P109 ISL-042 — a Cloud Function's runtime ports are `out-*` results and `function`/`in-*` inputs, so
+          // any other name it does not list can never exist. Prefixed names go on to (3): whether the called function
+          // declares them is `derivedPortTargets`'s question, not this rule's.
+          const cloudFunctionCannotMint = node.type === CLOUD_FUNCTION_TYPE && !cloudFunctionCanMint(port, plug);
+
+          if (catalog.hasRuntimeDynamicPorts(node.type) && !cloudFunctionCannotMint) {
             // (3) — runtime/adapter/numbered/component ports. Never an error.
             if (ctx.options.emitDynamicPortInfo) {
               out.push({
