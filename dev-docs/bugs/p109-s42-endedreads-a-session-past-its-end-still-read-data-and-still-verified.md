@@ -2,7 +2,7 @@
 id: P109-S42-ENDEDREADS
 title: A session past its end still read /classes and still passed Verify Session Token; only /users/me refused it
 status: fixed
-commit: PENDING
+commit: 082802923
 phase: P109
 task: ISL-040
 severity: high

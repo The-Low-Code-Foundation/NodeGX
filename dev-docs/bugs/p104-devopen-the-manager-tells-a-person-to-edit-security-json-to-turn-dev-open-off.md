@@ -2,7 +2,7 @@
 id: P104-DEVOPEN
 title: The backend manager tells a person to set "devOpen": false in security.json, and no page offers the switch
 status: fixed
-commit: PENDING
+commit: bb34e8206
 phase: P109
 task: ISL-040
 severity: medium
@@ -37,4 +37,8 @@ request. No reload route was needed. `GET /admin/permissions` already said `loop
   the rules have unsaved changes, because the save moves the etag and a new etag reloads the draft.
 - The three sentences (`App.tsx` `DevOpenNotice`, `views/keys.tsx`, `views/permissions.tsx` `EnforcementNotice`)
   point at the switch, not the file.
+- After a save the page asks `whoami` again, so the header chip and the page-wide notice follow the switch. The first
+  drive found them stale; the spec's arm for it is red with the refresh removed.
 - Spec: red 3 of 4 on the old page; the fourth (no switch on a public bind) is the absence arm beside them.
+- Driven in the served manager (a fresh backend, the owner account made through setup): an anonymous `/classes` read
+  went 200 → 403 → 200 → 403 as the switch moved, and `security.json` followed.

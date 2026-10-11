@@ -2,7 +2,7 @@
 id: P78-DBT-SESSIONS
 title: A sign-in session never expires, by any door
 status: fixed
-commit: PENDING
+commit: 082802923
 phase: P109
 task: ISL-040
 severity: medium

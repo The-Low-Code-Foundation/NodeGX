@@ -1,6 +1,6 @@
 # ISL-039 — A backend never loses or changes your data behind your back
 
-**Status: 🟢 s41 (2026-10-11): 7 of 8 fixed — both blockers (BACKUP `dc4e0b51a`, MIGRATE `2deb380d0`), NOACL `f8574d6f7`, ARRAYEQ + PTREQ `5bfb23cf4`, ADDUNIQUE `421cfc5a6`, NUL `3e18ea4cc`; each re-measured first and graded with a control. KEYORDER ruled s41 ("Order not promised"; AC2 met); left: its docs (AC3). Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 8 bugs
+**Status: ✅ s42 (2026-10-11): closed — 8 of 8. s42: KEYORDER's docs as ruled ("order not promised") `5a2af3644`. s41: both blockers (BACKUP `dc4e0b51a`, MIGRATE `2deb380d0`), NOACL `f8574d6f7`, ARRAYEQ + PTREQ `5bfb23cf4`, ADDUNIQUE `421cfc5a6`, NUL `3e18ea4cc`; each re-measured first and graded with a control. Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 8 bugs
 from the ledger (`dev-docs/bugs/`) that no phase owned: 2 blocker · 5 medium · 1 low; 1 to ask. **Side:** nodegx-backend (backups, migrate, the Parse wire, the SQLite and PostgreSQL adapters, local-sql queries)
 
 ## 1. The person sentence
@@ -100,3 +100,10 @@ shortest first, then alphabetically, at every level.
 **AC2 met, 2026-10-11:** KEYORDER ruled **"Order not promised"**. The question and answer are verbatim in the ledger
 file. Left for AC3: say so on the Records docs page and in the node reference, with the warning about comparing a
 read-back object with `JSON.stringify`.
+
+### s42 (2026-10-11) — closed
+
+KEYORDER, as ruled ("order not promised"), `5a2af3644`: the data concept page's Records section and the node reference
+for Query Records and Record say an Object field does not keep the order of its names, that a page sorts them itself,
+and to compare name by name rather than with `JSON.stringify`. No code changed. `catalog:merge --check` and
+`docs:nodes --check` are clean after it.

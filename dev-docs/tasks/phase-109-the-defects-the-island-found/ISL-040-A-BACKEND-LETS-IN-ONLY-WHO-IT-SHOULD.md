@@ -1,6 +1,6 @@
 # ISL-040 — A backend lets in only the people and the code it should
 
-**Status: 🟢 s41 (2026-10-11): 3 of 6 fixed — USERCOLS `6719e4a89` and UNRULED `89b9fd339` (both high, both measured as attacks first), LOCKOUT `f5f65a122` (ruled: a right token stays held). All three asks ruled s41 (AC2 met): SESSIONS → "ends after 30 days unused" (buildable), MCPOAUTH → "its own phase" (handed back, ledger `open`). Left to build: DEVOPEN, SESSIONS. Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 6 bugs
+**Status: ✅ s42 (2026-10-11): closed — 5 of 6 fixed, MCPOAUTH handed back as ruled ("its own phase"). s42: SESSIONS `082802923` (a sign-in ends after 30 days unused; P109-S42-ENDEDREADS found and fixed with it), DEVOPEN `bb34e8206`. s41: USERCOLS `6719e4a89`, UNRULED `89b9fd339`, LOCKOUT `f5f65a122`. Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 6 bugs
 from the ledger (`dev-docs/bugs/`) that no phase owned: 3 high · 3 medium; 1 to ask. **Side:** nodegx-backend (the cloud runtime's data path, function permissions, auth sessions and rate limit), the backend manager, the MCP door (FED-005)
 
 ## 1. The person sentence
@@ -88,3 +88,29 @@ security rows were driven as attacks:
 - **SESSIONS: "Ends after 30 days unused",** changeable per backend on the Sign-in page. Buildable, and the ledger
   file has the plan.
 - **MCPOAUTH: "Its own phase".** Handed back: no phase, no task, `status: open`.
+
+### s42 (2026-10-11) — closed
+
+Both rows re-measured at `84396782b` before building. Both still fired.
+
+| row | commit | what changed | graded by |
+|---|---|---|---|
+| SESSIONS (as ruled) | `082802923` | `auth/sessions.ts`: one `mint()` for the five sign-in doors, one `resolve()` for the three readers; a renewing end moves on with use; `settle()` on start and after a smaller number; `auth.json` `sessions.idleDays` on the Sign-in page | `isl040-sessions.test.ts` red 9/11 → 11/11; the Sign-in page arm in `email-signin-views` (red on HEAD's page) |
+| DEVOPEN | `bb34e8206` | Enforce my rules on this machine on Permissions (loopback only), through the existing `PUT /admin/permissions`; whoami asked again; the three sentences point at the switch | `permissions-view` "ISL-040 DEVOPEN" red 3/4, the whoami arm red with its refresh removed |
+
+**Found and fixed:** `P109-S42-ENDEDREADS` (high). The access check and Verify Session Token never read `expiresAt`, so a
+session past its end still read `/classes` (200) and verified. It reached impersonation sessions past their hour before
+SESSIONS, and would have made the 30-day rule a `/users/me` rule after it.
+
+**The handoff was wrong about DEVOPEN's server half.** It asked for a new admin route that writes `devOpen` and reloads
+`SecurityState`. `PUT /admin/permissions` already wrote it, live, with the public-bind refusal. Only the page was missing.
+
+**Driven** in the served manager on a fresh backend: the setup session ended 30 days out with `renews: true`; Save on
+the Sign-in page wrote `sessions.idleDays: 7` and pulled the owner's live session in to 7 days; 0 was refused with the
+server's sentence. The switch moved an anonymous read 200 → 403 → 200 → 403. The first drive found the header chip
+stale after the switch, fixed before the commit.
+
+**Gates (2026-10-11, before the commits, on 740f67ffa + this work):** full `nodegx-backend` run (`-w 3`, without
+`ac2-page-editor-drag-drive`): 2887 / 2889 tests, 234 of 237 files. The two reds are s41's (`bmg-002` past7 =
+SUNDAYWEEK, `rel002b`). The PostgreSQL suites ran (`brg-005-service-postgres` 3/3, conformance 20/20). After DEVOPEN's
+last change: `tests/admin-app` + the session specs 244 / 244; both `tsc` projects exit 0.

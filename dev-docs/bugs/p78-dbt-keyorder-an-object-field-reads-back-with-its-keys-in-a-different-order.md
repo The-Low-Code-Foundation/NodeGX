@@ -2,7 +2,7 @@
 id: P78-DBT-KEYORDER
 title: An Object field reads back with its keys in a different order from the one saved
 status: fixed
-commit: PENDING
+commit: 5a2af3644
 phase: P109
 task: ISL-039
 severity: low
