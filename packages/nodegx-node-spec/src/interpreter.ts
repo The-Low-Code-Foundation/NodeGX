@@ -98,8 +98,9 @@ import type { Step } from './adapter';
 import { canonicalise, canonicalKey } from './canonical';
 import { coerce } from './coerce';
 import { isRegistryEntry, performRegistryWrite } from './registry';
-import type { AnswerCall, AnyNodeSpec, BackendAnswerEvent, ChangeEvent, Outcome, InputDecl, PortContext, RealtimeEvent, ReducerOutcome, SignalOutputDecl, SocketEvent, SpecBackendCall, StreamEvent, SpecRequest, SpecSocketOp, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
-import { isSignalInput } from './spec';
+import type { AnswerCall, AnyNodeSpec, BackendAnswerEvent, ChangeEvent, Outcome, InputDecl, PlayContext, RealtimeEvent, ReducerOutcome, SignalOutputDecl, SocketEvent, SpecBackendCall, StreamEvent, SpecRequest, SpecSocketOp, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
+import { isSignalInput, playContextOf } from './spec';
+import { outcomePorts, playOutputs } from './ports';
 import type { TraceEvent } from './trace';
 import { backendEvent, installTimeZone, isAuthOp, locationEvent, openReturnsWindow, pushTarget, userRecordEvent, World, writeStoreEvent, type AuthNotice, type AuthReturnState, type AuthStep, type BackendDelivery, type Delivery, type LocationCall, type PickerClick, type PickerEvent, type PopupCall, type PopupEvent, type StoreEvent, type StreamDelivery, type WorldSocket, type WorldSubscription } from './world';
 
@@ -182,6 +183,14 @@ export interface Instance {
   sockets?: Map<string, WorldSocket>;
   /** P107-C155: the input ports a wire reaches for the whole play (spec.ts `WorldView.wired`); empty unless the mount named any. */
   readonly wired: ReadonlySet<string>;
+  /** NSP-020 (s82): the play's context — the wire fields, `wired` folded in — handed to every `derived.*` call (spec.ts `PlayContext`). */
+  readonly playContext: Readonly<PlayContext>;
+  /**
+   * NSP-020 (s82): the node's parameters as it now holds them — the mount's params, then every value a `set` step wrote
+   * (RAW, as `node.parameters` stores what was typed). What `derived.inputs/outputs` are re-derived from after a write to a
+   * `rederive` param (states.ts :338-358 registers a value output when `values` is written).
+   */
+  written: Record<string, unknown>;
 }
 
 export class SpecError extends Error {
@@ -244,7 +253,12 @@ function viewOf(inst: Instance): WorldView {
     bytes: (n) => world.random.bytes(n),
     uuid: () => world.random.uuid(),
     registry: world.registry,
-    send: (name, state) => observe(inst, [name], false, state),
+    // s82 — a send of a name the instance has no output for mints it when the spec's `discoverOutput` accepts the name (the
+    // Function's Outputs proxy, simplejavascript.ts :298); otherwise nothing is sent, as before
+    send: (name, state) => {
+      mintOutput(inst, name);
+      observe(inst, [name], false, state);
+    },
     watch: (t) => {
       const key = watchKey(t);
       if (inst.watches.has(key)) return;
@@ -296,7 +310,9 @@ function viewOf(inst: Instance): WorldView {
     socketAnswer: (url) => world.sockets.answerFor(url),
     group: () => ({ present: world.group.present, load: world.group.load }),
     // P107-C155 — the ports the mount named as wired (adapter.ts `mount`): a fact of this instance, not of the world
-    wired: (port) => inst.wired.has(port)
+    wired: (port) => inst.wired.has(port),
+    // NSP-020 (s82) — the runtime's `hasOutput`: declared, an outcome port, or a derived output the instance has NOW
+    hasOutput: (name) => name in inst.spec.outputs || name in inst.derivedOutputs || name in outcomePorts(inst.spec)
   };
 }
 
@@ -437,26 +453,26 @@ function hearRegistryWrites(world: World, all: Instance[]): void {
   });
 }
 
-export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, world: World = new World(), wired: readonly string[] = [], context: Readonly<PortContext> = {}): Instance {
+export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, world: World = new World(), wired: readonly string[] = [], context: Readonly<PlayContext> = {}): Instance {
   const inputs: Record<string, unknown> = {};
   for (const [name, decl] of Object.entries(spec.inputs)) {
     if (!isSignalInput(decl)) inputs[name] = decl.default;
   }
   for (const v of Object.values(params)) markExternal(v);
   const frozenParams = deepFreeze({ ...params });
-  // NSP-020 — the derived ports read the scenario's `context` (what an editor has without a viewer) with the mount's
-  // `wired` folded in: And counts a wired `input 3` the way `collectPorts` does, from the wire, not from a param.
-  const portContext = deepFreeze({ ...context, wired: [...(context.wired ?? []), ...wired] }) as Readonly<PortContext>;
+  // NSP-020 — the derived ports read the PLAY's context (spec.ts `PlayContext`: the wire fields and nothing else — at play a
+  // node has its params and its wires, never the project) with the mount's `wired` folded in: And counts a wired `input 3`
+  // the way `collectPorts` does, from the wire, not from a param.
+  const portContext = deepFreeze({ ...playContextOf(context), wired: [...(context.wired ?? []), ...wired] }) as Readonly<PlayContext>;
   const derivedInputs = spec.derived ? spec.derived.inputs(frozenParams, portContext) : {};
   const derivedValues: Record<string, unknown> = {};
   for (const [name, decl] of Object.entries(derivedInputs)) {
     if (name in spec.inputs) throw new SpecError(`${spec.type}: derived port "${name}" shadows a declared input`);
     if (!isSignalInput(decl)) derivedValues[name] = decl.default;
   }
-  const derivedOutputs = spec.derived?.outputs ? spec.derived.outputs(frozenParams, portContext) : {};
-  for (const name of Object.keys(derivedOutputs)) {
-    if (name in spec.outputs) throw new SpecError(`${spec.type}: derived output "${name}" shadows a declared output`);
-  }
+  // s82 — what a target registers: the params' derived outputs minus the `onWire` ones no wire asks for, plus the wired names
+  // nothing derived (ports.ts `playOutputs`)
+  const derivedOutputs = playOutputs(spec, frozenParams, portContext) as Record<string, ErasedValueOutput | SignalOutputDecl>;
   const inst: Instance = {
     spec,
     world,
@@ -477,7 +493,9 @@ export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, w
     requests: new Map(),
     changes: [],
     watches: new Map(),
-    wired: new Set(wired)
+    wired: new Set(wired),
+    playContext: portContext,
+    written: { ...params }
   };
   (inst as { view: WorldView }).view = viewOf(inst);
   // P107-C155 — a wired port is one the node has (the runtime's `connectInput` throws on one it does not); checked before
@@ -547,6 +565,52 @@ function discoverable(inst: Instance, port: string): boolean {
 }
 
 /**
+ * NSP-020 (s82) — after a write to a `rederive` param (spec.ts `DerivedPorts.rederive`): the derived ports for the params AS
+ * THEY NOW STAND (`written`), registered where new — a derived input at its default, a derived output unless `onWire` and
+ * unwired. Never removed, never re-shaped: the runtime never unregisters a port, and a name already registered keeps the
+ * placing's declaration (states.ts :338-358 registers; the `values` setter removes nothing).
+ */
+function rederive(inst: Instance): void {
+  const { spec } = inst;
+  if (!spec.derived) return;
+  const params = deepFreeze({ ...inst.written });
+  const inputs = spec.derived.inputs(params, inst.playContext);
+  let nextInputs = inst.derivedInputs;
+  let nextValues = inst.derivedValues;
+  for (const [name, decl] of Object.entries(inputs)) {
+    // the declaration wins over a re-derived port of its name (spec.ts `DerivedPorts`: "a DECLARED input always wins"; the
+    // runtime's `registerInputIfNeeded` is a no-op on a port the node has) — at mount the same shadow is a spec error
+    if (name in spec.inputs || name in nextInputs) continue;
+    nextInputs = { ...nextInputs, [name]: decl };
+    if (!isSignalInput(decl)) nextValues = { ...nextValues, [name]: decl.default };
+  }
+  if (nextInputs !== inst.derivedInputs) {
+    inst.derivedInputs = deepFreeze(nextInputs);
+    inst.derivedValues = deepFreeze(nextValues);
+  }
+  const outputs = playOutputs(spec, params, inst.playContext, 'skip') as Record<string, ErasedValueOutput | SignalOutputDecl>;
+  let nextOutputs = inst.derivedOutputs;
+  for (const [name, decl] of Object.entries(outputs)) if (!(name in nextOutputs)) nextOutputs = { ...nextOutputs, [name]: decl };
+  if (nextOutputs !== inst.derivedOutputs) inst.derivedOutputs = deepFreeze(nextOutputs);
+}
+
+/**
+ * NSP-020 (s82) — an output the node mints by its own write (spec.ts `DerivedPorts.discoverOutput`): a reducer that sends,
+ * pulses or `world.send`s a name the instance has no output for registers it first, as `registerOutputIfNeeded` in the
+ * Function's Outputs proxy (simplejavascript.ts :298) and the Logic Builder's run (:488, :601) do. Returns the output, or
+ * `undefined` when the spec refuses the name — then the caller's spec error stands.
+ */
+function mintOutput(inst: Instance, name: string): ErasedValueOutput | SignalOutputDecl | undefined {
+  const have = inst.derivedOutputs[name];
+  if (have) return have;
+  if (name in inst.spec.outputs) return undefined;
+  const decl = inst.spec.derived?.discoverOutput?.(name) as ErasedValueOutput | SignalOutputDecl | undefined;
+  if (!decl) return undefined;
+  inst.derivedOutputs = deepFreeze({ ...inst.derivedOutputs, [name]: decl });
+  return decl;
+}
+
+/**
  * A port the target registers on first write (spec.ts `DerivedPorts.discover`). Registered here
  * into the instance's derived ports, at its declared default, before the write is applied.
  */
@@ -568,6 +632,9 @@ export function set(inst: Instance, port: string, value: unknown): void {
     inst.trace.push(setEvent(port, value));
     const coerced = coerce(declared.coerce, value, declared.default);
     inst.inputs = deepFreeze({ ...inst.inputs, [port]: coerced });
+    // s82 — the write is a parameter the node now holds; a `rederive` param's setter registers ports at run time (States' `values`)
+    inst.written[port] = value;
+    if (spec.derived?.rederive?.includes(port)) rederive(inst);
     const reducer = spec.on[port];
     if (typeof reducer === 'function') {
       const sends = apply(inst, port, asWriter(inst, () => (reducer as (s: unknown, v: unknown, i: unknown, w: WorldView) => unknown)(inst.state, coerced, inst.inputs, view)), false);
@@ -584,6 +651,8 @@ export function set(inst: Instance, port: string, value: unknown): void {
     inst.trace.push(setEvent(port, value));
     const coerced = coerce(derived.coerce, value, derived.default);
     inst.derivedValues = deepFreeze({ ...inst.derivedValues, [port]: coerced });
+    inst.written[port] = value;
+    if (spec.derived?.rederive?.includes(port)) rederive(inst);
     if (!spec.derived) throw new SpecError(`${spec.type}: derived port without a derived reducer`);
     observe(inst, apply(inst, port, asWriter(inst, () => spec.derived!.on(inst.state as never, port, coerced, inst.derivedValues, view)), false));
     deliverChanges(inst);
@@ -738,7 +807,7 @@ function apply(inst: Instance, port: string, patchUnknown: unknown, outcomeRequi
   // derived pulses first, then declared ones — the one order the format fixes (spec.ts `emitDerived`)
   if (patch.emitDerived) {
     for (const name of patch.emitDerived) {
-      const out = inst.derivedOutputs[name];
+      const out = mintOutput(inst, name);
       if (!out || out.type !== 'signal') throw new SpecError(`${spec.type}.${port}: emitDerived names no derived signal output "${name}"`);
       inst.pending.signals.push(name);
     }
@@ -762,7 +831,7 @@ function apply(inst: Instance, port: string, patchUnknown: unknown, outcomeRequi
         inst.pending.signals.push(p);
       } else {
         const name = (p as { derived: string }).derived;
-        const out = inst.derivedOutputs[name];
+        const out = mintOutput(inst, name);
         if (!out || out.type !== 'signal') throw new SpecError(`${spec.type}.${port}: pulses names no derived signal output "${name}"`);
         inst.pending.signals.push(name);
       }
@@ -797,7 +866,7 @@ function apply(inst: Instance, port: string, patchUnknown: unknown, outcomeRequi
   }
   if (patch.sendDerived) {
     for (const name of patch.sendDerived) {
-      const out = inst.derivedOutputs[name];
+      const out = mintOutput(inst, name);
       if (!out || out.type === 'signal') throw new SpecError(`${spec.type}.${port}: sendDerived names no derived value output "${name}"`);
     }
   }
@@ -1276,7 +1345,7 @@ export function trace(inst: Instance): TraceEvent[] {
 }
 
 /** Runs a scripted sequence from a fresh mount and returns its trace. `wired` (P107-C155): the ports a wire reaches, as `mount` takes them; `context` (NSP-020) likewise. */
-export function run(spec: AnyNodeSpec, params: Record<string, unknown>, steps: readonly Step[], world?: World, wired?: readonly string[], context?: Readonly<PortContext>): TraceEvent[] {
+export function run(spec: AnyNodeSpec, params: Record<string, unknown>, steps: readonly Step[], world?: World, wired?: readonly string[], context?: Readonly<PlayContext>): TraceEvent[] {
   // a play under a world runs in its zone (NSP-013, world.ts TIME ZONE), as the adapter's does
   const restoreZone = world ? installTimeZone(world) : () => undefined;
   try {

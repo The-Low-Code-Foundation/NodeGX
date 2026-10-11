@@ -18,12 +18,14 @@
       },
       "r": {
         "type": "DbModel2",
+        "wiredOutputs": ["prop-n", "prop-title"],
         "params": {
           "modelId": "r1"
         }
       },
       "q": {
         "type": "DbModel2",
+        "wiredOutputs": ["prop-title"],
         "params": {
           "modelId": "r2"
         }
@@ -219,6 +221,7 @@
     "nodes": {
       "f": {
         "type": "DbModel2",
+        "wiredOutputs": ["prop-n", "prop-title", "changed-n"],
         "params": {
           "collectionName": "Lesson",
           "modelId": "r1"
@@ -226,12 +229,14 @@
       },
       "w": {
         "type": "DbModel2",
+        "wiredOutputs": ["prop-n", "prop-title", "changed-n"],
         "params": {
           "modelId": "r1"
         }
       },
       "q": {
         "type": "DbModel2",
+        "wiredOutputs": ["prop-title"],
         "params": {
           "modelId": "r2"
         }
@@ -500,6 +505,7 @@
       },
       "r": {
         "type": "DbModel2",
+        "wiredOutputs": ["prop-n", "prop-title", "changed-title"],
         "params": {
           "modelId": "r1"
         }
@@ -676,6 +682,7 @@
       },
       "r": {
         "type": "DbModel2",
+        "wiredOutputs": ["prop-n", "prop-title"],
         "params": {}
       }
     },

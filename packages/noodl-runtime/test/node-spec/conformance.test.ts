@@ -123,6 +123,11 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
     { row: 'NSP-016 §6 C100 — a Video playing a file fires no pointer output and takes no file drop', matches: videoFileTakesNoPointer }
   ],
   // the Drag's own rows (C102, C105, C106, s55) were fixed in P109 ISL-048
+  // NSP-020 s82 — found the day the padding came out of the States spec (the runtime target had registered every value output the
+  // generator could name at mount, so the throw below never reached a play): a `value-<state>-<v>` written while the node is in that
+  // state flags the output `v` whether or not `v` is in Values (states.ts :534-541), and a port the node does not have THROWS inside
+  // the setter. Narrow: the runtime threw with that sentence.
+  States: [{ row: 'P107-S82-STATESVALUEPORT — a value input for a name not in Values, written while in its state, throws (no such output port)', matches: (d) => threwWith(d, "doesn't have a port named") }]
 };
 
 /**

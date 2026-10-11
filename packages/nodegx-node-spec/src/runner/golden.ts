@@ -3,7 +3,7 @@
  *
  * GOLDEN TRACES. For every spec, the interpreter's trace of each of its hand scenarios is committed as
  * `golden/<type>.json`, with the spec's `version`, its port names, and for each scenario a hash of what it
- * plays (params, steps, world, wired) — so a scenario whose INPUT was edited is not mistaken for a node whose
+ * plays (params, steps, world, wired, wiredOutputs) — so a scenario whose INPUT was edited is not mistaken for a node whose
  * BEHAVIOUR changed. The interpreter is the reference (R3: the spec says what the node does), so its traces are
  * what a change to a reducer moves.
  *
@@ -25,12 +25,12 @@ import { canonicalise } from '../canonical';
 import { sha256 } from '../sha2';
 import type { AnyNodeSpec, Change } from '../spec';
 import type { TraceEvent } from '../trace';
-import { playReference } from './conformance';
+import { playContextOfScenario, playReference } from './conformance';
 import { canonicalScenario, type Scenario } from './scenario';
 
 export interface GoldenScenario {
   name: string;
-  /** sha256 (hex, first 16) of the canonical params, steps, world and wired — what the scenario plays. */
+  /** sha256 (hex, first 16) of the canonical params, steps, world, wired and wiredOutputs — what the scenario plays. */
   input: string;
   trace: TraceEvent[];
 }
@@ -48,7 +48,9 @@ const hex = (bytes: Uint8Array) => Array.from(bytes, (b) => b.toString(16).padSt
 /** What a scenario plays, as a short hash: its name, `because` and `row` are words about it and move nothing. */
 export function scenarioInput(scenario: Scenario): string {
   const c = canonicalScenario(scenario);
-  const played = { params: c.params, steps: c.steps, world: c.world ?? null, wired: c.wired ?? null };
+  // s82: `wiredOutputs` joins the hash only when present, so every scenario without one keeps the hash it had
+  const played: Record<string, unknown> = { params: c.params, steps: c.steps, world: c.world ?? null, wired: c.wired ?? null };
+  if (c.wiredOutputs !== undefined) played.wiredOutputs = c.wiredOutputs;
   return hex(sha256(new TextEncoder().encode(JSON.stringify(played)))).slice(0, 16);
 }
 
@@ -56,7 +58,7 @@ export function scenarioInput(scenario: Scenario): string {
 export async function goldenOf(spec: AnyNodeSpec, scenarios: readonly Scenario[]): Promise<Golden> {
   const out: GoldenScenario[] = [];
   for (const sc of scenarios) {
-    const trace = await playReference(spec, sc.params, sc.steps, sc.world, sc.wired);
+    const trace = await playReference(spec, sc.params, sc.steps, sc.world, sc.wired, playContextOfScenario(sc));
     // canonical, so NaN / -0 / a Date survive the JSON the file is written as
     out.push({ name: sc.name, input: scenarioInput(sc), trace: canonicalise(trace) as unknown as TraceEvent[] });
   }

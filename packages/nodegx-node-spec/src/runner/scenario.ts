@@ -16,7 +16,6 @@
 
 import type { Step } from '../adapter';
 import { canonicalise, revive } from '../canonical';
-import type { PortContext } from '../spec';
 import type { TraceEvent } from '../trace';
 import type { WorldScript } from '../world';
 
@@ -35,11 +34,14 @@ export interface Scenario {
    */
   wired?: string[];
   /**
-   * NSP-020: what an editor has about the node without a viewer, beyond its params (spec.ts `PortContext`) — the backend
-   * schema a Record draws `prop-*` from, the popup component Show Popup reads. Handed to `derived.inputs` / `outputs` at
-   * mount with `wired` folded in. Absent, an empty context: what every scenario before this meant.
+   * NSP-020 (s82): the OUTPUT ports a wire leaves from for the whole play (spec.ts `PortContext.wiredOutputs`) — a Record's
+   * `prop-title`, a States' `reached-B`. Each is registered at mount as `nodescope.ts addConnection` registers it
+   * (`registerOutputIfNeeded`, :150), and nothing listens on it; a send on it is observed, a send on an unwired one is not
+   * (the runtime gates every such send on `hasOutput`). Absent, no output is wired — what every scenario before this
+   * meant, and the generated sequences draw theirs from the spec's `outputCandidates`. s79's `context` field (the project
+   * on a scenario) is gone: at play a node has its params and its wires, never the project (§6.6).
    */
-  context?: PortContext;
+  wiredOutputs?: string[];
   /** When present, both targets are graded against it; when absent, against the interpreter. */
   expect?: TraceEvent[];
   /** For a replay file: the seed the sequence came from. */
@@ -76,6 +78,8 @@ export function reviveScenarios(parsed: unknown, type: string, file = `${type}.j
     const sc = s as Scenario;
     if (!sc || typeof sc.name !== 'string' || !Array.isArray(sc.steps)) throw new Error(`${file}[${i}]: a scenario needs a name and steps`);
     if (sc.wired !== undefined && (!Array.isArray(sc.wired) || sc.wired.some((p) => typeof p !== 'string'))) throw new Error(`${file}[${i}]: \`wired\` is a list of port names`);
+    if (sc.wiredOutputs !== undefined && (!Array.isArray(sc.wiredOutputs) || sc.wiredOutputs.some((p) => typeof p !== 'string'))) throw new Error(`${file}[${i}]: \`wiredOutputs\` is a list of port names`);
+    if ('context' in (sc as object)) throw new Error(`${file}[${i}]: a scenario has no \`context\` — at play a node has its params and its wires (\`wired\`, \`wiredOutputs\`), never the project (NSP-020 §6.6)`);
     const out: Scenario = { ...sc, node: sc.node ?? type, params: reviveParams(sc.params ?? {}), steps: sc.steps.map(reviveStep) };
     if (sc.world) out.world = reviveWorld(sc.world);
     return out;

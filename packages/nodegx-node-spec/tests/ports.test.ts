@@ -91,6 +91,8 @@ describe('the needs gate — a spec reads only the context it declares (NSP-020 
   // undeclared ones is what fires — never an `undefined` that happens to work.
   const full: PortContext = {
     wired: ['input 3'],
+    wiredOutputs: ['prop-zz'],
+    backends: [{ id: 'b1', name: 'First' }, { id: 'b2', name: 'Second' }],
     instancePorts: [{ name: 'x', plug: 'input', type: 'string' }],
     components: { '/Popup': { inputs: { name: { type: 'string' } }, outputs: { ok: { type: 'boolean' } } } },
     routers: [{ name: 'Main', pages: ['/Home'] }],
@@ -134,5 +136,177 @@ describe('the needs gate — a spec reads only the context it declares (NSP-020 
     // column (AC4) will replace it.
     expect(counts['with-project']).toBeGreaterThanOrEqual(1);
     expect(counts.none).toBe(0);
+  });
+});
+
+// ------------------------------------------------------------------------------------------------------------------
+// NSP-020 §6.6 (s82) — THE FORMAT DECISION for L1 and L3: at play a node has its params and its wires, never the project.
+// Graded on probe specs, so a planted hole in the interpreter or in ports.ts is red here whatever the real specs do.
+
+import { defineNode, mount, run, playOutputs, playContextOf, PLAY_CONTEXT_FIELDS, settle, set as setPort } from '../src';
+import type { AnyNodeSpec, OutputDecl, TraceEvent } from '../src';
+
+type ProbeState = { v: unknown };
+/** A node whose `prop-<f>` outputs come from the schema (the editor's draw) or from a wire (the play's), with an `onWire` signal each. */
+const Probe = defineNode({
+  type: 'probe-s82',
+  version: 1,
+  source: 'none',
+  state: { v: undefined } as ProbeState,
+  outcomes: ['done', 'failure'],
+  inputs: {
+    klass: { type: 'string', coerce: 'none' },
+    pick: { type: 'string', coerce: 'none', narrow: (p) => ({ enums: p.klass === undefined ? ['unset'] : ['set'] }), enums: ['static'] },
+    write: { type: '*', coerce: 'none' },
+    go: { type: 'signal', outcome: true }
+  },
+  outputs: { v: { type: '*', from: (s) => s.v } }
+}).on(
+  {
+    write: (_s, value, _i, w) => {
+      // the node's own write: sends `out-<v>` (minted when the spec accepts the name) and `prop-a` only where the node has it
+      const sent: string[] = [];
+      if (w.hasOutput('prop-a')) sent.push('prop-a');
+      return { says: 'writes', set: { v: value }, send: ['v'], sendDerived: sent, emitDerived: w.hasOutput('changed-a') ? ['changed-a'] : [] };
+    },
+    go: () => ({ says: 'done', outcome: 'done' })
+  },
+  {
+    derived: {
+      inputs: () => ({}),
+      outputs: (params, context) => {
+        const out: Record<string, OutputDecl<ProbeState>> = {};
+        const fields = typeof params.klass === 'string' ? Object.keys(context.schema?.classes[params.klass]?.fields ?? {}) : [];
+        for (const f of fields) out['prop-' + f] = { type: '*', from: (s) => s.v };
+        for (const port of [...(context.wired ?? []), ...(context.wiredOutputs ?? [])]) if (port.startsWith('prop-') && !(port in out)) out[port] = { type: '*', from: (s) => s.v };
+        for (const f of fields) out['changed-' + f] = { type: 'signal', onWire: true };
+        return out;
+      },
+      needs: ['schema', 'wired', 'wiredOutputs'],
+      on: () => ({ send: [] }),
+      discoverOutput: (port) => (port.startsWith('prop-') ? { type: '*', from: (s) => s.v } : port.startsWith('changed-') ? { type: 'signal' } : port.startsWith('out-') ? { type: '*', from: (s) => s.v } : undefined),
+      outputCandidates: ['prop-a', 'changed-a']
+    }
+  }
+) as unknown as AnyNodeSpec;
+
+const SCHEMA: PortContext = { schema: { classes: { Task: { fields: { a: { type: 'string' }, b: { type: 'number' } } } } } };
+
+describe('§6.6 — one derived.outputs, two readers: the editor draws the project, the play registers the wires', () => {
+  test('the editor draws every column and every wired name; the outcome ports are drawn too (gap 1)', () => {
+    const drawn = drawnPorts(Probe, { klass: 'Task' }, { ...SCHEMA, wiredOutputs: ['prop-zz'] });
+    const outputs = drawn.filter((p) => p.plug === 'output').map((p) => p.name);
+    expect(outputs).toEqual(['v', 'done', 'completed', 'failure', 'prop-a', 'prop-b', 'prop-zz', 'changed-a', 'changed-b']);
+    expect(drawn.find((p) => p.name === 'done')).toMatchObject({ source: 'declared', type: 'signal', displayName: 'Done' });
+    expect(drawn.find((p) => p.name === 'completed')).toMatchObject({ source: 'declared', type: 'signal' });
+    // no `unchanged`: the spec does not list it
+    expect(outputs).not.toContain('unchanged');
+  });
+
+  test('the play context is the two wire fields and nothing else', () => {
+    expect(PLAY_CONTEXT_FIELDS).toEqual(['wired', 'wiredOutputs']);
+    expect(playContextOf({ ...SCHEMA, wired: ['x'], wiredOutputs: ['prop-a'], backends: [{ id: 'b', name: 'B' }] })).toEqual({ wired: ['x'], wiredOutputs: ['prop-a'] });
+    expect(playContextOf(undefined)).toEqual({});
+  });
+
+  test('playOutputs: the params alone register nothing project-derived; a wired name is minted; an onWire output only when wired', () => {
+    expect(Object.keys(playOutputs(Probe, { klass: 'Task' }, {}))).toEqual([]);
+    expect(Object.keys(playOutputs(Probe, { klass: 'Task' }, { wiredOutputs: ['prop-zz', 'changed-q'] }))).toEqual(['prop-zz', 'changed-q']);
+    // an `onWire` output derived from the params exists only when a wire asks — here the schema is in the context on purpose, to
+    // show the flag gates it even when the draw has it
+    expect(Object.keys(playOutputs(Probe, { klass: 'Task' }, { ...SCHEMA } as never))).toEqual(['prop-a', 'prop-b']);
+    expect(Object.keys(playOutputs(Probe, { klass: 'Task' }, { ...SCHEMA, wiredOutputs: ['changed-a'] } as never))).toEqual(['prop-a', 'prop-b', 'changed-a']);
+    // a wired name the spec refuses is the scenario error it always was
+    expect(() => playOutputs(Probe, {}, { wiredOutputs: ['nope'] })).toThrow(SpecError);
+  });
+
+  test('narrow reads the params RAW (gap 3): an unset param is unset, not its declared default', () => {
+    expect((portsOf(Probe, {}).inputs.pick as { enums?: readonly string[] }).enums).toEqual(['unset']);
+    expect((portsOf(Probe, { klass: 'Task' }).inputs.pick as { enums?: readonly string[] }).enums).toEqual(['set']);
+  });
+
+  test('at play: a send gated on hasOutput reaches the trace only when the output is wired — the spec never pads', () => {
+    const steps = [{ set: 'write', value: 1 }, 'settle'] as const;
+    const unwired: TraceEvent[] = run(Probe, { klass: 'Task' }, [...steps]);
+    const wired: TraceEvent[] = run(Probe, { klass: 'Task' }, [...steps], undefined, [], { wiredOutputs: ['prop-a', 'changed-a'] });
+    expect(unwired.filter((e) => e.t === 'value' && e.port === 'prop-a')).toEqual([]);
+    expect(unwired.filter((e) => e.t === 'signal' && e.port === 'changed-a')).toEqual([]);
+    expect(wired).toContainEqual({ t: 'value', port: 'prop-a', value: 1 });
+    expect(wired).toContainEqual({ t: 'signal', port: 'changed-a' });
+    // the interpreter's mount refuses a wired output the spec cannot mint
+    expect(() => run(Probe, {}, ['settle'], undefined, [], { wiredOutputs: ['nope'] })).toThrow(/wired output "nope" is not an output/);
+  });
+
+  test('the node\'s own write mints an output (discoverOutput): a world.send on an unknown name registers it when the spec accepts the name', () => {
+    const Writer = { ...Probe, on: { ...Probe.on, write: (_s: unknown, value: unknown, _i: unknown, w: { send(p: string, s?: unknown): void }) => { w.send('out-x', { v: value }); return { says: 'writes', set: { v: value }, send: [] }; } } } as unknown as AnyNodeSpec;
+    const t = run(Writer, {}, [{ set: 'write', value: 7 }, 'settle']);
+    expect(t).toContainEqual({ t: 'value', port: 'out-x', value: 7 });
+    // a name the spec refuses sends nothing, as before
+    const Refuser = { ...Writer, derived: { ...Writer.derived!, discoverOutput: () => undefined } } as unknown as AnyNodeSpec;
+    expect(run(Refuser, {}, [{ set: 'write', value: 7 }, 'settle']).filter((e) => e.t === 'value' && e.port === 'out-x')).toEqual([]);
+  });
+
+  test('re-derive after a write to a `rederive` param (decision 4 as the runtime does it): an output a later param derives exists from that write on, and is never removed', () => {
+    // a probe whose derived outputs follow a `names` param whose setter registers, as States\' value outputs follow `values`
+    const Lists = defineNode({
+      type: 'probe-lists',
+      version: 1,
+      source: 'none',
+      state: { v: undefined } as ProbeState,
+      inputs: { names: { type: 'string', coerce: 'none' }, write: { type: '*', coerce: 'none' } },
+      outputs: {}
+    }).on(
+      {
+        write: (_s, value, _i, w) => ({ says: 'writes', set: { v: value }, send: [], sendDerived: ['x', 'y'].filter((n) => w.hasOutput(n)) })
+      },
+      {
+        derived: {
+          inputs: () => ({}),
+          outputs: (params) => Object.fromEntries((typeof params.names === 'string' && params.names ? params.names.split(',') : []).map((n) => [n, { type: '*' as const, from: (s: ProbeState) => s.v }])),
+          on: () => ({ send: [] }),
+          rederive: ['names']
+        }
+      }
+    ) as unknown as AnyNodeSpec;
+    const inst = mount(Lists, {});
+    expect(inst.view.hasOutput('x')).toBe(false);
+    setPort(inst, 'write', 1);
+    settle(inst);
+    setPort(inst, 'names', 'x');
+    expect(inst.view.hasOutput('x')).toBe(true);
+    expect(inst.view.hasOutput('y')).toBe(false);
+    setPort(inst, 'write', 2);
+    settle(inst);
+    setPort(inst, 'names', 'y'); // x stays: the runtime never unregisters
+    expect(inst.view.hasOutput('x')).toBe(true);
+    expect(inst.view.hasOutput('y')).toBe(true);
+    setPort(inst, 'write', 3);
+    settle(inst);
+    const sent = inst.trace.filter((e) => e.t === 'value').map((e) => `${e.port}=${String((e as { value?: unknown }).value)}`);
+    expect(sent).toEqual(['x=2', 'x=3', 'y=3']);
+  });
+
+  test('a scenario with the s79 `context` field is refused by the loader — the play never sees the project', () => {
+    const { reviveScenarios } = require('../src') as { reviveScenarios: (p: unknown, t: string) => unknown };
+    expect(() => reviveScenarios([{ name: 'x', steps: ['settle'], context: { schema: {} } }], 'probe')).toThrow(/a scenario has no `context`/);
+    expect(() => reviveScenarios([{ name: 'x', steps: ['settle'], wiredOutputs: ['prop-a'] }], 'probe')).not.toThrow();
+    expect(() => reviveScenarios([{ name: 'x', steps: ['settle'], wiredOutputs: 'prop-a' }], 'probe')).toThrow(/wiredOutputs/);
+  });
+
+  test('the real specs: DbModel2 and States carry the decision (what §6.6 says they say)', () => {
+    const Record = specs['DbModel2'];
+    const States = specs['States'];
+    expect(Record.derived!.needs).toEqual(['schema', 'backends', 'wired', 'wiredOutputs']);
+    expect(Record.derived!.outputCandidates).toEqual(['prop-title', 'changed-title', 'prop-n', 'changed-n']);
+    // the editor: a class's columns, a wired name, the picker with two backends; the play: the wires alone
+    const drawn = drawnPorts(Record, { collectionName: 'Lesson' }, { schema: { classes: { Lesson: { fields: { title: { type: 'string' } } } } }, wiredOutputs: ['prop-zz'], backends: [{ id: 'b1', name: 'One' }, { id: 'b2', name: 'Two' }] });
+    expect(drawn.filter((p) => p.source === 'derived').map((p) => `${p.plug} ${p.name}`)).toEqual(['input backendId', 'input collectionName', 'output prop-title', 'output changed-title', 'output prop-zz']);
+    expect((drawn.find((p) => p.name === 'collectionName') as { enums?: readonly string[] }).enums).toEqual(['_User', '_Role', 'Lesson']);
+    expect(Object.keys(playOutputs(Record, { collectionName: 'Lesson' }, { wiredOutputs: ['prop-n', 'changed-n'] }))).toEqual(['prop-n', 'changed-n']);
+    expect(Object.keys(playOutputs(Record, { collectionName: 'Lesson' }, {}))).toEqual([]);
+    // States: value outputs from the params, state ports onWire
+    expect(Object.keys(playOutputs(States, { states: 'A,B', values: 'x' }, {}))).toEqual(['x']);
+    expect(Object.keys(playOutputs(States, { states: 'A,B', values: 'x' }, { wiredOutputs: ['reached-B'] }))).toEqual(['x', 'reached-B']);
+    expect(drawnPorts(States, { states: 'A,B', values: 'x' }).filter((p) => p.source === 'derived' && p.plug === 'output').map((p) => p.name)).toEqual(['x', 'at-A', 'reached-A', 'at-B', 'reached-B']);
   });
 });

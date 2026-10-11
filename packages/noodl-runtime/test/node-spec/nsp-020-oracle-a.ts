@@ -86,6 +86,9 @@ export type Hook = (context: unknown, graphModel: unknown) => void;
  * `getMetaData('dbCollections')` from `context.schema`. `on` records handlers so the drive can fire `nodeAdded.<type>`
  * and `editorImportComplete` (the Record and Query families sweep on it).
  */
+/** The spec's `BackendSchema` field types as the Parse wire names them (record-ports.ts `PARSE_PORT_TYPES` :63-68 maps them back). */
+const PARSE_TYPE_OF: Record<string, string> = { string: 'String', number: 'Number', boolean: 'Boolean', date: 'Date', object: 'Object', array: 'Array' };
+
 export function announcedPorts(
   hook: Hook,
   type: string,
@@ -95,12 +98,28 @@ export function announcedPorts(
   meta: Record<string, unknown> = {}
 ): Announced[] {
   const id = 'n1';
-  const wires = (context.wired ?? []).map((port) => ({
-    sourceId: 'src',
-    sourcePort: 'out',
-    targetId: id,
-    targetPort: port
-  }));
+  const wires = [
+    ...(context.wired ?? []).map((port) => ({ sourceId: 'src', sourcePort: 'out', targetId: id, targetPort: port })),
+    // NSP-020 s82 — the wires OUT (`context.wiredOutputs`): what `getConnectionsFrom(id)` answers (record-ports.ts :305-308)
+    ...(context.wiredOutputs ?? []).map((port) => ({ sourceId: id, sourcePort: port, targetId: 'sink', targetPort: 'in' }))
+  ];
+  // NSP-020 s82 — project metadata from the context: the backend list (`backendServices`, P107-S80-BACKENDPICKER) from
+  // `context.backends`, the schema as the legacy `dbCollections` cache holds it (schema-ports.ts :323-408 parses the
+  // Parse class list, `collectionsFromParseClasses`), one class per `context.schema.classes` entry with its fields typed
+  // by the Parse table (record-ports.ts :63-68). A `meta` key the case names wins.
+  const fromContext: Record<string, unknown> = {};
+  if (context.backends) {
+    fromContext.backendServices = {
+      backends: context.backends.map((b) => ({ id: b.id, name: b.name, type: 'parse', endpoint: `https://${b.id}.example/parse`, appId: b.id })),
+      activeBackendId: context.backends[0]?.id
+    };
+  }
+  if (context.schema) {
+    fromContext.dbCollections = Object.entries(context.schema.classes).map(([className, c]) => ({
+      className,
+      fields: Object.fromEntries(Object.entries(c.fields).map(([f, d]) => [f, { type: PARSE_TYPE_OF[d.type] ?? 'Object' }]))
+    }));
+  }
   const nodeHandlers: Record<string, Array<(e?: unknown) => void>> = {};
   const node = {
     id,
@@ -126,12 +145,7 @@ export function announcedPorts(
   const graphModel = {
     components: {} as Record<string, unknown>,
     getNodesWithType: (t: string) => (t === type ? [node] : siblings.filter((n) => n.type === t)),
-    getMetaData: (key: string) =>
-      key in meta
-        ? meta[key]
-        : context.schema
-        ? ({ dbCollections: Object.keys(context.schema.classes) } as Record<string, unknown>)[key]
-        : undefined,
+    getMetaData: (key: string) => (key in meta ? meta[key] : fromContext[key]),
     on: (name: string, cb: (n?: unknown) => void) => {
       (gmHandlers[name] = gmHandlers[name] || []).push(cb);
     },
@@ -238,6 +252,13 @@ export function compareWithSpec(
     }
     const got = fromAnnounced(a);
     const want = fromDrawn(d);
+    // s82 — `drawnPorts` draws the outcome ports now (§6.4 gap 1); a node may group them its own way (`outcomeOutputs({ group })`),
+    // which the spec does not say, so they are compared on their type alone, as before
+    if (a.plug === 'output' && outcomes.has(a.name) && OUTCOME_PORTS.includes(a.name as never)) {
+      tally.outcomePorts++;
+      if (got.type !== 'signal') diffs.push(`${k}: an outcome port announced as ${show(got.type)}`);
+      continue;
+    }
     for (const f of FIELDS) {
       if (JSON.stringify(got[f]) !== JSON.stringify(want[f]))
         diffs.push(`${k}: ${f} runtime ${show(got[f])}, spec ${show(want[f])}`);

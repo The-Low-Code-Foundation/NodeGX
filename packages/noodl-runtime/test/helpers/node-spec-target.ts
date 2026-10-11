@@ -148,8 +148,8 @@ import { File as NodeFile } from 'buffer';
 import type { NodeInstance, NodeMetadata, OutcomeFailureOptions, OutcomeToken, RuntimeErrorEventLike } from '@noodl/types';
 
 import type { RuntimeNode } from '../../src/internal';
-import type { BackendCall, ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, LocationCall, PortContext, RequestRecord, StackAnswer, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
-import { parseEndpoint, REPEATER_TEMPLATES, ROUTER_PAGES, specFor, type WorldLocation } from '../../../nodegx-node-spec/src';
+import type { BackendCall, ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, LocationCall, PlayContext, RequestRecord, StackAnswer, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
+import { parseEndpoint, playContextOf, playOutputs, REPEATER_TEMPLATES, ROUTER_PAGES, specFor, type WorldLocation } from '../../../nodegx-node-spec/src';
 import { AUTH_OPS, backendEvent, canonicalise, fileError, installWorld, isFileOp, locationEvent, OUTCOME_PORTS, OWN_ELEMENT, performRegistryWrite, SELF_REFERENCE, type BackendDelivery, type RegistryTables } from '../../../nodegx-node-spec/src';
 
 import NoodlRuntime = require('../../noodl-runtime');
@@ -1442,8 +1442,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
   if (graphModel && !graphModel.componentToBundleMap) graphModel.componentToBundleMap = new Map();
   if (graphModel && !graphModel.componentIndex) graphModel.componentIndex = {};
   const states = new Map<string, State>();
-  /** NSP-020 L1 (s80) — each mounted instance's port context (the scenario's `context` + its `wired`), by handle id. */
-  const portContexts = new Map<string, Readonly<PortContext>>();
+  /** NSP-020 L1 (s80) — each mounted instance's PLAY context (the scenario's `wiredOutputs` + its `wired`; s82), by handle id. */
+  const portContexts = new Map<string, Readonly<PlayContext>>();
   const byNodeId = new Map<string, State>();
   let next = 0;
   /** NSP-015 s20 — the subject whose `update()` is on the stack right now (synchronously); `undefined` between updates. */
@@ -1522,10 +1522,13 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
    * and the connection-time read must not take that for a value.
    */
   function derivedSignalOutput(s: State, port: string): boolean {
-    const outputs = specFor(s.h.type)?.derived?.outputs;
-    if (!outputs) return false;
+    const spec = specFor(s.h.type);
+    if (!spec?.derived) return false;
     const params = ((s.h.node as unknown as { model?: { parameters?: Record<string, unknown> } }).model?.parameters ?? {}) as Record<string, unknown>;
-    return outputs(params, portContexts.get(s.h.id) ?? {})[port]?.type === 'signal';
+    // NSP-020 s82 — the play's list (ports.ts `playOutputs`: the params' derived outputs, the wired `onWire` ones, the wired names
+    // `discoverOutput` mints), then a name the node's own write minted (`discoverOutput`)
+    const decl = playOutputs(spec, params, portContexts.get(s.h.id) ?? {}, 'skip')[port] ?? spec.derived.discoverOutput?.(port);
+    return decl?.type === 'signal';
   }
 
   function intercept(s: State): void {
@@ -1879,13 +1882,33 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     (node as unknown as { connectInput(input: string, source: unknown, sourcePort: string): void }).connectInput(port, stub, 'value');
   }
 
-  function mountIn(type: string, params: Record<string, unknown>, scope?: InstanceType<typeof NodeScope>, graphId?: string, wired?: readonly string[], portContext: Readonly<PortContext> = {}): RuntimeHandle {
+  /**
+   * NSP-020 s82 — THE PLACING: the derived ports for the mount's params, written onto the model as a loaded project's saved
+   * `dynamicports` give it (nodemodel.ts `createFromExportData` → `addOutputPort`; the Function reads its signal kinds there,
+   * simplejavascript.ts :600-618, the Script re-registers them at each code read, javascript.ts :433) and registered as a wire
+   * would make the runtime do — minus the `onWire` outputs no wire asks for, plus the wired names `discoverOutput` mints (ports.ts
+   * `playOutputs`). Once, at mount: the model is the placing's for the whole play (NSP-017's contracts).
+   */
+  function placing(node: NodeInstance, model: { parameters: Record<string, unknown>; outputPorts: Record<string, { name: string; type: string }>; inputPorts: Record<string, { name: string; type: string }> }, spec: ReturnType<typeof specFor>, ports: Readonly<PlayContext>): void {
+    if (!spec?.derived) return;
+    for (const [name, decl] of Object.entries(spec.derived.inputs(model.parameters, ports))) {
+      if (name in spec.inputs) continue;
+      model.inputPorts[name] = { name, type: decl.type as string };
+    }
+    for (const [name, decl] of Object.entries(playOutputs(spec, model.parameters, ports))) {
+      model.outputPorts[name] = { name, type: decl.type as string };
+      node.registerOutputIfNeeded(name);
+    }
+  }
+
+  function mountIn(type: string, params: Record<string, unknown>, scope?: InstanceType<typeof NodeScope>, graphId?: string, wired?: readonly string[], portContext: Readonly<PlayContext> = {}): RuntimeHandle {
     if (!context.nodeRegister.hasNode(type)) throw new Error(`runtime: no node type "${type}" is registered`);
     if (graphId !== undefined && states.has(graphId)) throw new Error(`runtime: a node "${graphId}" is still mounted — a previous play leaked it`);
     const id = graphId ?? `${type}#${next++}`;
-    // NSP-020 L1 (s80) — the spec's derived ports read the scenario's `context` (what an editor has without a viewer), with the
-    // mount's `wired` folded in exactly as the interpreter's `mount` folds it; read again by `derivedSignal` after the mount
-    const ports: Readonly<PortContext> = { ...portContext, wired: [...(portContext.wired ?? []), ...(wired ?? [])] };
+    // NSP-020 L1 (s80) — the spec's derived ports read the PLAY's context (s82, spec.ts `PlayContext`: the wire fields and nothing
+    // else — at play a node has its params and its wires, never the project), with the mount's `wired` folded in exactly as the
+    // interpreter's `mount` folds it; read again by `derivedSignal` after the mount
+    const ports: Readonly<PlayContext> = { ...playContextOf(portContext), wired: [...(portContext.wired ?? []), ...(wired ?? [])] };
     portContexts.set(id, ports);
     const logs: LogLine[] = [];
     // NSP-016 s56 — a lone Component Stack builds its pages in its own scope (`createNode`, `createPrimitiveNode`, `deleteNode`):
@@ -1914,16 +1937,18 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     // listeners ever ran — Delay's and Repeat's timers were never stopped (NSP-013 s12, T7)
     // NSP-017 s65 — `outputPorts`: the derived outputs, as a loaded project's saved `dynamicports` give the model (nodemodel.ts
     // `createFromExportData` → `addOutputPort`); the Function reads its signal ports there (simplejavascript.ts :600-618, :843-846)
+    // NSP-020 s82 — ONE list for the model's saved ports and the registration (ports.ts `playOutputs`): the params' derived outputs
+    // minus the `onWire` ones no wire asks for, plus the wired names `discoverOutput` mints — what a loaded project's saved
+    // `dynamicports` give the model AND what its wires register (nodescope.ts :150). The placing's, for the whole play.
     const spec = specFor(type);
-    const outputPorts: Record<string, { name: string; type: string }> = {};
-    for (const [name, decl] of Object.entries(spec?.derived?.outputs?.(params, ports) ?? {})) outputPorts[name] = { name, type: decl.type as string };
-    // NSP-017 s66 — `inputPorts` the same way: the Script tells a signal input from a value by its type there (javascript.ts :640)
-    const inputPorts: Record<string, { name: string; type: string }> = {};
-    for (const [name, decl] of Object.entries(spec?.derived?.inputs?.(params, ports) ?? {})) inputPorts[name] = { name, type: decl.type as string };
-    (node as unknown as { model?: unknown }).model = { type, parameters: { ...params }, outputPorts, inputPorts, removeListenersWithRef: () => undefined };
-    // the derived outputs the spec declares for these params — registered as a wire would make the runtime do
-    if (spec?.derived?.outputs) {
-      for (const name of Object.keys(spec.derived.outputs(params, ports))) (node as unknown as NodeInstance).registerOutputIfNeeded(name);
+    const model = { type, parameters: { ...params } as Record<string, unknown>, outputPorts: {} as Record<string, { name: string; type: string }>, inputPorts: {} as Record<string, { name: string; type: string }>, removeListenersWithRef: () => undefined };
+    (node as unknown as { model?: unknown }).model = model;
+    placing(node as unknown as NodeInstance, model, spec, ports);
+    // THE WIRES OUT (scenario.ts `wiredOutputs`): each is brought into being as `nodescope.ts addConnection` brings it (:150,
+    // `registerOutputIfNeeded(sourcePort)`); nothing listens on it, as nothing sends on a `wired` input
+    for (const name of ports.wiredOutputs ?? []) {
+      (node as unknown as NodeInstance).registerOutputIfNeeded(name);
+      if (!(node as unknown as NodeInstance).hasOutput(name)) throw new Error(`${type}: no output "${name}" on the runtime to wire`);
     }
     // POPUP (world.ts, NSP-015 s20) — a Close Popup's call to the handler it resolved, recorded AS HANDED, before the call
     if (type === 'NavigationClosePopup') {
@@ -3180,6 +3205,9 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       // a frozen style is given back as a copy (its symbols too — the default-style layer) before the write
       const styled = node as unknown as { style?: object };
       if (styled.style && Object.isFrozen(styled.style)) styled.style = Object.assign({}, styled.style);
+      // NSP-020 s82 — the model stays the PLACING's: the headless runtime reads `model.outputPorts` / `model.parameters` as the project
+      // saved them (NSP-017's contracts, "the kinds are the placing's"), and a setter that registers at run time (States' `values`)
+      // does so itself. The interpreter's `rederive` after a `DerivedPorts.rederive` param mirrors that setter, not the model.
       node.setInputValue(port, value);
     },
 
@@ -3399,7 +3427,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       for (const id of Object.keys(nodes)) {
         const decl = nodes[id];
         const scope = tree ? (decl.in !== undefined ? (tree.instances[decl.in].nodeScope as unknown as InstanceType<typeof NodeScope>) : tree.root) : undefined;
-        handles[id] = mountIn(decl.type, decl.params ?? {}, scope, id);
+        // NSP-020 s82 — the outputs a wire leaves from to nodes outside the scenario (graph.ts `GraphNodeDecl.wiredOutputs`)
+        handles[id] = mountIn(decl.type, decl.params ?? {}, scope, id, undefined, decl.wiredOutputs ? { wiredOutputs: decl.wiredOutputs } : {});
       }
       // NSP-015 — each instance's ports once its nodes exist; then it is a subject (graph.ts BOUNDARY)
       if (tree) for (const cid of Object.keys(components ?? {})) handles[cid] = boundary(cid, tree.instances[cid], components![cid], orphanLogs);

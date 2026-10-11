@@ -30,7 +30,7 @@
  * shows the raw input (measured s21, probe P13).
  */
 
-import type { InputDecl, ValueInputDecl, WorldView } from '../spec';
+import type { InputDecl, PortContext, SignalOutputDecl, ValueInputDecl, WorldView } from '../spec';
 import { emptyId, errorOutput } from './data-base';
 
 /** :88 — the one code every Record-family failure reports. */
@@ -127,6 +127,59 @@ export function discoverRecordPort(port: string): InputDecl | undefined {
 }
 
 export const RECORD_CANDIDATES = ['collectionName', 'backendId'];
+
+// ------------------------------------------------------------------------------------------------
+// NSP-020 s82 — what the EDITOR draws for the family from the project (record-ports.ts, schema-ports.ts), as one pure
+// function of `(params, context)`. At play the context has no `schema` and no `backends` (spec.ts `PlayContext`), so the
+// same functions draw nothing here and the node has its params and its wires — which is what the runtime has.
+
+/** record-ports.ts :78-81 — the two classes every Parse-wire project has whether or not it has been introspected, offered first. */
+export const PARSE_SYSTEM_CLASSES = ['_User', '_Role'] as const;
+
+/**
+ * record-ports.ts :124-140 `recordClassPorts` → schema-ports.ts :616-650 `collectionPorts`: the Class dropdown — an enum of
+ * the system classes the schema does not list, then every class of the schema, no placeholder entry, in group General.
+ * Announced for EVERY Record node, with or without a schema (the hook runs at `nodeAdded`, dbmodelnode2.ts :548-571), so
+ * it is derived whenever the editor asks; `classPort` above is what a write to it registers at play.
+ */
+export function classPickerPort(context: Readonly<PortContext>): ValueInputDecl {
+  const classes = Object.keys(context.schema?.classes ?? {});
+  const enums = [...PARSE_SYSTEM_CLASSES.filter((c) => !classes.includes(c)), ...classes];
+  return { ...classPort(), type: 'enum', enums, editOnly: true };
+}
+
+/**
+ * schema-ports.ts :546-571 `backendPickerPorts` through record-ports.ts :119-121 (`hideWhenSingleBackend`, group General): the
+ * Backend dropdown — `Active Backend` (`_active_`) then each backend by id, default `_active_` — drawn only when the project
+ * has two or more backends (P107-S80-BACKENDPICKER). `backendPort` above is what a write to it registers at play.
+ */
+export function backendPickerPort(context: Readonly<PortContext>): Record<string, ValueInputDecl> {
+  const backends = context.backends ?? [];
+  if (backends.length <= 1) return {};
+  return { backendId: { ...backendPort(), type: 'enum', enums: ['_active_', ...backends.map((b) => b.id)], default: '_active_' } };
+}
+
+/**
+ * record-ports.ts :260-285 `recordWiredFieldNames` — "the wire is the declaration" (P77 SBR-008): the field names a
+ * `prop-<field>` PARAMETER or a wire INTO or OUT OF the node names, in first-seen order, each once.
+ */
+export function recordWiredFieldNames(params: Readonly<Record<string, unknown>>, context: Readonly<PortContext>): string[] {
+  const names: string[] = [];
+  const add = (port: string) => {
+    if (!port.startsWith('prop-')) return;
+    const field = port.slice('prop-'.length);
+    if (field.length > 0 && !names.includes(field)) names.push(field);
+  };
+  for (const key of Object.keys(params)) add(key);
+  for (const port of context.wired ?? []) add(port);
+  for (const port of context.wiredOutputs ?? []) add(port);
+  return names;
+}
+
+/** The `<field> Changed` signal beside a property output (record-ports.ts :189-197; dbmodelnode2.ts :478-480 registers it on a wire). */
+export function changedSignal(field: string): SignalOutputDecl {
+  return { type: 'signal', displayName: field + ' Changed', group: 'Events', description: 'Fires when the ' + field + ' property of the bound record changes' };
+}
 
 /** :593-596 setCollectionID, :190-193 the Backend setter — both stored raw. */
 export function onRecordPort(port: string, value: unknown): { set: Partial<RecordIdState>; send: [] } {

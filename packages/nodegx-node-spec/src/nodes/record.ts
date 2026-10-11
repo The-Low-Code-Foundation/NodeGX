@@ -32,10 +32,17 @@
  * the `Record properties` checkbox is on re-sends `prop-<key>` and pulses `<key> Changed` if the node has that
  * property output, and pulses `Changed` for any key.
  *
- * THE PROPERTY OUTPUTS: a Record's `prop-<field>` outputs exist when a graph wires them (`registerOutputIfNeeded`,
- * :473-481) — the fields are the CLASS's, from the project's schema. A play declares the two fields every world here
- * holds, `title` and `n` (FIELDS). The `prop-<field>` INPUTS the runtime accepts (`registerInputIfNeeded` :514-516)
- * hold a value read by nothing (`scheduleStore` is dead, :460-471) — discovered, inert.
+ * THE PROPERTY OUTPUTS (NSP-020 s82, §6.3): what the EDITOR draws is the Class's columns from the project's schema, one
+ * `prop-<field>` and one `<field> Changed` each (dbmodelnode2.ts `updatePorts` :548-571 → record-ports.ts
+ * `recordFieldPorts` :170-201), then a `prop-<name>` for every name a WIRE touches — a parameter, a wire in, or a wire
+ * out (`recordWiredFieldPorts` :260-345, "the wire is the declaration"). What exists AT PLAY is only what a wire
+ * registered (`registerOutputIfNeeded` :474-486, called from nodescope.ts :150), and every send is gated on it —
+ * `if (this.hasOutput('prop-' + key))` (:140-142, :340, :448). The schema is never read at play. So this spec's
+ * `derived.outputs(params, context)` reads `context.schema` and the wire fields; handed the play's context (the wires
+ * only), it is exactly the runtime's list, and the reducers ask `world.hasOutput` where the runtime asks `hasOutput`.
+ * A scenario names the wires under `wiredOutputs`; a generated sequence draws them from `outputCandidates`
+ * (`title` and `n`, the two fields every world here holds). The `prop-<field>` INPUTS the runtime accepts
+ * (`registerInputIfNeeded` :514-516) hold a value read by nothing (`scheduleStore` is dead, :460-471) — discovered, inert.
  *
  * NOT GRADED HERE, named:
  *   - the success's schema conversions (`_deserializeJSON` with the Class's schema: Date, Pointer, File, GeoPoint,
@@ -49,15 +56,15 @@
  *     states the pulse; the runtime's silence is a known row.
  */
 
-import type { ChangeEvent, OutputDecl, ValueInputDecl, WorldView } from '../spec';
+import type { ChangeEvent, OutputDecl, ValueInputDecl, ValueType, WorldView } from '../spec';
 import { defineNode, said } from '../spec';
 import type { BackendScript, WorldScript } from '../world';
 import { valueDidChange } from './condition';
 import { emptyId, runOnChange } from './data-base';
-import { discoverRecordPort, NO_BACKEND_MESSAGE, onRecordPort, RECORD_CANDIDATES, RECORD_FAILURE_CODE } from './record-base';
+import { backendPickerPort, changedSignal, classPickerPort, discoverRecordPort, NO_BACKEND_MESSAGE, onRecordPort, RECORD_CANDIDATES, RECORD_FAILURE_CODE, recordWiredFieldNames } from './record-base';
 import { sameList } from '../world';
 
-/** The fields a play's graph wires from a Record (THE PROPERTY OUTPUTS above) — the Class's, in a project. */
+/** The two fields every world here holds — what a generated sequence may WIRE (`outputCandidates`), not a stand-in for a schema (s82). */
 export const RECORD_FIELDS = ['title', 'n'] as const;
 
 /** :413 */
@@ -92,10 +99,13 @@ type RecordState = {
 const failures = (n: number) => Array.from({ length: n }, () => ({ port: 'fetch' as const, outcome: 'failure' as const, error: RECORD_FAILURE_CODE }));
 const dones = (n: number) => Array.from({ length: n }, () => ({ port: 'fetch' as const, outcome: 'done' as const }));
 
-/** The property output a graph wires (:473-481, `userOutputGetter` :522-525 — `get(name, { resolve: true })`). */
-function propertyOutput(p: string): OutputDecl<RecordState> {
+/**
+ * The property output (:474-481, `userOutputGetter` :522-525 — `get(name, { resolve: true })`): typed by its column when the
+ * schema has one (record-ports.ts `recordPortType` :205-219), `*` for a name only a wire declares (:336-340).
+ */
+function propertyOutput(p: string, type: ValueType = '*'): OutputDecl<RecordState> {
   return {
-    type: '*',
+    type,
     displayName: p,
     group: 'Properties',
     description: 'The ' + p + ' property of the bound record',
@@ -115,18 +125,14 @@ function changes(before: Readonly<RecordState>, after: RecordState, keys: Readon
   return out;
 }
 
-const isField = (key: string) => (RECORD_FIELDS as readonly string[]).includes(key);
-
 /** One frame's pulses in the order the runtime sends them (spec.ts `pulses`): declared, or `{ derived }`. */
 type Reaction = { pulses: Array<'changed' | 'fetched' | { derived: string }> };
 
 /** :136-145 onModelChangedCallback — this node's reaction to a write of `key` on its bound record, written beside the write (registry.ts: a node never hears its own write). */
 function react(st: RecordState, w: WorldView, key: string, on: boolean, r: Reaction): void {
   if (!on) return;
-  if (isField(key)) {
-    w.send('prop-' + key, st); // :140 — at the flag
-    r.pulses.push({ derived: 'changed-' + key }); // :142
-  }
+  if (w.hasOutput('prop-' + key)) w.send('prop-' + key, st); // :140 — at the flag, where the node has the port
+  if (w.hasOutput('changed-' + key)) r.pulses.push({ derived: 'changed-' + key }); // :142
   r.pulses.push('changed'); // :144
 }
 
@@ -137,7 +143,7 @@ function setModel(st: RecordState, w: WorldView, id: unknown, r: Reaction): void
   w.send('id', st); // :326
   if (id === undefined) return; // :334
   w.watch({ model: id }); // :336
-  for (const key of Object.keys(w.registry.model(id).data)) if (isField(key)) w.send('prop-' + key, st); // :339-341
+  for (const key of Object.keys(w.registry.model(id).data)) if (w.hasOutput('prop-' + key)) w.send('prop-' + key, st); // :339-341
   r.pulses.push('fetched'); // :342
 }
 
@@ -308,19 +314,28 @@ export const RecordNode = defineNode({
   },
   {
     derived: {
-      inputs: () => ({}),
-      // :473-481 — the property outputs a graph wires, and each one's Changed beside it (THE PROPERTY OUTPUTS)
-      outputs: () => {
+      // NSP-020 s82 — what the editor draws (dbmodelnode2.ts updatePorts :548-571): the Backend picker with two or more
+      // backends, then the Class dropdown from the schema; at play neither is in the context, and a write registers it (discover)
+      inputs: (_params, context) => ({ ...backendPickerPort(context), collectionName: classPickerPort(context) }),
+      // THE PROPERTY OUTPUTS: the Class's columns (record-ports.ts recordFieldPorts :170-201 — one `prop-` and one Changed each),
+      // then `prop-` alone for every name a wire or a parameter declares and the schema does not (recordWiredFieldPorts :260-345)
+      outputs: (params, context) => {
         const out: Record<string, OutputDecl<RecordState>> = {};
-        for (const p of RECORD_FIELDS) {
-          out['prop-' + p] = propertyOutput(p);
-          out['changed-' + p] = { type: 'signal', displayName: p + ' Changed', group: 'Events', description: 'Fires when the ' + p + ' property of the bound record changes' };
+        const klass = typeof params.collectionName === 'string' ? context.schema?.classes[params.collectionName] : undefined;
+        for (const [field, decl] of Object.entries(klass?.fields ?? {})) {
+          out['prop-' + field] = propertyOutput(field, decl.type);
+          out['changed-' + field] = changedSignal(field);
         }
+        for (const field of recordWiredFieldNames(params, context)) if (!('prop-' + field in out)) out['prop-' + field] = propertyOutput(field);
         return out;
       },
+      needs: ['schema', 'backends', 'wired', 'wiredOutputs'],
       // :483-518 registerInputIfNeeded — the Class, the Backend, and any `prop-` name
       discover: (port) => discoverRecordPort(port) ?? (port.startsWith('prop-') ? propertyInput(port.slice('prop-'.length)) : undefined),
       candidates: [...RECORD_CANDIDATES, 'prop-title'],
+      // :474-486 registerOutputIfNeeded — what a wire brings into being (nodescope.ts :150): a `prop-` getter, a `changed-` signal
+      discoverOutput: (port) => (port.startsWith('prop-') ? propertyOutput(port.slice('prop-'.length)) : port.startsWith('changed-') ? changedSignal(port.slice('changed-'.length)) : undefined),
+      outputCandidates: RECORD_FIELDS.flatMap((f) => ['prop-' + f, 'changed-' + f]),
       // :297-299 setCollectionID, :504-506 the Backend, :527-531 userInputSetter (held, read by nothing)
       on: (_s, port, v) => (port === 'collectionName' || port === 'backendId' ? onRecordPort(port, v) : { send: [] })
     },
@@ -395,16 +410,15 @@ export const RecordNode = defineNode({
           w.watch({ model: st.bound });
         }
         w.send('id', st); // :442
-        for (const key in item) if (key !== 'objectId' && isField(key)) w.send('prop-' + key, st); // :444-449
+        for (const key in item) if (key !== 'objectId' && w.hasOutput('prop-' + key)) w.send('prop-' + key, st); // :444-449
         // :451-452 — Fetched, then the batch's outcome
         return { set: changes(s, st, ['bound']), send: [], pulses: [...r.pulses, 'fetched'], outcomes: dones(n) };
       },
       // :136-145 onModelChangedCallback — the bound record, any key, written by ANOTHER node
-      change: (s, i, e: ChangeEvent) => {
+      change: (s, i, e: ChangeEvent, w) => {
         if (e.kind !== 'model' || e.id !== s.bound || !i['runOnChange-record']) return { send: [] };
         const key = String(e.name);
-        const own = isField(key);
-        return { sendDerived: own ? ['prop-' + key] : [], emitDerived: own ? ['changed-' + key] : [], emit: ['changed'], send: [] };
+        return { sendDerived: w.hasOutput('prop-' + key) ? ['prop-' + key] : [], emitDerived: w.hasOutput('changed-' + key) ? ['changed-' + key] : [], emit: ['changed'], send: [] };
       }
     }
   }

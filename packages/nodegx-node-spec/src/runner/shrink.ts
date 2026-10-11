@@ -15,6 +15,8 @@ export interface Candidate {
   steps: Step[];
   /** NSP-007: carried through unchanged — the script is part of what reproduces the divergence. An `advance` step shrinks like any other (dropped, then halved). */
   world?: WorldScript;
+  /** NSP-020 (s82): carried through unchanged, as the world is — the wires are part of what reproduces the divergence. */
+  wiredOutputs?: string[];
 }
 
 export type Fails = (c: Candidate) => Promise<boolean>;
@@ -49,6 +51,7 @@ export async function shrink(initial: Candidate, fails: Fails, options: ShrinkOp
   let runs = 0;
   let current: Candidate = { params: { ...initial.params }, steps: [...initial.steps] };
   if (initial.world) current.world = initial.world;
+  if (initial.wiredOutputs) current.wiredOutputs = initial.wiredOutputs;
 
   const tryOne = async (next: Candidate): Promise<boolean> => {
     if (runs >= maxRuns) return false;
@@ -64,7 +67,7 @@ export async function shrink(initial: Candidate, fails: Fails, options: ShrinkOp
   while (progress && runs < maxRuns) {
     progress = false;
 
-    const withWorld = (c: { params: Record<string, unknown>; steps: Step[] }): Candidate => (current.world ? { ...c, world: current.world } : c);
+    const withWorld = (c: { params: Record<string, unknown>; steps: Step[] }): Candidate => ({ ...c, ...(current.world ? { world: current.world } : {}), ...(current.wiredOutputs ? { wiredOutputs: current.wiredOutputs } : {}) });
 
     // 1. drop steps — chunks first (halves, quarters …), then single steps
     for (let chunk = Math.max(1, Math.floor(current.steps.length / 2)); chunk >= 1; chunk = Math.floor(chunk / 2)) {

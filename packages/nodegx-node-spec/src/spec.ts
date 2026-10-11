@@ -45,6 +45,8 @@ export type ValueType =
   | 'cloudfile'
   | 'color'
   | 'component'
+  /** NSP-020 s82 — a transition curve `{ curve, dur, delay }` (States' `transition-*` ports, states.ts :1030); the catalog's `curve`. Coerced like `*`. */
+  | 'curve'
   | 'date'
   | 'dimension'
   | 'domelement'
@@ -252,6 +254,14 @@ export interface WorldView {
    * not have is a scenario error at mount.
    */
   wired(port: string): boolean;
+  /**
+   * NSP-020 (s82) — whether THIS node has the output now: the runtime's `hasOutput` (node.ts), which every send of a
+   * `registerOutputIfNeeded` port is gated on (dbmodelnode2.ts :140-142, states.ts :257/:842/:860, simplejavascript.ts
+   * :609). A declared output always; a derived output when the params derived it, a wire asked for it
+   * (`wiredOutputs`, or `onWire`), or the node's own write minted it (`discoverOutput`). A reducer asks this instead of
+   * iterating a list of what "would be wired" — the fixture constants the four padded specs carried before s82.
+   */
+  hasOutput(name: string): boolean;
 }
 
 /** One registry entry to watch: a record by id or an array by name (the raw id, as the registry keeps it). */
@@ -388,11 +398,19 @@ export interface ValueInputDecl extends PortMeta {
    */
   undriven?: string;
   /**
+   * NSP-020 (s82, §6.4 gap 4) — the default the EDITOR's announcement shows for a derived port when it differs from the
+   * value the node holds at mount (`default`): a Component Stack's `startPage` is announced with the first page as its
+   * default while the node starts on none. `drawnPorts` draws this one; the interpreter mounts with `default`.
+   */
+  drawnDefault?: unknown;
+  /**
    * NSP-020 (s79) — the catalog's `runtime-narrowed` mechanism: the fields of THIS declared port that change per instance
    * (Dropdown's `value` becomes an enum of its `items`; Text Input's `startValue` takes the type its `type` names). The
    * runtime announces the narrowed port and the editor lets it REPLACE the static one of the same name and plug
    * (`NodeGraphNode.ts replaceOrAppendPorts`); here the declaration stays one and `portsOf` applies what this returns on
    * top. Only the shape — never the behaviour: a reducer reads the declared `type`/`coerce`.
+   * s82 (§6.4 gap 3): reads the params RAW, as the runtime's hooks read `node.parameters` — a Value SET to the default is
+   * not an unset one; a narrow that wants the declared default under an unset name says so itself.
    */
   narrow?: (params: Readonly<Record<string, unknown>>, context: Readonly<PortContext>) => Partial<Pick<ValueInputDecl, 'type' | 'enums' | 'default'>>;
 }
@@ -415,10 +433,26 @@ export interface ValueOutputDecl<S> extends PortMeta {
    * not write it.
    */
   from: (state: Readonly<S>, world: WorldView) => unknown;
+  /**
+   * NSP-020 (s82, §6.4 gap 2) — a declared OUTPUT the runtime narrows per instance (Text Input's `onTextChanged` takes the
+   * type its `type` names, text-input.ts :616-637): the output's `type` for these params. Raw params, as the input one.
+   */
+  narrow?: (params: Readonly<Record<string, unknown>>, context: Readonly<PortContext>) => Partial<Pick<ValueOutputDecl<S>, 'type'>>;
+  /**
+   * NSP-020 (s82) — on a DERIVED output: at play the output exists only when a wire leaves from it — the runtime registers
+   * it in `nodescope.ts addConnection` (:150, `registerOutputIfNeeded(sourcePort)`) and nowhere else, and gates every
+   * send on `hasOutput`. States' `at-<state>` / `reached-<state>` (states.ts :290, :918, :936); a Function's signal
+   * outputs (simplejavascript.ts :609). The editor DRAWS it from the params regardless. A target registers an `onWire`
+   * derived output only when the play's `wiredOutputs` names it; one without the flag at mount (and after a write to a
+   * `rederive` param, states.ts :338-358). Meaningless on a declared output.
+   */
+  onWire?: true;
 }
 
 export interface SignalOutputDecl extends PortMeta {
   type: 'signal';
+  /** NSP-020 (s82) — see `ValueOutputDecl.onWire`. */
+  onWire?: true;
 }
 
 /** The outcome ports the runtime declares for a node (ERG-001): always `done` + `completed`; `unchanged` and `failure` only when the node can. */
@@ -730,6 +764,19 @@ export type Reducers<S, I, O> = {
 export interface PortContext {
   /** The input port names a wire reaches on this node (the mount's `wired`). Numbered inputs count them; the Record family draws `prop-*` from them. */
   wired?: readonly string[];
+  /**
+   * NSP-020 (s82) — the OUTPUT port names a wire leaves from on this node (the runtime's `getConnectionsFrom`). The Record
+   * family draws `prop-*` from them too (record-ports.ts `recordWiredFieldNames` :260-285: "the wire is the declaration");
+   * at play they are the only `registerOutputIfNeeded` outputs a node has (§6.3, §6.5). A scenario names them under
+   * `wiredOutputs`; a generated sequence draws them from `DerivedPorts.outputCandidates`.
+   */
+  wiredOutputs?: readonly string[];
+  /**
+   * NSP-020 (s82, P107-S80-BACKENDPICKER) — the project's backends (`backendServices` metadata: id and name), in order.
+   * With two or more, every node that reads a backend draws a `backendId` picker (schema-ports.ts `backendPickerPorts`
+   * :546-571; hidden with one, record-ports.ts :119-121). Project metadata an editor has without a viewer.
+   */
+  backends?: readonly { id: string; name: string }[];
   /** The ports the user drew on the node itself — Component Inputs / Outputs carry theirs in the project's `ports` field. */
   instancePorts?: readonly PortRef[];
   /** The interface of each component a node may name: For Each's template, Push's target page, Show Popup's popup, a cloud function's request / response. */
@@ -764,7 +811,26 @@ export interface BackendSchema {
   classes: Readonly<Record<string, { fields: Readonly<Record<string, { type: ValueType }>> }>>;
 }
 
-export const PORT_CONTEXT_FIELDS = ['wired', 'instancePorts', 'components', 'routers', 'stacks', 'schema', 'siblings'] as const satisfies readonly (keyof PortContext)[];
+export const PORT_CONTEXT_FIELDS = ['wired', 'wiredOutputs', 'backends', 'instancePorts', 'components', 'routers', 'stacks', 'schema', 'siblings'] as const satisfies readonly (keyof PortContext)[];
+
+/**
+ * NSP-020 (s82) — THE PLAY'S CONTEXT: at play a node has its params and its wires, never the project. The runtime reads
+ * the schema, the component interfaces and the sibling nodes in its `setup` hooks, which announce ports to an EDITOR;
+ * at play it registers what a wire asks for (`nodescope.ts addConnection` :149-150) and what a setter or the node's own
+ * write registers, and the schema is never read (dbmodelnode2.ts :140-142, :340, :448 — every `prop-` send gated on
+ * `hasOutput`). So the interpreter and the runtime target hand `derived.inputs` / `outputs` a context holding ONLY these
+ * two fields, and one `derived.outputs(params, context)` is both the editor's draw (with the project in the context) and
+ * the play's registration (without it) — no padding, no fixture standing in for a project the play never reads.
+ */
+export type PlayContext = Pick<PortContext, 'wired' | 'wiredOutputs'>;
+export const PLAY_CONTEXT_FIELDS = ['wired', 'wiredOutputs'] as const satisfies readonly (keyof PlayContext)[];
+/** The play's slice of a context: the wire fields and nothing else (`PlayContext`). */
+export function playContextOf(context: Readonly<PortContext> | undefined): PlayContext {
+  const out: { wired?: readonly string[]; wiredOutputs?: readonly string[] } = {};
+  if (context?.wired !== undefined) out.wired = context.wired;
+  if (context?.wiredOutputs !== undefined) out.wiredOutputs = context.wiredOutputs;
+  return out;
+}
 
 export interface DerivedPorts<S, O> {
   /**
@@ -777,14 +843,43 @@ export interface DerivedPorts<S, O> {
    */
   inputs: (params: Readonly<Record<string, unknown>>, context: Readonly<PortContext>) => Record<string, InputDecl>;
   /**
-   * The OUTPUT ports these params derive (NSP-012): the Object node's `prop-<p>` value and
-   * `changed-<p>` signal per property named. A target registers them at mount the way a graph
-   * with every port wired would (the runtime registers a derived output only when a wire asks
-   * for it, `registerOutputIfNeeded`; a lone node on the runtime target gets them all), and the
-   * interpreter observes them like declared ones; a reducer reaches them through `sendDerived` /
-   * `emitDerived`. A derived output's `from` is read like a declared one's.
+   * The OUTPUT ports these params — and this context — derive (NSP-012, NSP-020): the Object node's `prop-<p>` value and
+   * `changed-<p>` signal per property named; a Record's `prop-<field>` per column of its Class in `context.schema` and
+   * per name a wire touches (`context.wired` / `wiredOutputs`). ONE pure function for two readers (s82): an editor calls
+   * it with the project in the context and draws the list; a target calls it with the PLAY's context (`PlayContext`:
+   * the wire fields only) and registers the list — at mount, and again after a write to a `rederive` param (States'
+   * `values`: its setter registers at run time) — except an `onWire` output, which exists only when `wiredOutputs` names it.
+   * The interpreter observes a derived output like a declared one; a reducer reaches it through `sendDerived` /
+   * `emitDerived` / `pulses`, and asks `world.hasOutput` whether it exists. No fixture, no padding: what a play's
+   * graph wires is the scenario's `wiredOutputs`, drawn by the generator from `outputCandidates`.
    */
   outputs?: (params: Readonly<Record<string, unknown>>, context: Readonly<PortContext>) => Record<string, OutputDecl<S>>;
+  /**
+   * NSP-020 (s82) — the output-side twin of `discover`: the declaration `registerOutputIfNeeded(name)` makes of a name
+   * no param derived — a Record's `prop-<anything>` getter and `changed-<anything>` signal (dbmodelnode2.ts :474-486), a
+   * Function's `out-<prop>` (simplejavascript.ts :903-920), a Logic Builder's any name (logic-builder.ts :488, :601).
+   * A target calls it for each `wiredOutputs` name at mount and for a wire made later (`connect`), as `nodescope.ts`
+   * :150 does; the interpreter also calls it when a reducer sends, pulses or `world.send`s a name the instance has no
+   * output for — the node's own write minting the port (:298). `undefined` for a name the node refuses: then the send is
+   * the spec error it always was.
+   */
+  discoverOutput?: (port: string) => OutputDecl<S> | undefined;
+  /**
+   * NSP-020 (s82) — output names a GENERATED sequence may wire (`wiredOutputs`), because `discoverOutput` accepts them or
+   * the params it draws derive them `onWire`: the Record's `prop-title`, `changed-n`; States' `at-A`, `reached-B`. The
+   * generator draws a subset per sequence, so the sends gated on `hasOutput` are exercised wired and unwired. The
+   * fixture lists the four padded specs carried (`RECORD_FIELDS`, `STATE_LISTS` …) were this, in the wrong place.
+   */
+  outputCandidates?: readonly string[];
+  /**
+   * NSP-020 (s82) — the params whose RUN-TIME setter registers ports, so a write to one of them re-derives the derived ports
+   * at play (new ports registered at their declared shape; nothing removed, nothing re-shaped): States' `values`
+   * (states.ts :338-358 registers each value output as the list is written). Every other node's ports are the PLACING's —
+   * the headless runtime reads `model.outputPorts` / `model.parameters` as the project saved them (NSP-017's contracts:
+   * "the kinds are the placing's"; javascript.ts :433 re-registers the SAVED ports on each code read) — and a name a later
+   * write mints is `discoverOutput`'s. Absent: no param write moves a port.
+   */
+  rederive?: readonly string[];
   /**
    * NSP-020 — the `PortContext` fields `inputs`, `outputs` and any `narrow` read. Absent or empty: the node's own params
    * are enough (21 of the 43 derived specs at s79). The needs gate calls them with a context holding only these and
@@ -1255,6 +1350,9 @@ export interface AnyNodeSpec {
     signal?: (state: never, port: string, derived: Readonly<Record<string, unknown>>, world: WorldView) => unknown;
     discover?: (port: string) => InputDecl | undefined;
     candidates?: readonly string[];
+    discoverOutput?: (port: string) => ErasedValueOutput | SignalOutputDecl | undefined;
+    outputCandidates?: readonly string[];
+    rederive?: readonly string[];
   };
   afterInputs?: (state: never, inputs: never, world: WorldView) => unknown;
   world?: {

@@ -119,7 +119,7 @@
  * something every target can compute; declaration order is knowledge of one file.
  */
 
-import type { PortContext } from './spec';
+import type { PlayContext } from './spec';
 import type { TraceEvent } from './trace';
 import type { World } from './world';
 
@@ -131,8 +131,12 @@ export interface Handle {
 
 export interface TargetAdapter<H extends Handle = Handle> {
   readonly name: string;
-  /** `wired` (P107-C155) and `context` (NSP-020, spec.ts `PortContext`) are the scenario's; a target that takes neither is called with two arguments. */
-  mount(type: string, params: Record<string, unknown>, wired?: readonly string[], context?: Readonly<PortContext>): H;
+  /**
+   * `wired` (P107-C155) and `context` (NSP-020, spec.ts `PlayContext` — the play's wire fields: `wired` again, and
+   * `wiredOutputs`, the outputs a wire leaves from; s82) are the scenario's; a target that takes neither is called with two
+   * arguments. At play a node has its params and its wires, never the project: a target hands `derived.*` exactly this.
+   */
+  mount(type: string, params: Record<string, unknown>, wired?: readonly string[], context?: Readonly<PlayContext>): H;
   set(h: H, port: string, value: unknown): void;
   signal(h: H, port: string): void;
   settle(): Promise<void>;
@@ -223,7 +227,7 @@ export async function play<H extends Handle>(
   steps: readonly Step[],
   world?: World,
   wired?: readonly string[],
-  context?: Readonly<PortContext>
+  context?: Readonly<PlayContext>
 ): Promise<TraceEvent[]> {
   let h: H | undefined;
   const restore = world && adapter.install ? adapter.install(world) : undefined;
@@ -244,8 +248,8 @@ export async function play<H extends Handle>(
   };
   try {
     const resolved = Object.fromEntries(Object.entries(params).map(([k, v]) => [k, resolve(v)]));
-    // NSP-020 — a scenario with a `context` hands it as the fourth argument (with `wired`, possibly empty); without one the
-    // call is exactly what it was, so every target that takes two or three arguments sees no change
+    // NSP-020 — a scenario with `wiredOutputs` hands the play context as the fourth argument (with `wired`, possibly empty);
+    // without one the call is exactly what it was, so every target that takes two or three arguments sees no change
     h = context ? adapter.mount(type, resolved, wired ?? [], context) : wired && wired.length > 0 ? adapter.mount(type, resolved, wired) : adapter.mount(type, resolved);
     for (const step of steps) {
       if (step === 'settle') await adapter.settle();

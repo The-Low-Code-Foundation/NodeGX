@@ -91,6 +91,13 @@ export interface GraphNodeDecl {
   params?: Record<string, unknown>;
   /** NSP-012: the component instance (a key of `components`) this node sits in; absent: the root. */
   in?: string;
+  /**
+   * NSP-020 (s82): the OUTPUT ports a wire leaves from on this node to nodes OUTSIDE the scenario (scenario.ts `wiredOutputs`
+   * for a lone node): each exists at play as `nodescope.ts addConnection` brings it (:150), and nothing in the scenario listens
+   * on it. A `prop-<field>` a Record claims on, an `at-` / `reached-` a States claims on, is wired somewhere in the app the
+   * scenario stands for; absent, only the scenario's own `wires` bring such a port into being.
+   */
+  wiredOutputs?: string[];
 }
 
 /** NSP-012: one component INSTANCE in the scenario's tree (the header's COMPONENTS paragraph). */
@@ -316,6 +323,11 @@ export function reviveGraphScenarios(parsed: unknown, file: string): GraphScenar
         if (n.in !== undefined && !(components && n.in in components)) throw new Error(`${file}[${i}]: node ${JSON.stringify(id)} sits in component ${JSON.stringify(n.in)}, which is not declared`);
         const decl: GraphNodeDecl = n.params ? { type: n.type, params: reviveRecord(n.params) } : { type: n.type };
         if (n.in !== undefined) decl.in = n.in;
+        // NSP-020 s82 — the outputs a wire leaves from to nodes outside the scenario (`GraphNodeDecl.wiredOutputs`)
+        if (n.wiredOutputs !== undefined) {
+          if (!Array.isArray(n.wiredOutputs) || n.wiredOutputs.some((port) => typeof port !== 'string')) throw new Error(`${file}[${i}]: node ${JSON.stringify(id)}: \`wiredOutputs\` is a list of port names`);
+          decl.wiredOutputs = [...n.wiredOutputs];
+        }
         nodes[id] = decl;
       }
       out.push({

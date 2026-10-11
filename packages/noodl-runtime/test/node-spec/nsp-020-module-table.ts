@@ -55,6 +55,9 @@ const TWO_BACKENDS = {
   }
 };
 const BACKEND_PICKER = 'P107-S80-BACKENDPICKER';
+const STATES_LOAD_GATE = 'P107-S82-STATESLOADGATE';
+/** NSP-020 s82 — a schema with one class of two columns, as the Record family's proof case reads it. */
+const LESSONS: PortContext = { schema: { classes: { Lesson: { fields: { title: { type: 'string' }, n: { type: 'number' } } } } } };
 
 export const TABLE: TableRow[] = [
   // ---- numbered-inputs (nodedefinition.ts collectPorts :623-660: params AND wires, the highest index plus one spare) ----
@@ -339,12 +342,8 @@ export const TABLE: TableRow[] = [
         params: { items: [{ Label: 'Small', Value: 's' }], value: 'Option 1' }
       }
     ],
-    known: {
-      // `narrow` reads the params with the declared defaults filled in (ports.ts effectiveParams, decided in s79), so it
-      // cannot tell a Value SET to 'Option 1' from one never set; options.ts :413-416 reads `parameters.value` as stored
-      'input value: enums runtime ["s","Option 1"], spec ["s"]':
-        'GAP: narrow cannot see a param set to its declared default'
-    }
+    // s82 closed §6.4 gap 3: `narrow` reads the params RAW (ports.ts), so a Value SET to 'Option 1' outside the list is offered back
+    // exactly as options.ts :428-432 offers it — the pin that measured the gap is gone, and the case above grades it
   },
   {
     type: 'net.noodl.controls.textinput',
@@ -388,13 +387,22 @@ export const TABLE: TableRow[] = [
     owedBy: 'L1',
     reads: 'schema (the Class picker; the relation fields of the class), the backend list'
   },
+  // NSP-020 s82 — the first L1 row switched on, the proof of the format decision (§6.6): the Class picker from the schema (the
+  // system classes first), the Backend picker with two backends (`context.backends`), `prop-`/`changed-` per column, `prop-`
+  // alone per wired name (record-ports.ts recordWiredFieldPorts), nothing for the wires at play
   {
     type: 'DbModel2',
     module: R + 'data/dbmodelnode2',
     hook: 'setup',
-    cases: [],
-    owedBy: 'L1',
-    reads: 'schema (the Class picker; the class fields → `prop-*`/`changed-*` outputs), the backend list'
+    cases: [
+      { name: 'a Class with two columns', params: { collectionName: 'Lesson' }, context: LESSONS },
+      { name: 'a Class the schema does not have', params: { collectionName: 'Nope' }, context: LESSONS },
+      { name: 'a wire out of prop-zz and a prop-title parameter, beside the schema', params: { collectionName: 'Lesson', 'prop-title': 'x' }, context: { ...LESSONS, wiredOutputs: ['prop-zz', 'changed-zz'] } },
+      { name: 'a wire into prop-n, no schema', params: {}, context: { wired: ['prop-n'] } },
+      { name: 'a project with two backends', params: { collectionName: 'Lesson' }, context: { ...LESSONS, backends: [{ id: 'b1', name: 'First' }, { id: 'b2', name: 'Second' }] } },
+      { name: 'a project with one backend draws no picker', params: {}, context: { backends: [{ id: 'b1', name: 'First' }] } }
+    ],
+    reads: 'schema (the Class picker; the class fields → `prop-*`/`changed-*` outputs), backends (the picker), wired + wiredOutputs (`prop-*` from the wires)'
   },
   {
     type: 'DeleteDbModelProperties',
@@ -489,12 +497,26 @@ export const TABLE: TableRow[] = [
   },
 
   // ---- owed by L3: `derived.outputs` padded with every fixture's outputs (task §3.1 (d), decision 4) ----
+  // NSP-020 s82 — the first L3 row switched on (§6.6): value outputs and the state ports from the params alone; at play the state
+  // ports exist only when wired (`onWire`), which the editor's draw does not show and this oracle does not ask
   {
     type: 'States',
     module: V + 'std-library/states',
     hook: 'setup',
-    cases: [{ name: 'two states, one value', params: { states: 'A,B', values: 'x' } }],
-    owedBy: 'L3',
+    cases: [
+      { name: 'two states, one value', params: { states: 'A,B', values: 'x' } },
+      { name: 'three states, three values of three types, a Default transition on B', params: { states: 'A,B,C', values: 'x,label,on', 'type-label': 'string', 'type-on': 'boolean', 'transitiondef-B': { curve: [0, 0, 1, 1], dur: 100, delay: 0 } } },
+      { name: 'transitions off', params: { states: 'A,B', values: 'x', useTransitions: false } },
+      { name: 'a Start State', params: { states: 'A,B', values: 'x,y', startState: 'B', 'type-y': 'color' } },
+      { name: 'values without states', params: { values: 'x' } }
+    ],
+    // P107-S82-STATESLOADGATE: at load (`nodeAdded`) the hook announces nothing until States is set (states.ts :1248-1250), while any
+    // later parameter edit announces the value outputs and Type pickers regardless (:1252-1260) — the drawn list depends on the edit
+    // order. The spec draws the edit path (what the `values` setter registers at play); this oracle measures the load path.
+    known: {
+      'input type-x: the spec draws it; the runtime does not announce it': STATES_LOAD_GATE,
+      'output x: the spec draws it; the runtime does not announce it': STATES_LOAD_GATE
+    },
     reads: 'params only'
   },
   {

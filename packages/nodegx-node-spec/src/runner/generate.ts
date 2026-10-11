@@ -38,6 +38,8 @@ export interface Sequence {
   steps: Step[];
   /** NSP-007: present exactly when the spec declares `needs`. */
   world?: WorldScript;
+  /** NSP-020 (s82): the outputs this sequence's graph wires — a subset of the spec's `derived.outputCandidates`; present only when the spec names some. */
+  wiredOutputs?: string[];
 }
 
 /** What a `needs` spec's world draws from when it declares no `worldPool` of its own. */
@@ -229,7 +231,13 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
   const steps: Step[] = [];
   for (let i = 0; i < n; i++) steps.push(oneStep(rng, steppable, signalPorts, settleChance, advances, acts, logicPorts, drawFrom));
   if (steps[steps.length - 1] !== 'settle') steps.push('settle');
-  if (needs.length === 0) return { seed, params, steps };
+  // NSP-020 s82 — THE WIRES OUT: each `outputCandidates` name wired with an even chance, drawn after every other draw so a
+  // spec that names none generates exactly what it did. A Record's `prop-title` wired is sent; unwired, its send is gated
+  // off on both targets (`hasOutput`) — the padding the four specs carried said "all wired, always", which no graph is.
+  const wiredOutputs: string[] = [];
+  for (const name of spec.derived?.outputCandidates ?? []) if (rng.chance(0.5)) wiredOutputs.push(name);
+  const wires = wiredOutputs.length > 0 ? { wiredOutputs } : {};
+  if (needs.length === 0) return { seed, params, steps, ...wires };
 
   const world: WorldScript = { seed };
   if (needs.includes('network')) {
@@ -296,7 +304,7 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
     const group = rng.pick(pool.groups ?? DEFAULT_WORLD_POOL.groups);
     if (Object.keys(group).length > 0) world.group = group;
   }
-  return { seed, params, steps, world };
+  return { seed, params, steps, world, ...wires };
 }
 
 function oneStep(

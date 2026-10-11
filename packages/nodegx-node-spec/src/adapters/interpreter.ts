@@ -15,7 +15,7 @@
 
 import { HostFileCtor } from '../host-file';
 
-import type { AnyNodeSpec, PortContext } from '../spec';
+import type { AnyNodeSpec } from '../spec';
 import type { Handle, TargetAdapter } from '../adapter';
 import type { TraceEvent } from '../trace';
 import { act, advance, mount, set, signal, settle, trace, type Instance } from '../interpreter';

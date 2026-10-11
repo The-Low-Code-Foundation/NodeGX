@@ -12,6 +12,7 @@
       },
       "st": {
         "type": "States",
+        "wiredOutputs": ["at-A", "at-B", "reached-B"],
         "params": {
           "states": "A,B",
           "values": "x",

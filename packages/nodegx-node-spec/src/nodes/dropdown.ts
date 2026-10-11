@@ -161,16 +161,15 @@ export const Dropdown = defineNode({
       // republishes this port to the EDITOR as an enum over this node's own Items — their Values (the Labels are the picker's
       // words; the format's enums are values), the first one the default (:441), plus a Value that matches no option
       // (:428-432) — and publishes nothing when Items cannot be read (:420-425: the static `string` port stays). The wire's
-      // type is `string` either way. `p` has the declared defaults filled in, so an unset Items is DEFAULT_ITEMS as the
-      // runtime reads it (:418); an unset Value reads as 'Option 1', which the runtime never sees (it reads `parameters.value` as
-      // stored), so the declared default is not offered back — a Value SET to 'Option 1' outside the list is the one
-      // case this cannot tell apart (NSP-020 §6.3, a format gap).
+      // type is `string` either way. NSP-020 s82 (§6.4 gap 3 closed): `p` is RAW, as the runtime reads `parameters` — an unset
+      // Items is DEFAULT_ITEMS by the hook's own fallback (:418, said here too), and a Value SET to 'Option 1' outside the list is
+      // offered back exactly as one set to any other name (:428-432); an unset Value is nothing.
       narrow: (p) => {
-        const items = editorItems(p.items);
+        const items = editorItems(p.items === undefined ? DEFAULT_ITEMS : p.items);
         if (items.length === 0) return {};
         const enums = items.map((item) => item.Value);
         const value = p.value;
-        if (typeof value === 'string' && value !== '' && value !== editorItems(DEFAULT_ITEMS)[0].Value && !enums.includes(value)) enums.push(value);
+        if (typeof value === 'string' && value !== '' && !enums.includes(value)) enums.push(value);
         return { type: 'enum', enums, default: items[0].Value };
       }
     },

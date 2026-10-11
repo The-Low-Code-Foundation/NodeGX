@@ -116,8 +116,6 @@ type State = {
   tTargetValues: Rec;
   tValueTypes: Rec;
   tUnreadable: Rec;
-  /** The derived outputs this instance has (`hasOutput`, :257, :842, :860) — fixed at mount from the graph's parameters. */
-  outputs: string[];
 };
 
 /** :91 */
@@ -132,9 +130,10 @@ const NO_STATES_CODE = 'states/no-states';
 const NO_STATES_MESSAGE = 'This States node has no states defined, so there is nowhere to go';
 
 /**
- * The lists the generator draws for `States` and `Values` (both panel-only). Every name in them is
- * a derived output the runtime target registers at mount (`derived.outputs`), as a graph wiring
- * every port would — so a list that arrives mid-play reaches ports that exist on both sides.
+ * The lists the generator draws for `States` and `Values` (both panel-only; `examples`). NSP-020 s82: they pad nothing
+ * any more — a value output exists once the `values` setter registers it (:338-358; both targets re-derive after the
+ * write), and an `At` / `Has Reached` port exists only when a wire asks for it (`onWire`; `outputCandidates` below is
+ * what a generated sequence may wire).
  */
 const STATE_LISTS = ['A,B', 'A,B,C', 'B,A', 'A', ''];
 const VALUE_LISTS = ['x', 'x,y', 'y,label,on'];
@@ -143,9 +142,6 @@ const VALUE_TYPES = ['number', 'string', 'boolean', 'color', 'textStyle'];
 /** The editor's split of a list parameter (:908, :944) — a non-string reads as none. */
 function listOf(value: unknown): string[] {
   return typeof value === 'string' && value ? value.split(',') : [];
-}
-function universe(param: unknown, lists: readonly string[]): string[] {
-  return [...new Set([...listOf(param), ...lists.flatMap(listOf)])];
 }
 
 /** :101-114 `setRGBA`, through the reader (color-blend.ts `readColor`) */
@@ -187,10 +183,11 @@ interface Out {
  * `flagOutputDirty(name)` (node.ts :832-835) — the output is SENT now, with what it reads now. A
  * frame end that writes a value three times (0, then false, then nothing) leaves the wire on the
  * last DEFINED one; reading once at the end would see only the last (`WorldView.send`). Only where
- * the port exists: a target registers exactly `derived.outputs`.
+ * the port exists (`hasOutput`, :257, :842, :860): a value output once `values` registered it, an
+ * `at-` port once a wire asked for it (NSP-020 s82).
  */
 function flag(w: State, name: string, out: Out): void {
-  if (name === 'currentState' || name === 'error' || w.outputs.includes(name)) out.world.send(name, w);
+  if (name === 'currentState' || name === 'error' || out.world.hasOutput(name)) out.world.send(name, w);
 }
 
 function draft(s: Readonly<State>): State {
@@ -204,7 +201,6 @@ function draft(s: Readonly<State>): State {
     startValues: { ...s.startValues },
     funcCurves: { ...s.funcCurves },
     queue: [...s.queue],
-    outputs: [...s.outputs],
     tStartValues: { ...s.tStartValues },
     tTargetValues: { ...s.tTargetValues },
     tValueTypes: { ...s.tValueTypes },
@@ -212,10 +208,10 @@ function draft(s: Readonly<State>): State {
   };
 }
 
-/** `Has Reached <state>` — only where the port exists (:257, :842). */
+/** `Has Reached <state>` — only where the port exists (:257, :842): a wire asked for it (`onWire`). */
 function reached(w: State, out: Out): void {
   const port = 'reached-' + w.state;
-  if (w.outputs.includes(port)) out.pulses.push({ derived: port });
+  if (out.world.hasOutput(port)) out.pulses.push({ derived: port });
 }
 
 // timerscheduler.ts :43-57 `start` / `stop` (+ `stopTimer` :96-114, `scheduleTimer` :85-94)
@@ -477,28 +473,40 @@ function valueType(params: Readonly<Rec>, v: string): 'number' | 'string' | 'boo
   return t === 'string' || t === 'boolean' || t === 'color' || t === 'textStyle' ? t : 'number';
 }
 
+/** :1151-1165 — the `At <state>` and `Has Reached <state>` ports: drawn from the States list; at play only where a wire asks (`onWire`). */
+const atPort = (st: string): OutputDecl<State> => ({ type: 'boolean', from: (s) => s.current['at-' + st], displayName: 'At ' + st, group: 'Current state', onWire: true });
+const reachedPort = (st: string): OutputDecl<State> => ({ type: 'signal', displayName: 'Has Reached ' + st, group: 'Current state', onWire: true });
+
 /**
- * :1071-1087 and the value outputs (:907-920) — for every name the generator's lists can bring, as a
- * fully wired graph would have them: a target registers each at mount.
+ * `updatePorts` :977-1000 (the value outputs — no display name, group Values, typed by `type-<v>`) and :1151-1165 (the two
+ * per state). The editor's list for these params; a target registers the values (the `values` setter does, :338-358 —
+ * re-derived after each write) and, of the state ports, only the wired ones (nodescope.ts :150).
  */
 function derivedOutputs(params: Readonly<Rec>): Record<string, OutputDecl<State>> {
   const out: Record<string, OutputDecl<State>> = {};
-  for (const v of universe(params.values, VALUE_LISTS)) {
-    if (RESERVED_OUTPUTS.includes(v) || v === 'currentState' || v === 'error') continue;
-    out[v] = { type: valueType(params, v), from: (s) => s.current[v], displayName: v, group: 'Values' };
+  for (const v of listOf(params.values)) {
+    if (RESERVED_OUTPUTS.includes(v) || v === 'currentState' || v === 'error') continue; // :316-323 refused by the setter
+    out[v] = { type: valueType(params, v), from: (s) => s.current[v], group: 'Values' };
   }
-  for (const st of universe(params.states, STATE_LISTS)) {
-    out['at-' + st] = { type: 'boolean', from: (s) => s.current['at-' + st], displayName: 'At ' + st, group: 'Current state' };
-    out['reached-' + st] = { type: 'signal', displayName: 'Has Reached ' + st, group: 'Current state' };
+  for (const st of listOf(params.states)) {
+    out['at-' + st] = atPort(st);
+    out['reached-' + st] = reachedPort(st);
   }
   return out;
 }
 
+/** :465-480 `registerOutputIfNeeded` — a wire brings any name into being; the two the spec can say something about. */
+function discoverOutput(port: string): OutputDecl<State> | undefined {
+  if (port.startsWith('at-')) return atPort(port.slice(3));
+  if (port.startsWith('reached-')) return reachedPort(port.slice(8));
+  return undefined;
+}
+
 const toState = (s: string) => ({ type: 'signal' as const, outcome: true, displayName: 'To ' + s, group: 'Go to state', description: 'Moves the node to the ' + s + ' state' });
-const curvePort = (displayName: string, group: string) => ({
-  type: '*' as const,
+const curvePort = (displayName: string, group: string, dflt: unknown = DEFAULT_CURVE) => ({
+  type: 'curve' as const,
   coerce: 'none' as const,
-  default: DEFAULT_CURVE,
+  default: dflt,
   examples: [DEFAULT_CURVE, { curve: [0, 0, 1, 1], dur: 100, delay: 0 }, { curve: [0.42, 0, 0.58, 1], dur: 200, delay: 50 }, { curve: [0, 0, 1, 1], dur: 0, delay: 0 }, { curve: [0, 0, 1, 1], dur: 100, delay: -50 }],
   displayName,
   group,
@@ -562,10 +570,8 @@ export const States = defineNode({
     tStartValues: {},
     tTargetValues: {},
     tValueTypes: {},
-    tUnreadable: {},
-    outputs: []
+    tUnreadable: {}
   } as State,
-  init: (_w, params) => ({ outputs: Object.keys(derivedOutputs(params)) }),
   // :268-270
   inspect: (s) => `Current state: ${s.state}`,
 
@@ -661,7 +667,8 @@ export const States = defineNode({
             out['transitiondef-' + st] = curvePort('Default', st + ' Transitions');
             for (const v of values) {
               const t = params['type-' + v];
-              if (t === undefined || t === 'number' || t === 'color') out['transition-' + st + '-' + v] = curvePort(v, st + ' Transitions');
+              // :1030 — a value's own curve defaults to the state's Default transition as set
+              if (t === undefined || t === 'number' || t === 'color') out['transition-' + st + '-' + v] = curvePort(v, st + ' Transitions', params['transitiondef-' + st] || DEFAULT_CURVE);
             }
           }
           out['to-' + st] = toState(st);
@@ -700,7 +707,12 @@ export const States = defineNode({
         return { set: { queue: w.queue, scheduled: w.scheduled }, outcome: 'deferred' };
       },
       discover,
-      candidates: ['currentState', 'startState', 'to-A', 'to-B', 'to-Z', 'value-A-x', 'value-B-x', 'transitiondef-B', 'transition-B-x', 'type-x']
+      candidates: ['currentState', 'startState', 'to-A', 'to-B', 'to-Z', 'value-A-x', 'value-B-x', 'transitiondef-B', 'transition-B-x', 'type-x'],
+      // NSP-020 s82 — the state ports a generated sequence may wire (the states STATE_LISTS can bring)
+      discoverOutput,
+      outputCandidates: ['A', 'B', 'C'].flatMap((st) => ['at-' + st, 'reached-' + st]),
+      // :338-358 — the `values` setter registers each value output as the list is written: the one param whose write moves a port
+      rederive: ['values']
     },
     // the frame: the queued moves (:688-698), then the scheduler's timer pass (timerscheduler.ts :116-198)
     afterInputs: (s, _i, world) => {
