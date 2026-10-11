@@ -103,45 +103,11 @@
   var pillSides = GARDEN.pillSides;
 
   /**
-   * P108-S7-METERS3D: how far up (px) each meter chip goes so no two cover each other. A building's parts stand on
-   * neighbouring tiles (the spa's stones and planks), and at the Workshop's camera their chips met: the stones' covered the
-   * planks'. Items in screen px: { x, bottom, w, h } — x the chip's centre, bottom its bottom edge (a chip is drawn
-   * translate(-50%, -100%) from its point). Greedy, the LOWEST on screen first (then list order), as pillSides: a chip stays
-   * over its thing unless it meets one already placed; then it goes just over the highest it meets, until it meets none.
-   * No width (nothing drawn) takes no room.
+   * P108-S7-METERS3D: how far up (px) each meter chip goes so no two cover each other (garden-kit's chipLifts, one copy
+   * since P109-S43-SECONDVISIT). Items in screen px: { x, bottom, w, h } — a chip is drawn translate(-50%, -100%) from its
+   * point. A garden-kit from before it has none: the chips stay where their things are, as before.
    */
-  function chipLifts(items) {
-    var list = Array.isArray(items) ? items : [], out = [], order = [], placed = [], GAP = 2;
-    for (var n = 0; n < list.length; n++) {
-      out.push(0);
-      order.push(n);
-    }
-    var bottomOf = function (k) {
-      return Number((list[k] || {}).bottom) || 0;
-    };
-    order.sort(function (a, b) {
-      return bottomOf(b) - bottomOf(a) || a - b;
-    });
-    for (var o = 0; o < order.length; o++) {
-      var i = order[o], it = list[i] || {}, w = Number(it.w) || 0, hh = Number(it.h) || 0, x = Number(it.x) || 0, b = bottomOf(i);
-      if (!(w > 0) || !(hh > 0)) continue;
-      var r = { l: x - w / 2, r: x + w / 2, t: b - hh, b: b };
-      // Each pass clears every chip it met (it only ever goes up), so one pass per placed chip is the most it can take.
-      for (var pass = 0; pass <= placed.length; pass++) {
-        var hit = null;
-        for (var k = 0; k < placed.length; k++) {
-          var q = placed[k];
-          if (r.l < q.r && q.l < r.r && r.t < q.b && q.t < r.b && (!hit || q.t < hit.t)) hit = q;
-        }
-        if (!hit) break;
-        r.b = hit.t - GAP;
-        r.t = r.b - hh;
-      }
-      placed.push(r);
-      out[i] = b - r.b;
-    }
-    return out;
-  }
+  var chipLifts = typeof GARDEN.chipLifts === 'function' ? GARDEN.chipLifts : function () { return []; };
   var wholeOf = GARDEN.wholeOf;
   // ── P108 IW-002 AC6 (lane D): the job model, drawn — garden-kit’s one copy of cg002Content’s table, and its meters ──────
   var JOB_LOOK = GARDEN.job;

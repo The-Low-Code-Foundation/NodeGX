@@ -2,10 +2,14 @@
  * P109 ISL-046 · P108-S7-METERS3D — in Garden 3D, no two meter chips over a plot's things cover each other.
  *
  * A building's parts stand on neighbouring tiles (the spa: stones at (3, 1), planks at (4, 1)); at the Workshop's camera
- * each part's chip was placed over its own tile, and the stones' covered the planks'. `chipLifts` (garden-3d-kit) says how
- * far up each chip goes: the lowest on screen first, a chip that meets one already placed goes just over it. Read from
- * the BUILT kit, loaded the way a page loads it (garden-kit first: the 3D kit `requires` it). The drive half is
- * `drive-iw007-touch.js --mode 3d` (METERS).
+ * each part's chip was placed over its own tile, and the stones' covered the planks'. `chipLifts` says how far up each
+ * chip goes: the lowest on screen first, a chip that meets one already placed goes just over it. Read from the BUILT
+ * kits, loaded the way a page loads them (garden-kit first: the 3D kit `requires` it).
+ *
+ * P109-S43-SECONDVISIT (s45): the flat Garden had no such pass, and a tablet that falls back to it (Too Slow) drew the
+ * spa's chips over each other in the Workshop. `chipLifts` now lives in garden-kit (its `exports`) and both kits place
+ * their plot chips with it. The drive half is `drive-iw007-touch.js` (METERS), in both modes: under software GL the
+ * island falls back to flat, so `--mode 3d`'s second Workshop is the flat Garden's.
  *
  * @module noodl-mcp/tests/isl046Meters3d.test
  */
@@ -16,7 +20,7 @@ import * as React from 'react';
 
 const LIBRARY = path.join(__dirname, '..', '..', '..', 'library', 'modules');
 
-function garden3d(): any {
+function kits(): { garden: any; garden3d: any } {
   const modules: any[] = [];
   let folder = '';
   const context: Record<string, any> = {
@@ -36,7 +40,10 @@ function garden3d(): any {
     folder = d;
     vm.runInContext(fs.readFileSync(path.join(LIBRARY, d, 'project', 'noodl_modules', d, 'index.js'), 'utf8'), context, { filename: `${d}/index.js` });
   }
-  return modules[modules.length - 1].reactNodes.find((n: any) => n.name === 'garden-3d-kit.Garden3D');
+  return {
+    garden: modules.find((m: any) => m.folder === 'garden-kit'),
+    garden3d: modules[modules.length - 1].reactNodes.find((n: any) => n.name === 'garden-3d-kit.Garden3D')
+  };
 }
 
 interface Chip {
@@ -46,7 +53,8 @@ interface Chip {
   h: number;
 }
 
-const chipLifts = garden3d().overlay.chipLifts as (items: Chip[]) => number[];
+const loaded = kits();
+const chipLifts = loaded.garden.exports.chipLifts as (items: Chip[]) => number[];
 const box = (c: Chip, lift: number) => ({ l: c.x - c.w / 2, r: c.x + c.w / 2, t: c.bottom - lift - c.h, b: c.bottom - lift });
 const meets = (chips: Chip[], lifts: number[]): number => {
   const bs = chips.map((c, i) => box(c, lifts[i] || 0));
@@ -69,6 +77,11 @@ const SPA: Chip[] = [
 ];
 
 describe('P108-S7-METERS3D — Garden 3D’s meter chips never cover each other (chipLifts)', () => {
+  it('one copy: Garden 3D places its chips with garden-kit’s chipLifts (the flat Garden’s own)', () => {
+    expect(typeof chipLifts).toBe('function');
+    expect(loaded.garden3d.overlay.chipLifts).toBe(chipLifts);
+  });
+
   it('🔴 control: the spa’s two chips, placed where their tiles are, cover each other', () => {
     expect(meets(SPA, [0, 0])).toBe(1);
   });
@@ -122,7 +135,7 @@ describe('P108-S7-METERS3D — Garden 3D’s meter chips never cover each other 
   });
 
   it('ARM: the source’s lift taken out (a chip never moves) leaves the spa’s chips covering each other', () => {
-    const src = fs.readFileSync(path.join(LIBRARY, 'garden-3d-kit', 'src', 'kit3d.js'), 'utf8');
+    const src = fs.readFileSync(path.join(LIBRARY, 'garden-kit', 'src', 'kit.js'), 'utf8');
     const from = src.indexOf('  function chipLifts(items) {');
     const end = '\n    return out;\n  }\n';
     const body = src.slice(from, src.indexOf(end, from) + end.length);

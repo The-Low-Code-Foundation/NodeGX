@@ -5076,11 +5076,52 @@ var gardenKitBlocks = (function () {
   }
 
   /**
+   * P108-S7-METERS3D: how far up (px) each meter chip goes so no two cover each other. A building's parts stand on
+   * neighbouring tiles (the spa's stones and planks), and in the Workshop their chips met: the stones' covered the
+   * planks'. Items in px: { x, bottom, w, h } — x the chip's centre, bottom its bottom edge where its tile puts it. Greedy,
+   * the LOWEST on screen first (then list order), as pillSides: a chip stays over its thing unless it meets one already
+   * placed; then it goes just over the highest it meets, until it meets none. No width (nothing drawn) takes no room.
+   * P109-S43-SECONDVISIT: both kits place their plot chips with this one (garden-3d-kit reads it from `exports`).
+   */
+  function chipLifts(items) {
+    var list = Array.isArray(items) ? items : [], out = [], order = [], placed = [], GAP = 2;
+    for (var n = 0; n < list.length; n++) {
+      out.push(0);
+      order.push(n);
+    }
+    var bottomOf = function (k) {
+      return Number((list[k] || {}).bottom) || 0;
+    };
+    order.sort(function (a, b) {
+      return bottomOf(b) - bottomOf(a) || a - b;
+    });
+    for (var o = 0; o < order.length; o++) {
+      var i = order[o], it = list[i] || {}, w = Number(it.w) || 0, hh = Number(it.h) || 0, x = Number(it.x) || 0, b = bottomOf(i);
+      if (!(w > 0) || !(hh > 0)) continue;
+      var r = { l: x - w / 2, r: x + w / 2, t: b - hh, b: b };
+      // Each pass clears every chip it met (it only ever goes up), so one pass per placed chip is the most it can take.
+      for (var pass = 0; pass <= placed.length; pass++) {
+        var hit = null;
+        for (var k = 0; k < placed.length; k++) {
+          var q = placed[k];
+          if (r.l < q.r && q.l < r.r && r.t < q.b && q.t < r.b && (!hit || q.t < hit.t)) hit = q;
+        }
+        if (!hit) break;
+        r.b = hit.t - GAP;
+        r.t = r.b - hh;
+      }
+      placed.push(r);
+      out[i] = b - r.b;
+    }
+    return out;
+  }
+
+  /**
    * The pure parts of a world: the Garden node's `world` (for the kit gate) and this kit's `exports`. P109 ISL-013: garden-3d-kit
    * draws the same world and reads these through `Noodl.getModule('garden-kit')` (its manifest `requires` this kit, so it loads
    * after it on every loader) — one copy, where it used to keep its own and walk `__noodl_modules` for this one.
    */
-  var WORLD = { parseMap: parseMap, parseThings: parseThings, parseRobots: parseRobots, robotPlaces: robotPlaces, pillSides: pillSides, walkTiles: walkTiles, stepFacing: stepFacing, rose: rose, DEFAULT_LEGEND: DEFAULT_LEGEND, KINDS: KINDS, rockSize: rockSize, loadOf: loadOf, wholeOf: wholeOf, METER_ICONS: METER_ICONS, job: JOB_LOOK };
+  var WORLD = { parseMap: parseMap, parseThings: parseThings, parseRobots: parseRobots, robotPlaces: robotPlaces, pillSides: pillSides, chipLifts: chipLifts, walkTiles: walkTiles, stepFacing: stepFacing, rose: rose, DEFAULT_LEGEND: DEFAULT_LEGEND, KINDS: KINDS, rockSize: rockSize, loadOf: loadOf, wholeOf: wholeOf, METER_ICONS: METER_ICONS, job: JOB_LOOK };
 
   /** @type {import('./types/node-kit').ReactNodeDefinition} */
   var Garden = {
@@ -5186,6 +5227,27 @@ var gardenKitBlocks = (function () {
           for (var q = 0; q < names.length; q++) {
             if (up[q]) names[q].setAttribute('data-up', '1');
             else if (names[q].hasAttribute('data-up')) names[q].removeAttribute('data-up');
+          }
+          // P109-S43-SECONDVISIT: on a plot (not the island's compact bars) a meter chip that would cover another goes up
+          // over it (chipLifts, as Garden 3D does). A chip is wider than its tile, so the spa's two parts' chips met. Each
+          // is read where its tile puts it (its rect less the lift it already has); the DOM is written only when a lift
+          // changes.
+          var chips = el.getAttribute('data-wide') === '1' ? [] : el.querySelectorAll('.gd-meter');
+          var wr = el.getBoundingClientRect(), scale = el.offsetWidth > 0 ? wr.width / el.offsetWidth : 1;
+          if (!(scale > 0)) scale = 1;
+          var boxes = [];
+          for (var c = 0; c < chips.length; c++) {
+            var cr = chips[c].getBoundingClientRect(), had = chips[c].__gdLift || 0;
+            boxes.push({ x: ((cr.left + cr.right) / 2 - wr.left) / scale, bottom: (cr.bottom - wr.top) / scale + had, w: cr.width / scale, h: cr.height / scale });
+          }
+          var lifts = chips.length > 1 ? chipLifts(boxes) : [];
+          for (var ci = 0; ci < chips.length; ci++) {
+            var ch = chips[ci], lift = Math.round((lifts[ci] || 0) * 10) / 10;
+            if ((ch.__gdLift || 0) === lift) continue;
+            ch.__gdLift = lift;
+            ch.style.marginTop = lift ? -lift + 'px' : '';
+            if (lift) ch.setAttribute('data-lift', lift.toFixed(1));
+            else ch.removeAttribute('data-lift');
           }
         });
 

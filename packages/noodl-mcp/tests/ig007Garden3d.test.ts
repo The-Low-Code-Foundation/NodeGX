@@ -1124,12 +1124,12 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       expect(node2d().world).toBe(exported);
       expect(node().world).toBe(exported);
       expect(node().job).toBe(exported.job);
-      for (const k of ['parseMap', 'parseThings', 'parseRobots', 'rose', 'pillSides', 'walkTiles', 'stepFacing', 'wholeOf', 'DEFAULT_LEGEND', 'KINDS', 'METER_ICONS', 'job'])
+      for (const k of ['parseMap', 'parseThings', 'parseRobots', 'rose', 'pillSides', 'chipLifts', 'walkTiles', 'stepFacing', 'wholeOf', 'DEFAULT_LEGEND', 'KINDS', 'METER_ICONS', 'job'])
         expect({ k, own: typeof exported[k] !== 'undefined' }).toEqual({ k, own: true });
       const built = fs.readFileSync(BUILT, 'utf8');
       // Known-firing beside the absences: the same reader finds garden-kit's definitions in its own built file.
       const built2d = fs.readFileSync(BUILT_2D, 'utf8');
-      for (const def of ['function parseMap(', 'function parseRobots(', 'var JOB_VOCABULARY = [', 'function meterOf(', 'function pillSides(']) {
+      for (const def of ['function parseMap(', 'function parseRobots(', 'var JOB_VOCABULARY = [', 'function meterOf(', 'function pillSides(', 'function chipLifts(']) {
         expect({ def, in2d: built2d.includes(def) }).toEqual({ def, in2d: true });
         expect({ def, in3d: built.includes(def) }).toEqual({ def, in3d: false });
       }

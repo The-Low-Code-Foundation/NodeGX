@@ -31,6 +31,8 @@
  *          full { go to nearest carrot patch, … } — WON while the land holds two buildings; the store: Cobble helps with
  *          the feeding program; on the island her bowl reaches 3/3 — and (s7) she gives her clover: its line is seen.
  *   METERS (s43, P108-S7-METERS3D) in each Workshop on her land, no two meter chips over the land's things cover each other.
+ *          (P109 s45: under software GL the island falls back to flat, so in --mode 3d Cobble's Workshop is the flat
+ *          Garden's — P109-S43-SECONDVISIT. Both kits are read here.)
  *   FR     390 × 844: the card's robots line and "Apprendre à Pip ici" in French.
  *   0 console errors.
  *
