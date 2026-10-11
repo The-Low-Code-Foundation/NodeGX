@@ -96,7 +96,7 @@ table says what it still has to take from the catalog until P107's three tasks l
 
 ## 5. The source after — NSP-021 §3.2, row by row (P107 s87, 2026-10-11)
 
-**Written on `c3fa9d3f5` + s87's commit.** §1's sentence *"`@nodegx/node-spec` is read by nothing in the editor or the MCP
+**Written on `c3fa9d3f5` + s87's commits (`ab494b0c2`, `a8faa0995`).** §1's sentence *"`@nodegx/node-spec` is read by nothing in the editor or the MCP
 server"* stopped being true at NSP-018 (s72–s77: the catalog takes descriptions and rules from the spec, gated) and
 NSP-020 R19 (s85–s86: the MCP draws ports from the spec and checks wires with them). For each row of §2: the spec field
 that answers it for a specced node (108 specs over 127 spec files), what the MCP server reads for it NOW, and what is
@@ -121,7 +121,7 @@ left. "Editor-only" is a row the spec should not answer, with the reason.
 | a parameter's default | `default`; `drawnDefault` where the editor shows another (NSP-020 s82) | catalog `default` | ✅ for specced nodes (parity-gated) |
 | the widget | none | — | **editor-only**: the shape → widget table (`widgets.ts`) is the editor's |
 | hidden / conditional ports | `when(params)` on 448 ports (NSP-020 L2), equal to the catalog's conditions by oracle (b) | the validator's evaluator over the CATALOG's conditions (`portConditions.ts`) | **reach 17,772 nodes of 41 types in 128 projects — but oracle (b) proves both give one answer**, so moving the source changes no output; do it when the catalog stops carrying conditions |
-| ports that exist only once the node runs | `derived.inputs/outputs(params, context)` + `PortContext` → `drawnPorts` (NSP-020); the context from `@nodegx/project-contract` `portContextFor` | **the spec**, for `DRAWN_PORT_TYPES` (40 types): `get_component`'s `drawnPorts` and the wire check (R19). **s87 added Navigate** (below) | Cloud Function (oracle (c), its `out-*` padding is L1 work); the HTTP Request's Output Fields; NSP-022's 17 |
+| ports that exist only once the node runs | `derived.inputs/outputs(params, context)` + `PortContext` → `drawnPorts` (NSP-020); the context from `@nodegx/project-contract` `portContextFor` | **the spec**, for `DRAWN_PORT_TYPES` (41 types): `get_component`'s `drawnPorts` and the wire check (R19). **s87 added Navigate and Cloud Function** (below) | the HTTP Request's Output Fields; Router (P107-S79-ADAPTERLABEL); NSP-022's 17 |
 | a component instance's ports | none (not a node type) — `@nodegx/project-contract` `portContextFor`'s `components` (s85) types them from the wires as the editor does | the validator's `componentInterface` | ✅ in the contract package, which AC4 allows |
 | may these two ports connect (typecasts) | none | `CatalogIndex.isTypeCompatible` — which **differs** from the editor's table (§2) | **owed — NSP-021's own field**, and the first place two editors disagree today |
 | inspect / preview text | `inspect(state, world)` on 28 specs | — (no running node) | needs a running instance; a second editor shows it only with a runtime |
@@ -136,11 +136,11 @@ left. "Editor-only" is a row the spec should not answer, with the reason.
 | adapter knowledge the MCP uses | nodes | wires to its minted ports | the spec |
 |---|---|---|---|
 | Navigate (`RouterNavigateAdapter`): Router, Target Page, `pm-*` | 468 in 44 projects | 74 `pm-*` | **✅ s87** — `derived.inputs` draws them from `routers` + `components`; graded by oracle (c) |
-| Cloud Function (`CloudFunctionAdapter`): Function, `in-*`, `out-*` | 153 in 24 | 266 `in-*`, 27 `out-*` | owed — its `out-*` outputs are padded with `RESULT_FIELDS` (a fixture); the L1 recipe |
+| Cloud Function (`CloudFunctionAdapter`): Function, `in-*`, `out-*` | 153 in 24 | 266 `in-*`, 27 `out-*` | **✅ s87** — `derived.inputs/outputs` from `components`; the `RESULT_FIELDS` padding replaced by `onWire` + `hasOutput` (the L1 recipe, no trace moved) |
 | Page Inputs (`PageInputsAdapter`): `pm-*` outputs | 60 in 28 | 65 | ✅ already drawn (oracle (a): the runtime's hook announces the same) |
-| `derivedPortTargets.ts` (the validator's DEF-002 check, built on the adapters' `parseNameList`) | — | the 74 + 266 + 27 above | still the adapters' reader; the spec's draw now says the same for Navigate (oracle (c)) |
+| `derivedPortTargets.ts` (the validator's DEF-002 check, built on the adapters' `parseNameList`) | — | the 74 + 266 + 27 above | still the adapters' reader — the one refusal of an undeclared `pm-` / `in-` / `out-` (the spec's draw ∪ minted accepts any prefixed name a wire mints); the spec's draw says the same names (oracle (c)) |
 
-**s87's build — the first question moved: "what ports does this Navigate node have?"** `router-navigate.ts`
+**s87's build — two questions moved: "what ports does this Navigate / Cloud Function have?"** Navigate first: `router-navigate.ts`
 `derived.inputs` = the adapter's `updatePortsForNode` over the context (`needs: ['routers', 'components']`); at play the
 context has no Routers and nothing is drawn, so no trace moved. `ADAPTER_GRADED_TYPES` (`drawn-port-types.ts`) names the
 types oracle (c) grades; `DRAWN_PORT_TYPES` holds them, and the runtime parity test excludes them from its own table.
@@ -148,4 +148,10 @@ Oracle (c) — `noodl-editor/tests-unit/nsp-020/adapter-ports.test.ts` — runs 
 made from each saved project and lays its `setDynamicPorts` over `drawnPorts` with `portContextFor`'s context: 5
 synthetic projects, the committed corpus (86 projects, 140 nodes, 24 with page parameters) and Richard's (201 projects,
 **463 nodes, 94 with page parameters, 0 different**; 14 nodes pinned: a project with no Router, where the adapter draws an
-empty Target picker and the spec nothing).
+empty Target picker and the spec nothing). Then Cloud Function (`a8faa0995`): the picker and `in-*` from the called
+function's Request nodes, `out-*` (`onWire`) from its Response nodes; at play an `out-` exists on a wire and a result is
+sent where `hasOutput`, as the runtime does (:219-228, :325) — the nine scenarios whose traces show a result name it in
+`wiredOutputs`, and all 19 traces stayed byte-identical. Oracle (c) over Richard's projects: **621 nodes (158 Cloud
+Function), 228 with parameter ports, 0 different.** Planted breaks (five, each red): Navigate's query parameters
+dropped, its Router picker with one Router, its unset Router not read as the first; Cloud Function's results read from
+the Request nodes, its picker over every component.

@@ -753,3 +753,14 @@ Whether it should is Richard's (R19 named the agent server); the false-refusal c
 
 **The whole MCP suite, after the commit:** 185 / 194 files, 3866 / 3880 tests. The 9 files that fail (14 tests) fail the
 same with the check made inert (`drawnPortCheck` answering `undefined`), so none is R19's.
+
+### 6.11 s87 (2026-10-11, Opus) — oracle (c): Navigate and Cloud Function, graded by their editor adapters
+
+Built under NSP-021 (its §6.1 has the readings): `noodl-editor/tests-unit/nsp-020/adapter-ports.test.ts` runs the REAL
+`RouterNavigateAdapter` and `CloudFunctionAdapter` over a fake project model made from each saved project and lays what
+they hand `setDynamicPorts` over `drawnPorts` with `portContextFor`'s context — 621 nodes in Richard's 201 projects,
+0 different. Both specs draw from the project now (`ab494b0c2`, `a8faa0995`); Cloud Function's `RESULT_FIELDS` padding is
+gone the L1 way (`onWire`, `discoverOutput`, `hasOutput`; 19 / 19 traces byte-identical). `ADAPTER_GRADED_TYPES` names
+the types oracle (c) grades; both are in `DRAWN_PORT_TYPES` (41). **Oracle (c) did not wait on P107-S79-ADAPTERLABEL:**
+the adapters it needed were read directly. The label (Router, Query Records, Filter Records) stays open; Router is the
+one type still "no view" because of it.

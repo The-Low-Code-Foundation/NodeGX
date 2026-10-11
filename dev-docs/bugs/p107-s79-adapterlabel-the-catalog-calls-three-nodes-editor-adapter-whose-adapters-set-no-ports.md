@@ -34,3 +34,11 @@ catalog, not the catalog against the editor).
 `registeradapters.ts` plus a grep for the port-setting call, or keep the table and add a test in `noodl-editor/
 tests-unit` that fails when a listed adapter sets no ports or an unlisted one does. NSP-021's knowledge census is the
 natural owner; NSP-020's oracle (c) (editor adapters vs `portsOf`) needs the true list first.
+
+**s87 (P107 NSP-021, 2026-10-11) — no longer blocks oracle (c).** Oracle (c) read the adapters that DO set ports
+directly (`RouterNavigateAdapter`, `CloudFunctionAdapter`; `noodl-editor/tests-unit/nsp-020/adapter-ports.test.ts`), and
+both types now draw from the spec. What the wrong label still costs: the ledger counts **Router** "no view" (its only
+dynamic ports are its data attributes, which its spec draws from the params; the extra `runtime-discovered` mechanism
+comes from the source-text heuristic in `build-catalog.js` `hasRuntimeDiscoveredPorts` :68-76, not read further), and
+`get_node_type`'s description for Query Records / Filter Records still names an adapter. Reach of fixing it: 1 ledger
+row; 0 wires in Richard's projects reach a Router dynamic port.

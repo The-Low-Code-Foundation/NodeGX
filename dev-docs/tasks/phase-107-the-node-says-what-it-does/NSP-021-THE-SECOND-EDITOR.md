@@ -2,7 +2,8 @@
 
 **Opened 2026-09-30 (s1), from Richard's ruling that the editor is a target (README §1, R6).**
 **Depends on NSP-018, NSP-020.** The phase's last thesis test, beside NSP-006.
-**Status: 📋 not started.**
+**Status: 🟡 s87 — AC1 written (the census's §5 "source after"); §3.2 begun: Navigate and Cloud Function draw their ports
+from the spec, graded by their editor adapters (oracle (c)).**
 **Shared with phase 112 (2026-10-02):** OWN-000 builds §3.1's census here, in this folder, and OWN-006 runs §3.3's
 round trip as two adapters in its editor suite. Build each once; both phases cite it.
 
@@ -54,4 +55,49 @@ and per-instance ports from a viewer or from editor-side adapters.
 
 ## 6. Built
 
-*(empty)*
+### 6.1 s87 (2026-10-11, Opus) — AC1's table, and the two adapters the agent server still leaned on
+
+**AC1.** [The census §5](NSP-021-EDITOR-KNOWLEDGE-CENSUS.md) gives every §2 row its source after: the spec field that
+answers it for a specced node, what the MCP server reads now, and what is left — owed to the spec, or editor-only with
+the reason (the picker list, category, colour, tooltip, the widget table, kit provenance: presentation or packaging, not
+behaviour). NSP-021's own three fields are still owed: `allowAsChild` (with visual-ness), `typecasts` (where the MCP's
+`isTypeCompatible` already differs from the editor's table) and display name / deprecation at node level.
+
+**§3.2, the first rows moved — measured first** over 128 of Richard's projects + the templates:
+
+| adapter knowledge | nodes | wires to its minted ports | s87 |
+|---|---|---|---|
+| Navigate (`RouterNavigateAdapter`) | 468 in 44 projects | 74 `pm-*` | ✅ `ab494b0c2` |
+| Cloud Function (`CloudFunctionAdapter`) | 153 in 24 | 266 `in-*`, 27 `out-*` | ✅ `a8faa0995` |
+| conditional ports (catalog conditions) | 17,772 of 41 types | — | not moved: oracle (b) proves the spec's `when` and the catalog agree, so no output changes |
+
+- **Navigate** — `derived.inputs` from `routers` + `components` as the adapter draws them (Router picker at two or more
+  Routers, Target over the chosen Router's pages, `pm-` per name in the target page's Page Inputs, typed `string`). At
+  play the context has no Routers: nothing drawn, no trace moved.
+- **Cloud Function** — the Function picker and `in-*` from the called function's Request nodes, `out-*` (`onWire`) from
+  its Response nodes. Its `RESULT_FIELDS` padding went the L1 way: `discoverOutput` + `world.hasOutput`, the nine
+  scenarios whose HEAD traces show a result naming it in `wiredOutputs` — 19 / 19 traces byte-identical by name.
+- **Oracle (c)** — `noodl-editor/tests-unit/nsp-020/adapter-ports.test.ts`: the REAL adapters over a fake project model
+  made from each saved project, against `drawnPorts` with `portContextFor`'s context. 7 synthetic projects; Richard's 201
+  (`NSP_PORT_PROJECTS`): **621 nodes, 228 with parameter ports, 0 different**; 14 pinned (a Navigate in a project with no
+  Router: the adapter draws an empty Target picker). Five planted breaks, each red. `ADAPTER_GRADED_TYPES` is held to the
+  test's adapters both ways; the runtime parity test holds the rest of `DRAWN_PORT_TYPES` to oracle (a).
+- **What a person sees:** `get_component` draws both types' ports from the project instead of the last list an editor
+  saved. The wire check refuses nothing new (no wire in Richard's projects reaches a Navigate port outside the catalog,
+  `pm-`, `target`, `router`; a Cloud Function's other names were already refused by ISL-042's rule); an undeclared `pm-` /
+  `in-` / `out-` is still DEF-002's refusal (`derivedPortTargets.ts`, the adapters' reader).
+- Ledger: ports 130 → 132 of 147.
+
+**Gates (s87):** oracle (c) 10 / 10 (committed corpus and Richard's); runtime `nsp-020-ports-parity` 325 / 325 (its
+DRAWN check planted red with the adapter list emptied); node-spec `ports` + `spec-ledger` 76 / 76; interpreter batch with
+mutants at seeds 13 and 20728 (Navigate, Cloud Function); runtime conformance at seed 20737 (Navigate, Page Inputs, Cloud
+Function: 200 / 200, 0 divergences); both graph suites (128, 96); `spec-golden:check`, `spec-ledger:check` 0; MCP
+`nsp020DrawnPorts` + `nsp020WireCheck` + `isl042CloudFunctionPorts` + `def011ScriptPortsDrive` + `toolDisclosure`
+(surface 8,279 / 8,280, unchanged); `tsc` node-spec 0, `typecheck:editor-tests` 0. MCP `tsc`: 3 errors, all in
+`tests/tpl010Template.test.ts`, a peer's uncommitted edit. **Not run:** the whole MCP suite, `test:main`, `test:ci`.
+
+**Left (s88 on):** Router's catalog labels (P107-S79-ADAPTERLABEL: its only dynamic ports are data attributes its spec
+already draws; the "runtime-discovered" label comes from a source-text heuristic, `build-catalog.js` :68-76); the
+validator's `derivedPortTargets` reading the spec's draw instead of the adapters' reader (the refusal of an undeclared
+prefixed name); then NSP-021's own fields (`typecasts` first: the MCP and the editor disagree today); §3.3's round trip
+is P112 OWN-006's.
