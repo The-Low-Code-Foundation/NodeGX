@@ -42,6 +42,10 @@
  *
  * Usage: `node kit-extract.cjs <projectDirectory>` → JSON on stdout.
  */
+// 🔴 BEFORE ANYTHING ELSE: stdout is this child's ANSWER, one JSON document, and a kit's `index.js` can log at
+// import. Logs go to stderr from here on (P109 ISL-042, P78 D84; see the module). An import, so it runs before the
+// shim below: imports run in the order they are written.
+import '../childLogsToStderr';
 import '../../../../scripts/node-catalog/dom-shim';
 
 const path = require('path');
