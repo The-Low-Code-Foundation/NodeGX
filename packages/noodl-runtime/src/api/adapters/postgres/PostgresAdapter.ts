@@ -34,7 +34,7 @@
  */
 
 import { declaredProperties, inferType } from '../local-sql/schemaCommon';
-import { SERIES_TABLE_DDL, SERIES_TAKE_SQL, formatSeries, seriesColumns, seriesName, seriesNow, seriesPeriod } from '../series';
+import { SERIES_RAISE_SQL, SERIES_TABLE_DDL, SERIES_TAKE_SQL, formatSeries, seriesColumns, seriesName, seriesNow, seriesPeriod, seriesRaises } from '../series';
 import { translatePgError } from './errors';
 import { PgSchemaManager } from './PgSchemaManager';
 import { DEFAULT_DATA_POOL_MAX, PgConnectionPool, type PgPoolSaturation } from './pool';
@@ -624,26 +624,38 @@ export class PostgresAdapter {
         const { sql, params } = QueryBuilder.buildInsert({ collection: options.collection, data }, recordId);
         await q.run(sql, params);
       };
-      const series = seriesColumns(this._sm().getTableSchema(options.collection)).filter((c) => {
+      // A carried number in the series' own look raises the counter in the insert's transaction
+      // (SERIESCARRY); a handed-out number that collides is named in the refusal (SERIESMSG).
+      const tableSchema = this._sm().getTableSchema(options.collection);
+      const series = seriesColumns(tableSchema).filter((c) => {
         const v = data[c.name];
         return v === undefined || v === null || v === '';
       });
-      if (!series.length) await insert(this._pool());
+      const raises = seriesRaises(tableSchema, options.collection, data);
+      if (!series.length && !raises.length) await insert(this._pool());
       else {
         await this._seriesTable();
         const at = seriesNow();
+        const filled: Record<string, unknown> = {};
         const take = async (q: { queryOne<T>(sql: string, params?: readonly unknown[]): Promise<T | undefined> }, c: (typeof series)[number]): Promise<void> => {
           const row = await q.queryOne<{ issued: string | number }>(SERIES_TAKE_SQL, [seriesName(options.collection, c.name), seriesPeriod(c.series, at)]);
-          data[c.name] = formatSeries(c.series, Number(row!.issued), at);
+          data[c.name] = filled[c.name] = formatSeries(c.series, Number(row!.issued), at);
         };
         for (const c of series) if (!c.series.gapFree) await take(this._pool(), c);
         const held = series.filter((c) => c.series.gapFree);
-        if (held.length)
-          await this._pool().transaction(async (tx) => {
-            for (const c of held) await take(tx, c);
-            await insert(tx);
-          });
-        else await insert(this._pool());
+        try {
+          if (held.length || raises.length)
+            await this._pool().transaction(async (tx) => {
+              for (const c of held) await take(tx, c);
+              for (const r of raises) await tx.run(SERIES_RAISE_SQL, [r.name, r.period, r.next]);
+              await insert(tx);
+            });
+          else await insert(this._pool());
+        } catch (e) {
+          const err = translatePgError(e);
+          err.message = QueryBuilder.uniqueConstraintWithValues(err.message, filled);
+          throw err;
+        }
       }
 
       const createdRow = await this._selectById(options.collection, recordId);
@@ -694,6 +706,13 @@ export class PostgresAdapter {
       if (changed === 0) {
         options.error('Object not found');
         return;
+      }
+
+      // P116-S22-SERIESCARRY: as on SQLite — a number edited into the series' own look raises its counter.
+      const raises = seriesRaises(this._sm().getTableSchema(options.collection), options.collection, options.data);
+      if (raises.length) {
+        await this._seriesTable();
+        for (const r of raises) await this._pool().run(SERIES_RAISE_SQL, [r.name, r.period, r.next]);
       }
 
       const updatedRow = await this._selectById(options.collection, recordId);

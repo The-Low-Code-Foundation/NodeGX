@@ -1348,10 +1348,22 @@ export function clientObjectIdProblem(message: string): 'taken' | 'invalid' | nu
  *
  * Returns `null` for every other error, including a failed PRIMARY KEY, which
  * is the objectId case {@link clientObjectIdProblem} already owns.
+ *
+ * `values` is there only when the store filled the colliding field itself (a
+ * series number, P116-S22-SERIESMSG) — the one value the body never carried.
+ * See {@link uniqueConstraintWithValues}.
  */
-export function uniqueConstraintProblem(message: string): { collection: string; fields: string[] } | null {
-  const m = /^UNIQUE constraint failed: (.+)$/.exec(String(message || '').trim());
+export function uniqueConstraintProblem(message: string): { collection: string; fields: string[]; values?: Record<string, unknown> } | null {
+  const m = /^UNIQUE constraint failed: (.+?)(?:; values (\{.*\}))?$/.exec(String(message || '').trim());
   if (!m) return null;
+  let values: Record<string, unknown> | undefined;
+  if (m[2]) {
+    try {
+      values = JSON.parse(m[2]);
+    } catch {
+      return null;
+    }
+  }
 
   const parts = m[1].split(',').map((s) => s.trim());
   const collections = new Set<string>();
@@ -1366,7 +1378,21 @@ export function uniqueConstraintProblem(message: string): { collection: string; 
   // The PRIMARY KEY is `objectId`; that refusal has its own, earlier reading.
   if (fields.length === 1 && fields[0] === 'objectId') return null;
 
-  return { collection: [...collections][0], fields };
+  return values ? { collection: [...collections][0], fields, values } : { collection: [...collections][0], fields };
+}
+
+/**
+ * P116-S22-SERIESMSG — a unique refusal of a write the store filled in itself (a series number it
+ * handed out): the message carries the values `filled` holds for the colliding fields, so the 409
+ * can name the number. Any other message, or one whose fields the store did not fill, is returned
+ * as it was.
+ */
+export function uniqueConstraintWithValues(message: string, filled: Record<string, unknown>): string {
+  const problem = uniqueConstraintProblem(message);
+  if (!problem || problem.values) return message;
+  const values: Record<string, unknown> = {};
+  for (const f of problem.fields) if (Object.prototype.hasOwnProperty.call(filled, f)) values[f] = filled[f];
+  return Object.keys(values).length ? `${message}; values ${JSON.stringify(values)}` : message;
 }
 
 /**

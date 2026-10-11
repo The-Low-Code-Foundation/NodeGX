@@ -9,8 +9,9 @@
  * `/classes`, the upsert, `/api`, the batch; the admin may bring one, AC2), the create's answer
  * carrying the number, the year and the month rolling on the backend's clock (UTC), `_Series` unread
  * by anyone but the admin (AC4), a series that cannot be kept refused when the table is declared —
- * and three mutants, each shown caught: the restart ignored, a gap-free number taken outside the
- * insert, and the doors' refusal taken out.
+ * a number the admin brings in the series' own look moving the counter past it (SERIESCARRY) — and four
+ * mutants, each shown caught: the restart ignored, a gap-free number taken outside the insert, the doors'
+ * refusal taken out, and the counter left under a number brought (whose 409 must name it, SERIESMSG).
  */
 import { execFileSync } from 'child_process';
 import * as fs from 'fs';
@@ -154,6 +155,23 @@ for (const engine of engines) {
       const r = await make('Invoice', { number: 'INV-2019-0042', amount: 3 }, admin);
       expect(r.status).toBe(201);
       expect((await req<Row>('GET', `/classes/Invoice/${String(r.json.objectId)}`)).json.number).toBe('INV-2019-0042');
+    });
+
+    it('🔴 a number the admin brings in the series’ own look moves the counter past it: three people make one each after T-0003, and every save holds (P116-S22-SERIESCARRY)', async () => {
+      expect((await table('Chit', [{ name: 'ref', type: 'String', series: { format: 'T-{####}' } }])).status).toBe(200);
+      expect((await make('Chit', { ref: 'T-0003' }, admin)).status).toBe(201);
+      const made = [await make('Chit'), await make('Chit'), await make('Chit')];
+      expect(made.map((r) => [r.status, r.json.ref])).toEqual([[201, 'T-0004'], [201, 'T-0005'], [201, 'T-0006']]);
+    });
+
+    it('🔴 mutant — the counter not moved by a number brought: the third person is handed T-0003 and refused, and the 409 names it (P116-S22-SERIESMSG)', async () => {
+      jest.spyOn(series, 'seriesRaises').mockReturnValue([]);
+      expect((await table('Chit2', [{ name: 'ref', type: 'String', series: { format: 'T-{####}' } }], [{ fields: ['ref'], unique: true }])).status).toBe(200);
+      expect((await make('Chit2', { ref: 'T-0003' }, admin)).status).toBe(201);
+      const made = [await make('Chit2'), await make('Chit2'), await make('Chit2')];
+      expect(made.map((r) => r.status)).toEqual([201, 201, 409]);
+      expect(made[2].json).toMatchObject({ field: 'ref', value: 'T-0003' });
+      expect(String(made[2].json.error)).toContain('"ref" is unique in "Chit2" and "T-0003" is already used');
     });
 
     it('ten creates in flight at once get ten different numbers, in a row', async () => {

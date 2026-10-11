@@ -11,7 +11,7 @@
 import { resolveEngine, type EngineDatabase, type ResolvedEngine } from './engine';
 import { registerSqlFunctions } from './sqlFunctions';
 import { declaredProperties, inferType, requiredWithoutDefault } from './schemaCommon';
-import { SERIES_TABLE_DDL, SERIES_TAKE_SQL, formatSeries, seriesColumns, seriesName, seriesNow, seriesPeriod } from '../series';
+import { SERIES_RAISE_SQL, SERIES_TABLE_DDL, SERIES_TAKE_SQL, formatSeries, seriesColumns, seriesName, seriesNow, seriesPeriod, seriesRaises } from '../series';
 import type { AclContext } from './QueryBuilder';
 
 import EventEmitter = require('../../../events');
@@ -1055,26 +1055,39 @@ class LocalSQLAdapter {
 
       // P116 ONT-015: a series field the record does not carry is handed out here. A gap-free one is
       // taken inside the insert's own transaction (a refused insert gives it back); the rest first.
-      const series = seriesColumns(this.schemaManager?.getTableSchema(options.collection)).filter((c) => {
+      // One the record carries in the series' own look raises the counter above it, in that same
+      // transaction (P116-S22-SERIESCARRY), and a number handed out that collides is named in the
+      // refusal (P116-S22-SERIESMSG: the body never carried it).
+      const tableSchema = this.schemaManager?.getTableSchema(options.collection);
+      const series = seriesColumns(tableSchema).filter((c) => {
         const v = data[c.name];
         return v === undefined || v === null || v === '';
       });
-      if (!series.length) insert();
+      const raises = seriesRaises(tableSchema, options.collection, data);
+      if (!series.length && !raises.length) insert();
       else {
         this.db.exec(SERIES_TABLE_DDL);
         const at = seriesNow();
+        const filled: Record<string, unknown> = {};
         const take = (c: (typeof series)[number]): void => {
           const row = this.db.prepare(SERIES_TAKE_SQL).get(seriesName(options.collection, c.name), seriesPeriod(c.series, at)) as { issued: number | bigint };
-          data[c.name] = formatSeries(c.series, Number(row.issued), at);
+          data[c.name] = filled[c.name] = formatSeries(c.series, Number(row.issued), at);
         };
         for (const c of series) if (!c.series.gapFree) take(c);
         const held = series.filter((c) => c.series.gapFree);
-        if (held.length)
-          this.db.transaction(() => {
-            for (const c of held) take(c);
-            insert();
-          })();
-        else insert();
+        try {
+          if (held.length || raises.length)
+            this.db.transaction(() => {
+              for (const c of held) take(c);
+              for (const r of raises) this.db.prepare(SERIES_RAISE_SQL).run(r.name, r.period, r.next);
+              insert();
+            })();
+          else insert();
+        } catch (e) {
+          // node:sqlite's error can come from another realm (a jest sandbox), so not `instanceof Error`.
+          if (e && typeof e.message === 'string') e.message = QueryBuilder.uniqueConstraintWithValues(e.message, filled);
+          throw e;
+        }
       }
 
       // Fetch the created record to get all fields
@@ -1163,6 +1176,14 @@ class LocalSQLAdapter {
       if (!result || result.changes === 0) {
         options.error('Object not found');
         return;
+      }
+
+      // P116-S22-SERIESCARRY: a number edited into the series' own look raises its counter too, or
+      // the store would later hand it out again and refuse a person's create.
+      const raises = seriesRaises(this.schemaManager?.getTableSchema(options.collection), options.collection, options.data);
+      if (raises.length) {
+        this.db.exec(SERIES_TABLE_DDL);
+        for (const r of raises) this.db.prepare(SERIES_RAISE_SQL).run(r.name, r.period, r.next);
       }
 
       // Fetch the updated record

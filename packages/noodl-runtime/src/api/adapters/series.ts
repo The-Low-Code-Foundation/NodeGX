@@ -14,7 +14,8 @@
  *
  * A delete never moves the counter, so a number is never handed out twice. A value the caller
  * sends is kept (the admin's backfill, AC2): the HTTP doors refuse it from anyone else, before
- * the store is reached (`seriesFields`).
+ * the store is reached (`seriesFields`). One in the series' own look raises the counter above it
+ * (`seriesRaises`), on a create and on an edit, inside the write's transaction.
  *
  * The period is read off the backend's clock in UTC: a person in another timezone sees the year
  * roll an hour or more off, which is a fact the brief says, not one to fix (ONT-015 §8).
@@ -110,6 +111,32 @@ export const SERIES_TAKE_SQL = `INSERT INTO "${SERIES_TABLE}" ("name", "period",
 
 /** Both engines: put a counter where the numbering left it (`setSeries`). Parameters: name, period, next. */
 export const SERIES_SET_SQL = `INSERT INTO "${SERIES_TABLE}" ("name", "period", "next") VALUES (?, ?, ?) ON CONFLICT ("name", "period") DO UPDATE SET "next" = excluded."next"`;
+
+/**
+ * Both engines: raise a counter above a number a record was given, never lower it (P116-S22-SERIESCARRY).
+ * Parameters: name, period, next.
+ */
+export const SERIES_RAISE_SQL = `INSERT INTO "${SERIES_TABLE}" ("name", "period", "next") VALUES (?, ?, ?) ON CONFLICT ("name", "period") DO UPDATE SET "next" = CASE WHEN excluded."next" > "${SERIES_TABLE}"."next" THEN excluded."next" ELSE "${SERIES_TABLE}"."next" END`;
+
+/**
+ * The counters a write must raise: for each series field `data` carries a value for that reads in
+ * the series' own look (the admin's backfill, or an edit), the period it reads in and the next
+ * number above it — `planNumbering`'s rule, one record at a time. A value in another look (`OLD-7`)
+ * counts for nothing, as it does there. Without this the counter later reaches the carried number,
+ * hands it out, and the unique rule refuses a person's create.
+ */
+export function seriesRaises(
+  schema: Parameters<typeof seriesColumns>[0],
+  collection: string,
+  data: Record<string, unknown>
+): Array<{ name: string; period: string; next: number }> {
+  const out: Array<{ name: string; period: string; next: number }> = [];
+  for (const c of seriesColumns(schema)) {
+    const held = seriesParse(c.series, data[c.name]);
+    if (held) out.push({ name: seriesName(collection, c.name), period: held.period, next: held.n + 1 });
+  }
+  return out;
+}
 
 const escapeRe = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 

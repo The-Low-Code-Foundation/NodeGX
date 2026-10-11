@@ -141,11 +141,38 @@ export const seriesCases: readonly ConformanceCase[] = Object.freeze([
   {
     id: 'series/a-number-the-store-is-given-is-kept',
     area: 'series',
-    pins: 'a create that carries its own number keeps it and does not move the counter — the store’s half of the admin’s backfill (the HTTP doors refuse it from anyone else)',
+    pins: 'a create that carries its own number keeps it, and one in another look does not move the counter — the store’s half of the admin’s backfill (the HTTP doors refuse it from anyone else)',
     async run(ctx) {
       const c = await invoices(ctx, { format: 'T-{####}' });
       eq(await numberOf(ctx, c, { number: 'OLD-7' }), 'OLD-7', 'the number brought');
       eq(await numberOf(ctx, c), 'T-0001', 'the first number handed out');
+    }
+  },
+
+  {
+    id: 'series/a-number-brought-in-its-look-moves-the-counter-past-it',
+    area: 'series',
+    pins: 'a number brought in the series’ own look (T-0003) moves the counter past it, never back (T-0002 after it moves nothing), and a create the store refuses moves nothing — the counter never reaches a number already held (P116-S22-SERIESCARRY)',
+    async run(ctx) {
+      const c = await invoices(ctx, { format: 'T-{####}' }, { uniqueCode: true });
+      eq(await numberOf(ctx, c, { number: 'T-0003', code: 'a' }), 'T-0003', 'the number brought');
+      eq(await numberOf(ctx, c, { code: 'b' }), 'T-0004', 'the number handed out after it');
+      eq(await numberOf(ctx, c, { number: 'T-0002', code: 'c' }), 'T-0002', 'a lower number brought');
+      await ctx.refused(() => ctx.create(c, { number: 'T-0020', code: 'a' }));
+      eq(await numberOf(ctx, c, { code: 'd' }), 'T-0005', 'the number after a lower one brought and a refused one');
+    }
+  },
+
+  {
+    id: 'series/a-number-edited-in-its-look-moves-the-counter-past-it',
+    area: 'series',
+    pins: 'a record whose number is changed to one in the series’ own look (an admin’s correction) moves the counter past it, as a create that brought it would (P116-S22-SERIESCARRY)',
+    async run(ctx) {
+      const c = await invoices(ctx, { format: 'T-{####}' });
+      const first = await ctx.create(c, {});
+      eq(first.number, 'T-0001', 'the first number');
+      await ctx.save(c, String(first.objectId), { number: 'T-0002' });
+      eq(await numberOf(ctx, c), 'T-0003', 'the number handed out after the edit');
     }
   },
 

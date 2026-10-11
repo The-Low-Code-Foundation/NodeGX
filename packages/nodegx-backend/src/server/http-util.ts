@@ -299,11 +299,14 @@ export function notWhileToHttp(e: unknown): HttpError | null {
  * array in the same order).
  */
 export function uniqueViolationToHttp(message: string, values?: Record<string, unknown>): HttpError | null {
-  const conflict = QueryBuilder.uniqueConstraintProblem(message) as { collection: string; fields: string[] } | null;
+  const conflict = QueryBuilder.uniqueConstraintProblem(message) as { collection: string; fields: string[]; values?: Record<string, unknown> } | null;
   if (!conflict) return null;
 
+  // P116-S22-SERIESMSG: a value the store filled in itself (a series number) is in the message; the
+  // body never carried it.
   const { collection, fields } = conflict;
-  const value = fields.map((f) => (values ? values[f] : undefined));
+  const filled = conflict.values || {};
+  const value = fields.map((f) => (f in filled ? filled[f] : values ? values[f] : undefined));
   const shown = fields.length === 1 ? value[0] : value;
   return new HttpError(
     409,

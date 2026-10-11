@@ -165,9 +165,9 @@ const numbers = async (b: Backend, ids: string[]): Promise<unknown[]> =>
 const migrate = (b: Backend, p: MigrationPlan, run: boolean) =>
   b.req<WorldMigrateResponse & { error?: string }>('POST', '/admin/world/migrate', { plan: p, ...(run ? { run: true, backupTakenElsewhere: 'a copy in the ops drive', acceptLosses: true } : {}) });
 /** A person's create: the store hands out the number, and the 201 says it. */
-async function personMakes(b: Backend): Promise<{ status: number; number?: unknown; error?: unknown }> {
-  const r = await b.req<{ number?: unknown; error?: unknown }>('POST', '/classes/Invoice', { amount: 1 }, b.ann);
-  return { status: r.status, number: r.json.number, error: r.json.error };
+async function personMakes(b: Backend): Promise<{ status: number; number?: unknown; error?: unknown; value?: unknown }> {
+  const r = await b.req<{ number?: unknown; error?: unknown; value?: unknown }>('POST', '/classes/Invoice', { amount: 1 }, b.ann);
+  return { status: r.status, number: r.json.number, error: r.json.error, ...(r.json.value !== undefined ? { value: r.json.value } : {}) };
 }
 
 // ------------------------------------------------------------------ the plans --
@@ -287,7 +287,9 @@ for (const engine of ['sqlite', 'postgres'] as const) {
         expect((await migrate(b, NUMBER_ADDED, true)).json.ran).toBe(true);
         const next = await personMakes(b);
         expect([next.status, next.number]).toEqual([409, undefined]);
-        expect(String(next.error)).toMatch(/"number" is unique in "Invoice"/);
+        // P116-S22-SERIESMSG: the refusal names the number the store handed out, which the body never carried.
+        expect(String(next.error)).toContain(`"number" is unique in "Invoice" and "INV-${year}-0001" is already used`);
+        expect(next.value).toBe(`INV-${year}-0001`);
       } finally {
         await b.stop();
       }
