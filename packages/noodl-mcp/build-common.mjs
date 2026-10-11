@@ -40,5 +40,10 @@ export const common = {
    * sibling package. The editor already carries this alias in its own three
    * resolvers for the same reason; this package is now the second consumer.
    */
-  alias: { '@nodegx/export': path.join(here, '..', 'nodegx-export', 'src', 'index.ts') }
+  alias: {
+    '@nodegx/export': path.join(here, '..', 'nodegx-export', 'src', 'index.ts'),
+    // NSP-020 R19 — the specs by source, as the editor maps them (its tsconfig, jest and webpack): the package's `main` is a
+    // `dist/` build that can be older than the specs, and `get_component`'s drawn ports must be today's
+    '@nodegx/node-spec': path.join(here, '..', 'nodegx-node-spec', 'src', 'browser.ts')
+  }
 };

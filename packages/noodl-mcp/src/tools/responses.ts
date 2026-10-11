@@ -35,6 +35,7 @@ import type {
 import type { ToolError } from '../errors';
 import type { NodeIdRemap } from '../project/nodeIds';
 import type { ComponentListRow, Usage } from '../project/ProjectStore';
+import type { DrawnPort } from '../specPorts';
 import type { StructuralFailure, WriteValidation } from '../validate';
 
 /**
@@ -223,6 +224,7 @@ export interface ListComponentsResponse {
   note?: string;
 }
 
+
 export interface GetComponentResponse {
   path: string;
   legacyName: string;
@@ -240,6 +242,12 @@ export interface GetComponentResponse {
   connections: ConnectionV2[];
   /** Only when `include_usages` was set. */
   usages?: Usage[];
+  /**
+   * NSP-020 R19 — by node id, the ports each node's spec draws NOW from its settings and the project (name, plug, type),
+   * for the node types whose spec is graded against the runtime (`DRAWN_PORT_TYPES`). A node's saved `dynamicports` is
+   * the last list a running editor saved and can be out of date; where the two differ, this one is the node's ports.
+   */
+  drawnPorts?: Record<string, DrawnPort[]>;
 }
 
 export interface SearchMatch {

@@ -16,6 +16,8 @@ module.exports = {
   // `build.mjs`'s esbuild alias.
   moduleNameMapper: {
     '^@nodegx/export$': '<rootDir>/../nodegx-export/src/index.ts',
-    '^@nodegx/export/(.*)$': '<rootDir>/../nodegx-export/src/$1'
+    '^@nodegx/export/(.*)$': '<rootDir>/../nodegx-export/src/$1',
+    // NSP-020 R19 — the specs by source, as build-common.mjs aliases them
+    '^@nodegx/node-spec$': '<rootDir>/../nodegx-node-spec/src/browser.ts'
   }
 };

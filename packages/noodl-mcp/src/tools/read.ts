@@ -36,6 +36,7 @@ import { userProfileForPrompt } from '../userProfile';
 import { guarded, jsonResult } from './util';
 import { projectVisualPredicate } from './author';
 import { readVisualRoots } from '../visualRoots';
+import { drawnPortsFor } from '../specPorts';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { kitDiagnostics } = require('@nodegx/kit-catalog');
@@ -343,6 +344,9 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
         connections: stored.files.connections.connections,
         ...(args.include_usages ? { usages: store.findUsages(stored.key) } : {})
       };
+      // NSP-020 R19 — the ports the specs draw now, beside the saved lists (a result field: no tool-surface cost)
+      const drawn = drawnPortsFor(store, stored.files.nodes.nodes);
+      if (Object.keys(drawn).length) payload.drawnPorts = drawn;
       return jsonResult(payload);
     })
   );
