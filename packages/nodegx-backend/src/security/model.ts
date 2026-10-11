@@ -15,7 +15,7 @@
  * @module nodegx-backend/security/model
  */
 
-import { pathProblem, type CollectionReach, type OnlyWhileRule, type PathHop, type Reach } from '@noodl/backend-contract';
+import { pathProblem, type CollectionReach, type OnlyWhileMove, type OnlyWhileRule, type PathHop, type Reach } from '@noodl/backend-contract';
 import type { RateLimitPolicy } from '../ops/model';
 
 // ============================================================================
@@ -318,6 +318,24 @@ export function ruleNarrowing(rule: RuleValue, principal: Principal): Record<str
 // Security config (security.json)
 // ============================================================================
 
+/**
+ * P116 ONT-014 — a collection's `onlyWhile` as `security.json` says it. A move's `by` is a rule
+ * value; {@link onlyWhileFor} decides it for one caller (`OnlyWhileMove.admits`) before the write,
+ * as {@link checkClp} decides a permission. `delete: "never"` is *"a sealed envelope is never
+ * deleted"* said in one word.
+ */
+export interface OnlyWhileConfig {
+  update?: Omit<OnlyWhileRule, 'moves'> & { moves?: Record<string, Record<string, OnlyWhileConfigMove>> };
+  delete?: OnlyWhileRule | 'never';
+}
+
+/** P116 ONT-014 — one old value's moves, as written: `by` is who may make them. */
+export interface OnlyWhileConfigMove {
+  to: string[];
+  by?: RuleValue;
+  says?: string;
+}
+
 export interface CollectionRules {
   permissions?: Partial<Record<ClpOp, RuleValue>>;
   creatorOwns?: boolean;
@@ -327,7 +345,7 @@ export interface CollectionRules {
    * WHEN; `permissions` says WHO) and binds every caller the row ACL binds. The facade compiles it
    * into the write itself (`AdapterFacade.heldWhile`), and a write it stops is a 409 in `says`.
    */
-  onlyWhile?: { update?: OnlyWhileRule; delete?: OnlyWhileRule };
+  onlyWhile?: OnlyWhileConfig;
   /**
    * P116 ONT-012 (R-a) — *"their company's representative reads my account, but not my two health
    * details"*. Per field, who may READ it: an ordinary rule value (path atoms included), ANDed with
@@ -455,16 +473,25 @@ function validateOnlyWhile(value: unknown): string[] {
       errors.push(`"${op}": only update and delete can depend on the record's values (a record being made has none yet)`);
       continue;
     }
+    if (op === 'delete' && rule === 'never') continue;
     if (!rule || typeof rule !== 'object' || Array.isArray(rule)) {
-      errors.push(`${op} must be an object { where, except?, says? }`);
+      errors.push(op === 'delete' ? 'delete must be "never" or an object { where, says? }' : `${op} must be an object { where?, except?, says?, moves?, frozen? }`);
       continue;
     }
     const r = rule as Record<string, unknown>;
+    const keys = op === 'update' ? ['where', 'except', 'says', 'moves', 'frozen'] : ['where', 'except', 'says'];
     for (const k of Object.keys(r)) {
-      if (k !== 'where' && k !== 'except' && k !== 'says') errors.push(`${op}: unknown key "${k}" (expected where, except, says)`);
+      if (!keys.includes(k)) errors.push(`${op}: unknown key "${k}" (expected ${keys.join(', ')})`);
     }
-    const wp = onlyWhileWhereProblem(r.where);
-    if (wp) errors.push(`${op}.${wp}`);
+    // ONT-014: an update may say its rule as moves or frozen fields alone; a delete's object form is a condition.
+    if (r.where !== undefined || op === 'delete' || (r.moves === undefined && r.frozen === undefined)) {
+      const wp = onlyWhileWhereProblem(r.where);
+      if (wp) errors.push(`${op}.${wp}`);
+    }
+    if (op === 'update') {
+      if (r.moves !== undefined) for (const err of validateMoves(r.moves)) errors.push(`update.moves${err}`);
+      if (r.frozen !== undefined) for (const err of validateFrozen(r.frozen, r.except)) errors.push(`update.frozen${err}`);
+    }
     if (r.except !== undefined) {
       if (op === 'delete') errors.push('delete.except: a delete removes every field, so nothing can be excepted');
       else if (!Array.isArray(r.except) || r.except.length === 0 || r.except.some((f) => typeof f !== 'string' || !f)) {
@@ -476,9 +503,88 @@ function validateOnlyWhile(value: unknown): string[] {
   return errors;
 }
 
-/** The `onlyWhile` a collection carries, or undefined. */
-export function onlyWhileFor(config: SecurityConfig, collection: string): CollectionRules['onlyWhile'] {
-  return config.collections[collection]?.onlyWhile;
+/** P116 ONT-014 — `update.moves`: per field, per old value (or `"*"`), `{ to, by?, says? }`. Errors start with their path. */
+function validateMoves(value: unknown): string[] {
+  if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).length === 0) {
+    return [' must be an object naming at least one field: { "<field>": { "<old value>": { "to": [...] } } }'];
+  }
+  const errors: string[] = [];
+  for (const [field, byOld] of Object.entries(value as Record<string, unknown>)) {
+    if (UNHIDEABLE_FIELDS.has(field)) errors.push(`.${field}: the record's own bookkeeping is not a value a person moves`);
+    if (!byOld || typeof byOld !== 'object' || Array.isArray(byOld) || Object.keys(byOld).length === 0) {
+      errors.push(`.${field} must be an object naming at least one old value`);
+      continue;
+    }
+    for (const [old, move] of Object.entries(byOld as Record<string, unknown>)) {
+      const at = `.${field}.${JSON.stringify(old)}`;
+      if (!move || typeof move !== 'object' || Array.isArray(move)) {
+        errors.push(`${at} must be an object { to, by?, says? }`);
+        continue;
+      }
+      const m = move as Record<string, unknown>;
+      for (const k of Object.keys(m)) if (k !== 'to' && k !== 'by' && k !== 'says') errors.push(`${at}: unknown key "${k}" (expected to, by, says)`);
+      if (!Array.isArray(m.to) || m.to.some((v) => typeof v !== 'string')) errors.push(`${at}.to must be a list of values ([] = it never moves)`);
+      else if (m.to.includes(old)) errors.push(`${at}.to names ${JSON.stringify(old)} itself: staying is not a move, and is always allowed`);
+      if (m.by !== undefined) {
+        const err = validateRuleValue(m.by, true);
+        if (err) errors.push(`${at}.by: ${err}`);
+      }
+      if (m.says !== undefined && (typeof m.says !== 'string' || !m.says.trim())) errors.push(`${at}.says must be a sentence`);
+    }
+  }
+  return errors;
+}
+
+/** P116 ONT-014 — `update.frozen`: `{ fields: [...] | "*", unless?, says? }`. Errors start with their path. */
+function validateFrozen(value: unknown, except: unknown): string[] {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return [' must be an object { fields, unless?, says? }'];
+  const errors: string[] = [];
+  const f = value as Record<string, unknown>;
+  for (const k of Object.keys(f)) if (k !== 'fields' && k !== 'unless' && k !== 'says') errors.push(`: unknown key "${k}" (expected fields, unless, says)`);
+  if (f.fields !== '*') {
+    if (!Array.isArray(f.fields) || f.fields.length === 0 || f.fields.some((x) => typeof x !== 'string' || !x)) {
+      errors.push('.fields must be a non-empty list of field names, or "*" for the whole record');
+    } else {
+      for (const x of f.fields as string[]) if (UNHIDEABLE_FIELDS.has(x)) errors.push(`.fields: "${x}" is the record's own bookkeeping, kept by the backend`);
+      const both = Array.isArray(except) ? (f.fields as string[]).filter((x) => (except as unknown[]).includes(x)) : [];
+      if (both.length) errors.push(`.fields: ${both.map((x) => `"${x}"`).join(', ')} cannot be both frozen and excepted from the condition`);
+    }
+  }
+  if (f.unless !== undefined) {
+    const wp = onlyWhileWhereProblem(f.unless);
+    if (wp) errors.push(`.unless: ${wp.replace(/^where/, 'unless')}`);
+  }
+  if (f.says !== undefined && (typeof f.says !== 'string' || !f.says.trim())) errors.push('.says must be a sentence');
+  return errors;
+}
+
+/**
+ * The `onlyWhile` a collection carries, as the facade reads it: with no principal, as written (a
+ * move's `by` dropped); with one, each move's `by` decided for that caller (`admits`), ONT-014.
+ */
+export function onlyWhileFor(
+  config: SecurityConfig,
+  collection: string,
+  principal?: Principal
+): { update?: OnlyWhileRule; delete?: OnlyWhileRule | 'never' } | undefined {
+  const ow = config.collections[collection]?.onlyWhile;
+  if (!ow?.update?.moves) return ow as { update?: OnlyWhileRule; delete?: OnlyWhileRule | 'never' } | undefined;
+  const subject = principal && rulePrincipal(principal);
+  const moves: Record<string, Record<string, OnlyWhileMove>> = {};
+  for (const [field, byOld] of Object.entries(ow.update.moves)) {
+    moves[field] = {};
+    for (const [old, { by, ...move }] of Object.entries(byOld)) {
+      moves[field][old] = by === undefined || !subject ? move : { ...move, admits: admitsFor(by, subject) };
+    }
+  }
+  return { ...ow, update: { ...ow.update, moves } };
+}
+
+/** Who a move's `by` lets through, for one caller: everyone it grants, none, or the records a path reaches. */
+function admitsFor(by: RuleValue, subject: Principal): OnlyWhileMove['admits'] {
+  if (!ruleAllows(by, subject)) return false;
+  const narrow = ruleNarrowing(by, subject);
+  return narrow ? { where: narrow } : true;
 }
 
 export interface FunctionRules {

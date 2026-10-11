@@ -607,7 +607,7 @@ export class ParseWireRoutes {
       try {
         const relationFields = [...addRelations, ...removeRelations].map((r) => r.key);
         const fields = [...Object.keys(plain), ...Object.keys(increments), ...relationFields];
-        const held = heldWhile(collection, acl, 'update', fields);
+        const held = heldWhile(collection, acl, 'update', fields, plain);
         const writeAcl = { ...acl, access: 'write' as const };
         await this.facade
           .rawFetch(collection, objectId, { ...held.acl!, access: 'write' })

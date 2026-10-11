@@ -72,7 +72,7 @@ export interface StorageAclOption {
    * one write it binds, so the check and the write are one statement on every engine. Scoped to its
    * collection like `only`.
    */
-  onlyWhile?: { collection: string; update?: OnlyWhileRule; delete?: OnlyWhileRule };
+  onlyWhile?: { collection: string; update?: OnlyWhileRule; delete?: OnlyWhileRule | 'never' };
   /**
    * P116 ONT-012 (R-a) — the fields this caller may not read, per collection (every collection
    * with a field rule, not only the one being read: an `include` and a `$path` hop reach others).
@@ -104,11 +104,43 @@ export type Reach = 'all' | 'none' | { where: Record<string, unknown> };
 
 /** P116 ONT-012 — one `onlyWhile` entry: the condition, the fields free of it, the refusal's words. */
 export interface OnlyWhileRule {
-  /** A Parse-wire filter on the record's own fields. */
-  where: Record<string, unknown>;
+  /** A Parse-wire filter on the record's own fields. ONT-014: optional when `moves` or `frozen` says the rule. */
+  where?: Record<string, unknown>;
   /** `update` only: a change to these fields alone is not held to the condition. */
   except?: string[];
+  /** The refusal in the person's words (for `where`; `moves` and `frozen` carry their own). */
+  says?: string;
+  /**
+   * P116 ONT-014 — *"an assignment goes from draft to issued to withdrawn, never back; only a coach
+   * issues one"*. Per field, per OLD value: the values it may move to. `"*"` is every old value no
+   * entry names; without it those move freely (the rule says what is forbidden). Setting a field to
+   * the value it has is not a move.
+   */
+  moves?: Record<string, Record<string, OnlyWhileMove>>;
+  /** P116 ONT-014 — *"once issued, its number and amount never change"*: fields that do not change, `unless` the old record matches. */
+  frozen?: OnlyWhileFrozen;
+}
+
+/** P116 ONT-014 — the moves one old value may make. */
+export interface OnlyWhileMove {
+  /** The values it may move to. `[]` = none. */
+  to: string[];
+  /**
+   * Who may make the move, decided for ONE caller before the write (`security.json` says `by`, a
+   * rule value; `SecurityState.aclFor` compiles it): absent or `true` = this caller, `false` = not
+   * this caller, `{ where }` = only on the records a path rule reaches from them.
+   */
+  admits?: boolean | { where: Record<string, unknown> };
   /** The refusal in the person's words. */
+  says?: string;
+}
+
+/** P116 ONT-014 — fields that never change, or not once a condition on the old record stops holding. */
+export interface OnlyWhileFrozen {
+  /** The fields; `"*"` = every field but `except` (*"never edited"*). */
+  fields: string[] | '*';
+  /** A filter on the OLD record under which the fields may still change. Absent = from the first save. */
+  unless?: Record<string, unknown>;
   says?: string;
 }
 

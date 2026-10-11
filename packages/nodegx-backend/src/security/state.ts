@@ -577,7 +577,7 @@ export class SecurityState {
     let acl = base && narrow ? { ...base, only: narrow } : base;
     // P116 ONT-012 (R-b): "only while it is a draft" binds the same callers the row ACL binds, and
     // rides beside it for the facade to compile into the one write it holds.
-    const onlyWhile = acl && access === 'write' && collection ? onlyWhileFor(this.config, collection) : undefined;
+    const onlyWhile = acl && access === 'write' && collection ? onlyWhileFor(this.config, collection, principal) : undefined;
     if (acl && onlyWhile && collection) acl = { ...acl, onlyWhile: { collection, ...onlyWhile } };
     // P116 ONT-012 (R-a): the fields this caller may not read, for every collection, on read and
     // write alike (a write answers with the record). The same callers the row ACL binds.

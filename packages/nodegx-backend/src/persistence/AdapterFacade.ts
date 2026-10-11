@@ -27,7 +27,6 @@ import { deleteKeepingLinks } from '@noodl/backend-contract';
 import type {
   IStorageAdapter,
   IStorageDataPlane,
-  OnlyWhileRule,
   IStorageFacade,
   IStorageSchema,
   StorageAclOption,
@@ -52,7 +51,7 @@ export type WireQueryResult = StorageQueryResult;
 export type ImportColumn = StorageImportColumn;
 
 import { reachOf, refuseHiddenNamed, stripHidden, type NamedFields } from './fieldRules';
-import { heldWhile, whyRefused } from './onlyWhile';
+import { heldWhile, whyRefused, type Held } from './onlyWhile';
 
 // QueryBuilder is the adapter's own SQL/serialization helper — reused here so
 // BAK-007 import writes serialize values EXACTLY as create()/save() do (JSON
@@ -320,7 +319,7 @@ export class AdapterFacade implements IStorageFacade {
     // HLT-016: `expect` is only sent when there is one, so a save without a precondition
     // reaches the adapter with exactly the options it always did.
     if (expect) this.refuseHidden(collection, { expect }, acl);
-    const held = heldWhile(collection, acl, 'update', Object.keys(data));
+    const held = heldWhile(collection, acl, 'update', Object.keys(data), data);
     const save = (a: AclOption | undefined) =>
       this.call<Record<string, unknown>>('save', expect ? { collection, objectId, data, acl: a, expect } : { collection, objectId, data, acl: a });
     const saved = held.rule ? save(held.acl).catch((e) => this.whyRefused(e, collection, objectId, 'update', acl, held)) : save(acl);
@@ -334,7 +333,7 @@ export class AdapterFacade implements IStorageFacade {
     objectId: string,
     op: 'update' | 'delete',
     acl: AclOption | undefined,
-    held: { acl: AclOption | undefined; rule?: OnlyWhileRule }
+    held: Held
   ): Promise<never> {
     return whyRefused((c, w, a) => this.rawCount(c, w, a), e, collection, objectId, op, acl, held);
   }
