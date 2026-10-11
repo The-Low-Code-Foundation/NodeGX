@@ -75,3 +75,11 @@ names, longest name first). `dev-docs/bugs/README.md`: "Bugs and the packages".
   `scenarios/Counter.json "…"` → accepted. Exit 1, three problems, exactly the three planted.
 - The String Format case: measured on the spec and on `stringformat.ts`'s loop copied verbatim, the repeated
   placeholder fills every time. The P109 session marked its bug `duplicate`, `of: P107-D2` (`bcdbaaad4`).
+
+**2026-10-11 (s9, P112 OWN-011).** 🔴 The ledger half above was built on 2026-10-02 and **never committed**: nine days in
+the working tree, while committed bug files already carried `kit:` tags nothing in HEAD read. Committed in `efcb43788`
+with two additions: `mcp` in `KITS` (a P107 bug had reached for `kit: noodl-mcp`; before, `--kit mcp` listed 0 because
+no bug could carry it), and `node scripts/bugs.js gate <kit>` — R6's release gate: exit 1 while the package has an
+open, needs-ruling or scheduled blocker, the lesser ones printed as known issues, exit 1 on a kit name that is not one.
+Measured live: with P112-S9-NPXDEPS open, `gate mcp` exited 1. `bugs.js check` reports 16 problems in other phases'
+files (none P112's); nothing runs it as a gate yet.

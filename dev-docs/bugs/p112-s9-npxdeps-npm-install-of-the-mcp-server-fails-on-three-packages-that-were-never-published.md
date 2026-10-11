@@ -1,12 +1,14 @@
 ---
 id: P112-S9-NPXDEPS
 title: "`npm install @noodl/mcp` fails: it asks npm for three workspace packages that were never published, and the server never loads them"
-status: open
+status: fixed
 severity: blocker
 area: mcp / package manifest (`packages/noodl-mcp/package.json` `dependencies`; `package-lock.json` its workspace entry)
 kit: mcp
 found: P112 OWN-011 s9, 2026-10-11
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/OWN-011-ONE-INSTALL.md §7
+regression: scripts/own/publishable.js
+commit: efcb43788
 ---
 
 `npm pack` the MCP server and install the tarball in an empty folder outside the checkout:
@@ -24,3 +26,5 @@ with a fallback). Inside the checkout the workspace links them, which is why not
 
 With the three moved to `devDependencies` (the tarball patched by hand), the same install takes 1 s, 96 packages,
 43 MB, and the installed `noodl-mcp --allow-writes` answers `initialize` and lists its six bootstrap tools.
+
+**Fixed:** the three are `devDependencies` (the lockfile's workspace entry moved with them). `node scripts/own/publishable.js` fails any kit package that is private or lists a private workspace package under `dependencies`; run on HEAD~1's manifest it names all three and exits 1. The unpatched tarball now installs and runs under `npx` in an empty folder.

@@ -1,12 +1,14 @@
 ---
 id: P112-S9-NPXREG
 title: "A project the MCP server creates while running under `npx` points its agent at npm's cache folder, which npm may empty at any time"
-status: open
+status: fixed
 severity: high
 area: mcp / create_project's agent config (`packages/noodl-mcp/src/project/agentConfig.ts` `selfRegistration`)
 kit: mcp
 found: P112 OWN-011 s9, 2026-10-11
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/OWN-011-ONE-INSTALL.md §7
+regression: packages/noodl-mcp/tests/agentConfig.test.ts "P112-S9-NPXREG"
+commit: efcb43788
 ---
 
 `create_project` writes the new project's `.mcp.json` by reproducing how the running server was launched
@@ -25,3 +27,5 @@ OWN-011 is written for runs exactly this launch (an `npx` command), so every pro
 Under `npx` the launch that works IS the npx command; the fix registers that, pinned to the server's version:
 `npx -y @noodl/mcp@<version> <project> --allow-writes`. A server started from a project's own install, or by the
 editor, still reproduces its own launch.
+
+**Fixed:** `selfRegistration(projectDir, entry)` registers `npx -y <name>@<version> <project> --allow-writes` (`cmd /c npx` on Windows) when the entry path has an `_npx` segment; the name and version are the package's own, so after R7 it reads `@nodegx/mcp@0.1.0`. Measured in the stranger run: the project's `.mcp.json` says exactly that. The test fails with the branch disabled.
