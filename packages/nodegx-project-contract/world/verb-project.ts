@@ -141,7 +141,8 @@ class Rows {
     return c;
   }
   private choices(c: WorldCollection, col: WorldColumn): string[] | undefined {
-    return c.checks.find((k) => k.field === col.name)?.oneOf;
+    const k = c.checks.find((x) => 'oneOf' in x && x.field === col.name);
+    return k && 'oneOf' in k ? k.oneOf : undefined;
   }
   value(c: WorldCollection, col: WorldColumn): ClaimValue | undefined {
     const k = ++this.k;

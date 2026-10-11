@@ -170,7 +170,7 @@ A kind enters this list only with an evidence row that names a file and a line, 
 
 *a {from} can end without being deleted*
 
-- **The question it asks:** When it ends, what stays and what goes — its record, its history, the things on it, its access elsewhere, the lists it is on? Can it come back, and does coming back make a new one or revive the old? Who may end it?
+- **The question it asks:** When it ends, what stays and what goes — its record, its history, the things on it, its access elsewhere, the lists it is on? Can it come back, and does coming back make a new one or revive the old? Who may end it? When it ends, is a note or a reason written with it — which detail, and must it be there?
 - **Told apart from its neighbours by:** a status, an active flag, an end date, an archive or erasure record — the record is kept
 - **Projects to (P104's tiles / the contract):** a status Choice or a Date, a rule for each linked thing, and a 'delete: nobody' permission; the archive note is this kind's unasked question
 - **Private rows, held outside the repo:** acme 4, tirion 3

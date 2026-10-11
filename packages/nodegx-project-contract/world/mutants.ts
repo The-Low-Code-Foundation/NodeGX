@@ -38,10 +38,15 @@ import {
   type WorldClaim,
   type WorldSchema
 } from './project';
+import { NOUN_FACTS, nounAskWords, nounQuestion, nounSeedFor } from './noun';
 import { validateWorld } from './validate';
 import { kindById } from './vocabulary';
 
-export type MutantOf = { relation: string; kind: string } | { noun: string; property: string };
+export type MutantOf =
+  | { relation: string; kind: string }
+  | { noun: string; property: string }
+  /** P116 ONT-011 step 2: one of the noun's own questions (`NOUN_QUESTIONS`). */
+  | { noun: string; question: string };
 
 /** What kills it: a question of the kind, in the person's nouns, or the tile a property was given. */
 export type Killer = { question: string; ask: string } | { kind: string } | { tile: FieldKind };
@@ -208,7 +213,7 @@ function retype(
     if (col.kind === shape.property) return { cannot: `"${r.property}" is already ${shape.property}` };
     col.kind = shape.property;
     col.type = STORAGE_TYPE[shape.property];
-    c.checks = c.checks.filter((k) => k.field !== name);
+    c.checks = c.checks.filter((k) => !('oneOf' in k) || k.field !== name);
     return { schema: s };
   }
   if ('without' in shape && 'field' in shape.without) {
@@ -219,7 +224,7 @@ function retype(
       c.columns = c.columns.filter((col) => !(col.relation === r.id && col.name === name));
       if (c.columns.length !== before) {
         n += 1;
-        c.checks = c.checks.filter((k) => k.field !== name);
+        c.checks = c.checks.filter((k) => !('oneOf' in k ? k.field === name : k.allOrNone.includes(name)));
         c.indexes = c.indexes.filter((i) => !i.fields.includes(name));
       }
     }
@@ -266,6 +271,15 @@ function retype(
       } catch {
         // Nothing to take out: a field set once on a record never edited is kept by the record's rule.
         return { schema: s, unchanged: 'unclaimed' };
+      }
+    }
+    // ONT-011 step 2: a detail required once another is set is an all-or-none check (held); the other readings are said.
+    if ('onlyWhen' in rule.holds) {
+      const h = rule.holds;
+      try {
+        return { schema: applyMutant(s, { dropAllOrNone: { collection: home.name, fields: [fieldName(h.onlyWhen), fieldName(h.when)] } }) };
+      } catch {
+        return { schema: s, unchanged: 'unkept' };
       }
     }
     // A rule no engine keeps, or a shape: taking it out changes nothing a claim can see.
@@ -465,6 +479,15 @@ export function worldMutants(files: WorldFiles): WorldMutants {
         continue;
       }
       const typed = retype(right, r, kind, shape);
+      if (!typed.schema && 'without' in shape && 'rule' in shape.without && seed.kills !== 'the kind' && !(seed.kills in answers)) {
+        // The rule it takes out is one an answer would make, and the question is unanswered here: the
+        // mistake and the unanswered question are the same thing (its own mutant, when any answer would
+        // change the schema), or nothing said yet reaches it.
+        const m = byQuestion.get(seed.kills);
+        if (m) m.seeds.push(seed.id);
+        else mutants.push({ id, of, mistake, kills, shape, seeds: [seed.id], made: 'schema', notApplicable: `"${seed.kills}" is unanswered on this world, and the rule it would take out is not made until it is` });
+        continue;
+      }
       mutants.push({
         id,
         of,
@@ -478,7 +501,45 @@ export function worldMutants(files: WorldFiles): WorldMutants {
     }
   }
 
-  // 3. A property stored as text: a number, a date, a yes/no, a choice (free text where a list belongs).
+  // 3. ONT-011 step 2 — the noun's own questions (`NOUN_QUESTIONS`), the four whose answer changes
+  //    the schema: unanswered, the mistake and the schema are the same thing (a survivor by
+  //    construction, which is what the runner asks); answered yes, the world re-said without the
+  //    answer — a `secret` taken off the noun takes the marks off its details too, or the format
+  //    refuses it. `calledBy` is a hint for the view (ONT-008 grades it), so it makes no mutant.
+  for (const n of nouns) {
+    const answers = n.answers || {};
+    for (const qid of NOUN_FACTS) {
+      if (qid === 'calledBy') continue;
+      const q = nounQuestion(qid)!;
+      const seed = nounSeedFor(qid)!;
+      const of: MutantOf = { noun: n.id, question: qid };
+      const kills: Killer = { question: qid, ask: nounAskWords(q, n.id) };
+      const mistake = seed.mistake.replace(/\{noun\}/g, n.id);
+      const id = `${n.id}/${qid}-unanswered`;
+      if (!(qid in answers)) {
+        mutants.push({ id, of, mistake: `${mistake} — "${kills.ask}" never answered`, kills, shape: { unanswered: qid }, seeds: [seed.id], made: 'world', schema: right });
+        continue;
+      }
+      if (answers[qid] !== true) continue; // answered no: the schema is the schema, and the mistake is the other answer
+      const f = clone(files);
+      const nn = f.nouns.nouns.find((x) => x.id === n.id)!;
+      delete nn.answers![qid];
+      if (!Object.keys(nn.answers!).length) delete nn.answers;
+      if (qid === 'secret') for (const p of nn.properties || []) delete p.secret;
+      const out = project(f);
+      if (!out.schema) {
+        inert.push({ relation: n.id, kind: 'noun', question: qid, why: `without it the world does not project: ${out.problems!.join('; ')}` });
+        continue;
+      }
+      if (collectionsText(out.schema) === rightText) {
+        inert.push({ relation: n.id, kind: 'noun', question: qid, why: 'its answer changes nothing in the schema' });
+        continue;
+      }
+      mutants.push({ id, of, mistake, kills, shape: { unanswered: qid }, seeds: [seed.id], made: 'world', schema: out.schema });
+    }
+  }
+
+  // 4. A property stored as text: a number, a date, a yes/no, a choice (free text where a list belongs).
   for (const n of nouns) {
     for (const p of n.properties || []) {
       if (!['choice', 'number', 'date', 'yesno'].includes(p.kind)) continue;
@@ -488,7 +549,7 @@ export function worldMutants(files: WorldFiles): WorldMutants {
       const col = c.columns.find((x) => x.name === name)!;
       col.kind = 'text';
       col.type = 'String';
-      c.checks = c.checks.filter((k) => k.field !== name);
+      c.checks = c.checks.filter((k) => !('oneOf' in k) || k.field !== name);
       mutants.push({
         id: `${n.id}/${name}-as-text`,
         of: { noun: n.id, property: p.name },
@@ -584,9 +645,9 @@ export function gradeStatically(right: WorldSchema, m: WorldMutant): StaticVerdi
           };
     return { verdict: 'survives', as: 'unclaimed', why: 'the mistake makes the same schema' };
   }
-  // The mutant's own relation's claims first, so a kill is attributed to what was said about it.
+  // The mutant's own relation's (or noun's) claims first, so a kill is attributed to what was said about it.
   const own = (c: WorldClaim): number =>
-    'relation' in m.of && 'relation' in c.from && c.from.relation === m.of.relation ? 0 : 1;
+    ('relation' in m.of && 'relation' in c.from && c.from.relation === m.of.relation) || ('question' in m.of && 'noun' in c.from && c.from.noun === m.of.noun) ? 0 : 1;
   const held = right.claims.filter((c) => c.held).sort((x, y) => own(x) - own(y));
   for (const c of held) {
     const miss = missingHome(m.schema, c);

@@ -63,6 +63,12 @@ describe('nothing said is dropped', () => {
         if ('shape' in h) continue;
         if ('unique' in h) expect([rule.says, c.indexes.some((i) => i.fields.join() === h.unique.map(fieldName).join())]).toEqual([rule.says, true]);
         else if ('pairOnce' in h) expect([rule.says, schema.claims.some((x) => x.held && x.says === rule.says)]).toEqual([rule.says, true]);
+        // ONT-014 (s17): kept by the backend inside the write — on the collection's `onlyWhile`, with a held claim.
+        else if ('setOnce' in h || 'neverEdited' in h || 'neverDeleted' in h || 'frozen' in h || 'moves' in h)
+          expect([rule.says, Boolean(c.onlyWhile), schema.claims.some((x) => x.held && x.says === rule.says)]).toEqual([rule.says, true, true]);
+        // ONT-011 step 2: required once the other is set — an all-or-none check, with a held claim.
+        else if ('onlyWhen' in h && h.required && h.is === undefined)
+          expect([rule.says, c.checks.some((k) => 'allOrNone' in k && k.allOrNone.includes(fieldName(h.onlyWhen))), schema.claims.some((x) => x.held && x.says === rule.says)]).toEqual([rule.says, true, true]);
         else expect([rule.says, said(c.name, rule.says), schema.notHeld.some((n) => n.says === rule.says)]).toEqual([rule.says, true, true]);
       }
       // R10: a link to a noun HOLDS its "when it goes" rule on the column, with a held claim; a text id
@@ -86,7 +92,7 @@ describe('nothing said is dropped', () => {
     const mutants = schema.claims.filter((c) => c.held).map((c) => JSON.stringify(c.mutant));
     for (const c of schema.collections) {
       for (const col of c.columns.filter((x) => x.required)) expect(mutants).toContain(JSON.stringify({ dropRequired: { collection: c.name, field: col.name } }));
-      for (const k of c.checks) expect(mutants).toContain(JSON.stringify({ dropCheck: { collection: c.name, field: k.field } }));
+      for (const k of c.checks) expect(mutants).toContain(JSON.stringify('allOrNone' in k ? { dropAllOrNone: { collection: c.name, fields: k.allOrNone } } : { dropCheck: { collection: c.name, field: k.field } }));
       for (const i of c.indexes) expect(mutants).toContain(JSON.stringify({ dropIndex: { collection: c.name, fields: i.fields } }));
     }
     // and every mutant takes exactly its one rule out

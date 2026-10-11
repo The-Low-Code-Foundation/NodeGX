@@ -11,6 +11,7 @@
  */
 import type { AnswerShape } from './kind';
 import { PROPERTY_KINDS, WORLD_FILES, type WorldFileName } from './files';
+import { NOUN_QUESTIONS, NUMBER_QUESTIONS } from './noun';
 import { validateVerbs } from './verbs';
 import { WORLD_VOCABULARY_REF, type VocabularyRef } from './vocabulary';
 
@@ -44,6 +45,7 @@ function answerWords(shape: AnswerShape): string {
   if (shape.type === 'yes-no') return 'true or false';
   if (shape.type === 'one-of') return `one of ${shape.values.map((v) => JSON.stringify(v)).join(', ')}`;
   if (shape.type === 'fields') return 'the names of its own details, comma-separated, or "nothing"';
+  if (shape.type === 'field') return 'the name of one of its own details, or "nothing"';
   return 'the person\'s words';
 }
 /** P116 ONT-011 step 2: a `fields` answer, as names: `"note, paid on"` → `['note', 'paid on']`; `"nothing"` → `[]`. */
@@ -99,14 +101,17 @@ export function validateWorld(
   const nounIds = new Map<string, Record<string, unknown>>();
   let signsIn: string | undefined;
   const wasIds: Array<{ at: string; was: string; id: string }> = [];
-  const checkProperties = (name: WorldFileName, at: string, props: unknown) => {
+  /** `owner`: the noun these are details of — a relation's own details pass none (a secret is a noun's). */
+  const checkProperties = (name: WorldFileName, at: string, props: unknown, owner?: Record<string, unknown>) => {
     if (props === undefined) return;
     if (!Array.isArray(props)) return say(name, at, 'a list of properties', props, `${at} must be a list.`);
     const seen = new Set<string>();
+    const siblings = new Map<string, Record<string, unknown>>();
+    for (const p of props) if (isObj(p) && nonEmpty(p.name)) siblings.set(p.name, p);
     props.forEach((p, i) => {
       const pat = `${at}[${i}]`;
       if (!isObj(p)) return say(name, pat, 'a property: a name and a kind', p, `${pat} is not a property.`);
-      strayKeys(name, pat, p, ['name', 'kind', 'sentence', 'values', 'freeWords']);
+      strayKeys(name, pat, p, ['name', 'kind', 'sentence', 'values', 'freeWords', 'secret', 'onlyWhen']);
       if (!nonEmpty(p.name)) say(name, `${pat}.name`, 'a name', p.name, `${pat} has no name.`);
       else if (seen.has(p.name)) say(name, `${pat}.name`, 'a name used once', p.name, `${pat}: "${p.name}" is named twice.`);
       else seen.add(p.name);
@@ -127,7 +132,61 @@ export function validateWorld(
       } else if (p.freeWords === true && p.kind !== 'text') {
         say(name, `${pat}.freeWords`, 'nothing: only a text can be free words', p.kind, `${pat} ("${String(p.name)}") is a ${String(p.kind)}, and only a text is asked whether it is free words or one of a fixed list.`);
       }
+      // ONT-011 step 2: a secret detail — the which; the noun's `answers.secret` is the yes.
+      if (p.secret !== undefined && p.secret !== true) {
+        say(name, `${pat}.secret`, 'true, or nothing', p.secret, `${pat} ("${String(p.name)}"): secret says this detail is not for everyone who can see the record; it is true or absent.`);
+      } else if (p.secret === true) {
+        if (!owner) say(name, `${pat}.secret`, "nothing: a secret is a noun's detail", p.secret, `${pat} ("${String(p.name)}") is a detail on a link, and only a noun's detail can be secret.`);
+        else if (!isObj(owner.answers) || owner.answers.secret !== true)
+          say(name, `${pat}.secret`, `answers.secret: true on "${String(owner.id)}" first`, isObj(owner.answers) ? owner.answers.secret : undefined, `${pat} ("${String(p.name)}") is secret, and "${String(owner.id)}" does not answer that any detail on it is: say "answers": { "secret": true } on the noun, then mark which.`);
+      }
+      // ONT-011 step 2: a detail that matters only in some cases — the case is another detail of the same record.
+      if (p.onlyWhen !== undefined) {
+        const ow = p.onlyWhen;
+        if (!isObj(ow)) return say(name, `${pat}.onlyWhen`, 'an object: { "field": …, "is"?: …, "required"?: true }', ow, `${pat} ("${String(p.name)}"): onlyWhen names the detail this one depends on, as { "field": "closed on" }.`);
+        strayKeys(name, `${pat}.onlyWhen`, ow, ['field', 'is', 'required']);
+        const other = nonEmpty(ow.field) ? siblings.get(ow.field) : undefined;
+        if (!other) say(name, `${pat}.onlyWhen.field`, 'another detail of the same record', ow.field, `${pat} ("${String(p.name)}") matters only when ${show(ow.field)} is set, which is not a detail of the same record.`);
+        else if (ow.field === p.name) say(name, `${pat}.onlyWhen.field`, 'another detail, not itself', ow.field, `${pat} ("${String(p.name)}") cannot matter only when it is itself set.`);
+        else if (ow.is !== undefined) {
+          if (!['string', 'number', 'boolean'].includes(typeof ow.is)) say(name, `${pat}.onlyWhen.is`, 'a word, a number or true/false', ow.is, `${pat} ("${String(p.name)}"): "is" is the value "${String(ow.field)}" holds when this detail matters.`);
+          else if (other.kind === 'choice' && !(Array.isArray(other.values) && other.values.includes(ow.is)))
+            say(name, `${pat}.onlyWhen.is`, `one of ${(Array.isArray(other.values) ? other.values : []).map((v) => JSON.stringify(v)).join(', ')}`, ow.is, `${pat} ("${String(p.name)}") matters only when "${String(ow.field)}" is ${show(ow.is)}, which is not one of its values.`);
+          else if (other.kind === 'yesno' && typeof ow.is !== 'boolean') say(name, `${pat}.onlyWhen.is`, 'true or false', ow.is, `${pat} ("${String(p.name)}"): "${String(ow.field)}" is a yes/no, so "is" is true or false.`);
+        }
+        if (ow.required !== undefined && ow.required !== true) say(name, `${pat}.onlyWhen.required`, 'true, or nothing', ow.required, `${pat} ("${String(p.name)}"): required says it is never left empty when it matters; it is true or absent.`);
+      }
     });
+  };
+
+  /** ONT-011 step 2: a noun's answers to its own questions (`NOUN_QUESTIONS`), in the shape each asks for. */
+  const checkNounAnswers = (at: string, n: Record<string, unknown>) => {
+    if (n.answers === undefined) return;
+    const label = `${at} ("${String(n.name ?? n.id)}")`;
+    if (!isObj(n.answers)) return say('nouns', `${at}.answers`, 'answers by question id', n.answers, `${label}: answers must be an object of question id to answer.`);
+    const names = new Set(((Array.isArray(n.properties) ? n.properties : []) as unknown[]).map((p) => (isObj(p) ? String(p.name) : '')));
+    const ids = NOUN_QUESTIONS.map((q) => q.id);
+    for (const [qid, value] of Object.entries(n.answers)) {
+      const q = NOUN_QUESTIONS.find((x) => x.id === qid);
+      if (!q) {
+        say('nouns', `${at}.answers.${qid}`, `one of ${ids.join(', ')}`, qid, `${label} answers "${qid}", which a noun is not asked; a noun is asked ${ids.join(', ')}.`);
+        continue;
+      }
+      if (!answerFits(q.answer, value)) {
+        say('nouns', `${at}.answers.${qid}`, answerWords(q.answer), value, `${label}: the answer to "${q.ask}" must be ${answerWords(q.answer)}; it is ${show(value)}.`);
+        continue;
+      }
+      if (q.answer.type === 'field') {
+        const [name, ...more] = fieldsAnswered(value);
+        if (more.length) say('nouns', `${at}.answers.${qid}`, 'one detail', value, `${label} answers "${q.ask}" with ${more.length + 1} details; it takes one.`);
+        else if (name === undefined) say('nouns', `${at}.answers.${qid}`, `a detail of "${String(n.id)}"`, value, `${label} answers "${q.ask}" with "nothing": a ${String(n.id)} in a list is called by one of its details.`);
+        else if (!names.has(name)) say('nouns', `${at}.answers.${qid}`, `a detail of "${String(n.id)}"`, name, `${label} answers "${q.ask}" with "${name}", which is not a detail of "${String(n.id)}".`);
+      }
+      if (NUMBER_QUESTIONS.includes(qid) && n.answers.readAloud !== true)
+        say('nouns', `${at}.answers.${qid}`, 'nothing: asked only of a noun whose number is read aloud', value, `${label} answers "${q.ask}", and does not say people read its number aloud (answers.readAloud is not true).`);
+    }
+    if (n.answers.secret === true && !((Array.isArray(n.properties) ? n.properties : []) as unknown[]).some((p) => isObj(p) && p.secret === true))
+      say('nouns', `${at}.answers.secret`, 'a detail marked "secret": true', true, `${label} says a detail on it is not for everyone who can see it, and no detail says which: mark it "secret": true.`);
   };
 
   const nf = files.nouns;
@@ -138,7 +197,7 @@ export function validateWorld(
     nf.nouns.forEach((n: unknown, i: number) => {
       const at = `nouns[${i}]`;
       if (!isObj(n)) return say('nouns', at, 'a noun', n, `${at} is not a noun.`);
-      strayKeys('nouns', at, n, ['id', 'name', 'sentence', 'properties', 'signsIn', 'was']);
+      strayKeys('nouns', at, n, ['id', 'name', 'sentence', 'properties', 'signsIn', 'answers', 'was']);
       if (typeof n.id !== 'string' || !ID.test(n.id)) say('nouns', `${at}.id`, 'an id: a letter, then letters, digits, - or _', n.id, `${at} has no usable id.`);
       else if (nounIds.has(n.id)) say('nouns', `${at}.id`, 'an id used once', n.id, `${at}: the id "${n.id}" is used twice.`);
       else nounIds.set(n.id, n);
@@ -146,7 +205,8 @@ export function validateWorld(
       if (!nonEmpty(n.sentence)) {
         say('nouns', `${at}.sentence`, 'the sentence the person said about it', n.sentence, `${at} ("${String(n.name ?? n.id)}") has no sentence: a noun is saved with what the person said it is.`);
       }
-      checkProperties('nouns', `${at}.properties`, n.properties);
+      checkProperties('nouns', `${at}.properties`, n.properties, n);
+      checkNounAnswers(at, n);
       if (n.signsIn !== undefined && n.signsIn !== true) {
         say('nouns', `${at}.signsIn`, 'true, or nothing', n.signsIn, `${at} ("${String(n.name ?? n.id)}"): signsIn says this noun is who signs in; it is true or absent.`);
       } else if (n.signsIn === true) {
@@ -247,11 +307,13 @@ export function validateWorld(
               say('relations', `${at}.answers.${qid}`, answerWords(q.answer), value, `${at} ("${String(r.id)}"): the answer to "${q.ask}" must be ${answerWords(q.answer)}; it is ${show(value)}.`);
               continue;
             }
-            if (q.answer.type === 'fields') {
+            if (q.answer.type === 'fields' || q.answer.type === 'field') {
               // Each name is a detail of the noun the relation starts from: a projection reads them back as fields.
               const owner = typeof r.from === 'string' ? nounIds.get(r.from) : undefined;
               const names = new Set(((owner && Array.isArray(owner.properties) ? owner.properties : []) as unknown[]).map((p) => (isObj(p) ? String(p.name) : '')));
-              for (const name of fieldsAnswered(value)) {
+              const named = fieldsAnswered(value);
+              if (q.answer.type === 'field' && named.length > 1) say('relations', `${at}.answers.${qid}`, 'one detail, or "nothing"', value, `${at} ("${String(r.id)}") answers "${q.ask}" with ${named.length} details; it takes one.`);
+              for (const name of named) {
                 if (!names.has(name)) say('relations', `${at}.answers.${qid}`, `details of "${String(r.from)}"`, name, `${at} ("${String(r.id)}") answers "${q.ask}" with "${name}", which is not a detail of "${String(r.from)}".`);
               }
             }

@@ -137,7 +137,9 @@
       "sentence": "A person can leave, and we keep what they did.",
       "answers": {
         "comesBack": true,
-        "backAs": "the old one"
+        "backAs": "the old one",
+        "endNote": "left because",
+        "endNoteNeeded": true
       }
     },
     {

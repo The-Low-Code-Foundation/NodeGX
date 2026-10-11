@@ -4,7 +4,7 @@
 *"let's borrow 1 to 4"*. **Depends on ONT-001** (the kinds), **ONT-003** (the projection), **ONT-005** (the mutants);
 **feeds ONT-008** (the view hints). **Status: 🟡 step 1 ✅ (P116 s15, 2026-10-10, Opus 5.5): the detectors are in
 `census.js`, every candidate in all 8 sources is classified by meaning, and all four borrows keep rows (§3.5). AC1 ✅.
-**Step 2's *settled* half ✅ (s18, 2026-10-11, Fable 5.1, §9): the fifteenth kind, its five questions, its projection onto ONT-014's two new holds, four mutants all killed, 8 rows over 4 sources.** Step 2's other three borrows (facts about a thing, secret details, only sometimes) are still owed. R-a, R-b and R-c ruled s16 (§6); step 4's two targets are built in ONT-012 (`fields.<f>.read`, `onlyWhile`).** §3.1–§3.4 were read by hand before the
+**Step 2's *settled* half ✅ (s18, 2026-10-11, Fable 5.1, §9): the fifteenth kind, its five questions, its projection onto ONT-014's two new holds, four mutants all killed, 8 rows over 4 sources. Step 2's other three borrows ✅ (s19, 2026-10-11, Fable 5.1, §10): the noun's eight questions (`noun.ts`), `secret` and `onlyWhen` on a property, the `ends` kind's two questions, each projected and graded.** Step 3's remaining mutants are §10's; step 4 (secret → `fields.<f>.read`) and step 5 (the view hints) are owed. R-a, R-b and R-c ruled s16 (§6); step 4's two targets are built in ONT-012 (`fields.<f>.read`, `onlyWhile`).** §3.1–§3.4 were read by hand before the
 census; §3.5 is what the census counted.
 
 > **Model check, before anything (Richard, 2026-10-08 rule):** steps 2 and 4 want **Fable 5.1**. They change the
@@ -253,3 +253,53 @@ field), step 4's projection of secret details to `fields.<f>.read` (the target e
 `secret` does not yet), and step 5. **A limit said:** one `frozen` per collection — a noun that is both *settled*
 and has a `setOnce` field gets the union of fields under settled's `unless`, so the set-once field is editable while
 the record is a draft (`project.ts` step 4 says so in its comment).
+
+## 10. Step 2, the other three borrows (s19, 2026-10-11, Fable 5.1)
+
+**Facts about a thing** live on the noun, as the kinds live on a relation: `world/noun.ts` declares `NOUN_QUESTIONS`
+(DATA, each with the incident it prevents and the shape of its answer) and `NOUN_MUTANTS` (ONT-005 §3 step 3's list,
+each killed by one question); the answers go in `nouns[].answers` by id (`files.ts`, `world.schema.json`). Five are
+asked once per world, naming the nouns that have not answered, after every relation question and before the
+kind-picker (the picker's lesson: a per-noun question outranks what the person said about how things join);
+three follow a noun whose number is read aloud. Each has a projection, and each projection is held or said:
+
+| question | answer | projects to | held? |
+|---|---|---|---|
+| `onlyOne` — is there only one? | yes/no | "there is only one X" in the description; a claim measured to fail (a second record is taken) | **said** — across records, none of the store's checks; ONT-013 step 4 |
+| `calledBy` — what is one called in a list? | one of its details | `calledBy` on the collection (`WorldCollection`), the hint every view reads (ONT-008 step 5) | nothing to hold; the mistake is the view's |
+| `history` — who changed what? | yes/no | a `<Noun>History` collection: the noun (goes-too, required), `at` (required), `who` (the login), `changed` (anything) | **held** (the records; their required fields are claimed); *writing one on every save* said — a verb's or a trigger's |
+| `readAloud` — do people read its number aloud? | yes/no | a `number` text field, **unique** and **set once** (held: an index and ONT-014's `frozen`); the series in words (`looksLike`, `maySkip` — R-g, asked never assumed — `restarts`); a claim measured to fail (a number used again after a delete) | held: unique, set once; said: handed out, never reused — ONT-015 |
+| `secret` — is any detail not for everyone who can see it? | yes/no, and `"secret": true` on each detail (the which, as `path` + `through`) | "X's email is not for everyone who can see the X" in the description | **said** — R-a's per-field read rule is step 4's (`fields.<f>.read` exists, ONT-012 §6.2) |
+
+**Only sometimes** is an answer on the property: `onlyWhen: { field, is?, required? }` — the detail matters only when
+another detail of the same record is set (or holds `is`), and `required` says it is never empty then. The validator
+checks the field is a sibling, `is` fits the sibling's kind (a choice's value, a yes/no), and refuses a detail that
+depends on itself. The `ends` kind asks the corpus's clearest case — *when a thing ends, is a note or a reason
+written with it (`endNote`, one of its details or "nothing"), and must it be there (`endNoteNeeded`)?* — and projects
+the same rule onto the named detail with `when: endedAt`. The rule's three readings: **required and no `is`** is
+both-or-neither, a declared **`allOrNone` check** the backend keeps on every engine (HLT-016, `schemaCommon.ts`) —
+held, with a claim (a row with both is made; one with only the case, and one with only the detail, are refused) and
+the mutant `dropAllOrNone`; **with `is`** or **not required** is said (`WHY.onlyWhenIs`, `WHY.onlyWhenOptional`).
+The seed `ends/note-always-optional` (`without: { rule: 'onlyWhen' }`) kills at the check. A `without`-rule seed whose
+question is unanswered on a world now rides its question's own mutant, or is *not applicable* in words — never
+"cannot" (it was "cannot" on `world` and `world-membership`, which the static spec crashes on).
+
+**Not asked:** the `one-of` question the plan named ("a detail that matters only for some values of {field}") — no
+census row has a detail that depends on a choice's value (§3.4's rows depend on dates and flags), and ONT-000's
+rule stands: no row, no question. The "one or the other" row (`resourceUrl` / `resourceStorageKey`, `exactlyOne`)
+is recorded and not built. A relation's own details may carry `onlyWhen`; `secret` is a noun's detail only.
+
+**Fixtures.** Every fixture's nouns answer the five facts (the plain answers), so the worlds the specs pin stay
+"described enough". `world-every-kind` exercises each once: a `settings` noun (`onlyOne`), `account.history`,
+`session.readAloud` with `S-{####}` / may skip / never restarts, `person.email` secret, `person.left because` named
+by `leaves.endNote` and needed (the held check), `slot.closed because` only when `open` is false (said). The brief's
+example answers the facts too. `BRIEF_EXAMPLE` and the brief's text teach the noun's questions and the two
+property keys. The migration's diff carries `noun-answered`; the plan's `setChecks` carries an `allOrNone`.
+
+**Read s19, not this task's:** `project.test.ts`'s goldens (`projected.json`, dated 2026-10-09) and its "nothing
+said is dropped" else-branch had been red since ONT-014 flipped *set once* / *never deleted* to held (s17,
+`e06f4259d`, 2026-10-11 10:38) — nobody ran it; `tests/migrate.test.ts` did not type-check since s18's `rules`
+step. Both fixed here (the test learned the five `onlyWhile` shapes; the goldens regenerated with
+`ONT003_WRITE_GOLDEN=1` and read).
+
+**Measured (s19, 2026-10-11):** project contract `npx jest` 13 suites, 263/263, `tsc` clean for the package and its tests; MCP `ont002WorldTools` 12/12; backend `tsc` clean; `ontology-census:check` green. ONT-005 every-kind: **51 mutants, 15 survive** (0 unanswered, 7 unkept, 8 unclaimed), identical on SQLite and PostgreSQL — 14 of 45 → 15 of 51: `account/history-unanswered` killed for want of a home, `leaves/endNote-` and `endNoteNeeded-unanswered` and the seed `note-always-optional` killed at the held all-or-none claim (which also kills `leaves/end-by-delete`, unsaid, so `endedAt` has no home), `settings/onlyOne-unanswered` and `person/secret-unanswered` surviving unkept by design, each naming the step that keeps it; `world` and `world-membership` gain `leaves/endNote-unanswered (unanswered)` — neither answers it. The backend band (ont-003-write, ont-003-claims, ont-005-mutants, ont-007-route, ont-004-world, ont-006-verbs, ont-002-through, ont-014-reach-review): **8 suites, 138/138, exit 0** on both engines (ont-003-write, ont-003-claims and ont-005-mutants rerun after the `who` rename and the pin, 51/51 at 15:22 CEST; the other five green in the 14:56 band); ONT-003 claims on every-kind: 46 of 46 (43 held, 3 measured not held — only one, the number never used again, and the pair said twice).

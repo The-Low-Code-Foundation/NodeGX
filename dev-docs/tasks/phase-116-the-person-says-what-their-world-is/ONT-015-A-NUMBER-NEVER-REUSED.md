@@ -5,7 +5,7 @@ out at create, in a format the person gave, going up by one, never skipping if t
 **Depends on** ONT-014 (the number is frozen after create), ONT-011 step 2 (the *read aloud* fact on a noun is the
 question that leads here), ONT-007 (a series put on a collection with records is a migration). **Feeds** ONT-013
 (the invoice sentence projects in full). **Status: 📋 — opened on Richard's sentence (`from: oral`) with a thin
-warrant: ONT-011 §3.3 found one read-aloud row and no invoice-style numbering in the 8 sources. R-g ruled 2026-10-10 (§5): ask, never assume.**
+warrant: ONT-011 §3.3 found one read-aloud row and no invoice-style numbering in the 8 sources. R-g ruled 2026-10-10 (§5): ask, never assume. **s19 (ONT-011 step 2):** the noun's questions exist — `readAloud`, then `looksLike`, `maySkip` (R-g's words), `restarts` — and project to a `number` field, unique and set once (held) with the series said in words; this task's build flips the `series` hold from said to held.**
 
 > **Model check (Richard, 2026-10-08 rule):** the build wants **Opus 5.5**: a counter table and an allocation inside
 > the create, on two engines, with a conformance area. The one Fable question is R-g below, and it is asked, not built.

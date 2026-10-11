@@ -31,7 +31,7 @@ function plan(before: WorldFiles, after: WorldFiles): MigrationPlan {
 }
 /** A step as one short word, so an order reads at a glance. */
 const shape = (p: MigrationPlan): string[] =>
-  p.steps.map((s) => ('backup' in s ? 'backup' : 'move' in s ? `move:${Object.keys(s.move)[0]}` : `${s.schema.action}:${s.schema.table}`));
+  p.steps.map((s) => ('backup' in s ? 'backup' : 'move' in s ? `move:${Object.keys(s.move)[0]}` : 'rules' in s ? `rules:${s.rules.collection}` : `${s.schema.action}:${s.schema.table}`));
 
 describe('the diff', () => {
   it('two worlds that say the same thing differ in nothing', () => {
@@ -296,6 +296,7 @@ describe('the extends mistakes only a diff can read (ONT-005 §6.6)', () => {
     const after = clone(before);
     after.nouns.nouns[0].properties!.push({ name: 'name2', kind: 'text' });
     after.nouns.nouns[1].properties = [];
+    delete after.nouns.nouns[1].answers!.calledBy; // nothing left to call one by (ONT-011 step 2)
     after.nouns.nouns[0].properties = after.nouns.nouns[0].properties!.filter((p) => p.name !== 'name2');
     after.nouns.nouns[0].properties!.push({ name: 'title', kind: 'text' });
     before.nouns.nouns[1].properties!.push({ name: 'title', kind: 'text' });

@@ -21,6 +21,7 @@ import {
   projectWorld,
   QUESTION_BUDGET,
   validateWorld,
+  NOUN_MUTANTS,
   WORLD_FILES,
   WORLD_KINDS,
   worldMutants,
@@ -44,7 +45,7 @@ const ok = (files: WorldFiles, limit?: number) => {
   return r;
 };
 const id = (q: NextQuestion): string =>
-  'relation' in q.about ? `${q.about.relation}/${q.question}` : 'world' in q.about ? 'signsIn' : 'freeWords';
+  'relation' in q.about ? `${q.about.relation}/${q.question}` : 'world' in q.about ? 'signsIn' : 'nouns' in q.about ? `noun/${q.question}` : 'freeWords';
 
 /** The membership world with every answer taken out. */
 function unanswered(): WorldFiles {
@@ -102,9 +103,10 @@ describe('AC3 — every question names its mutant or its incident', () => {
     for (const q of ok(files, 1000).ask)
       for (const m of q.mutants) {
         if (!byId.has(m)) {
-          // A kind's seed named directly: `<kind>/<seed>`.
+          // A kind's seed named directly: `<kind>/<seed>`; or one of the noun's own (ONT-011 step 2): `noun/<seed>`.
           const [kind, seed] = m.split('/');
-          expect(WORLD_KINDS.find((k) => k.id === kind)?.mutants.some((s) => s.id === seed)).toBe(true);
+          const seeds = kind === 'noun' ? NOUN_MUTANTS : WORLD_KINDS.find((k) => k.id === kind)?.mutants;
+          expect([m, seeds?.some((s) => s.id === seed)]).toEqual([m, true]);
           continue;
         }
         const mm = byId.get(m)!;

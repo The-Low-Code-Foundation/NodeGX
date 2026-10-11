@@ -6,11 +6,32 @@
       "name": "Product",
       "sentence": "A product is one thing we sell, with a price, a category and a subcategory.",
       "properties": [
-        { "name": "name", "kind": "text" },
-        { "name": "price", "kind": "number", "sentence": "What it sells for, in euros." },
-        { "name": "category", "kind": "text", "sentence": "Naturally it should just be a text field." },
-        { "name": "subcategory", "kind": "text" }
-      ]
+        {
+          "name": "name",
+          "kind": "text"
+        },
+        {
+          "name": "price",
+          "kind": "number",
+          "sentence": "What it sells for, in euros."
+        },
+        {
+          "name": "category",
+          "kind": "text",
+          "sentence": "Naturally it should just be a text field."
+        },
+        {
+          "name": "subcategory",
+          "kind": "text"
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "name",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
     }
   ]
 }

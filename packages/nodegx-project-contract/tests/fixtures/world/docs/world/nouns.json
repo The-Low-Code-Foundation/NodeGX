@@ -15,7 +15,14 @@
           "kind": "text",
           "sentence": "We write to them here; it can change."
         }
-      ]
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "name",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
     },
     {
       "id": "account",
@@ -36,7 +43,14 @@
           "name": "renews",
           "kind": "date"
         }
-      ]
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "plan",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
     },
     {
       "id": "company",
@@ -47,7 +61,14 @@
           "name": "name",
           "kind": "text"
         }
-      ]
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "name",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
     },
     {
       "id": "session",
@@ -62,7 +83,14 @@
           "name": "on",
           "kind": "date"
         }
-      ]
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "title",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
     },
     {
       "id": "note",
@@ -73,7 +101,14 @@
           "name": "text",
           "kind": "text"
         }
-      ]
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "text",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
     }
   ]
 }

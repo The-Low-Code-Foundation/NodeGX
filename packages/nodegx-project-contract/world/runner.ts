@@ -22,6 +22,7 @@
 import { WORLD_FILES, type Noun, type Relation, type ThroughStep, type WorldFiles } from './files';
 import type { Question } from './kind';
 import { answerMatters, askWords, gradeStatically, worldMutants, type WorldMutant } from './mutants';
+import { NOUN_FACTS, NUMBER_QUESTIONS, nounAskWords, nounQuestion, nounSeedFor } from './noun';
 import { ownerRule } from './paths';
 import { LOGIN_FIELD, loginHop, type WorldSchema } from './project';
 import { validateWorld, type WorldProblem } from './validate';
@@ -45,11 +46,13 @@ export type QuestionAbout =
   /** The kind-picker: one question per world, about every text field nobody has said is free words or a list. */
   | { fields: Array<{ noun: string; property: string }> }
   /** Which noun is who signs in. */
-  | { world: 'signsIn'; nouns: string[] };
+  | { world: 'signsIn'; nouns: string[] }
+  /** P116 ONT-011 step 2: one of the noun's own questions (`NOUN_QUESTIONS`), for these nouns at once. */
+  | { nouns: string[]; question: string };
 
 export interface NextQuestion {
   about: QuestionAbout;
-  /** The answer's key: a question id of the kind, `through`, `freeWords`, or `signsIn`. */
+  /** The answer's key: a question id of the kind (or of the noun), `through`, `freeWords`, or `signsIn`. */
   question: string;
   /** The question in the person's nouns. */
   ask: string;
@@ -67,6 +70,7 @@ export interface NextQuestion {
 }
 
 export interface AnswerRecord {
+  /** The relation answered — or, for one of a noun's own questions (ONT-011 step 2), the noun, with `kind: 'noun'`. */
   relation: string;
   kind: string;
   question: string;
@@ -111,7 +115,15 @@ const PICKER_RANK = 3;
 /** A question somebody paid for is asked whether or not a mutant stands; the rest wait for one (§3.3). */
 const lived = (from: IncidentSource): boolean => from === 'note' || from === 'oral';
 const answerWords = (q: Question): string =>
-  q.answer.type === 'yes-no' ? 'yes or no' : q.answer.type === 'one-of' ? `one of ${q.answer.values.join(', ')}` : 'words';
+  q.answer.type === 'yes-no'
+    ? 'yes or no'
+    : q.answer.type === 'one-of'
+      ? `one of ${q.answer.values.join(', ')}`
+      : q.answer.type === 'fields'
+        ? 'the names of its details, comma-separated, or "nothing"'
+        : q.answer.type === 'field'
+          ? 'the name of one of its details'
+          : 'words';
 const list = (xs: string[]): string => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).join(', ')} or ${xs[xs.length - 1]}`);
 
 /** A mutant that stands without an engine: it survives, or the engine would have to decide. */
@@ -248,6 +260,66 @@ export function nextQuestions(files: WorldFiles, options: { limit?: number } = {
     });
   }
 
+  // The noun's own questions (ONT-011 step 2): the five facts, one question per fact for the whole
+  // world naming the nouns that have not answered — after every relation question, like the
+  // picker, or they would outrank what the person said about how things join; then, per noun
+  // whose number is read aloud, the three about the number. An answered one is in the record.
+  NOUN_FACTS.forEach((qid, qi) => {
+    const q = nounQuestion(qid)!;
+    const seed = nounSeedFor(qid)!;
+    const open: Noun[] = [];
+    for (const n of nouns) {
+      if (qid in (n.answers || {})) {
+        record.push({ relation: n.id, kind: 'noun', question: qid, ask: nounAskWords(q, n.id), said: n.answers![qid], how: 'asked' });
+        continue;
+      }
+      if (qid === 'calledBy' && !(n.properties || []).length) continue; // nothing to call it by
+      open.push(n);
+    }
+    if (!open.length) return;
+    const standing = mutants.filter((m) => 'question' in m.of && m.of.question === qid && open.some((n) => n.id === (m.of as { noun: string }).noun) && stands(right, m));
+    const named = open.map((n) => n.id);
+    ranked.push({
+      q: {
+        about: { nouns: named, question: qid },
+        question: qid,
+        ask: `${nounAskWords(q, open[0].id)}${open.length > 1 ? ` The same for ${list(named.slice(1).map(a))}.` : ''}`,
+        answer: answerWords(q),
+        home: `nouns[<the noun>].answers.${qid}`,
+        mutants: standing.length ? standing.map((m) => m.id) : [`noun/${seed.id}`],
+        mistake: seed.mistake.replace(/\{noun\}/g, open[0].id),
+        incident: { from: q.from, prevents: q.prevents },
+        changes: qid === 'calledBy' ? 'the record' : 'the schema'
+      },
+      key: [PICKER_RANK, 0, qi, relations.length + 1]
+    });
+  });
+  nouns.forEach((n, ni) => {
+    if (n.answers?.readAloud !== true) return;
+    NUMBER_QUESTIONS.forEach((qid, qi) => {
+      const q = nounQuestion(qid)!;
+      const ask = nounAskWords(q, n.id);
+      if (qid in n.answers!) {
+        record.push({ relation: n.id, kind: 'noun', question: qid, ask, said: n.answers![qid], how: 'asked' });
+        return;
+      }
+      ranked.push({
+        q: {
+          about: { nouns: [n.id], question: qid },
+          question: qid,
+          ask,
+          answer: answerWords(q),
+          home: `nouns[${n.id}].answers.${qid}`,
+          mutants: [`noun/${nounSeedFor('readAloud')!.id}`],
+          mistake: q.prevents,
+          incident: { from: q.from, prevents: q.prevents },
+          changes: 'the record'
+        },
+        key: [RANK[q.from], 0, NOUN_FACTS.length + qi, ni]
+      });
+    });
+  });
+
   // The kind-picker: every text field nobody has said is free words, nor made a one-of. One
   // question for the whole world, after every relation question, or it is asked once per noun
   // and outranks the questions about what the person said (measured on the every-kind world:
@@ -277,7 +349,7 @@ export function nextQuestions(files: WorldFiles, options: { limit?: number } = {
         incident: { from: picker.from, prevents: needsDetails.prevents },
         changes: 'the schema'
       },
-      key: [PICKER_RANK, -oneOf.evidence.rows, 0, relations.length + 1]
+      key: [PICKER_RANK, 0, NOUN_FACTS.length + NUMBER_QUESTIONS.length, relations.length + 1]
     });
   }
 

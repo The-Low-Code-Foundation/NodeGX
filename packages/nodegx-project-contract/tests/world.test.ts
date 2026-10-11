@@ -183,7 +183,7 @@ describe('AC1 — the refusals name what was expected', () => {
     ['a choice with no list', (w: WorldFiles) => delete w.nouns.nouns[1].properties![0].values, 'nouns[1].properties[0].values', 'the list a choice is one of'],
     ['a relation with no sentence', (w: WorldFiles) => delete (w.relations.relations[0] as { sentence?: string }).sentence, 'relations[0].sentence', 'the sentence the person said'],
     ['a vocabulary this reader does not know', (w: WorldFiles) => (w.vocabulary.version = 2), 'vocabulary', 'nodegx-world-kinds v1'],
-    ['a key the format does not have', (w: WorldFiles) => ((w.nouns.nouns[0] as unknown as Record<string, unknown>).table = 'people'), 'nouns[0].table', 'only id, name, sentence, properties, signsIn, was']
+    ['a key the format does not have', (w: WorldFiles) => ((w.nouns.nouns[0] as unknown as Record<string, unknown>).table = 'people'), 'nouns[0].table', 'only id, name, sentence, properties, signsIn, answers, was']
   ])('refuses %s', (_name, mutate, at, expected) => {
     const problems = refuse(mutate as (w: WorldFiles) => void);
     expect(problems.map((p) => [p.at, p.expected])).toContainEqual([at, expected]);

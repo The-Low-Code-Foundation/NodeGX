@@ -13,9 +13,22 @@
         {
           "name": "email",
           "kind": "text",
-          "sentence": "We write to them here; it can change."
+          "sentence": "We write to them here; it can change.",
+          "secret": true
+        },
+        {
+          "name": "left because",
+          "kind": "text",
+          "sentence": "Why they left, in their words; written when they leave."
         }
-      ]
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "name",
+        "history": false,
+        "readAloud": false,
+        "secret": true
+      }
     },
     {
       "id": "account",
@@ -32,7 +45,14 @@
           ],
           "sentence": "The size of membership they pay for."
         }
-      ]
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "plan",
+        "history": true,
+        "readAloud": false,
+        "secret": false
+      }
     },
     {
       "id": "company",
@@ -43,7 +63,14 @@
           "name": "name",
           "kind": "text"
         }
-      ]
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "name",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
     },
     {
       "id": "session",
@@ -58,7 +85,17 @@
           "name": "held on",
           "kind": "date"
         }
-      ]
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "title",
+        "history": false,
+        "readAloud": true,
+        "secret": false,
+        "looksLike": "S-{####}",
+        "maySkip": true,
+        "restarts": "never"
+      }
     },
     {
       "id": "tag",
@@ -69,7 +106,14 @@
           "name": "label",
           "kind": "text"
         }
-      ]
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "label",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
     },
     {
       "id": "topic",
@@ -80,7 +124,14 @@
           "name": "title",
           "kind": "text"
         }
-      ]
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "title",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
     },
     {
       "id": "profile",
@@ -91,7 +142,14 @@
           "name": "bio",
           "kind": "text"
         }
-      ]
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "bio",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
     },
     {
       "id": "invite",
@@ -102,7 +160,14 @@
           "name": "email",
           "kind": "text"
         }
-      ]
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "email",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
     },
     {
       "id": "note",
@@ -113,7 +178,14 @@
           "name": "body",
           "kind": "text"
         }
-      ]
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "body",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
     },
     {
       "id": "slot",
@@ -128,8 +200,24 @@
           "name": "open",
           "kind": "yesno",
           "sentence": "Off days, breaks and public holidays are slots that are not open."
+        },
+        {
+          "name": "closed because",
+          "kind": "text",
+          "sentence": "Why the day is off: a holiday, a break.",
+          "onlyWhen": {
+            "field": "open",
+            "is": false
+          }
         }
-      ]
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "starts",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
     },
     {
       "id": "quote",
@@ -145,7 +233,38 @@
           "kind": "text",
           "sentence": "A line for ourselves; it can change after the quote is sent."
         }
-      ]
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "note",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
+    },
+    {
+      "id": "settings",
+      "name": "Settings",
+      "sentence": "The settings are the few things we set once for the whole app: our name, and the season we are in.",
+      "properties": [
+        {
+          "name": "our name",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "season",
+          "kind": "text",
+          "freeWords": true
+        }
+      ],
+      "answers": {
+        "onlyOne": true,
+        "calledBy": "our name",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
     }
   ]
 }

@@ -5,16 +5,44 @@
       "id": "user",
       "name": "User",
       "sentence": "A user is anyone with a place on the site.",
-      "properties": [{ "name": "name", "kind": "text", "freeWords": true }]
+      "properties": [
+        {
+          "name": "name",
+          "kind": "text",
+          "freeWords": true
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "name",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
     },
     {
       "id": "profile",
       "name": "Profile",
       "sentence": "A profile is what a user tells others about themselves.",
       "properties": [
-        { "name": "bio", "kind": "text", "freeWords": true },
-        { "name": "updated", "kind": "date", "sentence": "When the profile was last changed." }
-      ]
+        {
+          "name": "bio",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "updated",
+          "kind": "date",
+          "sentence": "When the profile was last changed."
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "bio",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
     }
   ]
 }

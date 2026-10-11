@@ -58,7 +58,9 @@ export type AnswerShape =
   | { type: 'one-of'; values: readonly string[] }
   | { type: 'words' }
   /** P116 ONT-011 step 2: names of the {from}'s own details, comma-separated, or "nothing" — what a projection can read back as fields. */
-  | { type: 'fields' };
+  | { type: 'fields' }
+  /** P116 ONT-011 step 2: one of the {from}'s own details by name, or "nothing" where the question allows it. */
+  | { type: 'field' };
 
 export interface Question {
   /** The answer's key in `relations.json` → `answers`. */
@@ -166,6 +168,24 @@ export type RuleHold =
    * a world cannot name a role.
    */
   | { moves: string; from: Readonly<Record<string, { to: readonly string[] }>> }
+  /**
+   * P116 ONT-011 step 2, *only sometimes*: `onlyWhen` matters only when `when` is set (or holds
+   * `is`); `required`: never empty then. Held as an all-or-none check when `required` and no
+   * `is` (both set or both empty); otherwise said in words.
+   */
+  | { onlyWhen: string; when: string; is?: string | number | boolean; required?: boolean }
+  /**
+   * P116 ONT-011 step 2, *read aloud*: a number the store hands out in a format, going up by one,
+   * never reused — ONT-015's series. Until it is built: a text field, unique and set once (held),
+   * and the rest said in words.
+   */
+  | { series: string; looksLike?: string; maySkip?: boolean; restarts?: 'never' | 'each year' | 'each month' }
+  /** P116 ONT-011 step 2, *only one*: at most one record of it. Across records: no engine behind the contract keeps it yet (ONT-013 step 4). */
+  | { onlyOne: true }
+  /** P116 ONT-011 step 2, *secret details*: this field is not for everyone who can see the record. Step 4 projects it to a per-field read rule (R-a). */
+  | { secret: string }
+  /** P116 ONT-011 step 2, *who changed what*: a history record per change, written on every save — a verb's or a trigger's, not the store's. */
+  | { history: true }
   /** Following this link never leads back to the record it starts from. */
   | { notUnderItself: string }
   /** Only the record this link names may see and change it; `path` when that is through a chain. */
@@ -178,6 +198,7 @@ export type RuleHold =
   | { shape: true };
 
 export interface ProjectedRule {
+  /** `from`: the record the relation starts from (a noun's own rule: the noun); `own`: the relation's own record. */
   on: 'from' | 'own';
   /** The rule in words, as the person would read it back. */
   says: string;

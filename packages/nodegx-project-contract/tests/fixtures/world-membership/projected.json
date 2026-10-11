@@ -10,10 +10,8 @@
         "noun": "person"
       },
       "sentence": "A person is anyone we know: a member, someone who came to a session, someone we wrote to.",
-      "notHeld": [
-        "nobody deletes a person; it ends"
-      ],
-      "description": "A person is anyone we know: a member, someone who came to a session, someone we wrote to. Not kept by the database yet: nobody deletes a person; it ends.",
+      "notHeld": [],
+      "description": "A person is anyone we know: a member, someone who came to a session, someone we wrote to.",
       "columns": [
         {
           "name": "name",
@@ -29,7 +27,11 @@
         }
       ],
       "checks": [],
-      "indexes": []
+      "indexes": [],
+      "calledBy": "name",
+      "onlyWhile": {
+        "delete": "never"
+      }
     },
     {
       "name": "Account",
@@ -37,10 +39,8 @@
         "noun": "account"
       },
       "sentence": "An account is what pays us: a company's membership, with the people on it.",
-      "notHeld": [
-        "an account's company is set once"
-      ],
-      "description": "An account is what pays us: a company's membership, with the people on it. Not kept by the database yet: an account's company is set once.",
+      "notHeld": [],
+      "description": "An account is what pays us: a company's membership, with the people on it.",
       "columns": [
         {
           "name": "name",
@@ -59,7 +59,17 @@
         }
       ],
       "checks": [],
-      "indexes": []
+      "indexes": [],
+      "calledBy": "name",
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": [
+              "company"
+            ]
+          }
+        }
+      }
     },
     {
       "name": "Company",
@@ -77,7 +87,8 @@
         }
       ],
       "checks": [],
-      "indexes": []
+      "indexes": [],
+      "calledBy": "name"
     },
     {
       "name": "Session",
@@ -110,7 +121,8 @@
         }
       ],
       "checks": [],
-      "indexes": []
+      "indexes": [],
+      "calledBy": "title"
     },
     {
       "name": "Tag",
@@ -128,7 +140,8 @@
         }
       ],
       "checks": [],
-      "indexes": []
+      "indexes": [],
+      "calledBy": "label"
     },
     {
       "name": "Topic",
@@ -157,7 +170,8 @@
         }
       ],
       "checks": [],
-      "indexes": []
+      "indexes": [],
+      "calledBy": "title"
     },
     {
       "name": "Membership",
@@ -272,11 +286,8 @@
         "relation": "attended"
       },
       "sentence": "A person came to a session.",
-      "notHeld": [
-        "nobody edits it",
-        "nobody deletes it"
-      ],
-      "description": "A person came to a session. Not kept by the database yet: nobody edits it; nobody deletes it.",
+      "notHeld": [],
+      "description": "A person came to a session.",
       "columns": [
         {
           "name": "person",
@@ -306,7 +317,15 @@
         }
       ],
       "checks": [],
-      "indexes": []
+      "indexes": [],
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": "*"
+          }
+        },
+        "delete": "never"
+      }
     },
     {
       "name": "SignedUp",
@@ -314,11 +333,8 @@
         "relation": "signed-up"
       },
       "sentence": "A person signed up, with their own login.",
-      "notHeld": [
-        "nobody edits it",
-        "nobody deletes it"
-      ],
-      "description": "A person signed up, with their own login. Not kept by the database yet: nobody edits it; nobody deletes it.",
+      "notHeld": [],
+      "description": "A person signed up, with their own login.",
       "columns": [
         {
           "name": "person",
@@ -348,7 +364,15 @@
         }
       ],
       "checks": [],
-      "indexes": []
+      "indexes": [],
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": "*"
+          }
+        },
+        "delete": "never"
+      }
     }
   ],
   "claims": [
@@ -964,7 +988,13 @@
       "from": {
         "relation": "account-company"
       },
-      "held": false,
+      "held": true,
+      "mutant": {
+        "dropOnlyWhile": {
+          "collection": "Account",
+          "setOnce": "company"
+        }
+      },
       "steps": [
         {
           "make": "Company",
@@ -972,8 +1002,13 @@
           "data": {}
         },
         {
+          "make": "Company",
+          "as": "company4",
+          "data": {}
+        },
+        {
           "make": "Account",
-          "as": "account3",
+          "as": "account5",
           "data": {
             "company": {
               "ref": "company2"
@@ -981,19 +1016,15 @@
           }
         },
         {
-          "make": "Company",
-          "as": "company5",
-          "data": {}
-        },
-        {
           "change": "Account",
-          "row": "account3",
+          "row": "account5",
           "data": {
             "company": {
-              "ref": "company5"
+              "ref": "company4"
             }
           },
-          "refused": true
+          "refused": true,
+          "byPerson": true
         }
       ]
     },
@@ -1003,7 +1034,13 @@
       "from": {
         "relation": "attended"
       },
-      "held": false,
+      "held": true,
+      "mutant": {
+        "dropOnlyWhile": {
+          "collection": "Attended",
+          "neverEdited": true
+        }
+      },
       "steps": [
         {
           "make": "Person",
@@ -1030,7 +1067,8 @@
               "date": "2026-01-06T00:00:00.000Z"
             }
           },
-          "refused": true
+          "refused": true,
+          "byPerson": true
         }
       ]
     },
@@ -1040,7 +1078,13 @@
       "from": {
         "relation": "attended"
       },
-      "held": false,
+      "held": true,
+      "mutant": {
+        "dropOnlyWhile": {
+          "collection": "Attended",
+          "neverDeleted": true
+        }
+      },
       "steps": [
         {
           "make": "Person",
@@ -1062,7 +1106,8 @@
         {
           "remove": "Attended",
           "row": "attended4",
-          "refused": true
+          "refused": true,
+          "byPerson": true
         }
       ]
     },
@@ -1097,7 +1142,13 @@
       "from": {
         "relation": "signed-up"
       },
-      "held": false,
+      "held": true,
+      "mutant": {
+        "dropOnlyWhile": {
+          "collection": "SignedUp",
+          "neverEdited": true
+        }
+      },
       "steps": [
         {
           "make": "Person",
@@ -1124,7 +1175,8 @@
               "date": "2026-01-06T00:00:00.000Z"
             }
           },
-          "refused": true
+          "refused": true,
+          "byPerson": true
         }
       ]
     },
@@ -1134,7 +1186,13 @@
       "from": {
         "relation": "signed-up"
       },
-      "held": false,
+      "held": true,
+      "mutant": {
+        "dropOnlyWhile": {
+          "collection": "SignedUp",
+          "neverDeleted": true
+        }
+      },
       "steps": [
         {
           "make": "Person",
@@ -1156,7 +1214,8 @@
         {
           "remove": "SignedUp",
           "row": "signedUp4",
-          "refused": true
+          "refused": true,
+          "byPerson": true
         }
       ]
     },
@@ -1166,7 +1225,13 @@
       "from": {
         "relation": "leaves"
       },
-      "held": false,
+      "held": true,
+      "mutant": {
+        "dropOnlyWhile": {
+          "collection": "Person",
+          "neverDeleted": true
+        }
+      },
       "steps": [
         {
           "make": "Person",
@@ -1176,7 +1241,8 @@
         {
           "remove": "Person",
           "row": "person1",
-          "refused": true
+          "refused": true,
+          "byPerson": true
         }
       ]
     },
@@ -1531,48 +1597,11 @@
   ],
   "notHeld": [
     {
-      "collection": "Account",
-      "field": "company",
-      "says": "an account's company is set once",
-      "why": "the schema has no rule against changing a field once the record is made",
-      "claim": "account-company/company-is-set-once"
-    },
-    {
-      "collection": "Attended",
-      "says": "nobody edits it",
-      "why": "the schema cannot say it; who may change a record is its collection’s permissions (BMG-006), which the projection does not write yet",
-      "claim": "attended/is-never-edited"
-    },
-    {
-      "collection": "Attended",
-      "says": "nobody deletes it",
-      "why": "the schema cannot say it; who may delete a record is its collection’s permissions (BMG-006), which the projection does not write yet",
-      "claim": "attended/is-never-deleted"
-    },
-    {
       "collection": "Topic",
       "field": "parent",
       "says": "no topic sits under itself",
       "why": "the schema has no rule that follows a link from record to record",
       "claim": "topic-tree/parent-never-leads-back"
-    },
-    {
-      "collection": "SignedUp",
-      "says": "nobody edits it",
-      "why": "the schema cannot say it; who may change a record is its collection’s permissions (BMG-006), which the projection does not write yet",
-      "claim": "signed-up/is-never-edited"
-    },
-    {
-      "collection": "SignedUp",
-      "says": "nobody deletes it",
-      "why": "the schema cannot say it; who may delete a record is its collection’s permissions (BMG-006), which the projection does not write yet",
-      "claim": "signed-up/is-never-deleted"
-    },
-    {
-      "collection": "Person",
-      "says": "nobody deletes a person; it ends",
-      "why": "the schema cannot say it; who may delete a record is its collection’s permissions (BMG-006), which the projection does not write yet",
-      "claim": "leaves/is-never-deleted"
     }
   ]
 }

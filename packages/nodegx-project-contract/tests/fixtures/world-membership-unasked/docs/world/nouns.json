@@ -11,7 +11,14 @@
           "kind": "text"
         }
       ],
-      "signsIn": true
+      "signsIn": true,
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "name",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
     },
     {
       "id": "account",
@@ -22,7 +29,14 @@
           "name": "name",
           "kind": "text"
         }
-      ]
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "name",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
     },
     {
       "id": "company",
@@ -33,7 +47,14 @@
           "name": "name",
           "kind": "text"
         }
-      ]
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "name",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
     },
     {
       "id": "session",
@@ -44,7 +65,14 @@
           "name": "title",
           "kind": "text"
         }
-      ]
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "title",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
     },
     {
       "id": "tag",
@@ -55,7 +83,14 @@
           "name": "label",
           "kind": "text"
         }
-      ]
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "label",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
     },
     {
       "id": "topic",
@@ -66,7 +101,14 @@
           "name": "title",
           "kind": "text"
         }
-      ]
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "title",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
     }
   ]
 }

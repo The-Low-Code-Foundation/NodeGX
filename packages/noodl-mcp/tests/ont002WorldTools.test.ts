@@ -105,10 +105,11 @@ describe('ONT-002 — validate_world and write_world', () => {
     expect(data.world).toBe('described');
     if (!data.report || !data.report.ok) throw new Error('no report');
     expect(data.report.ask.length).toBe(2);
-    expect(data.report.waiting).toBe(1);
+    // ONT-011 step 2 (s19): `ends` asks which detail is written when a person leaves (`leaves/endNote`) — the fixture leaves it unanswered, so two wait, not one.
+    expect(data.report.waiting).toBe(2);
     expect(data.report.enough).toBe(false);
     expect(data.report.record.length).toBeGreaterThan(20);
-    expect(data.note).toMatch(/1 more wait behind them/);
+    expect(data.note).toMatch(/2 more wait behind them/);
     expect(data.brief).toBeUndefined();
     const withBrief = await call<Report>(session, 'validate_world', { brief: true });
     expect(withBrief.data.brief).toMatch(/^# Describing a person's world/);

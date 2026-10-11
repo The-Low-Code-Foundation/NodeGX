@@ -11,10 +11,9 @@
       },
       "sentence": "A person is anyone we know: a member, someone who came to a session, someone we wrote to.",
       "notHeld": [
-        "every exchange with the course platform is logged, and a skipped one says why",
-        "nobody deletes a person; it ends"
+        "every exchange with the course platform is logged, and a skipped one says why"
       ],
-      "description": "A person is anyone we know: a member, someone who came to a session, someone we wrote to. Not kept by the database yet: every exchange with the course platform is logged, and a skipped one says why; nobody deletes a person; it ends.",
+      "description": "A person is anyone we know: a member, someone who came to a session, someone we wrote to. Not kept by the database yet: every exchange with the course platform is logged, and a skipped one says why.",
       "columns": [
         {
           "name": "name",
@@ -50,7 +49,11 @@
           ],
           "unique": true
         }
-      ]
+      ],
+      "calledBy": "name",
+      "onlyWhile": {
+        "delete": "never"
+      }
     },
     {
       "name": "Account",
@@ -58,10 +61,8 @@
         "noun": "account"
       },
       "sentence": "An account is what pays us: a company's membership, with the people on it.",
-      "notHeld": [
-        "an account's company is set once"
-      ],
-      "description": "An account is what pays us: a company's membership, with the people on it. Not kept by the database yet: an account's company is set once.",
+      "notHeld": [],
+      "description": "An account is what pays us: a company's membership, with the people on it.",
       "columns": [
         {
           "name": "plan",
@@ -96,7 +97,17 @@
           ]
         }
       ],
-      "indexes": []
+      "indexes": [],
+      "calledBy": "plan",
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": [
+              "company"
+            ]
+          }
+        }
+      }
     },
     {
       "name": "Company",
@@ -114,7 +125,8 @@
         }
       ],
       "checks": [],
-      "indexes": []
+      "indexes": [],
+      "calledBy": "name"
     },
     {
       "name": "Session",
@@ -137,7 +149,8 @@
         }
       ],
       "checks": [],
-      "indexes": []
+      "indexes": [],
+      "calledBy": "title"
     },
     {
       "name": "Note",
@@ -190,7 +203,8 @@
           ]
         }
       ],
-      "indexes": []
+      "indexes": [],
+      "calledBy": "text"
     },
     {
       "name": "Membership",
@@ -258,11 +272,8 @@
         "relation": "attended"
       },
       "sentence": "A person came to a session.",
-      "notHeld": [
-        "nobody edits it",
-        "nobody deletes it"
-      ],
-      "description": "A person came to a session. Not kept by the database yet: nobody edits it; nobody deletes it.",
+      "notHeld": [],
+      "description": "A person came to a session.",
       "columns": [
         {
           "name": "person",
@@ -304,7 +315,15 @@
         }
       ],
       "checks": [],
-      "indexes": []
+      "indexes": [],
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": "*"
+          }
+        },
+        "delete": "never"
+      }
     }
   ],
   "claims": [
@@ -875,7 +894,13 @@
       "from": {
         "relation": "account-company"
       },
-      "held": false,
+      "held": true,
+      "mutant": {
+        "dropOnlyWhile": {
+          "collection": "Account",
+          "setOnce": "company"
+        }
+      },
       "steps": [
         {
           "make": "Company",
@@ -883,8 +908,13 @@
           "data": {}
         },
         {
+          "make": "Company",
+          "as": "company4",
+          "data": {}
+        },
+        {
           "make": "Account",
-          "as": "account3",
+          "as": "account5",
           "data": {
             "company": {
               "ref": "company2"
@@ -892,19 +922,15 @@
           }
         },
         {
-          "make": "Company",
-          "as": "company5",
-          "data": {}
-        },
-        {
           "change": "Account",
-          "row": "account3",
+          "row": "account5",
           "data": {
             "company": {
-              "ref": "company5"
+              "ref": "company4"
             }
           },
-          "refused": true
+          "refused": true,
+          "byPerson": true
         }
       ]
     },
@@ -914,7 +940,13 @@
       "from": {
         "relation": "leaves"
       },
-      "held": false,
+      "held": true,
+      "mutant": {
+        "dropOnlyWhile": {
+          "collection": "Person",
+          "neverDeleted": true
+        }
+      },
       "steps": [
         {
           "make": "Person",
@@ -924,7 +956,8 @@
         {
           "remove": "Person",
           "row": "person1",
-          "refused": true
+          "refused": true,
+          "byPerson": true
         }
       ]
     },
@@ -934,7 +967,13 @@
       "from": {
         "relation": "attended"
       },
-      "held": false,
+      "held": true,
+      "mutant": {
+        "dropOnlyWhile": {
+          "collection": "Attended",
+          "neverEdited": true
+        }
+      },
       "steps": [
         {
           "make": "Attended",
@@ -953,7 +992,8 @@
               "date": "2026-01-04T00:00:00.000Z"
             }
           },
-          "refused": true
+          "refused": true,
+          "byPerson": true
         }
       ]
     },
@@ -963,7 +1003,13 @@
       "from": {
         "relation": "attended"
       },
-      "held": false,
+      "held": true,
+      "mutant": {
+        "dropOnlyWhile": {
+          "collection": "Attended",
+          "neverDeleted": true
+        }
+      },
       "steps": [
         {
           "make": "Attended",
@@ -977,7 +1023,8 @@
         {
           "remove": "Attended",
           "row": "attended2",
-          "refused": true
+          "refused": true,
+          "byPerson": true
         }
       ]
     },
@@ -1171,34 +1218,9 @@
   ],
   "notHeld": [
     {
-      "collection": "Account",
-      "field": "company",
-      "says": "an account's company is set once",
-      "why": "the schema has no rule against changing a field once the record is made",
-      "claim": "account-company/company-is-set-once"
-    },
-    {
       "collection": "Person",
       "says": "every exchange with the course platform is logged, and a skipped one says why",
       "why": "an exchange with another system is a workflow’s to keep, not the schema’s"
-    },
-    {
-      "collection": "Person",
-      "says": "nobody deletes a person; it ends",
-      "why": "the schema cannot say it; who may delete a record is its collection’s permissions (BMG-006), which the projection does not write yet",
-      "claim": "leaves/is-never-deleted"
-    },
-    {
-      "collection": "Attended",
-      "says": "nobody edits it",
-      "why": "the schema cannot say it; who may change a record is its collection’s permissions (BMG-006), which the projection does not write yet",
-      "claim": "attended/is-never-edited"
-    },
-    {
-      "collection": "Attended",
-      "says": "nobody deletes it",
-      "why": "the schema cannot say it; who may delete a record is its collection’s permissions (BMG-006), which the projection does not write yet",
-      "claim": "attended/is-never-deleted"
     },
     {
       "collection": "Note",

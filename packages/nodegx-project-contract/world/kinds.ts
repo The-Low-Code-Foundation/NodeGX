@@ -581,6 +581,7 @@ export const ends = defineKind({
   sentence: 'a {from} can end without being deleted',
   distinguishes: 'a status, an active flag, an end date, an archive or erasure record — the record is kept',
   projectsTo: "a status Choice or a Date, a rule for each linked thing, and a 'delete: nobody' permission; the archive note is this kind's unasked question",
+  // ONT-011 step 2: `endNote`/`endNoteNeeded` add a rule, not a field — the detail is the noun's own; the kind says it matters only once ended (held as all-or-none when it must be there).
   target: 'none',
   carriesDetails: false,
   tile: { label: 'Can end', line: 'stops, without being deleted', icon: '◼' },
@@ -612,12 +613,38 @@ export const ends = defineKind({
       prevents: 'anyone able to end anything',
       answer: { type: 'words' },
       from: 'census'
+    },
+    // ONT-011 step 2, *only sometimes*: the corpus's clearest rows are a note or a reason beside the
+    // day a thing ended (a task's closing note, a routine's stop note), and a cancellation with no
+    // field for why. The detail is the person's; the kind says when it matters, and whether it must.
+    {
+      id: 'endNote',
+      ask: 'When a {from} ends, is a note or a reason written with it? Name that detail of a {from}, or "nothing".',
+      prevents: 'a cancelled session shown to the learner with no field for why',
+      answer: { type: 'field' },
+      from: 'census'
+    },
+    {
+      id: 'endNoteNeeded',
+      ask: 'Must that note be there whenever a {from} has ended?',
+      prevents: 'a reason that was always optional, so it was empty when it mattered',
+      answer: { type: 'yes-no' },
+      from: 'census'
     }
   ],
-  projection: ({ from }) => ({
-    fields: [{ on: 'from', name: 'endedAt', kind: 'date' }],
-    rules: [{ on: 'from', says: `nobody deletes ${a(from)}; it ends`, holds: { neverDeleted: true } }]
-  }),
+  projection: ({ from, answers }) => {
+    const rules: ProjectedRule[] = [{ on: 'from', says: `nobody deletes ${a(from)}; it ends`, holds: { neverDeleted: true } }];
+    const [note] = typeof answers.endNote === 'string' ? answers.endNote.split(',').map((w) => w.trim()).filter((w) => w && !/^nothing$/i.test(w)) : [];
+    if (note) {
+      const needed = answers.endNoteNeeded === true;
+      rules.push({
+        on: 'from',
+        says: needed ? `${a(from)} that has ended has its ${note}, and one that has not has none` : `${a(from)}'s ${note} matters only once it has ended`,
+        holds: { onlyWhen: note, when: 'endedAt', required: needed }
+      });
+    }
+    return { fields: [{ on: 'from', name: 'endedAt', kind: 'date' }], rules };
+  },
   mutants: [
     {
       id: 'end-by-delete',
@@ -626,6 +653,14 @@ export const ends = defineKind({
       from: 'note',
       kills: 'whatStays',
       shape: { unsaid: true }
+    },
+    {
+      id: 'note-always-optional',
+      mistake: 'a reason for the end that is always optional, so it is empty when it mattered',
+      why: 'nothing ties the reason to the ending, so a thing ends with no reason on file and nothing refuses it',
+      from: 'task',
+      kills: 'endNoteNeeded',
+      shape: { without: { rule: 'onlyWhen' } }
     }
   ],
   evidence: { rows: 13, sources: ['lessons', 'acme', 'tirion'] }

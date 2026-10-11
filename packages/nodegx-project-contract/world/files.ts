@@ -40,6 +40,31 @@ export interface WorldProperty {
    * free words (ONT-002's kind-picker question; the answer's home, so it is asked once).
    */
   freeWords?: true;
+  /**
+   * P116 ONT-011 step 2, *secret details*: this detail is not for everyone who can see the
+   * record (a verifier on a profile anyone may read; a token every admin can list). The noun's
+   * `answers.secret` is the yes; this is the which — as `path: true` and `through` are. Step 4
+   * projects it to a per-field read rule (R-a); until then the projection says it is not kept.
+   */
+  secret?: true;
+  /**
+   * P116 ONT-011 step 2, *only sometimes*: this detail matters only when another detail of the
+   * same record is set (`field`), or holds one value (`is`) — a closing note beside the day a
+   * task closed; four details of a project's next move beside the move. `required`: it is never
+   * left empty when it matters. With `required` and no `is`, the store keeps it (the two are
+   * both set or both empty); otherwise the projection says it in words.
+   */
+  onlyWhen?: OnlyWhen;
+}
+
+/** P116 ONT-011 step 2 — the case a detail matters in: another detail of the same record set, or holding `is`. */
+export interface OnlyWhen {
+  /** A property of the same noun or relation record. */
+  field: string;
+  /** The value `field` holds when this one matters; absent: whenever `field` is set. */
+  is?: string | number | boolean;
+  /** Never empty when it matters. */
+  required?: true;
 }
 
 export interface Noun {
@@ -56,6 +81,15 @@ export interface Noun {
    * (ONT-004 `worldRule`); the runner asks which noun it is when a rule needs it (ONT-002).
    */
   signsIn?: true;
+  /**
+   * P116 ONT-011 step 2, *facts about a thing*: the person's answers to the noun's own questions
+   * (`NOUN_QUESTIONS` in `noun.ts`), by question id — is there only one, what one is called in a
+   * list, whether to keep who changed what, whether people read its number aloud (and then what
+   * it looks like, whether it may skip, when it starts again), and whether any detail on it is
+   * secret. Facts, not relations: the kinds in `relations.json` join two things; these are about
+   * one. The runner asks each once, for every noun at a time, and each has a projection.
+   */
+  answers?: Record<string, string | boolean>;
   /**
    * The id this noun had before the person called it something else (P116 ONT-007). A rename is
    * a diff the migration carries the records through, never a noun removed and another added;

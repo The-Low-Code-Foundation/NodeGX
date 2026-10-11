@@ -275,6 +275,14 @@ function honesty(engine: string, fixture: string, verdicts: Verdict[]): string {
  * settled's six (four seeds, two unanswered questions that change the schema) are all killed at its three held
  * claims or for want of a home; the one survivor added is the quote's number stored as text, the noun's own
  * property mutant, unclaimed like the slot's. 13 of 38 → 14 of 45.
+ *
+ * ONT-011 step 2, the other three borrows (s19): the noun's own questions and the `ends` kind's note questions.
+ * every-kind gained a `settings` noun and six answers: 51 mutants; `account/history-unanswered` falls for want of a
+ * home (the history collection's required link), `leaves/endNote-`, `endNoteNeeded-unanswered` and the seed
+ * `note-always-optional` fall at the held all-or-none claim — which also takes `leaves/end-by-delete` (unsaid, so
+ * `endedAt` is gone and the claim has no home). Two survive by design, unkept, each naming the step that keeps it:
+ * `settings/onlyOne-unanswered` (across records, ONT-013 step 4) and `person/secret-unanswered` (the per-field read
+ * rule, step 4). 14 of 45 → 15 of 51. `world` and `membership` never answer `leaves/endNote`: +1 unanswered each.
  */
 const SURVIVORS: Record<(typeof WORLDS)[number], string[]> = {
   world: [
@@ -282,6 +290,7 @@ const SURVIVORS: Record<(typeof WORLDS)[number], string[]> = {
     'membership/startsEnds-unanswered (unclaimed)',
     'plan-size/retires-unanswered (unanswered)',
     'on-the-course-platform/silent-skip (unkept)',
+    'leaves/endNote-unanswered (unanswered)',
     'attended/undo-unanswered (unanswered)',
     'attended/who-unanswered (unclaimed)',
     'note-about/whenTargetGoes-unanswered (unanswered)',
@@ -294,13 +303,14 @@ const SURVIVORS: Record<(typeof WORLDS)[number], string[]> = {
     'plan-size/retires-unanswered (unkept)',
     'topic-tree/ownAncestor-unanswered (unkept)',
     'on-the-course-platform/silent-skip (unkept)',
-    'leaves/end-by-delete (unclaimed)',
     'attended/who-unanswered (unclaimed)',
     'note-author/visible-to-all (unkept)',
     'person-profile/filter-field-split-off (unclaimed)',
     'person-profile/sort-key-copied (unclaimed)',
     'invite-for/the-text-itself (unclaimed)',
     'note-about/whenTargetGoes-unanswered (unkept)',
+    'person/secret-unanswered (unkept)',
+    'settings/onlyOne-unanswered (unkept)',
     'session/heldOn-as-text (unclaimed)',
     'slot/starts-as-text (unclaimed)',
     'slot/open-as-text (unclaimed)',
@@ -310,7 +320,8 @@ const SURVIVORS: Record<(typeof WORLDS)[number], string[]> = {
     'membership/startsEnds-unanswered (unclaimed)',
     'employment/startsEnds-unanswered (unclaimed)',
     'topic-tree/ownAncestor-unanswered (unkept)',
-    'signed-up/who-unanswered (unclaimed)'
+    'signed-up/who-unanswered (unclaimed)',
+    'leaves/endNote-unanswered (unanswered)'
   ],
   'world-categories': [
     'subcategory-category/retires-unanswered (unkept)',

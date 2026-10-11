@@ -11,6 +11,7 @@
  */
 export * from './world/kind';
 export * from './world/kinds';
+export * from './world/noun';
 export * from './world/files';
 export * from './world/vocabulary';
 export * from './world/validate';

@@ -22,7 +22,7 @@
  */
 import type { Noun, Relation, VerbsFile, WorldFiles, WorldProperty } from './files';
 import { plural } from './mutants';
-import { fieldName, projectWorld, type WorldCheck, type WorldCollection, type WorldColumn, type WorldIndex, type WorldOnlyWhile, type WorldSchema } from './project';
+import { checkFields, fieldName, projectWorld, type WorldCheck, type WorldCollection, type WorldColumn, type WorldIndex, type WorldOnlyWhile, type WorldSchema } from './project';
 import { endField, functionRef } from './verb-project';
 import { verbSubjects } from './verbs';
 
@@ -39,6 +39,8 @@ export type ChangeWhat =
   /** The word or the sentence changed; the id, and so the schema, did not. */
   | 'noun-reworded'
   | 'noun-signs-in'
+  /** P116 ONT-011 step 2: one of the noun's own answers (only one, called by, history, read aloud, secret, …) changed. */
+  | 'noun-answered'
   | 'property-added'
   | 'property-removed'
   | 'property-changed'
@@ -106,6 +108,12 @@ export function diffWorld(before: WorldFiles, after: WorldFiles): WorldChange[] 
       out.push({ what: 'noun-reworded', about, says: was.name !== n.name ? `${article(was.name)} is called ${quoteWords(n.name)} now` : `${article(n.id)} is said differently: ${quoteWords(n.sentence)}` });
     if (Boolean(was.signsIn) !== Boolean(n.signsIn))
       out.push({ what: 'noun-signs-in', about, says: n.signsIn ? `${plural(n.id)} sign in now` : `${plural(n.id)} no longer sign in` });
+    const wa = was.answers || {};
+    const na = n.answers || {};
+    for (const q of [...new Set([...Object.keys(wa), ...Object.keys(na)])].sort()) {
+      if (wa[q] === na[q]) continue;
+      out.push({ what: 'noun-answered', about, detail: q, says: `${plural(n.id)}: ${q} was ${shownAnswer(wa[q])}, is ${shownAnswer(na[q])} now` });
+    }
     out.push(...propertyChanges(about, article(n.id), was.properties, n.properties));
   }
   for (const n of before.nouns.nouns) if (!an.has(n.id) && !renames.has(n.id)) out.push({ what: 'noun-removed', about: { noun: n.id }, says: `there are no ${plural(n.id)} any more` });
@@ -372,7 +380,7 @@ function renameSteps(old: WorldSchema, renamed: WorldSchema, renames: ReadonlyMa
     // A rule comes off only when the rename reaches it: the table it is built under, or a field it reads.
     const moved = new Set(fields.map(([from]) => from));
     const tableMoves = c.name !== n.name;
-    const checksMove = c.checks.length > 0 && (tableMoves || c.checks.some((k) => moved.has(k.field)));
+    const checksMove = c.checks.length > 0 && (tableMoves || c.checks.some((k) => checkFields(k).some((f) => moved.has(f))));
     const indexesMove = c.indexes.length > 0 && (tableMoves || c.indexes.some((i) => [...i.fields, ...Object.keys(i.where || {})].some((f) => moved.has(f))));
     if (checksMove) off.push({ schema: { action: 'setChecks', table: c.name, checks: [] }, says: `take the lists ${wordsOf(c)} keep off while they are renamed` });
     if (indexesMove) off.push({ schema: { action: 'setIndexes', table: c.name, indexes: [] }, says: `take the unique rules ${wordsOf(c)} keep off while they are renamed` });
@@ -547,7 +555,7 @@ function planBetween(before: WorldFiles, after: WorldFiles, sb: WorldSchema, sa:
     const was = ba.get(c.name);
     if (!was) {
       created.push({ schema: { action: 'createTable', table: c.name, description: c.description, columns: c.columns.map(pushable) }, says: `make a place for ${wordsOf(c)}` });
-      if (c.checks.length) rules.push({ schema: { action: 'setChecks', table: c.name, checks: c.checks }, says: `${wordsOf(c)} keep: ${c.checks.map((k) => `${k.field} is one of its list`).join('; ')}` });
+      if (c.checks.length) rules.push({ schema: { action: 'setChecks', table: c.name, checks: c.checks }, says: `${wordsOf(c)} keep: ${c.checks.map((k) => ('allOrNone' in k ? `${k.allOrNone.join(' and ')} are both set or both empty` : `${k.field} is one of its list`)).join('; ')}` });
       if (c.indexes.length) rules.push({ schema: { action: 'setIndexes', table: c.name, indexes: c.indexes }, says: `${wordsOf(c)} keep: no two share ${c.indexes.map((i) => i.fields.join(' and ')).join('; ')}` });
       reach.push({ collection: c.name, words: wordsOf(c), fields: [], how: 'made' });
       continue;
@@ -580,11 +588,12 @@ function planBetween(before: WorldFiles, after: WorldFiles, sb: WorldSchema, sa:
     }
     if (sortedText(was.checks) !== sortedText(c.checks)) {
       rules.push({ schema: { action: 'setChecks', table: c.name, checks: c.checks }, says: `${wordsOf(c)} keep the lists said now` });
-      for (const k of [...was.checks, ...c.checks]) fields.add(k.field);
+      for (const k of [...was.checks, ...c.checks]) for (const f of checkFields(k)) fields.add(f);
       // A list put on a field the records already hold (s9): the route refuses it when any row is outside the
       // list, after the backup and every step before it. The dry run reads those rows first.
-      const had = new Set(was.checks.map((k) => JSON.stringify([k.field, [...k.oneOf].sort()])));
+      const had = new Set(was.checks.filter((k) => 'oneOf' in k).map((k) => JSON.stringify([checkFields(k)[0], [...(k as { oneOf: string[] }).oneOf].sort()])));
       for (const k of c.checks) {
+        if (!('oneOf' in k)) continue; // ONT-011 step 2: an all-or-none check on rows that break it is a refusal the route makes, not read ahead here yet
         if (had.has(JSON.stringify([k.field, [...k.oneOf].sort()])) || !was.columns.some((x) => x.name === k.field)) continue;
         checks.push({ refuse: 'outside-list', collection: c.name, field: k.field, values: [...k.oneOf], says: `${article(oneOf(c))} whose ${k.field} is not one of ${k.oneOf.join(', ')} cannot keep it` });
       }

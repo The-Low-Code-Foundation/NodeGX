@@ -11,6 +11,7 @@
  */
 import { VERBS_FILE, WORLD_DIR, WORLD_FILES, type WorldFiles } from './files';
 import { WORLD_KINDS } from './kinds';
+import { NOUN_QUESTIONS } from './noun';
 import { QUESTION_BUDGET } from './runner';
 import { WORLD_VOCABULARY } from './vocabulary';
 
@@ -19,8 +20,14 @@ export const BRIEF_EXAMPLE: WorldFiles = {
   vocabulary: { vocabulary: WORLD_VOCABULARY.id, version: WORLD_VOCABULARY.version },
   nouns: {
     nouns: [
-      { id: 'member', name: 'Member', sentence: 'A member is a person who pays us each year.', properties: [{ name: 'name', kind: 'text', freeWords: true }] },
-      { id: 'account', name: 'Account', sentence: 'An account is what a company pays for; its members are on it.' }
+      {
+        id: 'member',
+        name: 'Member',
+        sentence: 'A member is a person who pays us each year.',
+        properties: [{ name: 'name', kind: 'text', freeWords: true }],
+        answers: { onlyOne: false, calledBy: 'name', history: false, readAloud: false, secret: false }
+      },
+      { id: 'account', name: 'Account', sentence: 'An account is what a company pays for; its members are on it.', answers: { onlyOne: false, history: false, readAloud: false, secret: false } }
     ]
   },
   relations: {
@@ -52,6 +59,7 @@ const json = (v: unknown): string => JSON.stringify(v, null, 2);
 /** The brief, as Markdown. Pure; the same text every call. */
 export function worldBrief(): string {
   const kinds = WORLD_KINDS.map((k) => `| **${k.tile.label}** (\`${k.id}\`) | ${k.sentence} | ${TARGET[k.target]} | ${k.questions.length} |`).join('\n');
+  const nounQuestions = NOUN_QUESTIONS.map((q) => `\`${q.id}\` (${q.answer.type === 'yes-no' ? 'yes or no' : q.answer.type === 'one-of' ? q.answer.values.join(' / ') : q.answer.type === 'field' ? 'one of its details' : 'words'})`).join(', ');
   return `# Describing a person's world
 
 You are about to build a backend for someone. Before any collection exists, this project keeps what they said about their world in three files under \`${WORLD_DIR}/\`. The database is made from those files. So are the questions you ask.
@@ -85,6 +93,8 @@ ${json(BRIEF_EXAMPLE.relations)}
 \`\`\`
 
 A noun or a field can carry one more answer. The tool asks for each of these once, because the answer has a home. \`"signsIn": true\` on one noun says that noun is who signs in. A rule about who may see what starts from that noun. When an \`owned-by\` answers \`"path": true\`, its \`"through"\` lists the relations from the noun that signs in to the owner, in order, each \`{ "relation": <id> }\`, with \`"where"\` for which records a step lands on (as holder: \`{ "role": "holder" }\`); the hop from the owner back to what it owns is the relation itself and is not listed. \`"freeWords": true\` on a text field records the person's answer to one question: the field is free words, not one of a fixed list. A text that is one of a fixed list is a \`choice\` with its \`values\`. A \`one-of\` relation then says who adds to the list.
+
+A noun also has questions of its own, about one thing rather than two: ${nounQuestions}. Their answers go in the noun's \`"answers"\`, by id, the way a relation's do. The tool asks each of the first five once for the whole world, naming the nouns that have not answered; the last three only of a noun whose number is read aloud. Two answers live on a field: \`"secret": true\` marks the detail a noun's \`"secret": true\` is about, and \`"onlyWhen": { "field": <another detail>, "is"?: <its value>, "required"?: true }\` says the detail matters only in that case, and must be there then. An \`ends\` relation asks which detail is written when a thing ends, and whether it must be.
 
 ## The kinds
 

@@ -120,6 +120,19 @@ engines, every mutant**:
 > `slot/starts-as-text`. **Also read s18:** `tests/mutants.test.ts`'s static expectations for `merge-by-delete` and
 > `editable-history` had said *survives unkept* since s13; since s17 both are held and the engine runs the claim
 > (*run*, then killed) — the spec had been red since s17 and now says so.
+>
+> **ONT-011 step 2, the other three borrows, 2026-10-11 (P116 s19, Fable): now 15 of 51** (7 unkept, 8 unclaimed), identical
+> on both engines. The noun's own questions (`noun.ts`) make mutants of their own (`<noun>/<question>-unanswered`;
+> `calledBy` makes none — a view hint): `world-every-kind` gained a `settings` noun, `account.history`,
+> `session.readAloud`, `person.email` secret and `leaves.endNote` / `endNoteNeeded` (6 mutants more). Killed:
+> `account/history-unanswered` (no home — the history collection's required link), the two `leaves/endNote*-unanswered`
+> and the seed `ends/note-always-optional` at the held all-or-none claim `leaves/leftBecause-with-endedAt`, which also
+> takes `leaves/end-by-delete` (unsaid: `endedAt` is gone, so the claim has no home — it had survived unclaimed since s5).
+> Surviving by design, unkept, each naming the step that keeps it: `settings/onlyOne-unanswered` (across records,
+> ONT-013 step 4) and `person/secret-unanswered` (the per-field read rule, ONT-011 step 4). `world` and
+> `world-membership` never answer `leaves/endNote`: one more unanswered survivor each (12 and 5). A `without`-rule seed
+> whose question is unanswered on a world now rides that question's mutant, or is not applicable in words, never
+> "cannot" — the static spec crashed on it.
 
 **The honesty number on the fully answered world is 18 of 38.** Read by class, because the classes say different things:
 

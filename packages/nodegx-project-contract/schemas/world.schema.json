@@ -64,6 +64,39 @@
         "freeWords": {
           "description": "A text the person was asked about and said is free words, not one of a fixed list (ONT-002's kind-picker question, answered).",
           "const": true
+        },
+        "secret": {
+          "description": "ONT-011 step 2: this detail is not for everyone who can see the record (the noun's answers.secret is the yes; this is the which).",
+          "const": true
+        },
+        "onlyWhen": {
+          "description": "ONT-011 step 2: this detail matters only when another detail of the same record is set, or holds 'is'; 'required': never left empty when it matters.",
+          "type": "object",
+          "required": [
+            "field"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "field": {
+              "$ref": "#/definitions/words"
+            },
+            "is": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "required": {
+              "const": true
+            }
+          }
         }
       },
       "if": {
@@ -130,6 +163,20 @@
         "signsIn": {
           "description": "This noun is who signs in; at most one noun says so. Projects to a link to the app's users on its collection.",
           "const": true
+        },
+        "answers": {
+          "description": "ONT-011 step 2: the noun's answers to its own questions (onlyOne, calledBy, history, readAloud, secret; then looksLike, maySkip, restarts), by question id.",
+          "type": "object",
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "$ref": "#/definitions/words"
+              }
+            ]
+          }
         },
         "was": {
           "description": "The id this noun had before the person renamed it. A migration carries its records to the new name; a 'was' the world before does not have changes nothing.",

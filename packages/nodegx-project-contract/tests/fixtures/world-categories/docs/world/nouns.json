@@ -6,18 +6,51 @@
       "name": "Product",
       "sentence": "A product is one thing we sell, with a price.",
       "properties": [
-        { "name": "name", "kind": "text" },
-        { "name": "price", "kind": "number", "sentence": "What it sells for, in euros." }
-      ]
+        {
+          "name": "name",
+          "kind": "text"
+        },
+        {
+          "name": "price",
+          "kind": "number",
+          "sentence": "What it sells for, in euros."
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "name",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
     },
     {
       "id": "subcategory",
       "name": "Subcategory",
       "sentence": "A subcategory is a shelf within a category: fiction within books, jazz within music.",
       "properties": [
-        { "name": "name", "kind": "text" },
-        { "name": "category", "kind": "choice", "values": ["books", "music", "film"], "sentence": "Which of our three categories the shelf is in." }
-      ]
+        {
+          "name": "name",
+          "kind": "text"
+        },
+        {
+          "name": "category",
+          "kind": "choice",
+          "values": [
+            "books",
+            "music",
+            "film"
+          ],
+          "sentence": "Which of our three categories the shelf is in."
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "calledBy": "name",
+        "history": false,
+        "readAloud": false,
+        "secret": false
+      }
     }
   ]
 }
