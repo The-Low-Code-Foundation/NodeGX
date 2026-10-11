@@ -2,7 +2,7 @@
 
 **Opened 2026-09-30 (s1), from Richard's ruling that the editor is a target (README §1, R6).**
 **Depends on NSP-004.** Runs alongside the batches (NSP-011 to NSP-017): each batch closes its nodes' rows here.
-**Status: 🟡 s79 (2026-10-10, Fable): the design is decided and built in the format (§3.1) — `portsOf` / `drawnPorts`, `PortContext` + `derived.needs` with the needs gate, `when` and `narrow` on declared ports, `context` through the scenario, the adapter and the interpreter; the three-oracle parity drive stands with its first proofs (And with wires, String Format, Image's size-mode groups) and planted mutants. s80 (Opus): L2 done — `when` on all 448 conditioned ports, oracle (b) green and made honest (§6.2); L1 measured, its premise wrong (the fixtures are the play's wires, not the project), a format proposal in §6.3, the runtime target takes `context` and compiles again (P107-S80-DEADTARGET); L4 done — oracle (a)'s module table over all 70 hooks (§6.4). s81 (Opus): L3 measured, NOT built — decision 4 holds only for States' value outputs; the rest of the padding is the play's wires, the code's writes, or the project's saved ports, so L3 joins L1's format decision (§6.5). **s82 (Fable): the format decided and built (§6.6) — at play a node has its params and its wires, never the project: `PlayContext`, `wiredOutputs` + `backends`, `onWire`, `discoverOutput`, `outputCandidates`, `hasOutput`, re-derive after each write; proved on DbModel2 and States (traces byte-identical, both targets at 200, both L4 rows graded).** s83 (Opus): L3 done (§6.7). **s84 (Opus): L1 done (§6.8) — the last 14 specs on the format, oracle (a) 40 graded / 227 cases / 0 owed.** Left: L5 (the context builder in `project-contract`, AC3 (MCP), AC4 (ledger column)), oracle (c), the 10,000 run.**
+**Status: 🟡 s79 (2026-10-10, Fable): the design is decided and built in the format (§3.1) — `portsOf` / `drawnPorts`, `PortContext` + `derived.needs` with the needs gate, `when` and `narrow` on declared ports, `context` through the scenario, the adapter and the interpreter; the three-oracle parity drive stands with its first proofs (And with wires, String Format, Image's size-mode groups) and planted mutants. s80 (Opus): L2 done — `when` on all 448 conditioned ports, oracle (b) green and made honest (§6.2); L1 measured, its premise wrong (the fixtures are the play's wires, not the project), a format proposal in §6.3, the runtime target takes `context` and compiles again (P107-S80-DEADTARGET); L4 done — oracle (a)'s module table over all 70 hooks (§6.4). s81 (Opus): L3 measured, NOT built — decision 4 holds only for States' value outputs; the rest of the padding is the play's wires, the code's writes, or the project's saved ports, so L3 joins L1's format decision (§6.5). **s82 (Fable): the format decided and built (§6.6) — at play a node has its params and its wires, never the project: `PlayContext`, `wiredOutputs` + `backends`, `onWire`, `discoverOutput`, `outputCandidates`, `hasOutput`, re-derive after each write; proved on DbModel2 and States (traces byte-identical, both targets at 200, both L4 rows graded).** s83 (Opus): L3 done (§6.7). **s84 (Opus): L1 done (§6.8) — the last 14 specs on the format, oracle (a) 40 graded / 227 cases / 0 owed.** **s85 (Opus): L5's builder done and graded on saved projects (§6.9) — `portContextFor` agrees with the runtime's hooks on 7,812 nodes; AC4 ✅ (130 of 147); AC3 ruled R19 "check wires and show ports", `DRAWN_PORT_TYPES` the shared list.** Left: AC3, oracle (c) (and with it Cloud Function's and Navigate's project-drawn ports), the 10,000 run's reading.**
 
 ## 1. The person sentence
 
@@ -594,3 +594,84 @@ family hides (`userPropertyPorts` skips `shouldShowField` there; Sign Up's ignor
 
 **Left:** L5 (`portContextFor` in `project-contract`, AC3, AC4), oracle (c) (waits on P107-S79-ADAPTERLABEL), the one
 10,000-sequence run.
+
+### 6.9 s85 (2026-10-11, Opus) — L5: the builder, the drive on saved projects, AC4; AC3 researched, not built
+
+**The builder** (`packages/nodegx-project-contract/port-context.ts`, commit `7e25341ea`). `portContextFor(project, nodeId)`
+and `portContextReader(project)` (the project-wide fields once, for many nodes) read a node's `PortContext` from a saved v2
+project with no viewer:
+
+| field | read from | the runtime line it says |
+|---|---|---|
+| `wired`, `wiredOutputs` | the component's connections into / out of the node, in order | nodescope.ts, record-ports.ts :305-308 |
+| `backends` | the `cloudservices` endpoint (`_endpoint_`, "Built-in" / "Parse Server") then every `backendServices` backend | resolveBackend.pure.ts :141-174 |
+| `schema` | PER NODE: its Backend param (`_active_` / none → `defaultBackendId`, the converged gate at backendServices `version` ≥ 2) selects a backend; its introspected collections (typed as `recordPortType` → `getEnhancedFieldType`), else `dbCollections` + `systemCollections` on the Parse wire | schema-ports.ts :119-195, :323-381, :479-520; resolveBackend.pure.ts :184-222 |
+| `stacks`, `routers` | every Page Stack (`name` or Main, `pages[].id`, `pageComp-<id>`), every Router (`pages.routes`) | navigate.ts :338-363 |
+| `components` | every component by legacy name: its Component Inputs / Outputs ports TYPED FROM THE PORTS WIRED TO THEM (no wire `*`, one wire its type, several the shared type) — a catalog resolver passed in (`options.portType`); the nodes inside by type | noodl-editor componentmodel.ts :134-240 `getPorts` `_deriveType` |
+
+Not built: `siblings`, `instancePorts` (no spec reads them). A structural copy of the spec's `PortContext`, not an import.
+
+**Where the handoff was wrong:** "the cache drive over the templates" — **0 of the 13 templates' nodes carry a cached
+`dynamicports`** (agent-authored, never opened with a viewer). The caches live in projects the editor has opened: 5,605
+nodes in 154 of Richard's local projects, and 5 committed export fixtures. And a component's port types are not the
+types saved on its Component Inputs node: the editor derives them from the wires, which needs the node catalog.
+
+**The drive** (`noodl-runtime/test/node-spec/nsp-020-port-context.test.ts`). Per node of every saved v2 project whose type
+has an oracle (a) row and a spec, three lists: (A) the runtime's `setup` hook over a fake graph model made from the SAVED
+project (raw `metadata`, the real wires, every node of a type) against `drawnPorts(spec, params, portContextFor(…))` —
+non-circular for wires, backends, schema and stacks; for component interfaces the fake hands the hook the builder's (the
+runtime is handed them by the editor's exporter and computes none), so typing is graded by (B) and by a direct check
+against oracle (a)'s hand-written `PROJECT`; (B) the editor's cached `dynamicports` against the same draw; (C) hook vs
+cache. Oracle (a)'s pins apply; the drive's own pins are exact lines with a seen-gate. Three synthetic projects add what
+no committed one holds: two backends (legacy and converged readings, every Backend value a param can hold, a Directus
+collection with `date` / `json` / select / hidden columns) and pages (an unnamed stack, a popup, a row template).
+
+**Readings (this tree):**
+- **Committed corpus, 95 projects + 3 synthetic: (A) clean on every node.** Reach (nodes whose (A) a dropped field turns
+  red): wired 82, wiredOutputs 4, backends 40, schema 46, stacks 5, components 218 — the REACH gate holds each above 0.
+- **Planted builder breaks, each red:** the converged gate ignored (44 lines), `systemCollections` dropped (36), an unnamed
+  stack not read as Main, `wiredOutputs` dropped (13), a Relation's target dropped (10), interface typing ignored. **Not
+  graded, by design:** the backend's display NAME (the format's enums are values only).
+- **Found first run:** a REST column with no native type is `string` unless numeric / boolean / json / enum — the builder
+  said `*` for `text` and `date`; fixed before commit.
+- **Richard's 212 local projects (`NSP_PORT_PROJECTS`), 7,812 nodes: (A) clean on every node.** (B) where hook = cache:
+  0 lines. **Wherever the cache disagrees with the spec it disagrees with the live hook too: 1,027 stale caches of 4,228**
+  (Query Records' `collectionName` / `runOnChange-*` announced since; Expression's `length` / `trim` an older parser made
+  into inputs; schema columns added since). §5's worry, measured: an old project shows a diff on open TODAY, with or
+  without the spec — P107-S79-SILENTCACHE in numbers.
+- 3.6 s for the committed corpus (the first draft took 80 s: a hook sweeps every node of its type on
+  `editorImportComplete`; the fake now answers the driven node's own type with that node alone, as oracle (a) does).
+
+**Bug filed:** **P107-S85-RESTCOLTYPES** (low, format) — the Record spec types a column by the Parse table only: a REST
+`json` column the runtime draws as Object and a select column as an Enum (with its choices), the spec draws as `*`.
+
+**AC4 ✅ (commits `f43e9d2a0`, `0957bf896`, and the `DRAWN_PORT_TYPES` commit).** `spec-ledger` prints *ports: 130 of
+147 drawable without a viewer — 52 by a spec (31 from the params, 9 with the project, 12 with the schema), 78 static*,
+names the 17 that are not, and holds `floor.ports`. **The first commit said 134 and was wrong:** it counted any spec with
+`derived` as drawing its ports. Cloud Function's and Navigate's `derived.inputs` return nothing — their `in-*` / `pm-*`
+ports are discovered on a write, never drawn from the project. A type's runtime / adapter ports now count only for a type
+in **`DRAWN_PORT_TYPES`** (`src/nodes/drawn-port-types.ts`, 39 types): graded by oracle (a) and with no pin saying the
+runtime announces a port the spec does not draw — which leaves out the HTTP Request (its Output Fields). The parity test
+holds the list to `TABLE` both ways; the ledger and the MCP (R19) read the same list. Cloud Function, Navigate and Router
+are "oracle (c) owed".
+
+**AC3 — researched, NOT built; Richard asked for the research before deciding ("it's a big deal").** What an agent has
+today, measured:
+1. `get_component` hands the agent each node's SAVED `dynamicports` — stale on 1,027 of 4,228 nodes in Richard's projects.
+2. The validator the MCP runs (the editor's `validation/`) treats saved `ports` ∪ `dynamicports` as the node's ports
+   (`normalize.ts instancePortNames`), and for the ~50 types whose ports appear at run time a wire to any other name is
+   **never an error** — `nonexistentPort.ts` (3) emits an info, "could not be statically verified … Skipped". Hand-written
+   checkers cover Cloud Function, Navigate and Page Inputs (`derivedPortTargets.ts`) and the Function (`functionPorts.ts`);
+   the MCP already derives and WRITES a Function's ports itself on every write (DEF-011, `scriptPorts.ts`).
+3. Every wire endpoint on a dynamic-port node in 181 local projects (7,577 nodes): 2,906 are correct wires to ports the
+   spec draws that the saved list does not hold — today "skipped"; 176 on graded types go to a port the live editor
+   would not draw either (270 more on Cloud Function / Navigate are the spec's own gap above). **One read through:** CMG
+   Drive Looks' featured products wire For Each's `addToBasket`; the port is `itemOutputSignal-addToBasket` (the editor's
+   own saved list says so), and For Each registers an output only under those two prefixes (foreach.tsx :1081-1096) — the
+   Add to Basket press never reaches the page, and the validator let the wire through as "skipped".
+
+The costs, measured: the specs + `ports.ts` + `portContextFor` bundle to **1.7 MB** (the MCP is 9.8 MB); loading it costs
+**~50 ms and ~27 MB** once per server start; drawing a whole component takes **0.6 ms median, 2.8 ms p95, 47 ms worst**
+(the first read of a large project); the added answer is **+8% median / +20% p95** of a `get_component` answer as name,
+plug and type, **+20% / +64%** with every field. **Ruled R19 (README §7): "Check wires and show ports"** — part 1
+`get_component`'s drawn ports, part 2 the wire check, for `DRAWN_PORT_TYPES` only.

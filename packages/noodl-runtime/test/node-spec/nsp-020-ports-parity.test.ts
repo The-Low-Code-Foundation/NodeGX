@@ -21,6 +21,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import {
+  DRAWN_PORT_TYPES,
   drawnPorts,
   specs,
   type AnyNodeSpec,
@@ -416,5 +417,20 @@ describe('NSP-020 oracle (a): planted mutants are red', () => {
     expect(Object.keys(row.known).filter((pin) => !seen.some((d) => matchesPin(pin, d)))).toEqual([
       'input nothing: announced; the spec does not draw it'
     ]);
+  });
+});
+
+// NSP-020 s85 (R19) — the product reads `DRAWN_PORT_TYPES` (the MCP's drawn ports and wire check, the ledger's AC4): it must be
+// exactly the graded rows whose names are complete — a row with no pin saying the runtime announces a port the spec does not draw
+describe('DRAWN_PORT_TYPES is the graded table, less the rows whose names are incomplete', () => {
+  test('both directions', () => {
+    const incomplete = (row: TableRow) => Object.keys(row.known ?? {}).some((pin) => pin.includes('announced; the spec does not draw it'));
+    const graded = [...new Set(TABLE.filter((row) => specs[row.type] && !row.owedBy).map((row) => row.type))];
+    const complete = graded.filter((t) => !TABLE.filter((row) => row.type === t).some(incomplete)).sort();
+    expect([...DRAWN_PORT_TYPES].sort()).toEqual(complete);
+    // known-firing on both sides: the HTTP Request is graded and left out (its Output Fields), the Record is in
+    expect(graded).toContain('net.noodl.HTTP');
+    expect(DRAWN_PORT_TYPES).not.toContain('net.noodl.HTTP');
+    expect(DRAWN_PORT_TYPES).toContain('DbModel2');
   });
 });

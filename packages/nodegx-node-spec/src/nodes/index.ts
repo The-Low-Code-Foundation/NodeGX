@@ -244,6 +244,8 @@ export { FUNCTION_FIXTURES } from './function';
 export { SCRIPT_FIXTURES } from './script';
 // NSP-017 s67 — the Visual Function's fixtures: the blocks and the code written from them
 export { LOGIC_BUILDER_FIXTURES } from './logic-builder';
+// NSP-020 s85 (R19) — the types whose ports an editor may draw from the spec: graded by oracle (a), names complete
+export { DRAWN_PORT_TYPES } from './drawn-port-types';
 
 export function specFor(typeName: string): AnyNodeSpec | undefined {
   return specs[typeName];
