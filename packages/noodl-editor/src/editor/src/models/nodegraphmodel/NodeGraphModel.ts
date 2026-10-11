@@ -156,6 +156,15 @@ export class NodeGraphModel extends Model {
    */
   private recordedVisualRoots: ReadonlySet<string> = new Set();
 
+  /**
+   * P78-TPL011-INSTANCEROOT — whether the loaded file recorded `visualRoots` at all. Absent means nobody computed
+   * them (AWP-001's absence rule), not that nothing draws. See {@link isVisualRoot}.
+   */
+  private visualRootsRecorded = false;
+
+  /** The components whose roots are being asked about right now, so an instance cycle answers "no" rather than overflowing. */
+  private static readonly componentsAsked = new Set<ComponentModel>();
+
   private evaluatehealthScheduled: boolean;
   private updateTypesScheduled: boolean;
 
@@ -186,6 +195,7 @@ export class NodeGraphModel extends Model {
   static fromJSON(json: Partial<NodeGraphModelJson>) {
     const _this = new NodeGraphModel({ comments: json.comments });
     _this.recordedVisualRoots = new Set(json.visualRoots ?? []);
+    _this.visualRootsRecorded = json.visualRoots !== undefined;
     for (const i in json.roots) {
       _this.addRoot(NodeGraphNode.fromJSON(json.roots[i]));
     }
@@ -1272,10 +1282,32 @@ export class NodeGraphModel extends Model {
    *
    * ⚠️ Not "every unknown type is visual": a logic kit node is written with no `visualRoots` entry
    * and stays rootless here.
+   *
+   * 🔴 P78-TPL011-INSTANCEROOT — **a file that recorded no `visualRoots` answers from the project.** `nodegx deploy`
+   * exports a project it never registers in the node library (R20 keeps that export byte-identical), so an instance
+   * of another component in the same project is unresolved there too. The door writes no `visualRoots` key when it
+   * cannot see that the instanced component draws (it was not on disk yet), so a component whose only visual node
+   * was such an instance exported `roots: []` and drew nothing. Wrapped in a Group, it drew. With the key absent, an
+   * instance of a component of this project draws exactly when that component does. A recorded list still wins
+   * verbatim, and a kit type, which names no component, stays rootless as above.
    */
   isVisualRoot(root: NodeGraphNode): boolean {
-    if (NodeLibrary.instance.typeIsMissing(root.type)) return this.recordedVisualRoots.has(root.id);
+    if (NodeLibrary.instance.typeIsMissing(root.type)) {
+      if (this.visualRootsRecorded) return this.recordedVisualRoots.has(root.id);
+      return NodeGraphModel.componentDraws(this.owner?.owner?.getComponentWithName(root.typename));
+    }
     return !!root.type.allowAsChild;
+  }
+
+  /** Does an instance of this component draw? It has a visual root of its own. A cycle draws nothing. */
+  private static componentDraws(component: ComponentModel | undefined): boolean {
+    if (!component || NodeGraphModel.componentsAsked.has(component)) return false;
+    NodeGraphModel.componentsAsked.add(component);
+    try {
+      return component.graph.getVisualRootIds().length > 0;
+    } finally {
+      NodeGraphModel.componentsAsked.delete(component);
+    }
   }
 
   getVisualRootIds() {
