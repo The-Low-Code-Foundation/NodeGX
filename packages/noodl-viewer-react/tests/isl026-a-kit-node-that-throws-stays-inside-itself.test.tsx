@@ -6,10 +6,14 @@
  * nothing saying which node had failed.
  *
  * Each row renders a real React root (jsdom by hand, as GAM-009 does): a host `<span>` standing in for the
- * rest of the page, beside the kit node's own `render()`. The first row is the defect, re-measured without
- * the boundary, and is the known-firing signal beside the others: the same throw, the same root, the page
- * gone. The rows after it go through `withKitBoundary`, the one line `viewer.jsx` adds when it registers a
- * kit's `reactNodes`.
+ * rest of the page, beside the kit node's own `render()`. The kit rows go through `withKitBoundary`, the one
+ * line `viewer.jsx` adds when it registers a kit's `reactNodes`.
+ *
+ * P109-S22-BUILTINBOUNDARY (ruled 2026-10-11, "yes, same as kit parts"): the first row was the defect re-measured
+ * without the kit boundary, and the page went with the throw. That is what a BUILT-IN node still did, since a
+ * built-in is registered exactly so (`createNodeFromReactComponent`, no kit wrapper). Every node's element is now
+ * drawn inside `withNodeBoundary`, so those rows assert a built-in's containment, under its own code. They were
+ * red on the code before (the page gone), and that is their control.
  *
  * @module noodl-viewer-react/tests/isl026-a-kit-node-that-throws-stays-inside-itself
  */
@@ -39,7 +43,7 @@ const { createRoot } = require('react-dom/client');
 const { act } = require('react');
 
 const { createNodeFromReactComponent } = require('../src/react-component-node');
-const { withKitBoundary, KIT_NODE_FAILED } = require('../src/kit-node-boundary');
+const { withKitBoundary, KIT_NODE_FAILED, NODE_FAILED } = require('../src/kit-node-boundary');
 /* eslint-enable @typescript-eslint/no-var-requires */
 
 /** The cube's failure: a library that did not load, read in an effect. */
@@ -97,14 +101,33 @@ async function page(nodeDef: Record<string, unknown>) {
 }
 
 describe('ISL-026 KITTHROWBLANKS — one kit node failing stays inside that node', () => {
-  test('the defect, re-measured without the boundary: the throw takes the whole page with it', async () => {
-    const { container, thrown } = await page(def('isl026.CubeBare', Cube));
-    expect(thrown.length).toBe(1);
-    expect(container.textContent).not.toContain('isl026 page drew');
-    expect(container.querySelector('main')).toBeNull();
+  test('P109-S22-BUILTINBOUNDARY: a built-in node (no kit wrapper) that throws in an effect loses itself, not the page', async () => {
+    const { container, thrown, graph } = await page(def('isl026.CubeBare', Cube));
+    expect(thrown).toEqual([]);
+    expect(container.querySelector('#text')!.textContent).toBe('isl026 page drew');
+    expect(container.querySelector('[data-testid="cube"]')).toBeNull();
+    expect(graph.errors.map((e) => [e.code, e.nodeType])).toEqual([[NODE_FAILED, 'isl026.CubeBare']]);
+    expect(graph.errors[0].message).toContain('"isl026.CubeBare"');
+    expect(graph.editorConnection.warnings.map((w) => w.message)).toEqual([graph.errors[0].message]);
   });
 
-  test('with the boundary, a throw in an effect leaves the rest of the page drawn and the node empty', async () => {
+  test('P109-S22-BUILTINBOUNDARY: a built-in node that throws in render itself is contained the same way', async () => {
+    const { container, thrown, graph } = await page(def('isl026.BrokenBare', Broken));
+    expect(thrown).toEqual([]);
+    expect(container.querySelector('#text')!.textContent).toBe('isl026 page drew');
+    expect(graph.errors.map((e) => e.code)).toEqual([NODE_FAILED]);
+    expect(graph.errors[0].message).toContain('render went wrong');
+  });
+
+  test('P109-S22-BUILTINBOUNDARY: a healthy built-in draws as before, and its ref still reaches its own component', async () => {
+    const { container, thrown, graph, node } = await page(def('isl026.BadgeBare', Badge));
+    expect(thrown).toEqual([]);
+    expect(container.querySelector('[data-testid="badge"]')!.textContent).toBe('ok');
+    expect(graph.errors).toEqual([]);
+    expect(node.innerReactComponentRef).toBeInstanceOf(Badge);
+  });
+
+  test('with the kit boundary, a throw in an effect leaves the rest of the page drawn and the node empty, in the kit’s words (the nearer boundary)', async () => {
     const { container, thrown, graph } = await page(withKitBoundary(def('isl026.Cube', Cube)));
     expect(thrown).toEqual([]);
     expect(container.querySelector('#text')!.textContent).toBe('isl026 page drew');

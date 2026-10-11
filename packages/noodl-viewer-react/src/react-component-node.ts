@@ -4,6 +4,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import type { TSFixme } from '../typings/global';
+import { withNodeBoundary } from './kit-node-boundary';
 import type {
   ComponentInstanceLike,
   DynamicPortEntry,
@@ -1130,7 +1131,8 @@ export class NoodlReactComponent extends React.Component<NoodlReactComponentProp
             }*/
     }
 
-    return React.createElement(noodlNode.reactComponent, props, noodlNode.renderChildren());
+    // P109-S22-BUILTINBOUNDARY: a node that throws while drawing loses itself, not the page
+    return withNodeBoundary(noodlNode, React.createElement(noodlNode.reactComponent, props, noodlNode.renderChildren()));
   }
 }
 

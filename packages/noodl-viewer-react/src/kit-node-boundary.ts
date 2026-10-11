@@ -6,9 +6,10 @@
  * page went blank, built-in nodes included, and nothing said which node had failed (ISL-012 s17, the
  * cube kit with three.js missing).
  *
- * The boundary sits around each kit node's component and nothing else: a built-in node's throw still
- * takes the root down (C65 and C70 were fixed at their source; a boundary for built-ins is a ruling of
- * its own). When it catches, the node draws nothing, and the failure is raised once on the error bus
+ * The boundary sits around each kit node's component. P109-S22-BUILTINBOUNDARY (ruled 2026-10-11, "yes,
+ * same as kit parts"): every node's element is drawn inside {@link withNodeBoundary} too, by
+ * `NoodlReactComponent.render()`, so a built-in node that throws loses itself as a kit node does. A kit
+ * node's own boundary is the nearer one and keeps its words. When it catches, the node draws nothing, and the failure is raised once on the error bus
  * (`raiseRuntimeError`), which already carries it to the editor's warning on the node, the console and
  * `On App Error` (nodecontext.ts). A `setDiagnostic` beside it would report the same failure twice.
  *
@@ -32,8 +33,19 @@ export function kitNodeFailedMessage(nodeName: string, error: unknown): string {
   return `The kit node "${nodeName}" failed while drawing and shows nothing: ${reason}`;
 }
 
+/** P109-S22-BUILTINBOUNDARY — a built-in node that failed while drawing. */
+export const NODE_FAILED = 'node/render-failed';
+
+export function nodeFailedMessage(nodeName: string, error: unknown): string {
+  const reason = error instanceof Error ? error.message : String(error);
+  return `The node "${nodeName}" failed while drawing and shows nothing; the rest of the page keeps drawing: ${reason}`;
+}
+
 interface BoundaryProps {
   node: ReportingNode;
+  /** The error bus code and the sentence; a kit node's by default. */
+  code?: string;
+  describe?: (nodeName: string, error: unknown) => string;
   children?: React.ReactNode;
 }
 
@@ -45,11 +57,11 @@ class KitNodeBoundary extends React.Component<BoundaryProps, { failed: boolean }
   }
 
   componentDidCatch(error: unknown) {
-    const { node } = this.props;
-    const message = kitNodeFailedMessage(node.name ?? 'unknown', error);
+    const { node, code = KIT_NODE_FAILED, describe = kitNodeFailedMessage } = this.props;
+    const message = describe(node.name ?? 'unknown', error);
     // Reporting must not throw out of the boundary that is containing a throw.
     try {
-      node.raiseRuntimeError && node.raiseRuntimeError(KIT_NODE_FAILED, message, { error: String(error) });
+      node.raiseRuntimeError && node.raiseRuntimeError(code, message, { error: String(error) });
     } catch (e) {
       /* the node draws nothing either way */
     }
@@ -88,4 +100,12 @@ export function withKitBoundary(def: ReactNodeDefinition): ReactNodeDefinition {
   } as ReactNodeDefinition['getReactComponent'];
   marked[BOUNDED] = true;
   return def;
+}
+
+/**
+ * P109-S22-BUILTINBOUNDARY — a node's element, inside a boundary that reports to `node`. Wraps the element, not the
+ * component, so the component keeps its identity and the element keeps its `ref`.
+ */
+export function withNodeBoundary(node: ReportingNode, element: React.ReactElement): React.ReactElement {
+  return React.createElement(KitNodeBoundary, { node, code: NODE_FAILED, describe: nodeFailedMessage }, element);
 }
