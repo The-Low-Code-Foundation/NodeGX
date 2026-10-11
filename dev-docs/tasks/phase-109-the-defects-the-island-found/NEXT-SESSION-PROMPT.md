@@ -1,112 +1,114 @@
-# Next session — P109 session 42
+# Next session — P109 session 43
 
 **Phase:** [README](README.md) · **Audit:** [AUDIT-2026-10-01.md](AUDIT-2026-10-01.md) · scoped at `27d891bf3`.
-**Session 41 (2026-10-10 → 11, on `cline-dev`, primary tree):** board **34 of 52 closed** (33 before). s41 started Track
-G, which s38–s40 had called "waiting on Richard's order". It was not waiting: README marks ISL-041, 042, 043, 046 and
-047 as needing no ruling, and ISL-039/040 need one only on some rows. 14 ledger rows were fixed or closed, each
-re-measured first and red on the old code.
+**Session 42 (2026-10-11, on `cline-dev`, primary tree):** board **38 of 52 closed** (34 before). ISL-039, ISL-040,
+ISL-042 and ISL-047 closed; ISL-046 at 2 of 7. Every row was re-measured at HEAD first and red on the old code.
 
-## The board (re-derived from the task files' `**Status` lines, s41)
+## The board (re-derived from the task files' `**Status` lines, s42)
 
 | task | state | what is left | blocked on |
 |---|---|---|---|
-| ISL-039 backend data | 🟢 7 / 8 | KEYORDER's docs (ruled) | nothing |
-| ISL-040 backend access | 🟢 3 / 6 | **SESSIONS, DEVOPEN** (MCPOAUTH handed back) | nothing |
-| ISL-042 cloud function deploys | ⬜ 5 bugs (3 high) | all | nothing (read §6 for collisions) |
-| ISL-046 templates & kits | ⬜ 7 bugs (2 high) | all | nothing (P108/P78 collisions in §6) |
-| ISL-047 repo install / dev stack | ⬜ 2 bugs (1 high) | all | nothing |
-| ISL-043 export | ⬜ 8 bugs (2 high) | all | P18 is live in `nodegx-export` (§6) |
+| ISL-046 templates & kits | 🟢 2 / 7 | D81, METERS3D (buildable); MOVEARROW, INSTALLER, TPL011UNREADID | see §8 of the task: a ruling, the tablets, P78's untracked Nightbook pile |
+| ISL-043 export | ⬜ 8 bugs (2 high) | all | P18 is live in `nodegx-export` (uncommitted edits there today) |
 | ISL-044 editor a11y | ⬜ 6 bugs | all | 1 ruling inside |
 | ISL-045 node inputs | ⬜ 5 bugs | all | 3 rulings inside |
 | ISL-007, 008, 009, 010, 018, 022, 024, 025, 035, 037 | 🟡/🟢/⬜ | as in s40's list (AC4 → IW-010; P18's export halves; llama.cpp; DBT AC7; ISL-022 AC6 needs the rebuilt dist; ISL-024 waits a gap in P108; W4–W22; handed to P18/P108) | outside this phase |
 
 ## Do, in this order
 
-1. **Re-read the board yourself** (`grep -m1 '^\*\*Status' ISL-0*.md`). For each open row, grep its §8 for "not built" /
-   "not filed". Do not copy the table above.
-2. **ISL-040 SESSIONS (as ruled), then DEVOPEN, then ISL-039 KEYORDER's docs.** SESSIONS: the plan is in its ledger
-   file. DEVOPEN: A switch on the manager's Permissions page (*Enforce my rules on this machine*) and an admin
-   route that writes `devOpen` and reloads `SecurityState` (the restore path's `reloadConfig`). Point the three
-   sentences at it (`App.tsx` `DevOpenNotice`, `views/keys.tsx`, `views/permissions.tsx`). It needs a drive in the
-   served manager. P104 last worked on 2026-09-26 and is not building it.
-3. **ISL-042, then ISL-047, then ISL-046.** Each one: re-measure every row first, red before the fix, one commit per
-   row.
-4. Ask any new ruling at the END of the session, with what you built beside it, in plain words.
+1. **Re-read the board yourself** (`grep -m1 '^\*\*Status' ISL-0*.md`). Do not copy the table above.
+2. **ISL-046 D81.** First measure whether a `JavaScriptFunction` re-runs when an input is set to the value it already
+   holds (the picker's `''` → `''`). If it re-runs, the fix is in the script and must not wipe a pick when *another*
+   input re-runs it. If it does not, the fix is a `Clear` signal the templates wire. Then regenerate the five templates
+   and the library prefab with their own generators. Check P78's state first: `publish-templates-to-shelf.sh` and
+   `DEFECTS-THE-TEMPLATES-FOUND.md` were uncommitted all of s42.
+3. **ISL-046 METERS3D**, with `drive-iw007-touch.js --mode 3d` before and after.
+4. **ISL-044, then ISL-045.** Ask their rulings at the end of the session, in plain words, with what you built beside them.
+5. **ISL-043** only once P18 has no open edits in `packages/nodegx-export` (`git status`, then the mtimes).
 
-## Rulings Richard gave at the end of s41 (2026-10-11), all as recommended. Each is verbatim in its ledger file.
+## Human decisions owed
 
-- **KEYORDER: "Order not promised".** Docs and the node reference say so (ISL-039 AC3).
-- **LOCKOUT half 2: "No, keep it held".** The row is fixed as built.
-- **SESSIONS: "Ends after 30 days unused",** changeable per backend on the Sign-in page. Buildable.
-- **MCPOAUTH: "Its own phase".** Handed back (ledger `open`, no phase).
-- **Still owed from s40:**
-  - `P109-S36-STALEMCPDIST` (rebuild the people's MCP door; it gates ISL-022 AC6).
-  - The `nodegx` bin rebuild.
-  - s38/s39's list, in s40's handoff:
-    `git show 223288e2e^:dev-docs/tasks/phase-109-the-defects-the-island-found/NEXT-SESSION-PROMPT.md`.
+- **MOVEARROW (asked at the end of s42; if unanswered, ask again in plain words).** Planning is set aside (Richard,
+  2026-10-05). Opening a project in it adds a "→ " to the project's stored next move every time. The todo list's
+  Projects tab already repairs that text and does not have the bug. Fix the shelved planner now (half a day, it is not
+  deployed anywhere), or close the bug until Planning comes back?
+- 🔴 **The working copy's `package-lock.json` is a stale 2026-09-24 file.** It shows as modified by *removing*
+  `@nodegx/node-spec`'s entries (`a9c10ff8c`). Committing it would break `npm ci` on Windows again. Nobody has touched it
+  since 24 September. It wants restoring to HEAD, by its owner or on Richard's say-so. s42 left it alone.
+- **`templates/nightbook/` is untracked**, with `library/modules/nightbook-kit/` and 14 `tpl011*` specs in
+  `packages/noodl-mcp/tests/`. A P78 pile last worked on 2026-09-30. INSTALLER and TPL011UNREADID sit on it.
+- **Still owed from s40/s41:** `P109-S36-STALEMCPDIST` (rebuild the people's MCP door; it gates ISL-022 AC6, and the
+  shipped door's cloud bundler and kit extractor are now behind D84's fix), the `nodegx` bin rebuild, and s38/s39's
+  list (`git show 223288e2e^:dev-docs/tasks/phase-109-the-defects-the-island-found/NEXT-SESSION-PROMPT.md`).
 
-## What s41 built (commits)
+## What s42 built (commits)
 
-- **ISL-039:**
-  - BACKUP `dc4e0b51a`: the archive carries every settings file and `workflow-defs/`, and the manifest lists its
-    `folders`.
-  - MIGRATE `2deb380d0`: a first run refuses a target holding rows, and a refused run leaks no snapshot.
-  - NOACL `f8574d6f7`: zero changed rows is "Object not found" with no ACL too. There is a contract case and a
-    mutation for it.
-  - ARRAYEQ + PTREQ `5bfb23cf4`.
-  - ADDUNIQUE `421cfc5a6`.
-  - NUL `3e18ea4cc`.
-- **ISL-040:**
-  - USERCOLS `6719e4a89`: `/classes/_User` and `/api/_User` refuse the admin-only columns and `password`, for every
-    principal.
-  - UNRULED `89b9fd339`: SB-016 on deploy and reload. The 409 also carries `success:false`.
-  - LOCKOUT half `f5f65a122`.
-- **ISL-041:** TYPECHANGE `e9f576618`, LASTINDEX `776125dba`, DIALECTTEST `b2b956e6b`. RENAME was closed against P116's
-  `78ec0ed69`.
-- **Filed:** `P109-S41-SUNDAYWEEK`. A "past 7 days" filter read back on a Sunday comes back as "this week", and
-  `bmg-002`'s past7 case is red every Sunday.
+- **ISL-040 ✅:**
+  - SESSIONS `082802923`: a sign-in ends after 30 days unused (Sign-in page, `auth.json` `sessions.idleDays`). One
+    `auth/sessions.ts` for five minting doors and three readers; fixed-end rows are not stretched; a restart gives old
+    rows an end.
+  - Found with it, `P109-S42-ENDEDREADS` (high): the access check and Verify Session Token never read `expiresAt`, so an
+    ended session still read `/classes`.
+  - DEVOPEN `bb34e8206`: *Enforce my rules on this machine* on Permissions. Driven in the served manager.
+- **ISL-039 ✅:** KEYORDER's docs `5a2af3644` (data concept page and the Query Records / Record node reference).
+- **ISL-042 ✅:**
+  - SECRETSCAN `ac78efb4b`: the packaged backend passes its own scan; a spec bundles to a temp dir and runs it.
+  - D84 `ba530fd11`: the cloud bundler and the kit extractor keep logs off their stdout answer. The 2026-09-26 pile was
+    adopted.
+  - SUCCESS `b978cf353`: a Cloud Function port the runtime can never mint (`success`) is refused.
+  - BUNDLEWIRES `65394174a`: a bundle with on-disk wire spelling is refused at deploy; an undeclared helper port is
+    named.
+  - R10 `535bd63d0`: a cloud function's description reaches its MCP tool.
+- **ISL-047 ✅:**
+  - LOCKFILE `61694bc27`: canvas-look's lock entries, by hand on HEAD's lock; `npm run lockfile:check`.
+  - DEVSWEEP + found `P109-S42-SHELLSEED` `d20dd013f`: a dev launch spares a hand-started backend, and the shell a
+    suite runs in.
+- **ISL-046:** BKFONT `4af47a07a`, DEMOSTUBWIRES `6d8323ef4`.
 
 ## Gate readings (2026-10-11)
 
-- **`nodegx-backend` full run** (`-w 3`, without the hanging drive `P116-S13-AC2STALL` and a peer's two untracked P116
-  specs): 227 / 229 files. Red:
-  - `rel002b` (`P116-S13-REL002B`, red with the old adapters too, measured).
-  - `bmg-002`'s past7 case (SUNDAYWEEK).
-- Every later fix ran its targeted set:
-  - `_User` / BYOB specs: 52 / 53 (only the past7 case red).
-  - Deploy and reload specs: 92 / 92.
-  - Lockout specs: 253 / 253.
-  - Retype specs: 91 / 91.
-  - Promotion specs: 55 / 55.
-- Conformance: SQLite 29 / 29 (the four BRG-003 files), PostgreSQL 85 / 85. `noodl-runtime` `test/adapters`:
-  331 / 331. `tsc -p packages/nodegx-backend --noEmit`: exit 0.
+- **Full `nodegx-backend`** (`-w 3`, without `ac2-page-editor-drag-drive`) at `61694bc27` + the s42 backend work:
+  2961 / 2963 tests, 238 of 241 files (1 skipped). Red: s41's two, `bmg-002` past7 (SUNDAYWEEK, a Sunday) and
+  `rel002b` (REL002B). The PostgreSQL suites ran (`brg-005-service-postgres` 3/3, conformance 20/20).
+- Targeted, each after its change:
+  - `tests/admin-app` + session specs: 244 / 244.
+  - Deploy-touching backend suites: 686 passed.
+  - FED-005: 34 / 34.
+  - noodl-mcp template generators (sb005/6/7, tpl001/3, sbr010): 341 / 341.
+  - hls013, isl017, cn004, packaging completeness: 22 / 22.
+  - Editor unit specs on `nonexistentPort`: 143 / 143. DEF-002: 49 / 49. dev-tools: 19 / 19.
+  - Kit suite `cg001`: 64 / 64.
+- `tsc` (backend, admin app): exit 0. `typecheck:mcp`: exit 0. `catalog:merge --check`, `docs:nodes --check`: clean.
 
-## What s41 learned
+## What s42 learned (and where the handoff was wrong)
 
-- **"Waits on Richard's order" was a blocker nobody re-read.** The README's own 🔒 column said five Track G tasks need
-  no ruling. Read the column, not the handoff's sentence.
-- **Plain `grep` cannot read `packages/nodegx-backend/src/server/HttpServer.ts`.** It is treated as binary, so
-  `grep -rn` finds nothing in it. Use `grep -a`. Two of s41's searches came back empty because of it before the
-  route table turned up.
-- **A refusal has to reach the client in the field the client reads.** The editor's and the MCP door's deploy clients
-  read `success === false` and ignore the status, so a bare 409 would have told an agent a refused deploy worked.
-- **A ledger's proposed fix can undo the thing it sits behind.** LOCKOUT proposed letting a right credential through
-  a lockout, which turns the speed bump into an answer key. Build the safe half and ask about the other.
-- **A green that rests on another arm's leftovers is not a green.** USERCOLS's "the attack does not land" passed on
-  the old code because an earlier arm had disabled the same account. Each attack gets its own account and a
-  known-firing control beside it.
-- **Changing what `$eq` means moved a client that depended on the old meaning** (the admin's "list is empty" compared
-  JSON text). The full backend suite found it, a targeted run would not have. Run the full suite after a
-  query-builder change.
+- **DEVOPEN's server half already existed.** `PUT /admin/permissions` writes `devOpen` live, with the public-bind
+  refusal. The handoff asked for a new route and a reload. Only the page was missing.
+- **SUCCESS's resolving half was DEF-002's already** (`connection-unknown-derived-port`, write path). A first version
+  re-resolved it in `nonexistentPort`, and was cut as a second pipeline for one fact.
+- **R10 belongs in the cloud bundle, not `exportComponent`.** That one also builds the public frontend, where a page's
+  description would have shipped to every visitor.
+- **D84 did not reproduce on its named fixture.** d40's load rewrites nothing, so it never logged. A format-4 project
+  that the migration rewrites did reproduce it.
+- **A dry list of the sweep named this session's own suite shell.** That became SHELLSEED. Run
+  `dev:stop -- --list` while your own suite is live; it is a cheap census of what a peer's launch would kill.
+- **A demo builder's own output is the control before regenerating.** HEAD's builder differed from the committed demo in
+  one file (the template's later privacy text). That proved nothing hand-made would be lost.
 
 ## Recipes
 
 - **Commit through a temporary index:** `GIT_INDEX_FILE=$(git rev-parse --git-dir)/index-x`, `read-tree HEAD`,
-  `add -- <paths>`, commit, then `git reset -q -- <paths>` on the real index.
-- **A control without touching git:** copy your file to the scratchpad, `git show HEAD:<path> > <path>`, run, copy
-  yours back, `cmp`.
-- **PostgreSQL:** `postgres:///nodegx_brg005` answers here. The BRG-004/005 suites make their own databases.
-- **A cloud function's request** is `x-parse-master-key: <adminToken>`. With `authToken: 't0k'` that is `t0k`.
+  `add -- <paths>`, commit, then `git reset -q -- <exact paths>` on the real index (exact paths, never a directory: a
+  directory reset unstages a peer's staged file too). For a file holding a peer's hunks, or one whose working copy
+  must stay as it is, build the blob (`git hash-object -w`) and `update-index --cacheinfo`.
+- **The served manager from source:** `build:admin`, then a scratch `*.drive.ts` run with
+  `npx jest --roots <scratch> --testMatch '**/*.drive.ts'` (jest has the module mapping). It writes a ready file and
+  stops on a stop file. The bundle is `require`d at load, so restart the server after a rebuild. A `#hash` goto does not
+  reload the page.
+- **A child process from source:** `node packages/noodl-mcp/build-cloud-bundle.mjs <out>` and
+  `build-kit-extract.mjs <out>`. Run the cloud bundler with cwd `packages/noodl-mcp` (it reads a `package.json`).
+- **A corpus over real projects:** `grep -rlE '"type": ?"CloudFunction2"' --include=nodes.json` over `templates/` and
+  `NodeGX test projects/`; six are legacy format and the door refuses them.
 
 ## Worktrees
 

@@ -2,7 +2,7 @@
 id: P109-S19-DEMOSTUBWIRES
 title: The training demo's stubbed Functions keep wires into inputs they no longer read
 status: fixed
-commit: PENDING
+commit: 6d8323ef4
 phase: P109
 task: ISL-046
 severity: low

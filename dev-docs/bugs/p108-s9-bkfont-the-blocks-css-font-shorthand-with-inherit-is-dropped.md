@@ -2,7 +2,7 @@
 id: P108-S9-BKFONT
 title: The Blocks node's line and zoom buttons use `font:800 14px inherit` — an invalid shorthand the browser drops, so they render at the default weight and size
 status: fixed
-commit: PENDING
+commit: 4af47a07a
 phase: P109
 task: ISL-046
 severity: low
