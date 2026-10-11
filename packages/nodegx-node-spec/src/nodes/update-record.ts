@@ -40,6 +40,7 @@ import type { BackendScript } from '../world';
 import {
   bindId,
   discoverRecordPort,
+  recordCrudInputs,
   NO_BACKEND_MESSAGE,
   NO_CLASS_MESSAGE,
   onRecordPort,
@@ -51,7 +52,7 @@ import {
   RECORD_ID_STATE,
   type RecordIdState
 } from './record-base';
-import { ACCESS_CONTROL_INPUT, aclFor, aclInputs, aclRefusal, discoverWritePort, dones, failures, onWritePort, RECORD_WRITE_STATE, WRITE_CANDIDATES, type RecordWriteState } from './record-write';
+import { ACCESS_CONTROL_INPUT, aclFor, aclInputs, aclRefusal, discoverWritePort, recordFieldInputs, dones, failures, onWritePort, RECORD_WRITE_STATE, WRITE_CANDIDATES, type RecordWriteState } from './record-write';
 
 /** :211-214 */
 export const PRECONDITION_MESSAGE = 'Someone else changed this record after it was read, so this update was not applied. Fetch the record again, then retry.';
@@ -222,7 +223,10 @@ export const UpdateRecord = defineNode({
   },
   {
     derived: {
-      inputs: aclInputs,
+      // NSP-020 s84 — what the editor draws (dbmodelcrudbase.ts `_updatePorts` :373-401): the Backend picker and the Class
+      // from the project, the property ports from the Class's columns and the wires, then each access rule's ports
+      inputs: (params, context) => ({ ...recordCrudInputs(context), ...recordFieldInputs(params, context), ...aclInputs(params) }),
+      needs: ['schema', 'backends', 'wired', 'wiredOutputs'],
       discover: (port) => discoverWritePort(port) ?? discoverRecordPort(port),
       candidates: [...RECORD_CANDIDATES, ...WRITE_CANDIDATES],
       on: (s, port, v) => (port === 'collectionName' || port === 'backendId' ? onRecordPort(port, v) : { set: onWritePort(s, port, v), send: [] })

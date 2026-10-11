@@ -37,8 +37,9 @@
  * THE BACKEND input (`registerInputIfNeeded` :436-446): a dynamic port, stored raw, the node re-reads at once.
  *
  * THE PROPERTY OUTPUTS: `prop-<field>` and `<field> Changed` exist when a graph wires them (`registerOutputIfNeeded`
- * :447-463) — the fields are the accounts table's, from the project's schema (user-ports.ts). A play declares the two
- * every world here holds, `nick` and `n` (USER_FIELDS). `Logged In`, `Logged Out`, `Session Lost` likewise (:452-456).
+ * :447-463) — the fields are the accounts table's, from the project's schema (user-ports.ts). NSP-020 s84: a play has
+ * no schema, only its wires (`wiredOutputs`); a generated sequence wires from the two every world here holds, `nick` and
+ * `n` (USER_FIELDS). `Logged In`, `Logged Out`, `Session Lost` likewise (:452-456).
  *
  * NOT GRADED HERE, named:
  *   - a session field holding an OBJECT: the store turns it into an anonymous record on every read (cloudstore.js
@@ -48,13 +49,23 @@
  *   - the service's `current` model: no node here reads it.
  */
 
-import type { ChangeEvent, OutputDecl, WorldView } from '../spec';
+import type { BackendField, ChangeEvent, OutputDecl, PortContext, SignalOutputDecl, ValueType, WorldView } from '../spec';
 import { defineNode } from '../spec';
 import { sameList, userRecordEvent, type BackendScript } from '../world';
 import { runOnChange } from './data-base';
+import { backendPickerPort, recordFieldType } from './record-base';
 
 /** The fields a play's graph wires from a User (THE PROPERTY OUTPUTS above) — the accounts table's, in a project. */
 export const USER_FIELDS = ['nick', 'n'] as const;
+
+/**
+ * NSP-020 s84 — user-ports.ts `userSchemaContext` / `userPropertyPorts` :115-150: the accounts class (`_User` on the Parse
+ * wire) as the project's schema holds it, its columns in order less the ones `ignore` names and every Relation column. On the
+ * Parse wire `shouldShowField` is NOT applied (:131), so a hidden column — `ACL` — is drawn.
+ */
+export function userFields(context: Readonly<PortContext>, ignore: readonly string[]): Array<[string, BackendField]> {
+  return Object.entries(context.schema?.classes._User?.fields ?? {}).filter(([name, decl]) => !ignore.includes(name) && decl.relation === undefined);
+}
 
 /** :32 */
 export const USER_FETCH_ERROR_CODE = 'user/fetch-failed';
@@ -87,7 +98,6 @@ const reaction = (): Reaction => ({ pulses: [] });
 const failures = (n: number) => Array.from({ length: n }, () => ({ port: 'fetch' as const, outcome: 'failure' as const, error: USER_FETCH_ERROR_CODE }));
 const dones = (n: number) => Array.from({ length: n }, () => ({ port: 'fetch' as const, outcome: 'done' as const }));
 
-const isField = (key: string) => (USER_FIELDS as readonly string[]).includes(key);
 
 /** Only the keys a patch CHANGES (record.ts: a spread-everything `set` makes drop-set mutants meaningless). */
 function changes(before: Readonly<UserState>, after: UserState, keys: ReadonlyArray<keyof UserState>): Partial<UserState> {
@@ -99,10 +109,8 @@ function changes(before: Readonly<UserState>, after: UserState, keys: ReadonlyAr
 /** :103-112 onModelChangedCallback — this node's reaction to a write of `key` on its bound record. */
 function react(st: UserState, w: WorldView, key: string, on: boolean, r: Reaction): void {
   if (!on) return;
-  if (isField(key)) {
-    w.send('prop-' + key, st); // :107 — at the flag
-    r.pulses.push({ derived: 'changed-' + key }); // :109
-  }
+  if (w.hasOutput('prop-' + key)) w.send('prop-' + key, st); // :107 — at the flag, where a wire made the port
+  if (w.hasOutput('changed-' + key)) r.pulses.push({ derived: 'changed-' + key }); // :109
   r.pulses.push('changed'); // :111
 }
 
@@ -142,7 +150,7 @@ function setUserModel(st: UserState, w: WorldView, id: string | undefined): void
   // :376-378 — every property the record holds; v4 (C47): when the session ENDS, the properties of the one who left, empty
   const source = id !== undefined ? id : previous;
   if (source === undefined) return;
-  for (const key of Object.keys(w.registry.model(source).data)) if (isField(key)) w.send('prop-' + key, st);
+  for (const key of Object.keys(w.registry.model(source).data)) if (w.hasOutput('prop-' + key)) w.send('prop-' + key, st);
 }
 
 /** Read and bind — what every path that re-reads the session does (`setUserModel(this.currentUserModel())`). */
@@ -151,15 +159,30 @@ function reread(st: UserState, w: WorldView, on: boolean, r: Reaction): void {
 }
 
 /** The property output a graph wires (:459-462, `getUserProperty` :464-466 — `get(name)`). */
-function propertyOutput(p: string): OutputDecl<UserState> {
+function propertyOutput(p: string, type: ValueType = '*'): OutputDecl<UserState> {
   return {
-    type: '*',
+    type,
     displayName: p,
     group: 'Properties',
     description: 'The ' + p + ' property of the signed-in user',
     from: (s, w) => (s.bound !== undefined ? w.registry.model(s.bound).get(p) : null) // v4, C47: empty while nobody is signed in
   };
 }
+
+/** :447-470 — `<field> Changed` beside a property output (user-ports.ts :197-205). */
+function changedOutput(p: string): SignalOutputDecl {
+  return { type: 'signal', displayName: p + ' Changed', group: 'Events', description: 'Fires when the ' + p + ' property of the signed-in user changes' };
+}
+
+/** :511-532 — the three session signals the editor draws in a browser runtime; each exists at play only when wired (:452-456). */
+const SESSION_SIGNALS: Readonly<Record<'loggedIn' | 'loggedOut' | 'sessionLost', SignalOutputDecl>> = {
+  loggedIn: { type: 'signal', displayName: 'Logged In', group: 'Events', description: 'Fires when somebody signs in, on any backend' },
+  loggedOut: { type: 'signal', displayName: 'Logged Out', group: 'Events', description: 'Fires when somebody signs out, on any backend' },
+  sessionLost: { type: 'signal', displayName: 'Session Lost', group: 'Events', description: 'Fires when a session ends without the user asking, on any backend' }
+};
+
+/** user-ports.ts `USER_OUTPUT_IGNORE_PARSE` — the accounts columns the User node draws no port for on the Parse wire. */
+const USER_OUTPUT_IGNORE = ['authData', 'password', 'username', 'email'];
 
 const SESSION = { objectId: 'u1', email: 'ann@example.com', username: 'ann', nick: 'Ann', n: 1 };
 
@@ -297,19 +320,25 @@ export const UserNode = defineNode({
   },
   {
     derived: {
-      inputs: () => ({}),
-      // :447-463 — the property outputs a graph wires, each one's Changed beside it, and the three session signals (:452-456, browser only)
-      outputs: () => {
+      // NSP-020 s84 — what the editor draws (`updatePorts` :491-541): the Backend picker with two or more backends, one
+      // `prop-` and one Changed per column of the accounts class (user-ports.ts `userPropertyPorts`), then the three session
+      // signals. At play every one of them exists only when a wire made it (`registerOutputIfNeeded` :447-470 — `onWire`,
+      // or `discoverOutput` for a name the schema does not have) and every send asks `hasOutput` (:107-109, :120, :142, :147, :379)
+      inputs: (_params, context) => backendPickerPort(context),
+      outputs: (_params, context) => {
         const out: Record<string, OutputDecl<UserState>> = {};
-        for (const p of USER_FIELDS) {
-          out['prop-' + p] = propertyOutput(p);
-          out['changed-' + p] = { type: 'signal', displayName: p + ' Changed', group: 'Events', description: 'Fires when the ' + p + ' property of the signed-in user changes' };
+        for (const [p, decl] of userFields(context, USER_OUTPUT_IGNORE)) {
+          out['prop-' + p] = { ...propertyOutput(p, recordFieldType(decl)), onWire: true } as OutputDecl<UserState>;
+          out['changed-' + p] = { ...changedOutput(p), onWire: true };
         }
-        out.loggedIn = { type: 'signal', displayName: 'Logged In', group: 'Events', description: 'Fires when somebody signs in, on any backend' };
-        out.loggedOut = { type: 'signal', displayName: 'Logged Out', group: 'Events', description: 'Fires when somebody signs out, on any backend' };
-        out.sessionLost = { type: 'signal', displayName: 'Session Lost', group: 'Events', description: 'Fires when a session ends without the user asking, on any backend' };
+        for (const [name, decl] of Object.entries(SESSION_SIGNALS)) out[name] = { ...decl, onWire: true };
         return out;
       },
+      needs: ['schema', 'backends', 'wiredOutputs'],
+      // :447-470 registerOutputIfNeeded — a session signal, a `prop-` getter, a `changed-` signal
+      discoverOutput: (port) =>
+        port in SESSION_SIGNALS ? SESSION_SIGNALS[port as keyof typeof SESSION_SIGNALS] : port.startsWith('prop-') ? propertyOutput(port.slice('prop-'.length)) : port.startsWith('changed-') ? changedOutput(port.slice('changed-'.length)) : undefined,
+      outputCandidates: [...USER_FIELDS.flatMap((f) => ['prop-' + f, 'changed-' + f]), ...Object.keys(SESSION_SIGNALS)],
       // :436-446 registerInputIfNeeded — the Backend picker only (user-ports.ts: hidden with one backend)
       discover: (port) =>
         port === 'backendId'
@@ -355,15 +384,14 @@ export const UserNode = defineNode({
         const st: UserState = { ...s };
         const r = reaction();
         reread(st, w, i['runOnChange-user'], r);
-        if (event.type !== 'sessionGained') r.pulses.push({ derived: event.type }); // :120, :142, :147
+        if (event.type !== 'sessionGained' && w.hasOutput(event.type)) r.pulses.push({ derived: event.type }); // :120, :142, :147 — each behind `hasOutput`
         return { set: changes(s, st, ['bound']), send: [], pulses: r.pulses };
       },
       // :103-112 onModelChangedCallback — the bound record, any key, written by ANOTHER (the bridge, another node)
-      change: (s, i, e: ChangeEvent) => {
+      change: (s, i, e: ChangeEvent, w) => {
         if (e.kind !== 'model' || e.id !== s.bound || !i['runOnChange-user']) return { send: [] };
         const key = String(e.name);
-        const own = isField(key);
-        return { sendDerived: own ? ['prop-' + key] : [], emitDerived: own ? ['changed-' + key] : [], emit: ['changed'], send: [] };
+        return { sendDerived: w.hasOutput('prop-' + key) ? ['prop-' + key] : [], emitDerived: w.hasOutput('changed-' + key) ? ['changed-' + key] : [], emit: ['changed'], send: [] };
       }
     }
   }

@@ -45,19 +45,113 @@ const R = 'noodl-runtime/src/nodes/std-library/';
 const V = 'noodl-viewer-react/src/nodes/';
 const D = 'noodl-viewer-react/src/nodes-deprecated/';
 
-const TWO_BACKENDS = {
-  backendServices: {
-    backends: [
-      { id: 'b1', name: 'First', type: 'parse', endpoint: 'https://one.example/parse', appId: 'a' },
-      { id: 'b2', name: 'Second', type: 'parse', endpoint: 'https://two.example/parse', appId: 'b' }
-    ],
-    activeBackendId: 'b1'
-  }
-};
-const BACKEND_PICKER = 'P107-S80-BACKENDPICKER';
 const STATES_LOAD_GATE = 'P107-S82-STATESLOADGATE';
 /** NSP-020 s82 — a schema with one class of two columns, as the Record family's proof case reads it. */
 const LESSONS: PortContext = { schema: { classes: { Lesson: { fields: { title: { type: 'string' }, n: { type: 'number' } } } } } };
+/**
+ * NSP-020 s84 — a class with every kind of column the Record family types differently: a string, an object (untyped:
+ * record-ports.ts `PARSE_PORT_TYPES` has no Object), a Relation (the relation picker's; the Record node draws none, the
+ * writes draw it untyped) and the `ACL` (hidden, schema-ports.ts :378).
+ */
+const NOTES: PortContext = {
+  schema: {
+    classes: {
+      Lesson: { fields: { title: { type: 'string' }, n: { type: 'number' } } },
+      Note: { fields: { body: { type: 'string' }, meta: { type: 'object' }, tags: { type: 'array', relation: 'Tag' }, ACL: { type: 'object' } } }
+    }
+  }
+};
+const TWO: PortContext['backends'] = [
+  { id: 'b1', name: 'First' },
+  { id: 'b2', name: 'Second' }
+];
+/**
+ * NSP-020 s84 — the accounts class as a Parse project holds it (`systemCollections`): the columns each User node leaves out
+ * (user-ports.ts's ignore lists, signup.ts :219), a date, a Relation (no node draws one), and the `ACL` (the Parse wire
+ * skips `shouldShowField` for the User family, user-ports.ts :131, so it is drawn — unlike the Record family).
+ */
+const USERS: PortContext = {
+  schema: {
+    classes: {
+      Lesson: { fields: { title: { type: 'string' } } },
+      _User: {
+        fields: {
+          username: { type: 'string' },
+          email: { type: 'string' },
+          password: { type: 'string' },
+          emailVerified: { type: 'boolean' },
+          authData: { type: 'object' },
+          createdAt: { type: 'date' },
+          nick: { type: 'string' },
+          n: { type: 'number' },
+          born: { type: 'date' },
+          friends: { type: 'array', relation: '_User' },
+          ACL: { type: 'object' }
+        }
+      }
+    }
+  }
+};
+const USER_CASES: Case[] = [
+  { name: 'the accounts class', params: {}, context: USERS },
+  { name: 'a schema without the accounts class', params: {}, context: LESSONS },
+  { name: 'a project with two backends', params: {}, context: { ...USERS, backends: TWO } }
+];
+
+/**
+ * NSP-020 s84 — a project with components: a stack's two pages (each showing a component), a popup holding two Close Popup
+ * nodes, a row template with value and signal ports.
+ */
+const BACK = { PageStackNavigateBack: [{ backActions: 'Save,Cancel', results: 'name,ok' }, { backActions: 'Save', results: 'ok' }] };
+const CLOSE = { NavigationClosePopup: [{ closeActions: 'Save,Cancel', results: 'name,ok' }, { closeActions: 'Save', results: 'ok' }] };
+const PROJECT: PortContext = {
+  stacks: [
+    { name: 'Main', pages: ['home', 'detail'], components: { home: 'Home', detail: 'Detail' } },
+    { name: 'Other', pages: ['solo'], components: { solo: 'Missing' } }
+  ],
+  components: {
+    Home: { inputs: {}, outputs: {} },
+    Detail: { inputs: { id: { type: 'string' }, n: { type: 'number' } }, outputs: {}, nodes: BACK },
+    Dialog: { inputs: { title: { type: 'string' }, n: { type: 'number' } }, outputs: { ok: { type: 'boolean' } }, nodes: CLOSE },
+    Row: { inputs: { id: { type: 'string' }, label: { type: 'string' }, go: { type: 'signal' } }, outputs: { Id: { type: 'string' }, Label: { type: 'string' }, Tapped: { type: 'signal' } } }
+  }
+};
+
+/** The cases every CRUD node is graded on (dbmodelcrudbase.ts `_updatePorts`): the pickers, with and without a schema. */
+const CRUD_CASES: Case[] = [
+  { name: 'a Class with two columns', params: { collectionName: 'Lesson' }, context: LESSONS },
+  { name: 'a Class with an object, a relation and the ACL', params: { collectionName: 'Note' }, context: NOTES },
+  { name: 'a Class the schema does not have', params: { collectionName: 'Nope' }, context: NOTES },
+  { name: 'a project with two backends', params: { collectionName: 'Lesson' }, context: { ...LESSONS, backends: TWO } },
+  { name: 'a project with one backend draws no picker', params: {}, context: { backends: [{ id: 'b1', name: 'First' }] } }
+];
+/** NSP-020 s84 — a saved visual filter naming one connected parameter (`min`), in both shapes the runtime reads (queryutils.ts :212-240). */
+const filterOn = (prefix: string) => ({ type: 'and', conditions: [{ field: 'n', operator: 'greaterThan', valueSource: 'connected', valuePortName: prefix + 'min' }, { field: 'title', operator: 'equalTo', valueSource: 'static', value: 'a' }] });
+const LEGACY_FILTER = { combinator: 'and', rules: [{ property: 'title', operator: 'equal to', input: 'word' }, { combinator: 'or', rules: [{ property: 'n', operator: 'equal to', input: 'word' }] }] };
+/** The cases the three query nodes share: the pickers, the builders with a schema, the parameters a filter names. */
+const QUERY_CASES = (prefix: string): Case[] => [
+  { name: 'a Class the schema has: the builders', params: { collectionName: 'Lesson' }, context: LESSONS },
+  { name: 'a Class the schema does not have: no builders', params: { collectionName: 'Nope' }, context: LESSONS },
+  { name: 'a saved filter with a connected parameter, no schema', params: { collectionName: 'Lesson', visualFilter: filterOn(prefix) } },
+  { name: 'the legacy filter shape, one parameter named twice', params: { collectionName: 'Lesson', visualFilter: LEGACY_FILTER }, context: LESSONS },
+  { name: 'a filter but no Class: no parameters', params: { visualFilter: filterOn(prefix) } },
+  { name: 'a project with two backends', params: { collectionName: 'Lesson' }, context: { ...LESSONS, backends: TWO } }
+];
+
+/** …and the two writes' property ports beside them: a parameter, a wire in, a wire out (record-ports.ts :260-345). */
+const WRITE_CASES: Case[] = [
+  ...CRUD_CASES,
+  {
+    name: 'a prop-zz parameter and wires into prop-title and prop-new, beside the schema',
+    params: { collectionName: 'Lesson', 'prop-zz': 1 },
+    context: { ...LESSONS, wired: ['prop-title', 'prop-new'] }
+  },
+  { name: 'a wire out of prop-out, no schema', params: {}, context: { wiredOutputs: ['prop-out'] } },
+  {
+    name: 'two access rules, one a Role',
+    params: { accessControl: [{ id: 'a1', label: 'Owner' }, { id: 'a2', label: 'Team' }], 'acl-a2-target': 'role' }
+  }
+];
 
 export const TABLE: TableRow[] = [
   // ---- numbered-inputs (nodedefinition.ts collectPorts :623-660: params AND wires, the highest index plus one spare) ----
@@ -298,15 +392,21 @@ export const TABLE: TableRow[] = [
     type: 'Sign File URL',
     module: R + 'data/signfileurl',
     hook: 'setup',
-    cases: [{ name: 'a project with two backends', params: {}, meta: TWO_BACKENDS }],
-    known: { 'input backendId: announced; the spec does not draw it': BACKEND_PICKER }
+    // s84 — the picker from `context.backends` (P107-S80-BACKENDPICKER's two pins gone)
+    cases: [
+      { name: 'a project with two backends', params: {}, context: { backends: TWO } },
+      { name: 'a project with one backend draws no picker', params: {}, context: { backends: [{ id: 'b1', name: 'First' }] } }
+    ]
   },
   {
     type: 'Upload File',
     module: V + 'std-library/uploadfile',
     hook: 'setup',
-    cases: [{ name: 'a project with two backends', params: {}, meta: TWO_BACKENDS }],
-    known: { 'input backendId: announced; the spec does not draw it': BACKEND_PICKER }
+    // s84 — the picker from `context.backends` (P107-S80-BACKENDPICKER's two pins gone)
+    cases: [
+      { name: 'a project with two backends', params: {}, context: { backends: TWO } },
+      { name: 'a project with one backend draws no picker', params: {}, context: { backends: [{ id: 'b1', name: 'First' }] } }
+    ]
   },
 
   // ---- runtime-narrowed: an announcement that REPLACES a declared port (NodeGraphNode.ts getPorts replaceOrAppendPorts) ----
@@ -366,26 +466,26 @@ export const TABLE: TableRow[] = [
     type: 'DbCollection2',
     module: R + 'data/dbcollectionnode2',
     hook: 'setup',
-    cases: [],
-    owedBy: 'L1',
-    reads:
-      'schema (the Class picker `collectionName` from `dbCollections`/`systemCollections`, the class fields for the filter/sort/`qp-*`), the backend list (`backendServices`, `cloudservices` — no PortContext field)'
+    cases: [
+      ...QUERY_CASES('qp-'),
+      { name: 'Use limit and Fetch total count ticked', params: { storageEnableLimit: true, storageEnableCount: true } },
+      { name: 'the Javascript filter draws no visual builder', params: { collectionName: 'Lesson', storageFilterType: 'json' }, context: LESSONS }
+    ],
+    reads: 'schema (the Class picker; the class for the Filter and Sort builders), backends (the picker); the Javascript filter (`storageFilterValue-*`) is not in the spec'
   },
   {
     type: 'AddDbModelRelation',
     module: R + 'data/dbmodelnode-addrelation',
     hook: 'setup',
-    cases: [],
-    owedBy: 'L1',
-    reads: 'schema (the Class picker; the relation fields of the class), the backend list'
+    cases: CRUD_CASES,
+    reads: 'schema (the Class picker; the Relation picker over the relation columns of the class), backends (the picker)'
   },
   {
     type: 'RemoveDbModelRelation',
     module: R + 'data/dbmodelnode-removerelation',
     hook: 'setup',
-    cases: [],
-    owedBy: 'L1',
-    reads: 'schema (the Class picker; the relation fields of the class), the backend list'
+    cases: CRUD_CASES,
+    reads: 'schema (the Class picker; the Relation picker over the relation columns of the class), backends (the picker)'
   },
   // NSP-020 s82 — the first L1 row switched on, the proof of the format decision (§6.6): the Class picker from the schema (the
   // system classes first), the Backend picker with two backends (`context.backends`), `prop-`/`changed-` per column, `prop-`
@@ -408,92 +508,93 @@ export const TABLE: TableRow[] = [
     type: 'DeleteDbModelProperties',
     module: R + 'data/deletedbmodelpropertiesnode',
     hook: 'setup',
-    cases: [],
-    owedBy: 'L1',
-    reads: 'schema (the Class picker), the backend list'
+    cases: CRUD_CASES,
+    reads: 'schema (the Class picker), backends (the picker)'
   },
   {
     type: 'NewDbModelProperties',
     module: R + 'data/newdbmodelpropertiesnode',
     hook: 'setup',
-    cases: [],
-    owedBy: 'L1',
-    reads:
-      'schema (the Class picker; the class fields → `prop-*`), wired (`prop-*` from the wires into it, record-ports.ts / SBR-008), the backend list'
+    cases: WRITE_CASES,
+    reads: 'schema (the Class picker; the class columns → `prop-*`), wired + wiredOutputs (`prop-*` from the wires, SBR-008), backends (the picker)'
   },
   {
     type: 'SetDbModelProperties',
     module: R + 'data/setdbmodelpropertiesnode',
     hook: 'setup',
-    cases: [],
-    owedBy: 'L1',
-    reads: 'schema (the Class picker; the class fields → `prop-*`), wired (`prop-*` from the wires), the backend list'
+    cases: WRITE_CASES,
+    reads: 'schema (the Class picker; the class columns → `prop-*`), wired + wiredOutputs (`prop-*` from the wires, SBR-008), backends (the picker)'
   },
   {
     type: 'FilterDBModels',
     module: R + 'data/filterdbmodelsnode',
     hook: 'setup',
-    cases: [],
-    owedBy: 'L1',
-    reads: 'schema (the Class picker; the class fields for the filter), the backend list'
+    cases: [...QUERY_CASES('fp-'), { name: 'Use limit ticked', params: { filterEnableLimit: true } }],
+    reads: 'schema (the Class picker; the class for the Filter and Sorting builders), backends (the picker)'
   },
   {
     type: 'SubscribeToChanges',
     module: R + 'data/subscribetochanges',
     hook: 'setup',
-    cases: [],
-    owedBy: 'L1',
-    reads: 'schema (the Class picker `collectionName`; `qp-*`), the backend list'
+    cases: QUERY_CASES('qp-'),
+    reads: 'schema (the Class picker; the class for the Filter builder), backends (the picker)'
   },
   {
     type: 'net.noodl.user.User',
     module: R + 'user/user',
     hook: 'setup',
-    cases: [],
-    owedBy: 'L1',
-    reads: 'schema (the `_User` class fields → `prop-*`/`changed-*`, user-ports.ts), `systemCollections`'
+    cases: USER_CASES,
+    reads: 'schema (the `_User` columns → `prop-*`/`changed-*` outputs, user-ports.ts), backends (the picker); the session signals and every property exist at play only when wired'
   },
   {
     type: 'net.noodl.user.SetUserProperties',
     module: R + 'user/setuserproperties',
     hook: 'setup',
-    cases: [],
-    owedBy: 'L1',
-    reads: 'schema (the `_User` class fields → `prop-*`)'
+    cases: USER_CASES,
+    reads: 'schema (the `_User` columns → `prop-*` inputs, user-ports.ts), backends (the picker)'
   },
   {
     type: 'net.noodl.user.SignUp',
     module: V + 'std-library/user/signup',
     hook: 'setup',
-    cases: [],
-    owedBy: 'L1',
-    reads: 'schema (the `_User` class fields, `systemCollections`)'
+    cases: USER_CASES.slice(0, 2),
+    reads: 'schema (the `_User` columns → `prop-*`, read from `systemCollections` alone, signup.ts :213-217)'
   },
   {
     type: 'PageStackNavigate',
     module: V + 'navigation/navigate',
     hook: 'setup',
-    cases: [],
-    owedBy: 'L1',
-    reads:
-      'stacks (`getNodesWithType("Page Stack")` and their pages, navigate.ts :340-380), components (the target page\'s Component Inputs → `pm-*`, `graphModel.components[target]` :365, :430)'
+    cases: [
+      { name: 'Replace: Transition defaults to None, which draws no transition ports', params: { mode: 'replace' } },
+      { name: 'Popup, direction In: Zoom, Fade In', params: { transition: 'Popup', 'tr-direction': 'In' } },
+      { name: 'Push, direction Out: Zoom', params: { 'tr-direction': 'Out' } },
+      { name: 'Main with two pages, no Target: the first page, whose component has no inputs', params: {}, context: PROJECT },
+      { name: 'Target the detail page: its inputs as pm- ports, its Pop Component Stacks as back ports, each once', params: { target: 'detail' }, context: PROJECT },
+      { name: 'Stack Other: its one page, whose component the project does not have', params: { stack: 'Other' }, context: PROJECT },
+      { name: 'Stack named nowhere: no Target', params: { stack: 'Gone' }, context: PROJECT }
+    ],
+    reads: 'stacks (the Component Stack named Stack, its pages and their components, navigate.ts :338-363), components (the target page component inputs → `pm-*`, its Pop Component Stack nodes → `backAction-*`/`backResult-*`)'
   },
   {
     type: 'NavigationShowPopup',
     module: V + 'navigation/showpopup',
     hook: 'setup',
-    cases: [],
-    owedBy: 'L1',
-    reads:
-      "components (the popup's Component Inputs → `popupParam-*`, `graphModel.components[target]` :351, :425) and the Close Popup nodes inside it (their Results / Close Actions → `closeResult-*`/`closeAction-*`)"
+    cases: [
+      { name: 'a popup with inputs and two Close Popups: params typed, actions and results each once, a result typed by its output', params: { target: 'Dialog' }, context: PROJECT },
+      { name: 'a Target the project does not have', params: { target: 'Nope' }, context: PROJECT },
+      { name: 'no Target', params: {}, context: PROJECT }
+    ],
+    reads: 'components (the popup inputs → `popupParam-*`, its Close Popup nodes → `closeAction-*`/`closeResult-*`, a result typed by the popup output of its name)'
   },
   {
     type: 'For Each',
     module: V + 'std-library/data/foreach',
     hook: 'setup',
-    cases: [],
-    owedBy: 'L1',
-    reads: "components (the template's Component Outputs, `graphModel.components[template]`, foreach.tsx :1168-1172)"
+    cases: [
+      { name: 'a Template with value and signal outputs: Script with its default mapping, item outputs and item signals', params: { template: 'Row' }, context: PROJECT },
+      { name: 'a Template the project does not have: nothing announced', params: { template: 'Nope' }, context: PROJECT }
+    ],
+    reads: 'components (the Template outputs → `itemOutput-*`/`itemOutputSignal-*`, its value inputs → the default Script)'
   },
 
   // ---- were owed by L3: `derived.outputs` padded with every fixture's outputs (task §3.1 (d), decision 4) — graded since s82 / s83 ----

@@ -115,10 +115,19 @@ export function announcedPorts(
     };
   }
   if (context.schema) {
-    fromContext.dbCollections = Object.entries(context.schema.classes).map(([className, c]) => ({
-      className,
-      fields: Object.fromEntries(Object.entries(c.fields).map(([f, d]) => [f, { type: PARSE_TYPE_OF[d.type] ?? 'Object' }]))
-    }));
+    // s84 — a `relation` column is a Parse `Relation` to its target class (schema-ports.ts :371-374)
+    const fieldsOf = (c: { fields: Readonly<Record<string, { type: string; relation?: string }>> }) =>
+      Object.fromEntries(
+        Object.entries(c.fields).map(([f, d]) => [
+          f,
+          d.relation !== undefined ? { type: 'Relation', targetClass: d.relation } : { type: PARSE_TYPE_OF[d.type] ?? 'Object' }
+        ])
+      );
+    const classes = Object.entries(context.schema.classes);
+    // s84 — the Parse wire keeps its user classes in `dbCollections` and the `_User` / `_Role` ones in `systemCollections`,
+    // stored as `{ name, schema: { properties } }` (schema-ports.ts :498-504; signup.ts :213-217 reads that one alone)
+    fromContext.dbCollections = classes.filter(([n]) => !n.startsWith('_')).map(([className, c]) => ({ className, fields: fieldsOf(c) }));
+    fromContext.systemCollections = classes.filter(([n]) => n.startsWith('_')).map(([name, c]) => ({ name, schema: { properties: fieldsOf(c) } }));
   }
   const nodeHandlers: Record<string, Array<(e?: unknown) => void>> = {};
   const node = {
@@ -141,10 +150,36 @@ export function announcedPorts(
   const siblings = Object.entries(context.siblings ?? {}).flatMap(([t, nodes]) =>
     nodes.map((n, i) => ({ id: `${t}#${i}`, type: t, parameters: { ...n.params }, on: () => undefined }))
   );
+  // s84 — `context.stacks` as the project's Component Stack nodes (navigate.ts :338-363 reads `name`, `pages` and `pageComp-<id>`)
+  const stackNodes = (context.stacks ?? []).map((st, i) => ({
+    id: `stack#${i}`,
+    type: 'Page Stack',
+    parameters: {
+      name: st.name,
+      pages: st.pages.map((id) => ({ id, label: id })),
+      ...Object.fromEntries(Object.entries(st.components ?? {}).map(([id, c]) => ['pageComp-' + id, c]))
+    },
+    on: () => undefined
+  }));
+  // s84 — `context.components` as the graph model's components: their input and output ports, and the nodes of a type inside
+  // each (`getNodesWithType` — Push reads Pop Component Stack nodes, Show Popup Close Popup nodes)
+  const components = Object.fromEntries(
+    Object.entries(context.components ?? {}).map(([name, c]) => [
+      name,
+      {
+        name,
+        inputPorts: c.inputs,
+        outputPorts: c.outputs,
+        getNodesWithType: (t: string) =>
+          (c.nodes?.[t] ?? []).map((params, i) => ({ id: `${name}/${t}#${i}`, type: t, parameters: { ...params }, on: () => undefined })),
+        on: () => undefined
+      }
+    ])
+  );
   const gmHandlers: Record<string, Array<(n?: unknown) => void>> = {};
   const graphModel = {
-    components: {} as Record<string, unknown>,
-    getNodesWithType: (t: string) => (t === type ? [node] : siblings.filter((n) => n.type === t)),
+    components: components as Record<string, unknown>,
+    getNodesWithType: (t: string) => (t === type ? [node] : [...siblings, ...stackNodes].filter((n) => n.type === t)),
     getMetaData: (key: string) => (key in meta ? meta[key] : fromContext[key]),
     on: (name: string, cb: (n?: unknown) => void) => {
       (gmHandlers[name] = gmHandlers[name] || []).push(cb);

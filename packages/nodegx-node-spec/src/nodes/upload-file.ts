@@ -49,7 +49,7 @@ import type { BackendAnswerEvent, InputDecl, WorldView } from '../spec';
 import { defineNode } from '../spec';
 import { fileError, StoredFile, type BackendScript } from '../world';
 import { STORED_FILES } from './cloud-file';
-import { NO_BACKEND_MESSAGE } from './record-base';
+import { backendPickerPort, NO_BACKEND_MESSAGE } from './record-base';
 import { dones, failures, stringInput } from './user-actions';
 
 /** uploadfile.ts :55, signfileurl.ts :96 */
@@ -269,7 +269,9 @@ export const UploadFile = defineNode({
   },
   {
     derived: {
-      inputs: () => ({}),
+      // NSP-020 s84 — the Backend picker the editor draws with two or more backends (record-ports.ts `recordBackendPickerPorts`, P107-S80-BACKENDPICKER)
+      inputs: (_params, context) => backendPickerPort(context),
+      needs: ['backends'],
       discover: (port) => (port === 'backendId' ? backendPort() : undefined),
       candidates: ['backendId'],
       on: (_s, _port, v) => ({ set: { backendId: v }, send: [] })
@@ -396,7 +398,9 @@ export const SignFileUrl = defineNode({
   },
   {
     derived: {
-      inputs: () => ({}),
+      // NSP-020 s84 — the Backend picker the editor draws with two or more backends (record-ports.ts `recordBackendPickerPorts`, P107-S80-BACKENDPICKER)
+      inputs: (_params, context) => backendPickerPort(context),
+      needs: ['backends'],
       discover: (port) => (port === 'backendId' ? backendPort() : undefined),
       candidates: ['backendId'],
       on: (_s, _port, v) => ({ set: { backendId: v }, send: [] })

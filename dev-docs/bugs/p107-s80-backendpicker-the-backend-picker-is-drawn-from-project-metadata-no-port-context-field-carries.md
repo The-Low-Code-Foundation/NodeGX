@@ -36,5 +36,7 @@ two pins in the module table go stale and are removed. L1 should know before it 
 `backendPickerPort(context)` in `record-base.ts` — an enum of `_active_` then each backend's id, default `_active_`, group
 General, drawn only with two or more backends (record-ports.ts :119-121). DbModel2 spreads it into `derived.inputs` with
 `needs: [... 'backends' ...]`; oracle (a)'s fake graph model answers `backendServices` from `context.backends`, and the
-DbModel2 row grades both cases (`regression:` above — the cases "a project with two backends" and "a project with one backend draws no picker"). The two pins on Sign File URL and Upload File stay until those specs spread the same
-helper (L1's remaining rows); L5's `portContextFor` fills the field from `backendServices`.
+DbModel2 row grades both cases (`regression:` above — the cases "a project with two backends" and "a project with one backend draws no picker"). The two pins on Sign File URL and Upload File stayed until those specs spread the same
+helper — **done in s84**: both spread `backendPickerPort`, the pins are gone, and both rows grade the two-backend and
+one-backend cases; so do every L1 row that reads a backend (the Record CRUD five, Query / Filter / Subscribe, User and Set
+User Properties). L5's `portContextFor` fills the field from `backendServices`.

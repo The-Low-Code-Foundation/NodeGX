@@ -121,7 +121,7 @@
  * **itemOutputSignal-Tapped** — only when the Repeater has that output. A place with no row is nothing to click.
  */
 
-import { defineNode, said, type Patch } from '../spec';
+import { defineNode, said, type ComponentInterface, type InputDecl, type OutputDecl, type Patch, type SignalOutputDecl, type ValueType } from '../spec';
 import type { CollectionRef, RecordRef } from '../registry';
 
 /** What a row template is in the play's project: a component a target registers by name before the node is placed. */
@@ -383,8 +383,6 @@ type State = {
   /** v2 — the input mapping as last written (`undefined` until then), and whether it compiled (`inputMapFunc`) */
   mapping: unknown;
   mapCompiles: boolean;
-  /** the outputs the editor drew for the PLACED Template: the value outputs' names, and whether `Tapped` is one (`itemOutputSignals`) */
-  registered: { values: string[]; tapped: boolean; signals: string[] };
   /** `hasScheduledCopyItems`, `hasScheduledRefresh` */
   copyScheduled: boolean;
   refreshScheduled: boolean;
@@ -445,21 +443,30 @@ type View = {
   registry: { create(data?: unknown): RecordRef; collection(name?: unknown): CollectionRef; isRecord(v: unknown): v is RecordRef; isCollection(v: unknown): v is CollectionRef };
   watch(t: { collection: string } | { model: string }): void;
   unwatch(t: { collection: string }): void;
+  /** NSP-020 s84 — an item output exists only when a wire registered it (foreach.tsx `registerOutputIfNeeded` :1081-1096) */
+  hasOutput(name: string): boolean;
 };
 
-/** The outputs the editor draws for a Template (setup :1036-1091) */
-function outputsOf(template: unknown): { values: string[]; tapped: boolean; signals: string[] } {
-  const t = typeof template === 'string' && Object.prototype.hasOwnProperty.call(REPEATER_TEMPLATES, template) ? REPEATER_TEMPLATES[template] : undefined;
-  const values: string[] = [];
-  const signals: string[] = [];
-  let tapped = false;
-  for (const [name, kind] of Object.entries(t?.outputs ?? {})) {
-    if (kind === 'signal') {
-      tapped = tapped || name === 'Tapped';
-      signals.push(name);
-    } else values.push(name);
-  }
-  return { values, tapped, signals };
+/** foreach.tsx :1081-1096 registerOutputIfNeeded — `itemOutput-<name>` reads the row's output last reported; `itemOutputSignal-<name>` is a signal. */
+const itemOutput = (name: string, type: ValueType = '*'): OutputDecl<State> => ({ type, from: (s: State) => s.outs[name], displayName: name, group: 'Item Outputs' });
+const itemSignal = (name: string): SignalOutputDecl => ({ type: 'signal', displayName: name, group: 'Item Signals' });
+
+/** The item outputs a generated sequence may wire: every play template's outputs (THE PLAY'S PROJECT). */
+const ITEM_OUTPUT_CANDIDATES = [...new Set(Object.values(REPEATER_TEMPLATES).flatMap((t) => Object.entries(t.outputs).map(([name, kind]) => (kind === 'signal' ? 'itemOutputSignal-' : 'itemOutput-') + name)))];
+
+/** foreach.tsx :1149-1156 — the Script the editor offers for a Template: one `'input': 'input'` line per value input. */
+function defaultMapping(c: ComponentInterface): string {
+  let lines = '';
+  for (const [name, port] of Object.entries(c.inputs)) if (port.type !== 'signal') lines += "\t'" + name + "': '" + name + "',\n";
+  return (
+    '// Here you add mappings between the properties of the item objects and the inputs of the components.\n' +
+    "// 'myComponentInput': 'myObjectProperty',\n" +
+    "// 'anotherComponentInput': function () { return object.get('someProperty') + ' ' + object.get('otherProp') }\n" +
+    '// These are the default mappings based on the selected template component.\n' +
+    'map({\n' +
+    lines +
+    '})\n'
+  );
 }
 
 export const Repeater = defineNode({
@@ -496,7 +503,6 @@ export const Repeater = defineNode({
     compiles: false,
     mapping: undefined,
     mapCompiles: false,
-    registered: { values: [], tapped: false, signals: [] },
     copyScheduled: false,
     refreshScheduled: false,
     callbacks: [],
@@ -519,7 +525,7 @@ export const Repeater = defineNode({
   } as State,
   // `initialize` :232 — its own list (an anonymous array: ten draws); placed, it learns its parent before its parameters are set and asks
   // for a rebuild (`updateTarget` :436-439)
-  init: (w, params) => ({ own: w.registry.collection(), registered: outputsOf(params.template), refreshScheduled: true, callbacks: ['refresh' as const] }),
+  init: (w) => ({ own: w.registry.collection(), refreshScheduled: true, callbacks: ['refresh' as const] }),
 
   acts: {
     tapRow: { description: 'a person clicks the row the Repeater drew at this place in the list, counting from 0', values: [0, 1, 2, 3] }
@@ -584,18 +590,28 @@ export const Repeater = defineNode({
   },
   {
     derived: {
-      // v2 — `inputMappingScript` (:968-1010): the editor draws it with a Template, and the runtime registers it on any write
-      inputs: () => ({}),
+      // NSP-020 s84 — what the editor draws (setup :1166-1219), from the PROJECT's Template component: Script with its default
+      // mapping (one line per value input), then one `itemOutput-` per value output and one `itemOutputSignal-` per signal output.
+      // Nothing when the project has no such component. At play the context has no components: Script is registered by its
+      // first write (:968-1010) and an item output by a wire (`registerOutputIfNeeded` :1081-1096 — every send asks `hasOutput`)
+      inputs: (params, context): Record<string, InputDecl> => {
+        const c = typeof params.template === 'string' ? context.components?.[params.template] : undefined;
+        return c ? { inputMappingScript: { ...MAPPING_PORT, drawnDefault: defaultMapping(c) } } : {};
+      },
       discover: (port) => (port === 'inputMappingScript' ? MAPPING_PORT : undefined),
       candidates: ['inputMappingScript'],
-      outputs: (params) => {
-        const r = outputsOf(params.template);
-        const out: Record<string, unknown> = {};
-        for (const name of r.values) out[`itemOutput-${name}`] = { type: '*', from: (s: State) => s.outs[name], displayName: name, group: 'Item Outputs' };
-        if (r.tapped) out['itemOutputSignal-Tapped'] = { type: 'signal', displayName: 'Tapped', group: 'Item Signals' };
-        for (const name of r.signals) if (name !== 'Tapped') out[`itemOutputSignal-${name}`] = { type: 'signal', displayName: name, group: 'Item Signals' };
-        return out as never;
+      outputs: (params, context) => {
+        const c = typeof params.template === 'string' ? context.components?.[params.template] : undefined;
+        const out: Record<string, OutputDecl<State>> = {};
+        for (const [name, port] of Object.entries(c?.outputs ?? {})) {
+          if (port.type === 'signal') out['itemOutputSignal-' + name] = { ...itemSignal(name), onWire: true };
+          else out['itemOutput-' + name] = { ...itemOutput(name, port.type), onWire: true } as OutputDecl<State>;
+        }
+        return out;
       },
+      needs: ['components', 'wiredOutputs'],
+      discoverOutput: (port) => (port.startsWith('itemOutputSignal-') ? itemSignal(port.slice('itemOutputSignal-'.length)) : port.startsWith('itemOutput-') ? itemOutput(port.slice('itemOutput-'.length)) : undefined),
+      outputCandidates: ITEM_OUTPUT_CANDIDATES,
       // :970-1000 — compiled as it arrives when it is text that is not empty (what does not compile leaves none); a rebuild either way
       on: (s, port, v, _d, view) =>
         port === 'inputMappingScript'
@@ -1028,7 +1044,7 @@ function forwardOf(template: string, port: 'added' | 'tryRemove'): string | unde
  * graph updates — in a drain. Raised in one, it is heard in the drain's next pass; raised outside, at the next drain.
  */
 function raise(w: Work, row: Row, name: string | undefined): void {
-  if (name === undefined || !w.st.registered.signals.includes(name)) return;
+  if (name === undefined || !w.view.hasOutput('itemOutputSignal-' + name)) return; // `itemOutputSignals` — set by a wire (:1085-1086)
   const r: Raised = { born: row.born, name, late: w.st.dirty };
   if (w.inDrain) w.raisedInDrain.push(r);
   else w.st.pending.push(r);
@@ -1086,7 +1102,7 @@ function report(w: Work, heard: ReadonlyArray<{ row: Row; name: string }>): void
     const reads = ROW_OUTPUT[row.template];
     const outs = { ...w.st.outs };
     for (const name of Object.keys(REPEATER_TEMPLATES[row.template].outputs)) {
-      if (!w.st.registered.values.includes(name)) continue;
+      if (!w.view.hasOutput('itemOutput-' + name)) continue; // :1067-1068
       outs[name] = row.inputs[reads[name]];
       w.sendDerived.add(`itemOutput-${name}`);
     }
@@ -1159,7 +1175,7 @@ function rebuildFrom(w: Work, records: RecordRef[], k: number, tokens: number): 
  * waiting on it goes in that drain (after its `Tapped` is heard); one nothing waits on is Unchanged.
  */
 function tapped(w: Work, row: Row): void {
-  if (w.st.registered.signals.includes('Tapped')) {
+  if (w.view.hasOutput('itemOutputSignal-Tapped')) {
     w.st.itemId = row.rec.getId();
     w.send.add('itemActionItemId');
     report(w, [{ row, name: 'Tapped' }]);

@@ -84,13 +84,13 @@
  */
 
 import type { Filter } from '../../../nodegx-backend-contract/src/translators';
-import type { InputDecl, OutputDecl, WorldView } from '../spec';
+import type { InputDecl, OutputDecl, ValueInputDecl, WorldView } from '../spec';
 import { defineNode } from '../spec';
 import type { RecordRef } from '../registry';
 import type { BackendScript, RealtimeScriptEvent } from '../world';
 import { valueDidChange } from './condition';
-import { NO_BACKEND_MESSAGE } from './record-base';
-import { compareObjects, lowerToParse, matchesQuery, toNeutral } from './record-match';
+import { backendPickerPort, classPicker, NO_BACKEND_MESSAGE, selectedClass } from './record-base';
+import { compareObjects, filterParameterNames, lowerToParse, matchesQuery, toNeutral } from './record-match';
 import { sameList } from '../world';
 
 type QueryRecordsState = {
@@ -150,6 +150,15 @@ const GENERIC_SETTING = (name: string): InputDecl => ({
   description: 'Stored by name; a change re-queries under Query settings',
   examples: SETTING_EXAMPLES[name] ?? [true, 'x']
 });
+
+/** :1261-1262 — the script a Javascript filter starts with. */
+const DEFAULT_JSON_QUERY = '// Write your query script here, check out the reference documentation for examples\n' + 'where({ })\n';
+
+/** A setting as the editor draws it (`updatePorts` :1310-1391): its type, its label, its group. */
+const setting = (name: string, type: 'boolean' | 'number', displayName: string, group: string): ValueInputDecl => ({ ...(GENERIC_SETTING(name) as ValueInputDecl), type, displayName, group });
+
+/** :1386-1391 — `Total Count`, in group General. */
+const totalCount = (): OutputDecl<QueryRecordsState> => ({ type: 'number', displayName: 'Total Count', group: 'General', description: 'How many records match, ignoring Limit', from: (s) => s.settings.storageTotalCount });
 
 /** The settings the editor draws (updatePorts :1228-1457), with the values a panel holds. */
 const SETTING_EXAMPLES: Readonly<Record<string, readonly unknown[]>> = {
@@ -466,12 +475,51 @@ export const QueryRecords = defineNode({
   {},
   {
     derived: {
-      // :233-234 — the two boxes registered in `initialize`, whatever the params
-      inputs: () => ({ 'runOnChange-records': checkbox('records'), 'runOnChange-querySettings': checkbox('querySettings') }),
-      // :1110-1117 — an output a graph wires reads the stored setting of its name; the editor draws `Total Count` (:1349-1355)
-      outputs: () => ({
-        storageTotalCount: { type: 'number', displayName: 'Total Count', group: 'Total Count', description: 'How many records match, ignoring Limit', from: (s) => s.settings.storageTotalCount } as OutputDecl<QueryRecordsState>
-      }),
+      // NSP-020 s84 — what the editor draws (`updatePorts` :1264-1489), in its order: the Backend picker and the Class from the
+      // project; the Filter type (the Javascript one is not this spec's, so never driven); Search; the Limit group; Do; the four
+      // Run On Value Change boxes the node registers whatever the params (:233-234 registers two at `initialize`); Subscribe To
+      // Changes; Fetch total count; then — Visual, a Class set — the Filter and Sort builders when the schema has the Class, and
+      // one `qp-` port and its box per parameter the saved filter names. At play there is no schema; the rest is the params'
+      inputs: (params, context) => {
+        const out: Record<string, InputDecl> = {
+          ...backendPickerPort(context),
+          collectionName: classPicker(discover('collectionName') as ValueInputDecl, context),
+          storageFilterType: { type: 'enum', enums: ['simple', 'json'], drawnDefault: 'simple', coerce: 'none', editOnly: true, displayName: 'Filter', group: 'General', undriven: 'the Javascript filter is not in this spec (header)' },
+          search: discover('search')!,
+          storageEnableLimit: setting('storageEnableLimit', 'boolean', 'Use limit', 'Limit')
+        };
+        if (params.storageEnableLimit) {
+          out.storageLimit = { ...setting('storageLimit', 'number', 'Limit', 'Limit'), drawnDefault: 10 };
+          out.storageSkip = { ...setting('storageSkip', 'number', 'Skip', 'Limit'), drawnDefault: 0 };
+        }
+        out.storageFetch = discover('storageFetch')!;
+        for (const [governed, label] of [['collectionName', 'Class'], ['search', 'Search'], ['records', 'Record changes'], ['querySettings', 'Query settings']]) out['runOnChange-' + governed] = checkbox(label);
+        out.realtime = discover('realtime')!;
+        out.storageEnableCount = setting('storageEnableCount', 'boolean', 'Fetch total count', 'Total Count');
+        // :1452-1458 — the Javascript filter's script, drawn and never driven; its `storageFilterValue-` ports (:1460-1486, read
+        // from the script's `$name`s and `Inputs.name`s) are not drawn here: the Javascript filter is not in this spec (header)
+        if (params.storageFilterType === 'json') out.storageJSONFilter = { type: 'string', coerce: 'none', editOnly: true, displayName: 'Filter', group: 'Filter', drawnDefault: DEFAULT_JSON_QUERY, undriven: 'the Javascript filter is not in this spec (header)' };
+        if ((params.storageFilterType === undefined || params.storageFilterType === 'simple') && params.collectionName !== undefined) {
+          if (selectedClass(params, context)) {
+            out.visualFilter = { ...(discover('visualFilter') as ValueInputDecl), type: 'query-filter' };
+            out.visualSort = { ...(discover('visualSort') as ValueInputDecl), type: 'query-sorting' };
+          }
+          if (params.visualFilter !== undefined) {
+            for (const name of filterParameterNames(params.visualFilter, 'qp-')) {
+              out['qp-' + name] = queryParameter(name);
+              out['runOnChange-qp-' + name] = checkbox(name);
+            }
+          }
+        }
+        return out;
+      },
+      // :1381-1391 — the editor draws Total Count once Fetch total count is ticked; at play it exists only when wired
+      // (`registerOutputIfNeeded` :1146-1153, the send gated on `hasOutput` :929)
+      outputs: (params): Record<string, OutputDecl<QueryRecordsState>> => (params.storageEnableCount ? { storageTotalCount: { ...totalCount(), onWire: true } as OutputDecl<QueryRecordsState> } : {}),
+      needs: ['schema', 'backends'],
+      // :1146-1153 — a wire out of any name reads the stored setting of that name (`userOutputGetter`)
+      discoverOutput: (port) => (port === 'storageTotalCount' ? totalCount() : ({ type: '*', displayName: port, group: 'General', from: (s) => s.settings[port] } as OutputDecl<QueryRecordsState>)),
+      outputCandidates: ['storageTotalCount'],
       discover,
       candidates: ['storageFetch', 'collectionName', 'backendId', 'search', 'visualFilter', 'visualSort', 'qp-min', 'storageEnableLimit', 'storageLimit', 'storageSkip', 'storageEnableCount', 'runOnChange-collectionName', 'runOnChange-search', 'runOnChange-qp-min', 'runOnChange-querySettings', 'runOnChange-records', 'realtime'],
       on: (s, port, v, derived) => {
@@ -552,7 +600,8 @@ export const QueryRecords = defineNode({
           );
         }
         const settings = count !== undefined ? { settings: { ...s.settings, storageTotalCount: count } } : {};
-        return { set: { ...publish, ...settings }, send: [...all], sendDerived: count !== undefined ? ['storageTotalCount'] : [], emit: ['fetched'] };
+        // :929 — Total Count is flagged only when a wire registered it (s84: the interpreter would mint it on the send)
+        return { set: { ...publish, ...settings }, send: [...all], sendDerived: count !== undefined && w.hasOutput('storageTotalCount') ? ['storageTotalCount'] : [], emit: ['fetched'] };
       },
       // s24 — :251-363 `cloudStoreEvents`: a write made elsewhere, heard on the store this node is bound to
       store: (s, _i, e, w) => {

@@ -51,7 +51,8 @@ import type { RecordRef, RegistryScript } from '../registry';
 import type { BackendScript } from '../world';
 import { valueDidChange } from './condition';
 import { errorOutput, runOnChange } from './data-base';
-import { compareObjects, lowerToParse, matchesQuery, toNeutral } from './record-match';
+import { compareObjects, filterParameterNames, lowerToParse, matchesQuery, toNeutral } from './record-match';
+import { backendPickerPort, classPicker, selectedClass } from './record-base';
 
 type FilterRecordsState = {
   /** `_internal.collection` — a registry array, a plain array, or whatever else arrived (:316-320) */
@@ -285,8 +286,30 @@ export const FilterRecords = defineNode({
   },
   {
     derived: {
-      // the editor's ports need the class's schema (:666-712), which a play has none of: no port is drawn from params
-      inputs: () => ({}),
+      // NSP-020 s84 — what the editor draws (`updatePorts` :634-728): the Backend picker and the Class from the project, the
+      // Limit group, then — once a Class is set — the Filter and Sorting builders when the schema has that Class, and one
+      // `fp-` port and its Run On Value Change box per parameter the saved filter names. At play there is no schema: the
+      // parameters alone, which the runtime registers on their first write (:535-577)
+      inputs: (params, context) => {
+        const out: Record<string, InputDecl> = { ...backendPickerPort(context), collectionName: classPicker(discover('collectionName') as ValueInputDecl, context), filterEnableLimit: setting('filterEnableLimit') };
+        if (params.filterEnableLimit) {
+          out.filterLimit = { ...setting('filterLimit'), drawnDefault: 10 }; // :657-675
+          out.filterSkip = { ...setting('filterSkip'), drawnDefault: 0 };
+        }
+        if (params.collectionName === undefined) return out;
+        if (selectedClass(params, context)) {
+          out.visualFilter = { ...(discover('visualFilter') as ValueInputDecl), type: 'query-filter' }; // :683-702
+          out.visualSorting = { ...(discover('visualSorting') as ValueInputDecl), type: 'query-sorting' }; // :703-709
+        }
+        if (params.visualFilter !== undefined) {
+          for (const name of filterParameterNames(params.visualFilter, 'fp-')) {
+            out['fp-' + name] = discover('fp-' + name)!; // :712-727
+            out['runOnChange-fp-' + name] = checkbox(name);
+          }
+        }
+        return out;
+      },
+      needs: ['schema', 'backends'],
       discover,
       candidates: ['collectionName', 'backendId', 'visualFilter', 'visualSorting', 'fp-min', 'filterEnableLimit', 'filterLimit', 'filterSkip', 'runOnChange-fp-min'],
       on: (s, port, v, derived, w) => {

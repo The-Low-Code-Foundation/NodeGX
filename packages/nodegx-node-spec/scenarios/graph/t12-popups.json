@@ -42,7 +42,8 @@
           "target": "Dialog",
           "popupParam-name": "A",
           "popupParam-go": true
-        }
+        },
+        "wiredOutputs": ["closeResult-name"]
       }
     },
     "steps": [

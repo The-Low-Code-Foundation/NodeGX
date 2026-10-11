@@ -30,6 +30,8 @@ import type { RegistryScript } from '../registry';
 import {
   bindId,
   discoverRecordPort,
+  recordCrudInputs,
+  selectedClass,
   NO_BACKEND_MESSAGE,
   onRecordPort,
   RECORD_ERROR_OUTPUT,
@@ -39,7 +41,7 @@ import {
   RECORD_ID_STATE,
   type RecordIdState
 } from './record-base';
-import type { InputDecl, ValueInputDecl } from '../spec';
+import type { BackendField, InputDecl, ValueInputDecl } from '../spec';
 
 type Job = 'bind' | 'relate';
 
@@ -58,6 +60,11 @@ type RelationState = RecordIdState & {
 
 /** record-ports.ts :350-366 — the Relation dropdown, from the selected Class's relation fields; registered on first write (:757-766), stored raw. Edit-only. */
 const relationPort = (): ValueInputDecl => ({ type: 'string', coerce: 'none', editOnly: true, displayName: 'Relation', group: 'General', examples: ['tags', 'tags', 'owner'] });
+
+/** record-ports.ts :350-366 `recordRelationPorts` — the Relation dropdown over the Class's relation columns (`allowEditOnly`), offered once the schema has the Class. */
+function relationPickerPort(klass: { fields: Readonly<Record<string, BackendField>> }): ValueInputDecl {
+  return { ...relationPort(), type: 'enum', enums: Object.entries(klass.fields).filter(([, f]) => f.relation !== undefined).map(([name]) => name) };
+}
 
 function discover(port: string): InputDecl | undefined {
   if (port === 'relationProperty') return relationPort();
@@ -144,7 +151,13 @@ function relationNode(o: { type: string; source: string; op: 'addRelation' | 're
     },
     {
       derived: {
-        inputs: () => ({}),
+        // NSP-020 s84 — what the editor draws (dbmodelcrudbase.ts `_updatePorts` :373-385): the Backend picker, the Class,
+        // and once the schema has the Class, the Relation dropdown of its relation columns
+        inputs: (params, context) => {
+          const klass = selectedClass(params, context);
+          return { ...recordCrudInputs(context), ...(klass ? { relationProperty: relationPickerPort(klass) } : {}) };
+        },
+        needs: ['schema', 'backends'],
         discover,
         candidates: ['relationProperty', 'collectionName', 'backendId'],
         on: (_s, port, v) => (port === 'relationProperty' ? { set: { relationProperty: v }, send: [] } : onRecordPort(port, v))

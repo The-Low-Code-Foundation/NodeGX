@@ -2,7 +2,7 @@
 
 **Opened 2026-09-30 (s1), from Richard's ruling that the editor is a target (README §1, R6).**
 **Depends on NSP-004.** Runs alongside the batches (NSP-011 to NSP-017): each batch closes its nodes' rows here.
-**Status: 🟡 s79 (2026-10-10, Fable): the design is decided and built in the format (§3.1) — `portsOf` / `drawnPorts`, `PortContext` + `derived.needs` with the needs gate, `when` and `narrow` on declared ports, `context` through the scenario, the adapter and the interpreter; the three-oracle parity drive stands with its first proofs (And with wires, String Format, Image's size-mode groups) and planted mutants. s80 (Opus): L2 done — `when` on all 448 conditioned ports, oracle (b) green and made honest (§6.2); L1 measured, its premise wrong (the fixtures are the play's wires, not the project), a format proposal in §6.3, the runtime target takes `context` and compiles again (P107-S80-DEADTARGET); L4 done — oracle (a)'s module table over all 70 hooks (§6.4). s81 (Opus): L3 measured, NOT built — decision 4 holds only for States' value outputs; the rest of the padding is the play's wires, the code's writes, or the project's saved ports, so L3 joins L1's format decision (§6.5). **s82 (Fable): the format decided and built (§6.6) — at play a node has its params and its wires, never the project: `PlayContext`, `wiredOutputs` + `backends`, `onWire`, `discoverOutput`, `outputCandidates`, `hasOutput`, re-derive after each write; proved on DbModel2 and States (traces byte-identical, both targets at 200, both L4 rows graded).** Left: L1's other 14 specs and L3's 3 onto the format, oracle (c), the context builder in `project-contract`, AC3 (MCP) and AC4 (ledger column).**
+**Status: 🟡 s79 (2026-10-10, Fable): the design is decided and built in the format (§3.1) — `portsOf` / `drawnPorts`, `PortContext` + `derived.needs` with the needs gate, `when` and `narrow` on declared ports, `context` through the scenario, the adapter and the interpreter; the three-oracle parity drive stands with its first proofs (And with wires, String Format, Image's size-mode groups) and planted mutants. s80 (Opus): L2 done — `when` on all 448 conditioned ports, oracle (b) green and made honest (§6.2); L1 measured, its premise wrong (the fixtures are the play's wires, not the project), a format proposal in §6.3, the runtime target takes `context` and compiles again (P107-S80-DEADTARGET); L4 done — oracle (a)'s module table over all 70 hooks (§6.4). s81 (Opus): L3 measured, NOT built — decision 4 holds only for States' value outputs; the rest of the padding is the play's wires, the code's writes, or the project's saved ports, so L3 joins L1's format decision (§6.5). **s82 (Fable): the format decided and built (§6.6) — at play a node has its params and its wires, never the project: `PlayContext`, `wiredOutputs` + `backends`, `onWire`, `discoverOutput`, `outputCandidates`, `hasOutput`, re-derive after each write; proved on DbModel2 and States (traces byte-identical, both targets at 200, both L4 rows graded).** s83 (Opus): L3 done (§6.7). **s84 (Opus): L1 done (§6.8) — the last 14 specs on the format, oracle (a) 40 graded / 227 cases / 0 owed.** Left: L5 (the context builder in `project-contract`, AC3 (MCP), AC4 (ledger column)), oracle (c), the 10,000 run.**
 
 ## 1. The person sentence
 
@@ -538,3 +538,59 @@ Builder 3; a planted wrong `group` on Script is red.
 - Logic Builder needed one thing the eight pieces did not have: the act's kind on `discoverOutput`.
 
 **Left:** L1's 14 rows, L5, oracle (c) (waits on P107-S79-ADAPTERLABEL), and the one 10,000-sequence run once L1 lands.
+
+### 6.8 s84 (2026-10-11, Opus) — L1 ✅: the last 14 specs on the format; oracle (a) owes nothing
+
+All 14 rows L4 left `owedBy: 'L1'` are on §6.6's format. **Oracle (a): 40 graded rows, 227 cases, 0 owed** (from 26 / 137 / 14);
+the owed block now asserts that nothing is owed. Every spec draws what its hook announces from `(params, context)`. At play the
+context holds only the wires, so a schema-, stack- or component-driven port is registered by its first write or by a wire, as
+the runtime registers it.
+
+| family | specs | what the editor draws from the project | at play |
+|---|---|---|---|
+| Record CRUD | Create, Update, Delete Record; Add, Remove Record Relation | `recordCrudInputs` (record-base.ts): the Backend picker (two or more backends), the Class dropdown; Create / Update add `recordFieldInputs` (record-write.ts: one `prop-` per column, typed, then the wired and parameter names untyped, SBR-008); the relation nodes add the Relation picker over the class's relation columns | unchanged — a write registers each; no output is gated |
+| Query | Query Records, Filter Records, Subscribe To Changes | the pickers; Filter / Sort builders (`query-filter`, `query-sorting`, new `ValueType`s) when the schema has the Class; one `qp-` / `fp-` port (and its box) per parameter the saved filter names (`filterParameterNames`, record-match.ts, twin of queryutils.ts :212-240, both shapes). Query Records: every setting typed and labelled as drawn, the Javascript filter drawn `undriven` | Query Records' `storageTotalCount` exists only on a wire (`onWire` + `discoverOutput`) and its send asks `hasOutput` (:929) |
+| User | User, Set User Properties, Sign Up | `userFields` (user.ts): the `_User` columns less each node's ignore list and every Relation; on the Parse wire `ACL` is drawn (P107-S84-USERACL) | User's `prop-` / `changed-` and the three session signals are `onWire`, minted by a wire, every send gated as the runtime gates it |
+| Components | Push Component To Stack, Show Popup, For Each | Push: Transition's default per Mode and each transition's `tr-` ports typed with the panel's defaults (`drawnDefault`); Target Page over the named stack's pages; the target page component's inputs as `pm-`; its Pop Component Stack nodes as `backAction-` / `backResult-` (`onWire`, no candidates: the world's stacks have no back channel). Show Popup: `popupParam-` typed by the popup's inputs; its Close Popup nodes' actions and results, a result typed by the popup's output. For Each: Script with its default mapping, `itemOutput-` / `itemOutputSignal-` from the Template's outputs | Show Popup's and For Each's outputs `onWire`; For Each's `registered` state (the padding) is gone, every read is `hasOutput` |
+
+**Format additions (spec.ts, one stranger-hash refresh):** `BackendField` with `relation?` (a Parse Relation column);
+`ValueType` gains `query-filter` and `query-sorting`; `ComponentInterface` ports may be `'signal'` and gain `nodes?` (the
+params of the nodes of a type inside the component — `getNodesWithType`, read by Push and Show Popup); `NamedPages.components?`
+(page id → the component it shows, a Component Stack's `pageComp-<id>`). No interpreter or runner change. Oracle (a)'s fake
+project grew to match: `_`-prefixed classes in `systemCollections` (`{ name, schema: { properties } }`, as a Parse project
+keeps them, the only key Sign Up reads), a Relation column, the project's Component Stacks and components.
+
+**Also:** Sign File URL and Upload File spread `backendPickerPort`; BACKENDPICKER's two pins are gone. DbModel2 types a
+column as `recordPortType` does (only String / Number / Boolean / Date keep their type) and skips relation columns and `ACL`.
+
+**Traces against HEAD — every existing hand trace byte-identical.** `wiredOutputs` written from the gated names each HEAD
+trace mentions: User 28, Show Popup 7, For Each 261, Query Records 1; graph s10 (six User nodes) and t12 (one Show Popup).
+**New scenarios, each killing a mutant the generator reaches on some seeds only, or grading a gate:** Query Records
+"Total Count with no wire" (a planted ungated send shows in its trace) and "a filter parameter arriving alone" (a `qp-` write
+swapped with Search's survived at runtime seed 20737); Filter Records "a box written after its value" (a swap survived seed
+13 — HEAD killed it there by chance, measured on HEAD's spec); User "a lost session with no wire out of Session Lost" (an
+unwired sign-out binds silently — a branch HEAD never had, since the padding registered all three signals); Show Popup "a
+close and a new show in one frame" (drop-set at seed 13). **A first planted check was invalid and was redone:** dropping a
+scenario's `wiredOutputs` makes `golden --check` say "stale" because the INPUT hash moved, not the trace — compare the traces.
+
+**Planted breaks, each red then restored:** `ACL` shown on the Record writes (2 cases); the legacy filter shape ignored (3);
+the Total Count send ungated (the trace); `ACL` hidden on the User family (5); Replace's None default lost, Show Popup's result
+type ignored, For Each's Script mapping a signal input (3 rows).
+
+**Found:** **P107-S84-USERACL** (runtime, low): the User family draws `prop-ACL` on the Parse wire, which the Record
+family hides (`userPropertyPorts` skips `shouldShowField` there; Sign Up's ignore list lacks it).
+
+**Gates (s84, this tree, on `6e44387bc`):**
+- **node-spec:** `tsc --noEmit` 0. Interpreter conformance with mutants, seeds 13 and 20728, all 19 moved specs (the 14,
+  DbModel2, Upload File, Sign File URL): CONFORM, 0 survivors, 0 unreached.
+- **runtime:** `NSP_ONLY=` the 19 at 200, seed 20737: all CONFORM. `nsp-020-ports-parity` 324 / 324; `graph` 96 / 96;
+  runtime-target, the three contracts and the editor-suite graph 86 / 86. Node-spec graph 128 / 128.
+- **editor:** `tests-unit/nsp-020` 452 / 452; `typecheck:editor-tests` 0.
+- **ledgers:** `spec-golden:check` 0 (108 specs, 9,216 scenarios); `spec-ledger:check` 0 (125 / 147, unmoved).
+- **full suites:** the node-spec suite without the stranger file: 33 suites, 1,895 / 1,895 after two fixes it found — both
+  For Each's `registered` going: `world.test.ts`'s tap play now wires `itemOutputSignal-Tapped` (the padding had registered it),
+  and the page-model gate's For Each state list drops `registered`. The stranger hash for `src/spec.ts` refreshed (the only
+  guarded file that moved); the four rounds re-graded at 46 / 46 (+18 deep skipped), exit 0.
+
+**Left:** L5 (`portContextFor` in `project-contract`, AC3, AC4), oracle (c) (waits on P107-S79-ADAPTERLABEL), the one
+10,000-sequence run.

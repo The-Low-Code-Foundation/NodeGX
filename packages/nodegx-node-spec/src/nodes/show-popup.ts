@@ -31,11 +31,13 @@
  * nothing. Error keeps its last message — nothing clears it.
  * The ports: `popupParam-<name>` (the target component's inputs) and `closeResult-<name>` / `closeAction-<name>`
  * (from the Close Popups inside it) come from the PROJECT (setup :341-416), not from this node's params —
- * NSP-020's case. Inputs are registered on first write (:303-312); the outputs are those of a project whose popup
- * holds a Close Popup with Results `name,ok` and Close Actions `Save,Cancel` (:313-329).
+ * NSP-020's case. Inputs are registered on first write (:303-312); an output exists only when a wire registered it
+ * (:313-329) and every send asks for it (:270; `sendSignalOnOutput` of an output that is not there sends nothing). NSP-020
+ * s84: a play names its wires (`wiredOutputs`); a generated sequence wires from Results `name,ok` and Close Actions
+ * `Save,Cancel` (`outputCandidates`).
  */
 
-import { defineNode, type OutputDecl, type ValueInputDecl } from '../spec';
+import { defineNode, type OutputDecl, type SignalOutputDecl, type ValueInputDecl, type ValueType } from '../spec';
 
 type Rec = Readonly<Record<string, unknown>>;
 
@@ -84,9 +86,14 @@ type State = {
 // :303-312 `registerInputIfNeeded` — `registerInput(name, { set })`: no type, no conversion, stored raw
 const popupParamPort = (): ValueInputDecl => ({ type: '*', coerce: 'none', group: 'Params', examples: [1, 'a', '', null, { id: 2 }] });
 
-/** The project's Close Popup ports (see the header): Results `name,ok`, Close Actions `Save,Cancel`. */
+/** The Close Popup ports a generated sequence may wire (see the header): Results `name,ok`, Close Actions `Save,Cancel`. */
 const RESULTS = ['name', 'ok'] as const;
 const ACTIONS = ['closeAction-Save', 'closeAction-Cancel'] as const;
+
+/** :313-329 registerOutputIfNeeded — a Close Result reads the results the popup handed back; a Close Action is a signal. */
+const closeResult = (name: string, type: ValueType | 'signal' = '*'): OutputDecl<State> => ({ type: type === 'signal' ? '*' : type, displayName: name, group: 'Close Results', description: 'The close result ' + name + ', as the popup handed it back', from: (s) => s.closeResults[name] });
+const closeAction = (name: string): SignalOutputDecl => ({ type: 'signal', displayName: name, group: 'Close Actions', description: 'Fires when the popup was closed with this close action' });
+const listOf = (v: unknown): string[] => (typeof v === 'string' ? v.split(',') : []);
 
 const NO_TARGET = 'No Target component is set on this Show Popup node';
 
@@ -213,9 +220,9 @@ export const ShowPopup = defineNode({
         }
         // :266-275 — the results replace Close Results; each named port is flagged; then the action, or Closed
         closeResults = l.results;
-        for (const key of Object.keys(l.results)) if ((RESULTS as readonly string[]).includes(key)) flagged.add('closeResult-' + key);
+        for (const key of Object.keys(l.results)) if (world.hasOutput('closeResult-' + key)) flagged.add('closeResult-' + key); // :270
         if (!l.action) pulses.push('Closed');
-        else if ((ACTIONS as readonly unknown[]).includes(l.action)) pulses.push({ derived: l.action as string });
+        else if (typeof l.action === 'string' && world.hasOutput(l.action)) pulses.push({ derived: l.action });
         // an action with no port: `sendSignalOnOutput` finds no output and sends nothing (node.ts)
       }
       const base = { stack, closeResults, leaving: [] as readonly Leave[] };
@@ -248,14 +255,28 @@ export const ShowPopup = defineNode({
       return { set: { ...shown, stack, error }, send: ['error'], sendDerived, pulses, popup, outcomes: all('failure', 'show-popup/target-failed') };
     },
     derived: {
-      inputs: () => ({}),
-      // :313-329 — the project's ports (see the header)
-      outputs: () => {
-        const out: Record<string, OutputDecl<State>> = {};
-        for (const name of RESULTS) out['closeResult-' + name] = { type: '*', displayName: name, group: 'Close Results', description: 'The close result ' + name + ', as the popup handed it back', from: (s) => s.closeResults[name] };
-        for (const port of ACTIONS) out[port] = { type: 'signal', displayName: port.slice('closeAction-'.length), group: 'Close Actions', description: 'Fires when the popup was closed with this close action' };
+      // NSP-020 s84 — what the editor draws (setup :345-416): the Target component's inputs as `popupParam-` ports, typed as
+      // the component types them; then, for each Close Popup node inside it, its Close Actions as signals and its Results as
+      // values typed by the component's output of that name (else `*`), each once. At play the context has no components: an
+      // input is registered by its first write, an output by a wire
+      inputs: (params, context) => {
+        const out: Record<string, ValueInputDecl> = {};
+        const c = typeof params.target === 'string' ? context.components?.[params.target] : undefined;
+        for (const [name, port] of Object.entries(c?.inputs ?? {})) out['popupParam-' + name] = { ...popupParamPort(), type: port.type === 'signal' ? '*' : port.type, displayName: name };
         return out;
       },
+      outputs: (params, context) => {
+        const out: Record<string, OutputDecl<State>> = {};
+        const c = typeof params.target === 'string' ? context.components?.[params.target] : undefined;
+        for (const close of c?.nodes?.NavigationClosePopup ?? []) {
+          for (const a of listOf(close.closeActions)) if (!('closeAction-' + a in out)) out['closeAction-' + a] = { ...closeAction(a), onWire: true };
+          for (const r of listOf(close.results)) if (!('closeResult-' + r in out)) out['closeResult-' + r] = { ...closeResult(r, c?.outputs[r]?.type), onWire: true } as OutputDecl<State>;
+        }
+        return out;
+      },
+      needs: ['components', 'wiredOutputs'],
+      discoverOutput: (port) => (port.startsWith('closeResult-') ? closeResult(port.slice('closeResult-'.length)) : port.startsWith('closeAction-') ? closeAction(port.slice('closeAction-'.length)) : undefined),
+      outputCandidates: [...RESULTS.map((r) => 'closeResult-' + r), ...ACTIONS],
       // :196-198 — stored raw under the name after the prefix
       on: (s, port, value) => ({ set: { popupParams: { ...s.popupParams, [port.slice('popupParam-'.length)]: value } }, send: [] }),
       discover: (port) => (port.startsWith('popupParam-') ? popupParamPort() : undefined),

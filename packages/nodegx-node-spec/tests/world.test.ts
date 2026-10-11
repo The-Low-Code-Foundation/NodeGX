@@ -743,10 +743,12 @@ describe('REGISTRY — WRITES MADE ELSEWHERE (NSP-016 s62): the app writing an a
 
   test('on the interpreter, a node watching the array hears the write as another node\'s; one that does not, hears nothing', async () => {
     const watched = [{ at: 1, array: 'list', add: 'c' }] as const;
-    const bound = await play(interpreterAdapter(), 'For Each', { template: 'Row', items: { $array: 'list' } }, ['settle', { advance: 1 }, { act: 'tapRow', value: 2 }, 'settle'], new World({ registry: { ...registry, writes: watched } }));
+    // NSP-020 s84 — a tap is heard only through a wired Tapped (foreach.tsx `itemOutputSignals`, set by the wire)
+    const tapWired = { wiredOutputs: ['itemOutputSignal-Tapped'] };
+    const bound = await play(interpreterAdapter(), 'For Each', { template: 'Row', items: { $array: 'list' } }, ['settle', { advance: 1 }, { act: 'tapRow', value: 2 }, 'settle'], new World({ registry: { ...registry, writes: watched } }), undefined, tapWired);
     expect(bound.filter((e) => e.t === 'value' && e.port === 'itemActionItemId')).toEqual([{ t: 'value', port: 'itemActionItemId', value: 'c' }]);
     // the control: the same play with no write — no third row to tap
-    const still = await play(interpreterAdapter(), 'For Each', { template: 'Row', items: { $array: 'list' } }, ['settle', { advance: 1 }, { act: 'tapRow', value: 2 }, 'settle'], new World({ registry }));
+    const still = await play(interpreterAdapter(), 'For Each', { template: 'Row', items: { $array: 'list' } }, ['settle', { advance: 1 }, { act: 'tapRow', value: 2 }, 'settle'], new World({ registry }), undefined, tapWired);
     expect(still.filter((e) => e.t === 'value' && e.port === 'itemActionItemId')).toEqual([]);
   });
 });

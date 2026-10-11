@@ -15,7 +15,7 @@
  */
 
 import type { Filter } from '../../../nodegx-backend-contract/src/translators';
-import { isVisualQueryFormat, savedFilterToNeutral, toParseWhere, visualQueryToNeutral, type SavedFilterGroup, type VisualQueryNode } from '../../../nodegx-backend-contract/src/translators';
+import { isSavedGroup, isVisualQueryFormat, savedFilterToNeutral, toParseWhere, visualQueryToNeutral, type SavedFilterGroup, type SavedFilterItem, type VisualQueryNode } from '../../../nodegx-backend-contract/src/translators';
 import type { RecordRef } from '../registry';
 
 type Where = Readonly<Record<string, unknown>>;
@@ -107,4 +107,29 @@ export function lowerToParse(neutral: Filter | undefined): Readonly<Record<strin
   if (neutral === undefined) return undefined;
   const where = toParseWhere(neutral, { backend: 'nodegx', schema: undefined }) as Record<string, unknown>;
   return Object.keys(where).length === 0 ? undefined : where;
+}
+
+/**
+ * queryutils.ts :212-240 `collectFilterParameters` — the bare names of the filter parameters a saved filter needs an input
+ * port for, in first-seen order: a visual rule's `input`, or a saved condition whose value is `connected`, its
+ * `valuePortName` with the node's own prefix taken off. Both saved shapes, as the lowerings read both.
+ */
+export function filterParameterNames(query: unknown, prefix: string): string[] {
+  const names: string[] = [];
+  const walkVisual = (node: VisualQueryNode | undefined): void => {
+    if (node === undefined) return;
+    if (node.rules !== undefined) node.rules.forEach(walkVisual);
+    else if (node.input !== undefined && !names.includes(node.input)) names.push(node.input);
+  };
+  const walkSaved = (item: SavedFilterItem | undefined): void => {
+    if (!item) return;
+    if (isSavedGroup(item)) return (item.conditions ?? []).forEach(walkSaved);
+    if (item.valueSource !== 'connected' || !item.valuePortName) return;
+    const name = item.valuePortName.startsWith(prefix) ? item.valuePortName.slice(prefix.length) : item.valuePortName;
+    if (!names.includes(name)) names.push(name);
+  };
+  if (query === undefined) return names;
+  if (isVisualQueryFormat(query)) walkVisual(query);
+  else walkSaved(query as SavedFilterItem);
+  return names;
 }

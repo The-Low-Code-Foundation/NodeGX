@@ -61,7 +61,7 @@ import { defineNode, said } from '../spec';
 import type { BackendScript, WorldScript } from '../world';
 import { valueDidChange } from './condition';
 import { emptyId, runOnChange } from './data-base';
-import { backendPickerPort, changedSignal, classPickerPort, discoverRecordPort, NO_BACKEND_MESSAGE, onRecordPort, RECORD_CANDIDATES, RECORD_FAILURE_CODE, recordWiredFieldNames } from './record-base';
+import { backendPickerPort, changedSignal, classPickerPort, discoverRecordPort, NO_BACKEND_MESSAGE, onRecordPort, RECORD_CANDIDATES, RECORD_FAILURE_CODE, recordFieldType, recordWiredFieldNames, selectedClass, shownFields } from './record-base';
 import { sameList } from '../world';
 
 /** The two fields every world here holds — what a generated sequence may WIRE (`outputCandidates`), not a stand-in for a schema (s82). */
@@ -321,9 +321,8 @@ export const RecordNode = defineNode({
       // then `prop-` alone for every name a wire or a parameter declares and the schema does not (recordWiredFieldPorts :260-345)
       outputs: (params, context) => {
         const out: Record<string, OutputDecl<RecordState>> = {};
-        const klass = typeof params.collectionName === 'string' ? context.schema?.classes[params.collectionName] : undefined;
-        for (const [field, decl] of Object.entries(klass?.fields ?? {})) {
-          out['prop-' + field] = propertyOutput(field, decl.type);
+        for (const [field, decl] of shownFields(selectedClass(params, context), true)) {
+          out['prop-' + field] = propertyOutput(field, recordFieldType(decl));
           out['changed-' + field] = changedSignal(field);
         }
         for (const field of recordWiredFieldNames(params, context)) if (!('prop-' + field in out)) out['prop-' + field] = propertyOutput(field);

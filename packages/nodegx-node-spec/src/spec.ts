@@ -60,6 +60,10 @@ export type ValueType =
   | 'optionslist'
   | 'pages'
   | 'proplist'
+  /** NSP-020 s84 — the visual filter builder (`{ name: 'query-filter', schema }`, record-ports.ts `recordFilterSchema`): what the Query, Filter and Subscribe nodes draw. Coerced like `*`. */
+  | 'query-filter'
+  /** NSP-020 s84 — the visual sort builder beside it (filterdbmodelsnode.ts :703-709, dbcollectionnode2.ts). Coerced like `*`. */
+  | 'query-sorting'
   | 'reference'
   | 'source'
   | 'string'
@@ -798,17 +802,38 @@ export interface PortRef {
 }
 
 export interface ComponentInterface {
-  inputs: Readonly<Record<string, { type: ValueType }>>;
-  outputs: Readonly<Record<string, { type: ValueType }>>;
+  /** The component's input ports by name — its Component Inputs (`component.inputPorts`); a signal input is `'signal'`. */
+  inputs: Readonly<Record<string, { type: ValueType | 'signal' }>>;
+  /** The component's output ports by name — its Component Outputs (`component.outputPorts`); For Each draws a signal one as an Item Signal. */
+  outputs: Readonly<Record<string, { type: ValueType | 'signal' }>>;
+  /**
+   * NSP-020 s84 — the params of the nodes of a type INSIDE the component, by type (`component.getNodesWithType(type)`): Push
+   * Component To Stack draws its target page's Pop Component Stack nodes' Back Actions and Results (navigate.ts :365-404),
+   * Show Popup its popup's Close Popup nodes' Close Actions and Results (showpopup.ts :363-412).
+   */
+  nodes?: Readonly<Record<string, readonly Readonly<Record<string, unknown>>[]>>;
 }
 
 export interface NamedPages {
   name: string;
+  /** The pages by id, in order (a Component Stack's `pages` list; a Router's pages are its components). */
   pages: readonly string[];
+  /** NSP-020 s84 — the component each page shows, by page id (a Component Stack's `pageComp-<id>`, navigate.ts :358-360). */
+  components?: Readonly<Record<string, string>>;
 }
 
 export interface BackendSchema {
-  classes: Readonly<Record<string, { fields: Readonly<Record<string, { type: ValueType }>> }>>;
+  classes: Readonly<Record<string, { fields: Readonly<Record<string, BackendField>> }>>;
+}
+
+/**
+ * One column of a class. NSP-020 s84 — `relation` names the class a Parse `Relation` column points at: the Add / Remove
+ * Record Relation picker offers exactly those columns (record-ports.ts `recordRelationPorts` :350-366), the Record node
+ * draws no port for one (`skipRelationColumns`, dbmodelnode2.ts :562-564), and the writes draw it untyped.
+ */
+export interface BackendField {
+  type: ValueType;
+  relation?: string;
 }
 
 export const PORT_CONTEXT_FIELDS = ['wired', 'wiredOutputs', 'backends', 'instancePorts', 'components', 'routers', 'stacks', 'schema', 'siblings'] as const satisfies readonly (keyof PortContext)[];

@@ -371,6 +371,9 @@
     "name": "Fetch total count: the call asks for it, and the answer's total is re-sent on Total Count",
     "because": "getStorageFetchTotalCount; the success stores the count and flags storageTotalCount",
     "params": {},
+    "wiredOutputs": [
+      "storageTotalCount"
+    ],
     "steps": [
       "settle",
       {
@@ -3450,6 +3453,99 @@
               "never": true
             }
           },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Fetch total count with no wire out of Total Count: the call still asks for it and the total is stored, but nothing is sent on a port nobody wired",
+    "because": "dbcollectionnode2.ts :927-930 — the count is stored, and flagged only `if (this.hasOutput('storageTotalCount'))`; the output exists only when a wire registers it (:1146-1153). NSP-020 s84",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "storageEnableCount",
+        "value": true
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ],
+                "count": 7
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a filter parameter arriving alone, after the query ran, re-queries with it: the second call narrows on n > 2 and searches nothing",
+    "because": "dbcollectionnode2.ts :1169-1176 setQueryParameter — stored, and under its own ticked box (a changed value) the frame's query is scheduled; the call reads it through the filter (:1061-1098). NSP-020 s84: kills the swap of this branch with Search's, which generated sequences reach on some seeds only",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "n",
+              "operator": "greaterThan",
+              "valueSource": "connected",
+              "valuePortName": "qp-min"
+            }
+          ]
+        }
+      },
+      "settle",
+      {
+        "set": "qp-min",
+        "value": 2
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
           {
             "answer": {
               "ok": {

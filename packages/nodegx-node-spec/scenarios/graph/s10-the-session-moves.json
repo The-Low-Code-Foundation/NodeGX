@@ -18,7 +18,8 @@
         "type": "net.noodl.user.User",
         "params": {
           "runOnChange-user": true
-        }
+        },
+        "wiredOutputs": ["prop-n", "prop-nick", "loggedIn"]
       }
     },
     "steps": [
@@ -243,7 +244,8 @@
         "type": "net.noodl.user.User",
         "params": {
           "runOnChange-user": true
-        }
+        },
+        "wiredOutputs": ["prop-n", "prop-nick", "loggedIn"]
       }
     },
     "steps": [
@@ -467,7 +469,8 @@
         "type": "net.noodl.user.User",
         "params": {
           "runOnChange-user": true
-        }
+        },
+        "wiredOutputs": ["prop-n", "prop-nick"]
       }
     },
     "steps": [
@@ -654,7 +657,8 @@
         "type": "net.noodl.user.User",
         "params": {
           "runOnChange-user": true
-        }
+        },
+        "wiredOutputs": ["prop-n", "prop-nick", "loggedOut"]
       }
     },
     "steps": [
@@ -878,7 +882,8 @@
         "type": "net.noodl.user.User",
         "params": {
           "runOnChange-user": true
-        }
+        },
+        "wiredOutputs": ["prop-n", "prop-nick", "loggedOut"]
       }
     },
     "steps": [
@@ -1088,7 +1093,8 @@
         "type": "net.noodl.user.User",
         "params": {
           "runOnChange-user": true
-        }
+        },
+        "wiredOutputs": ["prop-n", "prop-nick", "loggedIn", "changed-nick"]
       }
     },
     "steps": [

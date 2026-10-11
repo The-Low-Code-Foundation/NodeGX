@@ -36,6 +36,7 @@ import type { BackendScript } from '../world';
 import {
   bindId,
   discoverRecordPort,
+  recordCrudInputs,
   NO_BACKEND_MESSAGE,
   NO_CLASS_MESSAGE,
   onRecordPort,
@@ -120,7 +121,9 @@ export const DeleteRecord = defineNode({
   },
   {
     derived: {
-      inputs: () => ({}),
+      // NSP-020 s84 — what the editor draws (dbmodelcrudbase.ts `_updatePorts` :373-385): the Backend picker and the Class
+      inputs: (_params, context) => recordCrudInputs(context),
+      needs: ['schema', 'backends'],
       discover: discoverRecordPort,
       candidates: RECORD_CANDIDATES,
       on: (_s, port, v) => onRecordPort(port, v)

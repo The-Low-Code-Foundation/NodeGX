@@ -2413,5 +2413,72 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "a filter parameter's box written after its value leaves the value as it was: Filter then reads min 0 and keeps all three rows",
+    "because": "run-on-value-change.ts — the box records its answer and nothing else (filterdbmodelsnode.ts :535-577 registers it beside fp-min); the parameter keeps the value it took (:526-534). NSP-020 s84: kills the swap of the box's branch with a parameter write, which the generated sequences reach on some seeds only",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "n",
+            "operator": "greaterThan",
+            "valueSource": "connected",
+            "valuePortName": "fp-min"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "fp-min",
+        "value": 0
+      },
+      "settle",
+      {
+        "set": "runOnChange-fp-min",
+        "value": false
+      },
+      {
+        "signal": "filter"
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {}
+    }
   }
 ]

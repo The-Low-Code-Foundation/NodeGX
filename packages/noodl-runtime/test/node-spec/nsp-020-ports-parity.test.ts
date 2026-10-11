@@ -330,6 +330,11 @@ describe('NSP-020 oracle (a): what the runtime announces is what the spec draws 
 });
 
 describe('NSP-020 oracle (a): the owed rows — driven, their disagreements printed and counted, not failed', () => {
+  // s84 — L1 landed and none is owed; the block stays for the next lane that switches a row on
+  if (owed.length === 0) {
+    test('no row is owed', () => expect(owed).toEqual([]));
+    return;
+  }
   test.each(owed.map((r) => [`${r.type} (owed by ${r.owedBy})`, r] as const))('%s', (_name, row) => {
     const o = drive(row);
     const lines = o.perCase.map(

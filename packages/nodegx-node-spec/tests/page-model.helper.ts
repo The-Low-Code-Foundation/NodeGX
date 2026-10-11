@@ -310,7 +310,7 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
   // element of its own to draw); the frame's end runs its callbacks (the copy, the rebuild) and the queue they start, which fires Items
   // Rendered and answers Refresh
   'For Each': {
-    node: ['own', 'items', 'template', 'templateType', 'script', 'compiles', 'mapping', 'mapCompiles', 'registered', 'copyScheduled', 'refreshScheduled', 'callbacks', 'tokens', 'queue', 'running', 'changed', 'hops', 'settling', 'owed', 'building', 'rows', 'answered', 'pending', 'dirty', 'afterFrame', 'made', 'itemId', 'outs'],
+    node: ['own', 'items', 'template', 'templateType', 'script', 'compiles', 'mapping', 'mapCompiles', 'copyScheduled', 'refreshScheduled', 'callbacks', 'tokens', 'queue', 'running', 'changed', 'hops', 'settling', 'owed', 'building', 'rows', 'answered', 'pending', 'dirty', 'afterFrame', 'made', 'itemId', 'outs'],
     attr: {},
     held: {},
     // s61 (v2) — Script and whether it compiled are the node's, written by the input; a rebuild's pending answers (`settling`) the queue's.

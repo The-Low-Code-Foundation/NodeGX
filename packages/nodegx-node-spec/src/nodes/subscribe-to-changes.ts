@@ -40,10 +40,11 @@
  *   - `updatePorts` (:586-643): the editor's ports — which inputs are DRAWN; the runtime accepts any (:554-582).
  */
 
-import { defineNode, type InputDecl } from '../spec';
+import { defineNode, type InputDecl, type ValueInputDecl } from '../spec';
 import type { BackendScript, RealtimeScriptEvent } from '../world';
 import { valueDidChange } from './condition';
-import { lowerToParse, toNeutral } from './record-match';
+import { backendPickerPort, classPicker, selectedClass } from './record-base';
+import { filterParameterNames, lowerToParse, toNeutral } from './record-match';
 
 const REALTIME = 'Realtime';
 
@@ -216,7 +217,17 @@ export const SubscribeToChanges = defineNode({
   },
   {
     derived: {
-      inputs: () => ({}),
+      // NSP-020 s84 — what the editor draws (`updatePorts` :597-651): the Backend picker and the Class from the project, then
+      // — once a Class is set — the Filter builder when the schema has that Class, and one `qp-` port per parameter the saved
+      // filter names. At play there is no schema: the parameters alone, which the runtime registers on their first write
+      inputs: (params, context) => {
+        const out: Record<string, InputDecl> = { ...backendPickerPort(context), collectionName: classPicker(discover('collectionName') as ValueInputDecl, context) };
+        if (params.collectionName === undefined) return out;
+        if (selectedClass(params, context)) out.visualFilter = { ...(discover('visualFilter') as ValueInputDecl), type: 'query-filter' }; // :613-634
+        if (params.visualFilter !== undefined) for (const name of filterParameterNames(params.visualFilter, 'qp-')) out['qp-' + name] = discover('qp-' + name)!; // :637-647
+        return out;
+      },
+      needs: ['schema', 'backends'],
       discover,
       candidates: ['collectionName', 'backendId', 'visualFilter', 'qp-min', 'qp-other'],
       on: (s, port, v) => {

@@ -38,7 +38,11 @@
 import type { BackendAnswerEvent, ValueInputDecl, WorldView } from '../spec';
 import { defineNode } from '../spec';
 import type { BackendScript } from '../world';
-import { USER_FIELDS } from './user';
+import { recordFieldType } from './record-base';
+import { USER_FIELDS, userFields } from './user';
+
+/** signup.ts :185-195 — a `prop-<field>` port, held by its field. */
+const signUpProperty = (field: string): ValueInputDecl => ({ type: '*', coerce: 'none', displayName: field, group: 'Properties', description: 'Value of ' + field + ' for the new account', examples: ['Annie', 2, '', null] });
 
 /** login.ts :22, signup.ts :30, logout.ts :22 */
 export const LOG_IN_ERROR_CODE = 'user/log-in-failed';
@@ -169,13 +173,17 @@ export const SignUp = defineNode({
   },
   {
     derived: {
-      inputs: () => ({}),
-      // signup.ts :185-195 registerInputIfNeeded — any `prop-` name, held by its field
-      discover: (port) => {
-        if (!port.startsWith('prop-')) return undefined;
-        const field = port.slice('prop-'.length);
-        return { type: '*', coerce: 'none', displayName: field, group: 'Properties', description: 'Value of ' + field + ' for the new account', examples: ['Annie', 2, '', null] };
+      // NSP-020 s84 — what the editor draws (signup.ts `updatePorts` :199-250, from `systemCollections`): one `prop-` per column
+      // of `_User` less the ones a sign-up does not set and every Relation ("cannot be set at sign-up time"), typed by the
+      // Parse table. No Backend picker. At play there is no schema: a write registers each (:185-195)
+      inputs: (_params, context) => {
+        const out: Record<string, ValueInputDecl> = {};
+        for (const [p, decl] of userFields(context, ['authData', 'password', 'username', 'createdAt', 'updatedAt', 'emailVerified', 'email'])) out['prop-' + p] = { ...signUpProperty(p), type: recordFieldType(decl) };
+        return out;
       },
+      needs: ['schema'],
+      // signup.ts :185-195 registerInputIfNeeded — any `prop-` name, held by its field
+      discover: (port) => (port.startsWith('prop-') ? signUpProperty(port.slice('prop-'.length)) : undefined),
       candidates: USER_FIELDS.map((f) => 'prop-' + f),
       on: (s, port, v) => ({ set: { properties: { ...(s as ActionState).properties, [port.slice('prop-'.length)]: v } }, send: [] }) // :180-182
     },

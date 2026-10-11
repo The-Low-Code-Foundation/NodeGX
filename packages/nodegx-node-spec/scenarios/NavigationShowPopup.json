@@ -308,6 +308,10 @@
     "params": {
       "target": "Popup"
     },
+    "wiredOutputs": [
+      "closeResult-name",
+      "closeResult-ok"
+    ],
     "steps": [
       {
         "signal": "show"
@@ -344,6 +348,10 @@
     "params": {
       "target": "Popup"
     },
+    "wiredOutputs": [
+      "closeResult-ok",
+      "closeAction-Save"
+    ],
     "steps": [
       {
         "signal": "show"
@@ -379,6 +387,9 @@
     "params": {
       "target": "Popup"
     },
+    "wiredOutputs": [
+      "closeResult-name"
+    ],
     "steps": [
       {
         "signal": "show"
@@ -414,6 +425,9 @@
     "params": {
       "target": "Popup"
     },
+    "wiredOutputs": [
+      "closeResult-name"
+    ],
     "steps": [
       {
         "signal": "show"
@@ -457,6 +471,10 @@
     "params": {
       "target": "Popup"
     },
+    "wiredOutputs": [
+      "closeResult-name",
+      "closeAction-Save"
+    ],
     "steps": [
       {
         "signal": "show"
@@ -499,6 +517,9 @@
       "target": "Popup",
       "stackPolicy": "stack"
     },
+    "wiredOutputs": [
+      "closeResult-ok"
+    ],
     "steps": [
       {
         "signal": "show"
@@ -621,6 +642,9 @@
       "target": "Popup",
       "stackPolicy": "stack"
     },
+    "wiredOutputs": [
+      "closeResult-name"
+    ],
     "steps": [
       {
         "signal": "show"
@@ -722,6 +746,62 @@
         "signal": "show"
       },
       "settle",
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "a close and a new show in one frame: the closed popup leaves with its results and Closed, the new one opens on the stack, and a later Escape cancels the new one",
+    "because": "nodecontext.ts :1284-1300 (the leave at the next frame's start), showpopup.ts :266-274 then :202-219 (the frame's show), :1183-1195 (Escape the top modal). NSP-020 s84: grades every field of that frame's state, which generated sequences reach on some seeds only",
+    "world": {
+      "popup": {
+        "components": [
+          "Popup",
+          "Other"
+        ],
+        "events": [
+          {
+            "at": 1,
+            "close": {
+              "results": {
+                "name": "A"
+              }
+            },
+            "popup": 0
+          },
+          {
+            "at": 3,
+            "escape": true
+          }
+        ]
+      }
+    },
+    "params": {
+      "target": "Popup",
+      "stackPolicy": "stack"
+    },
+    "wiredOutputs": [
+      "closeResult-name"
+    ],
+    "steps": [
+      {
+        "signal": "show"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      {
+        "set": "target",
+        "value": "Other"
+      },
+      {
+        "signal": "show"
+      },
       "settle",
       {
         "advance": 2

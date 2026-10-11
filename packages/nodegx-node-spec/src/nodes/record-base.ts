@@ -30,7 +30,7 @@
  * shows the raw input (measured s21, probe P13).
  */
 
-import type { InputDecl, PortContext, SignalOutputDecl, ValueInputDecl, WorldView } from '../spec';
+import type { BackendField, InputDecl, PortContext, SignalOutputDecl, ValueInputDecl, ValueType, WorldView } from '../spec';
 import { emptyId, errorOutput } from './data-base';
 
 /** :88 — the one code every Record-family failure reports. */
@@ -143,9 +143,14 @@ export const PARSE_SYSTEM_CLASSES = ['_User', '_Role'] as const;
  * it is derived whenever the editor asks; `classPort` above is what a write to it registers at play.
  */
 export function classPickerPort(context: Readonly<PortContext>): ValueInputDecl {
+  return classPicker(classPort(), context);
+}
+
+/** The same dropdown over a node's own `collectionName` decl (its words and its examples — what a sequence draws from). */
+export function classPicker(base: ValueInputDecl, context: Readonly<PortContext>): ValueInputDecl {
   const classes = Object.keys(context.schema?.classes ?? {});
   const enums = [...PARSE_SYSTEM_CLASSES.filter((c) => !classes.includes(c)), ...classes];
-  return { ...classPort(), type: 'enum', enums, editOnly: true };
+  return { ...base, type: 'enum', enums, editOnly: true };
 }
 
 /**
@@ -157,6 +162,38 @@ export function backendPickerPort(context: Readonly<PortContext>): Record<string
   const backends = context.backends ?? [];
   if (backends.length <= 1) return {};
   return { backendId: { ...backendPort(), type: 'enum', enums: ['_active_', ...backends.map((b) => b.id)], default: '_active_' } };
+}
+
+/** The class the node's Class names, when the schema has it — record-ports.ts `recordSchemaContext` :84-99 `selectedCollection`. */
+export function selectedClass(params: Readonly<Record<string, unknown>>, context: Readonly<PortContext>): { fields: Readonly<Record<string, BackendField>> } | undefined {
+  return typeof params.collectionName === 'string' ? context.schema?.classes[params.collectionName] : undefined;
+}
+
+/**
+ * The class's columns a port is drawn for, in order — schema-ports.ts :378 hides `ACL` ("access control, not data") and
+ * `shouldShowField` :87-105 drops a hidden one; `skipRelations` is the Record node's `skipRelationColumns` (dbmodelnode2.ts
+ * :562-564), the writes keep them.
+ */
+export function shownFields(klass: { fields: Readonly<Record<string, BackendField>> } | undefined, skipRelations: boolean): Array<[string, BackendField]> {
+  return Object.entries(klass?.fields ?? {}).filter(([field, decl]) => field !== 'ACL' && !(skipRelations && decl.relation !== undefined));
+}
+
+/**
+ * record-ports.ts :209-222 `recordPortType` — a Parse column's port type from `PARSE_PORT_TYPES` (:63-68): String, Number,
+ * Boolean and Date keep theirs, and "anything not in the table has always produced `'*'`" — Object, Array, Pointer, a Relation.
+ */
+export function recordFieldType(decl: BackendField): ValueType {
+  if (decl.relation !== undefined) return '*';
+  return decl.type === 'string' || decl.type === 'number' || decl.type === 'boolean' || decl.type === 'date' ? decl.type : '*';
+}
+
+/**
+ * dbmodelcrudbase.ts `_updatePorts` :373-385 — what the editor draws first for every CRUD node (Create / Update / Delete
+ * Record, Add / Remove Record Relation): the Backend picker with two or more backends, then the Class dropdown. At play
+ * the context has neither, and a write registers each (`discoverRecordPort`).
+ */
+export function recordCrudInputs(context: Readonly<PortContext>): Record<string, ValueInputDecl> {
+  return { ...backendPickerPort(context), collectionName: classPickerPort(context) };
 }
 
 /**

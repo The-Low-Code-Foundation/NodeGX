@@ -32,7 +32,8 @@
 import type { ValueInputDecl } from '../spec';
 import { defineNode } from '../spec';
 import type { BackendScript } from '../world';
-import { USER_FIELDS, USER_NO_BACKEND_MESSAGE } from './user';
+import { backendPickerPort, recordFieldType } from './record-base';
+import { USER_FIELDS, USER_NO_BACKEND_MESSAGE, userFields } from './user';
 
 /** :41 */
 export const SET_USER_PROPERTIES_ERROR_CODE = 'user/set-properties-failed';
@@ -161,7 +162,15 @@ export const SetUserProperties = defineNode({
   },
   {
     derived: {
-      inputs: () => ({}),
+      // NSP-020 s84 — what the editor draws (`updatePorts` :241-264): the Backend picker with two or more backends, then one
+      // `prop-` per column of the accounts class less the ones a browser cannot write (user-ports.ts
+      // `USER_INPUT_IGNORE_PARSE_BROWSER`) and every Relation. At play there is no schema: a write registers each (:207-226)
+      inputs: (_params, context) => {
+        const out: Record<string, ValueInputDecl> = { ...backendPickerPort(context) };
+        for (const [p, decl] of userFields(context, ['authData', 'createdAt', 'updatedAt', 'email', 'username', 'emailVerified', 'password'])) out['prop-' + p] = { ...propertyInput(p), type: recordFieldType(decl) };
+        return out;
+      },
+      needs: ['schema', 'backends'],
       // :207-226 registerInputIfNeeded — the Backend picker and any `prop-` name
       discover: (port) => {
         if (port === 'backendId') return { type: '*', coerce: 'none', editOnly: true, displayName: 'Backend', group: 'General', description: 'Which backend this node writes the signed-in user to', examples: ['_active_', 'other', 'gone', ''] };

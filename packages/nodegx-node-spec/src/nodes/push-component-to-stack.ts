@@ -39,7 +39,7 @@
  * ONE ROW the trace shows, fixed in P109 ISL-028: C28 — a Mode that is neither `push` nor `replace` answered no press.
  */
 
-import { defineNode, type InputDecl, type ValueInputDecl } from '../spec';
+import { defineNode, type ComponentInterface, type InputDecl, type OutputDecl, type PortContext, type ValueInputDecl } from '../spec';
 
 type Rec = Readonly<Record<string, unknown>>;
 
@@ -64,18 +64,50 @@ type State = {
   presses: number;
 };
 
-// transitions/push-transition.ts and popup-transition.ts `ports` — the `tr-` ports per transition
-const TRANSITION_PORTS: Readonly<Record<string, (params: Rec) => string[]>> = {
-  None: () => [],
-  Push: (p) => ['tr-direction', p['tr-direction'] === 'In' || p['tr-direction'] === 'Out' ? 'tr-zoom' : 'tr-shift', 'tr-crossfade', 'tr-darkoverlay', 'tr-darkoverlayamount', 'tr-timing'],
-  Popup: (p) => ['tr-direction', p['tr-direction'] === 'In' || p['tr-direction'] === 'Out' ? 'tr-zoom' : 'tr-shift', 'tr-fadein', 'tr-timing']
+/**
+ * transitions/push-transition.ts :133-196 and popup-transition.ts :83-136 `ports` — the `tr-` ports per transition, as the editor
+ * draws them: typed, named, and with the default the panel shows (`drawnDefault`; the node holds nothing until one is written).
+ * Direction In or Out swaps Shift Distance for Zoom. None draws none (none-transition.ts :23).
+ */
+const DIRECTIONS = ['Right', 'Left', 'Up', 'Down', 'In', 'Out'];
+const trPort = (displayName: string, type: ValueInputDecl['type'], drawnDefault?: unknown): ValueInputDecl => ({ ...transitionParamPort(), type, displayName, ...(drawnDefault !== undefined ? { drawnDefault } : {}) });
+const distance = (p: Rec): Record<string, ValueInputDecl> =>
+  p['tr-direction'] === 'In' || p['tr-direction'] === 'Out' ? { 'tr-zoom': trPort('Zoom', 'number', { value: 25, unit: '%' }) } : { 'tr-shift': trPort('Shift Distance', 'number', { value: 25, unit: '%' }) };
+const TRANSITION_PORTS: Readonly<Record<string, (params: Rec) => Record<string, ValueInputDecl>>> = {
+  None: () => ({}),
+  Push: (p) => ({
+    'tr-direction': { ...trPort('Direction', 'enum', 'Left'), enums: DIRECTIONS },
+    ...distance(p),
+    'tr-crossfade': trPort('Crossfade', 'boolean', false),
+    'tr-darkoverlay': trPort('Dark Overlay', 'boolean', true),
+    'tr-darkoverlayamount': trPort('Dark Overlay Amount', 'number', 0.5),
+    'tr-timing': trPort('Timing', 'curve')
+  }),
+  Popup: (p) => ({
+    'tr-direction': { ...trPort('Direction', 'enum', 'Right'), enums: DIRECTIONS },
+    ...distance(p),
+    'tr-fadein': trPort('Fade In', 'boolean', false),
+    'tr-timing': trPort('Timing', 'curve')
+  })
 };
+
+/** :365-404 — a list param of a node inside the target page (`'a,b'`), split on commas. */
+const listOf = (v: unknown): string[] => (typeof v === 'string' ? v.split(',') : []);
 
 // :242-261 `registerInputIfNeeded` — `registerInput(name, { set })`: no type, no conversion, stored raw
 const targetPort = (): ValueInputDecl => ({ type: 'string', coerce: 'none', displayName: 'Target Page', group: 'General', examples: ['detail', 'home', '', null, 'nope'] });
 const transitionPort = (): ValueInputDecl => ({ type: 'enum', enums: Object.keys(TRANSITION_PORTS), coerce: 'none', displayName: 'Transition', group: 'Transition', examples: ['Push', 'None', 'Popup', '', 'Fade'] });
 const transitionParamPort = (): ValueInputDecl => ({ type: '*', coerce: 'none', group: 'Transition', examples: ['Left', 'In', { value: 25, unit: '%' }, true, 0.5] });
 const pageParamPort = (): ValueInputDecl => ({ type: '*', coerce: 'none', group: 'Parameters', examples: [1, 2, 'a', '', null] });
+
+/** :338-363 — the Component Stack named Stack, its pages, and the component the target page (Target, else the first) shows. */
+function targetPage(params: Rec, context: Readonly<PortContext>): { pages: readonly string[]; component: ComponentInterface | undefined } | undefined {
+  const stack = (context.stacks ?? []).find((st) => st.name === ((params.stack as string) || 'Main'));
+  if (!stack || stack.pages.length === 0) return undefined;
+  const id = (params.target as string) || stack.pages[0];
+  const name = stack.components?.[id];
+  return { pages: stack.pages, component: name !== undefined ? context.components?.[name] : undefined };
+}
 
 function discover(port: string): InputDecl | undefined {
   if (port === 'target') return targetPort();
@@ -182,14 +214,34 @@ export const PushComponentToStack = defineNode({
       return { set: { ...reset, error: answer.failure.message }, send: ['error'], stack, outcomes: answerAll('failure', answer.failure.code) };
     },
     derived: {
-      // :282-300 — Transition always, then the chosen transition's own ports (default per Mode: replace → None, else Push)
-      inputs: (params) => {
-        const ports: Record<string, InputDecl> = { transition: transitionPort() };
-        const chosen = (params.transition as string) || (params.mode === 'replace' ? 'None' : 'Push');
-        const of = TRANSITION_PORTS[chosen];
-        if (of) for (const name of of(params)) ports[name] = transitionParamPort();
+      // :309-336 — Transition always, its default per Mode (replace → None, else Push), then the chosen transition's own ports.
+      // NSP-020 s84 — then, from the PROJECT (:338-404): the Component Stack named Stack (`Main` unset, either side); with pages,
+      // Target Page over them (the first the default), and the target page's component's inputs as `pm-` ports. At play the
+      // context has no stacks: a write registers each (:242-261)
+      inputs: (params, context) => {
+        const fallback = params.mode === 'replace' ? 'None' : 'Push';
+        const ports: Record<string, InputDecl> = { transition: { ...transitionPort(), drawnDefault: fallback } };
+        const of = TRANSITION_PORTS[(params.transition as string) || fallback];
+        if (of) Object.assign(ports, of(params));
+        const page = targetPage(params, context);
+        if (page) {
+          ports.target = { ...targetPort(), type: 'enum', enums: page.pages, drawnDefault: page.pages[0] };
+          for (const name of Object.keys(page.component?.inputs ?? {})) ports['pm-' + name] = { ...pageParamPort(), displayName: name };
+        }
         return ports;
       },
+      // :380-404 — each Pop Component Stack node inside the target page: its Back Actions as signals, its Results as values,
+      // each once. The runtime registers them on a wire (C26, P109 ISL-028); the world's stacks have no back channel, so no
+      // play wires one (no `outputCandidates`) and they are graded in the viewer (header)
+      outputs: (params, context) => {
+        const out: Record<string, OutputDecl<State>> = {};
+        for (const back of targetPage(params, context)?.component?.nodes?.PageStackNavigateBack ?? []) {
+          for (const a of listOf(back.backActions)) if (!('backAction-' + a in out)) out['backAction-' + a] = { type: 'signal', displayName: a, group: 'Back Actions', onWire: true };
+          for (const r of listOf(back.results)) if (!('backResult-' + r in out)) out['backResult-' + r] = { type: '*', displayName: r, group: 'Back Results', onWire: true, from: () => undefined };
+        }
+        return out;
+      },
+      needs: ['stacks', 'components'],
       // :242-261 — target, transition, `tr-` and `pm-` stored raw
       on: (s, port, value) => {
         if (port === 'target') return { set: { target: value }, send: [] };

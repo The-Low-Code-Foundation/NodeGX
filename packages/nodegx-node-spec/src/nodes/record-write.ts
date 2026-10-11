@@ -27,7 +27,8 @@
  * it was the LEGACY store's, whichever backend the record went to, so a Log In on that backend was nobody to the rules.
  */
 
-import type { InputDecl, ValueInputDecl } from '../spec';
+import type { InputDecl, PortContext, ValueInputDecl } from '../spec';
+import { recordFieldType, recordWiredFieldNames, selectedClass, shownFields } from './record-base';
 
 /** What the two writes hold of their property ports and their access rules. */
 export type RecordWriteState = {
@@ -94,6 +95,20 @@ export function aclInputs(params: Readonly<Record<string, unknown>>): Record<str
     out[prefix + '-read'] = { ...aclPort('read')!, group };
     out[prefix + '-write'] = { ...aclPort('write')!, group };
   }
+  return out;
+}
+
+/**
+ * dbmodelcrudbase.ts `_updatePorts` :387-394 — the property ports the EDITOR draws for a write: one `prop-<field>` per
+ * column of the selected class, typed by the column (record-ports.ts `recordFieldPorts` :170-201, relation columns kept),
+ * then `prop-<field>` untyped for every name a parameter or a wire declares that the schema does not (`recordWiredFieldPorts`
+ * :312-345, P77 SBR-008). At play the context has no schema: the wired and parameter names alone, which the runtime
+ * registers on the wire or the first write (:711-725) — the same ports, drawn the same way.
+ */
+export function recordFieldInputs(params: Readonly<Record<string, unknown>>, context: Readonly<PortContext>): Record<string, ValueInputDecl> {
+  const out: Record<string, ValueInputDecl> = {};
+  for (const [field, decl] of shownFields(selectedClass(params, context), false)) out['prop-' + field] = { ...propertyPort(field), type: recordFieldType(decl) };
+  for (const field of recordWiredFieldNames(params, context)) if (!('prop-' + field in out)) out['prop-' + field] = propertyPort(field);
   return out;
 }
 
