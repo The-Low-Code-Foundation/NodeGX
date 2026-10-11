@@ -122,8 +122,15 @@ export function refuseHiddenNamed(
   // route gated that one), is held to its own rule. A narrowed one is refused too: a `$path` hop
   // cannot carry the narrowing (a path inside a path), and a filter over it answers for every row.
   const mayRead = (c: string | undefined, op: 'get' | 'find', how: string): void => {
-    if (c === undefined || c === collection) return;
+    if (c === undefined) return;
     const reach = reachOf(acl, op, c);
+    if (c === collection) {
+      // The route gated the collection being read — but a path through it walks every row, the ones
+      // outside the caller's narrowing too (the reach review, ONT-014 AC6: "is anyone in band C
+      // under me?" answered from rows the caller may not read). A narrowing cannot ride a hop.
+      if (typeof reach === 'object') throw new UnreadableCollection(c, how, true);
+      return;
+    }
     if (reach !== 'all') throw new UnreadableCollection(c, how, reach !== 'none');
   };
 

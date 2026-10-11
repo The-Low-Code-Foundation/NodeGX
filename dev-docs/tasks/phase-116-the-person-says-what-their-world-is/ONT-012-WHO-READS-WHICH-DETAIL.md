@@ -3,7 +3,7 @@
 **Opened 2026-10-10 (s16)**, from Richard's rulings R-a and R-b (README §9), both *against* the recommendation: the
 backend itself learns **per-field read rules** and **a rule on a value of the record** ("editable only while a
 draft"). **Depends on** ONT-004 (the rule atoms and the `only` seam), R10 (the facade as the one door). **Feeds**
-ONT-011 step 4 (secret details and *settled* project to these two rules). **Status: 🟡 s16 — both rules built and graded on SQLite and PostgreSQL: the draft-only rule (R-b, §6.1) and per-field reads (R-a, §6.2). AC1–AC5 met as worded. Owed: the Fable reach review, and the two limits in §7 (search over an index that does not hold the field; who may change a field).**
+ONT-011 step 4 (secret details and *settled* project to these two rules). **Status: 🟡 s18 — both rules built and graded on SQLite and PostgreSQL: the draft-only rule (R-b, §6.1) and per-field reads (R-a, §6.2). AC1–AC5 met as worded. **The Fable reach review is done (§6.4; with ONT-014 §6.5): two doors through which a hidden value answered were closed (a write's success, a move's words) and the path through the narrowed queried collection is refused.** Owed: the two limits in §7 (search over an index that does not hold the field; who may change a field).**
 
 > **Model check (Richard, 2026-10-08 rule):** the build wants **Opus 5.5**. It is fixed-shape enforcement on seams that
 > exist (ONT-004's `only`, R10's `AdapterFacade`), graded on both engines. **A reach review on Fable 5.1** follows the
@@ -197,6 +197,26 @@ username is in the `hidden` mask, so an included author carries their name, not 
 red are P109's uncommitted `isl040-sessions` spec, live in `state.ts` at the same time). The reach review (Fable)
 should start from the bug file's "Not covered" list. Filed beside it: `P116-S17-DOTTEDFILTER` (a dotted filter
 answers nothing, even to the admin).
+
+### 6.4 The reach review (s18, 2026-10-11, Fable 5.1)
+
+Done together with ONT-014's (its §6.5 holds the table and the measurements). What this task's rules learned:
+
+- **A write is a read.** A field hidden from the caller answered through the WRITE's success: ONT-014's "staying is
+  not a move" and "writing the value it already has is not a change" compared the body with the hidden value, so a
+  PUT of a guess was 200 when right and 409 when wrong, and the move's 409 named the old value. Fixed in
+  `persistence/onlyWhile.ts`: for a field in the caller's `hidden` mask, every write of it is a change and the
+  words name the field, never the value; a field shown on some rows is compared only on the rows its rule reaches.
+  "Who may change a field" is still unruled (§7) — this closes the oracle, not the write.
+- **The path through the collection being read** (bug INCLUDECLP's "not covered"): a `$path` whose `from` or hop
+  is the queried collection walked the rows outside the caller's narrowing and answered for them. Fixed in
+  `persistence/fieldRules.ts`: refused (403, `collection-rule`) when the caller's reach on it is narrowed.
+- **Dotted filters and accessors** through a link onto a hidden or closed field answer nothing on both engines
+  (graded, so they stay closed when DOTTEDFILTER is fixed — that fix must then route through `reachOf` and the
+  target's `hidden`).
+- Re-read with no finding: realtime (system collections are refused at subscribe by `checkClp`; a hidden field is
+  stripped per frame), the upsert's unique lookup (a hidden field there is a 403), the increment echo, the create
+  echo, the search refusal, the `_User` mask (R-h) at every record-returning door.
 
 ## 7. Not this task
 

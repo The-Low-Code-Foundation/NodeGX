@@ -20,6 +20,12 @@
  * old value is the one being written, or `unless` holds". Each condition is a {@link Clause}; the
  * one that stopped a write names it in the 409.
  *
+ * The reach review (ONT-014 AC6): a field the caller may not READ (R-a, `StorageAclOption.hidden`)
+ * is never compared with what they wrote and never named by its old value — "writing the value it
+ * already has" would answer whether a guess is right, and "moves from "issued"" would say what it
+ * is. For such a field every write is a change, and the words name the field, not the value. A
+ * field shown on SOME rows is compared only on the rows its rule reaches.
+ *
  * @module nodegx-backend/persistence/onlyWhile
  */
 
@@ -81,12 +87,35 @@ const q = (v: unknown) => JSON.stringify(v);
  * `{ field: null }` to `= NULL`, which matches nothing (bug P116-S17-NULLEQ).
  */
 const eq = (field: string, value: unknown): Record<string, unknown> => (value === null ? { [field]: { $exists: false } } : { [field]: value });
-/** A value as storage compares it: a link is its id (the wire sends a Pointer envelope, the store keeps the id). */
-const stored = (v: unknown): unknown =>
-  v && typeof v === 'object' && (v as { __type?: unknown }).__type === 'Pointer' ? (v as { objectId?: unknown }).objectId : v;
-const isScalar = (v: unknown) => {
-  const s = stored(v);
-  return s === null || typeof s === 'string' || typeof s === 'number' || typeof s === 'boolean';
+/**
+ * A value as storage compares it: a link is its id, a date its ISO string (the wire sends `Pointer`
+ * and `Date` envelopes; both engines keep the id and the string — `QueryBuilder` reads a `where`
+ * the same way).
+ */
+const stored = (v: unknown): unknown => {
+  const tagged = v as { __type?: unknown; objectId?: unknown; iso?: unknown } | null;
+  if (!tagged || typeof tagged !== 'object') return v;
+  if (tagged.__type === 'Pointer') return tagged.objectId;
+  if (tagged.__type === 'Date') return tagged.iso;
+  return v;
+};
+/** A stored value one statement can compare for equality; an Object or an Array is not one. */
+const isScalar = (s: unknown) => s === null || typeof s === 'string' || typeof s === 'number' || typeof s === 'boolean';
+
+/**
+ * The fields of `collection` the caller may not read (ONT-012 `hidden`): `true` = on every row,
+ * a `where` = shown only on the rows it reaches.
+ */
+type Unseen = Map<string, true | Record<string, unknown>>;
+const unseenIn = (acl: StorageAclOption, collection: string): Unseen => {
+  const out: Unseen = new Map();
+  for (const h of acl.hidden?.[collection] ?? []) out.set(h.field, h.shownWhere ?? true);
+  return out;
+};
+/** `where`, but only where the caller may see `field`; absent when they may see it nowhere. */
+const whereSeen = (unseen: Unseen, field: string, where: Record<string, unknown>): Record<string, unknown> | undefined => {
+  const u = unseen.get(field);
+  return u === undefined ? where : u === true ? undefined : { $and: [u, where] };
 };
 
 /** `acl` with `where` ANDed into its `only` for `collection`. */
@@ -102,7 +131,13 @@ function deleteClauses(collection: string, rule: OnlyWhileRule | 'never' | undef
 }
 
 /** ONT-014 `moves`: one clause per moved field the body sets. */
-function moveClause(collection: string, field: string, byOld: Record<string, OnlyWhileMove>, values: Record<string, unknown> | undefined): Clause | null {
+function moveClause(
+  collection: string,
+  field: string,
+  byOld: Record<string, OnlyWhileMove>,
+  values: Record<string, unknown> | undefined,
+  unseen: Unseen
+): Clause | null {
   if (!values || !(field in values)) {
     // Named without a value (an increment, a relation): not a move this rule can judge.
     return { where: NEVER, says: `"${field}" on a "${collection}" record changes only by being set to one of its values. Nothing was changed.` };
@@ -110,7 +145,10 @@ function moveClause(collection: string, field: string, byOld: Record<string, Onl
   const to = values[field];
   const listed = Object.keys(byOld).filter((k) => k !== '*');
   const unlisted = listed.length ? { $or: [{ [field]: { $nin: listed } }, eq(field, null)] } : undefined;
-  const arms: Record<string, unknown>[] = [eq(field, to)]; // staying is not a move
+  // Staying is not a move — on the rows where the caller can see what it is (the review: a write
+  // of a guess must not answer whether the guess is right).
+  const staying = whereSeen(unseen, field, eq(field, to));
+  const arms: Record<string, unknown>[] = staying ? [staying] : [];
   const admit = (when: Record<string, unknown> | undefined, m: OnlyWhileMove) => {
     if (m.admits === false || !m.to.includes(to as string)) return;
     const conds = [when, typeof m.admits === 'object' ? m.admits.where : undefined].filter(Boolean) as Record<string, unknown>[];
@@ -121,6 +159,10 @@ function moveClause(collection: string, field: string, byOld: Record<string, Onl
   else if (!unlisted) return null; // nothing listed and no "*": every move is free
   else arms.push(unlisted);
   if (arms.some((a) => Object.keys(a).length === 0)) return null;
+  if (unseen.has(field)) {
+    // The caller may not read the field: the words never say what it is now.
+    return { where: arms.length ? { $or: arms } : NEVER, says: `"${field}" cannot move to ${q(to)} from the value it has now. Nothing was changed.` };
+  }
 
   const why = (old: string, m: OnlyWhileMove): string => {
     if (m.says) return m.says;
@@ -138,22 +180,27 @@ function moveClause(collection: string, field: string, byOld: Record<string, Onl
 }
 
 /** ONT-014 `frozen`: one clause when the body touches a frozen field. */
-function frozenClause(collection: string, rule: OnlyWhileRule, fields: string[], values: Record<string, unknown> | undefined): Clause | null {
+function frozenClause(collection: string, rule: OnlyWhileRule, fields: string[], values: Record<string, unknown> | undefined, unseen: Unseen): Clause | null {
   const frozen = rule.frozen!;
   const touched =
     frozen.fields === '*'
       ? fields.filter((f) => !BOOKKEEPING.has(f) && !(rule.except ?? []).includes(f))
       : frozen.fields.filter((f) => fields.includes(f));
   if (touched.length === 0) return null;
-  // Writing the value it already has is not a change (a PUT that echoes the record). A field frozen
-  // from the first save with nothing in it yet is written once ("set once").
+  // Writing the value it already has is not a change (a PUT that echoes the record) — compared as
+  // storage keeps it, on the rows where the caller may read it. A field frozen from the first save
+  // with nothing in it yet is written once ("set once"). An Object or an Array cannot be compared
+  // in one statement on both engines: its echo is a change, its first write is not.
   const setOnce = !frozen.unless && frozen.fields !== '*';
-  const same =
-    values && touched.every((f) => f in values && isScalar(values[f]))
-      ? touched.map((f) => (setOnce ? { $or: [eq(f, stored(values[f])), eq(f, null)] } : eq(f, stored(values[f]))))
-      : undefined;
-  const sameWhere = same ? (same.length === 1 ? same[0] : { $and: same }) : undefined;
-  const where = frozen.unless ? (sameWhere ? { $or: [frozen.unless, sameWhere] } : frozen.unless) : sameWhere ?? NEVER;
+  const perField = touched.map((f) => {
+    const v = values && f in values ? stored(values[f]) : undefined;
+    const arms = [v !== undefined && isScalar(v) ? whereSeen(unseen, f, eq(f, v)) : undefined, setOnce ? whereSeen(unseen, f, eq(f, null)) : undefined].filter(
+      Boolean
+    ) as Record<string, unknown>[];
+    return arms.length === 0 ? NEVER : arms.length === 1 ? arms[0] : { $or: arms };
+  });
+  const sameWhere = perField.length === 1 ? perField[0] : { $and: perField };
+  const where = frozen.unless ? { $or: [frozen.unless, sameWhere] } : sameWhere;
   const names = touched.map(q).join(', ');
   return {
     where,
@@ -163,7 +210,13 @@ function frozenClause(collection: string, rule: OnlyWhileRule, fields: string[],
   };
 }
 
-function updateClauses(collection: string, rule: OnlyWhileRule | undefined, fields: string[] | undefined, values: Record<string, unknown> | undefined): Clause[] {
+function updateClauses(
+  collection: string,
+  rule: OnlyWhileRule | undefined,
+  fields: string[] | undefined,
+  values: Record<string, unknown> | undefined,
+  unseen: Unseen
+): Clause[] {
   if (!rule) return [];
   const clauses: Clause[] = [];
   const freeOfWhere = rule.except && fields && fields.length > 0 && fields.every((f) => rule.except!.includes(f));
@@ -171,11 +224,11 @@ function updateClauses(collection: string, rule: OnlyWhileRule | undefined, fiel
   const known = fields ?? [];
   for (const [field, byOld] of Object.entries(rule.moves ?? {})) {
     if (fields && !fields.includes(field)) continue;
-    const c = moveClause(collection, field, byOld, values);
+    const c = moveClause(collection, field, byOld, values, unseen);
     if (c) clauses.push(c);
   }
   if (rule.frozen) {
-    const c = frozenClause(collection, rule, known, values);
+    const c = frozenClause(collection, rule, known, values, unseen);
     if (c) clauses.push(c);
   }
   return clauses;
@@ -199,7 +252,7 @@ export function heldWhile(
 ): Held {
   const ow = acl?.onlyWhile;
   if (!acl || !ow || ow.collection !== collection) return { acl };
-  const clauses = op === 'delete' ? deleteClauses(collection, ow.delete) : updateClauses(collection, ow.update, fields, values);
+  const clauses = op === 'delete' ? deleteClauses(collection, ow.delete) : updateClauses(collection, ow.update, fields, values, unseenIn(acl, collection));
   if (clauses.length === 0) return { acl };
   const where = clauses.length === 1 ? clauses[0].where : { $and: clauses.map((c) => c.where) };
   const rule: OnlyWhileRule = op === 'delete' && ow.delete === 'never' ? { says: clauses[0].says } : (ow[op] as OnlyWhileRule);

@@ -129,6 +129,32 @@ export function withWorldRules(collections: SecurityConfig['collections'], bodie
   return out;
 }
 
+/**
+ * The reach review (ONT-014 AC6): what a world's `rules` steps would take away that a PERSON wrote,
+ * said in words. The world writes only `frozen: { fields }` and `delete: "never"`, so a `frozen`
+ * with `unless` or `says` on a world collection was written by hand (the manager, `security.json`),
+ * and {@link withWorldRules} would replace it without a word. The route lists these in a dry run and
+ * refuses a run that has not accepted them (`acceptLosses`, as for a dropped column's values). A
+ * plain field list and a bare "never" cannot be told from the world's own earlier writing, so the
+ * world's slot stands for those (ONT-014 §6.3); telling them apart needs the step to carry what the
+ * world said before (`was`), which is owed.
+ */
+export function worldRuleLosses(collections: SecurityConfig['collections'], bodies: MigrationRulesBody[]): string[] {
+  const out: string[] = [];
+  const words = (f: { fields: string[] | '*'; unless?: Record<string, unknown>; says?: string }): string =>
+    `${f.fields === '*' ? 'the whole record' : f.fields.map((x) => `"${x}"`).join(', ')}${f.unless ? ` unless ${JSON.stringify(f.unless)}` : ''}${f.says ? ` ("${f.says}")` : ''}`;
+  for (const { collection, onlyWhile } of bodies) {
+    const hand = collections[collection]?.onlyWhile?.update?.frozen;
+    if (!hand || (!hand.unless && !hand.says)) continue;
+    const world = onlyWhile?.update?.frozen;
+    if (world && JSON.stringify(world) === JSON.stringify(hand)) continue;
+    out.push(
+      `"${collection}": the frozen rule written by hand (${words(hand)}) would be replaced by the world's (${world ? words(world) : 'none'}) — say it in the world, take it out by hand, or accept the loss`
+    );
+  }
+  return out;
+}
+
 export class AdminWorldRoutes {
   constructor(private readonly deps: AdminWorldDeps) {}
 
@@ -155,9 +181,11 @@ export class AdminWorldRoutes {
     const after = rulesFor(plan.steps);
     const says = plan.steps.map((s) => s.says);
 
+    // The reach review: a hand-written rule the world's steps would replace is a loss, said and accepted, never silent.
+    const handRules = worldRuleLosses(security.config.collections, worldRules);
     if (body.run !== true) {
       const dryRun = await dryRunMigration(mctx, plan);
-      const why = [...plan.refused, ...dryRun.refusals.map((r) => `${r.says} (${r.rows})`), ...after.problems];
+      const why = [...plan.refused, ...dryRun.refusals.map((r) => `${r.says} (${r.rows})`), ...after.problems, ...(body.acceptLosses === true ? [] : handRules)];
       sendJSON(ctx.res, 200, {
         ran: false,
         ...(why.length ? { why: why.join('; ') } : {}),
@@ -173,6 +201,8 @@ export class AdminWorldRoutes {
     if (after.problems.length) throw new HttpError(409, `The permission rules cannot be carried, so nothing was changed:\n${after.problems.map((p) => `- ${p}`).join('\n')}`);
     const invalid = validateSecurityConfig({ ...security.config, collections: withWorldRules(after.collections, worldRules) } as SecurityConfig);
     if (invalid.length) throw new HttpError(409, `The permission rules after this migration would be refused:\n${invalid.map((e) => `- ${e}`).join('\n')}`);
+    if (handRules.length && body.acceptLosses !== true)
+      throw new HttpError(409, `This migration would replace a rule written by hand, so nothing was changed:\n${handRules.map((e) => `- ${e}`).join('\n')}\nRun it again with acceptLosses to let it.`);
 
     const elsewhere = isWords(body.backupTakenElsewhere) ? body.backupTakenElsewhere.trim() : undefined;
     const backups = this.deps.backups;

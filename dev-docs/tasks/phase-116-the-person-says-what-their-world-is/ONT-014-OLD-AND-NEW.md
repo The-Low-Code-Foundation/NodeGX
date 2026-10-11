@@ -5,7 +5,7 @@ have — a rule that reads **the record before the change, the record after it, 
 write. ONT-012's `onlyWhile` is the special case that reads the old record only. **Depends on** ONT-012 (the seam:
 `heldWhile()` in `persistence/onlyWhile.ts`, the `StorageAclOption.onlyWhile` ride, the 409 mapping per door), R10 (the
 facade as the one door). **Feeds** ONT-013 (three unkept shapes flip to held), ONT-011 step 4 (*settled* projects to
-this and nothing else), ONT-008 (the view shows a value's allowed moves). **Status: 🟡 s17 (2026-10-11, Opus 5.5) — built: AC1, AC2, AC3's shape half, AC4 for the three flips, AC5 (§6). Owed: AC3's schema half, AC4's two new `RuleHold` shapes, AC6 (the Fable reach review).**
+this and nothing else), ONT-008 (the view shows a value's allowed moves). **Status: 🟡 s18 (2026-10-11, Fable 5.1) — built: AC1, AC2, AC3's shape half, AC4 for the three flips, AC5, **AC6 (the reach review, §6.5: 7 findings, 5 fixed, 1 filed as `P116-S18-CASCADEHOLD`, 1 a ruling)**. Owed: AC3's schema half, AC4's two new `RuleHold` shapes (with ONT-011 step 2), the cascade (the bug), and the `was` on a `rules` step (§6.5 #4).**
 
 > **Model check (Richard, 2026-10-08 rule):** the build wants **Opus 5.5** — fixed-shape enforcement on a seam that
 > exists and a grading suite that exists (`ont-012-only-while.test.ts`'s shape). **A reach review on Fable 5.1**
@@ -241,13 +241,45 @@ the world's.
   the permissions PUT, and the migration's `rules` step.
 - **AC4's two new `RuleHold` shapes** (`frozen` with `unless`, `moves`): a vocabulary change (`kind.ts`, the
   validator, the brief). It goes with ONT-011 step 2 (*settled*), which is their first user.
-- **AC6: the reach review (Fable).** Start from these:
-  - a cloud function's Update Record runs as admin, so it is not bound (by design; count the verbs that move a status);
-  - a `moves` field named with no value;
-  - a hidden status field: the 409 says "from "issued"", a value R-a may hide from the caller;
-  - a Date frozen field (an envelope `{__type: Date}` is never "the same value");
-  - `withWorldRules`'s ownership when a person hand-wrote `frozen` on a world collection.
+- ~~**AC6: the reach review (Fable).**~~ Done, §6.5.
 - Bug **`P116-S17-NULLEQ`** (medium, runtime), **`P116-S17-CRONLEAK`** (low, tests): filed, not fixed.
+- **The cascade** (bug `P116-S18-CASCADEHOLD`, high): a bound caller's delete reaches, through `goes-too` and
+  `stays-unlinked`, records whose own rule says never / frozen, and the rule is not asked. Needs a ruling (§6.5 #5)
+  and a per-collection `onlyWhile` in the ACL option. An Opus build on this seam.
+- **`was` on a `rules` step** (§6.5 #4): so the route can tell a world's withdrawal from a person's hand rule, and
+  merge instead of replace.
+
+### 6.5 The reach review (s18, 2026-10-11, Fable 5.1) — AC6
+
+**Method.** Every door in ONT-012 §4 was re-read with ONT-014's two questions ("which door lets a hidden detail
+out?", "which lets a value move the wrong way?"), then nine probes were written as the behaviour that SHOULD hold
+and run on SQLite and PostgreSQL over HTTP on a locked backend (`tests/ont-014-reach-review.test.ts`). Seven were
+red on both engines at HEAD `ae7db7dff`. Each is measured, not inferred.
+
+| # | finding | measured at HEAD | now |
+|---|---|---|---|
+| 1 | **A hidden status in a move's 409.** R-a hides `status` from the learner; their issued → draft PUT answered *""status" moves from "issued" only to "withdrawn"…"* — the value they may not read. And *staying is not a move* was an oracle: PUT `{status: "issued"}` was 200 on an issued row and 409 on a draft. | red ×2 | **fixed** (`persistence/onlyWhile.ts`): for a field the caller may not read, the staying arm is dropped and the words never carry the old value (*""status" cannot move to "issued" from the value it has now."*). Shown-on-some-rows: compared only on the rows the rule reaches. The coach's words are unchanged. |
+| 2 | **A hidden frozen field.** `ssn` hidden from the learner and frozen: PUT of the right value 200, of a wrong one 409 — a guess answered. Set once's "still empty" arm answered "is it set yet?" too. | red ×2 | **fixed** (same file): no same-value and no empty arm for a field the caller may not read; a carer who reads it echoes and first-writes it as before. |
+| 3 | **A Date frozen field.** `dateOfBirth` as a `Date` column, set once: an echo of the same date was a 409, and the FIRST write of an empty one was a 409 (`isScalar` refused the envelope, so the whole clause fell to NEVER). The same for an Object field's first write. The s17 spec used a `String` column. | red ×2 | **fixed**: `stored()` unwraps a `Date` to its ISO string (what both engines keep and what `QueryBuilder` compares); arms are built per field, so an Object's first write passes on the empty arm. **Known limit, graded:** an Object cannot be compared in one statement on both engines, so its echo is a change (409). |
+| 4 | **`withWorldRules` replaces a hand rule in silence.** A person's `frozen: amount unless draft` + `delete: "never"` on a world collection; the world's `rules` step (set once `number`) left `frozen: [number]`, no `amount`, no `never`. Emitted only when the world's answer changes, so the loss comes months later. | red | **half fixed** (`server/admin-world.ts` `worldRuleLosses`): a freeze the world could not have written (`unless` or `says`) is named in the dry run's `why` and a run is 409 until `acceptLosses`, in words. A plain field list and a bare `never` cannot be told from the world's own earlier writing, so the slot stays the world's (§6.3) — telling them apart needs the step to carry `was`. Owed. |
+| 5 | **The cascade** (`goes-too` into `delete: "never"`, `stays-unlinked` into a frozen link): a learner's DELETE of a keeper took the sealed envelope and emptied the issued invoice's customer, 200 on both engines. | red ×2 | **filed** `P116-S18-CASCADEHOLD` (high), `it.failing` ×2. Ruling owed: does the delete stop in the envelope's words? Recommendation: yes. |
+| 6 | **A `$path` through the narrowed queried collection** (INCLUDECLP's "not covered"). `Staff` narrowed to the caller's own row by a path rule; `where: { $path: { from: Staff where band C, follow manager } }` returned her row — "someone in band C reports to you" — and so did the repeated hop. A plain `where: { band: "C" }` returned nothing (control). | red ×2 | **fixed** (`persistence/fieldRules.ts`): a `from` or hop landing on the collection being read is refused (403, `collection-rule`) when the caller's reach on it is narrowed; open collections are unchanged. |
+| 7 | **A dotted filter / accessor through a link** on a hidden (`author.email`) or closed (`salary.amount`, a `$max` of it) target field. | **green** ×2: nothing returned, nothing summed (DOTTEDFILTER's defect is the guard here) | graded, so a future dotted filter cannot open it unnoticed. |
+| 8 | **The ACL of a never-edited record** (`frozen: "*"`): a bound writer rewrote a sealed envelope's ACL — 200 on both engines. `ACL` is bookkeeping, never frozen. | measured | **a ruling for Richard**: *"a sealed envelope is never edited" — may its owner still change who can read it?* Not asserted. |
+
+Also read, no finding: the relation-only PUT (held with the plain fields' values), the batch (per operation, with its
+collection), BYOB PUT (the route gate names the collection), the upsert (a hidden unique field is a 403 before
+anything is written), the increment echo (stripped), realtime (system collections refused at subscribe, a hidden
+field stripped per frame, a partial one refused), the create echo (id and date only), the `unique` 409 (ONT-012 §7,
+recorded). **Verbs that move a status** (ONT-014 §3.2 #4): 1 `update` verb across the two world fixtures, 0 that
+set a status; a verb's claim writes as the store's key (not `byPerson`), as designed.
+
+**Measured after the fixes:** `ont-014-reach-review` 26/26 (two `it.failing` for the bug) on both engines; the
+neighbour band is in the s18 handoff.
+
+**Not fixed here, and why:** #5 needs a ruling and a shape change in the contract; #4's `was` is a planner change
+(project-contract `migrate.ts` + the contract's `MigrationRulesBody`) and belongs with the Opus build of AC3's
+schema half; #8 is a ruling.
 
 ## 7. Not this task
 
