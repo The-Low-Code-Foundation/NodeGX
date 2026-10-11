@@ -250,7 +250,7 @@
     ]
   },
   "borrows": {
-    "_about": "ONT-011 step 1. Not kinds: the four things Frappe's DocType says about a kind of record, looked for by the detectors in census.js. `list` is each borrow's person sentence (ONT-011 §1) and its question; `classification` is the verdict on each in-repo candidate, by meaning — \"yes\", \"no: why\" (the word matched, the meaning does not) or \"neighbour: why\" (next door; step 2 decides). A key may use `*` for the collection. `hand` holds a row no detector can see, with its file:line. The private candidates' verdicts live in the private folder's borrows.json.",
+    "_about": "ONT-011 step 1. Not kinds: the four things Frappe's DocType says about a kind of record, looked for by the detectors in census.js. `list` is each borrow's person sentence (ONT-011 §1) and its question; `classification` is the verdict on each in-repo candidate, by meaning — \"yes\", \"no: why\" (the word matched, the meaning does not) or \"neighbour: why\" (next door; step 2 decides). A key may use `*` for the collection. `across` (ONT-013 step 4) is not Frappe's: rules over a set of records, found in the apps' code (a row count against a limit near a create, a sum against a total, two ranges compared) and in a field that holds a limit; the same code pass adds read-aloud candidates where an app hands out a number itself (ONT-015's warrant). `hand` holds a row no detector can see, with its file:line. The private candidates' verdicts live in the private folder's borrows.json.",
     "list": {
       "secret": {
         "sentence": "Some details on a record are not for everyone who can see the record, and the system asked me which ones before anyone could read them.",
@@ -273,6 +273,15 @@
       "sometimes": {
         "sentence": "A detail that only matters in some cases is asked for in those cases, and never left empty when it mattered.",
         "question": "Is any detail needed only in some cases? Which cases, and must it be filled then?"
+      },
+      "across": {
+        "sentence": "A cohort holds at most twenty learners, the bills never add up to more than the budget, and no two bookings of a room overlap.",
+        "question": "Is there a most (or a total) over a set of these, or two that may never share the same time?",
+        "facts": {
+          "count": "at most so many",
+          "sum": "never more than the total",
+          "overlap": "no two at the same time"
+        }
       }
     },
     "classification": {
@@ -337,7 +346,12 @@
       "lessons|ProgrammeDimension.archivedAt@sometimes": "neighbour: an end with no reason field and no reader of a reason found; the `ends` kind's question",
       "lessons|PathStep.removedAt@sometimes": "no: a removed step leaves the path (the read filters it out) and is not shown again; nobody is owed a reason",
       "lessons|SessionPrep.resourceUrl@sometimes": "yes: one or the other with resourceStorageKey, never both",
-      "lessons|AssignmentSubmission.linkUrl@sometimes": "yes: allowed only when the assignment's submissionModes includes link, a case decided on another record"
+      "lessons|AssignmentSubmission.linkUrl@sometimes": "yes: allowed only when the assignment's submissionModes includes link, a case decided on another record",
+      "template:nightbook|keepThing.rows@count": "yes: a person keeps at most 200 things; counted by the function before it creates, so two saves at 199 both pass",
+      "template:nightbook|sealEnvelope.helps@count": "no: the length of one text, not a count of records",
+      "template:todo-list|Projects.nextPosition@read-aloud": "neighbour: the next drag-sort position (the highest plus one) — an order, not a number that names the record",
+      "template:todo-list|Selected task.nextActionPosition@read-aloud": "neighbour: the next drag-sort position for an action — an order, not a number that names the record",
+      "template:todo-list|Task rows.nextPosition@read-aloud": "neighbour: the next drag-sort position for a task — an order, not a number that names the record"
     },
     "hand": [
       {

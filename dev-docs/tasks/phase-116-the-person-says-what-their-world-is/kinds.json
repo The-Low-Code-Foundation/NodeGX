@@ -1398,15 +1398,15 @@
           "called-by": "what you call one in a list",
           "who-changed": "who changed what"
         },
-        "kept": 55,
+        "kept": 57,
         "bySource": {
           "template:members-area": 6,
           "template:planning": 4,
-          "sentinel": 9,
+          "acme": 10,
+          "sentinel": 10,
           "template:nightbook": 1,
           "template:todo-list": 3,
           "lessons": 15,
-          "acme": 9,
           "tirion": 8
         },
         "counts": {
@@ -1433,18 +1433,28 @@
             }
           },
           "read-aloud": {
+            "template:todo-list": {
+              "yes": 0,
+              "no": 0,
+              "neighbour": 3
+            },
             "lessons": {
               "yes": 0,
               "no": 0,
               "neighbour": 3
             },
-            "tirion": {
-              "yes": 0,
-              "no": 1,
+            "acme": {
+              "yes": 1,
+              "no": 0,
               "neighbour": 0
             },
+            "tirion": {
+              "yes": 0,
+              "no": 2,
+              "neighbour": 2
+            },
             "sentinel": {
-              "yes": 1,
+              "yes": 2,
               "no": 0,
               "neighbour": 0
             }
@@ -1771,11 +1781,32 @@
             "why": "what one is called in a list"
           },
           {
+            "id": "template:todo-list|Projects.nextPosition@read-aloud",
+            "how": "highest-plus-one",
+            "evidence": "templates/todo-list/components/Logic/Projects/nodes.json:297",
+            "verdict": "neighbour",
+            "why": "the next drag-sort position (the highest plus one) — an order, not a number that names the record"
+          },
+          {
             "id": "template:todo-list|Routine.title@called-by",
             "how": "title-field",
             "evidence": "templates/todo-list/components/Commands/Add routine/nodes.json:121",
             "verdict": "yes",
             "why": "what one is called in a list"
+          },
+          {
+            "id": "template:todo-list|Selected task.nextActionPosition@read-aloud",
+            "how": "highest-plus-one",
+            "evidence": "templates/todo-list/components/Logic/Selected task/nodes.json:129",
+            "verdict": "neighbour",
+            "why": "the next drag-sort position for an action — an order, not a number that names the record"
+          },
+          {
+            "id": "template:todo-list|Task rows.nextPosition@read-aloud",
+            "how": "highest-plus-one",
+            "evidence": "templates/todo-list/components/Logic/Task rows/nodes.json:89",
+            "verdict": "neighbour",
+            "why": "the next drag-sort position for a task — an order, not a number that names the record"
           },
           {
             "id": "template:todo-list|Task.title@called-by",
@@ -1925,7 +1956,70 @@
             "note": "beside closedAt"
           }
         ]
+      },
+      {
+        "id": "across",
+        "sentence": "A cohort holds at most twenty learners, the bills never add up to more than the budget, and no two bookings of a room overlap.",
+        "question": "Is there a most (or a total) over a set of these, or two that may never share the same time?",
+        "facts": {
+          "count": "at most so many",
+          "sum": "never more than the total",
+          "overlap": "no two at the same time"
+        },
+        "kept": 2,
+        "bySource": {
+          "template:nightbook": 1,
+          "acme": 1
+        },
+        "counts": {
+          "count": {
+            "template:nightbook": {
+              "yes": 1,
+              "no": 1,
+              "neighbour": 0
+            },
+            "acme": {
+              "yes": 1,
+              "no": 0,
+              "neighbour": 0
+            },
+            "sentinel": {
+              "yes": 0,
+              "no": 1,
+              "neighbour": 1
+            }
+          },
+          "sum": {},
+          "overlap": {}
+        },
+        "evidence": [
+          {
+            "id": "template:nightbook|keepThing.rows@count",
+            "how": "row-count-near-a-create",
+            "evidence": "templates/nightbook/components/__cloud__/keepThing/nodes.json:62",
+            "verdict": "yes",
+            "why": "a person keeps at most 200 things; counted by the function before it creates, so two saves at 199 both pass",
+            "note": "rows.length >= 200"
+          },
+          {
+            "id": "template:nightbook|sealEnvelope.helps@count",
+            "how": "row-count-near-a-create",
+            "evidence": "templates/nightbook/components/__cloud__/sealEnvelope/nodes.json:73",
+            "verdict": "no",
+            "why": "the length of one text, not a count of records",
+            "note": "helps.length > 2000"
+          }
+        ]
       }
-    ]
+    ],
+    "codeRead": {
+      "template:members-area": 17085,
+      "template:nightbook": 42334,
+      "template:planning": 59734,
+      "template:todo-list": 44757,
+      "acme": 56119,
+      "tirion": 38104,
+      "sentinel": 7506
+    }
   }
 }

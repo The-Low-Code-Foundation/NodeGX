@@ -367,7 +367,7 @@ Not kinds. Four things a Frappe DocType says about a kind of record, looked for 
 |---|---|---|---|---|---|---|---|---|---|---|
 | **secret** | Some details on a record are not for everyone who can see the record, and the system asked me which ones before anyone could read them. | 16 | 1 | 3 | · | · | · | 8 | 4 | · |
 | **settled** | Once something is agreed, it stays as it was agreed. To change it I withdraw it or make a new one that says which one it replaces, and the old one is still there. | 8 | · | 1 | 1 | · | 4 | · | 2 | · |
-| **facts** | The system asked whether there is only one of something, whether people read its number aloud, what I call one in a list, and whether I need to know who changed what. | 55 | 6 | 1 | 4 | 3 | 15 | 9 | 8 | 9 |
+| **facts** | The system asked whether there is only one of something, whether people read its number aloud, what I call one in a list, and whether I need to know who changed what. | 57 | 6 | 1 | 4 | 3 | 15 | 10 | 8 | 10 |
 | **sometimes** | A detail that only matters in some cases is asked for in those cases, and never left empty when it mattered. | 9 | · | · | 2 | 2 | 3 | 2 | · | · |
 
 ### secret
@@ -431,7 +431,7 @@ Not kinds. Four things a Frappe DocType says about a kind of record, looked for 
   | family | yes | no | neighbour | yes per source |
   |---|---|---|---|---|
   | only-one — there is only one | 2 | 1 | 1 | members-area 1, planning 1 |
-  | read-aloud — people read its number aloud | 1 | 1 | 3 | sentinel 1 |
+  | read-aloud — people read its number aloud | 3 | 2 | 8 | acme 1, sentinel 2 |
   | called-by — what you call one in a list | 47 | 1 | 1 | members-area 5, nightbook 1, planning 3, todo-list 3, lessons 13, acme 8, tirion 6, sentinel 8 |
   | who-changed — who changed what | 5 | 2 | 10 | lessons 2, acme 1, tirion 2 |
 
@@ -476,7 +476,10 @@ Not kinds. Four things a Frappe DocType says about a kind of record, looked for 
   | `template:planning|Settings.(collection)@only-one` | single-name | **yes**: a collection meant to hold one record per person (creatorOwns) | `templates/planning/nodegx.security.json:75` |
   | `template:planning|Task.title@called-by` | title-field | **yes**: what one is called in a list | `templates/planning/components/Commands/Send to todo/nodes.json:168` |
   | `template:todo-list|Action.title@called-by` | title-field | **yes**: what one is called in a list | `templates/todo-list/components/Commands/Add action/nodes.json:135` |
+  | `template:todo-list|Projects.nextPosition@read-aloud` | highest-plus-one | **neighbour**: the next drag-sort position (the highest plus one) — an order, not a number that names the record | `templates/todo-list/components/Logic/Projects/nodes.json:297` |
   | `template:todo-list|Routine.title@called-by` | title-field | **yes**: what one is called in a list | `templates/todo-list/components/Commands/Add routine/nodes.json:121` |
+  | `template:todo-list|Selected task.nextActionPosition@read-aloud` | highest-plus-one | **neighbour**: the next drag-sort position for an action — an order, not a number that names the record | `templates/todo-list/components/Logic/Selected task/nodes.json:129` |
+  | `template:todo-list|Task rows.nextPosition@read-aloud` | highest-plus-one | **neighbour**: the next drag-sort position for a task — an order, not a number that names the record | `templates/todo-list/components/Logic/Task rows/nodes.json:89` |
   | `template:todo-list|Task.title@called-by` | title-field | **yes**: what one is called in a list | `templates/todo-list/components/Commands/Add task/nodes.json:128` |
 
 ### sometimes
@@ -506,4 +509,33 @@ Not kinds. Four things a Frappe DocType says about a kind of record, looked for 
   | `template:planning|Task.closingNote@sometimes` | note-beside-lifecycle — beside closedAt | **yes**: a note that matters only once the task is closed | `templates/planning/components/Commands/Send to todo/nodes.json:168` |
   | `template:todo-list|Routine.stopNote@sometimes` | note-beside-lifecycle — beside stoppedAt | **yes**: a note that matters only once the routine stops | `templates/todo-list/components/Commands/Add routine/nodes.json:121` |
   | `template:todo-list|Task.closingNote@sometimes` | note-beside-lifecycle — beside closedAt | **yes**: a note that matters only once the task is closed | `templates/todo-list/components/Commands/Add task/nodes.json:128` |
+
+## Rules across records (ONT-013 step 4)
+
+Not kinds, not Frappe's: a rule over a set of records ("a cohort holds at most twenty"). Found in the apps' **code** — a row count compared with a limit near a create, a sum compared with a total, two date ranges compared — and in a field that holds a limit; each candidate classified by meaning, as above. The same code pass adds **read-aloud** candidates where an app hands out a number itself (a sequence, a counter formatted into text, the highest plus one): ONT-015's warrant, counted under *facts*. Each detector is run on a line it must catch and a near-miss it must not before any source is read (`ACROSS_CONTROLS`), so a zero below is a measured zero. Never read: tests, fixtures, seeds, sandboxes, data generators, vendored code. 
+
+**The code read, in lines:** `members-area` 17085, `nightbook` 42334, `planning` 59734, `todo-list` 44757, `acme` 56119, `tirion` 38104, `sentinel` 7506. A template's lines are the scripts inside its components' node parameters; acme's `src` and `scripts`; tirion's `api`, `pipelines`, `ui/src` and `db`; sentinel's `backend`.
+
+| rule | a person's sentence | rows kept | `members-area` | `nightbook` | `planning` | `todo-list` | `lessons` | `acme` | `tirion` | `sentinel` |
+|---|---|---|---|---|---|---|---|---|---|---|
+| **across** | A cohort holds at most twenty learners, the bills never add up to more than the budget, and no two bookings of a room overlap. | 2 | · | 1 | · | · | · | 1 | · | · |
+
+### across
+
+*A cohort holds at most twenty learners, the bills never add up to more than the budget, and no two bookings of a room overlap.*
+
+- **The question it asks:** Is there a most (or a total) over a set of these, or two that may never share the same time?
+
+  | family | yes | no | neighbour | yes per source |
+  |---|---|---|---|---|
+  | count — at most so many | 2 | 2 | 1 | nightbook 1, acme 1 |
+  | sum — never more than the total | 0 | 0 | 0 | · |
+  | overlap — no two at the same time | 0 | 0 | 0 | · |
+
+  In this repo:
+
+  | candidate | found by | verdict | evidence |
+  |---|---|---|---|
+  | `template:nightbook|keepThing.rows@count` | row-count-near-a-create — rows.length >= 200 | **yes**: a person keeps at most 200 things; counted by the function before it creates, so two saves at 199 both pass | `templates/nightbook/components/__cloud__/keepThing/nodes.json:62` |
+  | `template:nightbook|sealEnvelope.helps@count` | row-count-near-a-create — helps.length > 2000 | **no**: the length of one text, not a count of records | `templates/nightbook/components/__cloud__/sealEnvelope/nodes.json:73` |
 

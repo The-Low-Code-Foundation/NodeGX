@@ -482,7 +482,9 @@ function acmeDepth(rows, paths) {
 // The gate is the relations' gate: an unclassified candidate fails, and so does a classification that names no
 // candidate. A borrow with no "yes" row is not a failure: ONT-011 AC1 records it with zero rows.
 
-const FAMILIES = { secret: 'secret', settled: 'settled', 'only-one': 'facts', 'read-aloud': 'facts', 'called-by': 'facts', 'who-changed': 'facts', sometimes: 'sometimes' };
+const FAMILIES = { secret: 'secret', settled: 'settled', 'only-one': 'facts', 'read-aloud': 'facts', 'called-by': 'facts', 'who-changed': 'facts', sometimes: 'sometimes', count: 'across', sum: 'across', overlap: 'across' };
+/** Borrow-list entries that are not Frappe's: ONT-013 step 4's rules across records, printed in their own section. */
+const ACROSS = 'across';
 
 const SECRET_RE = /^(token|secret|password|salt|pin)$|[a-z](Token|Secret|Hash|Salt|Verifier|Password|ApiKey|V)$|_(token|secret|hash|salt|password|api_key|verifier)$/;
 const STATUS_RE = /^(status|state|docstatus|stage)$|[a-z]Status$|_status$/;
@@ -703,6 +705,99 @@ function detectBorrows(cands, handRows) {
   }
 }
 
+// ------------------------------------------- across records (ONT-013) --
+//
+// ONT-013 step 4: a rule over a SET of records ("a cohort holds at most twenty") is not a fact about one field, so
+// these detectors read the apps' code, not their schemas — a row count compared with a limit near a create, a sum
+// compared with a total, two date ranges compared for overlap — plus one schema detector, a field that holds a
+// limit (`capacity`, `max_users`). Same gate as the borrows: every candidate is classified by meaning, in
+// kinds.hand.json or the private borrows.json. The same code pass looks for a number the app hands out itself
+// (a sequence, a counter formatted into text, the highest number plus one): ONT-015's warrant, family read-aloud.
+//
+// The code read: a template's `components/**/*.json` (the scripts inside a node's parameters, one line per line of
+// script, evidence at the line of the file that holds it); acme's `src` and `scripts`; tirion's `api`, `pipelines`,
+// `ui/src` and `db`; sentinel's `backend`. Never tests, fixtures, seeds, sandboxes, data generators or vendored code:
+// a generator that fakes another system's numbers is not the app handing one out.
+
+const CODE_SKIP = /(^|\/)(tests?|__tests__|fixtures|sandbox|generators|venv|\.venv|alembic|node_modules|dist|build|tools)(\/|$)|seed|\.test\.|\.spec\.|_test\.py$|\.d\.ts$/;
+const ROWCOUNT_RE = /(\b(?:rows|items|records|results|list|entries|members|seats|bookings|[a-z]\w*s)\.length|\b[a-z_]*count\b|\bCOUNT\(\*\)|\blen\(\w*s\)|\.count\(\))\s*(>=|>|<=|<)\s*([A-Za-z_][\w.]*|[2-9]|\d{2,})\b/i;
+const NOT_A_LIMIT = /^(0|1|i|j|k|n|idx|index|true|false|null|undefined)$/;
+const CREATE_RE = /INSERT INTO|\.insert\(|\.create\(|session\.add\(|db\.add\(|createRecord|\.save\(/i;
+const SUM_RE = /\bSUM\(|\.reduce\(|\bsum\(/;
+const TOTAL_WORD = /\b\w*(total|budget|amount|capacity|limit|remaining|allocated|allowance|quota)\w*\b/i;
+const OVERLAP_RE = /\bOVERLAPS\b|\b(?:tstzrange|tsrange|daterange)\s*\(|EXCLUDE USING gist|\b(\w*start\w*)\s*<=?\s*[\w.]*end\w*\b[^;\n]*(&&|\band\b)[^;\n]*\bend\w*\s*>=?\s*[\w.]*start/i;
+const SEQUENCE_RE = /\bnextval\(|CREATE SEQUENCE|GENERATED (?:ALWAYS|BY DEFAULT) AS IDENTITY/i;
+const FORMATTED_RE = /\{(\w+)(?:\s*\+\s*1)?:0[3-9]d\}|%0[3-9]d|\bzfill\(\s*[3-9]\s*\)|padStart\(\s*[3-9]\s*,\s*['"]0['"]\s*\)/;
+const NOT_A_COUNTER = /getMonth|getDate|getHours|getMinutes|toString\(16\)|charCode|\.hex|hour|minute|second/i;
+const NEXT_RE = /\b((?:next|number|seq|counter)\w*)\s*[:=]\s*(highest|max|last|count|total|top)\w*\s*\+\s*1\b/i;
+const CAP_FIELD_RE = /^(capacity|seats|quota)$|^max_[a-z_]+$|^[a-z]+_limit$|^max[A-Z][A-Za-z]+$|^limit[A-Z][a-z]+$/;
+const CODE_DIRS = { acme: ['src', 'scripts'], tirion: ['api', 'pipelines', 'ui/src', 'db'], sentinel: ['backend'] };
+
+/** One entry per line of code: { source, file, stem, line, text } — a JSON file's scripts unfolded, keeping the file's line. */
+function codeOf(source, dir, prefix, dirs) {
+  const out = [];
+  for (const d of dirs) {
+    for (const f of walkFiles(path.join(dir, d), (p) => /\.(js|mjs|ts|svelte|py|sql|json)$/.test(p) && !CODE_SKIP.test(path.relative(dir, p).split(path.sep).join('/')))) {
+      const relp = path.relative(dir, f).split(path.sep).join('/');
+      const stem = f.endsWith('nodes.json') ? path.basename(path.dirname(f)) : path.basename(f).replace(/\.\w+$/, '');
+      const raw = read(f);
+      if (raw.length > 3e6) continue;
+      raw.split('\n').forEach((l, i) => {
+        const parts = f.endsWith('.json') ? (/\\n/.test(l) ? l.replace(/\\"/g, '"').replace(/\\'/g, "'").split('\\n') : [l]) : [l];
+        for (const text of parts) if (text.length <= 400) out.push({ source, file: `${prefix}${relp}`, stem, line: i + 1, text });
+      });
+    }
+  }
+  return out;
+}
+
+// A zero row count means something only beside a detector known to fire (ONT-013 step 4 found none for sum and
+// overlap): each detector must fire on its line here and stay quiet on the near-miss, or the census fails.
+const ACROSS_CONTROLS = [
+  [ROWCOUNT_RE, 'if (members.length >= cohort.capacity) refuse();', 'if (text.length > 0) refuse();', (m) => !NOT_A_LIMIT.test(m[3])],
+  [ROWCOUNT_RE, 'if count >= 20:', 'if count > 0:', (m) => !NOT_A_LIMIT.test(m[3])],
+  [SUM_RE, 'if (bills.reduce((a, b) => a + b.amount, 0) > budget.total) refuse();', 'const n = rows.length;'],
+  [OVERLAP_RE, 'WHERE during && tstzrange($1, $2)', 'validateDateRange(startDate, endDate)'],
+  [OVERLAP_RE, 'if (a.startAt < b.endAt && a.endAt > b.startAt) clash();', 'if (startAt < endAt) ok();'],
+  [SEQUENCE_RE, "SELECT nextval('invoice_seq')", 'SELECT count(*) FROM invoice'],
+  [FORMATTED_RE, 'number = f"INV-{year}-{seq:04d}"', "String(d.getMonth() + 1).padStart(2, '0')"],
+  [FORMATTED_RE, "ref = 'T-' + String(seq).padStart(5, '0')", "'(U+' + c.charCodeAt(0).toString(16).padStart(4, '0') + ')'", (m, s) => !NOT_A_COUNTER.test(s)],
+  [NEXT_RE, 'const nextNumber = highest + 1;', 'const nextPage = page + 1;']
+];
+function checkAcrossControls() {
+  for (const [re, hit, miss, also] of ACROSS_CONTROLS) {
+    const m = re.exec(hit);
+    if (!m || (also && !also(m, hit))) errors.push(`ONT-013 control: ${re} does not fire on "${hit}"`);
+    const n = re.exec(miss);
+    if (n && (!also || also(n, miss))) errors.push(`ONT-013 control: ${re} fires on the near-miss "${miss}"`);
+  }
+}
+
+function detectAcross(cands, templateNames) {
+  checkAcrossControls();
+  const code = [];
+  for (const n of templateNames) code.push(...codeOf(`template:${n}`, path.join(templatesDir, n), `templates/${n}/`, ['components']));
+  for (const n of PRIVATE_NAMES) if (PRIVATE_SOURCES[n]) code.push(...codeOf(n, PRIVATE_SOURCES[n], `${n}/`, CODE_DIRS[n]));
+  const reach = {};
+  for (const c of code) reach[c.source] = (reach[c.source] || 0) + 1;
+  code.forEach((c, i) => {
+    const at = { source: c.source, from: c.stem, evidence: `${c.file}:${c.line}` };
+    const near = (k) => code.slice(Math.max(0, i - k), i + k + 1).filter((x) => x.file === c.file).map((x) => x.text).join('\n');
+    let m;
+    if ((m = ROWCOUNT_RE.exec(c.text)) && !NOT_A_LIMIT.test(m[3]) && CREATE_RE.test(near(15))) cands.add({ ...at, field: m[1].replace(/\W.*$/, '') || 'count', family: 'count', how: 'row-count-near-a-create', note: `${m[1]} ${m[2]} ${m[3]}` });
+    if (SUM_RE.test(c.text) && /[<>]=?/.test(c.text.replace(/=>|->|<[^<>=]*>/g, '')) && TOTAL_WORD.test(near(3))) cands.add({ ...at, field: (TOTAL_WORD.exec(near(3)) || [])[0], family: 'sum', how: 'sum-against-a-total' });
+    if ((m = OVERLAP_RE.exec(c.text))) cands.add({ ...at, field: m[1] || m[0].split(/[\s(]/)[0], family: 'overlap', how: 'two-ranges-compared' });
+    if ((m = SEQUENCE_RE.exec(c.text))) cands.add({ ...at, field: (/(\w+)\s*(?:INT|INTEGER|BIGINT)?\s*GENERATED/i.exec(c.text) || /nextval\(\s*'(\w+)/.exec(c.text) || /SEQUENCE\s+(?:IF NOT EXISTS\s+)?([\w.]+)/i.exec(c.text) || [])[1] || 'sequence', family: 'read-aloud', how: 'sequence' });
+    if ((m = FORMATTED_RE.exec(c.text)) && !NOT_A_COUNTER.test(c.text)) {
+      const lhs = /["']?(\w+)["']?\s*[:=]\s*f?["'`]/.exec(c.text);
+      cands.add({ ...at, field: lhs ? lhs[1] : m[1] || 'counter', family: 'read-aloud', how: 'counter-formatted-into-text' });
+    }
+    if ((m = NEXT_RE.exec(c.text))) cands.add({ ...at, field: m[1], family: 'read-aloud', how: 'highest-plus-one' });
+  });
+  for (const f of FIELDS) if (CAP_FIELD_RE.test(f.field)) cands.add({ source: f.source, from: f.from, field: f.field, evidence: f.evidence, family: 'count', how: 'limit-field' });
+  return reach;
+}
+
 /** `yes[: why]` | `no: why` | `neighbour: why` — the verdict on one candidate, by meaning. */
 const VERDICT_RE = /^(yes(: .+)?|no: .+|neighbour: .+)$/;
 function classifyBorrows(cands, table, label, present) {
@@ -809,6 +904,7 @@ function main() {
   const privateBorrows = PRIVATE_DIR && exists(path.join(PRIVATE_DIR, 'borrows.json')) ? readJson(path.join(PRIVATE_DIR, 'borrows.json')) : {};
   const cands = new Candidates();
   detectBorrows(cands, handBorrows.hand || []);
+  const codeRead = detectAcross(cands, sources.filter((s) => s.name.startsWith('template:')).map((s) => s.name.slice('template:'.length)));
   const inRepo = new Set(['lessons', ...fs.readdirSync(templatesDir).map((n) => 'template:' + n)]);
   classifyBorrows(cands, handBorrows.classification || {}, 'kinds.hand.json borrows', inRepo);
   classifyBorrows(cands, privateBorrows, 'private borrows.json', new Set(PRIVATE_NAMES.filter((n) => PRIVATE_SOURCES[n])));
@@ -881,6 +977,9 @@ function main() {
   for (const f of FIELDS) fieldsRead[f.source] = (fieldsRead[f.source] || 0) + 1;
   for (const n of privateAbsent) if (committed && committed.borrows && committed.borrows.fieldsRead && committed.borrows.fieldsRead[n] !== undefined) fieldsRead[n] = committed.borrows.fieldsRead[n];
   out.borrows = { $comment: 'ONT-011 step 1: candidates found by the detectors in census.js, each classified by meaning (yes / no / neighbour) in kinds.hand.json or the private borrows.json. Not kinds: step 2 decides the vocabulary.', fieldsRead: Object.fromEntries(srcOrder(Object.keys(fieldsRead)).map((n) => [n, fieldsRead[n]])), list: [] };
+  const codeReach = { ...codeRead };
+  for (const n of privateAbsent) if (committed && committed.borrows && committed.borrows.codeRead && committed.borrows.codeRead[n] !== undefined) codeReach[n] = committed.borrows.codeRead[n];
+  out.borrows.codeRead = Object.fromEntries(srcOrder(Object.keys(codeReach)).map((n) => [n, codeReach[n]]));
   for (const [id, b] of Object.entries(handBorrows.list || {})) {
     const fams = Object.keys(FAMILIES).filter((f) => FAMILIES[f] === id);
     const counts = {};
@@ -1014,9 +1113,11 @@ function main() {
   md.push('');
   md.push(`| borrow | a person's sentence | rows kept | ${srcNames.map((s) => '`' + s.replace('template:', '') + '`').join(' | ')} |`);
   md.push(`|---|---|---|${srcNames.map(() => '---').join('|')}|`);
-  for (const b of out.borrows.list) md.push(`| **${b.id}**${b.kept ? '' : ' (none)'} | ${b.sentence} | ${b.kept} | ${srcNames.map((s) => b.bySource[s] || '·').join(' | ')} |`);
+  const frappe = out.borrows.list.filter((b) => b.id !== ACROSS);
+  const across = out.borrows.list.filter((b) => b.id === ACROSS);
+  for (const b of frappe) md.push(`| **${b.id}**${b.kept ? '' : ' (none)'} | ${b.sentence} | ${b.kept} | ${srcNames.map((s) => b.bySource[s] || '·').join(' | ')} |`);
   md.push('');
-  for (const b of out.borrows.list) {
+  const section = (b) => {
     md.push(`### ${b.id}`);
     md.push('');
     md.push(`*${b.sentence}*`);
@@ -1038,7 +1139,19 @@ function main() {
       for (const e of b.evidence) md.push(`  | \`${e.id}\` | ${e.how}${e.note ? ' — ' + e.note : ''} | **${e.verdict}**${e.why ? ': ' + e.why : ''} | \`${e.evidence}\` |`);
     }
     md.push('');
-  }
+  };
+  frappe.forEach(section);
+  md.push('## Rules across records (ONT-013 step 4)');
+  md.push('');
+  md.push(`Not kinds, not Frappe's: a rule over a set of records ("a cohort holds at most twenty"). Found in the apps' **code** — a row count compared with a limit near a create, a sum compared with a total, two date ranges compared — and in a field that holds a limit; each candidate classified by meaning, as above. The same code pass adds **read-aloud** candidates where an app hands out a number itself (a sequence, a counter formatted into text, the highest plus one): ONT-015's warrant, counted under *facts*. Each detector is run on a line it must catch and a near-miss it must not before any source is read (\`ACROSS_CONTROLS\`), so a zero below is a measured zero. Never read: tests, fixtures, seeds, sandboxes, data generators, vendored code. ${out.privateVerified ? '' : 'Private counts are carried from the committed file.'}`);
+  md.push('');
+  md.push(`**The code read, in lines:** ${Object.entries(out.borrows.codeRead).map(([n, c]) => `\`${n.replace('template:', '')}\` ${c}`).join(', ')}. A template's lines are the scripts inside its components' node parameters; acme's \`src\` and \`scripts\`; tirion's \`api\`, \`pipelines\`, \`ui/src\` and \`db\`; sentinel's \`backend\`.`);
+  md.push('');
+  md.push(`| rule | a person's sentence | rows kept | ${srcNames.map((s) => '`' + s.replace('template:', '') + '`').join(' | ')} |`);
+  md.push(`|---|---|---|${srcNames.map(() => '---').join('|')}|`);
+  for (const b of across) md.push(`| **${b.id}**${b.kept ? '' : ' (none)'} | ${b.sentence} | ${b.kept} | ${srcNames.map((s) => b.bySource[s] || '·').join(' | ')} |`);
+  md.push('');
+  across.forEach(section);
   if (warnings.length) {
     md.push('## Warnings');
     md.push('');

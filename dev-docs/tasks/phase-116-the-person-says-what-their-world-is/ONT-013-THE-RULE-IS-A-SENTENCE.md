@@ -187,3 +187,37 @@ stand as written.
 - **The MCP surface budget** (R5). `rules.json` rides on `validate_world`/`write_world`; no new tool.
 - **Count the request, not the node.** The invoice sentence is three rules (series, frozen amount, frozen number),
   not one; the view must show three, each with its own held/unkept word.
+
+## 9. Built
+
+### 9.1 Step 4 — the census of across-record rules (s21, 2026-10-11, Opus 5.5)
+
+`scripts/ontology/census.js` `detectAcross()`: the first detectors that read the apps' **code**, not their schemas,
+over the four templates that are sources (the scripts inside their components' node parameters) and the three private
+corpora (acme `src` + `scripts`, tirion `api` + `pipelines` + `ui/src` + `db`, sentinel `backend`) — 265,639 lines,
+never tests, fixtures, seeds, sandboxes, data generators or vendored code. Four detectors: a row count compared with a
+limit near a create (**count**), a field that holds a limit (`capacity`, `max_<x>`, `<x>_limit`, `seats`, `quota`;
+**count**), a sum compared with a total (**sum**), two date ranges compared or a range type (**overlap**). Every
+candidate is classified by meaning (`kinds.hand.json` borrows, the private `borrows.json`), as ONT-011's are; the rows
+are in `KINDS.md` § *Rules across records*.
+
+| rule | yes | no | neighbour | yes per source |
+|---|---|---|---|---|
+| **count** — at most so many | 2 | 2 | 1 | nightbook 1, acme 1 |
+| **sum** — never more than the total | 0 | 0 | 0 | · |
+| **overlap** — no two at the same time | 0 | 0 | 0 | · |
+
+- **The two count rows are both unkept today, in two different ways.** Nightbook's keep function refuses a 201st kept
+  thing by counting the rows it was handed before it creates — the classic race (two saves at 199 both pass). Acme
+  declares the limit as a field on the parent record, and the field's own note says it is not enforced. That second
+  shape is §2.2's danger exactly: the rule is said, shown, and kept by nothing.
+- **The zeros are measured zeros.** Each detector runs first on a line it must catch and a near-miss it must not
+  (`ACROSS_CONTROLS`), and the census fails otherwise; five mutants (each code detector's regex made dead, and the
+  date/hex guard removed) each turn the census red.
+- **A task for the count atom may open** (§3.2: "earns a task only with rows"): 2 rows over 2 sources, both of the
+  per-parent shape ("at most N per person", "at most N per account"). Sum and overlap stay unopened, with zero rows.
+  Opened as ONT-016.
+- **The same pass found ONT-015's warrant** (read-aloud family, counted under *facts*): a number an app hands out
+  itself — a sequence, a counter formatted into text, the highest plus one. 1 → 3 rows over 2 sources (acme 1,
+  sentinel 2); todo-list's three hits are drag-sort positions (neighbour), tirion's are import stand-in keys
+  (neighbour). ONT-015 §6.

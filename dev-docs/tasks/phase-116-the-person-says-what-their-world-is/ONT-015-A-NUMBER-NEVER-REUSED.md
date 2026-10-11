@@ -4,7 +4,7 @@
 out at create, in a format the person gave, going up by one, never skipping if they said so, and never used twice.
 **Depends on** ONT-014 (the number is frozen after create), ONT-011 step 2 (the *read aloud* fact on a noun is the
 question that leads here), ONT-007 (a series put on a collection with records is a migration). **Feeds** ONT-013
-(the invoice sentence projects in full). **Status: 📋 — opened on Richard's sentence (`from: oral`) with a thin
+(the invoice sentence projects in full). **Status: 📋, unblocked s21 (§6.1: the census found 3 rows over 2 sources) — opened on Richard's sentence (`from: oral`) with a thin
 warrant: ONT-011 §3.3 found one read-aloud row and no invoice-style numbering in the 8 sources. R-g ruled 2026-10-10 (§5): ask, never assume. **s19 (ONT-011 step 2):** the noun's questions exist — `readAloud`, then `looksLike`, `maySkip` (R-g's words), `restarts` — and project to a `number` field, unique and set once (held) with the series said in words; this task's build flips the `series` hold from said to held.**
 
 > **Model check (Richard, 2026-10-08 rule):** the build wants **Opus 5.5**: a counter table and an allocation inside
@@ -91,12 +91,31 @@ On the schema surface, as a field option beside `unique` and `defaultValue` (`st
 | R-g | **When a person says "a number that goes up", do we assume it must never skip?** Never-skip is right for invoices in France and elsewhere and is a lock on every create; a plain sequence is fine for tickets and is what most people mean. | **Ask, never assume: "if a save fails, may the number it would have had be skipped?"** The agent asks it as one of the noun's questions (ONT-011's *read aloud*); the default when unanswered is a plain sequence, and the brief says why. |
 
 **Ruled 2026-10-10 (Richard, in chat, plain words; README §9):** R-g **ask, never assume** — the recommendation. `gapFree`
-defaults to false and the question is the noun's. The thin warrant stands; the build waits on a second census row or
-Richard's word to build it anyway (§8).
+defaults to false and the question is the noun's. The thin warrant stood until s21: ONT-013 step 4's census found the
+second and third rows (§6.1), so the build waits on nothing.
 
 ## 6. Built
 
-*(empty)*
+### 6.1 The warrant, measured (s21, 2026-10-11, Opus 5.5)
+
+ONT-013 step 4's code pass (`census.js` `detectAcross()`, ONT-013 §9.1) looks for a number an app hands out itself —
+a sequence (`nextval`, `CREATE SEQUENCE`, an identity column), a counter formatted into text (`{n:04d}`, `zfill`,
+`padStart(4, '0')`), the highest plus one — and the read-aloud borrow goes from **1 row to 3, over 2 sources**
+(acme 1, sentinel 2; `KINDS.md` § *facts*). §8's condition ("a second census row") is met: **the warrant is no longer
+thin and the build is unblocked** without a ruling. What the two new rows say about the design, in general words
+(the private rows stay outside the repo):
+
+- **Both are the mistake this task exists to prevent.** One hands out the highest number plus one from a screen,
+  outside any transaction; the other counts a ledger of issued numbers without a lock. Neither survives two creates
+  at once, and neither is the backend's job today, so neither is graded.
+- **One had to renumber its records once**, by a script that refuses a result with a gap or a duplicate and leaves
+  every record before an anchor as it was — §3.3's migration step, run by hand, and AC3's shape.
+- **One numbers only some records of a collection** (a record of another sort gets no number) **and lets staff type a
+  number by hand.** The first is not in §3.1: a series with a condition (ONT-011 step 2's `onlyWhen` shape) — recorded
+  here, not built, until a second row asks. The second is AC2's admin exception.
+- **One keys the series by a type** (one run of numbers per sort of record), which §3.1's series name already covers.
+- todo-list's "next position" (the highest plus one) is a drag-sort order, not a number that names the record:
+  classified neighbour, not counted.
 
 ## 7. Not this task
 
