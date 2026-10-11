@@ -1,11 +1,12 @@
 ---
 id: P109-S7-OLIVEDRIVE
 title: The Olive pages drive is red in three IG-006 clauses — its programs walk to where the can was before P108's R7
-status: scheduled
+status: fixed
 phase: P109
 task: ISL-037
 severity: low
 area: garden / drive (scripts/devtools/drive-cg005-olive.js, P-IG6-AC2, P-IG6-AC3, P-IG6-AC7)
+regression: scripts/devtools/drive-cg005-olive.js pages (P-IG6-AC2, -AC3, -AC7)
 found: P109 s7, 2026-10-03 (ISL-009 AC7's drive; met as a red neighbour)
 evidence: dev-docs/tasks/phase-109-the-defects-the-island-found/ISL-009-A-NODE-CAN-BE-NAMED-FOR-A-TEST-AND-SCROLLED-TO.md §8 s7
 ---
@@ -27,3 +28,11 @@ AC7 diff to the template is two data-* names on the owl row and the plot card's 
 
 **Owner:** P108 (it maintains this drive's layouts: IW-003 §8 lines 194 and 367). **Fix:** relay P-IG6-AC2/AC3's
 programs on the R7 layout, as s8 did for `drive-ig005-robots.js`. Then re-read: a product cause would remain red.
+
+## s45 (2026-10-11): relayed, green
+
+P108 has not run since 2026-10-04 and IW-010 has not started, so ISL-037 took it. Re-measured on a deploy of HEAD's
+garden: 19/3, the same three. Each request's own `referenceProgram` shows R7's change: both now begin by picking
+the can up off the grass (`mamie-note`: `pick, left` before the read; `rock-flower`: `pick` before `right, fill`).
+The drive's two programs gain exactly that. After: **22/22**. This run's note asked for the yellow row (the page
+seeds the day), so the yellow branch was the one driven; the program holds both. No product cause remained.

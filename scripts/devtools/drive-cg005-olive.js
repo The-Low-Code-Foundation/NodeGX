@@ -328,6 +328,9 @@ async function pagesPart() {
       // the row the stub (answering from the shell's written table) read.
       await openRequest('Water the flowers my note asks for', 'Mamie’s note');
       const day = await ev(`(() => { const W = Noodl.Variables.gardenWorld || {}; const n = (W.things || []).find((t) => t.kind === 'note'); return n && /^The yellow/.test(String(n.text)) ? 'yellow' : 'red'; })()`);
+      // P109-S7-OLIVEDRIVE (s45): since P108 s8's R7 the can lies on the grass — pick it up and face the well first
+      // (the request's own referenceProgram starts the same way).
+      for (const op of ['pick', 'left']) await palTap(op);
       for (const op of ['read']) await addAsk(op);
       await palTap('fill');
       const lastIf = () => ev(`(() => { const r = [...document.querySelectorAll('.bg-blocks-box .gd-prog .gd-rep')].filter((e) => e.getAttribute('data-t') === 'if'); return r.length ? r[r.length - 1].getAttribute('data-rep') : ''; })()`);
@@ -359,7 +362,8 @@ async function pagesPart() {
       // ── P-IG6-AC3: the rock and the flowers — ask 3 times, "2 of 3 said yes", the majority waters ──
       await openRequest('Water the flowers, not the rocks', 'the rock and the flowers');
       // P108 IW-003 (lane S): Echo carries an empty can now — turn to the pond below, fill, turn back, then as before.
-      for (const op of ['right', 'fill', 'left', 'fwd', 'left']) await palTap(op);
+      // P109-S7-OLIVEDRIVE (s45): and since R7 the can lies on the path ahead — pick it up first (as referenceProgram does).
+      for (const op of ['pick', 'right', 'fill', 'left', 'fwd', 'left']) await palTap(op);
       await addAsk('is-it-a');
       await tap(first('.bg-blocks-box .gd-prog .gd-blk[data-t="olive:is-it-a"] .gd-slot[data-slot="kind"]'), 'kind');
       await tap(first('.bg-blocks-box .gd-picker .gd-opt[data-opt="a flower"]'), 'a flower');
