@@ -24,3 +24,7 @@ Opening a project whose format is newer than the editor's shows two messages at 
 **Fix sketch:** the refusal names NodeGX, the project's format and the editor's, and links the NodeGX releases page;
 `projectFromDirectory` passes the refusal back with the empty result, and the launcher shows its toast only for a load
 nobody explained.
+
+**s12 (2026-10-11), a second path to the same toast.** R17's copy (`8f9137d8e`) refuses to open a 0.3.0 project when
+the `.before-0.4` copy can't be made, with its own message. Like every failed open, ProjectsPage then adds *Its
+project.json is missing or unreadable*. Fixing this bug should cover that path as well.

@@ -17,6 +17,75 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
+## 0.4.0 · 2026-10-11
+
+**NodeGX now opens the apps you make with `npm create nodegx`. This release also brings script files, new kinds of
+backend rule, and many fixes to how nodes behave.**
+
+### New
+
+- **Apps made with `npm create nodegx` open in the editor.** 0.3.0 refused them, because the npm tools save projects
+  in a newer format. Opening one keeps its project id.
+- **Functions can share code through script files.** Put `.js` files in your project's `scripts` folder. Scripts have
+  their own section in the Components panel. A script opens in its own tab. A Function picks the scripts it needs
+  in its Uses list. Code export includes the scripts.
+- **A node's properties now end with two folded sections.** *What this node does* explains each input in a sentence.
+  *Try this node* lets you set the inputs, press its signals and see what comes out.
+- **The Problems panel flags a wire to a port the node doesn't have.**
+- **Keep When Leaving** on Page keeps a page as it was when someone navigates away and comes back. Component Stack has
+  the same option, *Keep Pages When Unmounted*.
+- **Data Attributes** on every visual node, for example `data-testid`. Every visual node also has a *Scroll Into View*
+  signal.
+- **Your own CSS can place a Group.** A node now writes inline styles only for the values you set. The properties panel
+  says when a stylesheet decides a value.
+- **Array Filter** has *Is one of* and *Is not one of*, and can filter on a nested field such as `owner.id`.
+- **Model Request can use a model on your own computer,** such as one run with Ollama, through the OpenAI-compatible
+  option. In 0.3.0 that option didn't work.
+- **Code export:** Parse CSV, To CSV, Parse XML and Parse Feed now export.
+- **The backend can keep more kinds of rule.** A field can be readable by some people only. A record can be locked
+  once it stops being a draft. A field can be set once and never edited. A record can be protected from deletion.
+  Records can be numbered like invoices, so a number is never used twice. Your agent writes these rules from what you
+  tell it. The backend manager doesn't have a screen for them yet.
+- **When your agent renames a field or a collection,** the backend moves the records and the permission rules with
+  it. It makes a backup first.
+- **An existing field can be made required.**
+- **The Permissions page has an *Enforce my rules on this machine* switch,** to test your real rules locally.
+
+### Changed
+
+- **A sign-in ends after 30 days without use.** The person signs in again.
+
+### Fixed
+
+- **A cloud function could make someone the backend's admin.** It can't now. Update if your backend runs cloud
+  functions.
+- Restoring a backup now brings back every setting: sign-in, search, files, saved views and workflows.
+- `nodegx-backend migrate` refuses a PostgreSQL database that already holds records, before it moves anything.
+- HTTP Request's Authentication now sends the credential you give it.
+- A Function or node that throws an error, or a value of the wrong kind, no longer blanks the whole page.
+- One timer's error no longer stops every other timer in the app.
+- Repeater rows are no longer lost.
+- Form controls show what the person did and report it.
+- Component Stack, Router and Navigate handle addresses and the browser's back button properly.
+- JSON Stream Parser no longer freezes the app on a stray `}`.
+- Signing out clears the User.
+- Editor icon buttons have names a screen reader can read.
+- Many smaller fixes to how nodes behave.
+
+### Good to know
+
+- **A project opened in 0.4.0 can't be opened in 0.3.0 any more.** The first time you open a 0.3.0 project, NodeGX
+  copies the project folder to `<project>.before-0.4`. Then it updates the project to the new format. Your app works
+  as before. Keep the copy until you're happy with the updated project. It's the only copy 0.3.0 can still
+  open.
+- 0.3.0 refuses a project saved by 0.4.0 with two wrong messages. One names Noodl, and the other says `project.json`
+  is missing. The person needs to update to 0.4.0.
+- Opening a project rewrites `nodegx.project.json` even when nothing changed. The first open of a page your agent
+  wrote also rewrites that page's files. In a project kept in git, opening it can leave these files changed.
+- Code export is still in alpha.
+- Windows installers aren't signed, so SmartScreen will warn you. Choose More info, then Run anyway.
+- If you use the MCP server with an assistant, restart the assistant's session after updating.
+
 ## npm packages 0.1.0 · 2026-10-11
 
 **One command from npm now sets a folder up for your AI agent to build NodeGX apps in. The same release

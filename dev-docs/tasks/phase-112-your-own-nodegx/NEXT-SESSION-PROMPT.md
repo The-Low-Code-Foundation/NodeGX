@@ -1,9 +1,9 @@
 # Phase 112 — next session
 
-**Written 2026-10-11 at the end of session 11** (Opus 5.5). Session 11 opened the project the npm kit makes in an
-editor, which is what OWN-011 AC2 asks. The released editor (0.3.0) refuses it. The current editor opens it but
-writes four files on open. AC4 is met. Richard ruled two things: R15, release an editor that opens it (through `main`,
-now **OWN-013**), and R16, opening keeps the project's own id (built). Earlier handoffs are in this file's git history.
+**Written 2026-10-11 at the end of session 12** (Opus 5.5). Session 12 started OWN-013, the 0.4.0 cut, by UPG-008's
+runbook. G1 (the cut point) is measured and G2 (the changelog) is written and approved. Richard ruled R17: 0.4.0
+copies a 0.3.0 project to `<project>.before-0.4` before its format moves to 5. That is built (`8f9137d8e`) and
+unit-graded but undriven. Nothing was pushed, branched or tagged. Earlier handoffs are in this file's git history.
 
 ## The board (re-derived from the task files, 2026-10-11)
 
@@ -14,53 +14,54 @@ now **OWN-013**), and R16, opening keeps the project's own id (built). Earlier h
 | OWN-008 three strangers | 📋 | — | see its file |
 | OWN-009 Richard's own | 📋 | — | see its file |
 | OWN-010 every bug teaches the kit | 🟡 ledger + `gate <kit>` | `gate mcp`: 0 blockers, 2 known issues (FORMATSKEW, PAGEPORTS) | see its file |
-| OWN-011 one install | 🟡 published; **AC1, AC3, AC4 ✅**; **AC2 editor half ❌** (§9) | the made project through three suite adapters PASS; opened in 0.3.0 (refused) and the dev editor (4 writes) | **Opus** |
+| OWN-011 one install | 🟡 published; **AC1, AC3, AC4 ✅**; **AC2 editor half ❌** (§9) | waits on OWN-013's release | **Opus** |
 | OWN-012 the screen, from the descriptions | 📋 | — | step 1 **Opus**, 2–3 **Fable** |
-| **OWN-013 the 0.4.0 cut** | 📋 bump `88366e69f` on `cline-dev` (pushed) | G1–G10 all ⬜ | **Opus** |
+| **OWN-013 the 0.4.0 cut** | 🟡 **G1 ✅ measured, G2 ✅ written, G7 🟡** (R17 built); G3–G6, G8–G10 ⬜ | R17 unit 7/7 + mutant; editor tsc 0, eslint clean | **Opus** |
 
-**Built but undriven: 1** — P112-S11-IDREPLACE's fix (`f2505b83f`), unit-graded with a red mutant. The dev stack
-died of heap twice this session (load 20–32), so it was not seen in the editor. Commits: `f2505b83f` (the fix and the
-AC4 fixture), `c841e1ae4` (docs: five bugs, §9, R15/R16), `88366e69f` (the 0.4.0 bump), then this docs commit.
+**Built but undriven: 2.** P112-S11-IDREPLACE's fix (`f2505b83f`) and R17's copy (`8f9137d8e`). The dev stack was not
+launched this session: load 10–21, swap 12.2 of 13.3 GB, peers' jest running.
 
-## Session 11 in brief
+## Session 12 in brief
 
-- **From the registry, again:** `npm create nodegx@0.1.0` → `create_project` "Reading List" (15 files) through
-  `npx -y @nodegx/mcp@0.1.0`, spoken to by `scratchpad/probe.mjs` (a 70-line stdio client). Every open was of a copy,
-  graded by checksum against a snapshot.
-- **The installed NodeGX 0.3.0 refuses it:** P112-S11-FORMATSKEW (high, open). The kit writes format 5, and 0.3.0
-  opens ≤ 4. The refusal shows two messages and both are wrong (P112-S11-REFUSALWORDS, medium, open): it says "Noodl"
-  and links noodl.net, and a toast says *project.json is missing*.
-- **The dev editor opens it and writes four files** (through the real *Open project…* button; only the native folder
-  dialog was doubled):
-  - P112-S11-IDREPLACE (high): a new project id was saved over the file's. **Fixed (R16)**.
-  - P112-S11-PAGEPORTS (medium, `kit: mcp`): the Page's `dynamicports` cache. The control arm proves it is the whole
-    component-side cause.
-  - P112-S11-OPENWRITES (medium): `nodegx.project.json` gets rewritten on **every** open. The save baseline is hashed
-    from the importer, the save from `toJSON()`. The first open also loses `created` and stamps `nodegxVersion "1.1.0"`.
-- **AC4 ✅:** fixture `reading-list` + an agent's first page as its script. Reference, MCP adapter and Electron adapter
-  all PASS (`test:ci` 3,012 specs, the 2 floor failures by name). 🔴 **The suite does not grade port names**: a
-  `bogusPort` mutant passed. The existing `todo-list` script wires a Counter `limit` that does not exist.
-- 🔴 **I cut 0.4.0 the wrong way.** I tagged `v0.4.0` on `cline-dev` from an August memory. RELEASE-PROCESS §3 has
-  cut from `main` since v0.2.3. I asked Richard and he said redo it via `main`. The run was cancelled before any draft
-  and the tag deleted on both sides. The memory now opens with a correction, and the index line says `RELEASE@main`.
+- **G1 (OWN-013 §6.1):** `release/0.4.0` = `cline-dev` with `origin/main` merged in. The merge has 14 conflicts, and
+  every one is a file where `cline-dev` already holds `main`'s lines; only generated files differ, and `cline-dev`
+  has the newer copy. The merged tree equals `cline-dev`'s. A subagent surveyed `484d9d646..f301ee785` (981 commits,
+  251 feat/fix in shipped source; 17 cited hashes checked in HEAD). Nothing is marked *do not ship*. The release CI
+  builds the bundled MCP from source, so STALEMCPDIST doesn't reach the release.
+- **G2:** the 0.4.0 entry is at the top of CHANGELOG.md. It went through the content-authoring skill's offline checks
+  and Richard approved it. The Dropdown plain-word list (R21's runtime half, a peer's uncommitted edit) is left out.
+  The heading date says 2026-10-11 and is set to the tag day at the cut.
+- **R17 (Richard: "Make a copy"):** see OWN-013 §6.3. If the copy fails the project is not opened. That refusal also
+  shows the wrong *project.json is missing* toast (noted in P112-S11-REFUSALWORDS).
+- **OPENWRITES:** likely cause written in OWN-013 §6.3 (`metadata` with `undefined` values counts as non-empty in
+  `buildProjectV2File`); not measured.
 
 ## What to do next, in order
 
 **First, in your first message: say which model you are running on and whether the task's Model line says Richard
 should switch** (README §0.2). Do not wait for an answer.
 
-1. **OWN-013 (Opus): the 0.4.0 cut**, by UPG-008's runbook. Read `dev-docs/guidelines/RELEASE-PROCESS.md` §0/§3 and
-   `phase-100-0.3.0-the-first-upgrade/UPG-008-THE-CUT.md` before anything. G1 (the cut point) and G2 (the changelog,
-   through the content-authoring skill) come first. G7 asks whether PAGEPORTS and OPENWRITES are cheap enough to fix
-   before the cut. Each needs a rule chosen; see the bug files. Every push, PR, merge and tag is outward. R15 authorises
-   the release, but confirm each step with Richard.
-2. **Drive IDREPLACE's fix** in the editor on the next dev launch that survives (Open project… on a fresh copy keeps
-   `95de5bf2-…`; a second copy of the same folder gets a new id).
-3. **OWN-012 step 1 (Opus)** and **OWN-007 (R3)** as in s10's list; then OWN-011 §4.4 and OWN-004 §6.3 items 2–5.
+1. **Drive, when the box allows** (check `uptime` and `vm.swapusage`; one heavy job): in the dev editor, open a COPY of
+   a real 0.3.0 project (format 4). Check `<copy>.before-0.4` exists and holds the files as they were, the note names
+   it, `nodegx.project.json` says `"5"` after the open, and a second open makes no second copy. A new project from a
+   template makes no copy. In the same launch, drive IDREPLACE (a fresh copy keeps `95de5bf2-…`) and measure
+   OPENWRITES' cause (diff the baseline and the save's `buildProjectV2File` output). Fix OPENWRITES if the cause is the
+   one suspected and the fix is small; then remove its line from the changelog's *Good to know*, on both branches.
+2. **G5 + G6 on the cut tree:** a worktree (`make-worktree.sh`; delete its links into the primary's `dist` first) at
+   `cline-dev`'s tip with its own build output; `npm run ci:build:editor`, then `test:ci` and read the floor by name.
+3. **Make `release/0.4.0`** (local, through a temporary index or `git merge` in the worktree): the cut + `origin/main`
+   merged in, conflicts from the cut. Ask Richard before pushing it and opening the PR (G4). Six required checks.
+4. **G3:** `GITHUB-RELEASE-0.4.0.md` and the what's-new post, from the changelog; pushed only after Publish.
+5. G8 (install over 0.3.0, open a 0.3.0 project and a kit project), G9 (the shelf job), G10 (Richard's drives: NSP-019's
+   folds, script files, R17's copy), then §4's cut. Every push, PR, merge and tag is outward: ask each time.
+6. Then OWN-012 step 1 (Opus) and OWN-007 (R3), as in s10's list.
 
 **Human decisions / done since asking:**
-- ✅ **R15 (s11):** release an editor that opens what the kit makes. Re-ruled: **through `main`** → OWN-013.
-- ✅ **R16 (s11):** opening keeps the project's own id; only making a new project creates one. Built `f2505b83f`.
+- ✅ **R17 (s12):** make a copy before the format update. Built `8f9137d8e`.
+- ✅ **R15 (s11):** release through `main` → OWN-013. ✅ **R16 (s11):** opening keeps the project's own id.
+- ✅ **Changelog (s12):** approved as drafted.
+- Ask when it comes up: pushing `cline-dev` (2 commits ahead of `origin/cline-dev` after this session), making and
+  pushing `release/0.4.0`, the PR, the merge, the tag, Publish.
 - Still worth asking when it matters: *should a node an agent adds wear the same look as one a person drops from the
   picker?* (OWN-006 §6.3); who bumps the next npm release (s10).
 
@@ -149,6 +150,15 @@ should switch** (README §0.2). Do not wait for an answer.
     changed". Use `-mmin -25`, and run it on a folder you know changed first.
 40. **s11: release memory was stale for two months** and was linked only from a pointer file. Read
     RELEASE-PROCESS.md before any tag; the index line now carries `RELEASE@main`.
+41. **s12: a release's merge into `main` conflicts on every file the last release PR fixed**, because those fixes went
+    to `main` first and were cherry-picked to `cline-dev`. Check each conflict with "every line `main` added since
+    the merge base is in `cline-dev`'s copy"; generated files (ratchets, the cloud node library) differ only by
+    regeneration.
+42. **s12: the copy checks read hard-wrapped Markdown as broken sentences** (false *fragment* flags). Unwrap each
+    bullet onto one line before running `written.py`.
+43. **s12: prettier cannot parse `projectmodel.editor.ts`** (an old `<Type>{…}` cast at `setCloudServices`), so
+    `prettier --write` fails on it; format your own lines by hand. `LocalProjectsModel.ts` was already not
+    prettier-clean at HEAD; don't reformat it wholesale.
 
 ## To see or run things
 
