@@ -1,6 +1,6 @@
 # Phase 116 — next session
 
-**Written 2026-10-11, end of s23 (Opus 5.5).** ONT-000 ✅, ONT-002 ✅, ONT-003 ✅, ONT-007 ✅. 🟡: ONT-001 (AC4 →
+**Written 2026-10-11, end of s24 (Opus 5.5).** ONT-000 ✅, ONT-002 ✅, ONT-003 ✅, ONT-007 ✅. 🟡: ONT-001 (AC4 →
 ONT-008), ONT-004 (AC2 → ONT-008), ONT-005 (every-kind 14 of 51), ONT-006 (the view is ONT-008's), ONT-011 (step 5,
 the view hints, owed — ONT-008's suite), ONT-012 (reach review ✅ s18), ONT-014 (every AC built; closes when Richard
 reads it), **ONT-013 (step 4 ✅ s21; steps 1–3 and 5 owed)**, **ONT-015 (every AC built s22, both its defects fixed
@@ -10,9 +10,9 @@ ONT-008, ONT-009, ONT-010. R1–R10, R-a to R-j are ruled (README §9); **nothin
 ## Before anything
 
 0. **Model check.** Task 1 is Opus and blocked; tasks 2–4 are Fable. Say which you are. **An Opus session with ONT-008
-   still blocked takes task 5.**
-1. **`node scripts/bugs.js --from P116`**: 6 open after s23 (`-required`, DOTTEDFILTER, CRONLEAK, STORAGEFLAKE
-   (P104's spec), and two owned elsewhere).
+   still blocked takes task 5 (DOTTEDFILTER).**
+1. **`node scripts/bugs.js --from P116`**: 5 open after s24 (DOTTEDFILTER, CRONLEAK, STORAGEFLAKE (P104's spec), and
+   two owned elsewhere).
 2. **One heavy job on this box:** `pgrep -fl "bin/jest|vitest"`. Wait for a peer's run.
 3. **`git diff --cached --name-only`** first; commit by pathspec through a temporary index (the memory recipe), then
    `git reset -q HEAD -- <your files>` so the real index matches HEAD.
@@ -23,73 +23,77 @@ ONT-008, ONT-009, ONT-010. R1–R10, R-a to R-j are ruled (README §9); **nothin
    `tsc --noEmit -p tsconfig.tests.json`; the backend contract's `npx jest` + `tsc --noEmit -p tsconfig.json`; the
    runtime's `npx jest test/adapters` + `tsc --noEmit -p tsconfig.json`; the backend band (every `ont-`, `brg-`,
    `fed-002`, `fed-005`, `bmg-003`, `bmg-017`, both engines) + `tsc --noEmit -p tsconfig.tests.json`. **A change to
-   `QueryBuilder` reaches every query: run the whole backend `npx jest` (232 suites, slow) — s23's NULLEQ fix broke
-   `realtime-filter`'s property test, which the band does not include.**
+   `QueryBuilder` reaches every query: run the whole backend `npx jest` (232 files, slow) — DOTTEDFILTER is one.**
 
-## What s23 did (Opus 5.5)
+## What s24 did (Opus 5.5)
 
-1. **SERIESCARRY + SERIESMSG fixed** (`562e10453`, ONT-015 §6.4). A number the admin brings (create) or edits (save)
-   in the series' own look raises that period's counter above it, never back — on create inside the insert's
-   transaction, so a refused create raises nothing. A handed-out number that collides is named in the 409 (the
-   adapter appends what it filled to the refusal; `uniqueViolationToHttp` prefers it). Conformance `series` 13 → 15,
-   `ont-015-series` +2, the projection's counter-left mutant now asserts the number; mutants shown red on both engines.
-2. **NULLEQ fixed** (`ebdac4827`): `{ f: null }` is "is empty" in `QueryBuilder` (it was `= NULL`, never
-   true), and the realtime matcher (`nodegx-backend/src/realtime/filter.ts`), which had deliberately mirrored the old
-   behaviour, moved with it. Conformance `filters/null-short-form-is-empty` (both engines; the fix taken out reds it
-   and only it).
+OWN-007 re-measured first: still 📋 not started, so ONT-008 stays blocked and s24 took the Opus fallback.
 
-## What s23 measured (2026-10-11)
+1. **`P116-ONT-007-required` fixed** (ONT-007 §6.14). `setRequired(table, { field: true | false })` on the schema
+   surface (optional), both managers, the migration executor and `POST /admin/schema`. SQLite counts the empty
+   records, then rebuilds the table in one transaction (`SchemaManager._rebuildNotNull`: `PRAGMA table_info` with the
+   flag changed, rows **with their rowids**, indexes and triggers re-made from their stored SQL). PostgreSQL queues
+   `LOCK` → count → `ALTER COLUMN … SET / DROP NOT NULL`. Both refuse in one sentence (`FieldEmptyError`, `count`);
+   the route answers 409 `field-empty` on both (PostgreSQL's read off the queue error's `cause`). The executor has a
+   new dry-run refusal, `empty`. The planner makes a filled link required after the move (`notKept` is empty for the
+   mirror), migrates a change of only "is it required" as a step, and orders made-optional before a link's
+   `setWhenTargetGoes` and made-required after it.
+2. **`P116-S24-TYPEREQUIRED` found and fixed**: SQLite's `changeColumnType` dropped NOT NULL from a required field
+   (measured `notnull` 1 → 0, declaration still `required: true`) — `ADD COLUMN … NOT NULL` needs a default, so every
+   add-copy-drop rebuild loses it. Fixed with the same rebuild inside the same transaction.
 
-- Runtime `test/adapters` 17 suites **335/335**, `tsc` clean. Backend contract 9 suites **232/232**, `tsc` clean.
-- Backend band **41 suites, 670/670** on both engines, none skipped.
-- Backend tests `tsc`: one error, **P107's** `noodl-mcp/src/specPorts.ts` (`DRAWN_PORT_TYPES`), re-measured — not P116's.
-- Whole backend suite: see §"The whole backend run" below. Commits: `562e10453` (SERIESCARRY/MSG), `ebdac4827` (NULLEQ, CARDCHECKS).
+**Where the handoff was wrong or thin:** nothing it claimed was false. It sized the bug as "surface, managers,
+executor, route"; it also needed the planner (two branches), the plan guards (`admin-world.ts`) and a conformance case,
+and the PostgreSQL manager cannot refuse synchronously — its refusal has to travel through the queue.
 
-## The whole backend run
+## What s24 measured (2026-10-11, working tree over HEAD `c3fa9d3f5`)
 
-The first whole backend `npx jest` P116 has run since s17 (232 files, 249 suites; 30 minutes, beside a peer's
-`test:main` that started a minute later — load ~70). **241 passed, 7 failed.** Every red re-run alone:
-- `realtime-filter` — the NULLEQ twin (below); fixed in `ebdac4827`, red again with the old matcher arm.
-- `admin-app/ont-003-card` — **P116's own, red since s19** (the spec worded every rule "is one of"; an all-or-none
-  rule has no list). Fixed in `ebdac4827`, filed `P116-S23-CARDCHECKS`. **The band does not include `admin-app/`.**
-- `brg-005-conformance-postgres` (a 300 s `beforeAll` timeout) and `fed-004-overlap-drive` (`ECONNRESET`) — load;
-  21/21 and 7/7 alone.
-- `admin-app/storage-views` "BMG-011 Storage page › AC1" — a 30 ms `settle` lost under load (red twice, green on a
-  quiet box); filed `P116-S23-STORAGEFLAKE` (P104's spec).
-- `ac2-page-editor-drag-drive` (AC2STALL), `rel002b-fail-closed` (REL002B), `bmg-002-filters` past7 on a Sunday
-  (`P109-S41-SUNDAYWEEK`) — owned elsewhere.
+- Runtime `test/adapters` 18 suites **341/341** (335 → 341), `tsc` clean. Backend contract 9 suites **232/232**,
+  `tsc` clean. Project contract 15 suites **294/294**, `tsc` (tests) clean.
+- Conformance on PostgreSQL **102/102** (the new case included); the SQLite gate runs every case and passed.
+- `ont-007-migration` **69/69** and the new `ont-007-required-route` **8/8**, both engines.
+- Backend tests `tsc`: one error, **P107's** `noodl-mcp/src/specPorts.ts` (`DRAWN_PORT_TYPES`) — not P116's.
+- Backend band **42 suites, 686/686** on both engines, none skipped, exit 0 (41 / 670 at s23; + `ont-007-required-route`,
+  + the new `ont-007-migration` arms), 504 s beside a peer's short P107 unit run.
+- Commit: `bd7f54a64` (code and tests).
+- Mutants, each red where it should be and nowhere else: listed in ONT-007 §6.14.
 
 ## The next tasks, in order
 
-1. **ONT-008** once P112 OWN-007 has started (still 📋, re-measured s23) — it also takes ONT-015's capability cell.
+1. **ONT-008** once P112 OWN-007 has started (📋, re-measured s24) — it also takes ONT-015's capability cell.
 2. **ONT-013 steps 1–3** (Fable): the brief's two sentences, `rules.json`, the *not kept:* read-back.
 3. **ONT-016 scoping** (Fable): per-parent count; one ruling to ask (a limit lowered below today's count).
 4. Small, Fable: ONT-011 step 3's `one-of` leftover; refuse "goes with its keeper" + "never deleted" at authoring.
-5. **Opus, ONT-008 blocked:** `P116-ONT-007-required` (no schema route makes a field required once records exist,
-   except by filling every record with one value — a `setRequired` on the surface, both managers, the executor and
-   the route, refused while a record is empty). Then DOTTEDFILTER (a filter on a linked record's field returns
-   nothing on the built-in backend).
+5. **Opus, ONT-008 blocked:** `P116-S17-DOTTEDFILTER` — a filter on a linked record's field (`salary.amount > 90000`)
+   returns nothing on the built-in backend, even for the admin, with no error. A `QueryBuilder` change: run the whole
+   backend suite (rule 5).
+
+**Small, unowned, worth a line:** the admin app's Schema view has no switch for "required" on an existing field — the
+route takes it now (`setRequired`), so the view can call it; that is ONT-008's manager or BMG's, not a defect.
 
 ## For Richard (plain words; the recommendation first)
 
-- **Nothing blocking.** The two small faults s22 found in invoice numbers are fixed: if an admin types a number by
-  hand in the same look (say T-0003), the backend now carries on from T-0004 instead of later handing out T-0003 and
-  failing a person's save — and if two numbers ever do collide, the message names the number instead of "undefined".
-- **Also fixed:** asking for "the people whose date of birth is empty" the short way returned nobody; it now returns
-  the same people as the long way, on both databases and in live updates.
+- **Nothing blocking.** One more fix behind the scenes: when the world's rule "every member belongs to one account"
+  comes back after a time when members could be on several, the backend now keeps that rule — before, it moved
+  everyone's account across correctly but then let new members be made without one. Changing only whether something
+  is required is now also something the backend can do on its own, and it says plainly how many records are missing
+  the value when it cannot ("2 records have none").
+- **Also fixed:** changing the type of a required field (say from a number to text) on the built-in database quietly
+  stopped it being required. It stays required now.
 - Still open from s17/s20 (not blocking): who may change a field; search refused for a caller with a hidden field;
   a secret detail is unread even by the person it is about.
 
-## Traps s23 hit
+## Traps s24 hit
 
-- **A `python` edit script that asserts twice writes nothing when the FIRST assert fails** — s23 read the traceback
-  as the second edit failing and went on; the save half of SERIESCARRY was never written, and a mutant "reddened" a
-  case that was red anyway. After a failed scripted edit, `grep` for each edit before running anything.
-- **PostgreSQL errors are translated in `_run`, after an adapter method's own catch** — a catch that wants the shared
-  wording translates first; `translatePgError` is idempotent now (a second translation used to say `?.?`).
-- **node:sqlite's errors are from another realm under jest** — `instanceof Error` is false; test `message` by shape.
-- **A twin that mirrors a defect on purpose** (the realtime matcher's "`= NULL` is never true") moves with the fix;
-  the band does not run its property test.
+- **SQLite cannot `ADD COLUMN … NOT NULL` without a default** — every add-copy-drop rebuild of a column drops it
+  silently. A NOT NULL change is a whole-table rebuild, and it must copy `rowid` (a search index's external content
+  joins on it) and re-make the table's indexes and triggers. `_rebuildNotNull` does all three; reuse it.
+- **A manager method on PostgreSQL returns before its SQL runs.** A refusal that needs a count happens inside the
+  queued transaction and reaches the route at `barrier()` as `SchemaQueueError` with the real error in `cause`.
+- **A conformance case reads either engine's schema refusal** with "throw synchronously, else
+  `ctx.refused(() => ctx.count(c))`" — the next data-plane call is the barrier.
+- **A test fixture can be refused by the world's own validator** (a `number` property may not carry `freeWords`):
+  read a red test's message before reading it as the code's.
 
 ## Owned elsewhere
 
@@ -107,4 +111,4 @@ The private verdicts for s21's new candidates are in that folder's `borrows.json
 
 ## Memory
 
-`ontology-is-the-spec.md` (an s23 paragraph). The index is AT its 17,510-unit budget: tighten, never grow.
+`ontology-is-the-spec.md` (an s24 paragraph). The index is AT its 17,510-unit budget: tighten, never grow.

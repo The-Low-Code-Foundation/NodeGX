@@ -74,9 +74,9 @@ derived; with claims, the migration is graded on data. NSP-005's REACH is the wo
   (`refuse: rows`), the old link's values and every account's row are counted as losses. Nothing is carried by a
   guess. A rename that keeps the records needs a key the format does not have yet (`was`), and a `renameTable` the
   schema surface does not have (it has `renameColumn` only) — AC3, owed.
-- **A field that changes in place is refused** (type, target, or whether it is required): the route has
+- **A field that changes in place is refused** (type, target, ~~or whether it is required~~ — *s24: whether it is required is a `setRequired` step now, §6.14*): the route has
   `changeColumnType` but nothing that makes a field required or optional, and a target change is a data question.
-- **A required link added over records is added without `required`, and the plan says so** (`notKept`). The route's
+- **A required link added over records is added without `required`, and the plan says so** (`notKept`). *s24 (§6.14): and then made required by `setRequired` after the move; `notKept` is empty.* The route's
   only way to add a required field over rows is `fillExisting`, one value for all of them — a placeholder link nobody
   said. The mirror fills the link record by record; the claim `person/account-is-required` is then MEASURED to fail
   on the migrated table (see §6.3).
@@ -385,3 +385,36 @@ engines, exactly as filed (PostgreSQL took `My_<name>`'s links, SQLite `My<name>
   exit 0**; `noodl-runtime` `test/adapters` **328 / 328**; runtime `tsc` clean. BRG-005's conformance file took
   82 s against 19 s earlier the same hour, with ONT-005's doubling beside it: the box, not the retry (the race
   spec's own retry costs 1.6 s).
+
+### 6.14 s24, 2026-10-11 — a field made required over records (Opus 5.5)
+
+Bug `P116-ONT-007-required`, fixed: the measurement in §6.3 ("`person/account-is-required` fails at its rule step on
+the migrated table") is now the opposite, and kept as a mutant.
+
+| Piece | Where | What it does |
+|---|---|---|
+| `setRequired` | `IStorageSchema.setRequired?` (optional); `SchemaManager`, `PgSchemaManager`; `applyRequired` + `FieldEmptyError` in `schemaCommon.ts` | `{ field: true \| false }`. Refused in the same words on both engines: a record holding nothing (`FIELD_EMPTY`, with `count`: *"Cannot make "account" required on "Person": 2 records have none. Give each of them one first, or keep it optional."*), a list of links, a system field, an unknown field, a link that stays without one when its record goes. SQLite counts first, then rebuilds the table in one transaction (`_rebuildNotNull`: `PRAGMA table_info` with the flag changed, rows **with their rowids**, indexes and triggers re-made from their SQL). PostgreSQL: the model at once; `LOCK` → count → `ALTER COLUMN … SET / DROP NOT NULL` → declaration, queued; the refusal at the barrier. Returns `false` when nothing changed. |
+| The route action | `POST /admin/schema` `{ action: 'setRequired', table, columns }` | 501 without the member; 400 on a body it cannot read or a field it refuses (and `_User`'s own fields); 404 on no collection; **409** `{ reason: 'field-empty', field, count }` on both engines (PostgreSQL's read off the queue error's `cause` in `awaitSchemaQueue`); audited; answers `changed`. |
+| The executor | `runMigration` `applySchema`; `dryRunMigration` | A `setRequired` body; a new refusal **`empty`** (records with no value at all — what NOT NULL refuses, not an empty text). `migrationPlanProblems` checks the body's shape. |
+| The planner | `planBetween` | A required link a move fills: `addColumn` (optional) → the move → `setRequired` (rules phase); `notKept` stays in the type for the next rule that cannot be kept, empty today. A field whose only change is whether it is required: a step, with an `empty` check when made required. **Order:** made optional before a link's `setWhenTargetGoes`, made required after it — the store refuses `stays-unlinked` on a required link and a required link that stays unlinked. |
+| Plan guards | `admin-world.ts` | A `setRequired` on a system field or `_User`'s own fields refused before the backup, as a drop or a rename is. |
+
+**Graded** (2026-10-11, working tree over HEAD `c3fa9d3f5`, one job at a time):
+
+- Runtime `test/adapters` **341 / 341** (335 → 341: `SchemaManager.setRequired` ×5, the type-change regression ×1),
+  `tsc` clean. Backend contract **232 / 232**, `tsc` clean. Project contract **294 / 294** (`migrate.test.ts` 57),
+  `tsc` (tests) clean.
+- Conformance `schema/set-required-over-records`: SQLite (the gate runs every case) and PostgreSQL **102 / 102**.
+- `ont-007-migration` **69 / 69** on both engines; `ont-007-required-route` **8 / 8** on both engines.
+- Mutants, each red where it should be and nowhere else: the SQLite rebuild without re-made indexes/triggers (the
+  "keeps what is built" case), without the rowid copy (the rows-and-rowids case), without the count (the refusal case);
+  PostgreSQL without the count (conformance 101 / 102); the route without the barrier translation (the PostgreSQL
+  409 only); the mirror without its `setRequired` step (`ran: true`, and the grade names `person/account-is-required`);
+  the in-place plan without its `empty` check (the store refuses at step 1, after the backup, in words).
+- Backend band **42 suites, 686 / 686**, both engines, none skipped; backend tests `tsc` red only on P107's `specPorts.ts`.
+  Commit `bd7f54a64`.
+
+**Found:** `P116-S24-TYPEREQUIRED` — SQLite's `changeColumnType` added the converted column without NOT NULL
+(`ADD COLUMN … NOT NULL` needs a default), so a required field took records without it after a type change while
+its declaration still said required (measured: `notnull` 1 → 0). Fixed in the same transaction by the same rebuild.
+
