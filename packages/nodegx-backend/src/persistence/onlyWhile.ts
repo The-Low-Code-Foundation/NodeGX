@@ -250,13 +250,41 @@ export function heldWhile(
   fields?: string[],
   values?: Record<string, unknown>
 ): Held {
-  const ow = acl?.onlyWhile;
-  if (!acl || !ow || ow.collection !== collection) return { acl };
+  const ow = acl?.onlyWhile?.[collection];
+  if (!acl || !ow) return { acl };
   const clauses = op === 'delete' ? deleteClauses(collection, ow.delete) : updateClauses(collection, ow.update, fields, values, unseenIn(acl, collection));
   if (clauses.length === 0) return { acl };
   const where = clauses.length === 1 ? clauses[0].where : { $and: clauses.map((c) => c.where) };
   const rule: OnlyWhileRule = op === 'delete' && ow.delete === 'never' ? { says: clauses[0].says } : (ow[op] as OnlyWhileRule);
   return { acl: narrowed(acl, collection, where), rule, clauses };
+}
+
+/**
+ * Bug P116-S18-CASCADEHOLD (R-i: *the delete stops*) — the rows a delete reaches through its links,
+ * each judged by its own collection's rule before anything is deleted: a row that goes with it by
+ * that collection's `delete`, a link it would empty by `update` of that one field to nothing. A
+ * refusal is the clause's own words ("A sealed envelope is never deleted") and nothing goes.
+ *
+ * Only the condition is asked, as the store's own key: the cascade itself runs as that key (R10),
+ * so the caller's row ACL on a reached row is not the question — the row's rule is. `count` is a
+ * master count. The caller's own record is judged by the delete itself, after this.
+ */
+export async function heldCascade(
+  count: (collection: string, where: Record<string, unknown>) => Promise<number>,
+  acl: StorageAclOption | undefined,
+  reached: { gone: Array<{ collection: string; objectId: string }>; unlinked: Array<{ collection: string; objectId: string; field: string }> }
+): Promise<void> {
+  if (!acl?.onlyWhile) return;
+  const judge = async (collection: string, objectId: string, op: 'update' | 'delete', held: Held): Promise<void> => {
+    if (!held.rule) return;
+    const has = async (where: Record<string, unknown>) => (await count(collection, { $and: [{ objectId }, where] })) > 0;
+    for (const clause of held.clauses ?? []) {
+      if (await has(clause.where)) continue;
+      throw new NotWhileItIs(collection, objectId, op, held.rule, clause.explain ? await clause.explain(has) : clause.says);
+    }
+  };
+  for (const g of reached.gone) await judge(g.collection, g.objectId, 'delete', heldWhile(g.collection, acl, 'delete'));
+  for (const u of reached.unlinked) await judge(u.collection, u.objectId, 'update', heldWhile(u.collection, acl, 'update', [u.field], { [u.field]: null }));
 }
 
 /**

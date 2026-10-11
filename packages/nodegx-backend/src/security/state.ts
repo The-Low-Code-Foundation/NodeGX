@@ -577,8 +577,16 @@ export class SecurityState {
     let acl = base && narrow ? { ...base, only: narrow } : base;
     // P116 ONT-012 (R-b): "only while it is a draft" binds the same callers the row ACL binds, and
     // rides beside it for the facade to compile into the one write it holds.
-    const onlyWhile = acl && access === 'write' && collection ? onlyWhileFor(this.config, collection, principal) : undefined;
-    if (acl && onlyWhile && collection) acl = { ...acl, onlyWhile: { collection, ...onlyWhile } };
+    // Every collection's rule, not only this one's: a delete reaches others through its links, and each
+    // row it reaches is judged by its own rule before anything goes (bug P116-S18-CASCADEHOLD, R-i).
+    if (acl && access === 'write' && collection) {
+      const onlyWhile: NonNullable<AclOption['onlyWhile']> = {};
+      for (const name of Object.keys(this.config.collections)) {
+        const rule = onlyWhileFor(this.config, name, principal);
+        if (rule) onlyWhile[name] = rule;
+      }
+      if (Object.keys(onlyWhile).length) acl = { ...acl, onlyWhile };
+    }
     // P116 ONT-012 (R-a): the fields this caller may not read, for every collection, on read and
     // write alike (a write answers with the record). The same callers the row ACL binds.
     if (acl) {

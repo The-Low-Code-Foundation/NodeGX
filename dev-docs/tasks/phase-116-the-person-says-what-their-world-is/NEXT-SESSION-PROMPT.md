@@ -3,14 +3,14 @@
 **Written 2026-10-11, end of s20 (Opus 5.5).** ONT-000 ✅, ONT-002 ✅, ONT-003 ✅, ONT-007 ✅. 🟡: ONT-001 (AC4 →
 ONT-008), ONT-004 (AC2 → ONT-008), ONT-005 (every-kind 14 of 51), ONT-006 (the view is ONT-008's), **ONT-011 (steps
 1, 2, 4 ✅, AC1 and AC3 ✅; step 5, the view hints, owed — ONT-008's suite)**, ONT-012 (reach review ✅ s18),
-**ONT-014 (AC3 ✅ s20; only the cascade owed, a ruling first)**. 📋: ONT-013, ONT-015, ONT-008, ONT-009, ONT-010.
-R1–R10, R-a to R-h are ruled (README §9). **Two rulings are still waiting on Richard** (below, "For Richard").
+**ONT-014 (every AC built s20 — AC3's schema half, the cascade; closes when Richard reads it)**. 📋: ONT-013,
+ONT-015, ONT-008, ONT-009, ONT-010. R1–R10, R-a to R-j are ruled (README §9); **nothing is waiting on Richard**.
 
 ## Before anything
 
-0. **Model check.** Tasks 1–3 below are Opus builds; 4 is a small Fable vocabulary step. Say which you are.
-1. **`node scripts/bugs.js --from P116`**: 7 open (**CASCADEHOLD** high; NULLEQ, DOTTEDFILTER, CRONLEAK, -required,
-   and two owned elsewhere). `P116-S20-STALEMSG` is filed fixed.
+0. **Model check.** Tasks 1–2 below are Opus builds; 3–4 are small Fable vocabulary steps. Say which you are.
+1. **`node scripts/bugs.js --from P116`**: 6 open (NULLEQ, DOTTEDFILTER, CRONLEAK, -required, and two owned
+   elsewhere). `P116-S18-CASCADEHOLD` and `P116-S20-STALEMSG` are filed fixed.
 2. **One heavy job on this box:** `pgrep -fl "bin/jest|vitest"`. Wait for a peer's run.
 3. **`git diff --cached --name-only`** first; commit by pathspec through a temporary index (the memory recipe), then
    `git reset -q -- <your files>` so the real index matches HEAD.
@@ -37,6 +37,11 @@ R1–R10, R-a to R-h are ruled (README §9). **Two rulings are still waiting on 
    and the claim specs' helper routes a fetch with an ACL through `AdapterFacade.rawFetch`. Mutant `dropFieldRule`.
    **AC3:** Nightbook's `Profile` (`codeV`, `answerV`, `rescueV`) asked and projected (`project.test.ts`).
 3. **Found red at HEAD and fixed:** the backend contract's `migration.test.ts` since s17 (`P116-S20-STALEMSG`).
+4. **R-i and R-j ruled** (asked in plain words): a delete that would take a "never deleted" record stops; "never
+   edited" does not lock who can read it. **The cascade built** (ONT-014 §6.7, bug CASCADEHOLD fixed):
+   `StorageAclOption.onlyWhile` is per collection (`aclFor` fills every rule; `heldWhile` reads `[collection]`),
+   `DeleteContext.held(plan)` before anything goes, the facade's `heldCascade` judges each reached row by its own rule
+   (condition only, as the store's key) — and only after the caller may delete their own record (no oracle).
 
 ## What s20 measured (2026-10-11)
 
@@ -46,6 +51,9 @@ R1–R10, R-a to R-h are ruled (README §9). **Two rulings are still waiting on 
   ont-006-verbs, ont-002-through, ont-014-reach-review, ont-014-old-and-new, ont-012-only-while, ont-012-field-reads,
   security-model) on SQLite and PostgreSQL: **13 suites, 347/347, exit 0**; backend `tsc` clean for `src` and tests
   (exit 0, measured without `timeout`).
+- The cascade: `ont-014-reach-review` 5a/5b/5c on both engines (28/28), the band rerun with
+  `ont-003-target-goes`: **14 suites, 371/371** (ont-014-old-and-new's mutant spec fixed for the new ACL shape and
+  rerun alone, 67/67); backend contract 232/232; tests `tsc` exit 0.
 - Each new spec was shown red with its fix disabled (the route's schema check; the route's field merge) or carries a
   mutant (`onlyWhileSchemaProblems` spied to `[]`; `dropFieldRule`).
 - ONT-005 every-kind: **51 mutants, 14 survive** (0 unanswered, 6 unkept, 8 unclaimed) on both engines —
@@ -53,24 +61,18 @@ R1–R10, R-a to R-h are ruled (README §9). **Two rulings are still waiting on 
 
 ## The next tasks, in order
 
-1. **The cascade, `P116-S18-CASCADEHOLD`** (Opus, after the ruling): `StorageAclOption.onlyWhile` per collection (as
-   `hidden` and `reach` are), `aclFor` fills every collection that has one, `heldWhile` indexes by collection,
-   `DeleteContext` gains a `held` hook that `deleteKeepingLinks` asks for every gone and unlinked row BEFORE anything
-   is deleted. The probe's cases 5a/5b (`ont-014-reach-review.test.ts`) are the regression; flip them from `it.failing`.
-2. **ONT-015 or ONT-013** (Opus build), both on ONT-014's seam. ONT-015's `series` hold replaces s19's said one (the
+1. **ONT-015 or ONT-013** (Opus build), both on ONT-014's seam. ONT-015's `series` hold replaces s19's said one (the
    claim `session/number-never-used-again` is measured not held today). Read the task file's ACs first.
-3. **ONT-008** once P112 OWN-007 has started (still 📋); its step 5 reads `calledBy`, `onlyWhen` and now `fields`.
-4. **ONT-011 step 3's leftover** (Fable, small): the `one-of` "a detail that matters only for some values" question
+2. **ONT-008** once P112 OWN-007 has started (still 📋); its step 5 reads `calledBy`, `onlyWhen` and now `fields`.
+3. **ONT-011 step 3's leftover** (Fable, small): the `one-of` "a detail that matters only for some values" question
    has no census row and was not asked; if a row appears, it is `onlyWhen` with `is` on a choice.
+4. **Refuse the contradiction at authoring** (Fable, small): a world that says a link "goes with" its keeper
+   and the record "is never deleted" has answered one question twice (ONT-014 §6.7, not built).
 5. If blocked: NULLEQ (one line in `QueryBuilder`, both-engine spec), then `-required`.
 
 ## For Richard (plain words; the recommendation first)
 
-- **When someone deletes a keeper, and the keeper's envelope "is never deleted" — does the delete stop, in the
-  envelope's words, or does the envelope go with the keeper?** Recommendation: it stops; only the admin (or a
-  function) can delete the keeper then. The same for a frozen link. (CASCADEHOLD; measured: today the envelope goes.)
-- **"A sealed envelope is never edited" — may its owner still change who can read it (its ACL)?** Today they can.
-  Recommendation: no — `frozen: "*"` freezes the ACL too.
+- **Ruled s20:** R-i (the delete stops — built) and R-j (sharing stays changeable — no change). README §9.
 - **New, not blocking:** a detail said secret is now read by nobody but the admin and functions — not even the
   person it is about (their own email on their profile page). Ask only if an app needs "the person themselves may
   read it"; it would be a follow-up question ("who may read it?") answered with a path the world can say.

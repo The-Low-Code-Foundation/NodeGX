@@ -51,7 +51,7 @@ export type WireQueryResult = StorageQueryResult;
 export type ImportColumn = StorageImportColumn;
 
 import { reachOf, refuseHiddenNamed, stripHidden, type NamedFields } from './fieldRules';
-import { heldWhile, whyRefused, type Held } from './onlyWhile';
+import { heldCascade, heldWhile, whyRefused, type Held } from './onlyWhile';
 
 // QueryBuilder is the adapter's own SQL/serialization helper — reused here so
 // BAK-007 import writes serialize values EXACTLY as create()/save() do (JSON
@@ -364,7 +364,15 @@ export class AdapterFacade implements IStorageFacade {
         count: (c, where) => this.call('count', { collection: c, where }),
         save: (c, id, data) => this.call('save', { collection: c, objectId: id, data }),
         delete: (c, id, a) => this.call('delete', { collection: c, objectId: id, acl: a }),
-        unpair: (c, id, field, relatedId) => this.call('removeRelation', { collection: c, objectId: id, key: field, targetObjectId: relatedId })
+        unpair: (c, id, field, relatedId) => this.call('removeRelation', { collection: c, objectId: id, key: field, targetObjectId: relatedId }),
+        // Bug P116-S18-CASCADEHOLD (R-i): the rows the delete reaches, by their own rules, before anything
+        // goes — and only once the caller may delete their own record: a stranger's delete is refused by the
+        // delete itself, never by a 409 that tells them what links to it.
+        held: async (plan) => {
+          if (!acl?.onlyWhile) return;
+          if ((await this.call<number>('count', { collection, where: { objectId }, acl })) === 0) return;
+          await heldCascade((c, where) => this.call('count', { collection: c, where }), acl, { gone: plan.gone.slice(1), unlinked: plan.unlinked });
+        }
       },
       collection,
       objectId,

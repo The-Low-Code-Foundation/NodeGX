@@ -527,8 +527,8 @@ for (const engine of engines) {
     it('MUTANT — heldWhile drops the moves: issued → draft goes through, and the "never goes back" case catches it', async () => {
       const real = onlyWhile.heldWhile;
       const spy = jest.spyOn(onlyWhile, 'heldWhile').mockImplementation((c, a, op, fields, values) => {
-        const ow = a?.onlyWhile;
-        const stripped = ow?.update ? { ...a!, onlyWhile: { ...ow, update: { ...ow.update, moves: undefined } } } : a;
+        const ow = a?.onlyWhile?.[c]; // per collection since s20 (CASCADEHOLD)
+        const stripped = ow?.update ? { ...a!, onlyWhile: { ...a!.onlyWhile, [c]: { ...ow, update: { ...ow.update, moves: undefined } } } } : a;
         return real(c, stripped, op, fields, values);
       });
       const id = await assignment('issued');

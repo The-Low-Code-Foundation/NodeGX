@@ -124,6 +124,13 @@ export interface DeleteContext {
   delete(collection: string, objectId: string, acl?: StorageAclOption): Promise<void>;
   /** As the master key: takes one pair out of a Relation. */
   unpair(collection: string, objectId: string, field: string, relatedId: string): Promise<void>;
+  /**
+   * Bug P116-S18-CASCADEHOLD (R-i): asked once the whole delete is planned and before anything is
+   * deleted — throws to refuse it, having changed nothing, when a row it reaches says it is never
+   * deleted or a link it would empty is frozen. The backend's facade answers it for a caller its
+   * rules bind; absent (a conformance context, the master key), nothing is judged.
+   */
+  held?(plan: DeletePlan): Promise<void>;
 }
 
 /** One rule a collection's link says about the collection it points at. */
@@ -275,6 +282,8 @@ export async function planDelete(ctx: DeleteContext, collection: string, objectI
 export async function deleteKeepingLinks(ctx: DeleteContext, collection: string, objectId: string, acl?: StorageAclOption): Promise<DeletePlan | null> {
   const plan = await planDelete(ctx, collection, objectId);
   if (plan && plan.blocked.length) throw new StillLinked(collection, objectId, plan.blocked);
+  // The rows it reaches, each by its own rule, before anything goes (R-i: the delete stops).
+  if (plan && ctx.held) await ctx.held(plan);
   // The caller's own record first, under their ACL: a refusal here has touched nothing else.
   await ctx.delete(collection, objectId, acl);
   if (!plan) return null;

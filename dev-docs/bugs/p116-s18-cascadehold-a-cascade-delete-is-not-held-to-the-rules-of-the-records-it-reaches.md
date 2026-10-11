@@ -1,12 +1,12 @@
 ---
 id: P116-S18-CASCADEHOLD
 title: A bound caller's delete cascades (`goes-too`, `stays-unlinked`) into records whose own `onlyWhile` rule says "never deleted" or "frozen", and the rule is not asked
-status: open
+status: fixed
 severity: high
 area: backend / the delete cascade (`@noodl/backend-contract` `targetGoes.ts` `deleteKeepingLinks`: the cascaded `ctx.delete` and `ctx.save` run with no ACL; `nodegx-backend/src/persistence/AdapterFacade.ts` `deleteHeld` wires them to the raw adapter calls, past `heldWhile`) and the ACL option (`StorageAclOption.onlyWhile` carries ONE collection's rule, the one the route named, so the facade cannot hold a cascaded write even if it tried)
 found: P116 ONT-014 s18 (the Fable reach review), 2026-10-11
 evidence: packages/nodegx-backend/tests/ont-014-reach-review.test.ts cases 5a and 5b (`it.failing`, both engines)
-regression: packages/nodegx-backend/tests/ont-014-reach-review.test.ts "5a. [P116-S18-CASCADEHOLD] a `goes-too` link into a never-deleted record"
+regression: packages/nodegx-backend/tests/ont-014-reach-review.test.ts "5a. [P116-S18-CASCADEHOLD, R-i]", "5b. …" and the guard "5c. …" (both engines)
 ---
 
 `Envelope` says `delete: "never"` ("a sealed envelope is never deleted"). `Envelope.owner` is a link to `Keeper`
@@ -43,3 +43,16 @@ stops rather than emptying a field the person may not change.
 
 Not a fix for ONT-014's own doors: every direct door (PUT, upsert, BYOB, batch, increment, relation PUT, DELETE, MCP)
 is held. This is the one indirect door, and it is the schema's own.
+
+**Ruled 2026-10-11 (s20, R-i): the delete stops.** **Fixed s20 (Opus 5.5):** `StorageAclOption.onlyWhile` is per
+collection (`Record<collection, { update?, delete? }>`), `aclFor` fills every collection that has a rule for a bound
+writer, `heldWhile` reads `acl.onlyWhile[collection]`, and `DeleteContext` has a `held(plan)` hook that
+`deleteKeepingLinks` asks after planning and before anything is deleted. The facade answers it with
+`heldCascade` (`persistence/onlyWhile.ts`): each row that goes is judged by its collection's `delete`, each link it
+would empty by `update` of that field to nothing — the condition only, as the store's key (the cascade runs as that
+key, R10) — and a refusal is a 409 in that clause's words naming the reached collection, with nothing deleted. The
+hook asks only once the caller may delete their own record (5c: a stranger gets the delete's own 404, never a 409
+that says what links to it). The admin and functions are not bound (5a's control). Each of 5a/5b red with the hook
+disabled, 5c red with the own-record check removed; the claims' `writeAcl` carries every reached collection's rule.
+Not built: refusing the contradiction at authoring (a world that says "goes with its keeper" and "never deleted").
+

@@ -69,10 +69,13 @@ export interface StorageAclOption {
    * P116 ONT-012 (R-b) — *"a bill changes only while it is a draft"*: a condition on the record's
    * own values as they are BEFORE the write, from `security.json` `collections.<c>.onlyWhile`.
    * Read by the backend's facade, never by an adapter: the facade ANDs `where` into `only` for the
-   * one write it binds, so the check and the write are one statement on every engine. Scoped to its
-   * collection like `only`.
+   * one write it binds, so the check and the write are one statement on every engine.
+   *
+   * Per collection (bug P116-S18-CASCADEHOLD, R-i): every collection that has a rule, not only the
+   * one written, because a delete reaches others through its links (`goes-too`, `stays-unlinked`)
+   * and each row it reaches is judged by its own collection's rule before anything is deleted.
    */
-  onlyWhile?: { collection: string; update?: OnlyWhileRule; delete?: OnlyWhileRule | 'never' };
+  onlyWhile?: Record<string, { update?: OnlyWhileRule; delete?: OnlyWhileRule | 'never' }>;
   /**
    * P116 ONT-012 (R-a) — the fields this caller may not read, per collection (every collection
    * with a field rule, not only the one being read: an `include` and a `$path` hop reach others).

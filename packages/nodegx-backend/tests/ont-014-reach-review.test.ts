@@ -15,13 +15,13 @@
  *  6. A `$path` whose `from` or hop is the queried collection, narrowed for the caller (INCLUDECLP's
  *     "not covered").
  *  7. A dotted filter / accessor through a link, on a hidden or closed target field.
- *  8. Measured, not asserted: the ACL of a never-edited record (a ruling for Richard).
+ *  8. The ACL of a never-edited record: ruled s20 (R-j) — "never edited" does not lock who can read it.
  *  9. The route: a plan whose `rules` step would replace a hand-written rule is said in the dry run and
  *     refused on a run until the loss is accepted.
  *
  * Measured red first on both engines, 2026-10-11 (every case but 7 and 8). Fixed in this session: 1, 2, 3
  * (`persistence/onlyWhile.ts`), 6 (`persistence/fieldRules.ts`), 4/9 (`server/admin-world.ts`). Case 5 is
- * bug `P116-S18-CASCADEHOLD`, `it.failing` until it is built.
+ * bug `P116-S18-CASCADEHOLD`, `it.failing` until s20 built it (R-i: the delete stops): 5a, 5b and the guard 5c.
  */
 import { execFileSync } from 'child_process';
 import * as fs from 'fs';
@@ -308,20 +308,52 @@ for (const engine of engines) {
 
     // ---------------------------------------------------------- 5. the cascade
 
-    it.failing('5a. [P116-S18-CASCADEHOLD] a `goes-too` link into a never-deleted record: the learner’s delete of the keeper must not take the envelope', async () => {
+    const keeperGoes = (who: string, keeper: string) => req<{ error?: string; reason?: string; collection?: string }>('DELETE', `/classes/Keeper/${keeper}`, undefined, who === 'admin' ? admin : as(who));
+
+    it('5a. [P116-S18-CASCADEHOLD, R-i] a `goes-too` link into a never-deleted record: the learner’s delete of the keeper stops, in the envelope’s words, and nothing goes', async () => {
       const keeper = await make('Keeper', { name: 'K1' });
       const env = await make('Envelope', { to: 'Ann', owner: ptr('Keeper', keeper) });
-      const r = await req<{ error?: string }>('DELETE', `/classes/Keeper/${keeper}`, undefined, as('ann'));
-      const after = await req<Row>('GET', `/classes/Envelope/${env}`);
-      expect({ status: r.status, error: r.json?.error, envelope: after.status }).toMatchObject({ envelope: 200 });
+      const r = await keeperGoes('ann', keeper);
+      expect({ status: r.status, reason: r.json?.reason, collection: r.json?.collection, error: r.json?.error }).toEqual({
+        status: 409,
+        reason: 'not-while',
+        collection: 'Envelope',
+        error: 'This "Envelope" record is never deleted. Nothing was changed.'
+      });
+      expect((await req('GET', `/classes/Envelope/${env}`)).status).toBe(200);
+      expect((await req('GET', `/classes/Keeper/${keeper}`)).status).toBe(200);
+      // The admin is not bound: the keeper goes, and the envelope with it, as its link says.
+      expect((await keeperGoes('admin', keeper)).status).toBe(200);
+      expect((await req('GET', `/classes/Envelope/${env}`)).status).toBe(404);
     });
 
-    it.failing('5b. [P116-S18-CASCADEHOLD] a `stays-unlinked` link that is frozen on the issued invoice: the learner’s delete of the keeper must not empty it', async () => {
+    it('5b. [P116-S18-CASCADEHOLD, R-i] a `stays-unlinked` link that is frozen on the issued invoice: the delete stops in the freeze’s words; on a draft the link is emptied as before', async () => {
       const keeper = await make('Keeper', { name: 'K2' });
       const inv = await make('Invoice', { status: 'issued', amount: 10, customer: ptr('Keeper', keeper) });
-      const r = await req<{ error?: string }>('DELETE', `/classes/Keeper/${keeper}`, undefined, as('ann'));
-      const after = await held('Invoice', inv);
-      expect({ status: r.status, error: r.json?.error, customer: after.customer ?? null }).toMatchObject({ customer: expect.objectContaining({ objectId: keeper }) });
+      const r = await keeperGoes('ann', keeper);
+      expect({ status: r.status, collection: r.json?.collection, error: r.json?.error }).toEqual({
+        status: 409,
+        collection: 'Invoice',
+        error: '"customer" on this "Invoice" record does not change unless status is "draft". Nothing was changed.'
+      });
+      expect((await held('Invoice', inv)).customer).toMatchObject({ objectId: keeper });
+      expect((await req('GET', `/classes/Keeper/${keeper}`)).status).toBe(200);
+      // The control: the freeze lets go of a draft, so a draft's keeper goes and its link is emptied.
+      const loose = await make('Keeper', { name: 'K2b' });
+      const draft = await make('Invoice', { status: 'draft', amount: 10, customer: ptr('Keeper', loose) });
+      expect((await keeperGoes('ann', loose)).status).toBe(200);
+      expect((await held('Invoice', draft)).customer ?? null).toBeNull();
+    });
+
+    it('5c. [P116-S18-CASCADEHOLD] a caller who may not delete the keeper is refused by the delete itself — never by a 409 that says what links to it', async () => {
+      const r0 = await req<{ objectId: string }>('POST', '/classes/Keeper', { name: 'K-coach', ACL: { [users.coach.objectId]: { read: true, write: true }, '*': { read: true } } });
+      expect(r0.status).toBe(201);
+      const keeper = r0.json.objectId;
+      const env = await make('Envelope', { to: 'Coach', owner: ptr('Keeper', keeper) });
+      const r = await keeperGoes('ann', keeper);
+      expect(r.status).toBe(404);
+      expect(r.json?.error ?? '').not.toMatch(/Envelope|never deleted/);
+      expect((await req('GET', `/classes/Envelope/${env}`)).status).toBe(200);
     });
 
     // ---------------------------------------------------------- 6. a path through the narrowed queried collection
@@ -364,13 +396,11 @@ for (const engine of engines) {
 
     // ---------------------------------------------------------- 8. measured, not asserted
 
-    it('8. (measured) the ACL of a never-edited envelope, rewritten by a bound writer', async () => {
+    it('8. (ruled R-j: "never edited" does not lock who can read it) the ACL of a never-edited envelope, rewritten by a bound writer, goes through', async () => {
       const keeper = await make('Keeper', { name: 'K3' });
       const env = await make('Envelope', { to: 'Ann', owner: ptr('Keeper', keeper) });
       const r = await put('ann', 'Envelope', env, { ACL: { [users.ann.objectId]: { read: true, write: true } } });
-      // eslint-disable-next-line no-console
-      console.log(`[reach-review ${engine.name}] 8. ACL rewrite on a never-edited record: ${r.status} ${r.json?.error ?? ''}`);
-      expect([200, 409]).toContain(r.status);
+      expect(r.status).toBe(200);
     });
 
     // ---------------------------------------------------------- 9. the route and a hand-written rule

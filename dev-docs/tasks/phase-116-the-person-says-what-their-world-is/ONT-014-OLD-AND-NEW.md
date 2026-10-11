@@ -5,7 +5,7 @@ have — a rule that reads **the record before the change, the record after it, 
 write. ONT-012's `onlyWhile` is the special case that reads the old record only. **Depends on** ONT-012 (the seam:
 `heldWhile()` in `persistence/onlyWhile.ts`, the `StorageAclOption.onlyWhile` ride, the 409 mapping per door), R10 (the
 facade as the one door). **Feeds** ONT-013 (three unkept shapes flip to held), ONT-011 step 4 (*settled* projects to
-this and nothing else), ONT-008 (the view shows a value's allowed moves). **Status: 🟡 s18 (2026-10-11, Fable 5.1) — built: AC1, AC2, AC3's shape half, AC4 for the three flips, AC5, **AC6 (the reach review, §6.5: 7 findings, 5 fixed, 1 filed as `P116-S18-CASCADEHOLD`, 1 a ruling)**. **AC4's two new `RuleHold` shapes built with ONT-011 step 2 (s18, its §9), and `was` on a `rules` step (§6.5 #4) built.** **s20 (Opus 5.5): AC3's schema half built (§6.6).** Owed: the cascade (the bug, a ruling first).**
+this and nothing else), ONT-008 (the view shows a value's allowed moves). **Status: 🟡 s18 (2026-10-11, Fable 5.1) — built: AC1, AC2, AC3's shape half, AC4 for the three flips, AC5, **AC6 (the reach review, §6.5: 7 findings, 5 fixed, 1 filed as `P116-S18-CASCADEHOLD`, 1 a ruling)**. **AC4's two new `RuleHold` shapes built with ONT-011 step 2 (s18, its §9), and `was` on a `rules` step (§6.5 #4) built.** **s20 (Opus 5.5): AC3's schema half built (§6.6); R-i and R-j ruled; the cascade built (§6.7) — every AC built; the task closes when Richard reads it.**
 
 > **Model check (Richard, 2026-10-08 rule):** the build wants **Opus 5.5** — fixed-shape enforcement on a seam that
 > exists and a grading suite that exists (`ont-012-only-while.test.ts`'s shape). **A reach review on Fable 5.1**
@@ -242,9 +242,7 @@ the world's.
   to `WorldOnlyWhile`, claimed with a mutant each on both engines, dropped by `applyMutant` and `without: { rule }`.
 - ~~**AC6: the reach review (Fable).**~~ Done, §6.5.
 - Bug **`P116-S17-NULLEQ`** (medium, runtime), **`P116-S17-CRONLEAK`** (low, tests): filed, not fixed.
-- **The cascade** (bug `P116-S18-CASCADEHOLD`, high): a bound caller's delete reaches, through `goes-too` and
-  `stays-unlinked`, records whose own rule says never / frozen, and the rule is not asked. Needs a ruling (§6.5 #5)
-  and a per-collection `onlyWhile` in the ACL option. An Opus build on this seam.
+- ~~**The cascade**~~ Built s20 (§6.7) after R-i.
 - ~~**`was` on a `rules` step** (§6.5 #4)~~ Built s18: `planMigration` writes `was` (the world's previous
   `onlyWhile`) on every `rules` step; `withWorldRules` keeps a clause that differs from `was` (the person's) unless
   the world now says that clause too, which `worldRuleLosses` names for `acceptLosses`. A plan without `was` keeps
@@ -263,10 +261,10 @@ red on both engines at HEAD `ae7db7dff`. Each is measured, not inferred.
 | 2 | **A hidden frozen field.** `ssn` hidden from the learner and frozen: PUT of the right value 200, of a wrong one 409 — a guess answered. Set once's "still empty" arm answered "is it set yet?" too. | red ×2 | **fixed** (same file): no same-value and no empty arm for a field the caller may not read; a carer who reads it echoes and first-writes it as before. |
 | 3 | **A Date frozen field.** `dateOfBirth` as a `Date` column, set once: an echo of the same date was a 409, and the FIRST write of an empty one was a 409 (`isScalar` refused the envelope, so the whole clause fell to NEVER). The same for an Object field's first write. The s17 spec used a `String` column. | red ×2 | **fixed**: `stored()` unwraps a `Date` to its ISO string (what both engines keep and what `QueryBuilder` compares); arms are built per field, so an Object's first write passes on the empty arm. **Known limit, graded:** an Object cannot be compared in one statement on both engines, so its echo is a change (409). |
 | 4 | **`withWorldRules` replaces a hand rule in silence.** A person's `frozen: amount unless draft` + `delete: "never"` on a world collection; the world's `rules` step (set once `number`) left `frozen: [number]`, no `amount`, no `never`. Emitted only when the world's answer changes, so the loss comes months later. | red | **half fixed** (`server/admin-world.ts` `worldRuleLosses`): a freeze the world could not have written (`unless` or `says`) is named in the dry run's `why` and a run is 409 until `acceptLosses`, in words. A plain field list and a bare `never` cannot be told from the world's own earlier writing, so the slot stays the world's (§6.3) — telling them apart needs the step to carry `was`. Owed. |
-| 5 | **The cascade** (`goes-too` into `delete: "never"`, `stays-unlinked` into a frozen link): a learner's DELETE of a keeper took the sealed envelope and emptied the issued invoice's customer, 200 on both engines. | red ×2 | **filed** `P116-S18-CASCADEHOLD` (high), `it.failing` ×2. Ruling owed: does the delete stop in the envelope's words? Recommendation: yes. |
+| 5 | **The cascade** (`goes-too` into `delete: "never"`, `stays-unlinked` into a frozen link): a learner's DELETE of a keeper took the sealed envelope and emptied the issued invoice's customer, 200 on both engines. | red ×2 | **filed** `P116-S18-CASCADEHOLD` (high), `it.failing` ×2. **Ruled s20 (R-i): the delete stops**, in the envelope's words. |
 | 6 | **A `$path` through the narrowed queried collection** (INCLUDECLP's "not covered"). `Staff` narrowed to the caller's own row by a path rule; `where: { $path: { from: Staff where band C, follow manager } }` returned her row — "someone in band C reports to you" — and so did the repeated hop. A plain `where: { band: "C" }` returned nothing (control). | red ×2 | **fixed** (`persistence/fieldRules.ts`): a `from` or hop landing on the collection being read is refused (403, `collection-rule`) when the caller's reach on it is narrowed; open collections are unchanged. |
 | 7 | **A dotted filter / accessor through a link** on a hidden (`author.email`) or closed (`salary.amount`, a `$max` of it) target field. | **green** ×2: nothing returned, nothing summed (DOTTEDFILTER's defect is the guard here) | graded, so a future dotted filter cannot open it unnoticed. |
-| 8 | **The ACL of a never-edited record** (`frozen: "*"`): a bound writer rewrote a sealed envelope's ACL — 200 on both engines. `ACL` is bookkeeping, never frozen. | measured | **a ruling for Richard**: *"a sealed envelope is never edited" — may its owner still change who can read it?* Not asserted. |
+| 8 | **The ACL of a never-edited record** (`frozen: "*"`): a bound writer rewrote a sealed envelope's ACL — 200 on both engines. `ACL` is bookkeeping, never frozen. | measured | **ruled s20 (R-j): yes** — "never edited" covers the record's details, not its sharing; the 200 stands. |
 
 Also read, no finding: the relation-only PUT (held with the plain fields' values), the batch (per operation, with its
 collection), BYOB PUT (the route gate names the collection), the upsert (a hidden unique field is a 403 before
@@ -316,6 +314,26 @@ the route's check disabled the case is red on both engines (measured). 67/67 and
 **Not built:** the reverse door. A schema change after the rule (a value taken out of the choice, a column's type
 changed) does not re-read the moves. A move to a value the choice no longer has is refused by the check anyway; the
 rule goes stale, it does not open.
+
+### 6.7 The cascade (s20, 2026-10-11, Opus 5.5) — bug `P116-S18-CASCADEHOLD`, R-i
+
+**R-i (Richard): the delete stops.** `StorageAclOption.onlyWhile` is per collection now; `aclFor` fills every
+collection with a rule for a bound writer; `heldWhile` reads `acl.onlyWhile[collection]`. `deleteKeepingLinks` asks
+`DeleteContext.held(plan)` after planning and before anything goes; the facade answers with `heldCascade`: a row that
+goes is judged by its collection's `delete`, a link it would empty by `update` of that field to nothing — the
+condition only, counted as the store's key, since the cascade itself runs as that key (R10). A refusal is a 409 in
+the clause's words, naming the reached collection (*"This "Envelope" record is never deleted. Nothing was
+changed."*); nothing is deleted. The hook asks only once the caller may delete their own record, so a stranger gets
+the delete's own 404, never a 409 that tells them what links to it. The admin and functions are not bound.
+
+Graded (`ont-014-reach-review.test.ts`, both engines): 5a (goes-too into never deleted; the admin's delete still
+takes it), 5b (stays-unlinked into a frozen link on an issued invoice; a draft's link still emptied), 5c (the
+stranger) — 5a/5b red with the hook disabled, 5c red with the own-record check removed. A mutant spec in
+`ont-014-old-and-new.test.ts` that stripped `moves` from the old one-collection shape had stopped mutating and
+said so (red); it reads the new shape. **R-j:** case 8 asserts the ACL rewrite goes through.
+
+**Not built:** refusing the contradiction at authoring — a world that says both "goes when its keeper goes" and
+"never deleted" (the vocabulary could ask it; the backend now keeps the second).
 
 ## 7. Not this task
 

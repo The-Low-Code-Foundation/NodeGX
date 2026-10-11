@@ -134,11 +134,11 @@ export async function runClaim(ctx: ConformanceContext, schema: ClaimSchema, cla
   for (const c of collections) names.set(c.name, ctx.collection(c.name));
   const real = (name: string): string => names.get(name) ?? name;
   const byName = new Map(collections.map((c) => [c.name, c]));
-  // ONT-014: a write as a person makes it — the row ACL's public key, and the collection's rules.
-  const writeAcl = (name: string): StorageAclOption | undefined => {
-    const ow = byName.get(name)?.onlyWhile;
-    return ow ? { access: 'write', keys: ['*'], onlyWhile: { collection: real(name), ...ow } } : undefined;
-  };
+  // ONT-014: a write as a person makes it — the row ACL's public key, and the rules of every
+  // collection the claim reaches (a delete is judged by the rows its links take with it, R-i).
+  const rulesByCollection = Object.fromEntries(collections.filter((c) => c.onlyWhile).map((c) => [real(c.name), c.onlyWhile!]));
+  const writeAcl = (name: string): StorageAclOption | undefined =>
+    byName.get(name)?.onlyWhile ? { access: 'write', keys: ['*'], onlyWhile: rulesByCollection } : undefined;
   // ONT-011 step 4: a read as that person — the row ACL's public key, and the fields they may not read.
   const anyoneSignedIn = (read: unknown): boolean => (Array.isArray(read) ? read : [read]).some((atom) => atom === 'public' || atom === 'authenticated');
   const readAcl = (name: string): StorageAclOption => {
