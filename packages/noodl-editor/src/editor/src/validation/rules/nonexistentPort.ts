@@ -16,7 +16,8 @@
  *
  * 🔴 P107 NSP-020 R19 — the middle row has a door now. Where the caller can draw a
  * node's ports from its spec (`ValidatorOptions.drawnPorts`: the agent server does,
- * for the types `DRAWN_PORT_TYPES` lists), the ports drawn from its settings and the
+ * and since R20 the editor's Problems panel — both through `../drawnPortLookup` — for
+ * the types `DRAWN_PORT_TYPES` lists), the ports drawn from its settings and the
  * project ARE enumerable, and a port outside them is an error that names the near
  * one. Where it cannot (no callback, or a type the spec does not draw), it is the
  * skip it always was.

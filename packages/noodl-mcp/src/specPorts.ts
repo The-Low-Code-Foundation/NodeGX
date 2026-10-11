@@ -10,8 +10,8 @@
  * `drawnPortsFor` draws them from the node's spec instead: `@nodegx/node-spec`'s `drawnPorts(spec, params, context)` with
  * the context `@nodegx/project-contract`'s `portContextFor` reads from the saved project (the wires, the backends and
  * schema, the stacks, each component's interface). Only for the types in `DRAWN_PORT_TYPES` — graded against the
- * runtime's own announcement, names complete — so Cloud Function, Navigate and the HTTP Request's Output Fields, which the
- * spec does not draw yet, are never shown as if it did. Only the ports the spec DERIVES (the ones `dynamicports` holds),
+ * runtime's own announcement, or (Cloud Function, Navigate: s87) the editor adapter that draws them, names complete — so
+ * the HTTP Request's Output Fields, which the spec does not draw yet, are never shown as if it did. Only the ports the spec DERIVES (the ones `dynamicports` holds),
  * as name, plug and type: the static ports are `get_node_type`'s.
  *
  * Read-only: the saved nodes are returned as they are, so a read-modify-write hands back exactly what was read.
@@ -19,10 +19,10 @@
  * @module noodl-mcp/specPorts
  */
 import { DRAWN_PORT_TYPES, drawnPorts, specs } from '@nodegx/node-spec';
-import { findPortNode, portContextReader, portProjectFromStore, type PortProject, type PortTypeOf } from '@nodegx/project-contract/port-context';
+import { portContextReader, portProjectFromStore, type PortProject, type PortTypeOf } from '@nodegx/project-contract/port-context';
 
 import { catalogIndex } from './catalog';
-import { CatalogIndex, type DrawnPortsLookup } from './editor-deps';
+import { CatalogIndex, drawnPortLookup, type DrawnPortsLookup } from './editor-deps';
 import type { ComponentFiles } from './graph';
 import type { ProjectStore } from './project/ProjectStore';
 
@@ -84,32 +84,6 @@ export function drawnPortsFor(store: ProjectStore, component: string, nodes: rea
  * wire to a port the catalog and the saved lists do not name, and pay nothing.
  */
 export function drawnPortCheck(store: ProjectStore, overlay?: ReadonlyMap<string, ComponentFiles>): DrawnPortsLookup {
-  let read: { project: PortProject; contextOf: ReturnType<typeof portContextReader> } | undefined;
-  return (component, nodeId, nodeType) => {
-    if (!DRAWN.has(nodeType) || !specs[nodeType]) return undefined;
-    if (!read) {
-      const project = portProject(store, overlay);
-      read = { project, contextOf: portContextReader(project, { portType: catalogPortType }) };
-    }
-    // the validator names a component `path ?? key`, the builder `path ?? '/' + key`
-    const name = read.project.components.some((c) => c.name === component) ? component : '/' + component;
-    const found = findPortNode(read.project, nodeId, name);
-    if (!found) return undefined;
-    try {
-      const spec = specs[nodeType];
-      const context = read.contextOf(nodeId, name);
-      const ports = drawnPorts(spec, found.node.parameters ?? {}, context as Parameters<typeof drawnPorts>[2]);
-      const input = new Set(ports.filter((p) => p.plug === 'input').map((p) => p.name));
-      const output = new Set(ports.filter((p) => p.plug === 'output').map((p) => p.name));
-      // What the node HAS is more than what an editor draws: a wired name the runtime registers when the wire is made
-      // (nodescope.ts :150 → `registerInputIfNeeded` / `registerOutputIfNeeded`) is a port. A For Each's
-      // `itemOutputSignal-x` for a row output nothing typed is wired into is drawn `itemOutput-x`, and the wire registers
-      // it (foreach.tsx :1081-1096): 22 such wires in Richard's projects (P107 s86).
-      for (const port of context.wired ?? []) if (!input.has(port) && spec.derived?.discover?.(port)) input.add(port);
-      for (const port of context.wiredOutputs ?? []) if (!output.has(port) && spec.derived?.discoverOutput?.(port)) output.add(port);
-      return { input, output };
-    } catch {
-      return undefined;
-    }
-  };
+  // R20 (s87) — one body for both doors: the editor's Problems panel asks the same function over its live model
+  return drawnPortLookup(() => portProject(store, overlay), catalogIndex());
 }
