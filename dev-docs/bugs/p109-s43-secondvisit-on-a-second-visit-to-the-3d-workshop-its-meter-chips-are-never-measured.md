@@ -2,6 +2,7 @@
 id: P109-S43-SECONDVISIT
 title: In the flat Garden's Workshop the spa's two parts' meter chips cover each other (found as "the second visit to the 3D Workshop")
 status: fixed
+commit: eafa1b4af
 phase: P109
 task: ISL-046
 severity: low

@@ -1,6 +1,6 @@
 # ISL-046 — The templates and the garden kits carry no defect of their own
 
-**Status: 🟢 s44 (2026-10-11): 5 of 9 fixed — BKFONT `4af47a07a`, DEMOSTUBWIRES `6d8323ef4` (s42), D81 `37f35c8c4`, METERS3D `050ca561b` (s43), ROUTINEREFUSAL `9cb99b205` (s44). Still waiting: SECONDVISIT (buildable), MOVEARROW a ruling, INSTALLER the tablets, TPL011UNREADID P78's untracked Nightbook pile. Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 7 bugs
+**Status: 🟢 s45 (2026-10-11): 7 of 9 fixed — MOVEARROW `96059a380` (ruled s45 "fix the old planner now"), SECONDVISIT `eafa1b4af` (s45); BKFONT `4af47a07a`, DEMOSTUBWIRES `6d8323ef4` (s42), D81 `37f35c8c4`, METERS3D `050ca561b` (s43), ROUTINEREFUSAL `9cb99b205` (s44). Still waiting, neither buildable here: INSTALLER the tablets, TPL011UNREADID P78's untracked Nightbook pile. Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 7 bugs
 from the ledger (`dev-docs/bugs/`) that no phase owned: 2 high · 1 medium · 4 low. **Side:** templates (planning, Nightbook and its desktop installer, the training demo), the library Date picker, the garden kits
 
 ## 1. The person sentence
@@ -18,13 +18,13 @@ generated from the ledger headers. **The ledger file is the source**, so read it
 
 | bug | severity | status | what a person sees |
 |---|---|---|---|
-| [P78-TPL010-MOVEARROW](../../bugs/p78-tpl010-movearrow-opening-a-project-writes-the-chip-arrow-into-its-stored-move.md) | high | scheduled | Opening a project in the planner adds another "→ " (or "✓ Wed 30 · ") to its stored next move, every time |
+| [P78-TPL010-MOVEARROW](../../bugs/p78-tpl010-movearrow-opening-a-project-writes-the-chip-arrow-into-its-stored-move.md) | high | fixed | Opening a project in the planner adds another "→ " (or "✓ Wed 30 · ") to its stored next move, every time |
 | [P78-TPL011-INSTALLER](../../bugs/p78-tpl011-installer-nightbook-0-0-4-will-not-install-over-0-0-3-on-the-tablets.md) | high | scheduled | Nightbook 0.0.4 will not install over 0.0.3 on either tablet ("Nightbook cannot be closed") |
 | [P78-D81](../../bugs/p78-d81-the-library-date-picker-keeps-a-picked-day-when-the-next-record-s-day-is-empty-too.md) | medium | fixed | The library Date picker keeps a picked day when the next record's day is empty too |
 | [P109-S19-TPL011UNREADID](../../bugs/p109-s19-tpl011unreadid-nightbooks-openenvelope-wires-an-id-its-script-never-reads.md) | low | scheduled | Nightbook's generator wires the envelope id into a Function that never reads it, and the door now refuses the build |
 | [P109-S43-ROUTINEREFUSAL](../../bugs/p109-s43-routinerefusal-a-refused-routine-date-s-sentence-stays-on-the-next-routine.md) | medium | fixed | Pick an end date before a routine's start and open another routine: the refusal sentence is still there |
 | [P109-S19-DEMOSTUBWIRES](../../bugs/p109-s19-demostubwires-the-training-demos-stubbed-functions-keep-wires-to-inputs-they-never-read.md) | low | scheduled | The training demo's stubbed Functions keep wires into inputs they no longer read |
-| [P109-S43-SECONDVISIT](../../bugs/p109-s43-secondvisit-on-a-second-visit-to-the-3d-workshop-its-meter-chips-are-never-measured.md) | low | scheduled | On the second visit to the 3D Workshop, the meter chips still cover each other |
+| [P109-S43-SECONDVISIT](../../bugs/p109-s43-secondvisit-on-a-second-visit-to-the-3d-workshop-its-meter-chips-are-never-measured.md) | low | fixed | In the flat Garden's Workshop (a tablet too slow for 3D) the spa's two parts' meter chips cover each other |
 | [P108-S9-BKFONT](../../bugs/p108-s9-bkfont-the-blocks-css-font-shorthand-with-inherit-is-dropped.md) | low | scheduled | The Blocks node's line and zoom buttons use `font:800 14px inherit` — an invalid shorthand the browser drops, so they render at the default weight and size |
 | [P108-S7-METERS3D](../../bugs/p108-s7-meters3d-two-parts-meter-chips-overlap-in-the-3d-workshop.md) | low | fixed | In the 3D Workshop on her land, the spa's two parts' meter chips are drawn on top of each other |
 
@@ -82,3 +82,11 @@ MOVEARROW and INSTALLER first (high: data damage, and a family that cannot updat
 | row | state | what happened |
 |---|---|---|
 | ROUTINEREFUSAL (medium) | ✅ `9cb99b205` | Re-measured first: still fired. Three commands had the shape, not one (Set routine dates, Set schedule's Add time, Set deadline). `command()` gains `refusalAbout`: the guard publishes each verdict as a new object `{ about, error }`, and a small Function (`SAY_REFUSAL_SCRIPT`) says it only while `about` is open. The D81 drive gained three arms: two red on HEAD's template, 7/7 after. Control: a mutant comparing verdicts by value turns exactly the "said again" arm red. Set deadline is graded by the unit spec, not driven. Regenerated `todo-list` and `todo-list-demo` |
+
+### s45 (2026-10-11) — SECONDVISIT and MOVEARROW fixed
+
+| row | state | what happened |
+|---|---|---|
+| SECONDVISIT (low) | ✅ `eafa1b4af` | Read on the second visit, as s44 asked: a probe copy of the touch drive listed every Garden 3D root, waited, forced a frame. Cobble's Workshop had **no 3D root**: under software GL the island falls back to the flat Garden and keeps that choice, so the chips were garden-kit's, and "cached 0 × 0" was a 3D-only field read on 2D chips. The defect is the flat Garden's: chips placed by CSS inside each tile, wider than a tile, never kept apart. `chipLifts` moved into garden-kit (one copy); the Garden node's layout pass lifts a plot chip that would cover another. Red on HEAD's kits; after, METERS green in all four Workshops (3D mode 29/31, flat 28/31; the other reds TOUCHBUILD's, as on HEAD). Pip's flat Workshop needed a lift too |
+| MOVEARROW (high) | ✅ `96059a380` | Asked a third time in plain words with the cost; **ruled "fix the old planner now"**. Run for the first time (it was a trace): the card's script twice over a runtime `Model`, rows set into one runtime `Collection` with `keepPlainRowsApart`, gives `→ → Offer the add-on`. Every list the planner draws now gives a row its own id (card, day columns, carry list, and the block sheet's next actions, found by a census: they wrote `label`/`ink`/`edge` onto the todo action). The project guard strips the prefixes on save. No store clean-up: TPL-008-PJ's carry-over empties `Project.move` on the shared backend. 101/101, each list check and the consequence with mutant arms. Not driven deployed; `planning-demo` not republished to nodegx.io |
+

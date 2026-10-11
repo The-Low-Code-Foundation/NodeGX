@@ -2,6 +2,7 @@
 id: P78-TPL010-MOVEARROW
 title: Opening a project in the planner adds another "→ " (or "✓ Wed 30 · ") to its stored next move, every time
 status: fixed
+commit: 96059a380
 phase: P109
 task: ISL-046
 severity: high
