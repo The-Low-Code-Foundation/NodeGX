@@ -1183,6 +1183,10 @@ const PLAY: CgComponent = {
     wire('plCard', 'line', 'plChallenge', 'cardLine'),
     wire('plChallenge', 'line', 'plTaskP', 'text'),
     wire('plModeWords', 'badge', 'plRecText', 'text'),
+    // P109-S11-ARIALABELWORDS: the worlds' and the divider's screen-reader names, in her language.
+    wire('plT', 'a11yGarden', 'plGarden', 'label'),
+    wire('plT', 'a11yGarden', 'plGarden3d', 'label'),
+    wire('plT', 'a11yDivider', 'plSplit', 'label'),
     wire('plT', 'ig3Drive', 'plDrive', 'label'),
     wire('plT', 'ig3Teach', 'plTeach', 'label'),
     wire('plT', 'play', 'plPlay', 'label'),
@@ -1755,6 +1759,7 @@ const ISLE_WORLD: CgComponent = {
     place('iwGarden', KIT_GARDEN, 'The island, flat', 'iwScroll', { stepMs: STEP_MS, label: 'The island' }),
     // IG-007's rule on the island too: the 3D node on EXACTLY the flat one's wires, one of the two mounted.
     place('iwGarden3d', KIT_GARDEN_3D, 'The island in 3D', 'iwScroll', { stepMs: STEP_MS, label: 'The island', camera: 'island', mounted: false }),
+    logic('iwT', L('Translate words'), 'In their language'),
     place('iwFind', BUTTON_NODE, 'Find my robots', 'iwIsle', { ...btn('plain', 'find', { cssClassName: 'bg-isle-find' }), label: 'Find my robots' }),
     text('iwTap', 'How to use it', 'iwIsle', '', { ...T_SMALL, sizeMode: 'contentSize', cssClassName: 'bg-isle-tap' }),
     group('iwCard', 'The plot card', 'iwRoot', { ...row({ width: pct(100), sizeMode: 'contentHeight', flexWrap: 'nowrap', alignItems: 'flex-start', columnGap: sp(12) }), ...PANEL, cssClassName: 'bg-panel bg-plot-card', mounted: false }, ['iwCardFace', 'iwCardText']),
@@ -1870,6 +1875,10 @@ const ISLE_WORLD: CgComponent = {
     wire('iwLandCard', 'ghostShow', 'iwWithGhost', 'showGhost'),
     wire('iwWithGhost', 'world', 'iwDraw', 'world'),
     ...(['words', 'lang', 'botName', 'color', 'eye', 'hat'] as const).map((f) => wire('iwIn', f, 'iwDraw', f)),
+    // P109-S11-ARIALABELWORDS: the island's screen-reader name, in her language.
+    ...(['words', 'lang', 'botName'] as const).map((f) => wire('iwIn', f, 'iwT', f)),
+    wire('iwT', 'a11yIsland', 'iwGarden', 'label'),
+    wire('iwT', 'a11yIsland', 'iwGarden3d', 'label'),
     ...(['iwGarden', 'iwGarden3d'] as const).flatMap((g) => [wire('iwDraw', 'map', g, 'map'), wire('iwDraw', 'things', g, 'things'), wire('iwDraw', 'robots', g, 'robots')]),
     wire('iwWorld', 'focus', 'iwGarden3d', 'focus'),
     wire('iwView', 'camera', 'iwGarden3d', 'camera'),
@@ -2227,6 +2236,8 @@ const ROBOT_CARD: CgComponent = {
     wire('rcIn', 'tag', 'rcTagText', 'text'),
     wire('rcIn', 'nameWord', 'rcNameL', 'text'),
     wire('rcIn', 'name', 'rcName', 'startValue'),
+    // P109-S11-ARIALABELWORDS: a screen reader names the drawing by the robot's own name (the same in every language).
+    wire('rcIn', 'name', 'rcGarden', 'label'),
     wire('rcIn', 'name', 'rcNameText', 'text'),
     wire('rcIn', 'wears', 'rcWears', 'text'),
     wire('rcIn', 'colourWord', 'rcColourL', 'text'),
@@ -2348,6 +2359,8 @@ const PROFILE: CgComponent = {
     wire('pcIn', 'name', 'pcName', 'text'),
     wire('pcIn', 'band', 'pcBand', 'text'),
     wire('pcIn', 'robot', 'pcDraw', 'botName'),
+    // P109-S11-ARIALABELWORDS: a screen reader names her robot's drawing by its own name.
+    wire('pcIn', 'robot', 'pcGarden', 'label'),
     wire('pcIn', 'color', 'pcDraw', 'color'),
     wire('pcIn', 'eye', 'pcDraw', 'eye'),
     wire('pcIn', 'hat', 'pcDraw', 'hat'),
@@ -2999,6 +3012,7 @@ const PAGE_ROBOT: CgComponent = (() => {
       ...base.connections,
       ...headWires('rb', 'navRobot', 'ig5Title', 'ig5Sub'),
       wire('rbT', 'ig5Fleet', 'rbFleetL', 'text'),
+      wire('rbT', 'a11yMyRobot', 'rbGarden', 'label'),
       ...(['robots', 'hats', 'band', 'lang', 'botName'] as const).map((f) => wire('rbFam', f, 'rbCards', f)),
       wire('rbWords', 'words', 'rbCards', 'words'),
       wire('rbRequests', 'requests', 'rbCards', 'requests'),

@@ -567,6 +567,11 @@ export const IG006_WORDS: Readonly<Record<string, Bi>> = {
   lsFrEn: s('French → English: “{q}”', 'Du français vers l’anglais : « {q} »'),
   lsEnFr: s('English → French: “{q}”', 'De l’anglais vers le français : « {q} »'),
   lsWobbly: s('Olive is better one way than the other.', 'Olive est meilleure dans un sens que dans l’autre.'),
+  // P109-S11-ARIALABELWORDS: what a screen reader calls the worlds and the divider (their `label`, wired from here).
+  a11yIsland: s('The island', 'L’île'),
+  a11yGarden: s('The garden', 'Le jardin'),
+  a11yMyRobot: s('My robot', 'Mon robot'),
+  a11yDivider: s('Drag to make the steps wider or narrower', 'Fais glisser pour élargir ou rétrécir les étapes'),
   // P106 s3 lane B (IG-003): Drive · Teach · Play, and the islander's Predict challenge (R4, R5).
   ig3Drive: s('Drive', 'Conduire'),
   ig3Teach: s('Teach', 'Apprendre'),

@@ -11,6 +11,8 @@
  * language buttons are expected there). Across pages: every string that still shows a `{…}` placeholder, and the
  * known-firing control: the robot's name (Pip, a `{b}` word) on screen in BOTH languages.
  * Every press is checked with `elementFromPoint` first; a miss fails the run (an unpressed switch reads "0 changed").
+ * ARIA (P109-S11-ARIALABELWORDS, s45): what a screen reader calls each world and divider on the page (its aria-label,
+ * which READ never sees) changes on FR too — on every page that draws one.
  *
  * Exits 0 when every page changed at least one text, no `{…}` reached the screen, Pip shows in both languages on
  * at least one page and no press missed; 1 otherwise; 2 on a usage error.
@@ -36,6 +38,7 @@ const READ = `(() => {
   }
   return out;
 })()`;
+const ARIA = `(() => [...document.querySelectorAll('.gd-world, .gd3-world, .gd-divider')].filter((e) => e.offsetParent !== null && e.hasAttribute('aria-label')).map((e) => e.className.split(' ')[0] + ': ' + e.getAttribute('aria-label')))()`;
 withDeployedSite({ dir: DIR }, async (page) => {
   const { client } = page;
   const ev = (x) => page.evaluate(x);
@@ -55,14 +58,17 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await click(byText('button.bg-btn', 'Let’s go!'));
   await wait(1500);
   const landed = await ev('location.pathname');
-  const report = { landed, pages: {}, braces: [], pip: {}, presses };
+  const report = { landed, pages: {}, braces: [], pip: {}, presses, aria: {} };
   const visit = async (name, go) => {
     await go(); await wait(1500);
     const seg = async (l) => { await click(byText('.bg-top .bg-seg-btn', l)); await wait(900); };
     await seg('EN');
     const en = await ev(READ);
+    const ariaEn = await ev(ARIA);
     await seg('FR');
     const fr = await ev(READ);
+    const ariaFr = await ev(ARIA);
+    report.aria[name] = { en: ariaEn, fr: ariaFr };
     const keys = Object.keys(en).filter((k) => k in fr);
     const changed = keys.filter((k) => en[k] !== fr[k]);
     const same = keys.filter((k) => en[k] === fr[k]).map((k) => en[k]);
@@ -88,6 +94,10 @@ withDeployedSite({ dir: DIR }, async (page) => {
     check(`${name} (${v.path}): ${v.changed} of ${v.both} texts change on FR; unchanged: ${JSON.stringify(v.unchangedSample)}`, v.changed > 0, v);
   }
   check('no {…} placeholder reaches the screen, in either language', report.braces.length === 0, report.braces);
+  // s45: a world or divider whose screen-reader name stays the same in French (a robot's own name may: it is a name).
+  const ariaSame = Object.entries(report.aria).flatMap(([name, a]) => a.en.filter((l, i) => a.fr[i] === l && !/: (Pip|Cobble|Ada)$/.test(l)).map((l) => `${name}: ${l}`));
+  const ariaSeen = Object.values(report.aria).reduce((n, a) => n + a.en.length, 0);
+  check(`ARIA: every world and divider a screen reader names (${ariaSeen} read) is named in French on FR`, ariaSeen > 0 && ariaSame.length === 0, { ariaSame, aria: report.aria });
   check('control: Pip (a {b} word) is on screen in both languages', Object.values(report.pip).some((p) => p.en > 0 && p.fr > 0), report.pip);
   const total = Object.values(report.pages).reduce((a, v) => [a[0] + v.changed, a[1] + v.both], [0, 0]);
   console.log(`${total[0]} of ${total[1]} texts changed; ${failed ? `${failed} FAILED` : 'all passed'}`);

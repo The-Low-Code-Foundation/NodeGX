@@ -27,3 +27,10 @@ stops that from ever happening."*
 **Proposed (the measured exit):** `maxWidth: 100%` on each row (it stays as narrow as its items until it meets the edge,
 then wraps — fixture row C, 2 lines). The validator now names each one (`row-cannot-wrap`), so the template's own build
 shows it.
+
+## s45 (2026-10-11): the landing-pages half was fixed on 2026-10-02
+
+Re-measured: `templates/landing-pages` `Site/Header` `hdNav` carries `maxWidth: 100%`, from ISL-022's ruling commit
+`db086d75f` (2026-10-02); this row was never told. What is left is Nightbook's three (`tnFonts`, `tnEffects`,
+`tnColours`), in P78's untracked generator (`tpl011Template.ts`): they wait on that pile being committed, like
+P109-S19-TPL011UNREADID.

@@ -101,6 +101,24 @@
     },
     {
       "fromId": "plT",
+      "fromProperty": "a11yGarden",
+      "toId": "plGarden",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "plT",
+      "fromProperty": "a11yGarden",
+      "toId": "plGarden3d",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "plT",
+      "fromProperty": "a11yDivider",
+      "toId": "plSplit",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "plT",
       "fromProperty": "ig3Drive",
       "toId": "plDrive",
       "toProperty": "label"

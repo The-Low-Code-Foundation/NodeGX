@@ -541,7 +541,7 @@
       "type": "Condition",
       "label": "Can this computer draw 3D?",
       "x": 710,
-      "y": 2440
+      "y": 2560
     },
     {
       "id": "plRendNoGl",
@@ -561,7 +561,7 @@
         "event": "slow"
       },
       "x": 710,
-      "y": 2560
+      "y": 2680
     },
     {
       "id": "plRendWrite",
@@ -1805,7 +1805,7 @@
       "type": "/Logic/Translate words",
       "label": "In their language",
       "x": 710,
-      "y": 3640
+      "y": 2080
     },
     {
       "id": "plCard",
@@ -1918,7 +1918,7 @@
       "type": "/Logic/Start world",
       "label": "The world this request starts from",
       "x": 710,
-      "y": 3040
+      "y": 3160
     },
     {
       "id": "plNonce",
@@ -1962,7 +1962,7 @@
       "type": "/Logic/Land lift",
       "label": "The start the runner, the pad and Teach use, the parts already built",
       "x": 710,
-      "y": 3160
+      "y": 3280
     },
     {
       "id": "plSetWorldRec",
@@ -2070,7 +2070,7 @@
       "type": "/Logic/Record step",
       "label": "A pad press, recorded and driven",
       "x": 710,
-      "y": 2080
+      "y": 2200
     },
     {
       "id": "plPadAsking",
@@ -2094,7 +2094,7 @@
       "type": "/Logic/Pad answer",
       "label": "Her answer, over the robot",
       "x": 710,
-      "y": 2200
+      "y": 2320
     },
     {
       "id": "plRunner",
@@ -2108,14 +2108,14 @@
       "type": "/Logic/Draw world",
       "label": "The world in the kit’s words",
       "x": 710,
-      "y": 2320
+      "y": 2440
     },
     {
       "id": "plPalette",
       "type": "/Logic/Palette",
       "label": "The blocks this band may use",
       "x": 710,
-      "y": 3280
+      "y": 3400
     },
     {
       "id": "plKitPal",
@@ -2199,7 +2199,7 @@
       "type": "/Logic/Var monitor",
       "label": "What the robot remembers, in words",
       "x": 710,
-      "y": 3520
+      "y": 3640
     },
     {
       "id": "plAgain",
@@ -2257,7 +2257,7 @@
         "value-play-boxCls": "bg-blocks-box"
       },
       "x": 710,
-      "y": 3400
+      "y": 3520
     },
     {
       "id": "plTeachGate",
@@ -2301,7 +2301,7 @@
       "type": "/Logic/Mode line",
       "label": "What the mode says",
       "x": 710,
-      "y": 2920
+      "y": 3040
     },
     {
       "id": "plChallenge",
@@ -2416,14 +2416,14 @@
         "runOnChange-condition": false
       },
       "x": 710,
-      "y": 2680
+      "y": 2800
     },
     {
       "id": "plGuessEnd",
       "type": "/Logic/Predict end",
       "label": "Where the robot really ends",
       "x": 710,
-      "y": 2800
+      "y": 2920
     },
     {
       "id": "plHitGate",

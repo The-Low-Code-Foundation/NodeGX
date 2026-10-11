@@ -166,6 +166,36 @@
       "toProperty": "hat"
     },
     {
+      "fromId": "iwIn",
+      "fromProperty": "words",
+      "toId": "iwT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "lang",
+      "toId": "iwT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "botName",
+      "toId": "iwT",
+      "toProperty": "botName"
+    },
+    {
+      "fromId": "iwT",
+      "fromProperty": "a11yIsland",
+      "toId": "iwGarden",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "iwT",
+      "fromProperty": "a11yIsland",
+      "toId": "iwGarden3d",
+      "toProperty": "label"
+    },
+    {
       "fromId": "iwDraw",
       "fromProperty": "map",
       "toId": "iwGarden",

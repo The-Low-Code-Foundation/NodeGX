@@ -520,7 +520,7 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       const conns = connectionsOf(built, C.isleWorld);
       const into = (id: string) => conns.filter((c) => c.toId === id).map((c) => `${c.fromId}.${c.fromProperty}>${c.toProperty}`).sort();
       // The same wires into both renderers (IG-007's rule): one of the two is mounted by the stored choice.
-      expect(into('iwGarden').filter((w) => !w.endsWith('>mounted'))).toEqual(['iwDraw.map>map', 'iwDraw.robots>robots', 'iwDraw.things>things']);
+      expect(into('iwGarden').filter((w) => !w.endsWith('>mounted'))).toEqual(['iwDraw.map>map', 'iwDraw.robots>robots', 'iwDraw.things>things', 'iwT.a11yIsland>label']);
       expect(into('iwGarden3d').filter((w) => !/>(mounted|focus|camera)$/.test(w))).toEqual(into('iwGarden').filter((w) => !w.endsWith('>mounted')));
       expect([into('iwGarden').find((w) => w.endsWith('>mounted')), into('iwGarden3d').find((w) => w.endsWith('>mounted'))]).toEqual(['iwRenderer.show2d>mounted', 'iwRenderer.show3d>mounted']);
       const states = world.find((n) => n.id === 'iwRenderer')!;
@@ -914,7 +914,8 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       // The four world ports (map, things, robots, bubble); P108 IW-001 F7 gives the bubble two more sources, the pad's say
       // and Olive's answer to the pad's read — on BOTH renderers (the line above).
       // P108 IW-004: + watch and picking (lane D's world inputs, from the Blocks node).
-      expect([...new Set(into('plGarden', ['mounted']).map((c) => c.split('>')[1]))].sort()).toEqual(['bubble', 'map', 'picking', 'robots', 'things', 'watch']);
+      // P109-S11-ARIALABELWORDS: + label (its screen-reader name, in her language).
+      expect([...new Set(into('plGarden', ['mounted']).map((c) => c.split('>')[1]))].sort()).toEqual(['bubble', 'label', 'map', 'picking', 'robots', 'things', 'watch']);
       expect(into('plGarden', ['mounted']).filter((c) => c.endsWith('>bubble')).sort()).toEqual(['plDraw.bubble>bubble', 'plPadAnswer.bubble>bubble', 'plRecord.bubble>bubble']);
       expect(from('plGarden3d', WORLD_PORTS_3D_ONLY)).toEqual(from('plGarden'));
       // Tile X / Tile Y / Tile Tapped to the challenge's guess, and (P108 IW-004) to Pick thing, the chip's pick.

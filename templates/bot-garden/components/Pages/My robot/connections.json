@@ -148,6 +148,12 @@
       "toProperty": "text"
     },
     {
+      "fromId": "rbT",
+      "fromProperty": "a11yMyRobot",
+      "toId": "rbGarden",
+      "toProperty": "label"
+    },
+    {
       "fromId": "rbFam",
       "fromProperty": "robots",
       "toId": "rbCards",

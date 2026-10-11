@@ -36,6 +36,12 @@
     {
       "fromId": "rcIn",
       "fromProperty": "name",
+      "toId": "rcGarden",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "name",
       "toId": "rcNameText",
       "toProperty": "text"
     },

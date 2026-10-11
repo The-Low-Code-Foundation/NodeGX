@@ -167,7 +167,7 @@
       "path": "Logic/Translate words",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 767,
+      "connectionCount": 771,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -855,7 +855,7 @@
       "path": "Workshop/Play",
       "type": "visual",
       "nodeCount": 165,
-      "connectionCount": 461,
+      "connectionCount": 464,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -870,8 +870,8 @@
     "Island/World": {
       "path": "Island/World",
       "type": "visual",
-      "nodeCount": 80,
-      "connectionCount": 198,
+      "nodeCount": 81,
+      "connectionCount": 203,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -919,7 +919,7 @@
       "path": "Robot/Card",
       "type": "visual",
       "nodeCount": 42,
-      "connectionCount": 59,
+      "connectionCount": 60,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -975,7 +975,7 @@
       "path": "Profiles/Card",
       "type": "visual",
       "nodeCount": 13,
-      "connectionCount": 16,
+      "connectionCount": 17,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -1047,7 +1047,7 @@
       "path": "Pages/My robot",
       "type": "page",
       "nodeCount": 27,
-      "connectionCount": 99,
+      "connectionCount": 100,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -1086,7 +1086,7 @@
   },
   "stats": {
     "totalComponents": 135,
-    "totalNodes": 1111,
-    "totalConnections": 3571
+    "totalNodes": 1112,
+    "totalConnections": 3586
   }
 }

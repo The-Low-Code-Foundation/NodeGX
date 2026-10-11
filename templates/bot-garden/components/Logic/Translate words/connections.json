@@ -23,6 +23,30 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-a11yDivider",
+      "toId": "translatewordsOut",
+      "toProperty": "a11yDivider"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-a11yGarden",
+      "toId": "translatewordsOut",
+      "toProperty": "a11yGarden"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-a11yIsland",
+      "toId": "translatewordsOut",
+      "toProperty": "a11yIsland"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-a11yMyRobot",
+      "toId": "translatewordsOut",
+      "toProperty": "a11yMyRobot"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-ask",
       "toId": "translatewordsOut",
       "toProperty": "ask"

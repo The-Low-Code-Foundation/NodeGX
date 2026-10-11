@@ -100,7 +100,7 @@
         }
       ],
       "x": 590,
-      "y": 1360
+      "y": 1480
     },
     {
       "id": "iwRoot",
@@ -189,6 +189,13 @@
       },
       "x": 220,
       "y": 520
+    },
+    {
+      "id": "iwT",
+      "type": "/Logic/Translate words",
+      "label": "In their language",
+      "x": 590,
+      "y": 400
     },
     {
       "id": "iwFind",
@@ -674,14 +681,14 @@
       "type": "/Logic/Crew chips",
       "label": "The crew for this job",
       "x": 590,
-      "y": 2320
+      "y": 2440
     },
     {
       "id": "iwAssign",
       "type": "/Logic/Assign robot",
       "label": "A robot sent here, or home",
       "x": 590,
-      "y": 2440
+      "y": 2560
     },
     {
       "id": "iwAssignOk",
@@ -706,7 +713,7 @@
         "value-shown-shown": true
       },
       "x": 590,
-      "y": 1960
+      "y": 2080
     },
     {
       "id": "iwFound",
@@ -716,14 +723,14 @@
         "runOnChange-condition": false
       },
       "x": 590,
-      "y": 2080
+      "y": 2200
     },
     {
       "id": "iwWorld",
       "type": "/Logic/Island world",
       "label": "Her island, as it stands",
       "x": 590,
-      "y": 880
+      "y": 1000
     },
     {
       "id": "iwTick",
@@ -780,21 +787,21 @@
         "stepMs": 380
       },
       "x": 590,
-      "y": 400
+      "y": 520
     },
     {
       "id": "iwAt",
       "type": "/Logic/Plot at",
       "label": "Which plot was tapped",
       "x": 590,
-      "y": 520
+      "y": 640
     },
     {
       "id": "iwChoose",
       "type": "/Logic/Island choose",
       "label": "The plot card",
       "x": 590,
-      "y": 2200
+      "y": 2320
     },
     {
       "id": "iwHome",
@@ -818,7 +825,7 @@
       "type": "/Logic/Find robots",
       "label": "The robots found on the flat island",
       "x": 590,
-      "y": 1480
+      "y": 1600
     },
     {
       "id": "iwView",
@@ -836,7 +843,7 @@
         "value-robots-onRobots": true
       },
       "x": 590,
-      "y": 1000
+      "y": 1120
     },
     {
       "id": "iwViewIs",
@@ -846,7 +853,7 @@
         "runOnChange-condition": false
       },
       "x": 590,
-      "y": 1600
+      "y": 1720
     },
     {
       "id": "iwRenderer",
@@ -864,7 +871,7 @@
         "value-3d-show3d": true
       },
       "x": 590,
-      "y": 640
+      "y": 760
     },
     {
       "id": "iwRendStore",
@@ -896,7 +903,7 @@
       "type": "Condition",
       "label": "Can this computer draw 3D?",
       "x": 590,
-      "y": 1120
+      "y": 1240
     },
     {
       "id": "iwRendNoGl",
@@ -916,7 +923,7 @@
         "event": "slow"
       },
       "x": 590,
-      "y": 1240
+      "y": 1360
     },
     {
       "id": "iwRendWrite",
@@ -935,7 +942,7 @@
       "type": "/Logic/Island keep",
       "label": "The island’s jobs and shells, into her save",
       "x": 590,
-      "y": 1720
+      "y": 1840
     },
     {
       "id": "iwKeepDue",
@@ -980,7 +987,7 @@
         "value-shown-shown": true
       },
       "x": 590,
-      "y": 1840
+      "y": 1960
     },
     {
       "id": "iwPayIs",
@@ -1234,7 +1241,7 @@
       "type": "/Logic/Land card",
       "label": "Her land’s card",
       "x": 590,
-      "y": 2560
+      "y": 2680
     },
     {
       "id": "iwGhostVar",
@@ -1274,7 +1281,7 @@
         "mode": "move"
       },
       "x": 590,
-      "y": 760
+      "y": 880
     },
     {
       "id": "iwGhostPlace",

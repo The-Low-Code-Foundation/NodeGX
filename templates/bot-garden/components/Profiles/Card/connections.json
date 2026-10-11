@@ -29,6 +29,12 @@
     },
     {
       "fromId": "pcIn",
+      "fromProperty": "robot",
+      "toId": "pcGarden",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "pcIn",
       "fromProperty": "color",
       "toId": "pcDraw",
       "toProperty": "color"
