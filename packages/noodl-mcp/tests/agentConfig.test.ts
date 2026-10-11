@@ -294,6 +294,20 @@ describe('BST-005 the server registers itself, by construction', () => {
     expect(path.isAbsolute(registration!.args[0])).toBe(true);
   });
 
+  it('P112-S9-NPXREG: under npx, registers the pinned npx command, never the cache it ran from', () => {
+    // The path npx gave this server on 2026-10-11; npm may empty that folder whenever it likes.
+    const cached = '/Users/someone/.npm/_npx/aabc33aa1e2306c2/node_modules/.bin/noodl-mcp';
+    const registration = selfRegistration('/tmp/some-project', cached)!;
+    const { name, version } = require('../package.json');
+    const npx = ['-y', `${name}@${version}`, '/tmp/some-project', '--allow-writes'];
+    if (process.platform === 'win32') expect([registration.command, ...registration.args]).toEqual(['cmd', '/c', 'npx', ...npx]);
+    else expect([registration.command, ...registration.args]).toEqual(['npx', ...npx]);
+    expect(JSON.stringify(registration)).not.toContain('_npx');
+    // Control: the same server from a project's own install still reproduces its launch.
+    const local = selfRegistration('/tmp/some-project', '/Users/someone/app/node_modules/.bin/noodl-mcp')!;
+    expect(local.command).toBe(process.execPath);
+  });
+
   it('carries ELECTRON_RUN_AS_NODE only when it is an Electron binary', () => {
     // 🔴 BST-004/F80: without the flag the binary boots a GUI app and serves
     // stdio anyway, so a registration that dropped it would look correct.

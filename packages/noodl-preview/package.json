@@ -13,6 +13,8 @@
   ],
   "scripts": {
     "build": "node build.mjs",
+    "prepack": "node build.mjs && node scripts/pack-runtime.mjs",
+    "postpack": "node scripts/pack-runtime.mjs --remove",
     "in-page-check": "node scripts/in-page-check.mjs",
     "graph-target-check": "node scripts/graph-target-check.mjs",
     "test": "jest",

@@ -63,6 +63,7 @@ import { deployToFolder } from '@noodl-utils/compilation/build/deployer';
 import { gradeRoots, readDeployedRoots, type RootsReading } from './deployReading';
 import { bootstrapNodeLibrary } from './headless';
 import {
+  EXTERNAL_DIR,
   buildProjectModel,
   readLegacyProject,
   readProjectForDeploy,
@@ -84,19 +85,17 @@ import { describeWireHealth, readWireHealth, type WireHealthReading } from './wi
  * here and handed to the editor through {@link setExternalFolderPath}.
  *
  * ⚠️ `../..` from `dist/` and from `src/` both land on `packages/`, which is why one expression
- * serves the bundle and the specs. That is a coincidence of depth of exactly the kind C72 was —
- * and it is safe here only because both are inside the checkout. A published package resolves it
- * to somewhere that does not exist, {@link assertDeployRuntime} says so, and the refusal is the
- * shipped behaviour rather than a crash.
+ * serves the bundle and the specs in a checkout. P112 OWN-011: an installed package has no
+ * checkout around it, so it reads the production runtime `npm pack` built beside the bundle —
+ * the resolution is `loader.ts`'s {@link EXTERNAL_DIR}, one rule for the preview and the deploy.
  */
+export { EXTERNAL_DIR };
 export { gradeRoots, readDeployedRoots } from './deployReading';
 export type { RootsReading } from './deployReading';
 export { classifyViewerBuild, readViewerBuild, summariseViewerBuild } from './viewerBuild';
 export type { ViewerBuildReading } from './viewerBuild';
 export { describeWireHealth } from './wireHealth';
 export type { NamedWire, WireHealthReading } from './wireHealth';
-
-export const EXTERNAL_DIR = path.resolve(__dirname, '../../noodl-editor/src/external');
 
 /** The deploy runtime's own manifest. Its absence is what "this build cannot deploy" means. */
 export const DEPLOY_INDEX = path.join(EXTERNAL_DIR, 'deploy', 'index.json');

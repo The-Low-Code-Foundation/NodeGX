@@ -46,6 +46,43 @@ suspicion goes in your phase's notes until it is measured.
 **When a bug is fixed**, change its `status` to `fixed`, add `commit:`, and keep the file. The ledger is also
 the record of what was found and how it ended.
 
+## Bugs and the packages
+
+Some of what this repo finds is a fact about a package other people will install: `@nodegx/node-spec` (what a node
+does, P107) and the phase 112 kit (`@nodegx/project-contract`, the preview, the observe protocol, `@nodegx/canvas-look`,
+the editor suite), and `@nodegx/core`. A bug found by any phase, in any template, is a lesson for that package, and two
+header lines make sure the package learns it:
+
+| field | values |
+|---|---|
+| `kit` | the package whose behaviour the bug is about: `node-spec` · `project-contract` · `preview` · `observe` · `canvas-look` · `editor-suite` · `core` · `mcp` |
+| `regression` | the scenario, test or fixture that reproduces the bug **inside that package's own suite**, as a repo path, optionally followed by the scenario's name in quotes: `packages/nodegx-node-spec/scenarios/String Format.json "a placeholder used twice fills EVERY time — the port description says only the first (§6 row)"` |
+
+**Before you file a bug about a node, run the node's spec.** If `packages/nodegx-node-spec/scenarios/<Type>.json`
+exists, the node's behaviour is written down and graded against the runtime. Play your case through it (a scenario, or
+`mount` / `set` / `settle` in a scratch script). If the spec already does what you saw, the bug is the runtime, the
+export or the description disagreeing with it: say which. If the spec does something else, you may have read the code
+wrong. 2026-10-02: `P109-S5-STRINGFORMAT` said String Format fills a repeated placeholder only once, from the comment
+in `stringformat.ts`; the spec and the runtime both fill every one, and the real defect was the comment and the port
+description (`P107-D2`), which a String Format scenario had pinned since 2026-09-30. The wrong bug had already become a
+reason to write a Function instead of using the node.
+
+**When a kit bug is fixed**, its `regression:` must exist (`node scripts/bugs.js check` fails a fixed kit bug without
+one, or with a path that is not there). The regression ships with the package, so every later version is tested
+against the bug. If the fix changes what a specced node does, P107 NSP-010's rule applies too: the spec's `version`
+goes up in the same commit with a `changes` entry, and that entry names the bug's id. That entry is what a package's
+changelog is made from (P112 OWN-010).
+
+```
+node scripts/bugs.js --kit node-spec        # what one package still has to learn
+node scripts/bugs.js kits                   # per package: found, fixed, with a regression; and how many are untagged
+node scripts/bugs.js kits --suggest         # untagged bugs whose area names a specced node: where tagging starts
+node scripts/bugs.js gate preview           # before a publish: exit 1 while the package has an unresolved blocker
+```
+
+**A blocker stops a publish** (P112 R6): `gate <kit>` exits 1 while one of the package's bugs is an open,
+needs-ruling or scheduled `blocker`, and prints the lesser unresolved ones as the release's known issues.
+
 ## Building a bug-fixing phase
 
 Run `node scripts/bugs.js`, choose the bugs (worst first, grouped by area), give each `status: scheduled` and

@@ -300,11 +300,27 @@ export async function loadPreview(dir: string, format: ProjectFormat): Promise<P
 // ─── Deploy assets ────────────────────────────────────────────────────────────
 
 /**
- * The deployed runtime template + bundle, shared with the real deploy path.
- * This directory is a build artifact (gitignored) produced by
- * `npm run build:editor:_viewer`, so its absence is a first-class error.
+ * P112 OWN-011 — the viewer runtime's folder (`deploy/` inside it), for this preview and for `nodegx-deploy`.
+ *
+ * Two places, the first that holds `deploy/index.json` wins:
+ *   1. the editor's build output in a checkout (`npm run build:editor:_viewer`, or `npm run dev`'s watcher), so a
+ *      contributor's preview keeps reading the runtime their own build just rewrote;
+ *   2. `external/` beside this bundle — the production runtime `npm pack` builds into `dist/external/`
+ *      (`scripts/pack-runtime.mjs`). This is the one an installed package has. Before OWN-011 there was no second
+ *      place, and `@noodl/preview` from npm refused every project (P112-S9-NORUNTIME).
+ *
+ * ⚠️ `../..` from `dist/` and from `src/` both land on `packages/` in a checkout. Installed, it lands inside
+ * `node_modules/@noodl/`, where nothing is, and the second place answers. With neither, the first is returned so the
+ * refusal names the folder a contributor has to build.
  */
-export const DEPLOY_DIR = path.resolve(__dirname, '../../noodl-editor/src/external/deploy');
+const CHECKOUT_EXTERNAL_DIR = path.resolve(__dirname, '../../noodl-editor/src/external');
+export const EXTERNAL_DIR =
+  [CHECKOUT_EXTERNAL_DIR, path.join(__dirname, 'external')].find((dir) =>
+    fs.existsSync(path.join(dir, 'deploy', 'index.json'))
+  ) ?? CHECKOUT_EXTERNAL_DIR;
+
+/** The deployed runtime template + bundle, shared with the real deploy path. Its absence is a first-class error. */
+export const DEPLOY_DIR = path.join(EXTERNAL_DIR, 'deploy');
 
 export function deployAssetPath(file: string): string {
   return path.join(DEPLOY_DIR, file);
