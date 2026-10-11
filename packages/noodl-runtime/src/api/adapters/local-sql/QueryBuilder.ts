@@ -557,7 +557,13 @@ export function buildWhereClause(
         conditions.push('FALSE');
         continue;
       }
-      if (isArray && value !== null) {
+      // P116-S17-NULLEQ: `{ f: null }` means `{ f: { $eq: null } }` on the Parse wire — "is empty" —
+      // and SQL's `= NULL` is never true, so it matched nothing.
+      if (value === null) {
+        conditions.push(`${col} IS NULL`);
+        continue;
+      }
+      if (isArray) {
         conditions.push(arrayHolds(col, value, params, dialect));
         continue;
       }

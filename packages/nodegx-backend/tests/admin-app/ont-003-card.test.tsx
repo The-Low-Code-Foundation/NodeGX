@@ -13,6 +13,8 @@ import { projectWorld, schemaPushes, type WorldFiles } from '../../../nodegx-pro
 import * as fs from 'fs';
 import * as path from 'path';
 
+import { describeCheck, type CheckDecl } from '@noodl/runtime/src/api/adapters/local-sql/schemaCommon';
+
 import { KINDS, type RuleStatus } from '../../src/admin/app/fieldKinds';
 import { TableCard, type TableDef } from '../../src/admin/app/views/schema';
 
@@ -25,7 +27,9 @@ const schema = out.schema;
 
 function asListed(name: string): TableDef {
   const push = schemaPushes(schema).find((p) => p.table === name)!;
-  const checks: RuleStatus[] = push.checks.map((rule, i) => ({ name: `chk_${i}`, rule, description: `${rule.field} is one of ${rule.oneOf.join(', ')}`, built: true, declared: true }));
+  // The route's own words for a rule (`describeCheck`): since ONT-011 step 2 a projected check is a union (an
+  // all-or-none rule has no `oneOf`), and a copy of the wording here broke on it (P116-S23-CARDCHECKS).
+  const checks: RuleStatus[] = push.checks.map((rule, i) => ({ name: `chk_${i}`, rule, description: describeCheck(rule as CheckDecl), built: true, declared: true }));
   return { name, description: push.description, columns: push.columns, checks, indexes: [] };
 }
 

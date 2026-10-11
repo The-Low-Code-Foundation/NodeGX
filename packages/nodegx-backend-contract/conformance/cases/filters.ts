@@ -114,6 +114,18 @@ export const filterCases: readonly ConformanceCase[] = Object.freeze([
   },
 
   {
+    id: 'filters/null-short-form-is-empty',
+    area: 'filters',
+    pins: '`{ f: null }` asks "is empty", exactly as `{ f: { $eq: null } }` does — not `= NULL`, which is never true (P116-S17-NULLEQ)',
+    async run(ctx) {
+      const c = await seed(ctx, 'Flt');
+      deepEq(await names(ctx, c, { note: { $eq: null } }), ['fay'], '$eq: null is wrong');
+      deepEq(await names(ctx, c, { note: null }), ['fay'], 'the short form for "empty" matched a different set');
+      deepEq(await names(ctx, c, { note: null, tag: 'gamma' }), ['fay'], 'the short form did not compose as AND');
+    }
+  },
+
+  {
     id: 'filters/regex',
     area: 'filters',
     pins: '$regex matches on a pattern, anchored where the pattern says',
