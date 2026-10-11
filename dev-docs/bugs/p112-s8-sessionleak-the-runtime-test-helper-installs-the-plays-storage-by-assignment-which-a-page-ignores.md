@@ -8,7 +8,7 @@ kit: preview
 found: P112 OWN-003 s8, 2026-10-11 — the helper bundled for a page (`noodl-preview/dist/browser/noodl-graph-target.js`) on the 85 graph scenarios in headless Chrome: five of `s10-the-session-moves` and `s11-the-owner-is-who-logged-in` red (a User read `bea@example.com` where the Node recording reads `ann@example.com`; a create carried the previous play's ACL), 80 green
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/OWN-003-ONE-WAY-TO-RUN-A-GRAPH.md §6 (steps 2–3, run 2 of the check)
 regression: packages/noodl-preview/scripts/graph-target-check.mjs (`npm --prefix packages/noodl-preview run graph-target-check`; red at 80 / 85 with the assignment put back)
-commit: (this session)
+commit: 74a73de91
 fixed: P112 OWN-003 s8, 2026-10-11 — installed by descriptor, as `installWorld` installs every other global: an own data property shadows the window's accessor, and the saved descriptor puts it back
 ---
 
