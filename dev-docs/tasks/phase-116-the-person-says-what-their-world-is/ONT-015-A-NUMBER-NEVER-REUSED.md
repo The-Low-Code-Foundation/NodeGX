@@ -4,7 +4,7 @@
 out at create, in a format the person gave, going up by one, never skipping if they said so, and never used twice.
 **Depends on** ONT-014 (the number is frozen after create), ONT-011 step 2 (the *read aloud* fact on a noun is the
 question that leads here), ONT-007 (a series put on a collection with records is a migration). **Feeds** ONT-013
-(the invoice sentence projects in full). **Status: 🟡 s22 — every AC built (§6.3: the projection, the held claim and its mutant, AC2's 409, AC3's migration on both engines); open: the capability cell (lands with its consumer, ONT-008 — §6.3), two defects filed (`P116-S22-SERIESCARRY`, `-SERIESMSG`); closes when Richard reads it. s21 — unblocked (§6.1: the census found 3 rows over 2 sources); the store and the doors built (§6.2: AC1, AC4, AC2's create half; both engines) — opened on Richard's sentence (`from: oral`) with a thin
+(the invoice sentence projects in full). **Status: 🟡 s23 — both s22 defects fixed (§6.4, `562e10453`); every AC built (s22, §6.3: the projection, the held claim and its mutant, AC2's 409, AC3's migration on both engines); open: the capability cell (lands with its consumer, ONT-008 — §6.3); closes when Richard reads it. s21 — unblocked (§6.1: the census found 3 rows over 2 sources); the store and the doors built (§6.2: AC1, AC4, AC2's create half; both engines) — opened on Richard's sentence (`from: oral`) with a thin
 warrant: ONT-011 §3.3 found one read-aloud row and no invoice-style numbering in the 8 sources. R-g ruled 2026-10-10 (§5): ask, never assume. **s19 (ONT-011 step 2):** the noun's questions exist — `readAloud`, then `looksLike`, `maySkip` (R-g's words), `restarts` — and project to a `number` field, unique and set once (held) with the series said in words; this task's build flips the `series` hold from said to held.**
 
 > **Model check (Richard, 2026-10-08 rule):** the build wants **Opus 5.5**: a counter table and an allocation inside
@@ -209,7 +209,35 @@ thin and the build is unblocked** without a ruling. What the two new rows say ab
 - **Found (filed, not fixed; neither blocks an AC):** `P116-S22-SERIESCARRY` — a number the admin types in the
   series' own look does not move the counter, so the store later hands that number out and the person's create is a
   409 (the fix is `planNumbering`'s rule, applied in the create); `P116-S22-SERIESMSG` — that 409 says
-  `undefined is already used`, since its words read the request body, which never carries the number.
+  `undefined is already used`, since its words read the request body, which never carries the number. **Both
+  fixed in s23 (§6.4).**
+
+### 6.4 A number brought, and a number named (s23, 2026-10-11, Opus 5.5) — `562e10453`
+
+- **SERIESCARRY.** `seriesRaises` (series.ts) is `planNumbering`'s rule for one record: a carried value `seriesParse`
+  reads in the look names its period and the number above it; `SERIES_RAISE_SQL` moves that counter there and never
+  back (`CASE WHEN excluded."next" > "next"`, the one statement on both engines — no `GREATEST`/`MAX` split). On
+  create it runs **inside the insert's transaction**, so a refused create raises nothing; on save, after the row
+  changed. The save was the same hole through the other door: the doors refuse a series field only on create
+  (a person's edit is ONT-014's freeze, so only the admin reaches it). `OLD-7` still counts for nothing.
+- **SERIESMSG.** The create appends the values it filled for the colliding fields to the refusal
+  (`QueryBuilder.uniqueConstraintWithValues`: `UNIQUE constraint failed: Invoice.number; values {"number":"T-0003"}`);
+  `uniqueConstraintProblem` reads them back and `uniqueViolationToHttp` takes them over the body's. With SERIESCARRY
+  fixed it is reachable only when a counter is moved by hand, so the mutant arms grade it.
+- **Graded:** conformance `series` 13 → 15 cases (a number brought moves the counter past it, never back, and a
+  refused one moves nothing; a number edited does the same); `ont-015-series` +2 (the bug's own evidence over HTTP,
+  and its mutant — the third person is handed T-0003 and the 409 must name it); `ont-015-projection`'s counter-left
+  mutant now asserts `"INV-<year>-0001" is already used` and `value`; 4 runtime unit tests (the message round trip,
+  `seriesRaises`, the PG translation twice). **Mutants shown red:** never raise → exactly the two new conformance
+  cases, on both engines; the 409 composer reading the body only → 4 arms (2 × 2 engines). Files restored, `cmp`.
+- **Measured:** runtime `test/adapters` 17 suites 335/335; backend contract 9 suites 232/232; backend band 41 suites
+  **670/670** both engines (none skipped); runtime and backend-contract `tsc` clean; backend tests `tsc` one error,
+  P107's `noodl-mcp/src/specPorts.ts` (re-measured; not this change).
+- **Traps:** PostgreSQL's error is translated in `_run`, *after* the create's catch — and translating a translated
+  error said `?.?` (it keeps `code`, loses `detail`); `translatePgError` is idempotent now. node:sqlite's error under
+  jest comes from another realm, so `instanceof Error` is false; the catch reads `message` by shape. And a
+  `python` `assert` that fails on the first of two edits writes neither — read which line failed before trusting the
+  other edit landed (a "red under the mutant" for a case that was red anyway proves nothing).
 
 ## 7. Not this task
 
