@@ -9,7 +9,7 @@ severity: medium
 area: backend / schema (renameColumn, SQLite and PostgreSQL)
 found: P99 HLT-016 s17 (checks), 2026-09-22
 evidence: dev-docs/tasks/phase-99-the-ones-nobody-owned/verdicts/HLT-016/2026-09-22-checks/VERDICT.md ("Not built": "A renamed column is not renamed inside a check's declaration (nor an index's, pre-existing)")
-regression: packages/nodegx-backend-contract/conformance/cases/schema.ts `schema/rename-column-keeps-its-values-and-refuses-one-in-use` (P116's)
+regression: packages/nodegx-backend-contract/conformance/cases/schema.ts "schema/rename-column-keeps-its-values-and-refuses-one-in-use"
 ---
 
 A field renamed in a collection is renamed in the table and in the field list of the stored schema, but the

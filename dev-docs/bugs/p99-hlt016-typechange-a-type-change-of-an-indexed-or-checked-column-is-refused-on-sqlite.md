@@ -9,7 +9,7 @@ severity: medium
 area: backend / SQLite schema (changeColumnType)
 found: P99 HLT-016 s17 (checks), 2026-09-22
 evidence: dev-docs/tasks/phase-99-the-ones-nobody-owned/verdicts/HLT-016/2026-09-22-checks/VERDICT.md ("Found, not fixed, unowned")
-regression: packages/noodl-runtime/test/adapters/SchemaManager.changeColumnType.test.js ("a field an index or a rule reads")
+regression: packages/noodl-runtime/test/adapters/SchemaManager.changeColumnType.test.js "a field an index or a rule reads"
 ---
 
 Changing a field's type across SQLite storage classes (say Text → Number) on a field that a unique index or a

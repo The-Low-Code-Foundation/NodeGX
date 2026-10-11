@@ -1,7 +1,7 @@
 ---
 id: P100-UPG001-LOCKOUT
 title: Ten failed credentials from one IP lock it out of every route for five minutes, /health and valid admin calls included
-status: needs-ruling
+status: fixed
 commit: f5f65a122
 phase: P109
 task: ISL-040
@@ -45,3 +45,11 @@ is right. That answers a guesser 429 for a wrong credential and 200 for the righ
 speed. An admin token can be anything a person typed (`--token`), so guessing it is realistic. The spec pins today's
 answer (a right token from a locked-out address is 429) until Richard rules. The case it costs: a person whose
 browser retried an expired session ten times waits five minutes, though the app still works for them anonymously.
+
+**Ruled by Richard, 2026-10-11 (P109 s41, asked in plain words):**
+- **Q:** *"After ten wrong passwords or tokens from one internet address, that address is held back for five minutes. I
+  changed it today so that /health and visitors who aren't signed in still get through. Should a RIGHT token from that
+  same address get in during those five minutes?"*
+- **A:** **"No, keep it held"**. Otherwise someone guessing the admin token learns the moment they guess right.
+
+So the half built in `f5f65a122` is the whole fix. The spec's pinned arm is the ruled behaviour.

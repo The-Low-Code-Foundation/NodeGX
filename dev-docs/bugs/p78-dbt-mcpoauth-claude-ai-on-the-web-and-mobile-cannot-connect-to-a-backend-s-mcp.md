@@ -1,9 +1,7 @@
 ---
 id: P78-DBT-MCPOAUTH
 title: Claude on the web and on a phone cannot connect to a backend's MCP door, because it takes only an API key
-status: scheduled
-phase: P109
-task: ISL-040
+status: open
 severity: high
 area: backend / MCP (FED-005)
 found: P78 Digital Bricks Training template, sprint 55 (TASK-L191), 2026-10-01; re-confirmed on production 2026-10-01
@@ -31,3 +29,13 @@ and scoped like an API key. The Digital Bricks Training Next.js product built ex
 rotation with reuse detection, every check in the WHERE clause of the one UPDATE that redeems a code), and
 it was proven against the real claude.ai connector on 2026-09-22. It is the design to port. Size: a phase,
 not a task.
+
+**Ruled by Richard, 2026-10-11 (P109 s41, asked in plain words):**
+- **Q:** *"Claude on claude.ai, in the desktop chat or on your phone can't connect to a NodeGX backend's Claude door.
+  Only Claude Code with a pasted key can, so a trainer has to be at the one computer where the key lives. Fixing it
+  means building a 'Sign in with your backend' (OAuth) server into the backend. DBT's own app already has a working one
+  to copy (tested with real claude.ai on 22 Sept). Where does it go?"*
+- **A:** **"Its own phase"**. It is phase-sized: a consent screen, tokens, refresh and revocation.
+
+P109 has handed it back: no phase or task, `status: open`, until that phase is scoped. Read P96 FED-005 (the door) and
+DBT's TASK-L172 (the design to port) first.

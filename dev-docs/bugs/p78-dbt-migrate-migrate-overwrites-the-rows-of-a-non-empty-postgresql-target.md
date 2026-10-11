@@ -9,7 +9,7 @@ severity: blocker
 area: backend / migrate (SQLite to PostgreSQL)
 found: P78 Digital Bricks Training template, TASK-L179, 2026-09-24
 evidence: templates/digital-bricks-training/docs/START-HERE.md "Putting the demo back (TASK-L179)", "On PostgreSQL" ("Measured: `migrate` does not refuse a non-empty target")
-regression: packages/nodegx-backend/tests/brg-004-data-plane.test.ts (the ISL-039 case)
+regression: packages/nodegx-backend/tests/brg-004-data-plane.test.ts "ISL-039 (P78-DBT-MIGRATE): a first run into a database that already holds rows is refused by table, before a row moves"
 ---
 
 `nodegx-backend migrate --to postgres://…` into a database that already holds rows does not refuse. It replaced

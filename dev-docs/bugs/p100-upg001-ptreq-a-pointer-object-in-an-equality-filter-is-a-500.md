@@ -9,7 +9,7 @@ severity: medium
 area: runtime / local-sql query (backend data API)
 found: P100 UPG-001 s3 (§3.6b), 2026-09-23; re-read at HEAD 2026-10-01
 evidence: dev-docs/tasks/phase-100-0.3.0-the-first-upgrade/UPG-001-THE-BREAK-CENSUS.md §3.6b
-regression: packages/nodegx-backend-contract/conformance/cases/filters.ts `filters/a-pointer-written-as-a-parse-pointer-is-a-value` (both engines); packages/nodegx-backend/tests/isl039-backup-keeps-every-setting.test.ts (over `/classes`)
+regression: packages/nodegx-backend-contract/conformance/cases/filters.ts "filters/a-pointer-written-as-a-parse-pointer-is-a-value"
 ---
 
 `where author = {__type:'Pointer', className:'_User', objectId:'…'}`, the way a Parse client writes a pointer

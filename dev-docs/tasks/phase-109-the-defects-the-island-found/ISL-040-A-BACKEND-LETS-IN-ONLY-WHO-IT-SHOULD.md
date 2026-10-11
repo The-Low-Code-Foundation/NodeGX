@@ -1,6 +1,6 @@
 # ISL-040 — A backend lets in only the people and the code it should
 
-**Status: 🟢 s41 (2026-10-11): 3 of 6 built — USERCOLS `6719e4a89` and UNRULED `89b9fd339` (both high, both measured as attacks first), LOCKOUT's safe half `f5f65a122` (its other half is a ruling). Left: DEVOPEN (buildable: a switch on the manager, P104 is not building it), SESSIONS and MCPOAUTH (rulings), LOCKOUT half 2 (a ruling). Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 6 bugs
+**Status: 🟢 s41 (2026-10-11): 3 of 6 fixed — USERCOLS `6719e4a89` and UNRULED `89b9fd339` (both high, both measured as attacks first), LOCKOUT `f5f65a122` (ruled: a right token stays held). All three asks ruled s41 (AC2 met): SESSIONS → "ends after 30 days unused" (buildable), MCPOAUTH → "its own phase" (handed back, ledger `open`). Left to build: DEVOPEN, SESSIONS. Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 6 bugs
 from the ledger (`dev-docs/bugs/`) that no phase owned: 3 high · 3 medium; 1 to ask. **Side:** nodegx-backend (the cloud runtime's data path, function permissions, auth sessions and rate limit), the backend manager, the MCP door (FED-005)
 
 ## 1. The person sentence
@@ -82,3 +82,9 @@ security rows were driven as attacks:
   right from wrong.
 - **SESSIONS** is a ruling (do sessions expire?).
 - **MCPOAUTH** is a ruling (does OAuth on the door belong in P109 or in a FED phase?).
+
+**AC2 met, 2026-10-11:** each question and answer is verbatim in its ledger file.
+- **LOCKOUT half 2: "No, keep it held".** The row is fixed by `f5f65a122` as built.
+- **SESSIONS: "Ends after 30 days unused",** changeable per backend on the Sign-in page. Buildable, and the ledger
+  file has the plan.
+- **MCPOAUTH: "Its own phase".** Handed back: no phase, no task, `status: open`.

@@ -4,9 +4,9 @@
  * expired session, or a NAT full of people, took the app offline for everyone behind it.
  *
  * BAK-005's limiter is a speed bump against guessing a credential, so it now holds back only requests
- * that carry one. What it does NOT do (pinned below, waiting on a ruling): let a locked-out address
- * through because its credential is right. That would answer a guesser 429 for wrong and 200 for right,
- * which is the speed bump removed.
+ * that carry one. What it does NOT do, as Richard ruled on 2026-10-11 ("No, keep it held"): let a
+ * locked-out address through because its credential is right. That would answer a guesser 429 for wrong
+ * and 200 for right, which is the speed bump removed.
  */
 import * as fs from 'fs';
 import * as os from 'os';
@@ -66,7 +66,7 @@ describe('ISL-040 P100-UPG001-LOCKOUT — the lockout holds back credentials, no
     }
   );
 
-  it('PINNED pending a ruling: a RIGHT credential from the locked-out address is held back too (no 429-for-wrong, 200-for-right answer key)', async () => {
+  it('RULED 2026-10-11 "No, keep it held": a RIGHT credential from the locked-out address is held back too (no 429-for-wrong, 200-for-right answer key)', async () => {
     expect((await request(base, 'GET', '/classes/Notice', { headers: { authorization: 'Bearer t0k' } })).status).toBe(429);
   });
 });

@@ -1,7 +1,7 @@
 ---
 id: P78-DBT-KEYORDER
 title: An Object field reads back with its keys in a different order from the one saved
-status: needs-ruling
+status: scheduled
 phase: P109
 task: ISL-039
 severity: low
@@ -23,3 +23,17 @@ Neither was re-measured here.
 **Ruling wanted:** is key order part of an Object field's value? If yes, PostgreSQL needs `json` (or an order-keeping
 encoding) and the SQLite path needs finding. If no, the docs and the Records API should say so, and the node reference
 should warn that `JSON.stringify` comparison of a read-back object is unreliable. Either way, small.
+
+**Ruled by Richard, 2026-10-11 (P109 s41, asked in plain words):**
+- **Q:** *"When an app saves a record holding several named values (for example a learner's facts: 'zebra', 'apple',
+  'a'), a backend on SQLite gives them back in the order they were saved. A backend on PostgreSQL gives them back
+  re-sorted, shortest name first, then A–Z. I measured this today. DBT's coach page lists the facts in that order, so
+  the list shuffles after a move to PostgreSQL. What should NodeGX promise?"*
+- **A:** **"Order not promised"**: the docs and the node reference say the order is not kept, and a page that wants an
+  order sorts the list.
+
+Measured s41 on both engines through the facade: `{zebra, apple, mid:{y,b}, a}` comes back from PostgreSQL as
+`{a, mid:{b,y}, apple, zebra}`, and from SQLite as saved.
+
+**To build (ISL-039 AC3):** say it where a person reads it: the Records docs page, and the node reference for the nodes
+that read an Object field. Then warn that comparing a read-back object with `JSON.stringify` is unreliable.

@@ -1,6 +1,6 @@
 # ISL-039 — A backend never loses or changes your data behind your back
 
-**Status: 🟢 s41 (2026-10-11): 7 of 8 fixed — both blockers (BACKUP `dc4e0b51a`, MIGRATE `2deb380d0`), NOACL `f8574d6f7`, ARRAYEQ + PTREQ `5bfb23cf4`, ADDUNIQUE `421cfc5a6`, NUL `3e18ea4cc`; each re-measured first and graded with a control. Left: KEYORDER, a ruling (AC2). Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 8 bugs
+**Status: 🟢 s41 (2026-10-11): 7 of 8 fixed — both blockers (BACKUP `dc4e0b51a`, MIGRATE `2deb380d0`), NOACL `f8574d6f7`, ARRAYEQ + PTREQ `5bfb23cf4`, ADDUNIQUE `421cfc5a6`, NUL `3e18ea4cc`; each re-measured first and graded with a control. KEYORDER ruled s41 ("Order not promised"; AC2 met); left: its docs (AC3). Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 8 bugs
 from the ledger (`dev-docs/bugs/`) that no phase owned: 2 blocker · 5 medium · 1 low; 1 to ask. **Side:** nodegx-backend (backups, migrate, the Parse wire, the SQLite and PostgreSQL adapters, local-sql queries)
 
 ## 1. The person sentence
@@ -96,3 +96,7 @@ ledger files hold the detail.
 **AC2 — open: KEYORDER needs Richard.** Measured s41: SQLite gives an Object field's keys back in the order they were
 saved. PostgreSQL gives `{zebra, apple, mid:{y,b}, a}` back as `{a, mid:{b,y}, apple, zebra}`: `jsonb` sorts keys
 shortest first, then alphabetically, at every level.
+
+**AC2 met, 2026-10-11:** KEYORDER ruled **"Order not promised"**. The question and answer are verbatim in the ledger
+file. Left for AC3: say so on the Records docs page and in the node reference, with the warning about comparing a
+read-back object with `JSON.stringify`.

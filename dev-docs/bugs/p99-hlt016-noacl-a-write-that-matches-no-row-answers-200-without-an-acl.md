@@ -9,7 +9,7 @@ severity: medium
 area: backend / data adapters (SQLite and PostgreSQL)
 found: P99 HLT-018 s15 and HLT-016 s16, 2026-09-22
 evidence: dev-docs/tasks/phase-99-the-ones-nobody-owned/verdicts/HLT-016/2026-09-22/VERDICT.md "What §2 got right and wrong"; verdicts/HLT-018/2026-09-22/VERDICT.md §2
-regression: packages/nodegx-backend-contract/conformance/cases/records.ts `records/a-write-to-a-missing-row-is-not-found` (run by brg-003-conformance-sqlite and brg-005-conformance-postgres)
+regression: packages/nodegx-backend-contract/conformance/cases/records.ts "records/a-write-to-a-missing-row-is-not-found"
 ---
 
 A write that finds nothing to write is told it worked. With an ACL context, 0 rows changed is answered

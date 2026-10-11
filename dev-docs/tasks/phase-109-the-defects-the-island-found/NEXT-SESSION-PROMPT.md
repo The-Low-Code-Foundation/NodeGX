@@ -10,8 +10,8 @@ re-measured first and red on the old code.
 
 | task | state | what is left | blocked on |
 |---|---|---|---|
-| ISL-039 backend data | 🟢 7 / 8 | KEYORDER | **ruling** (below) |
-| ISL-040 backend access | 🟢 3 / 6 | **DEVOPEN (buildable)**; LOCKOUT half 2, SESSIONS, MCPOAUTH | rulings for three |
+| ISL-039 backend data | 🟢 7 / 8 | KEYORDER's docs (ruled) | nothing |
+| ISL-040 backend access | 🟢 3 / 6 | **SESSIONS, DEVOPEN** (MCPOAUTH handed back) | nothing |
 | ISL-042 cloud function deploys | ⬜ 5 bugs (3 high) | all | nothing (read §6 for collisions) |
 | ISL-046 templates & kits | ⬜ 7 bugs (2 high) | all | nothing (P108/P78 collisions in §6) |
 | ISL-047 repo install / dev stack | ⬜ 2 bugs (1 high) | all | nothing |
@@ -24,24 +24,26 @@ re-measured first and red on the old code.
 
 1. **Re-read the board yourself** (`grep -m1 '^\*\*Status' ISL-0*.md`). For each open row, grep its §8 for "not built" /
    "not filed". Do not copy the table above.
-2. **ISL-040 DEVOPEN.** A switch on the manager's Permissions page (*Enforce my rules on this machine*) and an admin
+2. **ISL-040 SESSIONS (as ruled), then DEVOPEN, then ISL-039 KEYORDER's docs.** SESSIONS: the plan is in its ledger
+   file. DEVOPEN: A switch on the manager's Permissions page (*Enforce my rules on this machine*) and an admin
    route that writes `devOpen` and reloads `SecurityState` (the restore path's `reloadConfig`). Point the three
    sentences at it (`App.tsx` `DevOpenNotice`, `views/keys.tsx`, `views/permissions.tsx`). It needs a drive in the
    served manager. P104 last worked on 2026-09-26 and is not building it.
 3. **ISL-042, then ISL-047, then ISL-046.** Each one: re-measure every row first, red before the fix, one commit per
    row.
-4. Ask the rulings below at the END of the session, with what you built beside them.
+4. Ask any new ruling at the END of the session, with what you built beside it, in plain words.
 
-## Rulings owed to Richard (asked in plain words at the end of s41; record the answers in the task files)
+## Rulings Richard gave at the end of s41 (2026-10-11), all as recommended. Each is verbatim in its ledger file.
 
-- **KEYORDER (ISL-039):** an Object field's keys come back in a different order on PostgreSQL, measured s41:
-  `{zebra, apple, mid:{y,b}, a}` → `{a, mid:{b,y}, apple, zebra}`. SQLite keeps the order.
-- **LOCKOUT half 2 (ISL-040):** after ten wrong tries from one address, should a RIGHT token from that address get in?
-- **SESSIONS (ISL-040):** a sign-in session never expires.
-- **MCPOAUTH (ISL-040):** OAuth on a backend's MCP door, so Claude on the web or a phone can connect. Is that P109 or
-  a FED phase?
-- Still carried from s40: `P109-S36-STALEMCPDIST` (rebuild the people's MCP door; it gates ISL-022 AC6), the `nodegx`
-  bin rebuild, and s38/s39's list (in s40's handoff, `git show 223288e2e^:dev-docs/tasks/phase-109-the-defects-the-island-found/NEXT-SESSION-PROMPT.md`).
+- **KEYORDER: "Order not promised".** Docs and the node reference say so (ISL-039 AC3).
+- **LOCKOUT half 2: "No, keep it held".** The row is fixed as built.
+- **SESSIONS: "Ends after 30 days unused",** changeable per backend on the Sign-in page. Buildable.
+- **MCPOAUTH: "Its own phase".** Handed back (ledger `open`, no phase).
+- **Still owed from s40:**
+  - `P109-S36-STALEMCPDIST` (rebuild the people's MCP door; it gates ISL-022 AC6).
+  - The `nodegx` bin rebuild.
+  - s38/s39's list, in s40's handoff:
+    `git show 223288e2e^:dev-docs/tasks/phase-109-the-defects-the-island-found/NEXT-SESSION-PROMPT.md`.
 
 ## What s41 built (commits)
 

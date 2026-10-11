@@ -9,7 +9,7 @@ severity: low
 area: runtime tests / QueryBuilder.dialect
 found: P99 HLT-016 s17, 2026-09-22
 evidence: dev-docs/tasks/phase-99-the-ones-nobody-owned/verdicts/HLT-016/2026-09-22-checks/VERDICT.md (9 and then 15 failures when concurrent; alone, green)
-regression: packages/noodl-runtime/test/adapters/QueryBuilder.dialect.test.js (run twice at once)
+regression: packages/noodl-runtime/test/adapters/QueryBuilder.dialect.test.js "two runs at once"
 ---
 
 A gate that reads red for a reason that is not the code: two runs of the runtime's adapter tests at once (two

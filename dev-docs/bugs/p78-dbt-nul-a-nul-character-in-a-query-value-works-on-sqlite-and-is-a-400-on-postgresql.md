@@ -9,7 +9,7 @@ severity: medium
 area: backend / PostgreSQL adapter (query values)
 found: P78 Digital Bricks Training template, the move to PostgreSQL, 2026-09-23
 evidence: templates/digital-bricks-training/docs/START-HERE.md (PostgreSQL notes: "A NUL byte in a query parameter is fine on SQLite and fatal on PostgreSQL")
-regression: packages/nodegx-backend-contract/conformance/cases/filters.ts `filters/a-nul-in-a-value-matches-nothing-on-every-engine` (both engines)
+regression: packages/nodegx-backend-contract/conformance/cases/filters.ts "filters/a-nul-in-a-value-matches-nothing-on-every-engine"
 ---
 
 The same cloud function answers on SQLite and fails with a 400 on PostgreSQL when a query compares against a string
