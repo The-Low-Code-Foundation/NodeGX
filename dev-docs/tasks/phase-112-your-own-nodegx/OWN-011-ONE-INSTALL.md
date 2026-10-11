@@ -204,5 +204,5 @@ the error sent to `/dev/null` — use `-mmin`, and run it on a folder known to h
 unit-graded with a calibration and a red mutant; **its in-editor drive is owed**: the dev stack died of heap a second
 time (renderer webpack at 4 GB on its second compile, load 32, swap 14.8 / 16 GB).
 
-**Owed:** R15's release (§10); PAGEPORTS and OPENWRITES, then AC2 re-driven on both routes (0.4.0 and the dev
+**Owed:** R15's release — **OWN-013** (re-ruled: via `main`; my `cline-dev` tag was cancelled before any draft); PAGEPORTS and OPENWRITES, then AC2 re-driven on both routes (0.4.0 and the dev
 editor); REFUSALWORDS. §4.4 unchanged.

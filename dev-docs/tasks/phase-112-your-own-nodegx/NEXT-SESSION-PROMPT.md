@@ -1,77 +1,68 @@
 # Phase 112 — next session
 
-**Written 2026-10-11 at the end of session 10** (Opus 5.5). Session 10 published the kit: six packages at 0.1.0 on npm
-(`create-nodegx`, `@nodegx/mcp`, `@nodegx/preview`, `@nodegx/node-spec`, `@nodegx/project-contract`,
-`@nodegx/canvas-look`), each built from a clean worktree at the commit pushed to GitHub, each registry checksum equal
-to the tarball that passed the stranger checks, and the whole chain passing again FROM THE REGISTRY. Earlier handoffs
-are in this file's git history (`git log -p -- NEXT-SESSION-PROMPT.md`).
+**Written 2026-10-11 at the end of session 11** (Opus 5.5). Session 11 opened the project the npm kit makes in an
+editor, which is what OWN-011 AC2 asks. The released editor (0.3.0) refuses it. The current editor opens it but
+writes four files on open. AC4 is met. Richard ruled two things: R15, release an editor that opens it (through `main`,
+now **OWN-013**), and R16, opening keeps the project's own id (built). Earlier handoffs are in this file's git history.
 
 ## The board (re-derived from the task files, 2026-10-11)
 
 | task | built | driven / gated | Model |
 |---|---|---|---|
-| OWN-000 the prototypes, measured | 🟢 | census re-run s8 | — |
-| OWN-001 the format leaves the editor | 🟢 AC1–AC4 | s5 | — |
-| OWN-002 the spec in a page | 🟢 | §6; **on npm s10** | — |
-| OWN-003 one way to run a graph | 🟢 | `graph-target-check` 85 / 85 (s8) | — |
-| OWN-004 the real app beside it | 🟢 slices 1–3 | `real/check.mjs` PASS (s6) | §6.3 items 2–5 **Opus** |
-| OWN-005 the look | 🟢 | §6; **on npm s10** | — |
-| OWN-006 the editor suite | 🟢 | s8/s9; **on npm s10** inside `@nodegx/project-contract` | — |
+| OWN-000 – OWN-006 | 🟢 | as s10 (OWN-006 gains a fourth fixture, s11) | — |
 | OWN-007 the brief | 📋 (R3: a skill in a public repo) | — | see its file |
 | OWN-008 three strangers | 📋 | — | see its file |
 | OWN-009 Richard's own | 📋 | — | see its file |
-| OWN-010 every bug teaches the kit | 🟡 ledger half + `gate <kit>`; s10: R6's known issues generated into CHANGELOG.md | 0 blockers on all five kit values | see its file |
-| OWN-011 one install | 🟡 **s10: PUBLISHED**, AC1 + AC3 met (§8) | the chain from the registry PASS (§8) | **Opus** |
+| OWN-010 every bug teaches the kit | 🟡 ledger + `gate <kit>` | `gate mcp`: 0 blockers, 2 known issues (FORMATSKEW, PAGEPORTS) | see its file |
+| OWN-011 one install | 🟡 published; **AC1, AC3, AC4 ✅**; **AC2 editor half ❌** (§9) | the made project through three suite adapters PASS; opened in 0.3.0 (refused) and the dev editor (4 writes) | **Opus** |
 | OWN-012 the screen, from the descriptions | 📋 | — | step 1 **Opus**, 2–3 **Fable** |
+| **OWN-013 the 0.4.0 cut** | 📋 bump `88366e69f` on `cline-dev` (pushed) | G1–G10 all ⬜ | **Opus** |
 
-**Built but undriven: 0.** Commits: `a4ac921d5` (licence, access, the MCP's files list, READMEs; UNLICENSED),
-`6b3910215` (the kit's three packages publishable, create-nodegx GPL, `stranger-kit.mjs`; CLASSICTYPES — **pushed to
-GitHub `cline-dev`**), `e4d5747fa` (R12–R14, CHANGELOG section), then the docs commit.
+**Built but undriven: 1** — P112-S11-IDREPLACE's fix (`f2505b83f`), unit-graded with a red mutant. The dev stack
+died of heap twice this session (load 20–32), so it was not seen in the editor. Commits: `f2505b83f` (the fix and the
+AC4 fixture), `c841e1ae4` (docs: five bugs, §9, R15/R16), `88366e69f` (the 0.4.0 bump), then this docs commit.
 
-## Session 10 in brief
+## Session 11 in brief
 
-- **Rulings R12–R14** (README §8), asked in one round just before anything went out: push, then publish; the three
-  kit packages in the same release; `create-nodegx` GPL-3.0-only.
-- **Two defects a first publish would have shipped**, fixed with gates that fail on their mutants:
-  P112-S10-UNLICENSED (blocker: no licence, restricted, a stale 767 KB file in the MCP tarball) and
-  P112-S10-CLASSICTYPES (high: classic-resolution TypeScript could not type `@nodegx/node-spec/node` or
-  `project-contract/format`).
-- 🔴 **The shared checkout is not a publish source:** the MCP tarball packed there inlined six of a peer's uncommitted
-  files. The release was packed in `make-worktree.sh` worktree at `6b3910215` — after deleting the script's links into
-  the primary's `dist` folders, which a build would have written through.
-- 🔴 **`project-contract` publishes from `dist/publish`** (`npm run build:publish`): the repo imports its TypeScript by
-  name, so its own manifest stays `private`.
-- 🔴 **npm 2FA:** `npm publish` from a session stops on `EOTP`; Richard runs the publish in his terminal
-  (`publish-all.sh` pattern: tested tarballs, dependency order, skip what is up).
-- 🔴 **I told Richard an approval was waiting on npmjs.com; it was not.** A brand-new name gets a `0.0.0-stage`
-  placeholder and the real version appears one to three minutes later. One read at 13:23 is not "unpublished".
-- Not touched, still flagged from s9: four of a peer's untracked files say `--workspace @noodl/mcp` / `@noodl/preview`.
+- **From the registry, again:** `npm create nodegx@0.1.0` → `create_project` "Reading List" (15 files) through
+  `npx -y @nodegx/mcp@0.1.0`, spoken to by `scratchpad/probe.mjs` (a 70-line stdio client). Every open was of a copy,
+  graded by checksum against a snapshot.
+- **The installed NodeGX 0.3.0 refuses it:** P112-S11-FORMATSKEW (high, open). The kit writes format 5, and 0.3.0
+  opens ≤ 4. The refusal shows two messages and both are wrong (P112-S11-REFUSALWORDS, medium, open): it says "Noodl"
+  and links noodl.net, and a toast says *project.json is missing*.
+- **The dev editor opens it and writes four files** (through the real *Open project…* button; only the native folder
+  dialog was doubled):
+  - P112-S11-IDREPLACE (high): a new project id was saved over the file's. **Fixed (R16)**.
+  - P112-S11-PAGEPORTS (medium, `kit: mcp`): the Page's `dynamicports` cache. The control arm proves it is the whole
+    component-side cause.
+  - P112-S11-OPENWRITES (medium): `nodegx.project.json` gets rewritten on **every** open. The save baseline is hashed
+    from the importer, the save from `toJSON()`. The first open also loses `created` and stamps `nodegxVersion "1.1.0"`.
+- **AC4 ✅:** fixture `reading-list` + an agent's first page as its script. Reference, MCP adapter and Electron adapter
+  all PASS (`test:ci` 3,012 specs, the 2 floor failures by name). 🔴 **The suite does not grade port names**: a
+  `bogusPort` mutant passed. The existing `todo-list` script wires a Counter `limit` that does not exist.
+- 🔴 **I cut 0.4.0 the wrong way.** I tagged `v0.4.0` on `cline-dev` from an August memory. RELEASE-PROCESS §3 has
+  cut from `main` since v0.2.3. I asked Richard and he said redo it via `main`. The run was cancelled before any draft
+  and the tag deleted on both sides. The memory now opens with a correction, and the index line says `RELEASE@main`.
 
 ## What to do next, in order
 
 **First, in your first message: say which model you are running on and whether the task's Model line says Richard
 should switch** (README §0.2). Do not wait for an answer.
 
-1. **OWN-011 AC2 second half (Opus):** the made project opens in the editor with nothing written beyond the three
-   files (run-editor skill, on a copy; make it with `npm create nodegx` + the registry server, §8). **AC4:** that
-   project as an OWN-006 suite fixture.
-2. **OWN-012 step 1 (Opus):** Orbit's nine visual nodes drawn from the specs + NSP-016's layout model, graded box by box.
-3. **OWN-007 (R3):** the brief as a skill in a public repo. It can now say what is real: `npm create nodegx`; the
-   server `npx -y @nodegx/mcp@0.1.0 --allow-writes`; `npm install @nodegx/node-spec @nodegx/project-contract
-   @nodegx/canvas-look`; offer `playGraph`; a fresh runner per scenario (s8).
-4. OWN-011 §4.4: the stranger's run on a clean account and a non-Mac machine, in a real Claude Code.
-5. OWN-004 §6.3 items 2–5.
+1. **OWN-013 (Opus): the 0.4.0 cut**, by UPG-008's runbook. Read `dev-docs/guidelines/RELEASE-PROCESS.md` §0/§3 and
+   `phase-100-0.3.0-the-first-upgrade/UPG-008-THE-CUT.md` before anything. G1 (the cut point) and G2 (the changelog,
+   through the content-authoring skill) come first. G7 asks whether PAGEPORTS and OPENWRITES are cheap enough to fix
+   before the cut. Each needs a rule chosen; see the bug files. Every push, PR, merge and tag is outward. R15 authorises
+   the release, but confirm each step with Richard.
+2. **Drive IDREPLACE's fix** in the editor on the next dev launch that survives (Open project… on a fresh copy keeps
+   `95de5bf2-…`; a second copy of the same folder gets a new id).
+3. **OWN-012 step 1 (Opus)** and **OWN-007 (R3)** as in s10's list; then OWN-011 §4.4 and OWN-004 §6.3 items 2–5.
 
 **Human decisions / done since asking:**
-- ✅ **nodegx.io deployed (s10, Richard: "publish everything"):** the homepage has a "Start from npm" section (the three
-  commands, the six packages linking to npm, the editor guide "coming soon"; the hero's second button points to it),
-  Orbit's card names the packages, and nodegx.io/changelog/ shows "npm packages 0.1.0". Richard's steer for the site:
-  **what has been done and what is coming soon — not the bugs** (the changelog points at `dev-docs/bugs/` instead of
-  listing 25 known issues). `cline-dev` pushed to GitHub at `28639c48b`.
-- The next release of any of the six: who bumps, and whether OWN-010's generated changelog must exist first (AC3 of
-  OWN-010 is still open; this release's section was generated from the gate, not from the ledger since a last release).
+- ✅ **R15 (s11):** release an editor that opens what the kit makes. Re-ruled: **through `main`** → OWN-013.
+- ✅ **R16 (s11):** opening keeps the project's own id; only making a new project creates one. Built `f2505b83f`.
 - Still worth asking when it matters: *should a node an agent adds wear the same look as one a person drops from the
-  picker?* (OWN-006 §6.3).
+  picker?* (OWN-006 §6.3); who bumps the next npm release (s10).
 
 **Not this phase's to fix, but owed:** P112-S7-TEXTDEFAULTS, P112-S8-SHAREDTARGET, P112-S9-FRESHFONT (open).
 
@@ -142,6 +133,22 @@ should switch** (README §0.2). Do not wait for an answer.
 34. **s10: `npm publish` needs Richard's authenticator** — hand him a script, not an OTP relay.
 35. **s10: classic `moduleResolution: node` ignores `exports`** — a subpath with types needs `typesVersions`; a `.d.ts`
     re-exporting JSON forces `resolveJsonModule` on every consumer. `scripts/own/stranger-kit.mjs` checks both.
+
+36. **s11: the released editor is a separate release train from the npm kit.** A format bump on `cline-dev` makes
+    every project the kit writes unopenable in the editor people can download, until the next editor release. Nothing
+    gates that yet (OWN-013 G8).
+37. **s11: the dev stack's renderer webpack dies of heap (4 GB) on its second compile on a loaded box.** A peer edit
+    starts the second compile. Check `uptime` and `vm.swapusage` before a launch. The installed app with
+    `--user-data-dir=<scratch> --remote-debugging-port=<p>` (and `NOODL_REMOTE_DEBUG_PORT=<p>` for `cdp.js`) is the
+    fallback for *released* behaviour. It may sit behind AppKit's "reopen windows?" prompt with no window:
+    `osascript … click button "Don’t Reopen"`.
+38. **s11: to open a folder the way a person does**, stub `filesystem.openDialog` through the webpack module cache and
+    press *Open project…*. A row seeded into `recently_opened_project.json` goes through `loadProject` instead, which
+    stamps the row's id over the file's: that measures your seed, not the product.
+39. **s11: `find -newermt "-25 minutes"` errors on this machine (bfs)**, and with `2>/dev/null` it reads as "nothing
+    changed". Use `-mmin -25`, and run it on a folder you know changed first.
+40. **s11: release memory was stale for two months** and was linked only from a pointer file. Read
+    RELEASE-PROCESS.md before any tag; the index line now carries `RELEASE@main`.
 
 ## To see or run things
 
