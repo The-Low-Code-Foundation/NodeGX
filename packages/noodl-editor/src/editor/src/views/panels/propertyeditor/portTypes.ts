@@ -10,48 +10,19 @@
  * `signal -> boolean` and `signal -> number`, so a tab that read the table alone
  * would tell an author that `Done` can drive a Number input. It cannot.
  *
- * Both halves live here, so the Ports tab and the popup cannot drift into
- * saying different things about the same wire. Nothing in this file imports the
- * editor: it takes the typecast table as an argument, which is what makes it
- * testable in the plain-Node `tests-unit` runner (see
- * `tests-unit/property-editor/portTypes.test.ts`).
+ * Both halves are `@nodegx/project-contract/typecasts`' (P107 NSP-021, s88):
+ * `canCastPortType` is the table, `canConnectPortTypes` the table plus the
+ * signal rule — the one body the canvas, this tab and the validator share.
+ * Nothing in this file imports the editor: it takes the typecast table as an
+ * argument, which is what makes it testable in the plain-Node `tests-unit`
+ * runner (see `tests-unit/property-editor/portTypes.test.ts`).
  */
+import { ANY_PORT_TYPE, canCastPortType, canConnectPortTypes, type Typecast } from '@nodegx/project-contract/typecasts';
 
-/** One row of `NodeLibraryData.typecasts` (see `nodelibraryexport.ts:207`). */
-export interface TypecastRule {
-  from: string;
-  to: string[];
-}
+export { ANY_PORT_TYPE, canCastPortType };
 
-/** The wildcard port type: casts to and from everything. */
-export const ANY_PORT_TYPE = '*';
-
-/**
- * `NodeLibrary.canCastPortTypes`, over an explicit table.
- *
- * Kept byte-equivalent to `nodelibrary.ts:311-324` on purpose — if that rule
- * changes, this is the twin that has to change with it.
- */
-export function canCastPortType(typecasts: readonly TypecastRule[], from: string, to: string): boolean {
-  if (!from || !to) return false;
-  if (from === ANY_PORT_TYPE || to === ANY_PORT_TYPE) return true;
-  if (from === to) return true;
-
-  const cast = typecasts.find((c) => c.from === from);
-  if (!cast || !Array.isArray(cast.to)) return false;
-
-  return cast.to.indexOf(to) !== -1;
-}
-
-/**
- * The popup's extra rule: a signal output only reaches a signal input.
- *
- * `ConnectionBar.tsx` applies this *after* `getConnectionStatus`, so it is
- * genuinely part of what an author can wire, and it is not in the cast table.
- */
-function isBlockedBySignalRule(from: string, to: string): boolean {
-  return from === 'signal' && to !== 'signal' && to !== ANY_PORT_TYPE;
-}
+/** One row of `NodeLibraryData.typecasts` (`@nodegx/project-contract/typecasts`). */
+export type TypecastRule = Typecast;
 
 /** Every port type the cast table mentions, in either column, except `*`. */
 export function portTypeUniverse(typecasts: readonly TypecastRule[]): string[] {
@@ -95,7 +66,7 @@ export function connectablePortTypes(
 
   const reaches = universe.filter((other) => {
     const [from, to] = direction === 'input' ? [other, typeName] : [typeName, other];
-    return canCastPortType(typecasts, from, to) && !isBlockedBySignalRule(from, to);
+    return canConnectPortTypes(typecasts, from, to);
   });
 
   reaches.sort((a, b) => {

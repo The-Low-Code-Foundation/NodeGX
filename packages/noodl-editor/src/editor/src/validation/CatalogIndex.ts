@@ -14,6 +14,8 @@
 
 // Type-only import of the generated catalog shape (no runtime cost).
 import type { NodeCatalog, CatalogNode, CatalogPort, Typecast } from '../../../../../noodl-types/src/node-catalog';
+import { canConnectPortTypes } from '@nodegx/project-contract/typecasts';
+
 import type { DeclaredPortGroup, ParameterBag } from './portConditions';
 // Import-free by construction (its header says why), the way `derivedPortTargets` reaches
 // `nameListParameter`: one reader of a derived-port rule, not a second copy here.
@@ -68,8 +70,8 @@ export class CatalogIndex {
   private readonly portNamesCache = new Map<string, { input: Set<string>; output: Set<string> }>();
   /** DEF-006 — memoised {@link inputDefaults} bags, one per node type. */
   private readonly defaultsByType = new Map<string, ParameterBag>();
-  /** from-type → Set<to-type> reachable via a documented typecast. */
-  private readonly typecasts = new Map<string, Set<string>>();
+  /** The catalog's typecast rows (`@nodegx/project-contract/typecasts`' table, as the runtime published it). */
+  private readonly typecasts: readonly Typecast[];
   private readonly allTypeNames: string[];
 
   constructor(private readonly catalog: NodeCatalog) {
@@ -77,9 +79,7 @@ export class CatalogIndex {
       this.byType.set(node.typeName, node);
     }
     this.allTypeNames = catalog.nodes.map((n) => n.typeName);
-    for (const cast of catalog.typecasts ?? ([] as Typecast[])) {
-      this.typecasts.set(cast.from, new Set(cast.to));
-    }
+    this.typecasts = catalog.typecasts ?? [];
   }
 
   // ── Node types ────────────────────────────────────────────────────────────
@@ -343,19 +343,16 @@ export class CatalogIndex {
   }
 
   /**
-   * Can a value of `fromType` feed an input of `toType`? Conservative: unknown
-   * types, wildcards, and signal endpoints are treated as compatible so the
-   * type rule only ever fires on a *provably* incompatible, statically-typed pair.
+   * Can a value of `fromType` feed an input of `toType`? The canvas's own answer (`canConnectPortTypes`: the
+   * typecast table, and a signal output reaches only a signal input), so the Problems panel and the agent server warn
+   * on exactly the wires a person could not draw. An unknown type is not guessed at.
+   *
+   * P107 R22 (2026-10-11): until s88 this let a signal through on either end, which the canvas never did — over
+   * Richard's 201 projects 0 wires answered differently, so the two rules became one.
    */
   isTypeCompatible(fromType: string | undefined, toType: string | undefined): boolean {
     if (!fromType || !toType) return true; // unknown ⇒ don't guess
-    if (fromType === toType) return true;
-    if (fromType === '*' || toType === '*') return true;
-    // Signals interoperate broadly and the runtime coerces around them, so a
-    // signal on either side is treated as compatible (a common, legal pattern).
-    if (fromType === 'signal' || toType === 'signal') return true;
-    const reach = this.typecasts.get(fromType);
-    return !!reach && reach.has(toType);
+    return canConnectPortTypes(this.typecasts, fromType, toType);
   }
 
   // ── Suggestions (edit distance) ──────────────────────────────────────────────

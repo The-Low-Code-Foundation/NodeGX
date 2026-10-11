@@ -135,7 +135,8 @@
       "from": "array",
       "to": [
         "collection",
-        "string"
+        "string",
+        "optionslist"
       ]
     }
   ],

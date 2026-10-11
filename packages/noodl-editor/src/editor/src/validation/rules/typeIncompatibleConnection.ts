@@ -2,8 +2,10 @@
  * Rule: connected ports carry compatible value types.
  *
  * Using the catalog's typecast matrix, a wire from an output of type A to an
- * input of type B is compatible when A === B, either side is the wildcard `*`,
- * a signal is involved, or the matrix lists B reachable from A.
+ * input of type B is compatible when the canvas would let a person draw it
+ * (`CatalogIndex.isTypeCompatible`: A === B, either side is the wildcard `*`, or
+ * the matrix lists B reachable from A — and a signal output reaches only a
+ * signal input; P107 R22).
  *
  * Severity is `warning`: the runtime coerces liberally and the catalog's type
  * model is incomplete, so a mismatch is "probably wrong", not "provably wrong"
