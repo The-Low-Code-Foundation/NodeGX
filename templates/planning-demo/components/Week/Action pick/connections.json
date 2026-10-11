@@ -23,7 +23,7 @@
     },
     {
       "fromId": "apIn",
-      "fromProperty": "id",
+      "fromProperty": "actionId",
       "toId": "apOut",
       "toProperty": "id"
     },

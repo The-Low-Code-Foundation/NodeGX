@@ -9,7 +9,7 @@
       "label": "The project",
       "ports": [
         {
-          "name": "id",
+          "name": "projectId",
           "plug": "output",
           "type": "string"
         },
@@ -24,7 +24,7 @@
           "type": "string"
         },
         {
-          "name": "move",
+          "name": "moveText",
           "plug": "output",
           "type": "string"
         },

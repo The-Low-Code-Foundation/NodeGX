@@ -1,12 +1,13 @@
 ---
 id: P78-TPL010-MOVEARROW
 title: Opening a project in the planner adds another "→ " (or "✓ Wed 30 · ") to its stored next move, every time
-status: scheduled
+status: fixed
 phase: P109
 task: ISL-046
 severity: high
 area: template / planning (Logic/Card rows → Week/Project group For Each), runtime / For Each + Model
 found: P78 TPL-010, user report from the hosted planner, 2026-10-05 (read-only trace, not driven)
+regression: packages/noodl-mcp/tests/tpl010Template.test.ts (§4 MOVEARROW: four list checks with arms, the runtime consequence with two arms, the save guard)
 evidence: templates/planning/components/Logic/Card rows/nodes.json node kdWork, script lines 207 and 212; templates/planning/components/Week/Project group/nodes.json node pgEach; packages/noodl-runtime/src/collection.ts `keptApart` and `set`; packages/noodl-runtime/src/model.ts `Model.create`
 ---
 
@@ -104,3 +105,35 @@ Richard set Planning aside the same day and its three useful parts moved into th
 
 **Still open:** `templates/planning` itself is unchanged. Fix it (rows carry `projectId`, not `id`) if Planning is ever
 brought back. The runtime warning suggested above is still a separate decision.
+
+## s45 (2026-10-11): ruled "Fix the old planner now", and fixed
+
+Asked a third time, in plain words, with the cost (half a day) and the fact that the todo list's Projects tab already
+strips the prefixes. Richard chose **fix it now**.
+
+**Run, not traced, for the first time.** `tpl010Template.test.ts` runs the card's script twice over a project the
+runtime's `Model` holds and sets its rows into one runtime `Collection` with `keepPlainRowsApart` (what a For Each does
+with its items). With the row wearing the project's id and its words in `move`, the project's move reads
+`→ → Offer the add-on`: the field report, reproduced. Fixed, it reads `Offer the add-on` and gains no field.
+
+**Fix** (in the generator, `tpl010Components.ts`; both `templates/planning` and `templates/planning-demo` regenerated,
+28 files, only these components):
+
+1. The project card's rows (`Logic/Card rows` `kdWork`): `id: 'card:' + proj.id`, the project's id in `projectId`, the
+   decorated words in `moveText`. `Week/Project list row` takes `projectId` and `moveText`; `prIn.projectId → prOut.id`,
+   so the card still hands on the project's id.
+2. The same family: the day columns (`dlWork`, `id: 'day:' + blk.id`, `blockId`), the shutdown's carry list (`suWork`,
+   `id: 'carry:' + cb.id`, `blockId`), and one the bug did not list, found by a census of every row the generator builds:
+   the block sheet's next actions (`twSheetRow` `actionRows`, `id: 'pick:' + act.id`, `actionId`). It wore the todo
+   action's id and wrote `label`, `ink` and `edge` onto the action record. Each row component sends the record's id on
+   as before (`bkIn.blockId`, `crIn.blockId`, `apIn.actionId` → `…Out.id`).
+3. The project guard (`PROJECT_GUARD`, used by both Add project and Edit project) takes the arrows and days off a move
+   before it is saved, with this file's regex. A move with an arrow in its middle is kept.
+4. **Not built: the one-time clean-up of the store.** The todo list's carry-over (TPL-008-PJ, `PROJECTS_CARRY_SCRIPT`)
+   moves every project's move into a task and empties `Project.move` on the same backend, so a planner brought back
+   finds no damaged move to clean. A move typed back in with the old prefixes is cleaned by step 3 when saved.
+
+**Gates:** `tpl010Template.test.ts` 101/101; the four list checks each with a mutant arm (the row's id put back to the
+record's: every row collides); the consequence test with two arms (id alone: the row's `hoursText` lands on the
+project; id and `move`: `→ → `); the guard on four moves. `editorSuite` and `tpl008Template` green beside it.
+Not driven on a deployed planner (it needs its backend); `planning-demo` on nodegx.io is not republished.

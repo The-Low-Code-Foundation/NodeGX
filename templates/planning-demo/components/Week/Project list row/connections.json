@@ -17,7 +17,7 @@
     },
     {
       "fromId": "prIn",
-      "fromProperty": "move",
+      "fromProperty": "moveText",
       "toId": "prMove",
       "toProperty": "text"
     },
@@ -59,7 +59,7 @@
     },
     {
       "fromId": "prIn",
-      "fromProperty": "id",
+      "fromProperty": "projectId",
       "toId": "prOut",
       "toProperty": "id"
     },

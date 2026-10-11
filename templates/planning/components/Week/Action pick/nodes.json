@@ -9,7 +9,7 @@
       "label": "The action",
       "ports": [
         {
-          "name": "id",
+          "name": "actionId",
           "plug": "output",
           "type": "string"
         },

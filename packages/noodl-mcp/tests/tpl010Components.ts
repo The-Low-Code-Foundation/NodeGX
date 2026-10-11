@@ -833,8 +833,9 @@ const MOVE_CHIP: Tpl010Component = {
   ]
 };
 
+// P78-TPL010-MOVEARROW — the block's id is `blockId`; the row's own id is not a record's.
 const BLOCK_FIELDS: Array<[string, string]> = [
-  ['id', 'string'],
+  ['blockId', 'string'],
   ['projectId', 'string'],
   ['projectName', 'string'],
   ['what', 'string'],
@@ -947,7 +948,7 @@ const BLOCK: Tpl010Component = {
     // wiring into it here lands nothing and says nothing.
     wire('bkIn', 'what', 'bkWhat', 'label'),
     wire('bkIn', 'hoursText', 'bkHours', 'label'),
-    wire('bkIn', 'id', 'bkOut', 'id'),
+    wire('bkIn', 'blockId', 'bkOut', 'id'),
     wire('bkIn', 'projectId', 'bkOut', 'projectId'),
     wire('bkIn', 'done', 'bkOut', 'done'),
     ...['bkTickTodo', 'bkLogTodo', 'bkWhoTodo'].flatMap((g) => [wire('bkIn', 'fromTodo', g, 'condition'), wire(g, 'ontrue', 'bkOut', 'openLog')]),
@@ -1218,11 +1219,14 @@ const MIGHT_LINK: Tpl010Component = {
   ]
 };
 
+// P78-TPL010-MOVEARROW — a display row never wears a record's id: a For Each turns a row into the
+// record with that id and writes every field onto it (the arrow went into Project.move). The row
+// carries the project's id as `projectId`, and its words as `moveText`, never the record's `move`.
 const PROJECT_ROW_FIELDS: Array<[string, string]> = [
-  ['id', 'string'],
+  ['projectId', 'string'],
   ['name', 'string'],
   ['hoursText', 'string'],
-  ['move', 'string'],
+  ['moveText', 'string'],
   ['hasMove', 'boolean'],
   ['moveColor', 'string'],
   ['mark', 'string'],
@@ -1266,19 +1270,19 @@ const PROJECT_LIST_ROW: Tpl010Component = {
   connections: [
     wire('prIn', 'name', 'prName', 'text'),
     wire('prIn', 'hoursText', 'prHours', 'text'),
-    wire('prIn', 'move', 'prMove', 'text'),
+    wire('prIn', 'moveText', 'prMove', 'text'),
     wire('prIn', 'hasMove', 'prMove', 'mounted'),
     wire('prIn', 'moveColor', 'prMove', 'color'),
     wire('prIn', 'mark', 'prBar', 'backgroundColor'),
     wire('prIn', 'barWidth', 'prBar', 'width'),
     wire('prIn', 'barRest', 'prBarRest', 'width'),
     wire('prIn', 'rowBackground', 'prRoot', 'backgroundColor'),
-    wire('prIn', 'id', 'prOut', 'id'),
+    wire('prIn', 'projectId', 'prOut', 'id'),
     wire('prRoot', 'onClick', 'prOut', 'pick')
   ]
 };
 
-const CARRY_ROW_FIELDS: Array<[string, string]> = [['id', 'string'], ['projectName', 'string'], ['what', 'string'], ['hoursText', 'string'], ['carryLabel', 'string']];
+const CARRY_ROW_FIELDS: Array<[string, string]> = [['blockId', 'string'], ['projectName', 'string'], ['what', 'string'], ['hoursText', 'string'], ['carryLabel', 'string']];
 
 /**
  * One block that was planned for today and is not done, in the shutdown drawer (R12).
@@ -1306,7 +1310,7 @@ const CARRY_ROW: Tpl010Component = {
     wire('crIn', 'projectName', 'crWho', 'text'),
     wire('crIn', 'what', 'crWhat', 'text'),
     wire('crIn', 'carryLabel', 'crCarry', 'label'),
-    wire('crIn', 'id', 'crOut', 'id'),
+    wire('crIn', 'blockId', 'crOut', 'id'),
     wire('crCarry', 'onClick', 'crOut', 'carry'),
     wire('crDrop', 'onClick', 'crOut', 'drop')
   ]
@@ -1774,7 +1778,7 @@ const ENTRY_ROW: Tpl010Component = {
   ]
 };
 
-const ACTION_PICK_FIELDS: Array<[string, string]> = [['id', 'string'], ['label', 'string'], ['ink', 'string'], ['edge', 'string']];
+const ACTION_PICK_FIELDS: Array<[string, string]> = [['actionId', 'string'], ['label', 'string'], ['ink', 'string'], ['edge', 'string']];
 
 /**
  * TPL-010-T T1 — one of a todo task's next actions in the block sheet. A press ticks or unticks it;
@@ -1801,7 +1805,7 @@ const ACTION_PICK: Tpl010Component = {
     wire('apIn', 'label', 'apBtn', 'label'),
     wire('apIn', 'ink', 'apBtn', 'color'),
     wire('apIn', 'edge', 'apBtn', 'borderColor'),
-    wire('apIn', 'id', 'apOut', 'id'),
+    wire('apIn', 'actionId', 'apOut', 'id'),
     wire('apBtn', 'onClick', 'apOut', 'pick')
   ]
 };
@@ -4428,7 +4432,9 @@ for (var d = 0; d < 6; d++) {
     // the day is holding for it.
     var logged = blk.done ? 0 : loggedOf(blk);
     rows.push({
-      id: blk.id,
+      // P78-TPL010-MOVEARROW — the row's own id; the block's is blockId.
+      id: 'day:' + blk.id,
+      blockId: blk.id,
       projectId: blk.projectId,
       // TPL-010-L — a task says where it came from, and how late it is when it is.
       projectName: fromTodo ? (blk.todoLate ? 'From todo · was due ' + shortDay(blk.todoDue) : 'From todo') : proj.name || '',
@@ -5586,7 +5592,9 @@ var carryRows = [];
 for (var c = 0; c < notDone.length; c++) {
   var cb = notDone[c];
   carryRows.push({
-    id: cb.id,
+    // P78-TPL010-MOVEARROW — the row's own id; the block's is blockId.
+    id: 'carry:' + cb.id,
+    blockId: cb.id,
     projectName: (byId[cb.projectId] || {}).name || '',
     what: cb.what || '',
     hoursText: hText(num(cb.planned, 0)) + ' h',
@@ -5706,12 +5714,14 @@ for (var g = 0; g < GROUPS.length; g++) {
     var late = isLate(proj);
     var live = liveMove(proj.id);
     rows.push({
-      id: proj.id,
+      // P78-TPL010-MOVEARROW — the row's own id; the project's is projectId.
+      id: 'card:' + proj.id,
+      projectId: proj.id,
       name: proj.name || '',
       hoursText: t > 0 ? hText(t) + ' h' : '\u2014',
       // R7d — the unplaced moves are what the eye should land on here: full strength, and red when
       // late. A placed one goes muted and says its day.
-      move: live ? '\u2713 ' + shortDay(live.date) + ' \u00b7 ' + (proj.move || '') : (late ? '! ' : '\u2192 ') + (proj.move || ''),
+      moveText: live ? '\u2713 ' + shortDay(live.date) + ' \u00b7 ' + (proj.move || '') : (late ? '! ' : '\u2192 ') + (proj.move || ''),
       hasMove: !!proj.move,
       moveColor: live ? 'var(--muted-foreground)' : late ? 'var(--destructive)' : 'var(--foreground)',
       mark: envMark(grp.env),
@@ -6407,7 +6417,8 @@ Outputs.kind = kind;
 Outputs.rate = Math.max(0, num(Inputs.rate, 0));
 Outputs.slot = String(Inputs.slot || '').trim();
 Outputs.rung = String(Inputs.rung || '').trim();
-Outputs.move = String(Inputs.move || '').trim();
+// P78-TPL010-MOVEARROW — the arrows and days the card once wrote into a move come off before it is saved.
+Outputs.move = String(Inputs.move || '').trim().replace(/^(?:(?:\u2192|!) |\u2713 (?:Mon|Tue|Wed|Thu|Fri|Sat|Sun) \\d{1,2} \u00b7 )+/, '').trim();
 Outputs.moveWorth = String(Inputs.moveWorth || '').trim();
 Outputs.moveWhen = String(Inputs.moveWhen || '').trim();
 Outputs.moveDue = parseDay(due) ? due : '';
@@ -7470,7 +7481,9 @@ if (b && b.todoProjected) {
     for (var a = 0; a < acts.length; a++) {
       var on = !!ticked[acts[a].id];
       arows.push({
-        id: acts[a].id,
+        // P78-TPL010-MOVEARROW (s45 census) — the row's own id; the todo action's is actionId.
+        id: 'pick:' + acts[a].id,
+        actionId: acts[a].id,
         label: (on ? '\u2611 ' : '\u2610 ') + acts[a].title,
         ink: on ? 'var(--foreground)' : 'var(--muted-foreground)',
         edge: on ? 'var(--foreground)' : 'var(--border)'

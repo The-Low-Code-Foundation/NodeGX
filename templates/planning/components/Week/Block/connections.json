@@ -47,7 +47,7 @@
     },
     {
       "fromId": "bkIn",
-      "fromProperty": "id",
+      "fromProperty": "blockId",
       "toId": "bkOut",
       "toProperty": "id"
     },

@@ -23,7 +23,7 @@
     },
     {
       "fromId": "crIn",
-      "fromProperty": "id",
+      "fromProperty": "blockId",
       "toId": "crOut",
       "toProperty": "id"
     },

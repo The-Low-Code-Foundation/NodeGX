@@ -670,12 +670,12 @@ describe('§4 the arithmetic, run rather than read', () => {
     const CARD = scriptOf(built, '/Logic/Card rows', 'kdWork');
     const ins = { projects: PROJECTS, blocks: [], weekStart: MONDAY, firstOpenDay: '2026-09-26' };
     const listRow = (out: Record<string, unknown>, id: string) =>
-      (out.groups as Array<{ rows: Array<Record<string, unknown>> }>).flatMap((g) => g.rows).find((r) => r.id === id) as Record<string, unknown>;
+      (out.groups as Array<{ rows: Array<Record<string, unknown>> }>).flatMap((g) => g.rows).find((r) => r.projectId === id) as Record<string, unknown>;
 
     const open = run(CARD, { ...ins, moveBlocks: [], selectedId: 'p-earn' }).outputs;
     expect([open.placed, open.unplaced, open.planDate, open.planHours, open.minDate, open.hasLast]).toEqual([false, true, '2026-09-26', '0.5', '2026-09-25', false]);
     expect(open.placedBlockId).toBe('');
-    expect(listRow(open, 'p-earn').move).toBe('\u2192 Offer the add-on');
+    expect(listRow(open, 'p-earn').moveText).toBe('\u2192 Offer the add-on');
     expect(listRow(open, 'p-earn').moveColor).toBe('var(--foreground)');
     // A late move that is not placed stays red — red is for exactly this (R13).
     expect(listRow(open, 'p-dormant').moveColor).toBe('var(--destructive)');
@@ -684,7 +684,7 @@ describe('§4 the arithmetic, run rather than read', () => {
     const placed = run(CARD, { ...ins, moveBlocks: [live], selectedId: 'p-earn' }).outputs;
     expect([placed.placed, placed.unplaced, placed.placedBlockId, placed.planDate]).toEqual([true, false, 'mv1', '2026-09-29']);
     expect(placed.placedLine).toBe('In the week: Tue 29 \u00b7 1 h');
-    expect(listRow(placed, 'p-earn').move).toBe('\u2713 Tue 29 \u00b7 Offer the add-on');
+    expect(listRow(placed, 'p-earn').moveText).toBe('\u2713 Tue 29 \u00b7 Offer the add-on');
     expect(listRow(placed, 'p-earn').moveColor).toBe('var(--muted-foreground)');
     // The hours box is put back whenever the project or its state changes.
     expect(placed.moveKey).not.toBe(open.moveKey);
@@ -805,6 +805,112 @@ describe('§4 the arithmetic, run rather than read', () => {
     });
     expect(edit.outputs).toMatchObject({ kind: 'earning', rate: 0, move: 'Offer the testing add-on', moveDue: '', moveStop: true });
     expect(run(scriptOf(built, C.editProject, 'EditprojecGuard'), { projectId: '', name: 'X' }).signals).toEqual([]);
+  });
+
+  /**
+   * P78-TPL010-MOVEARROW (ruled s45, "fix the old planner now"). A For Each turns each plain row into the record with
+   * that row's id and writes every field of the row onto it. The card's project rows wore the Project's id, so its
+   * decorated words ("→ ", "✓ Tue 29 · ") went into `Project.move`, one more each time the card's script ran, and a save
+   * stored them. Every list the planner draws now gives a row its own id and carries the record's in a field of its own.
+   */
+  const LISTS: Array<[string, string, string, string, (out: Record<string, unknown>) => Array<Record<string, unknown>>]> = [
+    ['the project card', '/Logic/Card rows', 'kdWork', "'card:' + proj.id", (o) => (o.groups as Array<{ rows: Array<Record<string, unknown>> }>).flatMap((g) => g.rows)],
+    ['the day columns', C.dayColumns, 'dlWork', "'day:' + blk.id", (o) => (o.columns as Array<{ blocks: Array<Record<string, unknown>> }>).flatMap((c) => c.blocks)],
+    ['the shutdown’s carry list', C.shutdown, 'suWork', "'carry:' + cb.id", (o) => o.carryRows as Array<Record<string, unknown>>]
+  ];
+  const TODAY = '2026-09-25';
+  const listInputs = {
+    projects: PROJECTS,
+    blocks: [block(MONDAY, 'p-earn', 2, false), block(TODAY, 'p-build', 1, false), block(TODAY, 'p-earn', 1, true)],
+    moveBlocks: [],
+    weekStart: MONDAY,
+    firstOpenDay: '2026-09-26',
+    selectedId: 'p-earn',
+    focusHours: 6,
+    newBlockId: '',
+    todayKey: TODAY,
+    tomorrowKey: '2026-09-26',
+    todayLong: 'Friday 25',
+    tomorrowLong: 'Saturday',
+    target: 55,
+    billableUsed: 41,
+    billableLeft: 14,
+    perDay: 2.75,
+    buildingLeft: 16.25,
+    daysLeft: 5,
+    unplacedDormant: ''
+  };
+  const recordIds = new Set([...PROJECTS, ...listInputs.blocks].map((r) => String(r.id)));
+
+  it.each(LISTS)('🔴 MOVEARROW — no row %s draws carries a record’s id, and it still names its record', (_label, component, node, own, rowsOf) => {
+    const script = scriptOf(built, component, node);
+    const rows = rowsOf(run(script, listInputs).outputs);
+    // Known-firing: the list drew rows, and each still names the record it stands for.
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows.filter((r) => recordIds.has(String(r.id)))).toEqual([]);
+    expect(rows.every((r) => recordIds.has(String(node === 'kdWork' ? r.projectId : r.blockId)))).toBe(true);
+    // ARM: the row's id back to the record's — this check sees every row.
+    expect(script).toContain(`id: ${own},`);
+    const record = own.slice(own.indexOf('+ ') + 2);
+    const arm = rowsOf(run(script.replace(`id: ${own},`, `id: ${record},`), listInputs).outputs);
+    expect(arm.filter((r) => recordIds.has(String(r.id)))).toHaveLength(rows.length);
+  });
+
+  it('🔴 MOVEARROW — the block sheet’s next actions: no row carries the todo action’s id, and the press still sends it', () => {
+    const acts = [
+      { id: 'a-draft', title: 'Draft the invoice' },
+      { id: 'a-send', title: 'Send it' }
+    ];
+    const b = { id: 'todo-t-inv', projectId: '', date: TODAY, what: 'Invoice', planned: 0.25, todoProjected: true, todoTaskId: 't-inv', todoActions: acts };
+    const out = run(scriptOf(built, C.pageWeek, 'twSheetRow'), { id: b.id, newDay: '', mode: '', blocks: [b], projects: PROJECTS, todoUrl: '', picked: '', history: [] }).outputs;
+    const rows = out.actionRows as Array<Record<string, unknown>>;
+    expect(rows.map((r) => r.actionId)).toEqual(['a-draft', 'a-send']);
+    expect(rows.filter((r) => r.id === 'a-draft' || r.id === 'a-send')).toEqual([]);
+    expect(connectionsOf(built, C.actionPick).some((w) => w.fromId === 'apIn' && w.fromProperty === 'actionId' && w.toId === 'apOut' && w.toProperty === 'id')).toBe(true);
+  });
+
+  /**
+   * The consequence, on the runtime's own Model and Collection (what a For Each does with its items): the card's script
+   * run twice over a project the query holds, its rows set into a list each time.
+   */
+  function cardTwice(script: string, id: string): { move: string; hoursText: unknown } {
+    /* eslint-disable @typescript-eslint/no-var-requires */
+    const M = require('../../noodl-runtime/src/model');
+    const L = require('../../noodl-runtime/src/collection');
+    /* eslint-enable @typescript-eslint/no-var-requires */
+    const Model = M.default ?? M;
+    const Collection = L.default ?? L;
+    const record = Model.create({ id, name: 'Bramble & Co', kind: 'earning', move: 'Offer the add-on', moveDue: '2026-09-25' });
+    // One For Each, its items set again each time the script runs (opening the card, then closing it).
+    const list = Collection.create();
+    Collection.keepPlainRowsApart(list);
+    for (let pass = 0; pass < 2; pass++) {
+      const projects = [{ ...PROJECTS[0], id, move: record.get('move') }];
+      const out = run(script, { ...listInputs, projects, selectedId: id }).outputs;
+      list.set((out.groups as Array<{ rows: unknown[] }>).flatMap((g) => g.rows));
+    }
+    return { move: String(record.get('move')), hoursText: record.get('hoursText') };
+  }
+
+  it('🔴 MOVEARROW — opening and closing the card twice leaves the project’s move as it was', () => {
+    const script = scriptOf(built, '/Logic/Card rows', 'kdWork');
+    expect(cardTwice(script, 'mv-fixed')).toEqual({ move: 'Offer the add-on', hoursText: undefined });
+    // ARMS: the row wearing the project's id again — its fields land on the project; and with its words back in `move`,
+    // the arrow goes into the project's move, one more each time (the bug as it was found).
+    const cut = "id: 'card:' + proj.id,", words = 'moveText: live ?';
+    expect([script.includes(cut), script.includes(words)]).toEqual([true, true]);
+    const sameId = script.replace(cut, 'id: proj.id,');
+    expect(cardTwice(sameId, 'mv-arm-id')).toEqual({ move: 'Offer the add-on', hoursText: '\u2014' });
+    expect(cardTwice(sameId.replace(words, 'move: live ?'), 'mv-arm-move').move).toBe('\u2192 \u2192 Offer the add-on');
+  });
+
+  it('🔴 MOVEARROW — a move saved with the card’s arrows and days loses them, and a move of its own words is kept', () => {
+    const guard = scriptOf(built, C.editProject, 'EditprojecGuard');
+    const save = (move: string) => run(guard, { projectId: 'p-earn', name: 'Bramble & Co', kind: 'earning', move }).outputs.move;
+    expect(save('\u2192 \u2192 Find out from Joss')).toBe('Find out from Joss');
+    expect(save('\u2713 Wed 30 \u00b7 \u2713 Wed 30 \u00b7 Ade work')).toBe('Ade work');
+    expect(save('! \u2192 Chase it')).toBe('Chase it');
+    expect(save('Find out from Joss \u2192 then call')).toBe('Find out from Joss \u2192 then call');
   });
 
   /**

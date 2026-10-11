@@ -9,7 +9,7 @@
       "label": "The block",
       "ports": [
         {
-          "name": "id",
+          "name": "blockId",
           "plug": "output",
           "type": "string"
         },
