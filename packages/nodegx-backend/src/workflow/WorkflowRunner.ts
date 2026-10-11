@@ -30,6 +30,7 @@ import * as path from 'path';
 import type { ExecutionHistory } from '../execution/ExecutionStore';
 import { boundText, boundValue, RecordBounds } from '../execution/record-bounds';
 import { logger } from '../ops/logger';
+import { bundleWiringProblems } from './bundleWiring';
 import { FunctionRuns } from './FunctionRuns';
 // SB-016 — the endpoint predicate, shared with the deploy interlock so the gate
 // and the runner cannot disagree about what a function is.
@@ -634,6 +635,9 @@ export class WorkflowRunner {
       try {
         const content = await fs.readFile(path.join(this.workflowsPath, file), 'utf-8');
         const exportData = JSON.parse(content);
+        // P109 ISL-042: a bundle already on disk still loads, as it always did, but what in it reaches nothing is said.
+        const wiring = bundleWiringProblems(exportData);
+        for (const problem of [...wiring.refusals, ...wiring.warnings]) safeLog(`Workflow ${workflowName}: ${problem}`);
         this.loadedWorkflows.set(workflowName, exportData);
         this.reportKitLoad(workflowName, await this.cloudRunner.load(exportData));
         safeLog(`Loaded workflow: ${workflowName}`);

@@ -32,6 +32,7 @@ import type {
 } from '@noodl/backend-contract';
 import { validateAclShape } from '../security/model';
 import { isVisibleAccountColumn, accountWriteRefusal } from '../users/accountColumns';
+import { bundleWiringProblems } from '../workflow/bundleWiring';
 import { declaredFunctionsIn, type FunctionDeclaration } from '../workflow/functionDeclarations';
 
 /** P109 ISL-040: SB-016's rule for functions arriving after start (`SecurityState.undeclaredOnDeploy`). */
@@ -971,8 +972,15 @@ export class ByobAdminRoutes {
     const verdict = gate ? gate(declaredFunctionsIn(body, name)) : null;
     // `success: false` too: the editor's and the MCP door's deploy clients read that field, not the status.
     if (verdict && verdict.refused) throw new HttpError(409, verdict.message, undefined, { success: false });
+    // P109 ISL-042 (P78-DBT-BUNDLEWIRES): a bundle whose wires connect nothing is refused, and a wire into a
+    // component port the component does not declare is named, before either reads as a 30-second hang.
+    const wiring = bundleWiringProblems(body);
+    if (wiring.refusals.length > 0) {
+      throw new HttpError(400, `Not deployed: ${wiring.refusals.join(' ')}`, undefined, { success: false });
+    }
     const result = await runner.loadWorkflow(name, body);
-    sendJSON(res, result.success ? 200 : 500, verdict ? { ...result, warning: verdict.message } : result);
+    const warnings = [...(verdict ? [verdict.message] : []), ...wiring.warnings];
+    sendJSON(res, result.success ? 200 : 500, warnings.length ? { ...result, warning: warnings.join('\n\n') } : result);
   }
 
   async deleteWorkflow(res: http.ServerResponse, name: string): Promise<void> {
