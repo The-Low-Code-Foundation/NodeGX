@@ -101,7 +101,7 @@ marked otherwise.
 
 Admin-only doors (`/admin/views`, `/admin/export`, `/api/_schema`) are out: the admin credential bypasses every rule.
 **Unbound scoped API keys bypass** (`security/state.ts:529-532`), as they bypass the row ACL. **No HTTP door gives
-`_User` to a non-admin** (`model.ts:727`).
+`_User` to a non-admin** (`model.ts:727`) at its own door. **Wrong as a census, s17:** an `include` of a link to `_User` gave another person's whole account (email, admin access) to anyone signed in. Fixed with R-h (§6.3).
 
 Found while counting, and filed as their own bugs, not built here: `include` reads the target collection without its
 `find` rule or narrowing, and `$path` hops walk collections without their CLP (bug `P116-S16-INCLUDECLP`).
@@ -185,6 +185,18 @@ Found while counting, and filed as their own bugs, not built here: `include` rea
   refuses the caller. Measured: `GET /classes/Salary/:id` → 403, `GET /classes/Contract/:id?include=salary` → 200
   with `amount: 91000`. Regression `tests/p116-s16-include-clp.test.ts` (`it.failing`). Pre-existing, not this
   task's: the field rules already strip an include by the target's `fields`, and the collection-level half is owed.
+
+### 6.3 Bug INCLUDECLP fixed, and R-h (s17, 2026-10-11, Opus 5.5)
+
+`e06ebbd2a`. The collection-level half that §6.2 owed: the ACL option carries each collection's `get`/`find`
+answer (`reach`, from `checkClp`), and the facade reads it (`fieldRules.reachOf`). A closed target is a bare link and
+a narrowed one is read with its narrowing. A `$path` hop or `$relatedTo` through a collection the caller may not read
+in full is a 403 naming it. Found beside it and ruled by Richard (R-h, README §9): every account column but the
+username is in the `hidden` mask, so an included author carries their name, not their account.
+`tests/p116-s16-include-clp.test.ts` 22/22 on both engines (two mutants). Neighbours in band 55 specs, 768/771 (the 3
+red are P109's uncommitted `isl040-sessions` spec, live in `state.ts` at the same time). The reach review (Fable)
+should start from the bug file's "Not covered" list. Filed beside it: `P116-S17-DOTTEDFILTER` (a dotted filter
+answers nothing, even to the admin).
 
 ## 7. Not this task
 
