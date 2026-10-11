@@ -527,6 +527,16 @@ export interface IStorageSchema {
    */
   setSeries?(table: string, columns: Record<string, StorageSeries | null>): boolean;
   /**
+   * P116-ONT-007-required: make fields the collection already has required (`true`) or optional
+   * (`false`), over the records it holds — the column's NOT NULL and the declaration together.
+   * Throws `code: 'FIELD_EMPTY'` (with `count`) while any record holds nothing in a field made
+   * required: SQLite before anything changes, PostgreSQL at the queue's barrier. Throws on a field
+   * the declaration does not have, a system field, a list of links, or a link that stays without one
+   * when its record goes. Returns false when every field was already as asked. Optional —
+   * `byob-admin.ts` answers 501 without it.
+   */
+  setRequired?(table: string, columns: Record<string, boolean>): boolean;
+  /**
    * BMG-003: drop a column (a Relation's junction table goes with it). Throws
    * `code: 'COLUMN_IN_USE'` naming the declared index, check or search opt-in
    * that reads the column — those are dropped first, on purpose, never

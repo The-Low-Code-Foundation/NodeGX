@@ -200,6 +200,11 @@ export type SchemaBody =
    * counts them.
    */
   | { action: 'setSeries'; table: string; columns: Record<string, NonNullable<WorldColumn['series']> | null> }
+  /**
+   * P116-ONT-007-required: fields the records already have made required (true) or optional (false).
+   * The store refuses `true` while a record holds none; the dry run counts them first (`refuse: 'empty'`).
+   */
+  | { action: 'setRequired'; table: string; columns: Record<string, boolean> }
   | { action: 'setChecks'; table: string; checks: WorldCheck[] }
   | { action: 'setIndexes'; table: string; indexes: WorldIndex[] }
   | { action: 'dropColumn'; table: string; column: string }
@@ -250,6 +255,8 @@ export type MigrationCheck =
   | { refuse: 'outside-list'; collection: string; field: string; values: string[]; says: string }
   /** Refused when two `collection` rows share the same `fields`: the unique rule would not build (s9). */
   | { refuse: 'duplicates'; collection: string; fields: string[]; says: string }
+  /** Refused when any `collection` row holds nothing in `field`: a field made required in place (P116-ONT-007-required). */
+  | { refuse: 'empty'; collection: string; field: string; says: string }
   /** Counts the values a drop would lose; the run asks for them to be accepted. */
   | { loses: 'values'; collection: string; field: string; says: string }
   | { loses: 'rows'; collection: string; says: string };
@@ -277,7 +284,8 @@ export interface MigrationPlan {
   /**
    * Claims of the after schema the migrated records will not keep: a rule the schema route
    * cannot put on a field once rows exist. Measured, not assumed — the grade runs them and
-   * each must fail at the step that says its rule.
+   * each must fail at the step that says its rule. Empty since `setRequired` (P116-ONT-007-required):
+   * a required link a move fills is made required after the move. Kept for the next rule that cannot be.
    */
   notKept: Array<{ claim: string; why: string }>;
   /** Changes this module cannot migrate yet, in words. A plan with any is refused whole. */
@@ -308,6 +316,13 @@ function goesNow(holder: string, col: WorldColumn): string {
   return `${when}, nothing is said about the ${holder} any more`;
 }
 const columnShape = (c: WorldColumn): string => JSON.stringify([c.type, c.targetClass ?? null, Boolean(c.required)]);
+/** The same type and target: a field whose only change, if any, is whether it is required. */
+const sameKind = (a: WorldColumn, b: WorldColumn): boolean => a.type === b.type && (a.targetClass ?? null) === (b.targetClass ?? null);
+/** P116-ONT-007-required: a `setRequired` step's words. */
+const requiredWords = (c: WorldCollection, columns: Record<string, boolean>): string =>
+  Object.entries(columns)
+    .map(([f, on]) => (on ? `every ${oneOf(c)} must have ${article(f)} from now on` : `${article(oneOf(c))} may be without ${article(f)} from now on`))
+    .join('; ');
 /** A field as the person picked it: "a required link to Account", "a list". */
 const columnWords = (c: WorldColumn): string => `${c.required ? `a required ${c.kind}` : article(c.kind)}${c.targetClass ? ` to ${c.targetClass}` : ''}`;
 const sortedText = (xs: readonly unknown[]): string => JSON.stringify(xs.map((x) => JSON.stringify(x)).sort());
@@ -579,14 +594,18 @@ function planBetween(before: WorldFiles, after: WorldFiles, sb: WorldSchema, sa:
       continue;
     }
     const fields = new Set<string>();
+    /** P116-ONT-007-required: fields made required (after the moves and a link's rule) or optional (before the rule). */
+    const requiredOn: Record<string, boolean> = {};
+    const requiredOff: Record<string, boolean> = {};
     for (const col of c.columns) {
       const old = was.columns.find((x) => x.name === col.name);
       if (!old) {
         const key = `${c.name}.${col.name}`;
         if (filled.has(key) && col.required) {
+          // P116-ONT-007-required: added optional, filled record by record by the move, then made required —
+          // the dry run's `none` check has already refused a record the move would leave without one.
           added.push({ schema: { action: 'addColumn', table: c.name, column: optional(col) }, says: `give every ${oneOf(c)} ${article(col.name)}, filled by the move below` });
-          const claim = sa.claims.find((x) => x.mutant && 'dropRequired' in x.mutant && x.mutant.dropRequired.collection === c.name && x.mutant.dropRequired.field === col.name);
-          if (claim) notKept.push({ claim: claim.id, why: `the schema route cannot make a field required once records exist, except by filling every one with the same value; the ${col.name} is filled record by record instead, and new ${wordsOf(c)} are not made to have one` });
+          requiredOn[col.name] = true;
         } else if (col.series) {
           // ONT-015 (AC3): the field first, then the series — which numbers the records already there.
           const { series: _series, ...plain } = pushable(col);
@@ -598,7 +617,14 @@ function planBetween(before: WorldFiles, after: WorldFiles, sb: WorldSchema, sa:
         }
         fields.add(col.name);
       } else if (columnShape(old) !== columnShape(col)) {
-        if (!refusedRelations.has(col.relation || '') && !refusedRelations.has(old.relation || ''))
+        if (sameKind(old, col) && col.type !== 'Relation') {
+          // P116-ONT-007-required: only whether it is required changed. Made required over records, the store
+          // refuses while any holds none — read first, so the run never meets it after the backup.
+          if (col.required) {
+            requiredOn[col.name] = true;
+            checks.push({ refuse: 'empty', collection: c.name, field: col.name, says: `every ${oneOf(c)} must have ${article(col.name)} now, and some have none` });
+          } else requiredOff[col.name] = false;
+        } else if (!refusedRelations.has(col.relation || '') && !refusedRelations.has(old.relation || ''))
           refused.push(`${article(oneOf(c))}'s ${col.name} changing from ${columnWords(old)} to ${columnWords(col)} in place is not migrated yet.`);
         fields.add(col.name);
       }
@@ -656,8 +682,11 @@ function planBetween(before: WorldFiles, after: WorldFiles, sb: WorldSchema, sa:
     const goes: Record<string, NonNullable<WorldColumn['whenTargetGoes']> | null> = {};
     for (const col of c.columns) {
       const old = was.columns.find((x) => x.name === col.name);
-      if (old && columnShape(old) === columnShape(col) && (old.whenTargetGoes ?? null) !== (col.whenTargetGoes ?? null)) goes[col.name] = col.whenTargetGoes ?? null;
+      if (old && sameKind(old, col) && (old.whenTargetGoes ?? null) !== (col.whenTargetGoes ?? null)) goes[col.name] = col.whenTargetGoes ?? null;
     }
+    // A required link cannot stay without one when its record goes, and the store refuses either half out of
+    // order: optional first, then the link's rule, then required.
+    if (Object.keys(requiredOff).length) rules.push({ schema: { action: 'setRequired', table: c.name, columns: requiredOff }, says: requiredWords(c, requiredOff) });
     if (Object.keys(goes).length)
       rules.push({
         schema: { action: 'setWhenTargetGoes', table: c.name, columns: goes },
@@ -666,6 +695,7 @@ function planBetween(before: WorldFiles, after: WorldFiles, sb: WorldSchema, sa:
           .map((col) => goesNow(oneOf(c), col))
           .join('; ')
       });
+    if (Object.keys(requiredOn).length) rules.push({ schema: { action: 'setRequired', table: c.name, columns: requiredOn }, says: requiredWords(c, requiredOn) });
     // s11 (§6.9 #5): a changed answer that changes only what the store does not keep changes only the words
     // — the collection's, or a kept field's. Said again by a step of its own, or the Schema card keeps the old
     // sentence. No reach row: nothing a component, a rule or a verb reads has moved.

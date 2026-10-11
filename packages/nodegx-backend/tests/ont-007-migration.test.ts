@@ -616,9 +616,82 @@ for (const engine of [sqlite(), postgres()]) {
         expect(ctx.schema.listTables()).not.toContain('Membership');
       });
 
-      it('keeps every claim of the old world but the one it said it would not', async () => {
-        expect(mirror.notKept.map((n) => n.claim)).toEqual(['person/account-is-required']);
+      it('keeps every claim of the old world — the link made required once the move has filled it (P116-ONT-007-required)', async () => {
+        // Until setRequired the plan named `person/account-is-required` in `notKept`, and it was measured to fail here.
+        expect(mirror.notKept).toEqual([]);
         expect(await claimsOnTheMigratedTables(ctx, mirror)).toEqual([]);
+      });
+    });
+
+    describe('P116-ONT-007-required — the link made required after the move, and the grade that catches a plan without it', () => {
+      async function migrated(p: MigrationPlan) {
+        const h = await engine.make();
+        const ctx = onTheRealTables(h.adapter);
+        applyWorld(ctx, mirror.before);
+        const a = String((await ctx.create('Account', { name: 'Northwind' })).objectId);
+        for (const name of ['Ada', 'Linus']) {
+          const person = String((await ctx.create('Person', { name })).objectId);
+          await ctx.create('Membership', { person: pointer('Person', person), account: pointer('Account', a) });
+        }
+        return { ctx, run: await runMigration(ctx, asPlanData(p), { backup: async () => 'taken', acceptLosses: true }) };
+      }
+
+      it('a person made without an account is refused after the run', async () => {
+        const { ctx, run } = await migrated(mirror);
+        expect(run).toMatchObject({ ran: true });
+        await ctx.refused(() => ctx.create('Person', { name: 'Grace' }));
+      });
+
+      it('the mutant: without its setRequired step the run still "works", and the grade names the claim it left unkept', async () => {
+        const { ctx, run } = await migrated(without(mirror, (s) => 'schema' in s && s.schema.action === 'setRequired'));
+        expect(run).toMatchObject({ ran: true });
+        expect((await claimsOnTheMigratedTables(ctx, mirror)).map((w) => w.split(' ')[0])).toEqual(['person/account-is-required']);
+      });
+    });
+
+    describe('P116-ONT-007-required — a link made required in place', () => {
+      const LOOSE: WorldFiles = (() => {
+        const w: WorldFiles = JSON.parse(JSON.stringify(ONE));
+        w.relations.relations[0].answers!.required = false;
+        return w;
+      })();
+      const tighten = plan(LOOSE, ONE);
+      const required = (ctx: ConformanceContext) => (ctx.schema.getTableSchema('Person')!.columns!.find((c) => c.name === 'account') as { required?: boolean }).required;
+
+      async function seeded() {
+        const h = await engine.make();
+        const ctx = onTheRealTables(h.adapter);
+        applyWorld(ctx, tighten.before);
+        const a = String((await ctx.create('Account', { name: 'Northwind' })).objectId);
+        await ctx.create('Person', { name: 'Ada', account: pointer('Account', a) });
+        const grace = String((await ctx.create('Person', { name: 'Grace' })).objectId);
+        return { ctx, a, grace };
+      }
+
+      it('is stopped by the dry run while a person has none — no backup, nothing changed — and runs once each has one', async () => {
+        const { ctx, a, grace } = await seeded();
+        let backups = 0;
+        const refused = await runMigration(ctx, asPlanData(tighten), { backup: async () => ++backups });
+        expect(refused).toMatchObject({ ran: false });
+        expect(refused.dryRun.refusals).toEqual([{ says: 'every person must have an account now, and some have none', rows: 1 }]);
+        expect(backups).toBe(0);
+        expect(required(ctx)).toBeFalsy();
+
+        await ctx.save('Person', grace, { account: pointer('Account', a) });
+        expect(await runMigration(ctx, asPlanData(tighten), { backup: async () => ++backups })).toMatchObject({ ran: true });
+        expect(required(ctx)).toBe(true);
+        expect(await claimsOnTheMigratedTables(ctx, tighten)).toEqual([]);
+        await ctx.refused(() => ctx.create('Person', { name: 'Linus' }));
+      });
+
+      it('the mutant: without its dry-run check the store refuses at the step, after the backup, in words', async () => {
+        const { ctx } = await seeded();
+        let backups = 0;
+        const run = await runMigration(ctx, asPlanData({ ...tighten, checks: [] }), { backup: async () => ++backups });
+        expect(backups).toBe(1);
+        expect(run).toMatchObject({ ran: 'partly', failed: { step: 1 } });
+        expect((run as { failed: { message: string } }).failed.message).toMatch(/Cannot make "account" required on "Person": 1 record has none/);
+        expect(required(ctx)).toBeFalsy();
       });
     });
 

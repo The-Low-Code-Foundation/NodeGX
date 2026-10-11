@@ -92,7 +92,7 @@ describe('the bombshell — one account becomes several', () => {
 
   it('every schema step is a body the schema route takes', () => {
     // `nodegx-backend/src/server/byob-admin.ts` `mutateSchema`: the actions it answers. The backend spec posts them.
-    const ROUTE = ['createTable', 'addColumn', 'renameColumn', 'renameTable', 'describeTable', 'setWhenTargetGoes', 'changeColumnType', 'dropColumn', 'deleteTable', 'setIndexes', 'setChecks'];
+    const ROUTE = ['createTable', 'addColumn', 'renameColumn', 'renameTable', 'describeTable', 'setWhenTargetGoes', 'setSeries', 'setRequired', 'changeColumnType', 'dropColumn', 'deleteTable', 'setIndexes', 'setChecks'];
     for (const s of p.steps) if ('schema' in s) expect(ROUTE).toContain(s.schema.action);
   });
 });
@@ -183,8 +183,8 @@ describe('the mirror — several accounts become one', () => {
     ]);
   });
 
-  it('adds the link, fills it from the records, then lets the records go', () => {
-    expect(shape(p)).toEqual(['backup', 'addColumn:Person', 'move:recordToLink', 'deleteTable:Membership']);
+  it('adds the link, fills it from the records, makes it required, then lets the records go', () => {
+    expect(shape(p)).toEqual(['backup', 'addColumn:Person', 'move:recordToLink', 'setRequired:Person', 'deleteTable:Membership']);
   });
 
   it('stops on a person on two accounts or on none, and counts the details it would lose', () => {
@@ -197,12 +197,15 @@ describe('the mirror — several accounts become one', () => {
     ]);
   });
 
-  it('says which rule the records will not keep after it, and why', () => {
-    // The link is added without `required` (the route cannot make a field required over rows
-    // except with one value for all); the claim that says it is measured to fail on the engines.
+  it('adds the link optional and makes it required once the move has filled it — every rule kept (P116-ONT-007-required)', () => {
+    // Before `setRequired` the link stayed optional and `person/account-is-required` was named in `notKept`,
+    // measured to fail on both engines. The dry run's `none` check stops a person the move would leave without one.
     const add = p.steps[1];
     expect('schema' in add && add.schema.action === 'addColumn' && 'required' in add.schema.column).toBe(false);
-    expect(p.notKept.map((n) => n.claim)).toEqual(['person/account-is-required']);
+    const made = p.steps[3];
+    expect('schema' in made && made.schema).toEqual({ action: 'setRequired', table: 'Person', columns: { account: true } });
+    expect(made.says).toBe('every person must have an account from now on');
+    expect(p.notKept).toEqual([]);
   });
 });
 
@@ -232,11 +235,38 @@ describe('what the plan will not do', () => {
     expect(plan(before, after).refused).toEqual(["'membership' changing from belongs-to to together is not migrated yet: only a link becoming a record of its own, and back, is."]);
   });
 
-  it('a field that changes in place is refused in the tiles’ words — no route changes whether a field is required', () => {
+  it('a field whose type or target changes in place is refused in the tiles’ words', () => {
+    const before = readWorld(BEFORE);
+    const after = clone(before);
+    after.nouns.nouns[1].properties![0] = { name: 'name', kind: 'number' };
+    expect(plan(before, after).refused).toEqual(["an account's name changing from a text to a number in place is not migrated yet."]);
+  });
+
+  it('a field whose only change is whether it is required is a step, not a refusal (P116-ONT-007-required)', () => {
     const before = readWorld(BEFORE);
     const after = clone(before);
     after.relations.relations[0].answers!.required = false;
-    expect(plan(before, after).refused).toEqual(["a person's account changing from a required link to Account to a link to Account in place is not migrated yet."]);
+    const p = plan(before, after);
+    expect(shape(p)).toEqual(['backup', 'setRequired:Person']);
+    expect((p.steps[1] as { schema: unknown }).schema).toEqual({ action: 'setRequired', table: 'Person', columns: { account: false } });
+    expect(p.steps[1].says).toBe('a person may be without an account from now on');
+    expect({ checks: p.checks, refused: p.refused, notKept: p.notKept }).toEqual({ checks: [], refused: [], notKept: [] });
+    expect(p.reach).toEqual([{ collection: 'Person', words: 'people', fields: ['account'], how: 'changed' }]);
+
+    // And back: made required over records, the dry run counts the ones with none before anything moves.
+    const back = plan(after, before);
+    expect(shape(back)).toEqual(['backup', 'setRequired:Person']);
+    expect((back.steps[1] as { schema: unknown }).schema).toEqual({ action: 'setRequired', table: 'Person', columns: { account: true } });
+    expect(back.checks).toEqual([{ refuse: 'empty', collection: 'Person', field: 'account', says: 'every person must have an account now, and some have none' }]);
+    expect(back.refused).toEqual([]);
+  });
+
+  it('a link made optional before it may stay without one, and required only after it no longer does', () => {
+    const before = readWorld(BEFORE); // required, blocks
+    const after = clone(before);
+    after.relations.relations[0].answers = { ...after.relations.relations[0].answers!, required: false, whenTargetGoes: 'stays-unlinked' };
+    expect(shape(plan(before, after))).toEqual(['backup', 'setRequired:Person', 'setWhenTargetGoes:Person']);
+    expect(shape(plan(after, before))).toEqual(['backup', 'setWhenTargetGoes:Person', 'setRequired:Person']);
   });
 
   it('a world that does not project is refused with the projection’s words, side named', () => {

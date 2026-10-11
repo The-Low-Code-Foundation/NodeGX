@@ -61,6 +61,17 @@ function requiredNeedsDefault(e: unknown, table: string, column: StorageColumn |
   );
 }
 
+/**
+ * P116-ONT-007-required: a field made required over records that hold nothing in it — the managers'
+ * `FieldEmptyError` (SQLite's at the call, PostgreSQL's as the queue's cause) as a 409 in their words,
+ * with how many, or null for any other error.
+ */
+function fieldEmpty(e: unknown, table: string): HttpError | null {
+  const err = e as { code?: string; message?: string; field?: string; count?: number } | null;
+  if (!err || err.code !== 'FIELD_EMPTY') return null;
+  return new HttpError(409, String(err.message), undefined, { reason: 'field-empty', collection: table, field: err.field, count: err.count });
+}
+
 /** Whether a declared check reads this column (BMG-003 — the drop refusal). */
 /** P116 ONT-003 — `{ description }` when it is words, `{}` otherwise: absent on the wire, never empty. */
 function describedAs(value: unknown): { description?: string } {
@@ -189,7 +200,7 @@ export interface TableSchemaResponse {
 /** `POST /admin/schema` — one of the five mutation actions. */
 export interface SchemaMutationResponse {
   success: boolean;
-  action: 'createTable' | 'addColumn' | 'renameColumn' | 'renameTable' | 'describeTable' | 'setWhenTargetGoes' | 'setSeries' | 'changeColumnType' | 'deleteTable' | 'setIndexes' | 'setChecks' | 'dropColumn';
+  action: 'createTable' | 'addColumn' | 'renameColumn' | 'renameTable' | 'describeTable' | 'setWhenTargetGoes' | 'setSeries' | 'setRequired' | 'changeColumnType' | 'deleteTable' | 'setIndexes' | 'setChecks' | 'dropColumn';
   table: string;
   /** Present on createTable / deleteTable: whether the DDL actually ran. */
   created?: boolean;
@@ -200,7 +211,7 @@ export interface SchemaMutationResponse {
   renamedTo?: string;
   column?: string;
   // ── changeColumnType (AAQ-002) ────────────────────────────────────────────
-  /** Whether the column's type actually moved (false when it already matched). */
+  /** Whether the column's type actually moved (false when it already matched). setRequired: whether any field's rule did. */
   changed?: boolean;
   /** The type it had before. */
   from?: string;
@@ -707,6 +718,33 @@ export class ByobAdminRoutes {
         sendJSON(res, 200, { success: true, action: 'setSeries', table } satisfies SchemaMutationResponse);
         return;
       }
+      case 'setRequired': {
+        // P116-ONT-007-required: fields the records already have made required (true) or optional (false) — the
+        // column's NOT NULL and the declaration together. Refused 409 in words, naming how many, while a record
+        // holds none (SQLite at the call, PostgreSQL at the queue). A world migration's step after its move.
+        if (typeof sm.setRequired !== 'function') throw new HttpError(501, 'This adapter cannot make a field required or optional.');
+        const columns = body.columns;
+        if (!columns || typeof columns !== 'object' || Array.isArray(columns) || !Object.keys(columns).length || !Object.values(columns).every((v) => typeof v === 'boolean')) {
+          throw new HttpError(400, 'Say each field as { "<field>": true } (required) or false (optional).');
+        }
+        if (!sm.getTableSchema(table)) throw new HttpError(404, `No such table: ${table}`);
+        const fields = columns as Record<string, boolean>;
+        for (const field of Object.keys(fields)) {
+          if (table === '_User' && (!isVisibleAccountColumn(field) || field === 'username' || field === 'email')) {
+            throw new HttpError(400, `"${field}" is one of the backend's own account fields.`);
+          }
+        }
+        let changed: boolean;
+        try {
+          changed = sm.setRequired(table, fields);
+        } catch (e) {
+          throw fieldEmpty(e, table) || new HttpError(400, e instanceof Error ? e.message : String(e));
+        }
+        await this.awaitSchemaQueue(ctx, table);
+        ctx.audit({ setRequired: table, fields });
+        sendJSON(res, 200, { success: true, action: 'setRequired', table, changed } satisfies SchemaMutationResponse);
+        return;
+      }
       case 'changeColumnType': {
         // AAQ-002. Optional on the interface (an older adapter predates it), so
         // its absence is a 501 rather than an `is not a function` at request time.
@@ -770,7 +808,7 @@ export class ByobAdminRoutes {
         throw new HttpError(
           400,
           `Unknown schema action: ${String(body.action)}. Expected one of createTable, addColumn, ` +
-            'renameColumn, renameTable, describeTable, setWhenTargetGoes, setSeries, changeColumnType, dropColumn, deleteTable, setIndexes, setChecks.'
+            'renameColumn, renameTable, describeTable, setWhenTargetGoes, setSeries, setRequired, changeColumnType, dropColumn, deleteTable, setIndexes, setChecks.'
         );
     }
   }
@@ -823,6 +861,8 @@ export class ByobAdminRoutes {
       const message = e instanceof Error ? e.message : String(e);
       const needsDefault = column ? requiredNeedsDefault(e, table, column) : null;
       if (needsDefault) throw needsDefault;
+      const empty = fieldEmpty((e as { cause?: unknown }).cause, table);
+      if (empty) throw empty;
       if (/UNIQUE constraint failed/.test(message)) {
         ctx.audit({ indexesRefused: { table, engine: 'postgres' } });
         throw new HttpError(

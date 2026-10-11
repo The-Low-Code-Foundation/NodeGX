@@ -63,6 +63,7 @@
 
 import { escapeColumn, escapeTable } from '../local-sql/QueryBuilder';
 import {
+  applyRequired,
   builtInIndexNames,
   checkChecksAgainstColumns,
   checkName,
@@ -75,6 +76,7 @@ import {
   type CheckStatus,
   declaredColumn,
   declaredProperties,
+  FieldEmptyError,
   indexName,
   junctionTableName,
   refuseColumnInUse,
@@ -877,6 +879,46 @@ export class PgSchemaManager {
             for (const a of plan.assign) await tx.run(`UPDATE ${escapeTable(tableName)} SET ${escapeColumn(name)} = ? WHERE "objectId" = ?`, [a.value, a.objectId]);
             for (const c of plan.counters) await tx.run(SERIES_SET_SQL, [counter, c.period, c.next]);
           }
+        });
+      },
+      () => {
+        st.schemas.set(tableName, schema);
+      }
+    );
+    return true;
+  }
+
+  /**
+   * P116-ONT-007-required — the SQLite manager's `setRequired`: `ALTER COLUMN … SET / DROP NOT NULL`
+   * and the declaration, in one queued transaction. The model changes at once; the empty records are
+   * counted inside the transaction, under the lock the ALTER takes anyway, so the refusal
+   * (`FieldEmptyError`, the same words) arrives at the barrier and the model is put back.
+   */
+  setRequired(tableName: string, columns: Record<string, boolean>): boolean {
+    const st = this.s;
+    const schema = st.schemas.get(tableName);
+    if (!schema || !st.tables.has(tableName)) throw new Error(`There is no collection called "${tableName}"`);
+    const fresh = freshSchema(schema);
+    const changes = applyRequired(fresh, tableName, columns);
+    if (!changes.length) return false;
+    st.schemas.set(tableName, fresh);
+    const snapshot = JSON.stringify(fresh);
+    const table = escapeTable(tableName);
+    this.enqueue(
+      `setRequired("${tableName}")`,
+      async () => {
+        await this.pool.transaction(async (tx) => {
+          await tx.run(`LOCK TABLE ${table} IN ACCESS EXCLUSIVE MODE`);
+          for (const c of changes) {
+            const col = escapeColumn(c.name);
+            if (c.required) {
+              const [empty] = await tx.query<{ n: string | number }>(`SELECT COUNT(*) AS "n" FROM ${table} WHERE ${col} IS NULL`);
+              const n = Number(empty?.n ?? 0);
+              if (n > 0) throw new FieldEmptyError(tableName, c.name, n);
+            }
+            await tx.run(`ALTER TABLE ${table} ALTER COLUMN ${col} ${c.required ? 'SET' : 'DROP'} NOT NULL`);
+          }
+          await tx.run(UPSERT_SCHEMA, [tableName, snapshot]);
         });
       },
       () => {

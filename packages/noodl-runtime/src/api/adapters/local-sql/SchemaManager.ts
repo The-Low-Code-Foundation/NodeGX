@@ -14,6 +14,7 @@ import { escapeTable, escapeColumn } from './QueryBuilder';
 import { assertSeriesColumns, planNumbering, seriesName, seriesProblem, SERIES_SET_SQL, SERIES_TABLE, SERIES_TABLE_DDL, type SeriesOption } from '../series';
 import {
   builtInIndexNames as sharedBuiltInIndexNames,
+  applyRequired,
   CHECK_FAILED_PREFIX,
   checkChecksAgainstColumns,
   checkName,
@@ -28,6 +29,7 @@ import {
   declaredColumn,
   declaredProperties,
   describeWhere,
+  FieldEmptyError,
   indexName as sharedIndexName,
   MigrationRefusal,
   normalizeIndexDecls,
@@ -608,6 +610,88 @@ class SchemaManager {
   }
 
   /**
+   * P116-ONT-007-required — make fields a collection already has required (`true`) or optional
+   * (`false`), over the records it holds. Refused with `FieldEmptyError`, before anything changes,
+   * while any record holds nothing in a field made required. SQLite cannot add or drop a NOT NULL in
+   * place (and `ADD COLUMN … NOT NULL` needs a default, so `changeColumnType`'s add-copy-drop cannot
+   * carry one), so the table is rebuilt: the same columns read from `PRAGMA table_info` with the flag
+   * changed, every row copied with its rowid (a search index's external content reads by it), and
+   * the table's own indexes and triggers (declared indexes, checks, search) re-made from their
+   * stored SQL — in one transaction, the declaration with it.
+   *
+   * @returns Whether any field's rule changed (`false` when every one was already as asked).
+   */
+  setRequired(tableName: string, columns: Record<string, boolean>): boolean {
+    const schema = this.getTableSchema(tableName);
+    if (!schema) throw new Error(`There is no collection called "${tableName}"`);
+    const fresh = freshSchema(schema);
+    const changes = applyRequired(fresh, tableName, columns);
+    if (!changes.length) return false;
+    const table = escapeTable(tableName);
+    for (const c of changes) {
+      if (!c.required) continue;
+      const empty = this.db.prepare(`SELECT COUNT(*) AS n FROM ${table} WHERE ${escapeColumn(c.name)} IS NULL`).get() as { n: number } | undefined;
+      if (empty && empty.n > 0) throw new FieldEmptyError(tableName, c.name, empty.n);
+    }
+
+    const missing = changes.find((c) => !this._columnInfo(tableName).some((i) => i.name === c.name));
+    if (missing) throw new Error(`"${tableName}" declares "${missing.name}" but its table has no such column`);
+
+    this.db.exec('BEGIN');
+    try {
+      this._rebuildNotNull(tableName, new Map(changes.map((c) => [c.name, c.required])));
+      this.ensureSchemaTable();
+      this.db.prepare(`UPDATE "_Schema" SET "schema" = ?, "updatedAt" = CURRENT_TIMESTAMP WHERE "name" = ?`).run(JSON.stringify(fresh), tableName);
+      this.db.exec('COMMIT');
+    } catch (e) {
+      this.db.exec('ROLLBACK');
+      throw e;
+    }
+    this._schemaCache.set(tableName, fresh);
+    return true;
+  }
+
+  /** `PRAGMA table_info` — the columns as the engine holds them, not as `_Schema` declares them. */
+  private _columnInfo(tableName: string): Array<{ name: string; type: string; notnull: number; dflt_value: string | null; pk: number }> {
+    return this.db.prepare(`PRAGMA table_info(${escapeTable(tableName)})`).all() as Array<{
+      name: string;
+      type: string;
+      notnull: number;
+      dflt_value: string | null;
+      pk: number;
+    }>;
+  }
+
+  /**
+   * P116-ONT-007-required — rebuild a table with some columns' NOT NULL changed (`flip`: column →
+   * whether it is NOT NULL now), everything else as the engine holds it: each column's type, primary
+   * key and DDL default from `PRAGMA table_info`, every row with its rowid (a search index's external
+   * content reads by it), and the indexes and triggers built on the table re-made from their stored
+   * SQL. Runs inside the caller's transaction; never opens one.
+   */
+  private _rebuildNotNull(tableName: string, flip: Map<string, boolean>): void {
+    const table = escapeTable(tableName);
+    const info = this._columnInfo(tableName);
+    const defs = info.map((c) => {
+      let def = `${escapeColumn(c.name)} ${c.type}`;
+      if (c.pk) def += ' PRIMARY KEY';
+      if (flip.has(c.name) ? flip.get(c.name) : c.notnull) def += ' NOT NULL';
+      if (c.dflt_value !== null) def += ` DEFAULT ${c.dflt_value}`;
+      return def;
+    });
+    const names = info.map((c) => escapeColumn(c.name)).join(', ');
+    const readers = this.db
+      .prepare("SELECT type, name, sql FROM sqlite_master WHERE tbl_name = ? AND type IN ('index', 'trigger') AND sql IS NOT NULL")
+      .all(tableName) as Array<{ type: string; name: string; sql: string }>;
+    const temp = escapeTable(`__nodegx_rebuild_${tableName}`);
+    this.db.exec(`CREATE TABLE ${temp} (${defs.join(', ')})`);
+    this.db.exec(`INSERT INTO ${temp} (rowid, ${names}) SELECT rowid, ${names} FROM ${table}`);
+    this.db.exec(`DROP TABLE ${table}`);
+    this.db.exec(`ALTER TABLE ${temp} RENAME TO ${table}`);
+    for (const r of readers) this.db.exec(r.sql);
+  }
+
+  /**
    * Rename a column in a table (SQLite 3.25.0+)
    *
    * @returns Whether column was renamed
@@ -760,6 +844,10 @@ class SchemaManager {
         this.db.exec(`ALTER TABLE ${escapeTable(tableName)} DROP COLUMN ${escapeColumn(columnName)}`);
         this.db.exec(`ALTER TABLE ${escapeTable(tableName)} RENAME COLUMN ${escapeColumn(temp)} TO ${escapeColumn(columnName)}`);
         for (const r of readers) this.db.exec(r.sql);
+        // P116-S24-TYPEREQUIRED: the column added above has no NOT NULL (`ADD COLUMN … NOT NULL` needs a
+        // default), so a required field came out of a type change taking records without it while its
+        // declaration still said required. Put back the way `setRequired` puts it on.
+        if (col.required) this._rebuildNotNull(tableName, new Map([[columnName, true]]));
         this.db.exec('COMMIT');
       } catch (e) {
         this.db.exec('ROLLBACK');

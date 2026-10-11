@@ -443,6 +443,60 @@ export const schemaCases: readonly ConformanceCase[] = Object.freeze([
       ok(deepEqFields((ctx.schema.getTableSchema(c)?.columns || []).map((col) => col.name), ['title', 'owner', 'must']), 'setWhenTargetGoes disturbed the columns');
     }
   },
+  {
+    id: 'schema/set-required-over-records',
+    area: 'schema',
+    pins:
+      'P116-ONT-007-required: setRequired makes a field the records already have required, and optional again — refused in the same words, naming how many, while a record holds none (and nothing changes); kept by the next create once it goes through; every record and value kept; a list, a system field and an unknown field refused; a second ask reports nothing done',
+    async run(ctx) {
+      if (typeof ctx.schema.setRequired !== 'function') {
+        throw new Error('setRequired is absent — declare this case unsupported (§3.4)');
+      }
+      const target = ctx.collection('ReqT');
+      const c = ctx.collection('Req');
+      ctx.createTable(target, [{ name: 'name', type: 'String' }]);
+      ctx.createTable(c, [
+        { name: 'title', type: 'String' },
+        { name: 'owner', type: 'Pointer', targetClass: target },
+        { name: 'tags', type: 'Relation', targetClass: target }
+      ]);
+      const t = String((await ctx.create(target, { name: 'ada' })).objectId);
+      const owner = { __type: 'Pointer', className: target, objectId: t };
+      const a = String((await ctx.create(c, { title: 'a', owner })).objectId);
+      const b = String((await ctx.create(c, { title: 'b' })).objectId);
+      const required = () => ((ctx.schema.getTableSchema(c)?.columns || []).find((col) => col.name === 'owner') as { required?: boolean } | undefined)?.required;
+      const set = (columns: Record<string, boolean>) => () => ctx.schema.setRequired!(c, columns);
+
+      const words = await refusedOverRecords(ctx, c, set({ owner: true }));
+      ok(/owner/.test(words) && /\b1 record\b/.test(words), `the refusal does not say which field and how many records hold none: ${words}`);
+      ok(!required(), 'a refused setRequired left the field declared required');
+      await ctx.create(c, { title: 'c' }); // the control: nothing physical changed either
+      eq(await ctx.count(c, { owner: { $exists: false } }), 2, 'the control: two records hold no owner');
+
+      for (const id of (await ctx.query(c, { where: { owner: { $exists: false } } })).results.map((r) => String(r.objectId))) {
+        await ctx.save(c, id, { owner });
+      }
+      ok(ctx.schema.setRequired(c, { owner: true }) === true, 'setRequired did not report the change');
+      eq(await ctx.count(c), 3, 'records went missing when the field was made required');
+      ok(required() === true, 'the field is not read back as required');
+      await ctx.refused(() => ctx.create(c, { title: 'd' }));
+      await ctx.create(c, { title: 'e', owner });
+      const kept = await ctx.fetch(c, a);
+      eq(kept.title, 'a', 'a record lost its other values when the field was made required');
+      eq((kept.owner as { objectId?: string } | undefined)?.objectId ?? kept.owner, t, 'a record lost its link when the field was made required');
+      ok((await ctx.fetch(c, b)).title === 'b', 'a filled record was not kept');
+      ok(ctx.schema.setRequired(c, { owner: true }) === false, 'a field already required was reported changed');
+
+      ok(/list/i.test(refusalOf(set({ tags: true }))), 'a list of links was not refused');
+      ok(/backend/i.test(refusalOf(set({ objectId: false }))), 'a system field was not refused');
+      ok(/nope/.test(refusalOf(set({ nope: true }))), 'a field the collection does not have was not refused');
+
+      ok(ctx.schema.setRequired(c, { owner: false }) === true, 'making it optional did not report the change');
+      await ctx.create(c, { title: 'f' });
+      ok(!required(), 'the field is still read back as required');
+      eq(await ctx.count(c), 5, 'the records are not all there');
+    }
+  },
 
   {
     id: 'schema/index-declaration-survives-a-reread',
@@ -476,6 +530,20 @@ function refusalOf(fn: () => unknown): string {
     return String((err as { message?: string }).message);
   }
   throw new Error('expected the call to be refused, and it succeeded');
+}
+
+/**
+ * A schema change refused because of the records already there: SQLite throws it from the call;
+ * PostgreSQL queues the change and throws it at the barrier the next data-plane call passes. Either
+ * way, the words.
+ */
+async function refusedOverRecords(ctx: ConformanceContext, collection: string, fn: () => unknown): Promise<string> {
+  try {
+    fn();
+  } catch (err) {
+    return String((err as { message?: string }).message);
+  }
+  return ctx.refused(() => ctx.count(collection));
 }
 
 function deepEqFields(a: string[] | undefined, b: string[]): boolean {

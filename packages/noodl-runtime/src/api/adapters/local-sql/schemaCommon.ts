@@ -872,6 +872,61 @@ export function refuseTableRename(
   }
 }
 
+/**
+ * P116-ONT-007-required — thrown by `setRequired` when records already in the
+ * collection hold nothing in the field. Both managers throw it in the same
+ * words (SQLite before it touches the table, PostgreSQL inside its queued
+ * transaction); `byob-admin` matches `code` and answers 409 with the message.
+ */
+export class FieldEmptyError extends Error {
+  code = 'FIELD_EMPTY';
+  table: string;
+  field: string;
+  count: number;
+  constructor(table: string, field: string, count: number) {
+    super(
+      `Cannot make "${field}" required on "${table}": ${count} ${count === 1 ? 'record has' : 'records have'} none. ` +
+        `Give ${count === 1 ? 'it' : 'each of them'} one first, or keep it optional.`
+    );
+    this.name = 'FieldEmptyError';
+    this.table = table;
+    this.field = field;
+    this.count = count;
+  }
+}
+
+/**
+ * P116-ONT-007-required — `setRequired`'s reading of the declaration, shared by
+ * both managers so the two engines refuse in the same words. Writes the change
+ * into `fresh` (the manager's own copy) and returns the fields whose rule
+ * actually changes; a field already as asked is left out, so a re-run reports
+ * nothing done. Throws on a collection or field the declaration does not have,
+ * a field every record carries anyway, and a list of links (a junction table,
+ * not a column — there is nothing for NOT NULL to hold).
+ */
+export function applyRequired(
+  fresh: TableSchema,
+  tableName: string,
+  columns: Record<string, boolean>
+): Array<{ name: string; required: boolean }> {
+  const changes: Array<{ name: string; required: boolean }> = [];
+  for (const [name, required] of Object.entries(columns)) {
+    if (typeof required !== 'boolean') throw new Error(`"${tableName}.${name}": say true (required) or false (optional)`);
+    if (SYSTEM_COLUMNS.includes(name)) throw new Error(`"${name}" is set by the backend on every record`);
+    const col = (fresh.columns || []).find((c) => c.name === name);
+    if (!col) throw new Error(`"${tableName}" has no field "${name}"`);
+    if (col.type === 'Relation') throw new Error(`"${tableName}.${name}" is a list of links, so it cannot be required`);
+    if (Boolean(col.required) === required) continue;
+    if (required && col.whenTargetGoes === 'stays-unlinked') {
+      throw new Error(`"${tableName}.${name}" stays without one when its record goes, so it cannot be required — say what happens then first`);
+    }
+    if (required) col.required = true;
+    else delete col.required;
+    changes.push({ name, required });
+  }
+  return changes;
+}
+
 /** A person's reading of a check. */
 export function describeCheck(check: CheckDecl): string {
   if ('exactlyOne' in check) return `exactly one of ${check.exactlyOne.join(', ')} is set`;

@@ -87,8 +87,8 @@ export function planTouchesWhatTheSchemaRouteRefuses(plan: MigrationPlanData): s
         const problem = seriesProblem(c.name, c.series, c.type);
         if (problem) out.push(`${at}: ${problem}`);
       }
-      const field = b.action === 'dropColumn' ? b.column : b.action === 'renameColumn' ? b.oldName : undefined;
-      if (field !== undefined) {
+      const fields = b.action === 'dropColumn' ? [b.column] : b.action === 'renameColumn' ? [b.oldName] : b.action === 'setRequired' ? Object.keys(b.columns) : [];
+      for (const field of fields) {
         if (SYSTEM_FIELDS.includes(field)) out.push(`${at}: "${field}" is set by the backend on every record`);
         else if (b.table === '_User' && (!isVisibleAccountColumn(field) || field === 'username' || field === 'email'))
           out.push(`${at}: "${field}" is one of the backend's own account fields`);

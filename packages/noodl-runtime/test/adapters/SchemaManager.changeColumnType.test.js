@@ -216,4 +216,21 @@ describe('SchemaManager.changeColumnType', () => {
       expect(indexNames(db, 'Dup').length).toBe(1);
     });
   });
+
+  // P116-S24-TYPEREQUIRED: the add-copy-drop-rename added the new column without NOT NULL, so a required
+  // field took records without it after a type change, while its declaration still said required.
+  it('keeps a required field required through a type change, NOT NULL and all', () => {
+    const { sm, db } = ctx;
+    sm.createTable({ name: 'Must', columns: [{ name: 'n', type: 'Number', required: true }] });
+    db.prepare('INSERT INTO "Must" ("objectId", "n") VALUES (?, ?)').run('a', 7);
+    const notNull = () => db.prepare('PRAGMA table_info("Must")').all().find((c) => c.name === 'n').notnull;
+    expect(notNull()).toBe(1);
+
+    expect(sm.changeColumnType('Must', 'n', 'String')).toMatchObject({ changed: true, rebuilt: true });
+
+    expect(notNull()).toBe(1);
+    expect(sm.getTableSchema('Must').columns[0].required).toBe(true);
+    expect(db.prepare('SELECT "n" FROM "Must" WHERE "objectId" = ?').get('a').n).toBe('7.0');
+    expect(() => db.prepare('INSERT INTO "Must" ("objectId") VALUES (?)').run('b')).toThrow(/NOT NULL/);
+  });
 });

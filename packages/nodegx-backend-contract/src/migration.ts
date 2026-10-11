@@ -43,6 +43,8 @@ export type MigrationSchemaBody =
   | { action: 'setWhenTargetGoes'; table: string; columns: Record<string, WhenTargetGoes | null> }
   /** P116 ONT-015: a series put on (or taken off) a field; the store numbers the records that hold none. */
   | { action: 'setSeries'; table: string; columns: Record<string, StorageSeries | null> }
+  /** P116-ONT-007-required: fields the records already have made required (true) or optional (false). */
+  | { action: 'setRequired'; table: string; columns: Record<string, boolean> }
   | { action: 'setChecks'; table: string; checks: StorageCheckDecl[] }
   | { action: 'setIndexes'; table: string; indexes: StorageIndexDecl[] }
   | { action: 'dropColumn'; table: string; column: string }
@@ -85,6 +87,8 @@ export type MigrationCheckData =
   | { refuse: 'rows'; collection: string; says: string }
   | { refuse: 'outside-list'; collection: string; field: string; values: string[]; says: string }
   | { refuse: 'duplicates'; collection: string; fields: string[]; says: string }
+  /** P116-ONT-007-required: a field made required over records, refused while any holds nothing in it. */
+  | { refuse: 'empty'; collection: string; field: string; says: string }
   | { loses: 'values'; collection: string; field: string; says: string }
   | { loses: 'rows'; collection: string; says: string };
 
@@ -200,6 +204,11 @@ export async function dryRunMigration(ctx: MigrationContext, plan: MigrationPlan
         }
         const over = Array.from(seen.values()).filter((n) => n > 1).reduce((a, n) => a + n, 0);
         if (over > 0) dry.refusals.push({ says: c.says, rows: over });
+      } else if (c.refuse === 'empty') {
+        // P116-ONT-007-required: the store refuses a field made required while a record holds nothing in it (NOT NULL),
+        // which a run would meet after the backup. Counted first, as the store counts: no value at all, not an empty text.
+        const empty = (await allRows(ctx, c.collection)).filter((r) => r[c.field] === undefined || r[c.field] === null).length;
+        if (empty > 0) dry.refusals.push({ says: c.says, rows: empty });
       } else if (c.refuse === 'more-than-one') {
         const seen = new Map<string, number>();
         for (const row of await allRows(ctx, c.record)) {
@@ -273,6 +282,10 @@ function applySchema(ctx: MigrationContext, body: MigrationSchemaBody): void {
     case 'setSeries':
       if (typeof sm.setSeries !== 'function') throw new Error('the schema surface cannot hand out numbers');
       sm.setSeries(body.table, body.columns);
+      return;
+    case 'setRequired':
+      if (typeof sm.setRequired !== 'function') throw new Error('the schema surface cannot make a field required or optional');
+      sm.setRequired(body.table, body.columns);
       return;
     case 'setChecks':
       if (typeof sm.reconcileChecks !== 'function') throw new Error('the schema surface has no reconcileChecks');
@@ -384,13 +397,14 @@ const SCHEMA_ACTIONS: ReadonlyArray<MigrationSchemaBody['action']> = [
   'describeTable',
   'setWhenTargetGoes',
   'setSeries',
+  'setRequired',
   'setChecks',
   'setIndexes',
   'dropColumn',
   'deleteTable'
 ];
 const MOVES = ['linkToRecord', 'recordToLink', 'fieldAcross'] as const;
-const REFUSALS = ['more-than-one', 'none', 'rows', 'outside-list', 'duplicates'];
+const REFUSALS = ['more-than-one', 'none', 'rows', 'outside-list', 'duplicates', 'empty'];
 const LOSSES = ['values', 'rows'];
 
 const isObject = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
@@ -438,6 +452,9 @@ export function migrationPlanProblems(plan: unknown): string[] {
         // ONT-015: the shape only — whether the store can keep the format is the store's (it refuses in words).
         if (!isObject(b.columns) || Object.values(b.columns).some((v) => v !== null && (!isObject(v) || !isWords(v.format))))
           out.push(`${at}: a series change is { columns: { <field>: { format, restart?, gapFree? } or null } }`);
+      } else if (b.action === 'setRequired') {
+        if (!isObject(b.columns) || !Object.keys(b.columns).length || Object.values(b.columns).some((v) => typeof v !== 'boolean'))
+          out.push(`${at}: a required change is { columns: { <field>: true (required) or false (optional) } }`);
       }
     }
     if ('move' in s) {
