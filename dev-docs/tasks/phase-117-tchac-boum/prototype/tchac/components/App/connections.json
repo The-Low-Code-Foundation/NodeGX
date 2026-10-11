@@ -1,0 +1,22 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7c4a6b10-0000-4000-8000-0000000000b1",
+  "version": 1,
+  "connections": [
+    { "fromId": "btn", "fromProperty": "onClick", "toId": "tourniquet", "toProperty": "increase" },
+    { "fromId": "tourniquet", "fromProperty": "currentCount", "toId": "compteur", "toProperty": "n" },
+    { "fromId": "compteur", "fromProperty": "formatted", "toId": "billesTxt", "toProperty": "text" },
+    { "fromId": "tourniquet", "fromProperty": "countChanged", "toId": "rampe", "toProperty": "start" },
+    { "fromId": "rampe", "fromProperty": "timerFinished", "toId": "ballon", "toProperty": "on" },
+    { "fromId": "ballon", "fromProperty": "state", "toId": "pancarte", "toProperty": "input" },
+    { "fromId": "pancarte", "fromProperty": "currentValue", "toId": "ballonTxt", "toProperty": "text" },
+    { "fromId": "btnReset", "fromProperty": "onClick", "toId": "ballon", "toProperty": "off" },
+    { "fromId": "btnReset", "fromProperty": "onClick", "toId": "tourniquet", "toProperty": "reset" },
+    { "fromId": "btnReset", "fromProperty": "onClick", "toId": "chatG", "toProperty": "off" },
+    { "fromId": "btnReset", "fromProperty": "onClick", "toId": "chatD", "toProperty": "off" },
+    { "fromId": "chatG", "fromProperty": "state", "toId": "pancG", "toProperty": "input" },
+    { "fromId": "pancG", "fromProperty": "currentValue", "toId": "chatGTxt", "toProperty": "text" },
+    { "fromId": "chatD", "fromProperty": "state", "toId": "pancD", "toProperty": "input" },
+    { "fromId": "pancD", "fromProperty": "currentValue", "toId": "chatDTxt", "toProperty": "text" }
+  ]
+}
