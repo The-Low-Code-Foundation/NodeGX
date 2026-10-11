@@ -10,7 +10,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { scanRecentProjects, userDataCandidates } from '../src/tools/listProjects';
+import { noteFor, scanFolderProjects, scanProjects, scanRecentProjects, userDataCandidates } from '../src/tools/listProjects';
 
 function tmp(prefix: string): string {
   return fs.mkdtempSync(path.join(os.tmpdir(), prefix));
@@ -158,5 +158,40 @@ describe('BST-006 — reading the launcher’s recent-projects list', () => {
     const candidates = userDataCandidates();
     expect(candidates[0]).toContain('NodeGX');
     expect(candidates.some((c) => c.includes('OpenNoodl'))).toBe(true);
+  });
+});
+
+describe('P112-S9-DAYTWO — a person who never opened the editor', () => {
+  // `npm create nodegx` (OWN-011): the agent made the app in a subfolder yesterday; the launcher's list, which only the
+  // editor writes, is empty. Today the same folder is opened again.
+  it('the folder the server started in reports the app, and the note no longer sends the agent to create_project', () => {
+    const folder = tmp('own011-folder-');
+    const app = v2Project(folder, 'reading-list');
+    fs.writeFileSync(path.join(app, 'nodegx.project.json'), JSON.stringify({ name: 'Reading List', modified: '2026-10-11T12:00:00.000Z' }));
+    fs.mkdirSync(path.join(folder, 'node_modules', 'not-a-project'), { recursive: true });
+    const emptyUserData = tmp('own011-userdata-');
+
+    const result = scanProjects([emptyUserData], folder);
+
+    expect(result.projects).toEqual([
+      { name: 'Reading List', directory: app, format: 'v2', lastOpened: '2026-10-11T12:00:00.000Z' }
+    ]);
+    expect(noteFor(result, false)).not.toContain('create_project is the way forward');
+    // Control: the launcher's list alone, the only source before the fix, answers "nothing here".
+    expect(scanRecentProjects([emptyUserData]).projects).toEqual([]);
+  });
+
+  it('a server started inside a project reports that project, not its folders', () => {
+    const app = v2Project(tmp('own011-self-'), 'App');
+    fs.mkdirSync(path.join(app, 'components', 'App'), { recursive: true });
+    expect(scanFolderProjects(app).map((p) => p.directory)).toEqual([app]);
+  });
+
+  it('a project in both sources is reported once', () => {
+    const folder = tmp('own011-both-');
+    const app = v2Project(folder, 'reading-list');
+    const userData = tmp('own011-userdata-');
+    writeStore(userData, [{ retainedProjectDirectory: app, name: 'Reading List', latestAccessed: 3000 }]);
+    expect(scanProjects([userData], folder).projects.map((p) => p.directory)).toEqual([app]);
   });
 });

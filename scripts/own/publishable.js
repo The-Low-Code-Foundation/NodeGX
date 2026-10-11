@@ -15,7 +15,7 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..', '..');
 /** The packages OWN-011's one install publishes (R2: at 0.x). */
-const KIT = ['packages/noodl-mcp', 'packages/noodl-preview'];
+const KIT = ['packages/noodl-mcp', 'packages/noodl-preview', 'packages/create-nodegx'];
 
 const workspace = new Map();
 for (const dir of fs.readdirSync(path.join(ROOT, 'packages'))) {

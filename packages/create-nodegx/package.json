@@ -1,0 +1,22 @@
+{
+  "name": "create-nodegx",
+  "version": "0.1.0",
+  "description": "npm create nodegx — sets a folder up so your AI agent can build NodeGX apps in it.",
+  "license": "MIT",
+  "bin": {
+    "create-nodegx": "bin/create-nodegx.js"
+  },
+  "files": [
+    "bin",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
