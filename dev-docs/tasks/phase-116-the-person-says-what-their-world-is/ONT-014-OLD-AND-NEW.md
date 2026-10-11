@@ -1,0 +1,170 @@
+# ONT-014 — Old and new
+
+**Opened 2026-10-10**, from ONT-013 §3.2: the one atom the person's lifecycle sentences need and the backend does not
+have — a rule that reads **the record before the change, the record after it, and who is making it**, held inside the
+write. ONT-012's `onlyWhile` is the special case that reads the old record only. **Depends on** ONT-012 (the seam:
+`heldWhile()` in `persistence/onlyWhile.ts`, the `StorageAclOption.onlyWhile` ride, the 409 mapping per door), R10 (the
+facade as the one door). **Feeds** ONT-013 (three unkept shapes flip to held), ONT-011 step 4 (*settled* projects to
+this and nothing else), ONT-008 (the view shows a value's allowed moves). **Status: 📋.**
+
+> **Model check (Richard, 2026-10-08 rule):** the build wants **Opus 5.5** — fixed-shape enforcement on a seam that
+> exists and a grading suite that exists (`ont-012-only-while.test.ts`'s shape). **A reach review on Fable 5.1**
+> follows, as ONT-012's does: "which door lets a value move the wrong way?" — the batch, the upsert, the increment, a
+> relation-only PUT, a workflow step, the MCP's `_update`.
+
+## 1. The person sentences
+
+> **"An assignment goes from draft to issued to withdrawn. It never goes back. Only a coach may issue one."**
+>
+> **"Once an invoice is issued, its number and its amount never change. We can still mark it paid."**
+>
+> **"A person's date of birth is written once."**
+>
+> **"A sealed envelope is never deleted."**
+
+The first is a **move**: a value, the moves it may make, and who may make each. The second is **frozen** fields under a
+condition on the old record. The third is frozen with no condition — the `setOnce` claim the vocabulary already writes
+and the engine does not keep. The fourth is `neverDeleted`, the same.
+
+## 2. Why
+
+`project.ts` `WHY` says, for `setOnce`: *"the schema has no rule against changing a field once the record is made"*;
+for `neverEdited` and `neverDeleted`: *"who may change a record is its collection's permissions, which the projection
+does not write yet"*. All three are survivors in ONT-005's 16 of 38. ONT-012 built the seam that can hold them —
+`onlyWhile` ANDs a condition on the old record into the write's own ACL, one SQL statement, a 409 in the person's
+words — but its `where` reads the old record only and never the body or the caller. The lessons corpus has the move
+(`Assignment.status` draft / issued / withdrawn, `PathStep.status`, `Programme.status`), nightbook has the seal, and
+every settled row in ONT-011 §3.2 is one of these four sentences.
+
+## 3. What to build
+
+### 3.1 `security.json`: `onlyWhile.update` grows two clauses, `onlyWhile.delete` grows one word
+
+```json
+"Assignment": {
+  "onlyWhile": {
+    "update": {
+      "moves": {
+        "status": {
+          "draft":  { "to": ["issued"],    "by": ["role:coach"] },
+          "issued": { "to": ["withdrawn"], "by": ["role:coach"] },
+          "withdrawn": { "to": [] }
+        }
+      },
+      "frozen": { "fields": ["learnerId", "brief"], "unless": { "status": "draft" }, "says": "An issued assignment's learner and brief never change." }
+    }
+  }
+},
+"Envelope": {
+  "onlyWhile": { "delete": { "where": { "sealed": false }, "says": "A sealed envelope is never deleted." } }
+},
+"Person": {
+  "onlyWhile": { "update": { "frozen": { "fields": ["dateOfBirth"] } } }
+}
+```
+
+- **`moves.<field>`**: for each old value, the values it may move to (`to`; `[]` = none) and who may make the move
+  (`by`, an ordinary rule value — role atoms, the record's own ACL keys, a `{ path }` atom). A write whose body sets
+  the field to a value not in `to` for the old value, or by a caller `by` does not admit, is refused. A write that
+  sets the field to its current value is not a move. An old value with no entry may move anywhere (the rule says
+  what is forbidden, not everything that is allowed) — **unless** the person said "nothing else", which is `"*": {
+  "to": [] }`.
+- **`frozen`**: `fields` whose change is refused, `unless` a Parse-wire condition on the **old** record holds (no
+  `$path`, as for `where`). No `unless` = frozen from the first save (`setOnce`). `fields: "*"` = the whole record
+  (`neverEdited`). ONT-012's `except` is the complement and stays; a body may not be both excepted and frozen — the
+  validator refuses it.
+- **`delete.where`** with a condition that can never hold is clumsy; `"delete": "never"` is the word for
+  `neverDeleted`. The admin credential, as always, is not bound.
+- **`says`** per clause, as before; a default sentence names the field and the move.
+
+### 3.2 Enforcement: still one statement
+
+Every clause here is decidable from **the body, the caller and the old record**, so it stays inside ONT-012's design:
+
+1. The body is read first (which fields change; for a `moves` field, the new value). From that, the clause compiles
+   to a condition on the **old** record: for `moves`, *old.status ∈ {the values whose `to` holds new.status}*; for
+   `frozen`, *unless holds* when a frozen field is in the body. `by` is decided on the principal before the statement,
+   as `checkClp` is.
+2. The condition is ANDed into the write's `only` by `heldWhile()`, so the check and the write are one statement on
+   both engines, with no read-then-write race. `whyRefused()`'s two counts tell a 409 (the rule stopped it) from a
+   404 (the caller may not write the row).
+3. The 409 carries the clause's `says`, at every door ONT-012 §6.1 mapped: PUT, the upsert, BYOB PUT and batch (both
+   arms), the increment (a frozen number is also frozen against `$inc`), the relation-only PUT. The MCP's `_update`
+   says it. A new door found in the review is a finding, not a silent pass.
+4. **Who it binds:** every caller the row ACL binds. Cloud functions and workflows run as admin and are not bound — *a
+   function is how an amend is made* (ONT-012 §3.1). ONT-006's verbs that move a status do so as admin and must
+   name the move in their steps; the reach review counts them.
+
+### 3.3 The projection
+
+`RuleHold` gains two shapes, and three existing ones flip from unkept to held:
+
+| `RuleHold` | projects to | was |
+|---|---|---|
+| `{ setOnce: f }` | `frozen: { fields: [f] }` | unkept |
+| `{ neverEdited: true }` | `frozen: { fields: "*" }` | unkept |
+| `{ neverDeleted: true }` | `delete: "never"` | unkept |
+| **new** `{ frozen: [f…]; unless?: where }` | `frozen` with `unless` | — |
+| **new** `{ moves: f; from: { old: { to: [...]; by?: rule } } }` | `moves` | — |
+
+*Settled* (ONT-011 step 2) projects to `moves` on its status choice (draft → agreed → withdrawn, nothing back) plus
+`frozen` on everything but its status and its note `unless` draft, plus `delete: "never"` for an agreed one if the
+person said so. Its `amends` self-link is a plain Link. `WHY` loses three lines.
+
+## 4. The doors
+
+ONT-012 §4's table is the census. Each row's "what this task does" for an update is **the same strip-or-refuse, plus
+the move and freeze check**. Two rows need their own thought:
+
+- **The increment echo** (`PUT` with `$inc`): a frozen Number must refuse `$inc`, and the refusal must not echo the
+  old value to a caller who could not read it (ONT-012's field mask runs first).
+- **The batch**: a batch that moves the same record twice in one request (draft → issued → withdrawn) is two moves
+  and each is judged on the record as the previous one left it. A batch that is refused half-way is ONT-012's
+  "both arms" case.
+
+## 5. Acceptance criteria
+
+1. **On SQLite and PostgreSQL, over HTTP on a locked backend**, with the §1 sentences as `security.json`: draft → issued
+   by a coach goes through; by a learner is a 409 carrying `says`; issued → draft by anyone is a 409; withdrawn → anything
+   is a 409; setting `status` to its current value is not a move. A frozen field changed on an issued assignment is a
+   409; the same change on a draft goes through; a `$inc` on a frozen number is a 409. A sealed envelope's DELETE is a
+   409 and the record stands. `dateOfBirth` set at create, then changed, is a 409. The admin credential does all of
+   it. A row the caller may not write is still 404. **Mutants, each caught by name:** `heldWhile` spied to drop the
+   `moves` condition; the body reader spied to miss a frozen field under a `$set`-style alias; `by` skipped.
+2. **Every door in ONT-012 §4** that takes an update or a delete refuses with the 409, counted in the spec per door,
+   including the batch's second move and the relation-only PUT.
+3. `validateSecurityConfig` refuses, in words: a `moves` entry on a field that is not a choice or text; a `to` naming a
+   value the choice does not hold; a field both `frozen` and `except`; `unless` with a `$path`; `delete: "never"`
+   beside a `delete.where`; either on a `_` collection.
+4. **The projection:** `setOnce`, `neverEdited`, `neverDeleted` are held — `ont-005-mutants.test.ts`'s pin moves
+   down and the three are named in ONT-005 §6 and ONT-013 §6; each flipped claim fails on its mutant on both engines.
+   The two new shapes have a claim and a mutant each, graded.
+5. **The round trip:** the permissions page's save and the MCP's `set_collection_permissions` keep `moves`,
+   `frozen` and `delete: "never"` (ONT-012 AC5's `UNDRAWN_KEYS`), measured red first if it is red.
+6. The Fable reach review is filed in §6 with its findings, each measured, before the task closes.
+
+## 6. Built
+
+*(empty)*
+
+## 7. Not this task
+
+- **Who may change a field** outside a move (a per-field `update` rule). Still unruled (ONT-012 §7).
+- **A move that must run something** (issuing sends the brief). That is a verb (ONT-006); the move rule only says
+  the move is allowed. A verb that moves a status runs as admin and is counted by the review, not bound.
+- **The series** (ONT-015). A frozen number is this task's; a handed-out number is that one's.
+- **History of moves** (who moved it when). ONT-011's "keep who changed what" fact, step 2's.
+- **Across records** ("at most twenty"). ONT-013 step 4 measures it first.
+
+## 8. Watch for
+
+- **A catch-all turns a 409 into a 404 or a 400** (ONT-012 §6.2, twice). Grade each door by its status *and* its
+  `says`, never by "the write did not happen".
+- **Setting a field to its current value** must not count as a move, or every PUT that echoes the whole record is
+  refused. The spec has that case.
+- **The old record under the caller's ACL, not the master's.** `whyRefused()`'s two counts run as the caller; a
+  move judged on a master-read old record leaks a value the caller may not see.
+- **Grade through the facade, never the raw adapter** (s12's trap). The Proxy adapter in
+  `tests/helpers/facade-deletes.ts` is the pattern.
+- **A gate with a hole shaped like the defect:** a spec that proves "issued → draft refused" and never tries
+  "issued → issued with a frozen field changed" has not tested `frozen`.
