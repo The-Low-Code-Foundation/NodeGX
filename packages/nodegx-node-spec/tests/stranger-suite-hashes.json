@@ -23,7 +23,7 @@
   "src/nodes/counter.ts": "6e1c37e0d58bf480d8f3c49fa2f7a1656ed4a53632bc63e267e83474a9b43682",
   "src/nodes/data-attributes.ts": "8fedddb1d1cb7abd5355adfaf13d5a37412fb55c725dae12a9e0440fc8ba9273",
   "src/nodes/delay.ts": "3d308e743644dfd6f0dbb2ef853ab5e79415dfc9d43ef17230eacdcaad33f6b1",
-  "src/nodes/dropdown.ts": "6040c9a7817cb2c18b125b149a6c6c5ba0a10b78e3d17ada06366471ed9b7056",
+  "src/nodes/dropdown.ts": "a5134e97d2743c576d61611ebb1b675dcf246a9072bff8cf85085f3ecf3eff23",
   "src/nodes/ease-curves.ts": "0d706fafdec909b56bc8ea89237010494d674005f2e9c14b09081304c004a601",
   "src/nodes/inverter.ts": "421c0e48980fedb8ef96788341dc177886c768c060535bcc139d5b485d190848",
   "src/nodes/repeat.ts": "90d90a0d26bf20c73afa748e7eb2ec5e93f3a63bb54914b1dbf5c2e2e86cf6af",

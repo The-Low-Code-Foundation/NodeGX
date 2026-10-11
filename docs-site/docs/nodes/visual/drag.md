@@ -30,7 +30,7 @@ Sliders, swipeable cards, drawers — any direct-manipulation gesture where you 
 | `enabled` | Boolean | `true` | Lets the user drag this element; when off it still renders and still responds to the Snap actions |
 | `inputPositionX` | Number | — | Sets the X position the element starts at, before any dragging |
 | `inputPositionY` | Number | — | Sets the Y position the element starts at, before any dragging |
-| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind |
+| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen) |
 | `scale` | Number | `1` | Divides pointer movement before it becomes element movement, so 2 makes the element move half as far as the pointer |
 | `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |
 | `snapToPositionX.duration` | Number | `300` | How long the X snap animation takes, in milliseconds |

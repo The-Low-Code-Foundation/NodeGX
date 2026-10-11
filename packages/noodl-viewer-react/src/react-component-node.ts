@@ -2371,7 +2371,7 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
       index: 9999,
       type: 'boolean',
       group: 'General',
-      description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind',
+      description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen)',
       default: true,
       set(value) {
         value = value ? true : false;

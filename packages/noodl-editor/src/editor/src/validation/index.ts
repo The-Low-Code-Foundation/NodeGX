@@ -208,10 +208,11 @@ export type { ArrangementNode, CheckResponsiveArrangementOptions } from './respo
 // justifyContent on a row whose children all grow.
 export { checkLayoutInertCombination, widthIsPercentage } from './layoutInertCombination';
 export { checkOneWayGate } from './oneWayGate';
+export { checkGateStartsShown } from './gateStartsShown';
 export type { CheckLayoutInertCombinationOptions, LayoutNode } from './layoutInertCombination';
 // DSG-004 §2.3 — doctrine §3: a page with one font weight.
 export { checkTypographyHierarchy, MIN_TEXT_NODES, TEXT_WEIGHT_TYPES } from './typographyHierarchy';
 export type { CheckTypographyHierarchyOptions } from './typographyHierarchy';
 export { SemanticValidator, validateProject } from './SemanticValidator';
 export { ALL_RULES } from './rules';
-export type { Rule, RuleContext, ValidatorOptions } from './rules';
+export type { DrawnPortsLookup, Rule, RuleContext, ValidatorOptions } from './rules';

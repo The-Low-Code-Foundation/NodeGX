@@ -29,7 +29,7 @@ The standard top-level navigation of an app: distinct pages with URLs, deep-link
 | `clip` | Enum (`contentHeight`, `scroll`, `clip`) | `contentHeight` | What happens when a page is taller than the router: grow to fit it, scroll it, or clip it |
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
 | `dataAttributes` | Stringlist | — | data-* names (data-testid) for tests and scripts to find this element by; each gets a value input |
-| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind |
+| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen) |
 | `name` | String | — | Name the Navigate nodes address this router by; leave it blank if there is only one |
 | `pages` | Pages | — | The components this router can show, and which of them is the start page |
 | `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |

@@ -146,7 +146,7 @@ export const Slider = defineNode({
     // slider.ts :127-134 — on the element only (Slider.tsx :120-122)
     step: { type: 'number', default: 1, coerce: 'none', displayName: 'Step', group: 'General', description: 'Smallest amount the handle can move by, so the value lands on multiples of it', portability: 'logic', examples: [1, 5, 0.5, 0, 25] },
     // react-component-node.ts :2302-2321
-    mounted: { type: 'boolean', default: true, coerce: 'none', displayName: 'Mounted', group: 'General', description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind', portability: 'logic', layout: 'present' },
+    mounted: { type: 'boolean', default: true, coerce: 'none', displayName: 'Mounted', group: 'General', description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen)', portability: 'logic', layout: 'present' },
     // utils.ts :366-398
     focus: { type: 'signal', outcome: true, displayName: 'Focus', group: 'Actions', description: 'Puts the keyboard on this slider, so Enter, Space and the arrow keys go to it', portability: 'logic' },
     blur: { type: 'signal', outcome: true, displayName: 'Blur', group: 'Actions', description: 'Takes the keyboard away from this slider, which is what fires Blurred', portability: 'logic' },

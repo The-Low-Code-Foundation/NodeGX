@@ -1,7 +1,7 @@
 ---
 id: P78-TPL011-MOUNTED
 title: A wired Mounted input that has no value yet leaves the node mounted, so a gated screen flashes
-status: needs-ruling
+status: fixed
 phase: P109
 task: ISL-045
 severity: medium
@@ -29,3 +29,21 @@ rendered from disk on the working-tree runtime. A Group whose Mounted is wired f
 **drawn**. Beside it, the controls: a Group gated by a Function that sends `false` is hidden, and one gated by `true`
 and one with no wire are drawn. This reads the steady state ("no value ever"). Nightbook's flash is the same default
 on the first frame, before the gate's value arrives. The ruling is still owed.
+
+**Ruled (Richard, P109 s44, 2026-10-11):** Warn when building (as recommended): nothing that runs changes; the door warns when a wired show/hide does not start hidden, and the author sets it.
+
+**Re-ruled the same day, on the count.** Before the warning was built, it was counted on the 13 templates: it would
+fire on 409 nodes, most of them an error line or an empty state where one frame shown does no harm. Asked again with
+that number, Richard ruled: **a quiet note, and say it in Mounted's help.**
+
+**Fixed (P109 s44, 2026-10-11).** Nothing that runs changes.
+
+- **Mounted's description** (`react-component-node.ts`, and its 17 copies in the node specs) now adds: *"Wired, it
+  counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen)"*.
+  The catalog, the enriched catalog and 26 docs pages were regenerated, and only that line moved.
+- **The door's info `gate-starts-shown`** (`validation/gateStartsShown.ts`, in the authored-output run): it fires on a
+  built-in visual node whose `mounted` is wired and whose own `mounted` is not `false`, and it names `mounted: false`.
+  It is never a warning and never blocking. It abstains on a component instance.
+- **Graded:** `tests-unit/validation/gateStartsShown.test.ts` 6/6 with its mutant ledger. Removing the `mounted:
+  false` abstention reddens exactly that arm. The neighbouring `oneWayGate` spec still passes, and so does the
+  validation folder (191/191).

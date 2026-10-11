@@ -248,7 +248,7 @@ export const Text = defineNode({
   inputs: {
     // ---- logic ----
     // react-component-node.ts :2276-2295
-    mounted: { type: 'boolean', default: true, coerce: 'none', displayName: 'Mounted', group: 'General', description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind', portability: 'logic', layout: 'present' },
+    mounted: { type: 'boolean', default: true, coerce: 'none', displayName: 'Mounted', group: 'General', description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen)', portability: 'logic', layout: 'present' },
     // text.ts :37-45 — what the element shows (Text.tsx :101): the page, not the wire
     text: { type: 'string', default: 'Text', coerce: 'none', displayName: 'Text', group: 'Text', description: 'The text to show; an empty value renders nothing rather than the words null or undefined', portability: 'logic' },
     // react-component-node.ts :1380-1395

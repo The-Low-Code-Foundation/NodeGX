@@ -77,6 +77,7 @@ import { checkRepeaterTemplate } from './repeaterTemplate';
 import { checkVariableInRepeatedComponent } from './repeatedComponentVariable';
 import { checkTypedWordNotTranslated } from './typedWordNotTranslated';
 import { checkLayoutInertCombination } from './layoutInertCombination';
+import { checkGateStartsShown } from './gateStartsShown';
 import { checkOneWayGate } from './oneWayGate';
 import { checkQueryBeforeFilter } from './queryBeforeFilter';
 import { checkResponsiveArrangement } from './responsiveArrangement';
@@ -656,6 +657,8 @@ export function authoredPreconditionDiagnostics(options: AuthoredPreconditionOpt
     // DEF-024 — a mounted/visible gate whose every writer is a constant-true
     // Condition: it can only ever turn on, so sibling answers accumulate.
     ...checkOneWayGate(nodes, { component, catalog, wires }),
+    // P78-TPL011-MOUNTED — a wired mounted that is on the page until its first value: an info, as ruled.
+    ...checkGateStartsShown(nodes, { component, catalog, wires }),
     // DEF-012 §2 — a cloud query with connected filter parameters that fetches
     // at graph build, before the parameters can arrive: the first result is
     // every row in the class. Reads wires; omitted means "do not check".

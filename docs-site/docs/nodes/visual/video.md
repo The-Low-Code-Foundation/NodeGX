@@ -76,7 +76,7 @@ Embedded video content, background/hero loops, and camera previews (wire a media
 | `minHeight` | Number | — | Smallest height the element may shrink to, taking priority over Height |
 | `minWidth` | Number | — | Smallest width the element may shrink to, taking priority over Width |
 | `mixBlendMode` | Enum (`normal`, `multiply`, `screen`, `overlay`, `darken`, `lighten`, `color-dodge`, `color-burn`, `hard-light`, `soft-light`, `difference`, `exclusion`, `hue`, `saturation`, `color`, `luminosity`) | `normal` | How this element's colours blend with whatever is painted behind it |
-| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind |
+| `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen) |
 | `muted` | Boolean | — | Silences the video without changing Volume, and is what lets Autoplay work |
 | `objectFit` | Enum (`contain`, `cover`, `fill`, `none`) | `contain` | How the video fills its box when the two have different proportions |
 | `objectPositionX` | Number | `50` | Which part of the video stays visible horizontally when Object Fit crops it |

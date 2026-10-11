@@ -124,7 +124,7 @@ export const Button = defineNode({
     // button.ts :58-66 — read by the component at each press (Button.tsx :122)
     keepsFocus: { type: 'boolean', default: false, coerce: 'none', displayName: 'Keeps Focus', group: 'General', description: 'Leaves the keyboard where it was when this button is clicked, instead of taking it — what a key on an on-screen keypad needs, so the cursor stays in the field being typed into', portability: 'logic' },
     // react-component-node.ts :2302-2321
-    mounted: { type: 'boolean', default: true, coerce: 'none', displayName: 'Mounted', group: 'General', description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind', portability: 'logic', layout: 'present' },
+    mounted: { type: 'boolean', default: true, coerce: 'none', displayName: 'Mounted', group: 'General', description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen)', portability: 'logic', layout: 'present' },
     // utils.ts :340-355
     focus: { type: 'signal', outcome: true, displayName: 'Focus', group: 'Actions', description: 'Puts the keyboard on this button, so Enter, Space and the arrow keys go to it', portability: 'logic' },
     // utils.ts :356-364

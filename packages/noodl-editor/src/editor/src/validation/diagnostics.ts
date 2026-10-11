@@ -902,6 +902,16 @@ export enum DiagnosticCode {
   GateOnlyTurnsOn = 'gate-only-turns-on',
 
   /**
+   * P78-TPL011-MOUNTED (P109 ISL-045) — a visual node whose `mounted` is wired
+   * but whose own `mounted` is not `false`: it is on the page until the wire's
+   * first value arrives, so a gated screen can flash.
+   *
+   * An **info**, as ruled: 409 fires on the templates, most of them harmless
+   * one-frame shows. See `gateStartsShown.ts`.
+   */
+  GateStartsShown = 'gate-starts-shown',
+
+  /**
    * DEF-012 §2 (P76 SB-011 §2) — a cloud Query Records node that filters on
    * connected parameters while its run-on-change boxes sit at the default, so
    * it fetches the moment the graph is built — before any value can have

@@ -270,7 +270,7 @@ export const Group = defineNode({
   inputs: {
     // ---- logic ----
     // react-component-node.ts :2276-2295
-    mounted: { type: 'boolean', default: true, coerce: 'none', displayName: 'Mounted', group: 'General', description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind', portability: 'logic', layout: 'present' },
+    mounted: { type: 'boolean', default: true, coerce: 'none', displayName: 'Mounted', group: 'General', description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen)', portability: 'logic', layout: 'present' },
     // group.ts :198-207 — the focus tracker (docblock)
     focus: { type: 'signal', outcome: true, displayName: 'Focus', group: 'Focus', description: 'Gives this group keyboard focus, so key events reach it', portability: 'logic' },
     // group.ts :86-148 — the scroll actions (docblock); Duration moves no output

@@ -109,7 +109,7 @@ export const Checkbox = defineNode({
     check: { type: 'signal', outcome: true, displayName: 'Check', group: 'Actions', description: 'Ticks the box if it is not already ticked, then fires Done — or Unchanged if it already was. Does not fire Changed', portability: 'logic' },
     uncheck: { type: 'signal', outcome: true, displayName: 'Uncheck', group: 'Actions', description: 'Unticks the box if it is ticked, then fires Done — or Unchanged if it already was. Does not fire Changed', portability: 'logic' },
     // react-component-node.ts :2302-2321
-    mounted: { type: 'boolean', default: true, coerce: 'none', displayName: 'Mounted', group: 'General', description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind', portability: 'logic', layout: 'present' },
+    mounted: { type: 'boolean', default: true, coerce: 'none', displayName: 'Mounted', group: 'General', description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen)', portability: 'logic', layout: 'present' },
     // utils.ts :340-364
     focus: { type: 'signal', outcome: true, displayName: 'Focus', group: 'Actions', description: 'Puts the keyboard on this checkbox, so Enter, Space and the arrow keys go to it', portability: 'logic' },
     blur: { type: 'signal', outcome: true, displayName: 'Blur', group: 'Actions', description: 'Takes the keyboard away from this checkbox, which is what fires Blurred', portability: 'logic' },

@@ -189,7 +189,7 @@ export const Dropdown = defineNode({
     // options.ts :225-230 — drawn in the span while nothing is selected (Select.tsx :181-183); nothing on the wire
     placeholder: { type: 'string', coerce: 'none', displayName: 'Placeholder', group: 'Placeholder', description: 'Text shown while nothing is selected', portability: 'logic' },
     // react-component-node.ts :2302-2321
-    mounted: { type: 'boolean', default: true, coerce: 'none', displayName: 'Mounted', group: 'General', description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind', portability: 'logic', layout: 'present' },
+    mounted: { type: 'boolean', default: true, coerce: 'none', displayName: 'Mounted', group: 'General', description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen)', portability: 'logic', layout: 'present' },
     // utils.ts :366-398
     focus: { type: 'signal', outcome: true, displayName: 'Focus', group: 'Actions', description: 'Puts the keyboard on this dropdown, so Enter, Space and the arrow keys go to it', portability: 'logic' },
     blur: { type: 'signal', outcome: true, displayName: 'Blur', group: 'Actions', description: 'Takes the keyboard away from this dropdown, which is what fires Blurred', portability: 'logic' },

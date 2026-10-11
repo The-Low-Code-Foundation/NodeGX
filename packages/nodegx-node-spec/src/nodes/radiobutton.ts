@@ -138,7 +138,7 @@ export const RadioButton = defineNode({
     // radiobutton.ts :84-91 (inputProps `value`) — raw, rendered at the frame's end
     value: { type: 'string', coerce: 'none', displayName: 'Value', group: 'General', description: 'What this button contributes to its Radio Button Group when selected; the group reports it as its own Value', portability: 'logic', examples: ['a', 'b', 'c', 1] },
     // react-component-node.ts :2302-2321
-    mounted: { type: 'boolean', default: true, coerce: 'none', displayName: 'Mounted', group: 'General', description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind', portability: 'logic', layout: 'present' },
+    mounted: { type: 'boolean', default: true, coerce: 'none', displayName: 'Mounted', group: 'General', description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen)', portability: 'logic', layout: 'present' },
     // utils.ts :340-364
     focus: { type: 'signal', outcome: true, displayName: 'Focus', group: 'Actions', description: 'Puts the keyboard on this radio button, so Enter, Space and the arrow keys go to it', portability: 'logic' },
     blur: { type: 'signal', outcome: true, displayName: 'Blur', group: 'Actions', description: 'Takes the keyboard away from this radio button, which is what fires Blurred', portability: 'logic' },
