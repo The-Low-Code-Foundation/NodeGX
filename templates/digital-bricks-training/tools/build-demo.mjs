@@ -163,13 +163,17 @@ function responder({ id, label, x, y, input, body, fixtureName }) {
   const ports = [];
   if (input) ports.push({ name: `in-${input}`, displayName: input, plug: 'input', type: '*', group: 'Inputs' });
   ports.push({ name: 'out-rows', displayName: 'rows', plug: 'output', type: '*', group: 'Outputs' });
+  // P109-S6-DEF038: a responder answers when its input changes (it has no `run`), so it says so. Left unsaid, the
+  // editor's first open writes `false` there and the demo stops answering a second learner or lesson.
+  const parameters = { functionScript: script };
+  if (input) parameters[`runOnChange-in-${input}`] = true;
   return {
     id,
     type: 'JavaScriptFunction',
     label,
     x,
     y,
-    parameters: { functionScript: script },
+    parameters,
     metadata: { comment: `Demo stand-in for the backend (TASK-L180). The fixture is backend/fixtures/${fixtureName}.json in the template.` },
     ports,
   };
