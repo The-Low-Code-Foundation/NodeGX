@@ -149,6 +149,7 @@ survivor adds claims and mutants of its own, so the denominator grows with the n
    second. **This is graded by reading what the person would see**, not by reading `rules.json`.
 4. ONT-005's pinned number on the fully answered world is lower after ONT-014 and ONT-015 than before, and the flipped
    shapes are named. A task that reports the atom built with the pin unchanged has not met this.
+   **ONT-014 (s17): 16 → 13 of 38; flipped: `setOnce`, `neverEdited`, `neverDeleted` (ONT-014 §6.2).**
 5. `world.test.ts`, `ontology-census:check`, `test:ci` green, the kinds still pinned to the hand file.
 
 ## 6. Rulings to ask (plain words)

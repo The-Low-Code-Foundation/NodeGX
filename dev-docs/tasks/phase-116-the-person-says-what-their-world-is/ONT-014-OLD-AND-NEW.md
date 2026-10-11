@@ -5,7 +5,7 @@ have — a rule that reads **the record before the change, the record after it, 
 write. ONT-012's `onlyWhile` is the special case that reads the old record only. **Depends on** ONT-012 (the seam:
 `heldWhile()` in `persistence/onlyWhile.ts`, the `StorageAclOption.onlyWhile` ride, the 409 mapping per door), R10 (the
 facade as the one door). **Feeds** ONT-013 (three unkept shapes flip to held), ONT-011 step 4 (*settled* projects to
-this and nothing else), ONT-008 (the view shows a value's allowed moves). **Status: 📋.**
+this and nothing else), ONT-008 (the view shows a value's allowed moves). **Status: 🟡 s17 (2026-10-11, Opus 5.5) — built: AC1, AC2, AC3's shape half, AC4 for the three flips, AC5 (§6). Owed: AC3's schema half, AC4's two new `RuleHold` shapes, AC6 (the Fable reach review).**
 
 > **Model check (Richard, 2026-10-08 rule):** the build wants **Opus 5.5** — fixed-shape enforcement on a seam that
 > exists and a grading suite that exists (`ont-012-only-while.test.ts`'s shape). **A reach review on Fable 5.1**
@@ -145,7 +145,109 @@ the move and freeze check**. Two rows need their own thought:
 
 ## 6. Built
 
-*(empty)*
+### 6.1 The rule (s17, `04a51c5eb`; the projection `e06f4259d`; the write `9bc713ada`)
+
+**`security.json`.** `onlyWhile.update` takes `moves` and `frozen` beside `where`/`except`/`says`, and `where` is now
+optional when either is said. `onlyWhile.delete` may be `"never"`. A move's `says` is per old value
+(`moves.status.withdrawn.says`), because a key `says` beside the values would collide with a value called "says".
+`frozen.says` is its own. `update.says` belongs to `where`.
+
+**Who: `by` decided before the write.** `SecurityState.aclFor` → `model.onlyWhileFor(config, collection, principal)`
+compiles each move's `by` into `admits`: `true`, `false`, or `{ where }`, the records a path atom reaches. This is
+`checkClp`'s decision shape (`ruleAllows` then `ruleNarrowing`). The facade never holds config.
+
+**The condition, still one statement.** `heldWhile(collection, acl, op, fields, values)` builds one clause per rule
+(`where`, each moved field, `frozen`, `delete: "never"`) and ANDs them into `only`.
+- A **move** is *old ∈ {values whose `to` holds the new one, admitted for this caller} ∪ {the new value itself}*.
+  Without `"*"`, it also includes *unlisted ∪ empty*.
+- A **frozen** field is *`unless` holds, or the old value is the one written*. With no `unless` and a list of fields
+  (set once), *or the old value is empty*, so "written once" allows the first write.
+- A Pointer compares by its id.
+- Empty is `$exists: false`, because `{ f: null }` matches nothing (bug `P116-S17-NULLEQ`, found here).
+- A field named without a value (an increment, a relation) is a change. A moved field named that way can never pass.
+
+**The words.** `whyRefused` asks clause by clause, under the caller's own ACL, which one the row fails. Each clause
+rides in `only`, never in `where`: a `by` path in a `where` would meet the INCLUDECLP path walk and be refused. The
+409 carries that clause's words, and for a move, the old value's: *"Moving "status" from "draft" to "issued" is not
+yours to make."*, *""status" moves from "issued" only to "withdrawn", not to "draft"."*, or the person's own `says`.
+
+**Measured** (`tests/ont-014-old-and-new.test.ts`, 54/54 on SQLite and PostgreSQL over HTTP, locked backend):
+- every move in §1, including staying put and the learner withdrawing their own assignment but not another's (the
+  path in `by`);
+- frozen fields under `unless`, an echo of an unchanged value, and a move plus a frozen field in one write (refused
+  whole);
+- `$inc` and a relation on frozen invoice fields;
+- set once, both filled at create and empty-then-set;
+- a sealed envelope never edited and never deleted at DELETE, BYOB DELETE and the batch;
+- the doors: upsert, BYOB PUT, MCP `_update` as a bound key, and the batch judging draft → issued → withdrawn → draft
+  move by move;
+- 404 for a row not yours, and the admin not bound;
+- AC5: the permissions save (the page's body, which is also the MCP's) and the revert keep it, and a bad move is a
+  400 in words. It was never red: the route keeps `onlyWhile` whole.
+
+Three mutants are caught: moves dropped, values not passed, `by` undecided. ONT-012's spec is 32/32, unchanged.
+
+### 6.2 The projection (AC4)
+
+`setOnce` → `frozen` fields, `neverEdited` → `frozen: "*"`, `neverDeleted` → `delete: "never"`, on
+`WorldCollection.onlyWhile`. `WHY` loses its three lines. Each claim is **held** with a mutant (`dropOnlyWhile`):
+- set once makes its row WITH a value and writes another;
+- never edited writes a different value (the other Boolean, another choice);
+- never deleted removes.
+
+**The facade keeps it; the claim carries it as data.** `ClaimCollection.onlyWhile` is passed in a write ACL on the
+claim's **`byPerson`** steps only. The spec's proxy (`tests/helpers/facade-deletes.ts`) sends a save with an ACL
+through `rawSave`, as it already sent every delete through `rawDelete`. No adapter reads `onlyWhile` (grepped), so a
+bare adapter fails the claim.
+
+**Found on the first run:** with every remove bound, "nobody deletes a person" refused the cascade claims' deletes
+("when a person goes, their memberships go too"). A cascade is what an admin or a function does. Only the steps a
+person makes are bound.
+
+**ONT-005's honesty number** (`retype` drops the rule through `applyMutant`; `differsInWhatIsHeld` counts
+`onlyWhile`), identical on both engines:
+
+| world | before | after | fell |
+|---|---|---|---|
+| world-every-kind | 16 of 38 | **13** | moves-unanswered, merge-by-delete, editable-history |
+| world | 14 of 27 | 11 | moves-unanswered, end-by-delete, editable-history |
+| world-membership | 8 of 20 | 4 | moves-unanswered, end-by-delete, editable-history (×2) |
+
+every-kind's `end-by-delete` survives (unclaimed).
+
+### 6.3 The write (what makes "held" true in a deployed backend)
+
+The product writes a world only through `POST /admin/world/migrate`, and no step carried `onlyWhile`.
+`planMigration` now ends with a **`rules`** step per collection whose `onlyWhile` changed (`keep, for people: account
+is set once`; `null` = none).
+
+The contract's executor hands it to `MigrationContext.rules`. A context without that hook fails the step by name
+(s11's lesson: an unknown step is never counted done).
+
+The route records the steps during the run and writes them **after** the renamed collections' rules have moved
+(written during, the move would overwrite them). It writes in place, and validates the whole result before anything
+runs.
+
+**Ownership** (`withWorldRules`): the world owns `update.frozen` and `delete: "never"` on its collections. `where`,
+`except`, `moves` and a delete condition are the person's and stay. A `rules` step on a `_` collection is a 400.
+
+Graded through the route on both engines (`ont-007-route.test.ts` 33/33): before / run / back, with a hand rule beside
+the world's.
+
+### 6.4 Owed
+
+- **AC3's schema half:** "a `moves` entry on a field that is not a choice or text; a `to` naming a value the choice
+  does not hold". The validator is schema-less. It belongs where `security.json` is written with the schema at hand:
+  the permissions PUT, and the migration's `rules` step.
+- **AC4's two new `RuleHold` shapes** (`frozen` with `unless`, `moves`): a vocabulary change (`kind.ts`, the
+  validator, the brief). It goes with ONT-011 step 2 (*settled*), which is their first user.
+- **AC6: the reach review (Fable).** Start from these:
+  - a cloud function's Update Record runs as admin, so it is not bound (by design; count the verbs that move a status);
+  - a `moves` field named with no value;
+  - a hidden status field: the 409 says "from "issued"", a value R-a may hide from the caller;
+  - a Date frozen field (an envelope `{__type: Date}` is never "the same value");
+  - `withWorldRules`'s ownership when a person hand-wrote `frozen` on a world collection.
+- Bug **`P116-S17-NULLEQ`** (medium, runtime), **`P116-S17-CRONLEAK`** (low, tests): filed, not fixed.
 
 ## 7. Not this task
 

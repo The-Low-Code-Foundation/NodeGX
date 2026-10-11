@@ -1,6 +1,6 @@
 # ONT-005 — The mistakes are mutants
 
-**Opened 2026-10-08.** **Depends on ONT-003.** **Status: 🟡 s5 — built 2026-10-09 (Fable 5.1); §6. R10 (s12): 16 of 38 survive on the fully answered world (§6.3).**
+**Opened 2026-10-08.** **Depends on ONT-003.** **Status: 🟡 s5 — built 2026-10-09 (Fable 5.1); §6. R10 (s12): 16 of 38 survive on the fully answered world (§6.3). ONT-014 (s17): 13 of 38 — set once, never edited and never deleted are held (ONT-014 §6.2).**
 
 > **Model check, before anything (Richard, 2026-10-08):** this task wants **Fable 5.1** — the judgement task of the phase: a mutant the claims already kill is not a mutant, and the survivors are the vocabulary's honesty number. Your system prompt says which model you are. If it is not the one named here, stop before any work and say so in one line ("this task is marked for Fable 5.1; you are on <model> — switch with /model, or say go"), and wait for Richard's word. Do not start on the wrong model because the check felt like a formality.
 
@@ -102,6 +102,9 @@ engines, every mutant**:
 | `world-categories` (AC3) | 10 | 6 | 3 (3) | 0 | 3 | 4 | 0 | 2 | 2 | 0 |
 
 > **R10, 2026-10-09 (P116 s12, ONT-003 §6.6): now 16 of 38** (8 unkept, 8 unclaimed), identical on both engines.
+>
+> **ONT-014, 2026-10-11 (P116 s17): now 13 of 38** (5 unkept, 8 unclaimed). `moves-unanswered`, `merge-by-delete` and
+> `editable-history` fall at the claim that says the rule; ONT-014 §6.2 has the three worlds.
 > A link's "when it goes" rule is kept by the backend at delete time, so in every world two fell: the link with that
 > question unanswered (`account-company`/`product-subcategory` `whenTargetGoes-unanswered`, unkept) and the link stored
 > as text (`…/id-as-text`, unclaimed — it loses the rule, and the held `…-blocks` claim kills it). world 16 → 14,
