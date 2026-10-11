@@ -68,6 +68,23 @@ const WINDOWS = process.platform === 'win32';
 const DEV_TOOL = /webpack|lerna|electron[/\\]dist|nodegx-backend|start-electron-dev|scripts[/\\]start\.ts|dev-debug\.js|scripts[/\\]devtools[/\\]/;
 
 /**
+ * A backend a person started by hand from this checkout, which rule 1 would otherwise read as a leftover.
+ *
+ * P109 ISL-047 (P78-DBT-DEVSWEEP): DBT's START-HERE runs `node <checkout>/packages/nodegx-backend/bin/nodegx-backend.js
+ * serve …`. Its command line holds the repo path and `nodegx-backend`, so every `npm run dev` sent it SIGTERM, and its
+ * owner saw the backend stop with no word why. The editor (`ServiceSupervisor`) and the MCP door (`provision.ts`) spawn
+ * `nodegx-backend/dist/cli.js`; only a person types the `bin/` entry (or its npm link in `node_modules/.bin`). So that
+ * one is never a seed. It is still swept as a *descendant* of a seed: started from inside the dev stack, it is the
+ * stack's.
+ */
+const HAND_STARTED_BACKEND = /(?:nodegx-backend|node_modules)[/\\](?:bin|\.bin)[/\\]nodegx-backend(?:\.js)?(?=\s|$)/;
+
+/** Rule 1, as one predicate: this checkout's path, a dev tool, and not a backend a person started by hand. */
+function isSeedCommand(command) {
+  return command.includes(ROOT) && DEV_TOOL.test(command) && !HAND_STARTED_BACKEND.test(command);
+}
+
+/**
  * The per-checkout agent scratchpad, e.g.
  * `/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/`.
  *
@@ -357,6 +374,14 @@ function protectedProcesses(table, offLimits) {
 
   const shielded = withDescendants(matched, table);
   for (const pid of launcherAncestors(matched, table, offLimits)) shielded.add(pid);
+  // P109-S42-SHELLSEED: the shell a suite runs in. An agent's shell is `zsh -c "cd <checkout>/packages/nodegx-backend
+  // && npx jest …"`, which rule 1 seeds (repo path + `nodegx-backend`), and `launcherAncestors` climbs only through
+  // launcher names. The suite survived its shell's SIGTERM, but the shell's exit line and summary did not. One level
+  // only: the parent is what owns the suite's reading, and climbing further would reach the session itself.
+  for (const pid of matched) {
+    const parent = table.get(pid)?.ppid;
+    if (parent && parent > 1) shielded.add(parent);
+  }
   return shielded;
 }
 
@@ -491,7 +516,7 @@ function findDevProcesses({ protectAncestors = true, includeScratchpad = false, 
 
     // Rule 1: repo path AND a known tool. The watchdog is excluded by name — it
     // is the one process that must outlive the sweep it is running.
-    const isDevStack = proc.command.includes(ROOT) && DEV_TOOL.test(proc.command);
+    const isDevStack = isSeedCommand(proc.command);
 
     // Rule 1b: a session helper launched from this checkout's agent scratchpad.
     // Same checkout-scoping, different evidence — the path is in the *scratchpad*
@@ -596,6 +621,7 @@ function sweep({ dryRun = false, onLog, protectAncestors = true, includeScratchp
 
 module.exports = {
   ROOT,
+  isSeedCommand,
   PID_FILE,
   alive,
   findDevProcesses,
