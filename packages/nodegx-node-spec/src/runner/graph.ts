@@ -10,7 +10,7 @@
  */
 
 import { PlayError, type Handle } from '../adapter';
-import { checkClaims, isGraphTarget, parseEndpoint, projectClaims, projectGraphTrace, subjectsOf, type GraphScenario, type GraphTarget } from '../graph';
+import { checkClaims, isGraphTarget, parseEndpoint, projectClaims, projectGraphTrace, subjectsOf, type GraphReach, type GraphScenario, type GraphTarget } from '../graph';
 import { specFor } from '../nodes';
 import type { TraceEvent } from '../trace';
 import { World } from '../world';
@@ -124,51 +124,74 @@ export interface GraphReport {
   conforms: boolean;
 }
 
+/** What one play produced: the trace, with the throw that ended it when one did — or why the target could not play it at all. */
+export type GraphPlay = { trace: TraceEvent[]; error?: string } | { outside: string };
+
+/**
+ * Grades ONE scenario's play against its recorded `expect` and its claims — the rule `runGraphScenarios` applies, on
+ * its own so a trace played ELSEWHERE is graded by the same rule: a page's runner that plays the scenario itself with
+ * this package's `playGraph` and hands the trace back (the editor suite's second door, P112 OWN-006 §6.4 — a remote
+ * driver cannot reproduce the recordings step by step, since every round trip is an event-loop turn the reference
+ * never had). The order is the runner's: no `expect` → refused; `outside` (the target's `canPlay`, given eagerly or
+ * returned by `play`) → outside; no observation inside the reach → refused, unplayed; then the play, compared and
+ * claimed. `targetName` is what `divergence` is keyed by.
+ */
+export async function gradeGraphScenario(
+  sc: GraphScenario,
+  targetName: string,
+  play: () => Promise<GraphPlay>,
+  options: { reach?: GraphReach; outside?: string } = {}
+): Promise<Omit<GraphScenarioResult, 'timeMs'>> {
+  const base = { name: sc.name, clauses: sc.clauses };
+  if (!sc.expect) return { ...base, status: 'refused', reason: 'no expect recorded — run the runtime test in record mode' };
+  if (options.outside !== undefined) return { ...base, status: 'outside', reason: options.outside };
+  const reach = options.reach;
+  const reference = reach ? projectGraphTrace(sc.expect, reach) : sc.expect;
+  const claims = reach ? projectClaims(sc.claims, reach) : sc.claims;
+  if (!hasObservation(reference)) return { ...base, status: 'refused', reason: `the recorded trace has no observation event${reach ? ' inside the reach' : ''} — an arm with no predicate grades nothing` };
+  const played = await play();
+  if ('outside' in played) return { ...base, status: 'outside', reason: played.outside };
+  const actual = played.trace;
+  const difference: Difference = played.error !== undefined ? differenceWithThrow(reference, actual, played.error) : compareTraces(reference, actual);
+  const expectedDivergence = sc.divergence?.[targetName];
+  if (expectedDivergence !== undefined) {
+    if (difference.index < 0) return { ...base, status: 'failed', reason: `expected to differ on ${targetName} (${expectedDivergence}) but the traces are equal`, actual };
+    return { ...base, status: 'diverged', reason: expectedDivergence, difference, actual };
+  }
+  const claimFailures = checkClaims(actual, claims);
+  if (difference.index < 0 && claimFailures.length === 0) return { ...base, status: 'passed', actual };
+  if (sc.row && difference.index >= 0 && claimFailures.length === 0) return { ...base, status: 'known', reason: `row ${sc.row}: ${targetName} bears the clause out where the runtime does not`, difference, actual };
+  return { ...base, status: 'failed', difference: difference.index < 0 ? undefined : difference, claimFailures: claimFailures.length ? claimFailures : undefined, actual };
+}
+
+/** `playGraph` as a `GraphPlay`: the trace, or the trace so far with the throw that ended it. */
+export async function playGraphForGrading<H extends Handle>(target: GraphTarget<H>, sc: GraphScenario): Promise<GraphPlay> {
+  try {
+    return { trace: await playGraph(target, sc) };
+  } catch (e) {
+    if (!(e instanceof PlayError)) throw e;
+    return { trace: e.trace, error: e.message };
+  }
+}
+
+/** Whether a report's results conform: every one passed, diverged as declared, is a known row or is outside the target's reach. */
+export function graphResultsConform(results: readonly GraphScenarioResult[]): boolean {
+  return results.every((r) => r.status === 'passed' || r.status === 'diverged' || r.status === 'known' || r.status === 'outside');
+}
+
 /** Plays every scenario on the target and grades it against its recorded `expect` and its claims. */
 export async function runGraphScenarios<H extends Handle>(target: GraphTarget<H>, scenarios: readonly GraphScenario[]): Promise<GraphReport> {
   if (!isGraphTarget(target)) throw new Error(`${(target as { name: string }).name} implements no mountGraph`);
   const results: GraphScenarioResult[] = [];
   for (const sc of scenarios) {
     const started = Date.now();
-    const done = (r: Omit<GraphScenarioResult, 'name' | 'clauses' | 'timeMs'>) => results.push({ name: sc.name, clauses: sc.clauses, timeMs: Date.now() - started, ...r });
-    if (!sc.expect) {
-      done({ status: 'refused', reason: 'no expect recorded — run the runtime test in record mode' });
-      continue;
-    }
-    const outside = target.canPlay ? target.canPlay(sc) : undefined;
-    if (outside !== undefined) {
-      done({ status: 'outside', reason: outside });
-      continue;
-    }
-    const reach = target.graphReach ? target.graphReach(sc) : undefined;
-    const reference = reach ? projectGraphTrace(sc.expect, reach) : sc.expect;
-    const claims = reach ? projectClaims(sc.claims, reach) : sc.claims;
-    if (!hasObservation(reference)) {
-      done({ status: 'refused', reason: `the recorded trace has no observation event${reach ? ' inside the reach' : ''} — an arm with no predicate grades nothing` });
-      continue;
-    }
-    let actual: TraceEvent[];
-    let difference: Difference;
-    try {
-      actual = await playGraph(target, sc);
-      difference = compareTraces(reference, actual);
-    } catch (e) {
-      if (!(e instanceof PlayError)) throw e;
-      actual = e.trace;
-      difference = differenceWithThrow(reference, e.trace, e.message);
-    }
-    const expectedDivergence = sc.divergence?.[target.name];
-    if (expectedDivergence !== undefined) {
-      if (difference.index < 0) done({ status: 'failed', reason: `expected to differ on ${target.name} (${expectedDivergence}) but the traces are equal`, actual });
-      else done({ status: 'diverged', reason: expectedDivergence, difference, actual });
-      continue;
-    }
-    const claimFailures = checkClaims(actual, claims);
-    if (difference.index < 0 && claimFailures.length === 0) done({ status: 'passed', actual });
-    else if (sc.row && difference.index >= 0 && claimFailures.length === 0) done({ status: 'known', reason: `row ${sc.row}: ${target.name} bears the clause out where the runtime does not`, difference, actual });
-    else done({ status: 'failed', difference: difference.index < 0 ? undefined : difference, claimFailures: claimFailures.length ? claimFailures : undefined, actual });
+    const graded = await gradeGraphScenario(sc, target.name, () => playGraphForGrading(target, sc), {
+      outside: sc.expect && target.canPlay ? target.canPlay(sc) : undefined,
+      reach: target.graphReach ? target.graphReach(sc) : undefined
+    });
+    results.push({ ...graded, timeMs: Date.now() - started });
   }
-  return { target: target.name, results, conforms: results.every((r) => r.status === 'passed' || r.status === 'diverged' || r.status === 'known' || r.status === 'outside') };
+  return { target: target.name, results, conforms: graphResultsConform(results) };
 }
 
 export function formatGraphReport(report: GraphReport): string {

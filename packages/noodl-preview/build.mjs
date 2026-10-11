@@ -26,7 +26,7 @@
  * the bundle fails loudly at build time (which is the good failure mode).
  */
 import path from 'path';
-import { renameSync, writeFileSync } from 'fs';
+import { readFileSync, renameSync, writeFileSync } from 'fs';
 import { readFile, writeFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 
@@ -186,6 +186,97 @@ if (!DEPLOY_ONLY) await esbuild.build({
   inject: [path.join(HERE, 'src/inPage/buffer.ts')],
   entryPoints: [path.join(HERE, 'src/inPage/index.ts')],
   outfile: path.join(HERE, 'dist/browser/noodl-preview-in-page.js')
+});
+
+/**
+ * P112 OWN-003 — THE GRAPH TARGET: the real engine with a way in, for a page (`src/inPage/graphTarget.ts`).
+ *
+ * The runtime test helper (`noodl-runtime/test/helpers/node-spec-target.ts`) — the reference that records the graph
+ * scenarios' traces — bundled for a browser with `@noodl/runtime`, the viewer's picker nodes it lists and
+ * `@nodegx/node-spec`'s browser entry, as one script with a global (`NodegxGraphTarget`). Four things a page lacks or
+ * must not have are replaced, each named here because each bites at once if dropped:
+ *
+ *   1. `async_hooks` — `src/inPage/asyncLocalStorage.ts` (what it can and cannot attribute is written there).
+ *   2. `buffer` — the helper takes Node's `File` from it; the page's own `File` is handed back.
+ *   3. `jsdom` — the helper's PERSON half renders a visual node into a jsdom page. A graph scenario mounts no node on a
+ *      page, so a constructor that throws, naming this file, is the honest stand-in.
+ *   4. the package's `/node` entry — the helper imports `nodegx-node-spec/src` (the file loaders over `fs`); the page
+ *      gets `src/browser.ts`, which has everything else.
+ *
+ * The viewer's node modules are the helper's four lists, read from its source at build time and imported STATICALLY in
+ * a generated module (`nodegx-viewer-node-modules`) — so the page registers exactly what Node does, and a module added
+ * to a list is in the next build. ESM order matters: a visual node's module reads the `Noodl` global when it loads,
+ * so the generated module's first import (`nodegx-viewer-globals`) calls the helper's `ensureAppGlobals()` before any
+ * of them evaluates. The Node built-ins and the asset loaders are the in-page build's (above), for the same reasons.
+ *
+ * The gate is `npm run graph-target-check`: the 85 graph scenarios on this bundle in headless Chrome, graded against
+ * the traces the Node helper recorded.
+ */
+const HELPER = path.join(REPO_ROOT, 'packages/noodl-runtime/test/helpers/node-spec-target.ts');
+const VIEWER_NODES_DIR = path.join(REPO_ROOT, 'packages/noodl-viewer-react/src/nodes');
+function viewerNodeLists() {
+  const src = readFileSync(HELPER, 'utf8');
+  const list = (name) => {
+    const m = src.match(new RegExp(`export const ${name} = \\[([^\\]]*)\\] as const`));
+    if (!m) throw new Error(`node-spec-target.ts: no ${name} list — the graph-target build reads the helper's four lists`);
+    return [...m[1].matchAll(/'([^']+)'/g)].map((x) => x[1]);
+  };
+  return {
+    stdLibrary: list('VIEWER_NODES').map((f) => path.join(VIEWER_NODES_DIR, 'std-library', f)),
+    navigation: list('VIEWER_NAVIGATION_NODES').map((f) => path.join(VIEWER_NODES_DIR, 'navigation', f)),
+    visual: list('VIEWER_VISUAL_NODES').map((f) => path.join(VIEWER_NODES_DIR, f)),
+    runtimeRegistered: list('VIEWER_REGISTERED_RUNTIME_NODES').map((f) => path.join(REPO_ROOT, 'packages/noodl-runtime/src/nodes/std-library', f))
+  };
+}
+const graphTargetPlugin = {
+  name: 'noodl-graph-target',
+  setup(build) {
+    build.onResolve({ filter: /^(node:)?async_hooks$/ }, () => ({ path: path.join(HERE, 'src/inPage/asyncLocalStorage.ts') }));
+    build.onResolve({ filter: /^(node:)?(buffer|jsdom)$/ }, (args) => ({ path: args.path.replace(/^node:/, ''), namespace: 'graph-target-stub' }));
+    build.onLoad({ filter: /.*/, namespace: 'graph-target-stub' }, (args) => ({
+      contents:
+        args.path === 'buffer'
+          ? 'exports.File = globalThis.File;'
+          : 'exports.JSDOM = class { constructor() { throw new Error("jsdom is not available in a page (noodl-graph-target): a graph scenario mounts no node on a page"); } };',
+      loader: 'js'
+    }));
+    build.onResolve({ filter: /(^|\/)nodegx-node-spec\/src$/ }, () => ({ path: path.join(REPO_ROOT, 'packages/nodegx-node-spec/src/browser.ts') }));
+    build.onResolve({ filter: /^nodegx-viewer-globals$/ }, () => ({ path: 'nodegx-viewer-globals', namespace: 'graph-target-globals' }));
+    build.onLoad({ filter: /.*/, namespace: 'graph-target-globals' }, () => ({
+      contents: `import { ensureAppGlobals } from ${JSON.stringify(HELPER)};\nensureAppGlobals();`,
+      loader: 'js',
+      resolveDir: REPO_ROOT
+    }));
+    build.onResolve({ filter: /^nodegx-viewer-node-modules$/ }, () => ({ path: 'nodegx-viewer-node-modules', namespace: 'graph-target-viewer' }));
+    build.onLoad({ filter: /.*/, namespace: 'graph-target-viewer' }, () => {
+      const lines = [`import 'nodegx-viewer-globals';`];
+      const names = {};
+      let i = 0;
+      for (const [key, files] of Object.entries(viewerNodeLists())) {
+        names[key] = files.map((f) => {
+          const id = `m${i++}`;
+          lines.push(`import * as ${id} from ${JSON.stringify(f)};`);
+          return id;
+        });
+      }
+      lines.push(`export default { ${Object.entries(names).map(([k, ids]) => `${k}: [${ids.join(', ')}]`).join(', ')} };`);
+      return { contents: lines.join('\n'), loader: 'js', resolveDir: REPO_ROOT };
+    });
+  }
+};
+
+if (!DEPLOY_ONLY) await esbuild.build({
+  ...shared,
+  platform: 'browser',
+  target: 'es2020',
+  format: 'iife',
+  globalName: 'NodegxGraphTarget',
+  external: [],
+  minify: process.env.NOODL_PREVIEW_MINIFY !== '0',
+  define: { 'process.env.NODE_ENV': '"production"', global: 'globalThis' },
+  plugins: [shimPlugin, graphTargetPlugin, inPagePlugin],
+  entryPoints: [path.join(HERE, 'src/inPage/graphTarget.ts')],
+  outfile: path.join(HERE, 'dist/browser/noodl-graph-target.js')
 });
 
 /**

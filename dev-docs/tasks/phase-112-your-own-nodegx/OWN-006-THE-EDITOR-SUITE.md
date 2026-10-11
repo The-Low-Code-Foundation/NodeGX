@@ -2,7 +2,7 @@
 
 **Opened 2026-10-02.** **Depends on OWN-001** (the reference reader and writer) **and OWN-003** (the graph runner and
 its scenarios).
-**Status: 🟡 first half built, s5 (2026-10-10): the adapter, the eight edits, the reference, the comparison, the runner, the command and the fixtures, in `@nodegx/project-contract/editor-suite`; AC1 and AC4 met; the MCP is the first adapter (AC3's first half). s6 (2026-10-10): **AC2 met** — the prototype page (`prototype/real/orbit.html`) is the second adapter and passes small, todo-list and planning; its first run found P112-S6-SUITEIDS (fixed). The graph half (`graphTarget()`, the 76 scenarios) waits for OWN-003 / R1; the Electron adapter (AC3's second half) is next. s7 (2026-10-10): **AC3 met** — the Electron editor is the third adapter (`packages/noodl-editor/tests/editor-suite/electronAdapter.test.ts`, in `test:ci`) and passes small, todo-list and planning; its first run found P112-S7-LOGICTYPE (fixed) and P112-S7-TEXTDEFAULTS (open). **Left: the graph half, after OWN-003.** §6.**
+**Status: 🟢 built. s8 (2026-10-11, Fable): the graph half — an adapter's own runner graded on the 85 graph scenarios through two doors, `graphTarget()` (a fresh runner per scenario) or `playGraph(scenario)` (the editor plays it itself; what a page needs, since a step proxy over CDP reads one scenario a frame early); the prototype page passes files and graphs; found P112-S8-SHAREDTARGET (open). §6.4. Earlier: first half built, s5 (2026-10-10): the adapter, the eight edits, the reference, the comparison, the runner, the command and the fixtures, in `@nodegx/project-contract/editor-suite`; AC1 and AC4 met; the MCP is the first adapter (AC3's first half). s6 (2026-10-10): **AC2 met** — the prototype page (`prototype/real/orbit.html`) is the second adapter and passes small, todo-list and planning; its first run found P112-S6-SUITEIDS (fixed). The graph half (`graphTarget()`, the 76 scenarios) waits for OWN-003 / R1; the Electron adapter (AC3's second half) is next. s7 (2026-10-10): **AC3 met** — the Electron editor is the third adapter (`packages/noodl-editor/tests/editor-suite/electronAdapter.test.ts`, in `test:ci`) and passes small, todo-list and planning; its first run found P112-S7-LOGICTYPE (fixed) and P112-S7-TEXTDEFAULTS (open). **Left: the graph half, after OWN-003.** §6.**
 **Model:** **Fable.** The adapter, the edit vocabulary and the comparison rule are the design every later task and every stranger depends on. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
 ## 1. The person sentence
@@ -232,3 +232,52 @@ that they arrived. Whether an agent's Text should wear the same look as a person
 **So the round trip is three adapters on one reference**: the MCP, the prototype page and the Electron editor each save
 what the reference saves on small, todo-list and planning. If two of them agree with the reference, they agree with
 each other.
+
+### 6.4 The graph half — an editor's own runner, graded (s8, 2026-10-11, Fable)
+
+**§3.1's `graphTarget()` and §3.5's "the graph scenarios run on it", built — with a second door the first run showed was
+needed.** OWN-003 chose the runner (the real engine, opened up, in a page: OWN-003 §6.1). The suite grades whatever an
+adapter offers:
+
+- **`graphTarget()`** — a fresh in-process `GraphTarget` (`@nodegx/node-spec`'s interface) **per call, called once per
+  scenario**. The recordings every scenario carries were made on a fresh engine each (`graph.test.ts`); the first run
+  of the prototype's bridge handed ONE engine all 85 in a row and 10 differed — nine by an id minted from the world's
+  random stream after a once-per-engine draw, one by a popup's state (**P112-S8-SHAREDTARGET**, open: the helper's
+  "a target plays many scenarios" does not hold for graphs). Fresh per scenario is what the reference means.
+- **`playGraph(scenario, file)`** — for a runner that lives elsewhere (a page): the editor plays the scenario itself,
+  with the spec package's own `playGraph` on a fresh runner, and hands back `{ trace, error? }` or `{ outside }`; the
+  suite grades the trace by the same rule (`gradeGraphScenario`, extracted from the spec package's `runGraphScenarios`
+  so there is one copy of the grading). Why it exists: a step-by-step proxy over CDP — `set`, `signal`, `settle`,
+  `trace` each a round trip, the synchronous steps queued and run in one batch right before the await they precede —
+  reached **84 / 85**; the last, *nested popups* (t12), read `Closed` a frame early because every round trip is an
+  event-loop turn between two steps the reference recorded as one synchronous run, and no batching removes the turn
+  between one `settle` resolving and the next starting. The whole play in the page is what the recordings were made of.
+
+**Where it lives.** `suite.ts`: `EditorAdapter.graphTarget?()` / `playGraph?()`, `GraphRunnerDoors`, `GraphGrader`
+(`SuiteOptions.graph`, handed in because the suite is in memory and holds no scenarios), `SuiteReport.graph`; an
+adapter WITH a runner and NO grader is **not** a pass. `editor-suite-node.ts`: `graphGraderFromNodeSpec()` builds the
+grader from the spec package's loader and runner and the command passes it by default (the sibling import is NAMED in
+P116's import gate, `tests/project.test.ts`, which now also catches a relative import that leaves the package).
+`noodl-runtime/test/node-spec/editor-suite-graph.test.ts` (where the runner compiles): six arms — the engine as runner
+PASSes with every scenario graded; the two-frames control FAILs naming C9; no grader is no pass; no runner is files
+only; the second door PASSes; the second door's control FAILs naming C9. The prototype: `real/orbit.html` `__orbit.graph`
+(loads `graph-target.js` — the kit's bundle, served by `serve.mjs`, not copied by `--out` — on first use and plays one
+scenario), `real/suite-adapter.mjs` `playGraph()`.
+
+**Readings (2026-10-11):**
+
+| | |
+|---|---|
+| the prototype through the suite, run 1 — a step proxy, one shared engine | FAIL, **10 / 85** graph scenarios: s07 ×1, s08 ×2, s09 ×4 (`$array` ids), t03 ×2 (`transactionId`), t12 ×1 (`Closed` pulsed 0) |
+| run 2 — a fresh engine per scenario, the same proxy | FAIL, **1 / 85**: t12 nested popups, `Closed` a frame early |
+| run 3 — the proxy's steps batched synchronously before each await | FAIL, the same 1 |
+| run 4 — the second door, the page plays the whole scenario | **PASS**, files and **85 / 85** graph scenarios, **11.4 s** in all (files 9.7 s of it) |
+| `@nodegx/node-spec` `tests/graph.test.ts` after the grading was extracted | 128 / 128 |
+| `@nodegx/project-contract` jest (the gate's new rule, the suite's doors) | **263 / 263** |
+| `noodl-runtime` `editor-suite-graph.test.ts` | 4 / 6 at 10:28 — the two PASS arms listed five scenarios (s07 ×4, t11) that the Node reference `graph.test.ts` was red on **at the same minute** (91 / 96; green three times earlier): a P107 peer's uncommitted derived-ports edit to the helper (10:19) and node-spec. Not this work; NEXT-SESSION-PROMPT says what to run once it lands |
+
+**What a stranger's page editor learns from this (for OWN-007):** offer `playGraph`, not a proxy; make the runner
+fresh per scenario; the kit's `NodegxGraphTarget.graphTarget()` is both.
+
+**Left in this task: nothing.** AC1–AC4 (s5–s7) and the graph half (s8) are built; the MCP and the Electron editor
+offer no runner, rightly — neither runs a graph.

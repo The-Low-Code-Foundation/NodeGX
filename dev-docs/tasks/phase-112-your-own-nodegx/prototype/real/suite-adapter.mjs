@@ -63,6 +63,18 @@ export default function orbitAdapter() {
   let session;
   return {
     name: 'orbit.html (the P112 prototype)',
+    /**
+     * OWN-003 step 4 / OWN-006 §6.4 — the suite's second door: the page plays the scenario itself on the kit's runner
+     * (`@noodl/preview`'s noodl-graph-target.js, loaded by orbit.html on first use) with the spec package's own
+     * `playGraph`, and hands the trace back; the suite grades it. A first bridge drove the page's runner STEP BY STEP as
+     * a `GraphTarget` over CDP (set, signal, settle, trace…): 84 of 85, the last — nested popups — a frame early,
+     * because each round trip is an event-loop turn between two steps the reference recorded as one synchronous run.
+     * The whole play in the page is what the recordings were made of.
+     */
+    async playGraph(scenario, file) {
+      if (!session) throw new Error('open() first');
+      return evaluate(session.client, `__orbit.graph("play", ${JSON.stringify({ scenario, file })})`);
+    },
     async open(files) {
       session ??= await start();
       const { client, sitePort } = session;

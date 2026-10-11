@@ -91,6 +91,14 @@ const server = http.createServer((req, res) => {
     return res.end();
   }
   if (url.pathname === '/preview.js') return send(readFileSync(bundle), types['.js']);
+  // OWN-003 — the kit's graph runner (`@noodl/preview`'s page bundle of the real engine with a way in), which orbit.html loads
+  // on first use for the editor suite's graph half (suite-adapter.mjs `graphTarget()`). Not copied by --out: a person never loads it.
+  if (url.pathname === '/graph-target.js') {
+    const gt = join(repo, 'packages/noodl-preview/dist/browser/noodl-graph-target.js');
+    if (existsSync(gt)) return send(readFileSync(gt), types['.js']);
+    res.writeHead(404);
+    return res.end('no graph-target bundle: npm --prefix packages/noodl-preview run build');
+  }
   const project = url.pathname.match(/^\/project\/([\w-]+)\.json$/);
   if (project && existsSync(join(here, project[1], 'nodegx.project.json'))) return send(JSON.stringify(projectFiles(join(here, project[1]))), types['.json']);
   const [root, rel] = url.pathname.startsWith('/runtime/') ? [runtimeDir, url.pathname.slice('/runtime/'.length)] : [here, url.pathname.slice(1) || 'index.html'];

@@ -48,6 +48,12 @@ const mdOut = path.join(phaseDir, 'CENSUS.md');
 
 const PAGE_NEEDS = new Set(['clock', 'random', 'timezone']);
 
+// P112 OWN-003 AC4 — "runnable in a page" ON THE CHOSEN RUNNER (R1: the real engine, opened up): the node types the
+// engine registers in a page, written by `npm --prefix packages/noodl-preview run graph-target-check -- --types <file>`
+// into engine-types.json beside this script's outputs. Read, never typed. Absent: the engine section is not produced.
+const engineTypesPath = path.join(phaseDir, 'engine-types.json');
+const engineTypes = fs.existsSync(engineTypesPath) ? new Set(JSON.parse(fs.readFileSync(engineTypesPath, 'utf8'))) : undefined;
+
 // README §1 reading 6 — the rough count this script replaces. Kept so the comparison is printed, never trusted.
 const README_READING_6 = {
   'todo-list': { total: 531, page: 19, world: 92, visual: 201, script: 52, component: 71, other: 96 },
@@ -105,12 +111,29 @@ function classify(type) {
   return { bucket: 'world', needs: extra.length ? extra : ['(does not mount with no parameters)'] };
 }
 
+/**
+ * OWN-003 AC4 — the same node on the chosen runner. The first three rules are the spec rule's (component, not in picker,
+ * visual: a visual node runs in a page through the real app, `@noodl/preview`, R4 — not headless); then `engine` when
+ * the page's engine registers the type (a spec or not; the escape hatches too — Function and Logic Builder are played
+ * by the graph scenarios), else `unregistered`, listed by name.
+ */
+function classifyEngine(type) {
+  if (typeof type === 'string' && type.startsWith('/')) return 'component';
+  const cat = population.get(type);
+  if (!cat) return 'notInPicker';
+  if (cat.isVisual) return 'visual';
+  return engineTypes.has(type) ? 'engine' : 'unregistered';
+}
+
 const BUCKETS = ['page', 'world', 'visual', 'script', 'component', 'notInPicker', 'unspecced'];
+const ENGINE_BUCKETS = ['engine', 'visual', 'component', 'notInPicker', 'unregistered'];
 const rows = templates.map((t) => {
   const files = nodeFiles(path.join(templatesDir, t, 'components'));
   const counts = Object.fromEntries(BUCKETS.map((b) => [b, 0]));
   const byType = Object.fromEntries(BUCKETS.map((b) => [b, {}]));
   const worldNeeds = {};
+  const engineCounts = Object.fromEntries(ENGINE_BUCKETS.map((b) => [b, 0]));
+  const unregistered = {};
   let total = 0;
   let components = 0;
   for (const f of files) {
@@ -123,6 +146,11 @@ const rows = templates.map((t) => {
       counts[bucket]++;
       byType[bucket][n.type] = (byType[bucket][n.type] || 0) + 1;
       if (needs) for (const need of needs) worldNeeds[need] = (worldNeeds[need] || 0) + 1;
+      if (engineTypes) {
+        const b = classifyEngine(n.type);
+        engineCounts[b]++;
+        if (b === 'unregistered') unregistered[n.type] = (unregistered[n.type] || 0) + 1;
+      }
     }
   }
   const sortedTypes = (o) => Object.entries(o).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
@@ -135,7 +163,8 @@ const rows = templates.map((t) => {
     unspecced: Object.fromEntries(sortedTypes(byType.unspecced)),
     notInPicker: Object.fromEntries(sortedTypes(byType.notInPicker)),
     world: Object.fromEntries(sortedTypes(byType.world)),
-    page: Object.fromEntries(sortedTypes(byType.page))
+    page: Object.fromEntries(sortedTypes(byType.page)),
+    ...(engineTypes ? { engine: { counts: engineCounts, unregistered: Object.fromEntries(sortedTypes(unregistered)) } } : {})
   };
 });
 
@@ -147,6 +176,25 @@ for (const r of rows) {
   for (const [k, v] of Object.entries(r.unspecced)) all.unspecced[k] = (all.unspecced[k] || 0) + v;
   for (const [k, v] of Object.entries(r.worldNeeds)) all.worldNeeds[k] = (all.worldNeeds[k] || 0) + v;
   for (const [k, v] of Object.entries(r.notInPicker)) all.notInPicker[k] = (all.notInPicker[k] || 0) + v;
+}
+// OWN-003 AC4 — the engine's totals, and the move from README §1 reading 6's "19 of 531"
+let engine;
+if (engineTypes) {
+  const counts = Object.fromEntries(ENGINE_BUCKETS.map((b) => [b, 0]));
+  const unregistered = {};
+  for (const r of rows) {
+    for (const b of ENGINE_BUCKETS) counts[b] += r.engine.counts[b];
+    for (const [k, v] of Object.entries(r.engine.unregistered)) unregistered[k] = (unregistered[k] || 0) + v;
+  }
+  const todo = rows.find((r) => r.template === 'todo-list');
+  engine = {
+    source: rel(engineTypesPath),
+    types: engineTypes.size,
+    rule: 'component · not in picker · visual (the real app, R4) · engine (the page\'s engine registers the type) · unregistered',
+    counts,
+    unregistered: Object.fromEntries(Object.entries(unregistered).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))),
+    todoList: todo ? { readmeReading6: README_READING_6['todo-list'], engine: todo.engine.counts.engine, visual: todo.engine.counts.visual, total: todo.total } : undefined
+  };
 }
 const sortDesc = (o) => Object.fromEntries(Object.entries(o).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])));
 all.unspecced = sortDesc(all.unspecced);
@@ -173,6 +221,7 @@ const out = {
   },
   templates: rows,
   all,
+  ...(engine ? { engine } : {}),
   readmeReading6: README_READING_6
 };
 
@@ -204,6 +253,24 @@ md.push('|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|');
 for (const r of rows) md.push(`| \`${r.template}\` | ${r.components} | ${r.total} | ${r.counts.page} | ${r.counts.world} | ${r.counts.visual} | ${r.counts.script} | ${r.counts.component} | ${r.counts.notInPicker} | ${r.counts.unspecced} |`);
 md.push(`| **all** | | **${all.total}** | ${all.counts.page} | ${all.counts.world} | ${all.counts.visual} | ${all.counts.script} | ${all.counts.component} | ${all.counts.notInPicker} | ${all.counts.unspecced} |`);
 md.push('');
+if (engine) {
+  md.push('## On the real engine (OWN-003 AC4)');
+  md.push('');
+  md.push(`R1 ruled the runner is the real engine, opened up (\`@noodl/preview\`'s \`noodl-graph-target.js\`). The same nodes, counted against the **${engine.types}** node types that engine registers in a page (\`${engine.source}\`, written by \`graph-target-check --types\`): **engine** (registered: it runs headless in a page, a spec or not, the escape hatches too) · **visual** (runs in a page through the real app, R4) · **component** · **not in picker** · **unregistered** (in the population, not visual, and the engine does not register it).`);
+  md.push('');
+  md.push('| template | nodes | engine | visual | component | not in picker | unregistered |');
+  md.push('|---|---:|---:|---:|---:|---:|---:|');
+  for (const r of rows) md.push(`| \`${r.template}\` | ${r.total} | ${r.engine.counts.engine} | ${r.engine.counts.visual} | ${r.engine.counts.component} | ${r.engine.counts.notInPicker} | ${r.engine.counts.unregistered} |`);
+  md.push(`| **all** | **${all.total}** | ${engine.counts.engine} | ${engine.counts.visual} | ${engine.counts.component} | ${engine.counts.notInPicker} | ${engine.counts.unregistered} |`);
+  md.push('');
+  if (engine.todoList) {
+    const t = engine.todoList;
+    md.push(`README §1 reading 6 counted **${t.readmeReading6.page} of ${t.readmeReading6.total}** todo-list nodes as runnable in a page (the prototype's own runner). On the engine it is **${t.engine} of ${t.total}** headless, and **${t.visual}** more through the real app.`);
+    md.push('');
+  }
+  md.push('Unregistered types, by name: ' + (Object.entries(engine.unregistered).map(([k, v]) => `\`${k}\` ×${v}`).join(', ') || 'none') + '.');
+  md.push('');
+}
 md.push('## What the specced-but-world nodes need');
 md.push('');
 md.push('One count per need per node (a node that needs two things is counted under both). Across every template:');
@@ -257,4 +324,6 @@ if (CHECK) {
 fs.writeFileSync(jsonOut, json);
 fs.writeFileSync(mdOut, md.join('\n') + '\n');
 console.log(`own census: ${rows.length} templates, ${all.total} nodes; ${specCount} specs, ${pageTypes.length} page-runnable types → ${rel(jsonOut)}, ${rel(mdOut)}`);
+if (engine) console.log(`own census: on the engine (${engine.types} types) — ${engine.counts.engine} nodes headless, ${engine.counts.visual} visual, ${engine.counts.unregistered} unregistered${engine.todoList ? `; todo-list ${engine.todoList.readmeReading6.page} of ${engine.todoList.readmeReading6.total} → ${engine.todoList.engine} of ${engine.todoList.total}` : ''}`);
+else console.log('own census: no engine-types.json — the OWN-003 AC4 section was not produced (graph-target-check --types writes it)');
 for (const l of compareLines()) console.log(l);

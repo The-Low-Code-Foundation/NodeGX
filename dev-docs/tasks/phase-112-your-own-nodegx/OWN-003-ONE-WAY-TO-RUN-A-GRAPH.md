@@ -1,7 +1,7 @@
 # OWN-003 — One way to run a graph
 
 **Opened 2026-10-02.** **Depends on OWN-002 and on R1** (README §8).
-**Status: 🟡 step 1 measured, s1 (2026-10-03). R1 ruled 2026-10-10 (s6): the real engine, opened up (a way in to set an input, send a signal and read a port), so steps 2–4 are next.**
+**Status: 🟢 built, s8 (2026-10-11, Fable): steps 2–4 — the real engine with a way in, in a page (`@noodl/preview`'s `noodl-graph-target.js`: the runtime test helper bundled, not ported), 85 / 85 graph scenarios passed in headless Chrome with traces equal to the Node recordings, the control red, the census re-run (todo-list 19 of 531 → 382 of 883 headless), and the suite grading an adapter's runner (§6.1). Found and fixed P112-S8-SESSIONLEAK. Step 1 measured s1 (2026-10-03); R1 ruled s6 (2026-10-10): the real engine, opened up.**
 **Model:** **Fable.** Porting the test helper to a page and naming each divergence from the 76 scenarios is hard reasoning over two runtimes; a wrong reading here becomes every editor's wrong answer. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
 ## 1. The person sentence
@@ -102,3 +102,76 @@ real app" already works with no way in but the files and the screen; what it can
 needs — set one input, send one signal, settle, read one port — which is still step 2. AC3's `#selftest` / `#demo`
 now have a real-engine form (`real/check.mjs`'s mission arm; `?demo`); `page.html` was removed on Richard's ruling
 (s6), so step 3 means `real/orbit.html`.
+
+### 6.1 Steps 2 to 4 — the real engine, opened up, in a page (s8, 2026-10-11, Fable)
+
+**What was chosen, and why it is not a port.** The way in already existed in Node: the runtime test helper
+(`noodl-runtime/test/helpers/node-spec-target.ts`, `runtimeTarget()`) is the `GraphTarget` that RECORDED every graph
+scenario's `expect` — its `adopt` / `intercept` / `settle` are the definition of "what the real app sends", frame by
+frame. A port of its 3,400 lines would have been a second copy of that definition (memory: a second copy of a palette
+drifts silently). So the page gets the helper itself, bundled: **`@noodl/preview`'s `dist/browser/noodl-graph-target.js`**
+(`src/inPage/graphTarget.ts`, global `NodegxGraphTarget`, built by `npm --prefix packages/noodl-preview run build`), the
+helper with `@noodl/runtime`, the viewer's picker nodes it lists and `@nodegx/node-spec`'s browser entry in one script.
+`graphTarget()` is a fresh engine with every picker node registered; `spec` is the spec package's browser entry (the
+runner, `reviveGraphScenarios`, the grader). What a page lacks is replaced in the build and named there (build.mjs, THE
+GRAPH TARGET): `async_hooks` (a call-stack-only `AsyncLocalStorage`, `src/inPage/asyncLocalStorage.ts`), `buffer`'s
+`File` (the page's own), `jsdom` (a constructor that throws — a graph scenario mounts no node on a page) and the
+package's `/node` entry (the browser entry instead). The helper itself changed in three small ways, each platform-free:
+`withViewerNodes` split into the Node loader and `registerViewerModules(target, modules)` (a page hands it statically
+imported modules — the build generates that module from the helper's own four lists, so the page registers exactly what
+Node does); the `Noodl` global stand-ins moved into `ensureAppGlobals()`, called before any visual module loads (a
+visual node's module reads `Noodl.deployed` at load; the first page run died there); and `installUser` installs the
+play's storage by descriptor (P112-S8-SESSIONLEAK below).
+
+**The gate: `npm --prefix packages/noodl-preview run graph-target-check`** (`scripts/graph-target-check.mjs`): the
+spec package's graph scenarios — **85 today** (36 files; the task file's 76 was s1's count) — on `graphTarget()` in
+headless Chrome, a fresh engine per scenario as `graph.test.ts` does, graded by the spec package's own
+`runGraphScenarios` against the `expect` the Node helper recorded and the claims. `--mutant two-frames` is the control
+(a `settle()` that runs two frames: a runner wrong the way §5 warns of); `--types <file>` writes the engine's type list
+for AC4; `--only <text>` narrows.
+
+**Readings (2026-10-11, headless Chrome, `baa70f788` + this session's edits):**
+
+| | |
+|---|---|
+| the bundle | **2,881 KB** minified (es2020; 5,883 KB unminified); the in-page preview beside it is 1,637 KB; the two are separate on purpose — an editor that only shows the app does not pay for the engine twice |
+| node types registered in the page | **130** (the runtime's 80 + the helper's four lists: 23 + 8 + 18 + 1); Node registers the same 130 |
+| run 1 | the bundle did not load: `ReferenceError: Noodl is not defined` from `addDimensions` (node-shared-port-definitions) — ESM evaluates the visual modules before any code runs; fixed by `ensureAppGlobals()` as the generated module's first import |
+| run 2 | **80 / 85** — five red, all one cause: `s10` ×4 and `s11` ×1 read the person the PREVIOUS play signed in (`bea@example.com` for `ann@example.com`; a create carrying `u2`'s ACL). **P112-S8-SESSIONLEAK:** `installUser` set `globalThis.localStorage = {}`; a page's `localStorage` is a getter-only accessor, the assignment did nothing, and the real `SessionStore` read the page's storage, which outlives a play. Installed by descriptor, as `installWorld` installs the clock and the network |
+| run 3 | **85 / 85 passed**, traces equal to the Node recordings, in **1,230 ms** for all 85 (about 15 ms a scenario); the Node test: 96 / 96 in 4.1 s |
+| the `async_hooks` shim, measured both ways | a shim that also carried the store across `.then` continuations: 85 / 85; the call-stack-only shim: 85 / 85 — the simpler one ships, with what it cannot attribute written in its header |
+| the control, `--mutant two-frames` | **6 / 85 red** (clauses C9, N, S2) — the gate reads red on a wrong runner |
+| `graph.test.ts` after the helper edits | 96 / 96 (run three times across the edits) |
+
+**AC4 — the census on the chosen runner** (`node scripts/own/census.js`, which now reads `engine-types.json`, written
+by the check's `--types`; CENSUS.md "On the real engine"). "Runnable in a page" now means the page's engine registers
+the type: **todo-list 19 of 531 → 382 of 883 headless**, and 398 more through the real app (visual, R4). Over the 13
+templates on disk (10,093 nodes; `templates/nightbook` is a peer's, untracked today): **4,154 headless, 4,049 visual,
+158 unregistered** — the cloud-function nodes (`noodl.cloud.request` / `response` / `secret` / `createuser` …, 146;
+the browser engine does not register the cloud runtime's) and `CSS Definition` (12; an editor-only node). The
+spec-runner table above the new section is unchanged: 37 types run on specs alone; the engine runs 130.
+
+**Step 4 — the suite grades an editor's runner.** `@nodegx/project-contract/editor-suite`: `SuiteOptions.graph`, a
+`GraphGrader` the caller hands in (the suite stays free of the spec package); `runSuite` hands it a factory over
+`adapter.graphTarget()` when the adapter has one — **a fresh runner per scenario**, because the recordings were made on
+one (the first run of the prototype's bridge on a single shared engine differed on 10 of 85, nine by an id minted from
+the world's stream and one by a popup's state; P112-S8-SHAREDTARGET, OWN-006 §6.4) — and appends its sentences; an
+adapter WITH a runner and NO grader is **not** a pass (a check that silently skips reads green on nothing). The command
+(`editor-suite-node.ts`) builds the grader from the spec package's loader and runner (`graphGraderFromNodeSpec`; the
+sibling import is named in P116's import gate, which now also catches a relative import that leaves the package).
+A second door, `playGraph(scenario, file)`, is for a runner that lives in a page: the editor plays the scenario itself
+with the spec package's own driver and hands the trace back — a step-by-step proxy over CDP reads nested popups (t12) a
+frame early, because every round trip is an event-loop turn the reference never had (OWN-006 §6.4). Graded in
+`noodl-runtime/test/node-spec/editor-suite-graph.test.ts` (six arms: each door passes on the engine and fails on the
+two-frames control naming C9; no grader is no pass; no runner is files only). The prototype page offers the second
+door (`suite-adapter.mjs` `playGraph()`, `orbit.html` `__orbit.graph`) and **passes the suite, files and 85 / 85
+graph scenarios, in 11.4 s**.
+
+**AC3, as it stands.** The prototype IS on the chosen runner since s6: `real/orbit.html` runs Orbit on the real engine
+through `@noodl/preview` and checks each mission on a copy in a second real app (`real/check.mjs`, `?demo`). What this
+session adds is the same engine with the way in beside it, in the same package, for the editor that wants to set one
+input and read one port without the whole app.
+
+**Not measured here:** the engine's frame cost on the todo template's biggest logic component in a page (step 1's
+open item; the scenarios are 2–6 nodes); whether a kit consumer's bundler re-bundles the helper or takes the built
+script (OWN-011 decides; today the built script is the kit's).

@@ -29,9 +29,45 @@ export interface EditorAdapter {
   /** For `add_node`, returns the id the editor gave the node when it minted its own. */
   apply(edit: Edit): void | { id?: string } | Promise<void | { id?: string }>;
   save(): Files | Promise<Files>;
-  /** OWN-003: the editor's own graph runner, graded by the 76 scenarios when present. */
-  graphTarget?(): unknown;
+  /**
+   * OWN-003: the editor's own graph runner — a FRESH `GraphTarget` (`@nodegx/node-spec`: `mountGraph`, `set`, `signal`,
+   * `settle`, `trace`, `connect`) each call, graded by the package's graph scenarios when present. Called ONCE PER
+   * SCENARIO: the scenarios' recorded traces were made on a fresh engine each (the runtime's graph test), and an engine
+   * that has played before answers ten of them differently (an id minted from the world's stream after a once-per-engine
+   * draw, a popup's state — OWN-006 §6.4), so a shared runner would be graded against the wrong reference. Typed
+   * `unknown` because this package depends on nothing of the spec package; the grader the caller hands in
+   * (`SuiteOptions.graph`) knows the type. An editor that runs the kit's own runner (`@noodl/preview`'s
+   * `NodegxGraphTarget.graphTarget()`, itself a factory) returns one of those; one that wrote its own returns its own.
+   */
+  graphTarget?(): unknown | Promise<unknown>;
+  /**
+   * OWN-003, the other door — for an editor whose runner lives elsewhere (a page, driven over CDP): plays ONE scenario
+   * itself, on a fresh runner, with the spec package's own driver (`playGraph`, in its browser entry too), and hands
+   * back `{ trace, error? }` (the trace format; `error` the throw that ended the play, with the trace so far) or
+   * `{ outside: why }` for a scenario its runner cannot play. `scenario` is the scenario AS ITS FILE HOLDS IT (plain
+   * JSON, `expect` stripped; `reviveGraphScenarios([scenario], file)` makes it playable) and `file` names the file.
+   * The suite grades the trace by the same rule as an in-process runner's. Why a second door: a remote driver cannot
+   * play step by step — every round trip is an event-loop turn the reference never had, and one scenario (t12,
+   * nested popups) reads a frame early for it (OWN-006 §6.4). An adapter offers one door or the other.
+   */
+  playGraph?(scenario: unknown, file: string): Promise<unknown>;
 }
+
+/** The runner an adapter offers, by its door: a fresh in-process `GraphTarget` per call, or a play of one scenario elsewhere. */
+export interface GraphRunnerDoors {
+  make?: () => Promise<unknown>;
+  play?: (scenario: unknown, file: string) => Promise<unknown>;
+}
+
+/**
+ * OWN-003 / §3.5 — grades a graph runner: the graph scenarios on it, as the spec package's runner grades every target,
+ * each scenario on a fresh runner (`make()`) or played by the editor itself (`play()`). The suite is in memory and holds
+ * no scenarios, so the caller hands the grader in; in a checkout the command (`editor-suite-node.ts`) builds it from
+ * `@nodegx/node-spec`'s loader and runner. `sentences` is one line per scenario that does not conform (empty when every
+ * one passes, diverges as declared, is a known row or is outside the runner's reach); `summary` is the one line the
+ * PASS report carries.
+ */
+export type GraphGrader = (runner: GraphRunnerDoors) => Promise<{ summary: string; sentences: string[] }>;
 
 /** An adapter whose methods are synchronous: what the reference is, and what a page's own editor usually is. */
 export interface SyncEditorAdapter extends EditorAdapter {
@@ -55,6 +91,8 @@ export interface SuiteOptions {
   mint?: (editIndex: number) => string;
   /** Files the comparison ignores (project-relative). */
   ignoreFiles?: string[];
+  /** OWN-003: grades `adapter.graphTarget()` when the adapter has one. Without it, an adapter WITH a runner is not a pass (§6.4). */
+  graph?: GraphGrader;
 }
 
 export interface SuiteReport {
@@ -67,7 +105,9 @@ export interface SuiteReport {
   checks: Record<string, string[]>;
   /** The edit the fixture itself could not apply through the reference, when that is the fault. */
   fixtureFault?: string;
-  timings: { editor: number; reference: number; compare: number; checks: number; total: number };
+  /** OWN-003: the graph half's result, present when the adapter has a `graphTarget()`. */
+  graph?: { summary: string; sentences: string[] };
+  timings: { editor: number; reference: number; compare: number; checks: number; graph?: number; total: number };
 }
 
 const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
@@ -267,6 +307,32 @@ export async function runSuite(
   }
   report.timings.checks = now() - tk;
 
+  // The graph half (OWN-003): the editor's own runner, when it has one. An adapter that offers a runner and is handed
+  // no grader is NOT a pass — a check that silently skips reads green on nothing (memory: a rule reading zero in both
+  // arms grades nothing). An adapter without a runner is graded on the files alone, as before.
+  if (typeof adapter.graphTarget === 'function' || typeof adapter.playGraph === 'function') {
+    const tg = now();
+    if (!options.graph) {
+      const sentence = `${report.adapter} has a graph runner (graphTarget() or playGraph()) and the suite was handed no grader for it — pass SuiteOptions.graph (the command builds one from the spec package's scenarios).`;
+      report.graph = { summary: sentence, sentences: [sentence] };
+      report.sentences.push(sentence);
+    } else {
+      try {
+        const doors: GraphRunnerDoors = {
+          make: typeof adapter.graphTarget === 'function' ? () => Promise.resolve(adapter.graphTarget!()) : undefined,
+          play: typeof adapter.playGraph === 'function' ? (scenario, file) => adapter.playGraph!(scenario, file) : undefined
+        };
+        report.graph = await options.graph(doors);
+        report.sentences.push(...report.graph.sentences.map((s) => `graph scenarios: ${s}`));
+      } catch (err) {
+        const sentence = `graph scenarios could not run on ${report.adapter}'s runner: ${(err as Error).message}`;
+        report.graph = { summary: sentence, sentences: [sentence] };
+        report.sentences.push(sentence);
+      }
+    }
+    report.timings.graph = now() - tg;
+  }
+
   report.pass = report.sentences.length === 0;
   report.timings.total = now() - t0;
   return report;
@@ -275,7 +341,7 @@ export async function runSuite(
 /** The report as the command prints it: PASS, or the first ten sentences and how many more. */
 export function formatReport(report: SuiteReport, limit = 10): string {
   const head = `${report.adapter} on ${report.fixture} (${Math.round(report.timings.total)} ms)`;
-  if (report.pass) return `PASS — ${head}`;
+  if (report.pass) return `PASS — ${head}${report.graph ? `; ${report.graph.summary}` : ''}`;
   const lines = report.sentences.slice(0, limit).map((s, i) => `${i + 1}. ${s}`);
   const more = report.sentences.length - lines.length;
   return [

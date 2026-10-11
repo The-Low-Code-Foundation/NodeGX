@@ -940,15 +940,19 @@ function installUser(w: World): () => void {
   // s27 (T14) — a storage EVERY backend play, signed in or not: the app always has one. Installed only when the play started
   // with a session, a Log In into an empty world wrote its session into no storage at all, and a User watching read nobody
   // (graph s10 — Logged In pulsed, nothing else moved; the play that started signed in moved). Found by its first graph.
-  const g = globalThis as { localStorage?: unknown };
-  const had = 'localStorage' in g;
-  const saved = g.localStorage;
+  // P112 OWN-003 — installed BY DESCRIPTOR, as `installWorld` installs the world's globals: in a page `localStorage` is a
+  // getter-only property of the window, and an assignment to it does nothing, so every play read the page's own storage
+  // and the person the previous play signed in (graph s10, five scenarios red in a page, green in Node — where the
+  // global did not exist and the assignment made it). An own data property shadows the window's accessor, and the saved
+  // descriptor puts it back.
+  const g = globalThis as Record<string, unknown>;
+  const saved = Object.getOwnPropertyDescriptor(g, 'localStorage');
   const storage: Record<string, string> = {};
-  g.localStorage = storage;
+  Object.defineProperty(g, 'localStorage', { value: storage, configurable: true, writable: true, enumerable: false });
   for (const [id, session] of sessions) storage['NodeGX/' + id + '/session'] = JSON.stringify({ ...session, sessionToken: 'world' });
   if (user !== undefined) parseSessionStore(CloudStore.instance._handle().publicToken).write({ objectId: user, sessionToken: 'world' });
   return () => {
-    if (had) g.localStorage = saved;
+    if (saved) Object.defineProperty(g, 'localStorage', saved);
     else delete g.localStorage;
   };
 }
@@ -1267,36 +1271,70 @@ export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox', 'con
 export const VIEWER_REGISTERED_RUNTIME_NODES = ['data/httpnode'] as const;
 
 type NodeModuleLike = { node: Parameters<typeof NodeDefinition.defineNode>[0] };
+/** A node's module as loaded: an `export default { node }` module (the viewer's TS files) or an `export =` one (httpnode.ts). */
+export type ViewerNodeModule = { default?: NodeModuleLike } & Partial<NodeModuleLike>;
 
-/** The target with the viewer-provided picker nodes registered as well. */
-export function withViewerNodes(target: RuntimeTarget): RuntimeTarget {
-  const register = (mod: { default?: NodeModuleLike } & Partial<NodeModuleLike>) => {
-    // an `export default { node }` module (the viewer's TS files) or an `export =` one (httpnode.ts)
-    const m = mod.default ?? (mod as NodeModuleLike);
-    target.context.nodeRegister.register(NodeDefinition.defineNode(m.node));
-  };
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  for (const file of VIEWER_NODES) register(require('../../../noodl-viewer-react/src/nodes/std-library/' + file));
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  for (const file of VIEWER_NAVIGATION_NODES) register(require('../../../noodl-viewer-react/src/nodes/navigation/' + file));
-  // PERSON (above) — a visual node's module reads `Noodl.deployed` at load (node-shared-port-definitions.ts :1435,
-  // group.ts :541): the deploy bootstrap's global (static/deploy/index.js), which says the node is in a deployed app
-  // and not under the editor — what a person's app is
+/**
+ * The four lists above as LOADED modules, in list order — what `registerViewerModules` takes. In Node they come from
+ * jest's `require` (`withViewerNodes`); in a page (P112 OWN-003, `noodl-preview/src/inPage/graphTarget.ts`) a bundler
+ * imports the same files statically and hands them here, so the page registers exactly what this file lists.
+ */
+export interface ViewerNodeModules {
+  stdLibrary: readonly ViewerNodeModule[];
+  navigation: readonly ViewerNodeModule[];
+  visual: readonly ViewerNodeModule[];
+  runtimeRegistered: readonly ViewerNodeModule[];
+}
+
+/**
+ * What the app's page gives a node's module before it loads, stood in once per process (`if` guarded):
+ * - PERSON (above) — a visual node's module reads `Noodl.deployed` at load (node-shared-port-definitions.ts :1435,
+ *   group.ts :541): the deploy bootstrap's global (static/deploy/index.js), which says the node is in a deployed app
+ *   and not under the editor — what a person's app is;
+ * - NSP-016 s53 — the app's environment, as the viewer's JavaScript API makes it (noodl-js-api.ts :48 `Noodl.Env = {}`):
+ *   Image.tsx and Video.tsx read `Noodl.Env['BaseUrl']` for every source that starts with `/`. A project's Base URL is
+ *   not on this page;
+ * - NSP-016 s57 — what a Page Router calls on the app's API when it shows a page (router.tsx `Noodl.SEO.setTitle` — the
+ *   tab's title, the same string as Current Page Title; router-handler.ts `onNavigated` →
+ *   `Noodl.Events.emit('NoodlApp_Navigated')`, which an Event Receiver in the app hears). Neither reaches the trace yet:
+ *   the face takes both.
+ * Called before the visual modules are required here, and by a page's bundle before it evaluates them (P112 OWN-003).
+ */
+export function ensureAppGlobals(): void {
   const g = globalThis as { Noodl?: { deployed?: boolean; Env?: Record<string, string> } };
   if (!g.Noodl) g.Noodl = { deployed: true };
-  // NSP-016 s53 — the app's environment, as the viewer's JavaScript API makes it (noodl-js-api.ts :48 `Noodl.Env = {}`): Image.tsx and
-  // Video.tsx read `Noodl.Env['BaseUrl']` for every source that starts with `/`. A project's Base URL is not on this page
   if (!g.Noodl.Env) g.Noodl.Env = {};
-  // NSP-016 s57 — what a Page Router calls on the app's API when it shows a page (router.tsx `Noodl.SEO.setTitle` — the tab's title,
-  // the same string as Current Page Title; router-handler.ts `onNavigated` → `Noodl.Events.emit('NoodlApp_Navigated')`, which an Event
-  // Receiver in the app hears). Neither reaches the trace yet: the face takes both
   const api = g.Noodl as { SEO?: unknown; Events?: unknown };
   if (!api.SEO) api.SEO = { setTitle: () => undefined };
   if (!api.Events) api.Events = { emit: () => undefined };
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  for (const file of VIEWER_VISUAL_NODES) register(require('../../../noodl-viewer-react/src/nodes/' + file));
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  for (const file of VIEWER_REGISTERED_RUNTIME_NODES) register(require('../../src/nodes/std-library/' + file));
+}
+
+/** The target with the viewer-provided picker nodes registered as well, loaded through Node's `require`. */
+export function withViewerNodes(target: RuntimeTarget): RuntimeTarget {
+  ensureAppGlobals();
+  return registerViewerModules(target, {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    stdLibrary: VIEWER_NODES.map((file) => require('../../../noodl-viewer-react/src/nodes/std-library/' + file)),
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    navigation: VIEWER_NAVIGATION_NODES.map((file) => require('../../../noodl-viewer-react/src/nodes/navigation/' + file)),
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    visual: VIEWER_VISUAL_NODES.map((file) => require('../../../noodl-viewer-react/src/nodes/' + file)),
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    runtimeRegistered: VIEWER_REGISTERED_RUNTIME_NODES.map((file) => require('../../src/nodes/std-library/' + file))
+  });
+}
+
+/** Registers the viewer-provided picker nodes from their loaded modules — the one copy of what the app's page gives them. */
+export function registerViewerModules(target: RuntimeTarget, modules: ViewerNodeModules): RuntimeTarget {
+  const register = (mod: ViewerNodeModule) => {
+    const m = mod.default ?? (mod as NodeModuleLike);
+    target.context.nodeRegister.register(NodeDefinition.defineNode(m.node));
+  };
+  ensureAppGlobals();
+  for (const mod of modules.stdLibrary) register(mod);
+  for (const mod of modules.navigation) register(mod);
+  for (const mod of modules.visual) register(mod);
+  for (const mod of modules.runtimeRegistered) register(mod);
   return target;
 }
 

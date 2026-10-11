@@ -193,14 +193,19 @@ describe('AC4 — nothing in the package reaches an adapter', () => {
     'format/validator.ts': ['ajv'],
     'format-node.ts': ['fs', 'path'],
     // P112 OWN-006 — the suite's command over a folder on disk; the suite itself (`editor-suite.ts`) is in memory.
-    'editor-suite-node.ts': ['fs', 'path']
+    // P112 OWN-003 — the command grades an editor's graph runner with the spec package's scenarios and runner (a
+    // sibling package, by source path). The in-memory suite takes the grader as an option and imports nothing of it.
+    'editor-suite-node.ts': ['fs', 'path', '../nodegx-node-spec/src']
   };
+
+  /** A relative import that leaves the package root is an outside import too (P112 OWN-003: the first one, named above). */
+  const leavesPackage = (from: string, spec: string) => spec.startsWith('../') && !path.resolve(path.dirname(from), spec).startsWith(root + path.sep);
 
   it('every import stays inside the package', () => {
     const outside = sources.flatMap((f) =>
       [...fs.readFileSync(f, 'utf8').matchAll(/(?:^|\n)\s*(?:import|export)[^'";]*from\s+'([^']+)'/g)]
         .map((m) => m[1])
-        .filter((spec) => !spec.startsWith('./') && !spec.startsWith('../'))
+        .filter((spec) => !spec.startsWith('./') && !(spec.startsWith('../') && !leavesPackage(f, spec)))
         .filter((spec) => !(NAMED[path.relative(root, f).split(path.sep).join('/')] ?? []).includes(spec))
         .map((spec) => `${path.relative(root, f)}: ${spec}`)
     );

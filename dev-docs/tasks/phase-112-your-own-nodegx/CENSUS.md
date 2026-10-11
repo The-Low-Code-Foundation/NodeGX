@@ -23,6 +23,31 @@ The rule, in order (the first that fits wins): **component** (an instance of the
 | `todo-list-demo` | 79 | 852 | 24 | 81 | 388 | 113 | 99 | 1 | 146 |
 | **all** | | **10093** | 347 | 1212 | 4049 | 1398 | 1367 | 365 | 1355 |
 
+## On the real engine (OWN-003 AC4)
+
+R1 ruled the runner is the real engine, opened up (`@noodl/preview`'s `noodl-graph-target.js`). The same nodes, counted against the **130** node types that engine registers in a page (`dev-docs/tasks/phase-112-your-own-nodegx/engine-types.json`, written by `graph-target-check --types`): **engine** (registered: it runs headless in a page, a spec or not, the escape hatches too) · **visual** (runs in a page through the real app, R4) · **component** · **not in picker** · **unregistered** (in the population, not visual, and the engine does not register it).
+
+| template | nodes | engine | visual | component | not in picker | unregistered |
+|---|---:|---:|---:|---:|---:|---:|
+| `bot-garden` | 1111 | 529 | 366 | 196 | 19 | 1 |
+| `digital-bricks-training` | 955 | 316 | 319 | 60 | 168 | 92 |
+| `digital-bricks-training-demo` | 455 | 161 | 191 | 29 | 73 | 1 |
+| `landing-pages` | 494 | 74 | 341 | 75 | 3 | 1 |
+| `members-area` | 573 | 153 | 344 | 32 | 13 | 31 |
+| `nightbook` | 1528 | 756 | 272 | 429 | 46 | 25 |
+| `pixel-game` | 97 | 45 | 29 | 17 | 5 | 1 |
+| `planning` | 972 | 381 | 521 | 67 | 2 | 1 |
+| `planning-demo` | 939 | 358 | 513 | 66 | 1 | 1 |
+| `rocket-school` | 1146 | 601 | 322 | 192 | 30 | 1 |
+| `story-engine` | 88 | 35 | 45 | 5 | 2 | 1 |
+| `todo-list` | 883 | 382 | 398 | 100 | 2 | 1 |
+| `todo-list-demo` | 852 | 363 | 388 | 99 | 1 | 1 |
+| **all** | **10093** | 4154 | 4049 | 1367 | 365 | 158 |
+
+README §1 reading 6 counted **19 of 531** todo-list nodes as runnable in a page (the prototype's own runner). On the engine it is **382 of 883** headless, and **398** more through the real app.
+
+Unregistered types, by name: `noodl.cloud.response` ×91, `noodl.cloud.request` ×41, `CSS Definition` ×12, `noodl.cloud.secret` ×4, `noodl.cloud.createuser` ×3, `noodl.cloud.addusertorole` ×2, `noodl.cloud.getuserroles` ×2, `noodl.cloud.hmac` ×1, `noodl.cloud.listusersinrole` ×1, `noodl.cloud.sendemail` ×1.
+
 ## What the specced-but-world nodes need
 
 One count per need per node (a node that needs two things is counted under both). Across every template:

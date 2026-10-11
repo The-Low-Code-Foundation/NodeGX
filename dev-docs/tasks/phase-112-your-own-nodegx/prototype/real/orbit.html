@@ -1640,7 +1640,42 @@ function screenOf(id, what = 'card') {
   p.project(camera);
   return { x: Math.round((p.x + 1) / 2 * innerWidth), y: Math.round((1 - p.y) / 2 * innerHeight) };
 }
+/* ================= the kit's graph runner, for the editor suite (OWN-003 step 4, OWN-006 §6.4) ================= */
+// The real engine with a way in — `@noodl/preview`'s noodl-graph-target.js (served as graph-target.js; 2.9 MB, so loaded on
+// first use and never for a person). The suite's second door (suite.ts `playGraph`): the page plays ONE scenario itself,
+// on a fresh engine, with the spec package's own driver, and hands the trace back; Node grades it. Not a step-by-step
+// proxy: every CDP round trip is an event-loop turn the reference never had, and nested popups (t12) read a frame early
+// through one — the whole play in the page is what the recordings were made of.
+const graphBridge = (() => {
+  let lib;
+  const load = () => (lib ??= new Promise((resolve, reject) => {
+    if (window.NodegxGraphTarget) return resolve(window.NodegxGraphTarget);
+    const s = document.createElement('script');
+    s.src = 'graph-target.js';
+    s.onload = () => resolve(window.NodegxGraphTarget);
+    s.onerror = () => reject(new Error('graph-target.js did not load — serve.mjs serves @noodl/preview/dist/browser/noodl-graph-target.js (npm --prefix packages/noodl-preview run build)'));
+    document.head.appendChild(s);
+  }));
+  return async function op(name, a = {}) {
+    const GT = await load();
+    switch (name) {
+      case 'types': return GT.graphTarget().types().length;
+      case 'play': {
+        const [sc] = GT.spec.reviveGraphScenarios([a.scenario], a.file);
+        try {
+          return { trace: await GT.spec.playGraph(GT.graphTarget(), sc) };
+        } catch (e) {
+          if (e && e.name === 'PlayError') return { trace: e.trace, error: e.message };
+          throw e;
+        }
+      }
+      default: throw new Error(`graph: unknown op ${name}`);
+    }
+  };
+})();
+
 window.__orbit = {
+  graph: graphBridge,
   recent, wiresSeen, project, screenOf, preview, store, files, cards, rows, last, MISSIONS, mstate,
   get conns() { return conns; }, get nodes() { return nodes; }, get mode() { return mode; }, get mix() { return mix; }, get stage() { return stage; }, get stageT() { return stageT; },
   get events() { return eventCount; }, get lastShow() { return lastShow; }, get shows() { return shows; }, get checker() { return checker; }, get selected() { return selected; },
