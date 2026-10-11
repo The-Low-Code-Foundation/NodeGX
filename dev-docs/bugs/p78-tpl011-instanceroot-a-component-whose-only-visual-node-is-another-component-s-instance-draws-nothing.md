@@ -2,6 +2,7 @@
 id: P78-TPL011-INSTANCEROOT
 title: A component whose only visual node is another component's instance draws nothing (cause not isolated)
 status: fixed
+commit: dad3a9c33
 phase: P109
 task: ISL-045
 severity: medium

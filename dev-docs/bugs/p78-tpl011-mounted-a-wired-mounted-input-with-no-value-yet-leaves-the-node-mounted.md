@@ -23,3 +23,9 @@ unconnected default and a connected input still waiting for its value behave the
 **Ruling wanted:** should a node whose `Mounted` is connected start unmounted until its first value arrives? That is
 safer for any gate, and it changes the first frame of every app that wires Mounted. Alternatively the door could warn
 on a wired Mounted whose parameter is not set to `false`. Small either way. The first option is a behaviour change.
+
+**Re-measured (P109 s44, 2026-10-11): still fires.** `packages/nodegx-backend/tests/isl045-mounted-drive.test.ts`,
+rendered from disk on the working-tree runtime. A Group whose Mounted is wired from a Variable nobody sets is
+**drawn**. Beside it, the controls: a Group gated by a Function that sends `false` is hidden, and one gated by `true`
+and one with no wire are drawn. This reads the steady state ("no value ever"). Nightbook's flash is the same default
+on the first frame, before the gate's value arrives. The ruling is still owed.

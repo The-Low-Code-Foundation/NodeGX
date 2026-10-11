@@ -2,6 +2,7 @@
 id: P109-S21-DROPDOWNEMPTYRESET
 title: The Dropdown spec thinks the hidden option is still selected after Items offered no options, so a person choosing the first option of the next list reads as a change the browser never raises
 status: fixed
+commit: d08eada79
 phase: P109
 task: ISL-045
 severity: low

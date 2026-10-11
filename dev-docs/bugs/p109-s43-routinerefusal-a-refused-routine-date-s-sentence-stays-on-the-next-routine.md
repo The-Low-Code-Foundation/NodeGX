@@ -2,6 +2,7 @@
 id: P109-S43-ROUTINEREFUSAL
 title: A refused routine date's sentence stays on screen when the person opens another routine
 status: fixed
+commit: 9cb99b205
 phase: P109
 task: ISL-046
 severity: medium

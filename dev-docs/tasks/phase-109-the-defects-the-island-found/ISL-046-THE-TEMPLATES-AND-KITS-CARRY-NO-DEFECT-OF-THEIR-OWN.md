@@ -1,6 +1,6 @@
 # ISL-046 — The templates and the garden kits carry no defect of their own
 
-**Status: 🟢 s43 (2026-10-11): 4 of 9 fixed — BKFONT `4af47a07a`, DEMOSTUBWIRES `6d8323ef4` (s42), D81 `37f35c8c4`, METERS3D `050ca561b` (s43); two found in s43 and filed here (ROUTINEREFUSAL, SECONDVISIT). Still waiting: MOVEARROW a ruling, INSTALLER the tablets, TPL011UNREADID P78's untracked Nightbook pile. Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 7 bugs
+**Status: 🟢 s44 (2026-10-11): 5 of 9 fixed — BKFONT `4af47a07a`, DEMOSTUBWIRES `6d8323ef4` (s42), D81 `37f35c8c4`, METERS3D `050ca561b` (s43), ROUTINEREFUSAL `9cb99b205` (s44). Still waiting: SECONDVISIT (buildable), MOVEARROW a ruling, INSTALLER the tablets, TPL011UNREADID P78's untracked Nightbook pile. Scoped 2026-10-07 at `088579843` by the second ledger sweep (Track G).** **Source:** 7 bugs
 from the ledger (`dev-docs/bugs/`) that no phase owned: 2 high · 1 medium · 4 low. **Side:** templates (planning, Nightbook and its desktop installer, the training demo), the library Date picker, the garden kits
 
 ## 1. The person sentence
@@ -22,7 +22,7 @@ generated from the ledger headers. **The ledger file is the source**, so read it
 | [P78-TPL011-INSTALLER](../../bugs/p78-tpl011-installer-nightbook-0-0-4-will-not-install-over-0-0-3-on-the-tablets.md) | high | scheduled | Nightbook 0.0.4 will not install over 0.0.3 on either tablet ("Nightbook cannot be closed") |
 | [P78-D81](../../bugs/p78-d81-the-library-date-picker-keeps-a-picked-day-when-the-next-record-s-day-is-empty-too.md) | medium | fixed | The library Date picker keeps a picked day when the next record's day is empty too |
 | [P109-S19-TPL011UNREADID](../../bugs/p109-s19-tpl011unreadid-nightbooks-openenvelope-wires-an-id-its-script-never-reads.md) | low | scheduled | Nightbook's generator wires the envelope id into a Function that never reads it, and the door now refuses the build |
-| [P109-S43-ROUTINEREFUSAL](../../bugs/p109-s43-routinerefusal-a-refused-routine-date-s-sentence-stays-on-the-next-routine.md) | medium | scheduled | Pick an end date before a routine's start and open another routine: the refusal sentence is still there |
+| [P109-S43-ROUTINEREFUSAL](../../bugs/p109-s43-routinerefusal-a-refused-routine-date-s-sentence-stays-on-the-next-routine.md) | medium | fixed | Pick an end date before a routine's start and open another routine: the refusal sentence is still there |
 | [P109-S19-DEMOSTUBWIRES](../../bugs/p109-s19-demostubwires-the-training-demos-stubbed-functions-keep-wires-to-inputs-they-never-read.md) | low | scheduled | The training demo's stubbed Functions keep wires into inputs they no longer read |
 | [P109-S43-SECONDVISIT](../../bugs/p109-s43-secondvisit-on-a-second-visit-to-the-3d-workshop-its-meter-chips-are-never-measured.md) | low | scheduled | On the second visit to the 3D Workshop, the meter chips still cover each other |
 | [P108-S9-BKFONT](../../bugs/p108-s9-bkfont-the-blocks-css-font-shorthand-with-inherit-is-dropped.md) | low | scheduled | The Blocks node's line and zoom buttons use `font:800 14px inherit` — an invalid shorthand the browser drops, so they render at the default weight and size |
@@ -76,3 +76,9 @@ MOVEARROW and INSTALLER first (high: data damage, and a family that cannot updat
 | ROUTINEREFUSAL (medium, new) | ⏸ scheduled | Found by D81's drive: the routine pane's refusal sentence follows the person to the next routine. Not a one-wire fix (the sign-in form's constant-false Condition would silence a second refusal). Filed with the proposal |
 | METERS3D (low) | ✅ `050ca561b` | `chipLifts` (garden-3d-kit): chips placed lowest first, and a chip that meets one already placed goes just over it. The touch drive gains METERS, red on HEAD in both Workshops. After: Pip's (the row's shot) green; every other clause as on HEAD (28/31 against 27/31; BUILD and PAY are `P109-S18-TOUCHBUILD`) |
 | SECONDVISIT (low, new) | ⏸ scheduled | Cobble's Workshop, the second visit, stayed red: every chip cached `0 × 0` though drawn at a real size, so they were measured before layout and never again. A `ResizeObserver` that asked for a frame changed nothing and was taken out. Filed with what to read next |
+
+### s44 (2026-10-11) — ROUTINEREFUSAL fixed
+
+| row | state | what happened |
+|---|---|---|
+| ROUTINEREFUSAL (medium) | ✅ `9cb99b205` | Re-measured first: still fired. Three commands had the shape, not one (Set routine dates, Set schedule's Add time, Set deadline). `command()` gains `refusalAbout`: the guard publishes each verdict as a new object `{ about, error }`, and a small Function (`SAY_REFUSAL_SCRIPT`) says it only while `about` is open. The D81 drive gained three arms: two red on HEAD's template, 7/7 after. Control: a mutant comparing verdicts by value turns exactly the "said again" arm red. Set deadline is graded by the unit spec, not driven. Regenerated `todo-list` and `todo-list-demo` |
