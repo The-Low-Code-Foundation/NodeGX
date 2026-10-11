@@ -11,14 +11,17 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { applyMutant, collectionName, fieldName, nextQuestions, projectWorld, schemaText, WORLD_FILES, WORLD_KINDS, type WorldFiles, type WorldSchema } from '../world';
+import { applyMutant, collectionName, fieldName, nextQuestions, projectWorld, schemaText, RULES_FILE, WORLD_FILES, WORLD_KINDS, type WorldFiles, type WorldSchema } from '../world';
 
 const FIXTURES = path.join(__dirname, 'fixtures');
-const WORLDS = ['world', 'world-every-kind', 'world-membership', 'world-categories', 'world-categories-unanswered'] as const;
+const WORLDS = ['world', 'world-every-kind', 'world-membership', 'world-categories', 'world-categories-unanswered', 'world-rules'] as const;
 
 function readWorld(fixture: string): WorldFiles {
   const read = (f: string) => JSON.parse(fs.readFileSync(path.join(FIXTURES, fixture, f), 'utf8'));
-  return { nouns: read(WORLD_FILES.nouns), relations: read(WORLD_FILES.relations), vocabulary: read(WORLD_FILES.vocabulary) };
+  const files: WorldFiles = { nouns: read(WORLD_FILES.nouns), relations: read(WORLD_FILES.relations), vocabulary: read(WORLD_FILES.vocabulary) };
+  // ONT-013: the fifth file, when the fixture has one.
+  if (fs.existsSync(path.join(FIXTURES, fixture, RULES_FILE))) files.rules = read(RULES_FILE);
+  return files;
 }
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v));
 
@@ -83,8 +86,18 @@ describe('nothing said is dropped', () => {
         expect([r.id, f.name, col.type, held, said]).toEqual([r.id, f.name, col.type, col.type === 'Pointer', col.type !== 'Pointer']);
       }
     }
+    // ONT-013: a rule of `rules.json` is held (a claim under the rule's id, on the collection's `onlyWhile` or an index) or said, as a kind's is.
+    for (const rule of files.rules?.rules ?? []) {
+      rules += 1;
+      const c = schema.collections.find((x) => x.name === collectionName(rule.on))!;
+      const h = rule.holds;
+      const claimed = schema.claims.some((x) => x.held && 'rule' in x.from && x.from.rule === rule.id);
+      if ('unique' in h) expect([rule.says, c.indexes.some((i) => i.fields.join() === h.unique.map(fieldName).join()), claimed]).toEqual([rule.says, true, true]);
+      else if ('setOnce' in h || 'neverEdited' in h || 'neverDeleted' in h || 'frozen' in h || 'moves' in h) expect([rule.says, Boolean(c.onlyWhile), claimed]).toEqual([rule.says, true, true]);
+      else expect([rule.says, said(c.name, rule.says.replace(/\.$/, '')), schema.notHeld.some((n) => n.says === rule.says), claimed]).toEqual([rule.says, true, true, false]);
+    }
     if (files.relations.relations.length) expect(rules).toBeGreaterThan(0);
-    for (const n of schema.notHeld) expect([n.says, said(n.collection, n.says), n.why.length > 0]).toEqual([n.says, true, true]);
+    for (const n of schema.notHeld) expect([n.says, said(n.collection, n.says.replace(/\.$/, '')), n.why.length > 0]).toEqual([n.says, true, true]);
   });
 
   it.each(WORLDS)('%s: every required field, choice and unique rule has a held claim with a mutant', (fixture) => {

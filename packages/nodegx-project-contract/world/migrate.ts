@@ -759,11 +759,16 @@ function keptWords(c: WorldCollection, was?: WorldCollection): string {
   const frozen = ow?.update?.frozen?.fields;
   const unless = ow?.update?.frozen?.unless ? ' once it is agreed' : '';
   const except = ow?.update?.except?.length ? ` but ${ow.update.except.join(', ')}` : '';
-  if (frozen === '*') parts.push(unless ? `nothing on one changes${unless}${except}` : 'nobody edits one once it is made');
-  else if (frozen) parts.push(`${frozen.join(', ')} ${frozen.length > 1 ? 'are' : 'is'} set once`);
-  for (const [field, byOld] of Object.entries(ow?.update?.moves ?? {})) parts.push(`${field} moves ${Object.entries(byOld).map(([old, m]) => `from ${old} to ${m.to.length ? m.to.join(' or ') : 'nowhere'}`).join(', ')}`);
+  // ONT-013: a rule the person said carries its own sentence (`says`); the step reads it back in their words.
+  const said = (s: string | undefined, fallback: string): string => (s ? `${fallback} (${s.replace(/\.$/, '')})` : fallback);
+  if (frozen === '*') parts.push(said(ow?.update?.frozen?.says, unless ? `nothing on one changes${unless}${except}` : 'nobody edits one once it is made'));
+  else if (frozen) parts.push(said(ow?.update?.frozen?.says, `${frozen.join(', ')} ${frozen.length > 1 ? 'are' : 'is'} set once`));
+  for (const [field, byOld] of Object.entries(ow?.update?.moves ?? {})) {
+    const says = Object.values(byOld).find((m) => m.says)?.says;
+    parts.push(said(says, `${field} moves ${Object.entries(byOld).map(([old, m]) => `from ${old} to ${m.to.length ? m.to.join(' or ') : 'nowhere'}`).join(', ')}`));
+  }
   if (ow?.delete === 'never') parts.push('nobody deletes one');
-  else if (ow?.delete) parts.push('an agreed one is never deleted');
+  else if (ow?.delete) parts.push(said(ow.delete.says, 'an agreed one is never deleted'));
   if (secret.length) parts.push(`${isAre(secret)} read by nobody but the backend's own key`);
   if (openedWords) parts.push(openedWords);
   return `keep, for ${wordsOf(c)}: ${parts.join('; ')}`;

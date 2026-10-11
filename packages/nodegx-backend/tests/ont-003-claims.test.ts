@@ -46,7 +46,10 @@ const FIXTURES = path.join(__dirname, '../../nodegx-project-contract/tests/fixtu
 function readWorld(fixture: string): WorldFiles {
   const dir = path.join(FIXTURES, fixture, 'docs/world');
   const read = (name: string) => JSON.parse(fs.readFileSync(path.join(dir, `${name}.json`), 'utf8'));
-  return { nouns: read('nouns'), relations: read('relations'), vocabulary: read('vocabulary') };
+  const files: WorldFiles = { nouns: read('nouns'), relations: read('relations'), vocabulary: read('vocabulary') };
+  // ONT-013: the fifth file, when the fixture has one.
+  if (fs.existsSync(path.join(dir, 'rules.json'))) files.rules = read('rules');
+  return files;
 }
 
 function project(fixture: string): WorldSchema {
@@ -59,7 +62,7 @@ function project(fixture: string): WorldSchema {
 const asRunnerSchema = (s: WorldSchema): ClaimSchema => s;
 const asRunnerClaims = (s: WorldSchema): readonly Claim[] => s.claims;
 
-const WORLDS = ['world', 'world-every-kind', 'world-membership', 'world-categories', 'world-categories-unanswered'] as const;
+const WORLDS = ['world', 'world-every-kind', 'world-membership', 'world-categories', 'world-categories-unanswered', 'world-rules'] as const;
 
 /** The claims of a world as cases, and each held claim on its own mutant. */
 function casesFor(schema: WorldSchema): { claims: ConformanceCase[]; mutants: ConformanceCase[] } {

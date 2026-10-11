@@ -182,6 +182,20 @@ export type RuleHold =
   | { series: string; looksLike?: string; maySkip?: boolean; restarts?: 'never' | 'each year' | 'each month' }
   /** P116 ONT-011 step 2, *only one*: at most one record of it. Across records: no engine behind the contract keeps it yet (ONT-013 step 4). */
   | { onlyOne: true }
+  /**
+   * P116 ONT-013 / ONT-016, *at most so many*: at most `atMost` records `of` a noun (or a relation
+   * that is a record of its own) point at one record of the noun the rule is on, through the
+   * relation `per` (or the only one that joins them); the limit a number, or a field of the parent
+   * record. Across records: no engine behind the contract keeps it yet — ONT-016 builds it.
+   */
+  | { atMost: number | { field: string }; of: string; per?: string }
+  /**
+   * P116 ONT-013, *who may*: only the role named may change this field (`to` one value, when
+   * said). Said, never held by the projection: a world names no role (ONT-011 step 4), so who may
+   * make a change is the backend's permissions — a move's `by` (ONT-014), set in the manager; the
+   * per-field update rule is ONT-012 §7's, unruled.
+   */
+  | { onlyBy: string; changes: string; to?: string | number | boolean }
   /** P116 ONT-011 step 2, *secret details*: this field is not for everyone who can see the record. Step 4 projects it to a per-field read rule (R-a). */
   | { secret: string }
   /** P116 ONT-011 step 2, *who changed what*: a history record per change, written on every save — a verb's or a trigger's, not the store's. */

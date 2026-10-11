@@ -11,12 +11,13 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { VERBS_FILE, WORLD_FILES } from '@nodegx/project-contract/world';
+import { RULES_FILE, VERBS_FILE, WORLD_FILES } from '@nodegx/project-contract/world';
 
 import { call, connect, copyFixture, type TestSession } from './helpers';
 
 const WORLD_FIXTURE = path.resolve(__dirname, '../../nodegx-project-contract/tests/fixtures/world-membership-unasked');
 const VERBS_FIXTURE = path.resolve(__dirname, '../../nodegx-project-contract/tests/fixtures/world-verbs');
+const RULES_FIXTURE = path.resolve(__dirname, '../../nodegx-project-contract/tests/fixtures/world-rules');
 
 interface Question {
   about: Record<string, unknown>;
@@ -46,6 +47,7 @@ const readWorld = (dir = WORLD_FIXTURE) => {
   return { nouns: read(WORLD_FILES.nouns), relations: read(WORLD_FILES.relations), vocabulary: read(WORLD_FILES.vocabulary) };
 };
 const readVerbs = () => JSON.parse(fs.readFileSync(path.join(VERBS_FIXTURE, VERBS_FILE), 'utf8'));
+const readRules = () => JSON.parse(fs.readFileSync(path.join(RULES_FIXTURE, RULES_FILE), 'utf8'));
 
 interface VerbsReport {
   file: string;
@@ -209,6 +211,82 @@ describe('ONT-006 — the world tools read the fourth file, verbs.json', () => {
     expect(data.world).toBe('partial');
     expect(data.unreadable).toHaveLength(1);
     expect(data.unreadable![0]).toMatch(new RegExp(`^${VERBS_FILE}: `));
+  });
+});
+
+interface RulesReport {
+  file: string;
+  rules: { id: string; on: string; says: string; kept: boolean; why?: string }[];
+}
+
+describe('ONT-013 — the world tools read the fifth file, rules.json', () => {
+  let session: TestSession;
+  beforeAll(async () => {
+    session = await connect(copyFixture(), true);
+    await call(session, 'find_tools', { group: 'backend' });
+  });
+  afterAll(async () => {
+    await session.close();
+  });
+
+  it('a world written without rules has no rules report', async () => {
+    const { isError, data } = await call<Written & { rules?: RulesReport }>(session, 'write_world', readWorld(RULES_FIXTURE));
+    expect(isError).toBe(false);
+    expect(data.written).toEqual([WORLD_FILES.nouns, WORLD_FILES.relations, WORLD_FILES.vocabulary]);
+    expect(data.rules).toBeUndefined();
+  });
+
+  it('writes the rules with the world, and validate_world reads each back as kept or not kept, with why (step 3)', async () => {
+    const read = await call<Report>(session, 'validate_world');
+    const { isError, data } = await call<Written & { rules?: RulesReport }>(session, 'write_world', { ...readWorld(RULES_FIXTURE), rules: readRules(), ifRevision: read.data.revision });
+    expect(isError).toBe(false);
+    expect(data.written).toEqual([RULES_FILE]);
+    expect(data.revision).not.toBe(read.data.revision);
+    const again = await call<Report & { rules?: RulesReport }>(session, 'validate_world');
+    expect(again.data.revision).toBe(data.revision);
+    const rules = again.data.rules!;
+    expect(rules.file).toBe(RULES_FILE);
+    expect(rules.rules.map((r) => [r.id, r.kept, r.says])).toEqual(readRules().rules.map((r: { id: string; says: string }) => [r.id, r.id === 'invoice-amount-settled' || r.id === 'assignment-never-back', r.says]));
+    expect(rules.rules.find((r) => r.id === 'cohort-at-most-twenty')!.why).toMatch(/ONT-016/);
+    expect(rules.rules.find((r) => r.id === 'invoice-amount-settled')!.why).toBeUndefined();
+    // The read-back in the schema the tool returns: the unkept sentence under "Not kept", the kept one nowhere.
+    const schema = (again.data.report as { schema: { collections: { name: string; description: string }[] } }).schema;
+    expect(schema.collections.find((c) => c.name === 'Cohort')!.description).toMatch(/Not kept by the database yet: A cohort holds at most twenty learners\.$/);
+    expect(schema.collections.find((c) => c.name === 'Invoice')!.description).not.toContain('amount never changes');
+  });
+
+  it('a rule of code or SQL is refused, not written (AC2’s mutant)', async () => {
+    const read = await call<Report>(session, 'validate_world');
+    const rules = readRules();
+    rules.rules[0].holds = { sql: 'UPDATE invoices SET amount = amount' };
+    const refused = await call<Failure>(session, 'write_world', { ...readWorld(RULES_FIXTURE), rules, ifRevision: read.data.revision });
+    expect(refused.isError).toBe(true);
+    expect(refused.data.error.code).toBe('invalid-argument');
+    const problems = (refused.data.error.details as { problems: { file: string; message: string }[] }).problems;
+    expect(problems.map((p) => p.file)).toEqual([RULES_FILE]);
+    expect(problems[0].message).toMatch(/fits no shape/);
+    expect(fs.readFileSync(path.join(session.projectDir, RULES_FILE), 'utf8')).not.toContain('sql');
+  });
+
+  it('a write that leaves the rules out keeps them, and is refused when the world it writes breaks them', async () => {
+    const read = await call<Report>(session, 'validate_world');
+    const world = readWorld(RULES_FIXTURE);
+    const invoice = world.nouns.nouns.find((n: { id: string }) => n.id === 'invoice');
+    invoice.properties = invoice.properties.filter((p: { name: string }) => p.name !== 'amount');
+    invoice.answers.calledBy = 'status';
+    const refused = await call<Failure>(session, 'write_world', { ...world, ifRevision: read.data.revision });
+    expect(refused.isError).toBe(true);
+    const problems = (refused.data.error.details as { problems: { file: string }[] }).problems;
+    expect(problems.length).toBeGreaterThan(0);
+    expect(problems.every((p) => p.file === RULES_FILE)).toBe(true);
+    expect(fs.readFileSync(path.join(session.projectDir, WORLD_FILES.nouns), 'utf8')).toContain('"amount"');
+  });
+
+  it('an unreadable rules file makes the world partial, and says which', async () => {
+    fs.writeFileSync(path.join(session.projectDir, RULES_FILE), '{ not json');
+    const { data } = await call<Report & { unreadable?: string[] }>(session, 'validate_world');
+    expect(data.world).toBe('partial');
+    expect(data.unreadable).toEqual([expect.stringMatching(new RegExp(`^${RULES_FILE}: `))]);
   });
 });
 

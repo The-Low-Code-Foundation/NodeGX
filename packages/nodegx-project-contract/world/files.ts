@@ -7,7 +7,7 @@
  * said. The format is a property graph in the plain sense (things, typed links between them,
  * details on the links) and names no engine and no graph framework (R2).
  */
-import type { FieldKind } from './kind';
+import type { FieldKind, RuleHold } from './kind';
 
 /** Project-relative, forward-slashed. */
 export const WORLD_DIR = 'docs/world';
@@ -224,10 +224,45 @@ export interface VerbsFile {
   verbs: Verb[];
 }
 
+/**
+ * P116 ONT-013 — the fifth file, optional: a rule the person said that no kind's question
+ * produced ("once an invoice is issued, its amount never changes"). The kinds are the templates;
+ * this is the freedom to invent (R-d), gated by honesty, not by the catalogue: a rule's `holds` is
+ * one of the shapes the store keeps or says plainly it cannot (`RuleHold`, the whole atom set), it
+ * carries the mistake it prevents as its mutant, and it is held on every engine or shown as *not
+ * kept*, in that word, never as a law (R-e). A sentence that fits no shape is not written: the
+ * validator says which shapes exist, and the agent asks the person a narrower question.
+ */
+export const RULES_FILE = `${WORLD_DIR}/rules.json`;
+
+/** Where a rule came from, as a question's (ONT-000's rule): "Claude" is not a source. */
+export const RULE_FROM = Object.freeze(['oral', 'note', 'census'] as const);
+export type RuleFrom = (typeof RULE_FROM)[number];
+
+export interface WorldRule {
+  id: string;
+  /** The noun, or the relation that is a record of its own, whose records the rule is about. */
+  on: string;
+  /** The person's sentence: read back to them, shown in the view, carried by the refusal (R-f). */
+  says: string;
+  /** What the store is asked to keep, in one of the shapes of `kind.ts` `RuleHold`; fields by the person's names. */
+  holds: RuleHold;
+  /** The mistake, in words: what happens without the rule. ONT-005 grades it like a kind's. */
+  mutant: string;
+  from: RuleFrom;
+}
+
+export interface RulesFile {
+  $schema?: string;
+  rules: WorldRule[];
+}
+
 export interface WorldFiles {
   nouns: NounsFile;
   relations: RelationsFile;
   vocabulary: VocabularyFile;
   /** ONT-006; absent when nobody has said a verb. */
   verbs?: VerbsFile;
+  /** ONT-013; absent when every rule came from a kind's question. */
+  rules?: RulesFile;
 }

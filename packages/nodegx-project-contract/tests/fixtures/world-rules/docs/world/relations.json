@@ -1,0 +1,18 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/world-v1.json#/definitions/relationsFile",
+  "relations": [
+    {
+      "id": "learner-cohort",
+      "from": "learner",
+      "to": "cohort",
+      "kind": "belongs-to",
+      "sentence": "A learner is in one cohort.",
+      "answers": {
+        "several": false,
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "moves": true
+      }
+    }
+  ]
+}

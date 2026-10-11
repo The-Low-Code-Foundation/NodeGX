@@ -43,12 +43,15 @@ import { deletesThroughTheFacade } from './helpers/facade-deletes';
 jest.setTimeout(600000);
 
 const FIXTURES = path.join(__dirname, '../../nodegx-project-contract/tests/fixtures');
-const WORLDS = ['world', 'world-every-kind', 'world-membership', 'world-categories'] as const;
+const WORLDS = ['world', 'world-every-kind', 'world-membership', 'world-categories', 'world-rules'] as const;
 
 function readWorld(fixture: string): WorldFiles {
   const dir = path.join(FIXTURES, fixture, 'docs/world');
   const read = (name: string) => JSON.parse(fs.readFileSync(path.join(dir, `${name}.json`), 'utf8'));
-  return { nouns: read('nouns'), relations: read('relations'), vocabulary: read('vocabulary') };
+  const files: WorldFiles = { nouns: read('nouns'), relations: read('relations'), vocabulary: read('vocabulary') };
+  // ONT-013: the fifth file, when the fixture has one.
+  if (fs.existsSync(path.join(dir, 'rules.json'))) files.rules = read('rules');
+  return files;
 }
 
 type Engine = { name: string; make: () => Promise<IStorageAdapter>; teardown: () => Promise<void>; available: boolean };
@@ -152,6 +155,8 @@ const killer = (m: WorldMutant): string =>
     ? `${m.kills.question}: "${m.kills.ask}"`
     : 'kind' in m.kills
     ? `the kind (${m.kills.kind})`
+    : 'rule' in m.kills
+    ? `the rule (${m.kills.rule}: "${m.kills.says}")`
     : `the tile (${m.kills.tile})`;
 
 /**
@@ -202,12 +207,9 @@ async function grade(
     if (v.verdict === 'cannot') throw new Error(`${m.id} cannot be made: ${v.why}`);
     const hits = stopped.get(m.id) || [];
     if (!hits.length) return { id: m.id, seeds: m.seeds, verdict: 'survives', as: v.as, kills: killer(m) };
-    // Attribute the kill to the mutant's own relation's claim when one hit, else the first.
-    const own =
-      hits.find(
-        (h) =>
-          'relation' in m.of && JSON.stringify(byId.get(h.claim)!.from) === JSON.stringify({ relation: m.of.relation })
-      ) || hits[0];
+    // Attribute the kill to the mutant's own relation's (or rule's) claim when one hit, else the first.
+    const ownFrom = 'relation' in m.of ? { relation: m.of.relation } : 'rule' in m.of ? { rule: m.of.rule } : undefined;
+    const own = hits.find((h) => ownFrom !== undefined && JSON.stringify(byId.get(h.claim)!.from) === JSON.stringify(ownFrom)) || hits[0];
     const claim = byId.get(own.claim)!;
     return {
       id: m.id,
@@ -332,6 +334,17 @@ const SURVIVORS: Record<(typeof WORLDS)[number], string[]> = {
   'world-categories': [
     'subcategory-category/retires-unanswered (unkept)',
     'product/price-as-text (unclaimed)'
+  ],
+  /**
+   * ONT-013 (s25): the three sentences as `rules.json`. The two rules the store keeps (the amount frozen once
+   * issued, the status never back) are killed by their own claims; the two it only says — only a coach may
+   * issue (a world names no role), at most twenty (ONT-016) — survive as unkept, each read as such in the
+   * description. The invoice's amount as text is unclaimed, as every as-text number is (3 of 11, both engines).
+   */
+  'world-rules': [
+    'invoice/amount-as-text (unclaimed)',
+    'assignment-issued-by-coach/never-said (unkept)',
+    'cohort-at-most-twenty/never-said (unkept)'
   ]
 };
 

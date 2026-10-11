@@ -12,6 +12,7 @@
 import type { AnswerShape } from './kind';
 import { PROPERTY_KINDS, WORLD_FILES, type WorldFileName } from './files';
 import { NOUN_QUESTIONS, NUMBER_QUESTIONS, numberLookProblem } from './noun';
+import { validateRules } from './rules';
 import { validateVerbs } from './verbs';
 import { WORLD_VOCABULARY_REF, type VocabularyRef } from './vocabulary';
 
@@ -65,7 +66,7 @@ export function fieldsAnswered(value: unknown): string[] {
  * knows other versions passes its own.
  */
 export function validateWorld(
-  files: Partial<Record<WorldFileName, unknown>> & { verbs?: unknown },
+  files: Partial<Record<WorldFileName, unknown>> & { verbs?: unknown; rules?: unknown },
   vocabulary: VocabularyRef = WORLD_VOCABULARY_REF
 ): WorldVerdict {
   const problems: WorldProblem[] = [];
@@ -383,6 +384,10 @@ export function validateWorld(
   // ── verbs.json (ONT-006), when there is one — read only over a world the three files describe ──
   if (files.verbs !== undefined && problems.length === 0) {
     problems.push(...validateVerbs(files.verbs, files as never, vocabulary).problems);
+  }
+  // ── rules.json (ONT-013), when there is one — the same: a rule names the nouns' details by name.
+  if (files.rules !== undefined && problems.length === 0) {
+    problems.push(...validateRules(files.rules, files as never).problems);
   }
 
   return { ok: problems.length === 0, problems };

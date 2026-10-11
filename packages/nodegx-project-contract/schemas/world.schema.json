@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://opennoodl.dev/schemas/world-v1.json",
   "title": "NodeGX world",
-  "description": "What a person said about their world: docs/world/nouns.json, relations.json and vocabulary.json (P116 ONT-001), and verbs.json when the person has said what they do over it (ONT-006). A property graph in plain JSON: things, typed links between them, details on the links. It names no engine and no graph framework. A file is one of the three definitions; which kinds exist, and what each asks, is the pinned vocabulary's, and the validator in @nodegx/project-contract/world checks it.",
+  "description": "What a person said about their world: docs/world/nouns.json, relations.json and vocabulary.json (P116 ONT-001), verbs.json when the person has said what they do over it (ONT-006), and rules.json when they said a rule no kind asked for (ONT-013). A property graph in plain JSON: things, typed links between them, details on the links. It names no engine and no graph framework. A file is one of the three definitions; which kinds exist, and what each asks, is the pinned vocabulary's, and the validator in @nodegx/project-contract/world checks it.",
   "oneOf": [
     {
       "$ref": "#/definitions/nounsFile"
@@ -15,6 +15,9 @@
     },
     {
       "$ref": "#/definitions/verbsFile"
+    },
+    {
+      "$ref": "#/definitions/rulesFile"
     }
   ],
   "definitions": {
@@ -514,6 +517,292 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/verb"
+          }
+        }
+      }
+    },
+    "ruleHold": {
+      "description": "What the store is asked to keep, in one shape by its naming member (P116 ONT-013). Never code, a query or free text; the hand validator says which shapes exist, in words, and holds every detail to one the noun has.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "unique"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "unique": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/definitions/words"
+              }
+            },
+            "whileEmpty": {
+              "$ref": "#/definitions/words"
+            }
+          },
+          "description": "no two records share these details"
+        },
+        {
+          "type": "object",
+          "required": [
+            "setOnce"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "setOnce": {
+              "$ref": "#/definitions/words"
+            }
+          },
+          "description": "a detail written when the record is made and never changed"
+        },
+        {
+          "type": "object",
+          "required": [
+            "neverEdited"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "neverEdited": {
+              "const": true
+            }
+          },
+          "description": "a record never changed once made"
+        },
+        {
+          "type": "object",
+          "required": [
+            "neverDeleted"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "neverDeleted": {
+              "const": true
+            },
+            "unless": {
+              "type": "object",
+              "minProperties": 1,
+              "additionalProperties": {
+                "type": [
+                  "string",
+                  "number",
+                  "boolean"
+                ]
+              },
+              "description": "The old record still matches: a choice or yes/no detail and the value it holds then, as { \"status\": \"draft\" }."
+            }
+          },
+          "description": "a record never deleted, unless it still matches"
+        },
+        {
+          "type": "object",
+          "required": [
+            "frozen"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "frozen": {
+              "oneOf": [
+                {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "$ref": "#/definitions/words"
+                  }
+                },
+                {
+                  "const": "*"
+                }
+              ]
+            },
+            "unless": {
+              "type": "object",
+              "minProperties": 1,
+              "additionalProperties": {
+                "type": [
+                  "string",
+                  "number",
+                  "boolean"
+                ]
+              },
+              "description": "The old record still matches: a choice or yes/no detail and the value it holds then, as { \"status\": \"draft\" }."
+            },
+            "except": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/definitions/words"
+              }
+            }
+          },
+          "description": "details that never change, unless the record still matches"
+        },
+        {
+          "type": "object",
+          "required": [
+            "moves",
+            "from"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "moves": {
+              "$ref": "#/definitions/words"
+            },
+            "from": {
+              "type": "object",
+              "minProperties": 1,
+              "additionalProperties": {
+                "type": "object",
+                "required": [
+                  "to"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "to": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/words"
+                    }
+                  }
+                },
+                "description": "where this old value may move to"
+              }
+            }
+          },
+          "description": "a choice that moves only as said, per old value"
+        },
+        {
+          "type": "object",
+          "required": [
+            "onlyOne"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "onlyOne": {
+              "const": true
+            }
+          },
+          "description": "at most one record of it"
+        },
+        {
+          "type": "object",
+          "required": [
+            "atMost",
+            "of"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "atMost": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "field"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "field": {
+                      "$ref": "#/definitions/words"
+                    }
+                  },
+                  "description": "a limit kept on the record itself"
+                }
+              ]
+            },
+            "of": {
+              "$ref": "#/definitions/id"
+            },
+            "per": {
+              "$ref": "#/definitions/id"
+            }
+          },
+          "description": "at most so many records of another noun on one of these (ONT-016)"
+        },
+        {
+          "type": "object",
+          "required": [
+            "onlyBy",
+            "changes"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "onlyBy": {
+              "$ref": "#/definitions/words"
+            },
+            "changes": {
+              "$ref": "#/definitions/words"
+            },
+            "to": {
+              "type": [
+                "string",
+                "number",
+                "boolean"
+              ]
+            }
+          },
+          "description": "only a role may change a detail"
+        }
+      ]
+    },
+    "rule": {
+      "type": "object",
+      "required": [
+        "id",
+        "on",
+        "says",
+        "holds",
+        "mutant",
+        "from"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "on": {
+          "$ref": "#/definitions/id",
+          "description": "The noun, or the relation that is a record of its own, whose records the rule is about."
+        },
+        "says": {
+          "$ref": "#/definitions/words",
+          "description": "The person's sentence: read back, shown in the view, carried by the refusal."
+        },
+        "holds": {
+          "$ref": "#/definitions/ruleHold"
+        },
+        "mutant": {
+          "$ref": "#/definitions/words",
+          "description": "The mistake, in words: what happens without the rule."
+        },
+        "from": {
+          "enum": [
+            "oral",
+            "note",
+            "census"
+          ],
+          "description": "The person, a note, or the census. An agent is not a source."
+        }
+      }
+    },
+    "rulesFile": {
+      "type": "object",
+      "required": [
+        "rules"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "$schema": {
+          "type": "string"
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/rule"
           }
         }
       }

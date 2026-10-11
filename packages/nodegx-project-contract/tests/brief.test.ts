@@ -37,7 +37,8 @@ describe('the brief', () => {
 
   it('is the same text every call, and short enough to read before the first sentence', () => {
     expect(worldBrief()).toBe(text);
-    expect(text.length).toBeLessThan(9000);
+    // 8,895 before ONT-013's fifth-file section (s25); the section is the brief's frame for invented rules, not bloat.
+    expect(text.length).toBeLessThan(10000);
     expect(text.length).toBeGreaterThan(4000);
   });
 });

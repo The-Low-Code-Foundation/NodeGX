@@ -17,20 +17,24 @@ import {
   WORLD_FILES,
   WORLD_KINDS,
   worldMutants,
+  RULES_FILE,
   type WorldFiles,
   type WorldMutant
 } from '../world';
 
 const FIXTURES = path.join(__dirname, 'fixtures');
-const WORLDS = ['world', 'world-every-kind', 'world-membership', 'world-categories'] as const;
+const WORLDS = ['world', 'world-every-kind', 'world-membership', 'world-categories', 'world-rules'] as const;
 
 function readWorld(fixture: string): WorldFiles {
   const read = (f: string) => JSON.parse(fs.readFileSync(path.join(FIXTURES, fixture, f), 'utf8'));
-  return {
+  const files: WorldFiles = {
     nouns: read(WORLD_FILES.nouns),
     relations: read(WORLD_FILES.relations),
     vocabulary: read(WORLD_FILES.vocabulary)
   };
+  // ONT-013: the fifth file, when the fixture has one.
+  if (fs.existsSync(path.join(FIXTURES, fixture, RULES_FILE))) files.rules = read(RULES_FILE);
+  return files;
 }
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v));
 

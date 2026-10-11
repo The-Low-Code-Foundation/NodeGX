@@ -7,7 +7,7 @@ freedom to invent?". The answer is **yes, and most of it is already this phase**
 a rule **no kind asks for** and it still ends up kept by the database on every engine, or honestly shown as not kept.
 **Depends on** ONT-003 (claims graded on both engines), ONT-005 (the honesty number), ONT-012 (`onlyWhile`, the first
 rule on a value of the record). **Feeds** ONT-014 (the old-and-new atom), ONT-015 (the series atom), ONT-008 (a rule
-is shown in the view in its own words). **Status: 📋 — R-d, R-e, R-f ruled 2026-10-10 (§6), each the recommendation; nothing built.**
+is shown in the view in its own words). **Status: 🟡 — R-d, R-e, R-f ruled 2026-10-10 (§6), each the recommendation; step 4 built s21 (§9.1); steps 1–3 built s25 (§9.2: `rules.json`, the validator, the projection, the read-back, the brief); step 5 (Opus) owed.**
 
 > **Model check (Richard, 2026-10-08 rule):** steps 1–3 want **Fable 5.1**: the frame ("what may be invented, and what
 > stops an invented rule from being a lie") is the kind of wrong turn no suite catches. Step 4 (the census of
@@ -221,3 +221,77 @@ are in `KINDS.md` § *Rules across records*.
   itself — a sequence, a counter formatted into text, the highest plus one. 1 → 3 rows over 2 sources (acme 1,
   sentinel 2); todo-list's three hits are drag-sort positions (neighbour), tirion's are import stand-in keys
   (neighbour). ONT-015 §6.
+
+### 9.2 Steps 1–3 — the frame, the fifth file, the read-back (s25, 2026-10-11, Fable 5.1)
+
+**The frame, as code.** A rule enters the world files only as `{ id, on, says, holds, mutant, from }` in
+`docs/world/rules.json` (`RULES_FILE`, `WorldRule`, `RulesFile`; `WorldFiles.rules`, optional like the verbs).
+`world/rules.ts` is the validator, run after the verbs' over a world the three files already describe:
+
+- `holds` is **one shape by its naming member**, from `RULE_SHAPES` (nine: `unique`, `setOnce`, `neverEdited`,
+  `neverDeleted`, `frozen`, `moves`, `onlyOne`, `atMost`, `onlyBy`), its members only. A `holds` that fits none —
+  AC2's mutant `{ "sql": … }` — is refused with every shape in words and "ask the person a narrower question", and
+  **not written** (`planWorldWrite` → `invalid`, the MCP's `write_world` → `invalid-argument`, measured). Two shapes
+  at once are two rules. A shape with a home of its own (`secret`, `history`, a read-aloud number, `onlyWhen`, a
+  pair's or a link's rule) is refused naming the home (`RULE_HOMES`).
+- every detail a shape names is one of `on`'s, by the person's name (a read-aloud noun's `number` counts); a link
+  is a relation, and a rule about one is the relation's kind's. `moves` names a choice and only its values; a `by`
+  on a move is refused and pointed at `onlyBy`. An `unless` is a choice or yes/no detail with one of its values — so
+  the projection can make a row the rule binds and one it frees — and never an operator.
+- no `mutant` → "a rule nobody can grade is a sentence"; `from` is `oral` / `note` / `census` — "An agent is not a source".
+- `on` is a noun or a relation with records of its own (`verbSubjects`).
+
+**Two shapes joined `RuleHold`**, each said and never held, each naming its home: `{ atMost, of, per? }` (ONT-016,
+`WHY.atMost`) and `{ onlyBy, changes, to? }` ("only a coach may issue one": a world names no role, so the backend's
+`moves … by` in the manager keeps it — ONT-014; `WHY.onlyBy`). They are the §1 sentences' third rule and the "who"
+clause, recorded as unkept with the atom they wait for named (AC3).
+
+**The projection** takes a rule exactly as a kind's: into `ruled` under `{ rule: id }` (`WorldClaim.from` grew the
+third source), its details renamed to the fields they became, and — for a `frozen` / `neverDeleted` with `unless` —
+the row hints derived from the condition (`asProjected`). A held shape is a claim under the rule's id
+(`invoice-amount-settled/frozen-once-issued`, `assignment-never-back/status-never-goes-back`), graded on SQLite and
+PostgreSQL with every other world's in `ont-003-claims` (31/31) and failing on its `dropOnlyWhile` mutant. **R-f**:
+a rule's `says` rides the backend's rule (`WorldOnlyWhile` `frozen.says`, each move arm's `says`, a delete's
+`{ where, says }`), through the migration's `rules` step, so the 409 IS the sentence — measured over HTTP on both
+engines (`ont-013-rules.test.ts`, 8/8): the amount of an issued invoice, an assignment put back to draft; the same
+write on a draft, and the move the rule allows, go through. The migration's words carry it too (`keptWords`).
+
+**The read-back (step 3).** An unkept rule's `says` is in `notHeld` with its `why` and in the collection's
+description under the existing prefix *Not kept by the database yet:* (one list per collection; a sentence's own
+full stop is stripped so the list reads as one). AC3 is graded **on what the person sees**: the contract spec's
+reader (`readBack`) and the backend spec read `GET /admin/schema`'s descriptions — a held rule's sentence nowhere,
+an unkept one after the prefix and never before it — and the reader reports the step-3 mutant (the sentence written
+without the prefix) as `law`. On the MCP arm, `validate_world` returns `rules: [{ id, on, says, kept, why? }]`
+beside the verbs report (`ont002WorldTools`, 17/17), and the schema it returns carries the descriptions.
+
+**The mutants (ONT-005).** `worldMutants()` makes one per rule, `<id>/never-said`, with the rule's own `mutant` as
+the mistake and the rule's sentence as the killer: the world without the rule, projected. A held rule's mutant
+differs in what is held and is run (its own claim first, `own()`); an unkept rule's is the right schema, as a
+kind's unkept rule's is (`retype`), and survives `unkept` (`gradeStatically`). The fixture `world-rules` joined the
+four pinned worlds; its pin is in `ont-005-mutants.test.ts`: **3 of 11** on both engines — the two rules the store
+only says, unkept, and the invoice's amount as text, unclaimed; the other eight killed, seven by a claim at the rule's
+step (the two rules' own claims among them) and one by a question.
+
+**The brief (step 1)** gained "What the person insists on": the fifth file, "A sentence that fits no shape is not
+written. Ask the person a narrower question; never write a rule as free text, code or a query.", and "shown as *not
+kept*, in those words … never as a law"; the write section says rules left out are kept. 8,895 → 9,839 chars; the
+spec's budget moved from 9,000 to 10,000 with the measurement beside it.
+
+**Also:** `write.ts` keeps and grades a left-out `rules.json` as it does the verbs (one `OPTIONAL` list; the revision
+takes each optional file under its own name, so a rules file and a verbs file of the same text are not one world);
+`world.schema.json` has `rulesFile`, `rule` and `ruleHold` (the nine shapes, `additionalProperties: false`);
+`world.test.ts`'s engine-name gate still walks every new file.
+
+**Watch for, found while building:** the store keeps **one** `frozen` condition per collection (ONT-014 §7), so a
+rule's conditional freeze on a list of fields binds a kind's unconditional `setOnce` on the same collection to the
+same condition — a read-aloud invoice's `number` is "set once, once issued". The series refuses a person's number
+at every door anyway, so nothing a person sees changed; the `setOnce` claim now makes its row one the freeze binds
+(it read the bound row only under `frozen: "*"` before). A second conditional freeze on one collection is still the
+§7 limit.
+
+**Measured (2026-10-11, working tree over `ec116ed5a`):** project contract 16 suites **332/332**, `tsc` (tests)
+clean (`rules.test.ts` 38 cases new); MCP `ont002WorldTools` **17/17**; backend `ont-013-rules` **8/8** and
+`ont-003-claims` **31/31**, `ont-005-mutants` **23/23** (200 s), both engines; backend tests `tsc`: only P107's `DRAWN_PORT_TYPES` (not P116's).
+**Owed:** step 5 (Opus — the honesty accounting; `world-rules` is a fifth pinned world, so the fully answered
+world's 14 of 51 did not move); the MCP tool-surface measurement on both arms (no new tool, one optional argument on
+`write_world`); ONT-008's view shows `kept` / *not kept* per rule from the report.

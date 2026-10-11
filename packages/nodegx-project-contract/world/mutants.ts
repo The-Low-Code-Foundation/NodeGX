@@ -46,10 +46,12 @@ export type MutantOf =
   | { relation: string; kind: string }
   | { noun: string; property: string }
   /** P116 ONT-011 step 2: one of the noun's own questions (`NOUN_QUESTIONS`). */
-  | { noun: string; question: string };
+  | { noun: string; question: string }
+  /** P116 ONT-013: a rule of `rules.json`, by id — the mistake is the world without it. */
+  | { rule: string };
 
-/** What kills it: a question of the kind, in the person's nouns, or the tile a property was given. */
-export type Killer = { question: string; ask: string } | { kind: string } | { tile: FieldKind };
+/** What kills it: a question of the kind, in the person's nouns, the tile a property was given, or (ONT-013) the rule itself, in the person's sentence. */
+export type Killer = { question: string; ask: string } | { kind: string } | { tile: FieldKind } | { rule: string; says: string };
 
 export interface WorldMutant {
   /** `<relation>/<seed>`, `<relation>/<question>-unanswered`, `<noun>/<field>-as-text`. */
@@ -573,6 +575,29 @@ export function worldMutants(files: WorldFiles): WorldMutants {
     }
   }
 
+  // 5. ONT-013 — a rule of `rules.json` never said: the world without it, projected. A rule the store
+  //    keeps (a freeze, a move) is a schema the right one's claim fails on; one it only says changes
+  //    nothing the store holds — its mutant is the right schema, as a kind's unkept rule's is
+  //    (`retype`), and it survives as `unkept`, counted by the honesty number (AC1). The mistake is
+  //    the rule's own `mutant`.
+  for (const rule of files.rules?.rules ?? []) {
+    const f = clone(files);
+    f.rules!.rules = f.rules!.rules.filter((x) => x.id !== rule.id);
+    if (!f.rules!.rules.length) delete f.rules;
+    const out = project(f);
+    const schema = out.schema && differsInWhatIsHeld(right, out.schema) ? out.schema : out.schema ? right : undefined;
+    mutants.push({
+      id: `${rule.id}/never-said`,
+      of: { rule: rule.id },
+      mistake: rule.mutant,
+      kills: { rule: rule.id, says: rule.says },
+      shape: { unsaid: true },
+      seeds: [],
+      made: 'world',
+      ...(schema ? { schema } : { cannot: `without the rule the world does not project: ${(out.problems ?? []).join('; ')}` })
+    });
+  }
+
   return { right, mutants, inert };
 }
 
@@ -641,6 +666,8 @@ export function gradeStatically(right: WorldSchema, m: WorldMutant): StaticVerdi
   if (m.notApplicable) return { verdict: 'not-applicable', why: m.notApplicable };
   if (!m.schema) return { verdict: 'cannot', why: m.cannot || 'unexplained' };
   if (collectionsText(m.schema) === collectionsText(right)) {
+    // ONT-013: a rule the store only says — without it, nothing the store holds differs (its words do).
+    if ('rule' in m.of) return { verdict: 'survives', as: 'unkept', why: `"${'says' in m.kills ? m.kills.says : m.of.rule}" is said in the description, and no engine behind the contract keeps it` };
     if ('unanswered' in m.shape) return { verdict: 'survives', as: 'unanswered', why: m.mistake };
     if ('without' in m.shape && 'rule' in m.shape.without)
       return m.shape.without.rule === 'shape'
@@ -658,7 +685,11 @@ export function gradeStatically(right: WorldSchema, m: WorldMutant): StaticVerdi
   }
   // The mutant's own relation's (or noun's) claims first, so a kill is attributed to what was said about it.
   const own = (c: WorldClaim): number =>
-    ('relation' in m.of && 'relation' in c.from && c.from.relation === m.of.relation) || ('question' in m.of && 'noun' in c.from && c.from.noun === m.of.noun) ? 0 : 1;
+    ('relation' in m.of && 'relation' in c.from && c.from.relation === m.of.relation) ||
+    ('question' in m.of && 'noun' in c.from && c.from.noun === m.of.noun) ||
+    ('rule' in m.of && 'rule' in c.from && c.from.rule === m.of.rule)
+      ? 0
+      : 1;
   const held = right.claims.filter((c) => c.held).sort((x, y) => own(x) - own(y));
   for (const c of held) {
     const miss = missingHome(m.schema, c);

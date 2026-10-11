@@ -24,3 +24,4 @@ export * from './world/brief';
 export * from './world/migrate';
 export * from './world/verbs';
 export * from './world/verb-project';
+export * from './world/rules';

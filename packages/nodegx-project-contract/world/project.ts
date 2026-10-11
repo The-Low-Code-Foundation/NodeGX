@@ -21,7 +21,7 @@
  * Nothing is dropped. The test counts every rule in and every rule out.
  */
 import type { FieldKind, ProjectedField, ProjectedRule } from './kind';
-import type { Noun, OnlyWhen, Relation, WorldFiles, WorldProperty } from './files';
+import type { Noun, OnlyWhen, Relation, WorldFiles, WorldProperty, WorldRule } from './files';
 import { kindById, WORLD_VOCABULARY } from './vocabulary';
 import { fieldsAnswered, validateWorld } from './validate';
 import { numberSeries, type NumberSeries } from './noun';
@@ -149,15 +149,19 @@ export interface WorldCollection {
 /** P116 ONT-014 — the part of a collection's `onlyWhile` a world says (`@noodl/backend-contract` `OnlyWhileRule`, restated). */
 export interface WorldOnlyWhile {
   update?: {
-    /** Fields that do not change; `unless` (ONT-011 step 2, *settled*) a condition on the old record holds. */
-    frozen?: { fields: string[] | '*'; unless?: Record<string, unknown> };
+    /**
+     * Fields that do not change; `unless` (ONT-011 step 2, *settled*) a condition on the old record
+     * holds. `says` (ONT-013, R-f): the person's sentence, which the backend's 409 then carries — only
+     * a rule from `rules.json` has one; a kind's rule leaves the backend's own words.
+     */
+    frozen?: { fields: string[] | '*'; unless?: Record<string, unknown>; says?: string };
     /** With `frozen: "*"`: the fields that still change (a status, a note). */
     except?: string[];
-    /** A value's allowed moves per old value (*settled*: draft → agreed → withdrawn, never back). No `by`: a world names no role. */
-    moves?: Record<string, Record<string, { to: string[] }>>;
+    /** A value's allowed moves per old value (*settled*: draft → agreed → withdrawn, never back). No `by`: a world names no role. `says` as for `frozen`. */
+    moves?: Record<string, Record<string, { to: string[]; says?: string }>>;
   };
-  /** `"never"`, or (*settled*) only while the old record matches (a draft may go). */
-  delete?: 'never' | { where: Record<string, unknown> };
+  /** `"never"`, or (*settled*) only while the old record matches (a draft may go), with `says` as for `frozen`. */
+  delete?: 'never' | { where: Record<string, unknown>; says?: string };
 }
 
 /** A value a claim step writes. `ref` is the id of a row an earlier step made; `date` an ISO date. */
@@ -228,8 +232,8 @@ export interface WorldClaim {
   id: string;
   /** The claim in the person's words. */
   says: string;
-  /** The relation, or the noun, whose words it comes from (a noun's own answers make noun claims — ONT-011 step 2). */
-  from: { relation: string } | { noun: string };
+  /** The relation, or the noun, whose words it comes from (a noun's own answers make noun claims — ONT-011 step 2); or (ONT-013) a rule of `rules.json`, by id. */
+  from: { relation: string } | { noun: string } | { rule: string };
   /** True: every engine must pass it. False: no engine keeps it today, and the claim measures that. */
   held: boolean;
   /** For a held claim: the schema it must fail on. */
@@ -290,7 +294,10 @@ const WHY: Record<string, string> = {
   history: 'the store keeps the history records, and does not write one on every save; a verb or a trigger does',
   series: 'the store hands out a number only in a look someone said, and nobody has said what this one looks like; until then the field is text, unique and set once',
   onlyWhenIs: 'a detail that matters only for one value of another is none of the store’s checks; the screen hides it, and nothing refuses it',
-  onlyWhenOptional: 'a detail allowed only once another is set, and not required then, is none of the store’s checks (all-or-none would make it required)'
+  onlyWhenOptional: 'a detail allowed only once another is set, and not required then, is none of the store’s checks (all-or-none would make it required)',
+  // ONT-013: the two shapes a rule can say that nothing keeps yet, each naming its home.
+  atMost: 'a count over the records linked to one parent, held inside the create, is none of the store’s checks, which are each on one row; ONT-016 builds it (a count made before the create lets two saves at the limit both pass)',
+  onlyBy: 'who may make a change is a role, and a world names no role; the backend keeps it as the move’s "by" in its permissions, set in the manager (ONT-014) — a rule on who may change one field is ONT-012 §7’s, unruled'
 };
 
 /**
@@ -315,6 +322,27 @@ function goesWords(field: ProjectedField, from: string): string {
 }
 /** What holds a link, in words: a noun's plural, or a relation's own records by its id. */
 const holders = (made: WorldCollection['made']): string => ('noun' in made ? `${made.noun}s` : `'${made.relation}' records`);
+
+/**
+ * P116 ONT-013 — a rule of `rules.json` as the projection holds it: its details renamed to the
+ * fields they became (the person wrote "closed on"; the store has `closedOn`), and, for a rule
+ * with an `unless`, the row hints its claim needs — `freeOn` is the condition itself, `heldOn`
+ * the same detail with another of its values (a choice's next value; a yes/no's other answer).
+ */
+function asProjected(rule: WorldRule, d: Draft): ProjectedRule['holds'] {
+  const h = rule.holds;
+  if (!('frozen' in h || 'neverDeleted' in h) || !h.unless) return h;
+  const freeOn: Record<string, string | number | boolean> = {};
+  const heldOn: Record<string, string | number | boolean> = {};
+  for (const [detail, v] of Object.entries(h.unless)) {
+    const field = fieldName(detail);
+    const value = v as string | number | boolean;
+    freeOn[field] = value;
+    const other = d.choices.get(field)?.find((x) => x !== value);
+    heldOn[field] = other !== undefined ? other : typeof value === 'boolean' ? !value : value;
+  }
+  return { ...h, unless: freeOn, heldOn, freeOn } as ProjectedRule['holds'];
+}
 
 // --------------------------------------------------------------- the function --
 
@@ -509,11 +537,24 @@ export function projectWorld(files: WorldFiles): WorldProjection {
       }
   }
 
+  // 3b. ONT-013: the rules of `rules.json` — a sentence no kind asked for, on a noun or a relation
+  //     that is a record of its own, in the person's names for its details; held or said exactly as
+  //     a kind's rule is, and claimed under the rule's own id. A rule with an `unless` gets the row
+  //     hints its claim needs (a row the rule binds, one it frees) from the condition itself, which
+  //     the validator holds to a choice or yes/no detail with one of its values.
+  for (const rule of files.rules?.rules ?? []) {
+    const d = drafts.get(rule.on);
+    if (!d) continue; // its noun did not open: the problem is already recorded above
+    ruled.push({ src: { rule: rule.id }, key: rule.id, d, rule: { on: 'relation' in d.collection.made ? 'own' : 'from', says: rule.says, holds: asProjected(rule, d) } });
+  }
+
   if (problems.length) return { ok: false, problems };
 
   // 4. Rules: a unique rule is an index; the rest are said, not held.
-  for (const { d, rule } of ruled) {
+  for (const { src, d, rule } of ruled) {
     const h = rule.holds;
+    // ONT-013 (R-f): a rule a person said carries its sentence into the backend's rule, so the 409 says it.
+    const says = 'rule' in src ? rule.says : undefined;
     if ('unique' in h) {
       const fields = h.unique.map(fieldName);
       d.collection.indexes.push(h.whileEmpty ? { fields, unique: true, where: { [fieldName(h.whileEmpty)]: { exists: false } } } : { fields, unique: true });
@@ -529,18 +570,20 @@ export function projectWorld(files: WorldFiles): WorldProjection {
         const have = update.frozen;
         const all = fields === '*' || have?.fields === '*';
         const merged = all ? ('*' as const) : [...new Set([...(have?.fields ?? []), ...(fields as string[])])];
-        update.frozen = { fields: merged, ...((unless ?? have?.unless) ? { unless: unless ?? have?.unless } : {}) };
+        // Two sentences on one collection are both carried: the 409 says both, in file order.
+        const said = [have?.says, says].filter(Boolean).join(' ');
+        update.frozen = { fields: merged, ...((unless ?? have?.unless) ? { unless: unless ?? have?.unless } : {}), ...(said ? { says: said } : {}) };
         if (except?.length) update.except = [...new Set([...(update.except ?? []), ...except])];
       };
       if ('neverDeleted' in h) {
-        if (h.unless && ow.delete !== 'never') ow.delete = { where: h.unless };
+        if (h.unless && ow.delete !== 'never') ow.delete = { where: h.unless, ...(says ? { says } : {}) };
         else ow.delete = 'never';
       } else if ('neverEdited' in h) freeze('*');
       else if ('setOnce' in h) freeze([fieldName(h.setOnce)]);
       else if ('frozen' in h) freeze(h.frozen === '*' ? '*' : h.frozen.map(fieldName), h.unless as Record<string, unknown> | undefined, h.except?.map(fieldName));
       else {
         const moves = (update.moves ??= {});
-        moves[fieldName(h.moves)] = Object.fromEntries(Object.entries(h.from).map(([old, m]) => [old, { to: [...m.to] }]));
+        moves[fieldName(h.moves)] = Object.fromEntries(Object.entries(h.from).map(([old, m]) => [old, { to: [...m.to], ...(says ? { says } : {}) }]));
       }
       if (!Object.keys(update).length) delete ow.update;
     } else if ('onlyWhen' in h) {
@@ -558,8 +601,9 @@ export function projectWorld(files: WorldFiles): WorldProjection {
     } else if ('onlyOne' in h || 'history' in h) {
       notHeld.push({ collection: d.collection.name, says: rule.says, why: 'onlyOne' in h ? WHY.onlyOne : WHY.history });
     } else {
+      // ONT-013's `atMost` and `onlyBy` land here too: said, each naming its home (WHY).
       const key = Object.keys(h)[0];
-      const field = 'notUnderItself' in h ? fieldName(h.notUnderItself) : undefined;
+      const field = 'notUnderItself' in h ? fieldName(h.notUnderItself) : 'onlyBy' in h ? fieldName(h.changes) : undefined;
       notHeld.push({ collection: d.collection.name, ...(field ? { field } : {}), says: rule.says, why: WHY[key] });
     }
   }
@@ -571,7 +615,8 @@ export function projectWorld(files: WorldFiles): WorldProjection {
   const collections = [...drafts.values()].map((d) => d.collection);
   for (const c of collections) {
     c.notHeld = notHeld.filter((n) => n.collection === c.name).map((n) => n.says);
-    c.description = c.notHeld.length ? `${c.sentence} Not kept by the database yet: ${c.notHeld.join('; ')}.` : c.sentence;
+    // A rule's sentence (ONT-013) may end in a full stop of its own; the list carries one at its end.
+    c.description = c.notHeld.length ? `${c.sentence} Not kept by the database yet: ${c.notHeld.map((s) => s.replace(/\.$/, '')).join('; ')}.` : c.sentence;
   }
 
   const schema: WorldSchema = { vocabulary: { id: WORLD_VOCABULARY.id, version: WORLD_VOCABULARY.version }, collections, claims: [], notHeld };
@@ -857,8 +902,11 @@ function claimsFor(
       const first = s.valueFor(d, col);
       const then = s.other(d, col, first);
       if (first === undefined || then === undefined) continue;
-      // Under a `frozen: "*"` with an `unless` (a settled noun's), the row must be one the freeze binds.
-      const bound = frozen === '*' ? Object.fromEntries(Object.entries((ruled.find((x) => x.d === d && 'frozen' in x.rule.holds)?.rule.holds as { heldOn?: Record<string, string | number | boolean> } | undefined)?.heldOn ?? {})) : {};
+      // Under a freeze with an `unless` on the same collection (a settled noun's `"*"`, or ONT-013's rule on
+      // a list of fields: the store keeps one condition per collection, so it binds this field too), the
+      // row must be one the freeze binds.
+      const conditioned = ruled.find((x) => x.d === d && 'frozen' in x.rule.holds && x.rule.holds.unless)?.rule.holds as { heldOn?: Record<string, string | number | boolean> } | undefined;
+      const bound = Object.fromEntries(Object.entries(conditioned?.heldOn ?? {}));
       const row = s.row(c, { ...bound, [field]: first });
       s.steps.push({ change: c, row, data: { [field]: then }, refused: true, byPerson: true });
       claims.push({ id: `${key}/${field}-is-set-once`, says: rule.says, from: src, held: true, mutant: { dropOnlyWhile: { collection: c, setOnce: field } }, steps: s.steps });

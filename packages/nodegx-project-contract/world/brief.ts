@@ -9,7 +9,7 @@
  * Served by the MCP's `validate_world` (the backend group) and nowhere resident: a project
  * that never asks for a backend never reads it (R5).
  */
-import { VERBS_FILE, WORLD_DIR, WORLD_FILES, type WorldFiles } from './files';
+import { RULES_FILE, VERBS_FILE, WORLD_DIR, WORLD_FILES, type WorldFiles } from './files';
 import { WORLD_KINDS } from './kinds';
 import { NOUN_QUESTIONS } from './noun';
 import { QUESTION_BUDGET } from './runner';
@@ -62,7 +62,7 @@ export function worldBrief(): string {
   const nounQuestions = NOUN_QUESTIONS.map((q) => `\`${q.id}\` (${q.answer.type === 'yes-no' ? 'yes or no' : q.answer.type === 'one-of' ? q.answer.values.join(' / ') : q.answer.type === 'field' ? 'one of its details' : 'words'})`).join(', ');
   return `# Describing a person's world
 
-You are about to build a backend for someone. Before any collection exists, this project keeps what they said about their world in three files under \`${WORLD_DIR}/\`. The database is made from those files. So are the questions you ask.
+You are about to build a backend for someone. Before any collection exists, this project keeps what they said about their world in three files under \`${WORLD_DIR}/\` (and two more, optional: what they do, and what they insist on). The database is made from those files. So are the questions you ask.
 
 A world is nouns and relations. A noun is a thing the person names: a member, an account, a session. A relation is a sentence that joins two nouns, such as "a member is on an account". A relation can also say something about one noun, such as "a person can leave". Every relation has a kind from a fixed list of ${WORLD_KINDS.length}. Each kind was read off real apps. Each carries the questions those apps paid for not asking.
 
@@ -114,8 +114,12 @@ A sentence that fits no kind is not a relation yet. Say so and ask what the pers
 
 The person may also say what happens. "When a membership is activated, enrol them on the course" is one such sentence. Write it as a verb in \`${VERBS_FILE}\`. This fourth file is optional. A verb keeps the person's sentence and lists its steps. A step makes, updates, ends, removes or keeps one of this project's records. It can also ask another system. A step has at most one way to fail. That failure either records what happened and goes on, or it stops the verb. The tool grades the verbs with the rest of the world. It also lists the functions each verb calls. You write those functions.
 
+## What the person insists on
+
+A rule no kind asked for, such as "once an invoice is issued, its amount never changes", is written in \`${RULES_FILE}\`. This fifth file is optional. A rule keeps the person's sentence, what the store is asked to keep (\`holds\`, one of a fixed list of shapes, each a plain JSON object the tool names in words when it refuses one), the mistake it prevents (\`mutant\`) and where it came from. **A sentence that fits no shape is not written. Ask the person a narrower question; never write a rule as free text, code or a query.** A rule names the noun's own details by the person's names for them; a rule about a link belongs to the relation's kind. The tool grades a rule as it grades a kind's: kept on every engine, or shown as *not kept*, in those words, on the collection and in the view, never as a law.
+
 ## Writing the files
 
-With Claude Code, write the files with your own tools. From this server, call \`write_world\` with the three files, the verbs if there are any, and the revision you read. Verbs you leave out are kept, and checked against the world you write. A write over files that changed since you read them is refused. A world the validator refuses is not written. The refusal names each problem and where it is.
+With Claude Code, write the files with your own tools. From this server, call \`write_world\` with the three files, the verbs and the rules if there are any, and the revision you read. Verbs you leave out are kept, and so are rules; both are checked against the world you write. A write over files that changed since you read them is refused. A world the validator refuses is not written. The refusal names each problem and where it is.
 `;
 }
