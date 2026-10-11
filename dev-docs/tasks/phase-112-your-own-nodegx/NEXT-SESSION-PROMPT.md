@@ -60,7 +60,7 @@ should switch** (README §0.2). Do not wait for an answer.
 - ✅ **R17 (s12):** make a copy before the format update. Built `8f9137d8e`.
 - ✅ **R15 (s11):** release through `main` → OWN-013. ✅ **R16 (s11):** opening keeps the project's own id.
 - ✅ **Changelog (s12):** approved as drafted.
-- Ask when it comes up: pushing `cline-dev` (2 commits ahead of `origin/cline-dev` after this session), making and
+- Ask when it comes up: pushing `cline-dev` (ahead of `origin/cline-dev` by this session's two commits and peers'; count it with `git rev-list --count origin/cline-dev..cline-dev`), making and
   pushing `release/0.4.0`, the PR, the merge, the tag, Publish.
 - Still worth asking when it matters: *should a node an agent adds wear the same look as one a person drops from the
   picker?* (OWN-006 §6.3); who bumps the next npm release (s10).
