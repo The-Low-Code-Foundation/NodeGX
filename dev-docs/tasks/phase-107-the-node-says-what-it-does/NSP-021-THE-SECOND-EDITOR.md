@@ -96,7 +96,16 @@ Function: 200 / 200, 0 divergences); both graph suites (128, 96); `spec-golden:c
 (surface 8,279 / 8,280, unchanged); `tsc` node-spec 0, `typecheck:editor-tests` 0. MCP `tsc`: 3 errors, all in
 `tests/tpl010Template.test.ts`, a peer's uncommitted edit. **Not run:** the whole MCP suite, `test:main`, `test:ci`.
 
-**Left (s88 on):** Router's catalog labels (P107-S79-ADAPTERLABEL: its only dynamic ports are data attributes its spec
+**R20 — ruled and built in the same session (`2a05e8833`).** Asked in plain words (Add to Basket's dead wire; 99 such
+wires over 117 projects, all dead, 0 false): **"Error, as the agent does."** The R19 callback moved into the editor's
+`validation/drawnPortLookup.ts` as one body for both doors: the agent server's `drawnPortCheck` delegates to it, and the
+Problems panel (`ProjectValidationService`) passes it over its live model (`portProjectFromLegacy` — `toJSON()`'s nested
+trees made flat). `tests-unit/nsp-020/problems-panel-wire-check` goes through the service itself (a cut-down CMG shop:
+`addToBasket` refused, `itemOutputSignal-addToBasket` named; planted: the service without the callback → red). **Not
+driven in the running editor**: a peer's editor held port 9222 at the time.
+
+**Left (s88 on):** the R20 drive (a copy of CMG Drive Looks B opened in the editor; the Problems panel shows the Add to
+Basket wire as an error); Router's catalog labels (P107-S79-ADAPTERLABEL: its only dynamic ports are data attributes its spec
 already draws; the "runtime-discovered" label comes from a source-text heuristic, `build-catalog.js` :68-76); the
 validator's `derivedPortTargets` reading the spec's draw instead of the adapters' reader (the refusal of an undeclared
 prefixed name); then NSP-021's own fields (`typecasts` first: the MCP and the editor disagree today); §3.3's round trip
