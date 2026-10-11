@@ -17,6 +17,63 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
+## npm packages 0.1.0 · 2026-10-11
+
+**One command from npm now sets a folder up for your AI agent to build NodeGX apps in. The same release
+publishes the packages for building your own NodeGX editor.**
+
+### New
+
+- **`npm create nodegx my-apps`** writes one file, `my-apps/.mcp.json`. Run Claude Code in that folder
+  and your agent can scope and build a NodeGX app with you. It does not need the editor or this repository.
+- **`@nodegx/mcp`** is the NodeGX server your agent talks to. Any agent that speaks MCP can start it
+  with `npx -y @nodegx/mcp --allow-writes`.
+- **`@nodegx/preview`** shows the app in your browser and reloads it when its files change:
+  `npx @nodegx/preview <app folder> --open`.
+- **`@nodegx/node-spec`** describes what each node does, runs it, and grades any runtime against it.
+- **`@nodegx/project-contract`** is the project file format: its types, schemas and validator, the
+  design tokens, and a test suite that grades any editor against the format.
+- **`@nodegx/canvas-look`** holds the colours and sizes of the editor's canvas, for an editor that
+  wants to look like NodeGX.
+
+### Good to know
+
+- `@nodegx/mcp`, `@nodegx/preview`, `@nodegx/project-contract` and `create-nodegx` are GPL-3.0, because
+  the first three contain the editor's code. `@nodegx/node-spec` and `@nodegx/canvas-look` are MIT.
+  The runtime your apps run on is MIT.
+- These are 0.x versions: a minor version may change how they are used.
+
+Known issues, from the bug ledger. None of them blocks a release.
+
+- **@nodegx/preview**, 1 open:
+  - P117-S1-UNWIREDOUT (low): An output nobody is wired to has no live value in the in-page preview's trace, so a home-made editor cannot show it
+- **@nodegx/node-spec**, 22 open:
+  - P107-C100 (medium): A Video playing a file fires no Click, Hover, Pointer Down, Pointer Up or Pointer Enter, and takes no file dropped from the desktop
+  - P107-C156 (medium): Server-Sent Events — On Close fires twice for one failed stream: once when the connection fails for good, and again on the Disconnect that follows
+  - P107-C157 (medium): Server-Sent Events — a replayed older event id moves the resume point back silently: the next reconnect asks for events it has already had, and Last Event Id on the wire stays stale until the next delivered event
+  - P107-C158 (high): WebSocket — Auto Connect does nothing once a connection object exists: a Send that lands before the first rebuild leaves its message queued forever, and turning Auto Connect on after a Disconnect or a failure never connects
+  - P107-C159 (low): WebSocket — blanking Heartbeat Reply while a beat awaits its reply leaves the pending ping set; set the reply again before the next beat and that beat declares the connection dead with a stale wait
+  - P107-C160 (low): Drag — Enabled disables dragging only on exactly `false`: a wired `0` or the text "false" leaves the element draggable, while the description reads as "off
+  - P107-C161 (medium): Video — Restart and Reset seek to second 0, not Start Time: with a Start Time set, a Restart plays from before it, and the seek takes the End Time bound with it
+  - P107-C162 (low): Parse XML and Parse Feed — "Max Bytes" counts characters, not bytes, and its description says "larger than this
+  - P107-C96 (medium): A Video showing a YouTube or Vimeo link throws when Source Object arrives — before its first draw, the throw is inside React's commit and the page goes blank
+  - P107-C97 (low): Play or Restart on a Video whose Source changed from a video file to a YouTube or Vimeo link throws, and the action reports neither Done nor Failure
+  - P107-C98 (high): A Video whose Volume is outside 0 to 1, or not a number, blanks the whole page — Volume 50 from a Slider is enough
+  - P107-C99 (low): A Video's Source Object wired anything that is not a stream (text, a number, an object) throws — before the first draw, inside React's commit
+  - P107-D38 (low): Boolean To String's Selector Changed fires on any different Selector value, not only when it flips
+  - P107-S80-PICKSWAP (low): Radio Button's "pick of the selected sibling" swap mutant survives on some daily seeds — the swap hands back a group value the play already holds
+  - P107-S82-STATESLOADGATE (low): States announces its dynamic ports at load only when States is set — a node saved with Values alone shows no value outputs or Type pickers until any parameter is edited
+  - P107-S82-STATESVALUEPORT (low): States — a `value-<state>-<v>` written while the node is in that state throws when `v` is not in Values (no such output port), and the setter dies with it
+  - P107-S84-USERACL (low): On the Parse wire the User, Set User Properties and Sign Up nodes draw a `prop-ACL` port, which the Record family hides as "access control, not data
+  - P107-SIZE (low): The spec package's browser entry is over its size budget (268.7 KB gzipped against 240 KB), and nothing runs the check
+  - P109-S21-DROPDOWNEMPTYRESET (low): The Dropdown spec thinks the hidden option is still selected after Items offered no options, so a person choosing the first option of the next list reads as a change the browser never raises
+  - P109-S31-REPLACEDROPSPAGE (low): A Component Stack replace refused after its checks (a component the project does not have) has already removed the page on screen — the stack shows nothing while Top Component Name and Stack Depth still name it
+  - P112-S4-SCHEMADUP (low): `trace.schema.json` declares `params` twice in the stack and popup observations — every bundle of the spec package warns
+  - P112-S8-SHAREDTARGET (low): A runtime target that has played a graph scenario before answers ten of the 85 differently from a fresh one — nine by an id minted from the world's random stream, one by a popup's Closed — so the recorded traces hold only for a target's first play
+- **@nodegx/project-contract**, 2 open:
+  - P107-S79-SILENTCACHE (medium): A node's cached dynamic ports are trusted as real until a viewer connects, and then replaced with no diff — a wire to a port that no longer exists is found only by the health check, after the fact
+  - P107-S83-SENDFORM (medium): Function — code that fires a signal only as `Outputs.done.send()` gets a VALUE port `done`, so the call throws "Cannot read properties of undefined (reading 'send')" at every run
+
 ## 0.3.0 · 2026-09-27
 
 **Projects made in 0.2 are upgraded when you open them, there is a new Styles panel, and your

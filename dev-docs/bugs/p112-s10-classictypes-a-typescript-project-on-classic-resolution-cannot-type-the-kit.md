@@ -8,7 +8,7 @@ kit: node-spec
 found: P112 OWN-011 s10, 2026-10-11
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/OWN-011-ONE-INSTALL.md §8
 regression: scripts/own/stranger-kit.mjs
-commit: see OWN-011 §8
+commit: 6b3910215
 ---
 
 The three kit packages installed from their tarballs in an empty folder, and a consumer file importing from each
