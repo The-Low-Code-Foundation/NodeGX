@@ -435,6 +435,33 @@ for (const engine of ['sqlite', 'postgres'] as const) {
         expect(r.status).toBe(400);
         expect(r.json.error).toContain('puts rules on "_Session"');
       });
+
+      it('🔴 AC3’s schema half — a move the plan writes is read against the choices the plan leaves: to a value outside them, the dry run says so and the run is 409 before anything moves', async () => {
+        const plan = (to: string[]) => ({
+          steps: [
+            { backup: true, says: 'b' },
+            { schema: { action: 'createTable', table: 'Ticket', description: 'A thing to fix.', columns: [{ name: 'status', type: 'String' }] }, says: 'make a place for tickets' },
+            { schema: { action: 'setChecks', table: 'Ticket', checks: [{ field: 'status', oneOf: ['open', 'closed'] }] }, says: 'tickets keep: status is one of its list' },
+            { rules: { collection: 'Ticket', onlyWhile: { update: { moves: { status: { open: { to }, closed: { to: [] } } } } }, was: null }, says: 'a ticket goes from open to closed, never back' }
+          ],
+          checks: [],
+          refused: []
+        });
+        const words = 'update.moves.status."open".to names "reopened", which "status" cannot hold — its choices are "open", "closed"';
+        const dry = await migrate(b, { plan: plan(['reopened']) });
+        expect(dry.status).toBe(200);
+        expect(dry.json.ran).toBe(false);
+        expect(dry.json.why).toContain(words);
+        const run = await migrate(b, { plan: plan(['reopened']), run: true, backupTakenElsewhere: 'snapshot' });
+        expect(run.status).toBe(409);
+        expect(run.json.error).toContain(words);
+        expect(await columnsOf(b, 'Ticket')).toBeNull();
+        // The control: the choice's own values run, and the move is in force.
+        const ok = await migrate(b, { plan: plan(['closed']), run: true, backupTakenElsewhere: 'snapshot' });
+        expect(ok.status).toBe(200);
+        const rules = (await b.req<{ config: { collections: Record<string, { onlyWhile?: unknown }> } }>('GET', '/admin/permissions')).json.config.collections.Ticket?.onlyWhile;
+        expect(rules).toEqual({ update: { moves: { status: { open: { to: ['closed'] }, closed: { to: [] } } } } });
+      });
     });
   });
 }

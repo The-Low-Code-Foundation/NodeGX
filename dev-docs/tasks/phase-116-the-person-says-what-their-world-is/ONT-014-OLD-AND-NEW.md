@@ -5,7 +5,7 @@ have — a rule that reads **the record before the change, the record after it, 
 write. ONT-012's `onlyWhile` is the special case that reads the old record only. **Depends on** ONT-012 (the seam:
 `heldWhile()` in `persistence/onlyWhile.ts`, the `StorageAclOption.onlyWhile` ride, the 409 mapping per door), R10 (the
 facade as the one door). **Feeds** ONT-013 (three unkept shapes flip to held), ONT-011 step 4 (*settled* projects to
-this and nothing else), ONT-008 (the view shows a value's allowed moves). **Status: 🟡 s18 (2026-10-11, Fable 5.1) — built: AC1, AC2, AC3's shape half, AC4 for the three flips, AC5, **AC6 (the reach review, §6.5: 7 findings, 5 fixed, 1 filed as `P116-S18-CASCADEHOLD`, 1 a ruling)**. **AC4's two new `RuleHold` shapes built with ONT-011 step 2 (s18, its §9), and `was` on a `rules` step (§6.5 #4) built.** Owed: AC3's schema half and the cascade (the bug).**
+this and nothing else), ONT-008 (the view shows a value's allowed moves). **Status: 🟡 s18 (2026-10-11, Fable 5.1) — built: AC1, AC2, AC3's shape half, AC4 for the three flips, AC5, **AC6 (the reach review, §6.5: 7 findings, 5 fixed, 1 filed as `P116-S18-CASCADEHOLD`, 1 a ruling)**. **AC4's two new `RuleHold` shapes built with ONT-011 step 2 (s18, its §9), and `was` on a `rules` step (§6.5 #4) built.** **s20 (Opus 5.5): AC3's schema half built (§6.6).** Owed: the cascade (the bug, a ruling first).**
 
 > **Model check (Richard, 2026-10-08 rule):** the build wants **Opus 5.5** — fixed-shape enforcement on a seam that
 > exists and a grading suite that exists (`ont-012-only-while.test.ts`'s shape). **A reach review on Fable 5.1**
@@ -236,9 +236,7 @@ the world's.
 
 ### 6.4 Owed
 
-- **AC3's schema half:** "a `moves` entry on a field that is not a choice or text; a `to` naming a value the choice
-  does not hold". The validator is schema-less. It belongs where `security.json` is written with the schema at hand:
-  the permissions PUT, and the migration's `rules` step.
+- ~~**AC3's schema half:**~~ Built s20 (§6.6).
 - ~~**AC4's two new `RuleHold` shapes** (`frozen` with `unless`, `moves`)~~ Built s18 with ONT-011 step 2 (its §9):
   `{ frozen, unless?, except?, heldOn?, freeOn? }`, `{ moves, from }`, and `neverDeleted` with `unless`; projected
   to `WorldOnlyWhile`, claimed with a mutant each on both engines, dropped by `applyMutant` and `without: { rule }`.
@@ -283,6 +281,41 @@ neighbour band is in the s18 handoff.
 **Not fixed here, and why:** #5 needs a ruling and a shape change in the contract; #4's `was` is a planner change
 (project-contract `migrate.ts` + the contract's `MigrationRulesBody`) and belongs with the Opus build of AC3's
 schema half; #8 is a ruling.
+
+### 6.6 AC3's schema half (s20, 2026-10-11, Opus 5.5)
+
+`validateSecurityConfig` stays schema-less: `security.json` is loaded at start, before any table exists (the ONT-014
+spec itself writes it first). The schema half is a second function, `onlyWhileSchemaProblems(collections, tableOf)`
+in `security/model.ts`, called where a rule is written with the schema at hand:
+
+- **The permissions PUT**, both doors (`PUT /admin/permissions`, `PUT /admin/permissions/collections/:name`), after
+  the validator passes, against `schemaManager.getTableSchema` — a 400 in words, nothing saved.
+- **The world migration** (`POST /admin/world/migrate`), against the schema **the plan leaves**:
+  `tablesAfterPlan(steps, tableOf)` (`server/admin-world.ts`) overlays the plan's `createTable` (create-if-absent, as
+  the route is), `addColumn`, `renameColumn`, `dropColumn`, `renameTable`, `deleteTable` and `setChecks` on today's
+  declared columns and checks. Named in the dry run's `why`; a run is 409 before the backup.
+
+What it refuses: a `moves` field whose declared column is not `String` (*""priority" is a Number; only a choice or
+text has values that move"*; a Number with a `oneOf` is *"a choice of numbers"* — `to` is a list of words); where
+the field is a choice (a `{ field, oneOf }` check), an old value it never has (*""status" is never "draft" — its
+choices are …"*) and a `to` it cannot hold (*"… names "reopened", which "status" cannot hold — its choices are …"*).
+`"*"` is always allowed.
+
+**Only what the schema declares is refused.** A table made by first use records `columns: []`, and a column can hold
+data while missing from `_Schema` (`LocalSQLAdapter._columnScope`'s note), so an undeclared field or collection
+passes. For the same reason a `frozen` or `except` field name is not checked against the schema: a typo there and
+a column the schema has not recorded look the same.
+
+Graded: `ont-014-old-and-new.test.ts` — 7 unit cases (the refusals in words, the controls, `tablesAfterPlan`) and,
+on SQLite and PostgreSQL over HTTP, both permission doors (three refusals, the whole-document write, nothing saved,
+three controls) with a mutant (`onlyWhileSchemaProblems` spied to `[]`: the bad move is saved, caught);
+`ont-007-route.test.ts` — a hand plan making `Ticket` with a two-value choice and a move to `"reopened"`: the dry
+run says it, the run is 409 and `Ticket` is not made; the choice's own values run and the move is in force. With
+the route's check disabled the case is red on both engines (measured). 67/67 and 35/35; the neighbour band 230/230.
+
+**Not built:** the reverse door. A schema change after the rule (a value taken out of the choice, a column's type
+changed) does not re-read the moves. A move to a value the choice no longer has is refused by the check anyway; the
+rule goes stale, it does not open.
 
 ## 7. Not this task
 

@@ -43,6 +43,7 @@ import {
   PUBLIC_WRITE_DEFAULT_RATE_LIMIT,
   canAccessRecord,
   effectiveFunctionRule,
+  onlyWhileSchemaProblems,
   validateSecurityConfig,
   validateScopes,
   ruleAllows
@@ -146,6 +147,12 @@ export class AdminSecurityRoutes {
     );
   }
 
+  /** P116 ONT-014 AC3: the rules a write sends, read against the schema they will be kept on. */
+  private schemaProblems(collections: SecurityConfig['collections']): string[] {
+    const sm = this.facade.schemaManager;
+    return sm ? onlyWhileSchemaProblems(collections, (c) => sm.getTableSchema(c)) : [];
+  }
+
   async putPermissions(ctx: RequestContext): Promise<void> {
     const body = await readJSONBody(ctx.req);
     const candidate = (body.config !== undefined ? body.config : body) as SecurityConfig;
@@ -162,6 +169,7 @@ export class AdminSecurityRoutes {
       }
     }
     const errors = validateSecurityConfig(candidate);
+    if (errors.length === 0) errors.push(...this.schemaProblems(candidate.collections));
     if (errors.length > 0) {
       throw new HttpError(400, `Invalid security config:\n${errors.map((e) => `- ${e}`).join('\n')}`);
     }
@@ -234,6 +242,7 @@ export class AdminSecurityRoutes {
     const candidate = JSON.parse(JSON.stringify(this.security.config)) as SecurityConfig;
     candidate.collections[name] = entry as SecurityConfig['collections'][string];
     const errors = validateSecurityConfig(candidate);
+    if (errors.length === 0) errors.push(...this.schemaProblems({ [name]: candidate.collections[name] }));
     if (errors.length > 0) {
       throw new HttpError(400, `Invalid collection rules:\n${errors.map((e) => `- ${e}`).join('\n')}`);
     }

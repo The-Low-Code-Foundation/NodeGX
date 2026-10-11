@@ -15,7 +15,7 @@
  * @module nodegx-backend/security/model
  */
 
-import { pathProblem, type CollectionReach, type OnlyWhileMove, type OnlyWhileRule, type PathHop, type Reach } from '@noodl/backend-contract';
+import { pathProblem, type CollectionReach, type OnlyWhileMove, type OnlyWhileRule, type PathHop, type Reach, type StorageTableSchema } from '@noodl/backend-contract';
 import type { RateLimitPolicy } from '../ops/model';
 
 // ============================================================================
@@ -555,6 +555,53 @@ function validateFrozen(value: unknown, except: unknown): string[] {
     if (wp) errors.push(`.unless: ${wp.replace(/^where/, 'unless')}`);
   }
   if (f.says !== undefined && (typeof f.says !== 'string' || !f.says.trim())) errors.push('.says must be a sentence');
+  return errors;
+}
+
+/** What {@link onlyWhileSchemaProblems} reads of one collection: its declared columns and checks. */
+export type DeclaredTable = Pick<StorageTableSchema, 'columns' | 'checks'>;
+
+/**
+ * P116 ONT-014 AC3, the schema half — a `moves` rule read against the schema it will be kept on:
+ * only text moves (`moves.<f>.<old>.to` is a list of words, and the rule compares them as words), and
+ * where the field is a choice, every old value and every `to` is one of its values. The validator
+ * cannot say this: `security.json` is loaded before any table exists. The writes that have the
+ * schema at hand call it (the permissions PUT, the world migration with the schema its plan leaves).
+ *
+ * Only what the schema DECLARES is refused: a table made by first use records no columns, and a
+ * column can hold data while missing from `_Schema` (`LocalSQLAdapter._columnScope`), so an
+ * undeclared field or collection is not evidence of a mistake. Errors carry the validator's paths.
+ */
+export function onlyWhileSchemaProblems(
+  collections: Record<string, CollectionRules | undefined>,
+  tableOf: (collection: string) => DeclaredTable | null | undefined
+): string[] {
+  const errors: string[] = [];
+  for (const [name, entry] of Object.entries(collections)) {
+    const moves = entry?.onlyWhile?.update?.moves;
+    if (!moves || typeof moves !== 'object') continue;
+    const table = tableOf(name);
+    if (!table) continue;
+    for (const [field, byOld] of Object.entries(moves)) {
+      const at = `collections.${name}.onlyWhile: update.moves.${field}`;
+      const column = table.columns?.find((c) => c.name === field);
+      if (!column?.type) continue;
+      const choice = table.checks?.find((c): c is { field: string; oneOf: Array<string | number> } => 'oneOf' in c && c.field === field)?.oneOf;
+      if (column.type !== 'String') {
+        errors.push(`${at}: "${field}" is ${column.type === 'Number' && choice ? 'a choice of numbers' : `a ${column.type}`}; only a choice or text has values that move`);
+        continue;
+      }
+      if (!choice || !byOld || typeof byOld !== 'object') continue;
+      const named = choice.map((v) => JSON.stringify(v)).join(', ');
+      for (const [old, move] of Object.entries(byOld)) {
+        if (old !== '*' && !choice.includes(old)) errors.push(`${at}.${JSON.stringify(old)}: "${field}" is never ${JSON.stringify(old)} — its choices are ${named}`);
+        const outside = Array.isArray(move?.to) ? move.to.filter((v) => !choice.includes(v)) : [];
+        if (outside.length) {
+          errors.push(`${at}.${JSON.stringify(old)}.to names ${outside.map((v) => JSON.stringify(v)).join(', ')}, which "${field}" cannot hold — its choices are ${named}`);
+        }
+      }
+    }
+  }
   return errors;
 }
 

@@ -32,7 +32,7 @@ import { dryRunMigration, migrationContextOf, migrationPlanProblems, rulesAfterM
 import type { BackupSubsystem } from '../backup/BackupSubsystem';
 import { BackupNotFileBackedError } from '../backup/BackupManager';
 import type { CollectionRules, SecurityConfig } from '../security/model';
-import { validateSecurityConfig } from '../security/model';
+import { onlyWhileSchemaProblems, validateSecurityConfig, type DeclaredTable } from '../security/model';
 import type { SecurityState } from '../security/state';
 import { isVisibleAccountColumn } from '../users/accountColumns';
 import type { RequestContext } from './HttpServer';
@@ -188,6 +188,49 @@ export function worldRuleLosses(collections: SecurityConfig['collections'], bodi
   return out;
 }
 
+/**
+ * P116 ONT-014 AC3 — each collection's declared columns and checks as the plan's schema steps leave
+ * them, read lazily over today's schema: what a `moves` rule the migration writes is kept on. A step
+ * this does not model (an index, a description, a link's rule) changes neither columns nor checks.
+ */
+export function tablesAfterPlan(
+  steps: MigrationPlanData['steps'],
+  tableOf: (collection: string) => DeclaredTable | null | undefined
+): (collection: string) => DeclaredTable | undefined {
+  const after = new Map<string, DeclaredTable | undefined>();
+  const at = (table: string): DeclaredTable | undefined => {
+    if (!after.has(table)) {
+      const now = tableOf(table);
+      after.set(table, now ? { columns: [...(now.columns ?? [])], checks: [...(now.checks ?? [])] } : undefined);
+    }
+    return after.get(table);
+  };
+  for (const step of steps) {
+    if (!('schema' in step)) continue;
+    const s = step.schema;
+    // Create-if-absent (`byob-admin.ts`): a table that is there already keeps its columns.
+    if (s.action === 'createTable') {
+      const inline = (s as { checks?: DeclaredTable['checks'] }).checks;
+      const t = at(s.table) ?? { columns: [...s.columns], checks: [] };
+      if (inline) t.checks = [...inline]; // the route applies a push's checks either way
+      after.set(s.table, t);
+    }
+    else if (s.action === 'deleteTable') after.set(s.table, undefined);
+    else if (s.action === 'renameTable') {
+      after.set(s.newName, at(s.table));
+      after.set(s.table, undefined);
+    } else {
+      const t = at(s.table);
+      if (!t) continue;
+      if (s.action === 'addColumn') t.columns = [...(t.columns ?? []), s.column];
+      else if (s.action === 'dropColumn') t.columns = t.columns?.filter((c) => c.name !== s.column);
+      else if (s.action === 'renameColumn') t.columns = t.columns?.map((c) => (c.name === s.oldName ? { ...c, name: s.newName } : c));
+      else if (s.action === 'setChecks') t.checks = [...s.checks];
+    }
+  }
+  return at;
+}
+
 export class AdminWorldRoutes {
   constructor(private readonly deps: AdminWorldDeps) {}
 
@@ -213,12 +256,14 @@ export class AdminWorldRoutes {
     const rulesFor = (steps: MigrationPlanData['steps']) => rulesAfterMigration({ steps }, security.config, targetOf);
     const after = rulesFor(plan.steps);
     const says = plan.steps.map((s) => s.says);
+    // ONT-014 AC3: a move the world writes, read against the columns and choices the plan leaves.
+    const unkeepable = onlyWhileSchemaProblems(withWorldRules(after.collections, worldRules), tablesAfterPlan(plan.steps, (c) => sm.getTableSchema(c)));
 
     // The reach review: a hand-written rule the world's steps would replace is a loss, said and accepted, never silent.
     const handRules = worldRuleLosses(security.config.collections, worldRules);
     if (body.run !== true) {
       const dryRun = await dryRunMigration(mctx, plan);
-      const why = [...plan.refused, ...dryRun.refusals.map((r) => `${r.says} (${r.rows})`), ...after.problems, ...(body.acceptLosses === true ? [] : handRules)];
+      const why = [...plan.refused, ...dryRun.refusals.map((r) => `${r.says} (${r.rows})`), ...after.problems, ...unkeepable, ...(body.acceptLosses === true ? [] : handRules)];
       sendJSON(ctx.res, 200, {
         ran: false,
         ...(why.length ? { why: why.join('; ') } : {}),
@@ -233,6 +278,7 @@ export class AdminWorldRoutes {
     // anything moves, so a run never ends with rules the validator refuses and nothing saved.
     if (after.problems.length) throw new HttpError(409, `The permission rules cannot be carried, so nothing was changed:\n${after.problems.map((p) => `- ${p}`).join('\n')}`);
     const invalid = validateSecurityConfig({ ...security.config, collections: withWorldRules(after.collections, worldRules) } as SecurityConfig);
+    if (!invalid.length) invalid.push(...unkeepable);
     if (invalid.length) throw new HttpError(409, `The permission rules after this migration would be refused:\n${invalid.map((e) => `- ${e}`).join('\n')}`);
     if (handRules.length && body.acceptLosses !== true)
       throw new HttpError(409, `This migration would replace a rule written by hand, so nothing was changed:\n${handRules.map((e) => `- ${e}`).join('\n')}\nRun it again with acceptLosses to let it.`);

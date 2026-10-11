@@ -22,6 +22,7 @@ import * as path from 'path';
 
 import * as onlyWhile from '../src/persistence/onlyWhile';
 import * as model from '../src/security/model';
+import { tablesAfterPlan } from '../src/server/admin-world';
 import { BackendService } from '../src/service';
 import { request } from './helpers/http';
 
@@ -94,6 +95,66 @@ describe('ONT-014 AC3 — the validator', () => {
 
   it('refuses it on a system collection', () => {
     expect(withRule({ delete: 'never' }, '_User')).toMatch(/system collections/);
+  });
+});
+
+describe('ONT-014 AC3 — the schema half: a move read against the schema it is kept on', () => {
+  /** `Ticket.status` a choice of three, `Ticket.title` text, `Ticket.priority` a Number, `Ticket.size` a choice of numbers. */
+  const TICKET = {
+    columns: [
+      { name: 'status', type: 'String' },
+      { name: 'title', type: 'String' },
+      { name: 'priority', type: 'Number' },
+      { name: 'size', type: 'Number' },
+      { name: 'done', type: 'Boolean' }
+    ],
+    checks: [
+      { field: 'status', oneOf: ['open', 'closed', 'archived'] },
+      { field: 'size', oneOf: [1, 2, 3] }
+    ]
+  };
+  const tableOf = (c: string) => (c === 'Ticket' ? TICKET : c === 'Firstuse' ? { columns: [] } : null);
+  const problems = (moves: unknown, collection = 'Ticket') =>
+    model.onlyWhileSchemaProblems({ [collection]: { onlyWhile: { update: { moves } } } } as never, tableOf).join(' | ');
+
+  it('a move between the choice’s own values, on text, or on a field the schema does not declare, is kept', () => {
+    expect(problems({ status: { open: { to: ['closed'] }, closed: { to: ['archived', 'open'] }, '*': { to: [] } } })).toBe('');
+    expect(problems({ title: { draft: { to: ['final'] } } })).toBe('');
+    // Not declared is not a mistake: a table made by first use records no columns, and a column can hold data while missing from _Schema.
+    expect(problems({ stage: { a: { to: ['b'] } } })).toBe('');
+    expect(problems({ status: { a: { to: ['b'] } } }, 'Firstuse')).toBe('');
+    expect(problems({ status: { a: { to: ['b'] } } }, 'Nowhere')).toBe('');
+  });
+
+  it.each([
+    [{ status: { open: { to: ['reopened'] } } }, 'collections.Ticket.onlyWhile: update.moves.status."open".to names "reopened", which "status" cannot hold — its choices are "open", "closed", "archived"'],
+    [{ status: { draft: { to: ['open'] } } }, 'collections.Ticket.onlyWhile: update.moves.status."draft": "status" is never "draft" — its choices are "open", "closed", "archived"'],
+    [{ priority: { '1': { to: ['2'] } } }, 'collections.Ticket.onlyWhile: update.moves.priority: "priority" is a Number; only a choice or text has values that move'],
+    [{ size: { '1': { to: ['2'] } } }, 'collections.Ticket.onlyWhile: update.moves.size: "size" is a choice of numbers; only a choice or text has values that move'],
+    [{ done: { false: { to: ['true'] } } }, 'collections.Ticket.onlyWhile: update.moves.done: "done" is a Boolean; only a choice or text has values that move']
+  ])('refuses %j in words', (moves, words) => {
+    expect(problems(moves)).toBe(words);
+  });
+
+  it('tablesAfterPlan: the columns and choices a plan leaves — made, added, renamed, dropped, its checks set; a table there already keeps its columns', () => {
+    const now = (c: string) => (c === 'Ticket' ? TICKET : null);
+    const after = tablesAfterPlan(
+      [
+        { backup: true, says: 'b' },
+        { schema: { action: 'createTable', table: 'Ticket', description: '', columns: [{ name: 'other', type: 'String' }] }, says: 'kept' },
+        { schema: { action: 'createTable', table: 'Job', description: '', columns: [{ name: 'stage', type: 'String' }] }, says: 'made' },
+        { schema: { action: 'setChecks', table: 'Job', checks: [{ field: 'stage', oneOf: ['new', 'done'] }] }, says: 'listed' },
+        { schema: { action: 'renameColumn', table: 'Ticket', oldName: 'title', newName: 'name' }, says: 'r' },
+        { schema: { action: 'dropColumn', table: 'Ticket', column: 'priority' }, says: 'd' },
+        { schema: { action: 'renameTable', table: 'Ticket', newName: 'Issue' }, says: 'r' }
+      ],
+      now
+    );
+    expect(after('Ticket')).toBeUndefined();
+    expect(after('Issue')?.columns?.map((c) => c.name)).toEqual(['status', 'name', 'size', 'done']);
+    expect(after('Issue')?.checks).toEqual(TICKET.checks);
+    expect(after('Job')).toEqual({ columns: [{ name: 'stage', type: 'String' }], checks: [{ field: 'stage', oneOf: ['new', 'done'] }] });
+    expect(TICKET.columns).toHaveLength(5); // today's schema is read, never written
   });
 });
 
@@ -402,7 +463,66 @@ for (const engine of engines) {
       expect(JSON.stringify(rules().Assignment?.onlyWhile)).toBe(JSON.stringify(LOCKED.collections.Assignment.onlyWhile));
     });
 
+    /** AC3's schema half at both permission doors: a `Ticket` whose status is a choice and whose priority is a Number. */
+    const ticketMoves = (moves: unknown) => ({ onlyWhile: { update: { moves } } });
+    const putTicket = (moves: unknown) => req<{ error: string }>('PUT', '/admin/permissions/collections/Ticket', ticketMoves(moves));
+    const ensureTicket = async () => {
+      const r = await req('POST', '/admin/schema', {
+        action: 'createTable',
+        table: 'Ticket',
+        columns: [
+          { name: 'status', type: 'String' },
+          { name: 'title', type: 'String' },
+          { name: 'priority', type: 'Number' }
+        ],
+        checks: [{ field: 'status', oneOf: ['open', 'closed', 'archived'] }]
+      });
+      expect(r.status).toBe(200);
+    };
+
+    it('🔴 AC3, the schema half — a move to a value the choice cannot hold, from one it never has, or on a Number, is a 400 in words at both permission doors, and nothing is saved', async () => {
+      await ensureTicket();
+      type Config = { collections: Record<string, { onlyWhile?: unknown }> };
+      const config = () => (service as unknown as { security: { config: Config } }).security.config;
+      const before = JSON.stringify(config());
+
+      const reopened = await putTicket({ status: { open: { to: ['reopened'] } } });
+      expect(reopened.status).toBe(400);
+      expect(reopened.json.error).toContain('update.moves.status."open".to names "reopened", which "status" cannot hold — its choices are "open", "closed", "archived"');
+      const draft = await putTicket({ status: { draft: { to: ['open'] } } });
+      expect(draft.status).toBe(400);
+      expect(draft.json.error).toContain('"status" is never "draft"');
+      const number = await putTicket({ priority: { '1': { to: ['2'] } } });
+      expect(number.status).toBe(400);
+      expect(number.json.error).toContain('"priority" is a Number; only a choice or text has values that move');
+
+      // The whole-document write reads the same rule against the same schema.
+      const whole = JSON.parse(before);
+      whole.collections.Ticket = ticketMoves({ status: { open: { to: ['reopened'] } } });
+      const doc = await req<{ error: string }>('PUT', '/admin/permissions', whole);
+      expect(doc.status).toBe(400);
+      expect(doc.json.error).toContain('"reopened", which "status" cannot hold');
+      expect(JSON.stringify(config())).toBe(before);
+
+      // Controls: between the choice's own values, on text, and on a field the schema does not declare.
+      expect((await putTicket({ status: { open: { to: ['closed'] }, closed: { to: ['archived'] }, '*': { to: [] } } })).status).toBe(200);
+      expect((await putTicket({ title: { draft: { to: ['final'] } } })).status).toBe(200);
+      expect((await putTicket({ stage: { a: { to: ['b'] } } })).status).toBe(200);
+      expect((await req('PUT', '/admin/permissions/collections/Ticket', { onlyWhile: null })).status).toBe(200);
+    });
+
     // ---------------------------------------------------------------- mutants
+
+    it('MUTANT — the schema half never asked: a move to "reopened" is saved, and the AC3 schema case catches it', async () => {
+      await ensureTicket();
+      const spy = jest.spyOn(model, 'onlyWhileSchemaProblems').mockReturnValue([]);
+      try {
+        expect((await putTicket({ status: { open: { to: ['reopened'] } } })).status).toBe(200);
+      } finally {
+        spy.mockRestore();
+        expect((await req('PUT', '/admin/permissions/collections/Ticket', { onlyWhile: null })).status).toBe(200);
+      }
+    });
 
     it('MUTANT — heldWhile drops the moves: issued → draft goes through, and the "never goes back" case catches it', async () => {
       const real = onlyWhile.heldWhile;
