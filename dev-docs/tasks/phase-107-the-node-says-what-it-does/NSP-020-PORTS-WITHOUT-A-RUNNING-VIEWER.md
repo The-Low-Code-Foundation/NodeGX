@@ -2,7 +2,7 @@
 
 **Opened 2026-09-30 (s1), from Richard's ruling that the editor is a target (README §1, R6).**
 **Depends on NSP-004.** Runs alongside the batches (NSP-011 to NSP-017): each batch closes its nodes' rows here.
-**Status: 🟡 s79 (2026-10-10, Fable): the design is decided and built in the format (§3.1) — `portsOf` / `drawnPorts`, `PortContext` + `derived.needs` with the needs gate, `when` and `narrow` on declared ports, `context` through the scenario, the adapter and the interpreter; the three-oracle parity drive stands with its first proofs (And with wires, String Format, Image's size-mode groups) and planted mutants. s80 (Opus): L2 done — `when` on all 448 conditioned ports, oracle (b) green and made honest (§6.2); L1 measured, its premise wrong (the fixtures are the play's wires, not the project), a format proposal in §6.3, the runtime target takes `context` and compiles again (P107-S80-DEADTARGET); L4 done — oracle (a)'s module table over all 70 hooks (§6.4). Left: the lanes (§6 s79) — `needs` on the 22 project- and schema-dependent specs, the padding out of four specs, oracle (c), the context builder in `project-contract`, AC3 (MCP) and AC4 (ledger column).**
+**Status: 🟡 s79 (2026-10-10, Fable): the design is decided and built in the format (§3.1) — `portsOf` / `drawnPorts`, `PortContext` + `derived.needs` with the needs gate, `when` and `narrow` on declared ports, `context` through the scenario, the adapter and the interpreter; the three-oracle parity drive stands with its first proofs (And with wires, String Format, Image's size-mode groups) and planted mutants. s80 (Opus): L2 done — `when` on all 448 conditioned ports, oracle (b) green and made honest (§6.2); L1 measured, its premise wrong (the fixtures are the play's wires, not the project), a format proposal in §6.3, the runtime target takes `context` and compiles again (P107-S80-DEADTARGET); L4 done — oracle (a)'s module table over all 70 hooks (§6.4). s81 (Opus): L3 measured, NOT built — decision 4 holds only for States' value outputs; the rest of the padding is the play's wires, the code's writes, or the project's saved ports, so L3 joins L1's format decision (§6.5). Left: the lanes (§6 s79) — `needs` on the 22 project- and schema-dependent specs, the padding out of four specs, oracle (c), the context builder in `project-contract`, AC3 (MCP) and AC4 (ledger column).**
 
 ## 1. The person sentence
 
@@ -105,6 +105,8 @@ visibility condition and no context argument (`spec.ts:705-745`).
    write and register what is new — which is what the live runtime does (`_onNodeModelParameterUpdated` →
    `registerInputIfNeeded`, and the `setup` hook on `parameterUpdated`). A lane does this with `spec-golden:check`
    beside it; a moved trace is a row.
+   *(s81: measured against the runtime, this holds only for States' VALUE outputs. The other padded ports exist because a
+   wire registered them, the code wrote them, or the project saved them. See §6.5; it is part of L1's format decision.)*
 5. **The parity drive has three oracles, none of which mounts a node.** (a) `runtime-discovered` and
    `numbered-inputs`: fire the module's `setup` (or `defineNode(...).setupNumberedInputDynamicPorts`) with a fake
    graph model built from `(params, context)` — `getConnectionsTo` from `context.wired`, `getNodesWithType` from
@@ -365,3 +367,42 @@ them, pinned.
 nodes (Event Receiver, Cloud Function) have no spec under the runtime's type name (the spec is CloudFunction2's, whose
 setup is empty). HTTP and Component Stack subscribe to `nodeAdded` only inside `editorImportComplete` — the drive's
 `getNodesWithType` sweep is what reaches them.
+
+### 6.5 s81 (2026-10-11, Opus) — L3 measured: the padding is wires, writes and saved ports, not params
+
+**Not built.** The handoff called L3 "independent of step 1". Measured against the runtime, it is not. Decision 4 (§3.1) has
+`derived.outputs` pure and both targets re-deriving after each param write, "which is what the live runtime does". For
+these four nodes the live runtime does that for ONE family of ports. The rest of each spec's padding stands in for
+something else, and two of those are exactly L1's wired outputs (§6.3):
+
+| node | ports the spec pads | where the runtime gets them | the format piece it needs |
+|---|---|---|---|
+| **States** | value outputs (`x`, `label` …) | the `values` SETTER registers each name as it is written (`states.ts` :338-358) — params, re-derived on a write | decision 4 as written: re-derive after a param write |
+| | `at-<state>`, `reached-<state>` | ONLY a wire: `nodescope.ts` :150 `sourceNode.registerOutputIfNeeded(sourcePort)`; every send gated on `hasOutput` (:290, :918, :936) | L1's `wiredOutputs` + an output-side `discover` |
+| **Function** | `out-<name>` values | when the CODE writes one: `registerOutputIfNeeded('out-' + prop)` in the Outputs proxy (`simplejavascript.ts` :298) and `publishHeldWrites` (:240); typed from `outtype-<name>` (:903-920) | an output made by the node's own write — not in the format |
+| | `out-<name>` signals | typed from `model.outputPorts` (the project's saved ports, :601, :854); sent only if wired (`hasOutput`, :609) | L1's `wiredOutputs`, plus the saved ports |
+| **Script** | every output | `model.outputPorts` read at each code read (`javascript.ts` :433-435): the ports the EDITOR announced and the project saved (`editormodeleventshandler.ts` :120, :250 `addOutputPort`) | a context field for the node's saved ports (`PortContext` has none) |
+| **Logic Builder** | values and signals | when the program writes or sends them: `registerOutputIfNeeded` after a run (`logic-builder.ts` :488) and on a signal send (:601) | an output made by the node's own write |
+
+The runtime target already shows the padding is two things at once. At mount it registers every derived output "as a
+wire would make the runtime do" (`noodl-runtime/test/helpers/node-spec-target.ts` :1886-1888), and it hands the same list
+to `model.outputPorts` "as a loaded project's saved `dynamicports` give the model" (:1877-1885). So the fixture lists in
+these specs (`STATE_LISTS` / `VALUE_LISTS`, `FUNCTION_FIXTURES`, `SCRIPT_FIXTURES`, `LOGIC_BUILDER_FIXTURES`) are what
+`RECORD_FIELDS` is: the play's wires and its saved project. They are not a stand-in for future params.
+
+**For the format decision (one change, not two).** On top of §6.3's five pieces, L3 adds:
+
+1. **An output the node makes by writing it.** Function and Logic Builder register on write. §6.3's `discoverOutput(port)`
+   is the right shape if the interpreter calls it on the node's own write as well as on a wired output. Then the reducers'
+   sends need no list at all for values. Which outputs exist still matters for SIGNALS: Function sends only a wired one.
+2. **The node's saved ports**, for Script and for Function's signal types: what the project file holds for the instance.
+   That could be a `PortContext` field (`savedPorts`, close to P107-S79-SILENTCACHE's cached `dynamicports`) or the same
+   `derived.playWires` default §6.3 piece 5 proposes, renamed for both.
+3. **States' value outputs keep decision 4**: re-derive after a `values` write. It is the only case of the four that
+   decision 4 describes as written.
+
+Each spec's L4 row stays `owedBy: 'L3'` until the format lands. The field disagreements L4 printed (Function's
+`intype-` / `outtype-` should be `enum`, `in-*` `string`, labels and groups) do not depend on any of this and can be fixed
+on their own, with `spec-golden:check` and oracle (a) beside them.
+
+**Gates:** none run; this session changed no code.
