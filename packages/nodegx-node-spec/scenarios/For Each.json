@@ -21418,5 +21418,53 @@
    },
    "settle"
   ]
+ },
+ {
+  "name": "Items emptied (null) and a Refresh in one frame, rows on the page: the rows go and the Refresh fails repeater/no-items at the yield, and Items Rendered fires; the queue is idle after it — a new list builds its row, and a click on it is heard",
+  "because": "refresh :749-752 runs at the yield behind the removals the null queued (the queue runs to its end there, :851-858), and the run ends idle; the 10,000 run (s85, seed 20737) reached this yield only at the end of a sequence, so a yield that left the queue running was told apart by nothing — the new list after it is the reader (P107 s86)",
+  "params": {
+   "template": "Row",
+   "items": [
+    {
+     "id": "a",
+     "label": "A"
+    },
+    {
+     "id": "b",
+     "label": "B"
+    }
+   ]
+  },
+  "wiredOutputs": [
+   "itemOutput-Id",
+   "itemOutput-Label",
+   "itemOutputSignal-Tapped"
+  ],
+  "steps": [
+   "settle",
+   {
+    "set": "items",
+    "value": null
+   },
+   {
+    "signal": "refresh"
+   },
+   "settle",
+   {
+    "set": "items",
+    "value": [
+     {
+      "id": "c",
+      "label": "C"
+     }
+    ]
+   },
+   "settle",
+   {
+    "act": "tapRow",
+    "value": 0
+   },
+   "settle"
+  ]
  }
 ]

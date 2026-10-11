@@ -1389,5 +1389,186 @@
     "wiredOutputs": ["prop-title"],
     "steps": ["settle", { "signal": "fetch" }, "settle", { "set": "idSource", "value": "foreach" }, { "signal": "fetch" }, "settle", { "set": "backendId", "value": "_active_" }, { "set": "idSource", "value": "explicit" }, { "signal": "fetch" }, "settle"],
     "world": { "backend": { "answers": [{ "answer": { "ok": { "objectId": "r1", "title": "fresh", "n": 1 } } }] }, "registry": { "models": { "r1": { "title": "old", "n": 1 } } } }
+  },
+  {
+    "name": "an object on the unticked Id naming the record the node is bound to: its keys are written and heard (Changed), and the stored Id becomes that record — a Fetch after it asks for the bound record, not the Id stored before",
+    "because": "dbmodelnode2.ts :253-275 — the object's record is made (`Model.create`), so the Id the setter stores is its id whichever way the checkbox stands (:268, :273), and the fetch reads the stored Id (:428-430); the 10,000 run (s85, seed 20737) reached this branch only by chance (P107 s86)",
+    "params": {},
+    "wiredOutputs": [
+      "prop-n",
+      "prop-title"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r7"
+      },
+      "settle",
+      {
+        "set": "runOnChange-modelId",
+        "value": false
+      },
+      {
+        "set": "modelId",
+        "value": "r5"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": {
+          "id": "r7",
+          "n": 8
+        }
+      },
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r7"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r5": {
+            "title": "five",
+            "n": 5
+          },
+          "r7": {
+            "title": "seven",
+            "n": 7
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "an object on Id naming the record the Id already holds: no new binding, its keys written and heard (Changed), and a Fetch after it asks for that same record",
+    "because": "dbmodelnode2.ts :253-275 — the same Id is no change (:268), so nothing binds and nothing is stored; the keys are still written onto the bound record (:136-145), and the fetch reads the Id as it stands (:428-430) (P107 s86: the reader after it, which the three scenarios reaching this branch lacked)",
+    "params": {},
+    "wiredOutputs": [
+      "prop-n",
+      "prop-title"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": {
+          "id": "r1",
+          "title": "new"
+        }
+      },
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "ticked again after an Id was stored unticked: an object on Id naming the record still bound changes the Id, so it binds again — to the same record (Fetched, no new binding), its keys heard (Changed) — and a Fetch after it asks for that record, not the Id stored before",
+    "because": "dbmodelnode2.ts :253-275 — the object's record is made first, so its id is a change from the stored one (:268) and setModelID runs (:271, :320-343: Fetched; the binding is the same record); the fetch reads the stored Id (:428-430). The branch the 10,000 run (s85, seed 20737) left alive: nothing after it read the stored Id (P107 s86)",
+    "params": {},
+    "wiredOutputs": [
+      "prop-n",
+      "prop-title"
+    ],
+    "steps": [
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r7"
+      },
+      "settle",
+      {
+        "set": "runOnChange-modelId",
+        "value": false
+      },
+      {
+        "set": "modelId",
+        "value": "r5"
+      },
+      "settle",
+      {
+        "set": "runOnChange-modelId",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": {
+          "id": "r7",
+          "n": 8
+        }
+      },
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r7"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r5": {
+            "title": "five",
+            "n": 5
+          },
+          "r7": {
+            "title": "seven",
+            "n": 7
+          }
+        }
+      }
+    }
   }
 ]
