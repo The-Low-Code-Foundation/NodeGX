@@ -74,6 +74,7 @@ const censusPath = argValue('--census', path.join(phaseDir, 'census.json'));
 const ledgerPath = argValue('--ledger', path.join(phaseDir, 'spec-ledger.json'));
 const graphDir = path.join(specPkg, 'scenarios', 'graph');
 const reachPath = path.join(root, 'packages', 'nodegx-export', 'tests', 'helpers', 'node-spec-target.ts');
+const moduleTablePath = path.join(root, 'packages', 'noodl-runtime', 'test', 'node-spec', 'nsp-020-module-table.ts');
 
 const TIERS = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6'];
 const ts = require(path.join(root, 'node_modules', 'typescript'));
@@ -166,11 +167,35 @@ const reach = exportReach();
  *   - a spec that models every mechanism it has — `derived` for runtime-discovered, numbered-inputs, component-ports and
  *     editor-adapter ports; `narrow` on a declared port for runtime-narrowed; `when` for declared-port-groups, except the
  *     data-attributes group (`dataAttributes`), an editor rule the spec leaves to the editor (NSP-020 §6.6 piece 8(5)) —
- *     classed by `portsDerivability` (ports.ts): from the params alone, with the project, or with the backend schema;
+ *     classed by `portsDerivability` (ports.ts): from the params alone, with the project, or with the backend schema —
+ *     and, for runtime or adapter ports, only when oracle (a) grades the spec's draw (`gradedPortTypes`);
  *   - anything else is NOT derivable: a node with dynamic ports and no spec, or a spec that misses a mechanism (named).
  */
 const { portsDerivability } = requireSource(path.join(specPkg, 'src', 'ports.ts'));
 const NEEDS_DERIVED = ['runtime-discovered', 'numbered-inputs', 'component-ports', 'editor-adapter'];
+/**
+ * The types oracle (a) GRADES (`TABLE` in the runtime's nsp-020-module-table.ts, read from its AST as EXPORT_REACH is): a
+ * spec's `derived` counts only where an oracle lays the runtime's announcement over it. Having `derived` is not drawing
+ * the ports — Cloud Function's and Navigate's draw nothing from the project, and discover their ports on a write (s85).
+ */
+function gradedPortTypes() {
+  const src = ts.createSourceFile(moduleTablePath, fs.readFileSync(moduleTablePath, 'utf8'), ts.ScriptTarget.ES2019, true);
+  const types = new Set();
+  const visit = (node) => {
+    if (ts.isVariableDeclaration(node) && node.name.getText() === 'TABLE' && node.initializer && ts.isArrayLiteralExpression(node.initializer)) {
+      for (const el of node.initializer.elements) {
+        if (!ts.isObjectLiteralExpression(el)) continue;
+        const t = el.properties.find((pr) => pr.name && pr.name.getText() === 'type');
+        if (t && ts.isPropertyAssignment(t) && ts.isStringLiteral(t.initializer)) types.add(t.initializer.text);
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(src);
+  if (!types.size) throw new Error(`spec-ledger: no \`TABLE\` array literal in ${rel(moduleTablePath)} — re-read the file`);
+  return types;
+}
+const gradedPorts = gradedPortTypes();
 function portsClass(n) {
   const mechanisms = (n.dynamicPorts && n.dynamicPorts.mechanisms) || [];
   if (!mechanisms.length) return { cls: 'static' };
@@ -180,6 +205,8 @@ function portsClass(n) {
   const groups = (n.dynamicPorts.declaredPortGroups || []).filter((g) => g.parameter !== 'dataAttributes');
   const missing = [];
   if (mechanisms.some((m) => NEEDS_DERIVED.includes(m)) && !spec.derived) missing.push('`derived`');
+  else if (mechanisms.some((m) => NEEDS_DERIVED.includes(m)) && !gradedPorts.has(n.typeName))
+    return { cls: null, why: `its ${mechanisms.filter((m) => NEEDS_DERIVED.includes(m)).join(', ')} ports are drawn by no graded spec (no oracle (a) row${mechanisms.includes('editor-adapter') ? '; oracle (c), the adapters, is owed' : ''})` };
   if (mechanisms.includes('runtime-narrowed') && !declared.some((d) => d && d.narrow)) missing.push('`narrow`');
   if (mechanisms.includes('declared-port-groups') && groups.length && !declared.some((d) => d && d.when)) missing.push('`when`');
   if (missing.length) return { cls: null, why: `the spec has no ${missing.join(', ')}` };

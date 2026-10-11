@@ -4,7 +4,7 @@
     "runtime": 125,
     "contract": 3,
     "export": 2,
-    "ports": 134
+    "ports": 131
   },
   "owed": {
     "noodl.cloud.addusertorole": "NSP-022 — the cloud-only nodes: they run only in cloud functions, and are graded once the cloud runtime is a second target; not started",

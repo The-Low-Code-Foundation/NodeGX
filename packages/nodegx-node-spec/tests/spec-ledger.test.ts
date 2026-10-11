@@ -162,7 +162,9 @@ describe('NSP-020 AC4 — ports drawable without a viewer', () => {
     const p = reading.ports as { derivable: number; by: Record<string, number>; not: Array<{ type: string; why: string }> };
     expect(Object.values(p.by).reduce((a, n) => a + n, 0)).toBe(p.derivable);
     expect(p.derivable + p.not.length).toBe(reading.population);
-    for (const n of p.not) expect(n.why).toMatch(/no spec|the spec has no/);
+    for (const n of p.not) expect(n.why).toMatch(/no spec|the spec has no|drawn by no graded spec/);
+    // s85 — `derived` is not drawing: Cloud Function draws nothing from the project and has no oracle (a) row
+    expect(p.not.map((n) => n.type)).toContain('CloudFunction2');
     // known-firing on both sides: And draws its numbered inputs from the params and its wires; Component Inputs has no spec
     expect(p.not.map((n) => n.type)).toContain('Component Inputs');
     expect(p.not.map((n) => n.type)).not.toContain('And');
