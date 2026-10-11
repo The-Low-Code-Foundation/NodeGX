@@ -40,7 +40,7 @@ cascade owed)**. 📋: ONT-013, ONT-015, ONT-008, ONT-009, ONT-010. R1–R10, R-
      (high), `it.failing` ×2. Not fixed: needs the ruling and a per-collection `onlyWhile` in the ACL option.
    - Dotted filters/accessors through a link onto a hidden or closed field: **green** (nothing returned), graded.
    - The ACL of a never-edited record: a bound writer rewrote it (200) — a ruling, not asserted.
-2. **ONT-011 step 2, the *settled* half** — uncommitted at the time of writing (see "Measured"). The fifteenth kind in
+2. **ONT-011 step 2, the *settled* half** — the second s18 commit, `d1df615a0`. The fifteenth kind in
    `kinds.hand.json` (with `borrow: 'settled'`: `census.js` counts a borrow-backed kind from step 1's yes verdicts;
    8 rows over 4 sources, the relation-row count still 303, `world.test.ts` pins 311) and `kinds.ts`; five questions,
    one with a new **`fields`** answer shape (names of the noun's own details, validated against the noun); the
@@ -61,8 +61,8 @@ cascade owed)**. 📋: ONT-013, ONT-015, ONT-008, ONT-009, ONT-010. R1–R10, R-
 - After step 2: project contract `world.test.ts` 36/36, `mutants.test.ts` 21/21; MCP `ont002WorldTools` 12/12;
   `npm run ontology-census:check` green with the private paths; `tsc --noEmit` clean for the project contract, the
   backend contract and the backend. The backend band for step 2 (ont-005, ont-007-route, ont-003-claims,
-  ont-014-reach-review) was running when this was written — its result is in the s18 commit message for step 2, or,
-  if there is no such commit, the next session runs it first.
+  ont-014-reach-review): **4 suites, 104/104, exit 0** on both engines (14:15 CEST); `world`, `world-membership` and
+  `world-categories` unchanged at 11, 4 and 2. The full backend suite and `test:ci` were **not** run.
 - ONT-005 every-kind: **45 mutants, 14 survive** (5 unkept, 9 unclaimed) on both engines; settled's six killed.
 
 ## The next tasks, in order
