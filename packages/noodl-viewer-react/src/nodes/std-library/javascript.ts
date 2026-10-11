@@ -762,7 +762,13 @@ const JavascriptModule: NodeModule = {
           }
         ];
 
+        // P109-S20-LISTDEFAULTTYPE (ruled 2026-10-11): an output's port is `outtype-<name> || '*'` and a default is never
+        // written, so the select's default is Any (`*`), as the Function's is.
         const _outputTypeEnums = [
+          {
+            value: '*',
+            label: 'Any'
+          },
           {
             value: 'string',
             label: 'String'
@@ -805,7 +811,7 @@ const JavascriptModule: NodeModule = {
                 enums: _outputTypeEnums,
                 allowEditOnly: true
               },
-              default: 'string',
+              default: '*',
               parent: 'scriptOutputs',
               parentItemId: p.id
             });

@@ -103,7 +103,8 @@ const FIXTURE_TEXTS: readonly string[] = Object.values(FUNCTION_FIXTURES);
 
 /** :978-1009 `inputTypeEnums`, and Signal for an output (:1013-1018). */
 const INPUT_TYPES = ['string', 'boolean', 'number', 'object', 'date', 'array', 'color'] as const;
-const OUTPUT_TYPES = [...INPUT_TYPES, 'signal'] as const;
+// P109-S20-LISTDEFAULTTYPE: an output's select starts on Any (`*`), what its port is until a type is picked
+const OUTPUT_TYPES = ['*', ...INPUT_TYPES, 'signal'] as const;
 
 type Row = { label?: unknown };
 const labelsOf = (list: unknown): string[] =>
@@ -161,7 +162,7 @@ const drawnCheckboxPort = (label: string): InputDecl => ({ ...checkboxPort(), di
 /** :1049-1062, :1019-1031 — a written row's type picker; nothing reads it at run time (:870-892). */
 const typePort = (): InputDecl => ({ type: 'string', default: 'string', coerce: 'none', editOnly: true });
 /** The picker as the editor draws it: an enum named Type, Signal among an output's choices. */
-const drawnTypePort = (enums: readonly string[]): InputDecl => ({ type: 'enum', enums, default: 'string', coerce: 'none', editOnly: true, displayName: 'Type' });
+const drawnTypePort = (enums: readonly string[], drawnDefault = 'string'): InputDecl => ({ type: 'enum', enums, default: drawnDefault, coerce: 'none', editOnly: true, displayName: 'Type' });
 /** :903-920 — a value output the code's write (or a wire) brings into being; it reads what the code last wrote. */
 const valueOutput = (name: string): OutputDecl<FunctionState> => ({ type: '*', from: (s: Readonly<FunctionState>) => s.outputs[name] });
 
@@ -406,7 +407,7 @@ export const JavaScriptFunction = defineNode({
       // :1013-1073, :946-962 — what the editor draws: the written rows with their type pickers, then each name the code reads
       inputs: (params) => {
         const ports: Record<string, InputDecl> = {};
-        for (const label of labelsOf(params.scriptOutputs)) ports['outtype-' + label] = drawnTypePort(OUTPUT_TYPES);
+        for (const label of labelsOf(params.scriptOutputs)) ports['outtype-' + label] = drawnTypePort(OUTPUT_TYPES, '*');
         for (const label of labelsOf(params.scriptInputs)) {
           ports['intype-' + label] = drawnTypePort(INPUT_TYPES);
           ports['in-' + label] = drawnValuePort(label, ((params['intype-' + label] as string) || 'string') as ValueType);

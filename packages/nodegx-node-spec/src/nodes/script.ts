@@ -292,9 +292,10 @@ function portsOf(params: Readonly<Record<string, unknown>>, code: unknown, into:
 type Drawn = { type?: ValueType | 'signal'; enums?: readonly string[]; drawnDefault?: unknown; displayName?: string; group?: string; editOnly?: true };
 /** :742-763 and :765-790 — the two pickers' choices */
 const INPUT_TYPES = ['string', 'boolean', 'number', 'object', 'array'] as const;
-const OUTPUT_TYPES = ['string', 'boolean', 'number', 'object', 'array', 'signal'] as const;
+// P109-S20-LISTDEFAULTTYPE: an output's picker starts on Any (`*`), what its port is until a type is picked
+const OUTPUT_TYPES = ['*', 'string', 'boolean', 'number', 'object', 'array', 'signal'] as const;
 // the default is the announcement's (`drawnDefault`): nothing reads a picker at run time, and a declared default is never set (:446-456)
-const pickerOf = (enums: readonly string[]): Drawn => ({ type: 'enum', enums, drawnDefault: 'string', displayName: 'Type', editOnly: true });
+const pickerOf = (enums: readonly string[], drawnDefault = 'string'): Drawn => ({ type: 'enum', enums, drawnDefault, displayName: 'Type', editOnly: true });
 
 /** javascriptnodeparser.js :402-411 — a declared input: a type name, or an object whose fields are the port's */
 function declaredInput(t: unknown): Drawn {
@@ -316,7 +317,7 @@ function drawnOf(params: Readonly<Record<string, unknown>>): { inputs: Record<st
     if (into[name] === undefined) into[name] = d;
   };
   for (const label of labelsOf(params.scriptOutputs)) {
-    put(inputs, 'outtype-' + label, pickerOf(OUTPUT_TYPES));
+    put(inputs, 'outtype-' + label, pickerOf(OUTPUT_TYPES, '*'));
     put(outputs, label, { type: ((params['outtype-' + label] as ValueType | undefined) || '*') as ValueType, group: 'Outputs' });
   }
   for (const label of labelsOf(params.scriptInputs)) {

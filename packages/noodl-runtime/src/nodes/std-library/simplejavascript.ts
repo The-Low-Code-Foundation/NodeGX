@@ -1012,7 +1012,10 @@ const SimpleJavascriptNodeModule: NodeModule = {
       function _updatePorts() {
         const ports: Record<string, unknown>[] = [];
 
-        const _outputTypeEnums = inputTypeEnums.concat([
+        // P109-S20-LISTDEFAULTTYPE (ruled 2026-10-11): an output's port is `outtype-<name> || '*'` and a default is never
+        // written, so the select's default is Any (`*`): it says what the port is until a type is picked. Inputs keep
+        // String, which is what their port falls back to.
+        const _outputTypeEnums = [{ value: '*', label: 'Any' }].concat(inputTypeEnums, [
           {
             value: 'signal',
             label: 'Signal'
@@ -1034,7 +1037,7 @@ const SimpleJavascriptNodeModule: NodeModule = {
                 enums: _outputTypeEnums,
                 allowEditOnly: true
               },
-              default: 'string',
+              default: '*',
               parent: 'scriptOutputs',
               parentItemId: p.id
             });
