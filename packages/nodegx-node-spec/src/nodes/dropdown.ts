@@ -78,8 +78,8 @@ type State = {
   value: string | undefined;
   /** options.ts :164-168 `_internal.items` — the list as handed */
   items: unknown;
-  /** the `<select>`'s own selection: an option's value, or '' for the hidden empty option (:217) */
-  domSelected: string;
+  /** the `<select>`'s own selection: an option's value, '' for the hidden empty option (:217), or `null` when it selects nothing */
+  domSelected: string | null;
 };
 
 type O = typeof Dropdown extends { outputs: infer X } ? X : never;
@@ -109,7 +109,20 @@ export const Dropdown = defineNode({
   // option (the runtime's render threw on both — row C70).
   // v5 (P109 ISL-031, P107-C64 ruled "Ignore touches, keep hover"): a finger on a disabled control reports nothing — no Pressed, no Pointer Down or Up — as Enabled promises; the pointer's hover still reports
   // v6 (P109 ISL-031, P107-D30 ruled "Reset and announce"): a control leaving the page (Mounted off) takes Focused, Hover and Pressed with it — each goes false, sent if it was true, with Blurred and Hover End for the ones that were on
-  version: 6,
+  // v7 (P109 ISL-045, P109-S21-DROPDOWNEMPTYRESET): the spec correcting itself — after Items offered no options the element selects nothing, and the next option to arrive is selected as it arrives
+  version: 7,
+  // NSP-010 — v7 is the spec correcting itself, not the runtime changing
+  changes: [
+    {
+      version: 7,
+      says:
+        "No app does anything differently. When Items takes the selected option away and offers no enabled one, the <select> selects nothing, and the next enabled option to arrive is selected as it arrives: a person choosing it sends no Value and fires no Changed. v6 kept the hidden empty option selected there and said the choice was a change, which the browser never raises",
+      row: 'P109-S21-DROPDOWNEMPTYRESET',
+      migration: {
+        none: 'The runtime did not change; only the spec stopped promising a Value and a Changed the browser never sends. A fresh dropdown offered nothing still keeps its hidden option (it carries `selected`), as v6 said'
+      }
+    }
+  ],
   source: 'packages/noodl-viewer-react/src/nodes/controls/options.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches — the browser's selection with them
@@ -473,7 +486,8 @@ function optionsOf(items: unknown): Option[] {
  *     person's pick included, and nothing on the wire (v3, R14; the runtime took the author's Value back until P109 ISL-031, row D34).
  *   - the selection: the element is told the node's value while it names an option (:210); otherwise the browser keeps what it
  *     had — a fresh element selects the hidden empty option (:217), and a selected option that left the list hands the selection
- *     to the first enabled option (HTML's reset; the hidden one is disabled).
+ *     to the first enabled option (HTML's reset; the hidden one is disabled) — with none, the element selects nothing, and the
+ *     next option to arrive is selected as it arrives (v7, P109-S21-DROPDOWNEMPTYRESET).
  */
 function painted(s: Readonly<State>): { set: Partial<State>; send: ValueOut[]; emit: Pulse[] } {
   const set: Partial<State> = { ...(s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled }), ...(s.pageVisible === s.visible ? {} : { pageVisible: s.visible }) };
@@ -492,10 +506,15 @@ function painted(s: Readonly<State>): { set: Partial<State>; send: ValueOut[]; e
   const value = s.value;
   const options = optionsOf(s.items);
   const inList = value !== undefined && options.some((o) => o.value === value);
+  const firstEnabled = options.find((o) => !o.disabled)?.value ?? null;
   let dom = s.domSelected;
   if (fresh) dom = inList ? (value as string) : '';
   else if (inList) dom = value as string;
-  else if (dom !== '' && !options.some((o) => o.value === dom)) dom = options.find((o) => !o.disabled)?.value ?? '';
+  // a selected option that left the list: HTML's reset selects the first enabled option, and with none, nothing (the hidden one is disabled)
+  else if (dom !== '' && dom !== null && !options.some((o) => o.value === dom)) dom = firstEnabled;
+  // an option arriving in a `<select>` that selects nothing is selected as it arrives (P109-S21-DROPDOWNEMPTYRESET); the
+  // fresh element's hidden option carries `selected`, so '' is a selection and keeps it
+  else if (dom === null) dom = firstEnabled;
   if (dom !== s.domSelected) set.domSelected = dom;
   return { set, send: [], emit };
 }

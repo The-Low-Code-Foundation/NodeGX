@@ -22905,6 +22905,59 @@
     ]
   },
   {
+    "name": "Items written an empty list, then a list of one: the browser selects 'x' as it arrives, since nothing was selected, so choosing 'x' is no change — no Value, no Changed",
+    "because": "P109-S21-DROPDOWNEMPTYRESET (ISL-045): the empty list took the selected option away and the hidden one is disabled, so nothing was selected; HTML's selectedness setting algorithm then selects the first enabled option inserted into a <select> that selects nothing (Select.tsx :220 the hidden option, :213 value={undefined} while Value names no option)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "items",
+        "value": []
+      },
+      "settle",
+      {
+        "set": "items",
+        "value": [
+          {
+            "Label": "X",
+            "Value": "x"
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "choose",
+        "value": "x"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a fresh dropdown offered nothing keeps its hidden option selected when a list arrives, so choosing the list's first option 'x' moves Value with Changed",
+    "because": "P109-S21-DROPDOWNEMPTYRESET's control: the fresh element's hidden option carries `selected` (Select.tsx :220), so an option inserted after it finds the select already selecting one and is not selected",
+    "params": {
+      "items": []
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "items",
+        "value": [
+          {
+            "Label": "X",
+            "Value": "x"
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "choose",
+        "value": "x"
+      },
+      "settle"
+    ]
+  },
+  {
     "name": "a list holding an empty item: the item is skipped and the others are offered — 'a' is selected by the browser's reset, and choosing 'b' moves Value with Changed",
     "because": "P107-C70 (v4): an empty item is skipped; the runtime's render threw reading .Value of it",
     "params": {},

@@ -221,6 +221,9 @@ class Dropdown {
 
     // the options, and what the element is told to select
     const held = fresh ? '' : select.value;
+    // Not the stranger's line: Dropdown v7 (P109 ISL-045, row P109-S21-DROPDOWNEMPTYRESET) — read before the rebuild, which
+    // the DOM's own selectedness rules would answer for it
+    const heldNothing = !fresh && select.selectedIndex === -1;
     const options = optionsOf(this.items);
     while (select.options.length > 1) select.remove(1);
     for (const o of options) {
@@ -233,13 +236,19 @@ class Dropdown {
     const offered = (v) => options.some((o) => o.value === v);
     const inList = this.value !== undefined && offered(this.value);
     let selected = held;
+    // Not the stranger's line: Dropdown v7 (P109 ISL-045, row P109-S21-DROPDOWNEMPTYRESET) — with no enabled option left the
+    // element selects nothing (`null`, selectedIndex -1), and the next enabled option to arrive is selected as it arrives; v6,
+    // the spec this round was handed, kept the hidden option selected in both places
+    const firstEnabled = () => {
+      const first = options.find((o) => !o.disabled);
+      return first ? first.value : null;
+    };
     if (fresh) selected = inList ? this.value : '';
     else if (inList) selected = this.value;
-    else if (held !== '' && !offered(held)) {
-      const first = options.find((o) => !o.disabled);
-      selected = first ? first.value : '';
-    }
-    select.value = selected;
+    else if (held !== '' && !offered(held)) selected = firstEnabled();
+    else if (heldNothing) selected = firstEnabled();
+    if (selected === null) select.selectedIndex = -1;
+    else select.value = selected;
     this.drawShown();
   }
 

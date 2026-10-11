@@ -78,7 +78,7 @@ const PLANTS: Plant[] = [
     key: 'selected',
     follows: (s) => s.value,
     edits: [
-      ['  domSelected: string;\n};', '  domSelected: string;\n  selected: string | undefined;\n};'],
+      ['  domSelected: string | null;\n};', '  domSelected: string | null;\n  selected: string | undefined;\n};'],
       ["items: DEFAULT_ITEMS, domSelected: ''", "items: DEFAULT_ITEMS, domSelected: '', selected: undefined"],
       ["    set.onPage = true;\n    emit.push('didMount');\n  }\n  const value = s.value;", "    set.onPage = true;\n    set.selected = s.value;\n    emit.push('didMount');\n  }\n  const value = fresh ? s.value : s.selected;"],
       ['{ set: { value: picked, domSelected: picked }', '{ set: { value: picked, domSelected: picked, selected: picked }']
