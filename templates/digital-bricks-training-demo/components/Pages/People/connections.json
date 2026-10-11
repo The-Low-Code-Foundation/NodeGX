@@ -132,8 +132,8 @@
     {
       "fromId": "t_pp_page_title",
       "fromProperty": "Translation",
-      "toId": "seo_pp_page",
-      "toProperty": "in-title"
+      "toId": "pp_page",
+      "toProperty": "title"
     },
     {
       "fromId": "pp_rows",

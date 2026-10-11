@@ -102,8 +102,8 @@
     {
       "fromId": "t_ls_page_title",
       "fromProperty": "Translation",
-      "toId": "seo_ls_page",
-      "toProperty": "in-title"
+      "toId": "ls_page",
+      "toProperty": "title"
     },
     {
       "fromId": "ls_lang_var",

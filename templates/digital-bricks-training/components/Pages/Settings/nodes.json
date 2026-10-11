@@ -826,25 +826,6 @@
       }
     },
     {
-      "id": "seo_st_page",
-      "type": "JavaScriptFunction",
-      "label": "Set the browser tab",
-      "x": 1800,
-      "y": 2200,
-      "parameters": {
-        "functionScript": "// The page title is the browser TAB. `Page.title` is read off the node's PARAMETERS at\n// export time, and a connection to the port is silently ignored (TASK-L161 §1), so the\n// parameter is the build-time fallback and the translated value overrides it here.\nconst t = Inputs.title;\nif (typeof t === 'string' && t !== '' && typeof Noodl !== 'undefined' && Noodl.SEO) {\n  Noodl.SEO.setTitle(t);\n}\n"
-      },
-      "ports": [
-        {
-          "name": "in-title",
-          "plug": "input",
-          "type": "*",
-          "displayName": "title",
-          "group": "Inputs"
-        }
-      ]
-    },
-    {
       "id": "st_gone",
       "type": "JavaScriptFunction",
       "label": "Forget the session here, then Home, saying it is done",

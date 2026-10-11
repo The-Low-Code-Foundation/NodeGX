@@ -195,8 +195,10 @@ describe('ISL-007 AC6 — what the rule says about the repository\'s projects', 
     });
   });
 
-  test('the DBT template: eleven page titles, the browser tab stays English in French', () => {
-    expect(census('templates/digital-bricks-training')).toEqual({ 'Page.title': 11 });
+  // Was `{ 'Page.title': 11 }`: each page named its tab through a JavaScript node because the Router ignored a wired
+  // Title. Since P109-S45-WIREDTITLE the title Translations are wired into the Page nodes (P109-S11-DBTPAGETITLES).
+  test('the DBT template: every page title is wired, so it reads nothing', () => {
+    expect(census('templates/digital-bricks-training')).toEqual({});
   });
 
   test('control: the island types words but places no Translation node, so it reads nothing', () => {

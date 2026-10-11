@@ -316,26 +316,6 @@
       }
     },
     {
-      "id": "seo_un_page",
-      "type": "JavaScriptFunction",
-      "label": "The tab's title",
-      "x": 960,
-      "y": 460,
-      "parameters": {
-        "functionScript": "// The tab title (TASK-L161 §1): Page.title is the build-time fallback; this overrides it.\nconst t = Inputs.title;\nif (typeof t === 'string' && t !== '' && typeof Noodl !== 'undefined' && Noodl.SEO) Noodl.SEO.setTitle(t);\n",
-        "runOnChange-in-title": true
-      },
-      "ports": [
-        {
-          "name": "in-title",
-          "plug": "input",
-          "type": "*",
-          "displayName": "title",
-          "group": "Inputs"
-        }
-      ]
-    },
-    {
       "id": "t_un_eyebrow",
       "type": "Translation",
       "label": "privacy:unsubscribe.eyebrow",

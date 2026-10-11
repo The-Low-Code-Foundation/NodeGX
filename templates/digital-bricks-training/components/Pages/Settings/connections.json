@@ -126,8 +126,8 @@
     {
       "fromId": "t_st_page_title",
       "fromProperty": "Translation",
-      "toId": "seo_st_page",
-      "toProperty": "in-title"
+      "toId": "st_page",
+      "toProperty": "title"
     },
     {
       "fromId": "st_notice",

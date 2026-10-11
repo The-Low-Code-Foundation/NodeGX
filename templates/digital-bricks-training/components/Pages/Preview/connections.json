@@ -216,8 +216,8 @@
     {
       "fromId": "lp_say",
       "fromProperty": "out-tab",
-      "toId": "seo_lp_page",
-      "toProperty": "in-title"
+      "toId": "lp_page",
+      "toProperty": "title"
     },
     {
       "fromId": "lp_say",

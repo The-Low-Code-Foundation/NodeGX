@@ -3,8 +3,8 @@ KEYS={'text','label','placeholder','title','content'}
 # Two exclusions, each by reason, never by loosening the pattern (L91/L100):
 #  1. dbt-lesson.Section.label — the port's own description is "Shown on the node
 #     in the graph only", so it is an EDITOR label, not learner-facing (AC6).
-#  2. Page.title — read off parameters at export into the router index; it is the
-#     BUILD-TIME FALLBACK behind a Noodl.SEO.setTitle override (TASK-L161 §1).
+#  2. Page.title — the typed FALLBACK the tab shows until the title wired into it lands
+#     (each page wires its title Translation into Page.title; P109-S45-WIREDTITLE).
 def excluded(t,i,k):
     if t.startswith('dbt-lesson.') and k=='label': return 'kit editor label'
     if t=='Page' and k=='title': return 'build-time tab fallback'

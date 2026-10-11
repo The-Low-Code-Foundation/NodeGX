@@ -68,11 +68,14 @@ carrying "(example) Do not add a Router; this app is a single page".
   JSON string and loads it under exactly one namespace, and a `Translation` node takes
   no wire — it reads the module-scoped i18next instance, so the bundle must load in a
   component that is always mounted.
-- **A page title is the one exception, and it is not a wire.** `Page.title` is read off
-  the node's parameters at export time into the router index, so a connection to it is
-  silently ignored (measured: the tab then shows the component name). The parameter
-  stays as the build-time fallback and a small JavaScript node overrides it at runtime
-  through `Noodl.SEO.setTitle`.
+- **A page title is a wire too.** Each page's title `Translation` (or the value that
+  names the page, on `/learner` and `/preview`) is wired into its `Page` node's `Title`,
+  and the Router names the tab from it while the page shows. The typed `Title` stays as
+  the fallback for the instant before the wire's value lands. Until P109
+  (`P109-S45-WIREDTITLE`, 2026-10-11) the Router read only the typed title and a wire
+  into it was silently ignored, so each page carried a small JavaScript node that called
+  `Noodl.SEO.setTitle`; those nodes are gone. A site built on an engine older than that
+  fix shows the typed titles.
 - **`dbt-lesson.*` `label` parameters are editor labels**, shown on the node in the
   graph only. They stay literals.
 - **`nodegx.project.json`'s `settings.htmlTitle`** is project metadata with no node to

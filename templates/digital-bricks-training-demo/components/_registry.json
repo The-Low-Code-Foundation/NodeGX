@@ -14,7 +14,7 @@
     "Pages/Home": {
       "path": "Pages/Home",
       "type": "page",
-      "nodeCount": 34,
+      "nodeCount": 33,
       "connectionCount": 25,
       "modified": "2026-10-01T08:56:14.350Z",
       "created": "2026-09-19T20:51:44.992Z"
@@ -54,7 +54,7 @@
     "Pages/Lesson": {
       "path": "Pages/Lesson",
       "type": "page",
-      "nodeCount": 41,
+      "nodeCount": 40,
       "connectionCount": 45,
       "modified": "2026-09-30T15:30:00.000Z",
       "created": "2026-09-19T21:11:05.603Z"
@@ -158,7 +158,7 @@
     "Pages/People": {
       "path": "Pages/People",
       "type": "page",
-      "nodeCount": 32,
+      "nodeCount": 31,
       "connectionCount": 24,
       "modified": "2026-09-23T13:44:57.668Z",
       "created": "2026-09-21T09:35:02.402Z"
@@ -222,7 +222,7 @@
     "Pages/Learner": {
       "path": "Pages/Learner",
       "type": "page",
-      "nodeCount": 59,
+      "nodeCount": 58,
       "connectionCount": 103,
       "modified": "2026-09-23T13:45:08.603Z",
       "created": "2026-09-21T13:01:49.484Z"
@@ -302,7 +302,7 @@
   },
   "stats": {
     "totalComponents": 37,
-    "totalNodes": 455,
+    "totalNodes": 451,
     "totalConnections": 720
   }
 }

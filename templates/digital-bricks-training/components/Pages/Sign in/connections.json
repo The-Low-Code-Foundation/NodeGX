@@ -132,8 +132,8 @@
     {
       "fromId": "t_si_page_title",
       "fromProperty": "Translation",
-      "toId": "seo_si_page",
-      "toProperty": "in-title"
+      "toId": "si_page",
+      "toProperty": "title"
     }
   ]
 }

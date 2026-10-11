@@ -60,8 +60,8 @@
     {
       "fromId": "t_un_pageTitle",
       "fromProperty": "Translation",
-      "toId": "seo_un_page",
-      "toProperty": "in-title"
+      "toId": "un_page",
+      "toProperty": "title"
     },
     {
       "fromId": "un_url",

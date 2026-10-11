@@ -30,8 +30,8 @@
     {
       "fromId": "t_hm_page_title",
       "fromProperty": "Translation",
-      "toId": "seo_hm_page",
-      "toProperty": "in-title"
+      "toId": "hm_page",
+      "toProperty": "title"
     },
     {
       "fromId": "hm_coach",

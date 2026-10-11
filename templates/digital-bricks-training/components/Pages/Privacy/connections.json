@@ -54,8 +54,8 @@
     {
       "fromId": "t_pv_page_title",
       "fromProperty": "Translation",
-      "toId": "seo_pv_page",
-      "toProperty": "in-title"
+      "toId": "pv_page",
+      "toProperty": "title"
     },
     {
       "fromId": "pv_back",

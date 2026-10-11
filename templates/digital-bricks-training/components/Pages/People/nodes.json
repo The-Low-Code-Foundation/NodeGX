@@ -506,25 +506,6 @@
       }
     },
     {
-      "id": "seo_pp_page",
-      "type": "JavaScriptFunction",
-      "label": "Tab title",
-      "x": 1400,
-      "y": 1240,
-      "parameters": {
-        "functionScript": "// The page title is the browser TAB. `Page.title` is read off the node's PARAMETERS at\n// export time into the router index, and a connection to that port is silently ignored\n// (TASK-L161 §1). So the parameter stays as the build-time fallback and the translated\n// value overrides it here — the same node every page carries.\nconst t = Inputs.title;\nif (typeof t === 'string' && t !== '' && typeof Noodl !== 'undefined' && Noodl.SEO) {\n  Noodl.SEO.setTitle(t);\n}"
-      },
-      "ports": [
-        {
-          "name": "in-title",
-          "displayName": "title",
-          "plug": "input",
-          "type": "*",
-          "group": "Inputs"
-        }
-      ]
-    },
-    {
       "id": "pp_open",
       "type": "RouterNavigate",
       "label": "Into their page",

@@ -198,8 +198,8 @@
     {
       "fromId": "t_cs_page_title",
       "fromProperty": "Translation",
-      "toId": "seo_cs_page",
-      "toProperty": "in-title"
+      "toId": "cs_page",
+      "toProperty": "title"
     },
     {
       "fromId": "cs_lang_var",
