@@ -2,7 +2,7 @@
 id: P109-S42-SHELLSEED
 title: A dev launch's sweep kills the shell a suite is running in when that shell cd'd into a package the sweep names
 status: fixed
-commit: PENDING
+commit: d20dd013f
 phase: P109
 task: ISL-047
 severity: medium

@@ -2,7 +2,7 @@
 id: P78-DBT-DEVSWEEP
 title: Starting the editor's dev stack kills a backend someone started by hand from the checkout
 status: fixed
-commit: PENDING
+commit: d20dd013f
 phase: P109
 task: ISL-047
 severity: medium
