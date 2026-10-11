@@ -45,9 +45,9 @@ function ledger(flags: string[], copies: { catalog?: Json; census?: Json; ledger
 }
 
 /** The real ledger file with its floor set to what the script reads today — the control every plant moves one thing from. */
-const atFloor = (runtime = reading.runtime, exp = reading.export.length, contract = reading.contract.length): Json => ({
+const atFloor = (runtime = reading.runtime, exp = reading.export.length, contract = reading.contract.length, ports = reading.ports.derivable): Json => ({
   ...read(path.join(PHASE, 'spec-ledger.json')),
-  floor: { runtime, contract, export: exp }
+  floor: { runtime, contract, export: exp, ports }
 });
 
 beforeAll(() => {
@@ -154,5 +154,22 @@ describe('NSP-017 AC3 — a contract spec is counted in a column of its own, nev
     const r = ledger(['--check'], { ledger: atFloor(reading.runtime, reading.export.length, reading.contract.length + 1) });
     expect(r.status).toBe(1);
     expect(r.err).toContain('SPEC COVERAGE FELL on the contract');
+  });
+});
+
+describe('NSP-020 AC4 — ports drawable without a viewer', () => {
+  test('the reading splits the population: by a spec (three classes), static, or not — each "not" with its reason', () => {
+    const p = reading.ports as { derivable: number; by: Record<string, number>; not: Array<{ type: string; why: string }> };
+    expect(Object.values(p.by).reduce((a, n) => a + n, 0)).toBe(p.derivable);
+    expect(p.derivable + p.not.length).toBe(reading.population);
+    for (const n of p.not) expect(n.why).toMatch(/no spec|the spec has no/);
+    // known-firing on both sides: And draws its numbered inputs from the params and its wires; Component Inputs has no spec
+    expect(p.not.map((n) => n.type)).toContain('Component Inputs');
+    expect(p.not.map((n) => n.type)).not.toContain('And');
+  });
+  test('the ports floor is held like the others: a planted fall fails, named', () => {
+    const r = ledger(['--check'], { ledger: atFloor(undefined, undefined, undefined, reading.ports.derivable + 1) });
+    expect(r.status).toBe(1);
+    expect(r.err).toContain('SPEC COVERAGE FELL on the ports');
   });
 });

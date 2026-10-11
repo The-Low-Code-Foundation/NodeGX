@@ -53,7 +53,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { loadSpecs } = require('./load-specs');
+const { loadSpecs, requireSource } = require('./load-specs');
 const { saidCoverage } = require('./rules');
 
 const started = Date.now();
@@ -159,6 +159,33 @@ function exportReach() {
 }
 const reach = exportReach();
 
+/**
+ * NSP-020 AC4 — can an editor draw this node's ports WITHOUT A VIEWER? Read from what the catalog says the node's ports
+ * do (`dynamicPorts.mechanisms`) against what its spec models:
+ *   - no mechanism: the ports are the registration's own, a static list — `static`;
+ *   - a spec that models every mechanism it has — `derived` for runtime-discovered, numbered-inputs, component-ports and
+ *     editor-adapter ports; `narrow` on a declared port for runtime-narrowed; `when` for declared-port-groups, except the
+ *     data-attributes group (`dataAttributes`), an editor rule the spec leaves to the editor (NSP-020 §6.6 piece 8(5)) —
+ *     classed by `portsDerivability` (ports.ts): from the params alone, with the project, or with the backend schema;
+ *   - anything else is NOT derivable: a node with dynamic ports and no spec, or a spec that misses a mechanism (named).
+ */
+const { portsDerivability } = requireSource(path.join(specPkg, 'src', 'ports.ts'));
+const NEEDS_DERIVED = ['runtime-discovered', 'numbered-inputs', 'component-ports', 'editor-adapter'];
+function portsClass(n) {
+  const mechanisms = (n.dynamicPorts && n.dynamicPorts.mechanisms) || [];
+  if (!mechanisms.length) return { cls: 'static' };
+  const spec = loadedSpecs[n.typeName];
+  if (!spec) return { cls: null, why: `dynamic ports (${mechanisms.join(', ')}) and no spec` };
+  const declared = [...Object.values(spec.inputs || {}), ...Object.values(spec.outputs || {})];
+  const groups = (n.dynamicPorts.declaredPortGroups || []).filter((g) => g.parameter !== 'dataAttributes');
+  const missing = [];
+  if (mechanisms.some((m) => NEEDS_DERIVED.includes(m)) && !spec.derived) missing.push('`derived`');
+  if (mechanisms.includes('runtime-narrowed') && !declared.some((d) => d && d.narrow)) missing.push('`narrow`');
+  if (mechanisms.includes('declared-port-groups') && groups.length && !declared.some((d) => d && d.when)) missing.push('`when`');
+  if (missing.length) return { cls: null, why: `the spec has no ${missing.join(', ')}` };
+  return { cls: portsDerivability(spec) };
+}
+
 // ---------------------------------------------------------------------------------------------
 // the count
 
@@ -181,7 +208,8 @@ const rows = population
       graphRowOnly: !spec && !!graph && graph.rowOnly,
       export: spec && reach.includes(t),
       exempt: exemptions[t] ? exemptions[t].reason : null,
-      owed: owed[t] || null
+      owed: owed[t] || null,
+      ports: portsClass(n)
     };
   })
   .sort((a, b) => a.typeName.localeCompare(b.typeName));
@@ -198,6 +226,10 @@ const byTier = Object.fromEntries(
   })
 );
 const pct = population.length ? (100 * runtime.length) / population.length : 0;
+const PORT_CLASSES = ['params-only', 'with-project', 'with-schema', 'static'];
+const portsBy = Object.fromEntries(PORT_CLASSES.map((c) => [c, rows.filter((r) => r.ports.cls === c).length]));
+const portsDerivable = rows.filter((r) => r.ports.cls !== null);
+const portsNot = rows.filter((r) => r.ports.cls === null);
 
 // ---------------------------------------------------------------------------------------------
 // what must hold — checked on every run; --check makes it the exit status
@@ -248,7 +280,7 @@ for (const r of exempt) if (r.runtime || r.contract) problems.push(`${name(r.typ
 // the floor — exactly as pickerCoverageFloor
 const floor = ledger.floor || {};
 const floorProblems = [];
-for (const [key, have] of [['runtime', runtime.length], ['contract', contracted.length], ['export', exported.length]]) {
+for (const [key, have] of [['runtime', runtime.length], ['contract', contracted.length], ['export', exported.length], ['ports', portsDerivable.length]]) {
   const f = floor[key];
   if (typeof f !== 'number') floorProblems.push(`${rel(ledgerPath)} has no numeric \`floor.${key}\` — add it (${have} today)`);
   else if (have < f)
@@ -286,6 +318,7 @@ if (args.includes('--json')) {
         problems: [...problems, ...floorProblems],
         said,
         idioms: withIdioms.length,
+        ports: { derivable: portsDerivable.length, by: portsBy, not: portsNot.map((r) => ({ type: r.typeName, why: r.ports.why })) },
         ms
       },
       null,
@@ -306,6 +339,11 @@ if (args.includes('--json')) {
       (said.unread.length ? `; not readable from the source (built in a factory): ${said.unread.join(', ')}` : '')
   );
   console.log(`  idioms:   ${withIdioms.length} of ${registry.length} specs name the code they replace (NSP-018)`);
+  console.log(
+    `  ports:    ${portsDerivable.length} of ${population.length} drawable without a viewer (NSP-020) — ${portsDerivable.length - portsBy.static} by a spec ` +
+      `(${portsBy['params-only']} from the params, ${portsBy['with-project']} with the project, ${portsBy['with-schema']} with the schema), ${portsBy.static} static`
+  );
+  for (const r of portsNot) console.log(`  no view:  ${name(r.typeName)} — ${r.ports.why}`);
   for (const r of exempt) console.log(`  exempt:   ${name(r.typeName)} — ${r.exempt}`);
   for (const [b, names] of Object.entries(owedByBatch)) console.log(`  owed:     ${b} ×${names.length} — ${names.join(', ')}`);
 }
@@ -318,7 +356,7 @@ if (args.includes('--check')) {
     console.error(`\nspec-ledger: FAILED in ${Date.now() - started} ms.`);
     process.exit(1);
   }
-  console.log(`spec-ledger: holds at ${runtime.length}/${population.length} on the runtime, ${contracted.length} as a contract, ${exported.length} on the export (${Date.now() - started} ms).`);
+  console.log(`spec-ledger: holds at ${runtime.length}/${population.length} on the runtime, ${contracted.length} as a contract, ${exported.length} on the export, ${portsDerivable.length} with ports drawable without a viewer (${Date.now() - started} ms).`);
 } else if (all.length && !args.includes('--json')) {
   console.log(`\n  ⚠️  ${all.length} problem(s) — run with --check to see them as the PR job will.`);
 }
