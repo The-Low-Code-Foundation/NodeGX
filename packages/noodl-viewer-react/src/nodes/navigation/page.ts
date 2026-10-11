@@ -10,6 +10,8 @@ interface PageNodeInstance extends ReactNodeInstance {
     title?: string;
     urlPath?: string;
     keepWhenLeaving?: boolean;
+    /** P109-S45-WIREDTITLE — set by the Router showing this page; names the tab after a Title change (router.tsx `_nameTabFromPage`). */
+    onTitleChanged?: () => void;
   };
 }
 
@@ -112,6 +114,8 @@ const PageNode = {
       type: 'string',
       set: function (this: PageNodeInstance, value: string) {
         this._internal.title = value;
+        // P109-S45-WIREDTITLE — a wired Title arrives after the Router has shown the page, and can change while it shows.
+        if (this._internal.onTitleChanged) this._internal.onTitleChanged();
       }
     },
     urlPath: {
@@ -244,6 +248,7 @@ const PageNode = {
         },*/
     setTitle: function (this: PageNodeInstance, value: string) {
       this._internal.title = value;
+      if (this._internal.onTitleChanged) this._internal.onTitleChanged();
     },
     setUrlPath: function (this: PageNodeInstance, value: string) {
       this._internal.urlPath = value;

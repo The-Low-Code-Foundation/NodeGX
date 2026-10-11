@@ -455,6 +455,31 @@ const RouterNode = {
       }
       return kept;
     },
+    /**
+     * P109-S45-WIREDTITLE — the browser tab is named by the Page node's current Title, the typed one from the Pages list
+     * when it has none.
+     *
+     * The tab used to be set once, from the router index's entry, which the exporter builds from the Page node's
+     * *parameters*: a Title wired from a Translation or a record reached the Page node and never the tab. A wired value
+     * arrives after the page is shown, and can change while it shows, so the Page node calls back on every Title it is
+     * given, and the callback names the tab only while this Router is still showing that page (a page left, or kept and
+     * hidden, names nothing). Current Page Title still reads the Pages list, as its description says.
+     */
+    _nameTabFromPage(content) {
+      const pages = content && content.nodeScope ? content.nodeScope.getNodesWithType('Page') : undefined;
+      // A Page node always has both; the guard is for a stand-in without them (as `_keepsWhenLeaving` guards `_internal`).
+      const pageNode =
+        pages && pages.length === 1 && pages[0]._internal && typeof pages[0].getTitle === 'function' ? pages[0] : undefined;
+      const nameTab = () => {
+        if (this._internal.currentPageComponent !== content || !this._internal.currentPage) return;
+        const title = pageNode ? pageNode.getTitle() : undefined;
+        Noodl.SEO.setTitle(
+          title !== undefined && title !== null && title !== '' ? String(title) : this._internal.currentPage.title
+        );
+      };
+      if (pageNode) pageNode._internal.onTitleChanged = nameTab;
+      nameTab();
+    },
     _showKeptPage(content) {
       _eachNodeOf(content, (n) => n._onPageShown && n._onPageShown());
     },
@@ -642,7 +667,7 @@ const RouterNode = {
 
       this.flagOutputDirty('currentPageTitle');
       this.flagOutputDirty('currentPageComponent');
-      Noodl.SEO.setTitle(this._internal.currentPage.title);
+      this._nameTabFromPage(content);
 
       this._updatePageInputs(this._internal.currentPageComponent.nodeScope, params);
 
@@ -989,7 +1014,7 @@ const RouterNode = {
 
       this.flagOutputDirty('currentPageTitle');
       this.flagOutputDirty('currentPageComponent');
-      Noodl.SEO.setTitle(this._internal.currentPage.title);
+      this._nameTabFromPage(content);
 
       const pageInputNodes = content.nodeScope.getNodesWithType('PageInputs');
       if (pageInputNodes !== undefined && pageInputNodes.length > 0) {
