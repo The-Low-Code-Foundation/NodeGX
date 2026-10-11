@@ -170,7 +170,8 @@ export const WORKAROUNDS: Row[] = [
     what: 'the run-on-value-change settle, run from test code after authoring',
     files: [t('cg003Template.ts')],
     pattern: /^\s*pinRunOnValueChangeDefaultsInDirectory\(built\.projectDir\);/m,
-    state: 'present'
+    // P109 s46, ISL-018 AC6: the step wrote 0 of 187 family nodes (the door ticks what it writes), so it is gone.
+    state: 'removed'
   },
   {
     w: 'W19',

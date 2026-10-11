@@ -24,7 +24,7 @@ import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import type { LegacyProject } from '../../noodl-editor/src/editor/src/io/ProjectExporter';
 import { createServer } from '../src/server';
 
-import { pinRunOnValueChangeDefaultsInDirectory, readAsLegacyProject } from './templateArtefact';
+import { readAsLegacyProject } from './templateArtefact';
 import { copyTree } from './templatePins';
 import { APP_NODES, APP_WIRES, C, CG003_COMPONENTS, CgComponent, GAME_NAME, PAGES, REQUIRED_MODULES } from './cg003Components';
 import { GARDEN_PRESET, GARDEN_TOKENS } from './cg007Look';
@@ -240,7 +240,8 @@ export async function buildGardenTemplateProject(options: BuildOptions = {}): Pr
 // ── The directory a person is handed ────────────────────────────────────────
 
 export function prepareGardenArtefact(built: AuthoredGarden, output: string): void {
-  pinRunOnValueChangeDefaultsInDirectory(built.projectDir);
+  // P109 ISL-018 AC6: the raw run-on-change settle (`pinRunOnValueChangeDefaultsInDirectory`) ran here. The door ticks the
+  // box on every node it writes, so it wrote 0 of 187 family nodes (measured s46) and is gone; the byte gate checks the door.
 
   if (path.basename(output) !== TEMPLATE_ID) throw new Error(`refusing to clear ${output}`);
   fs.rmSync(output, { recursive: true, force: true });

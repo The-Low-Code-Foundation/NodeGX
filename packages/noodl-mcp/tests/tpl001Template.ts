@@ -49,7 +49,7 @@ import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import type { LegacyProject } from '../../noodl-editor/src/editor/src/io/ProjectExporter';
 import { createServer } from '../src/server';
 
-import { pinRunOnValueChangeDefaultsInDirectory, readAsLegacyProject } from './templateArtefact';
+import { readAsLegacyProject } from './templateArtefact';
 import { TPL001_CLOUD_COMPONENTS } from './tpl001Cloud';
 import { TPL002_CLOUD_COMPONENTS } from './tpl002Cloud';
 import { APP_NODES, APP_WIRES, TPL001_COMPONENTS, createPass } from './tpl001Components';
@@ -422,18 +422,10 @@ export function prepareArtefact(built: AuthoredTemplate, output: string, policyS
     throw new Error('refusing to write: no page registered into a router — the app would open on nothing');
   }
 
-  // DEF-038 — settle the governed checkboxes BEFORE the id pinning reads the
-  // files, so the artefact means the same thing on disk as it does once the
-  // editor has loaded it. `toTemplateContent` does this for the site builder and
-  // this generator did not: measured 57 stored parameters against the control's
-  // 0, both arms carrying real family nodes. See
-  // `pinRunOnValueChangeDefaultsInDirectory`, where the measurement is recorded.
-  //
-  // ⚠️ Runs on `built.projectDir`, so `built.project` — read before this — is a
-  // pre-settling snapshot. Nothing reads it afterwards, and the gate reads the
-  // written artefact rather than that field, which is what makes the byte
-  // comparison a check on what ships.
-  pinRunOnValueChangeDefaultsInDirectory(built.projectDir);
+  // DEF-038's settle step (`pinRunOnValueChangeDefaultsInDirectory`) used to run here: this generator once stored 57
+  // parameters the editor would rewrite on load. Since ISL-018 the door ticks the box on every node it writes, so the
+  // step wrote 0 of 108 family nodes (measured P109 s46) and is gone (ISL-018 AC6). `tpl001Template.test.ts`'s byte
+  // gate checks the door still does it: with the door's ticking switched off, regenerating loses 57 `true`s in 18 files.
 
   pinComponentFiles(built.projectDir);
   pinRegistry(built.projectDir);
