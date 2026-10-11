@@ -596,11 +596,11 @@ describe('§5 the scripts', () => {
 
   it('Set deadline: ISO dates, "today" and "" are accepted; anything else is refused in words; an unchanged date writes nothing', () => {
     const ok = run(DEADLINE_SCRIPT, { taskId: 't', text: '2026-9-3', current: '' });
-    expect([ok.outputs.value, ok.outputs.hasError, ok.signals]).toEqual(['2026-09-03', false, ['go']]);
+    expect([ok.outputs.value, ok.outputs.verdict, ok.signals]).toEqual(['2026-09-03', { about: 't', error: '' }, ['go']]);
     expect(run(DEADLINE_SCRIPT, { taskId: 't', text: 'today', current: '' }).outputs.value).toBe(iso(today));
     expect(run(DEADLINE_SCRIPT, { taskId: 't', text: '', current: '2026-09-03' }).outputs.summary).toBe('Deadline cleared');
     const bad = run(DEADLINE_SCRIPT, { taskId: 't', text: '2026-02-30', current: '' });
-    expect([bad.outputs.hasError, bad.signals]).toEqual([true, []]);
+    expect([bad.outputs.verdict, bad.signals]).toEqual([{ about: 't', error: 'Use a date like 2026-09-30, or leave it empty.' }, []]);
     expect(run(DEADLINE_SCRIPT, { taskId: 't', text: '2026-09-03', current: '2026-09-03' }).signals).toEqual([]);
   });
 });

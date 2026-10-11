@@ -77,12 +77,24 @@
     },
     {
       "fromId": "SetdeadlinGuard",
+      "fromProperty": "out-verdict",
+      "toId": "SetdeadlinSay",
+      "toProperty": "in-verdict"
+    },
+    {
+      "fromId": "SetdeadlinIn",
+      "fromProperty": "taskId",
+      "toId": "SetdeadlinSay",
+      "toProperty": "in-about"
+    },
+    {
+      "fromId": "SetdeadlinSay",
       "fromProperty": "out-error",
       "toId": "SetdeadlinOut",
       "toProperty": "error"
     },
     {
-      "fromId": "SetdeadlinGuard",
+      "fromId": "SetdeadlinSay",
       "fromProperty": "out-hasError",
       "toId": "SetdeadlinOut",
       "toProperty": "hasError"

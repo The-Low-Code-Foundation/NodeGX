@@ -13,10 +13,10 @@ import * as os from 'os';
 import * as path from 'path';
 
 import { placeStarterAssets } from './helpers/judge';
-import { clickAt, clickButton } from './helpers/members-drive';
+import { clickAt, clickButton, fill } from './helpers/members-drive';
 import { withRenderedPage } from './helpers/site-drive';
 import type { RenderedPage } from './helpers/site-drive';
-import { clickWords, text, until, wait } from './helpers/todo-drive';
+import { clickButtonByField, clickWords, text, until, wait } from './helpers/todo-drive';
 
 jest.setTimeout(300_000);
 
@@ -27,6 +27,10 @@ const STORAGE_KEY = 'nodegx-todo-list-demo-v1';
 /** Seeded in `tpl008Demo.ts`: Pilates starts in five days, the tablets twelve days ago; neither ends. */
 const PILATES = 'Pilates';
 const TABLETS = 'Take the tablets';
+/** `ROUTINE_DATES_SCRIPT` in `tpl008Components.ts`, for an end before the start. */
+const REFUSAL = 'It cannot end before it starts.';
+/** `SET_SCHEDULE_SCRIPT`, for a typed time that is not a time — the pane's other refusal. */
+const TIME_REFUSAL = 'Type a time like 08:00, 8:30 or 8pm.';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -96,7 +100,7 @@ describe('P78-D81 — the routine pane’s dates are the open routine’s', () =
         await wait(800);
         R.pilatesOpened = await fields(page);
         await pickDateIn(page, 1, plus(1));
-        await until('refused', () => text(page), (s) => s.includes('It cannot end before it starts.'));
+        await until('refused', () => text(page), (s) => s.includes(REFUSAL));
         await wait(800);
         R.refused = await fields(page);
         R.pilatesEnd = (await routine(PILATES))?.endDate;
@@ -106,8 +110,29 @@ describe('P78-D81 — the routine pane’s dates are the open routine’s', () =
         await wait(1200);
         R.tablets = await fields(page);
         R.tabletsRecord = await routine(TABLETS);
-        R.tabletsSaysRefusal = (await text(page)).includes('It cannot end before it starts.');
-        console.log(`D81 reading: the refusal sentence is still shown on the next routine: ${R.tabletsSaysRefusal}`);
+        R.tabletsSaysRefusal = (await text(page)).includes(REFUSAL);
+
+        // P109-S43-ROUTINEREFUSAL. Back to Pilates: the refusal was about a pick the field no longer
+        // shows, so it is not said again. Then the same refusal a second time — the same words, a
+        // `hasError` already true once — must be said (the trap a constant-false hide falls into).
+        await clickWords(page, PILATES);
+        await until('Pilates open again', () => text(page), (s) => s.includes('Every Tue and Thu at 18:30'));
+        await wait(1200);
+        R.backSaysRefusal = (await text(page)).includes(REFUSAL);
+        await pickDateIn(page, 1, plus(1));
+        await wait(1200);
+        R.againSaysRefusal = (await text(page)).includes(REFUSAL);
+        R.pilatesEndAgain = (await routine(PILATES))?.endDate;
+
+        // The pane's other refusal (Set schedule's add) takes the same path: said here, not on the tablets.
+        await fill(page, 'a time, like 08:00', 'soon');
+        await clickButtonByField(page, 'Add time', 'A time, like');
+        await wait(1200);
+        R.timeRefused = (await text(page)).includes(TIME_REFUSAL);
+        await clickWords(page, TABLETS);
+        await until('tablets open again', () => text(page), (s) => s.includes('Every day at 08:00 and 20:00'));
+        await wait(1200);
+        R.tabletsSaysTimeRefusal = (await text(page)).includes(TIME_REFUSAL);
         R.consoleErrors = [...page.consoleErrors];
       } catch (error) {
         driveError = error instanceof Error ? error.message : String(error);
@@ -130,6 +155,18 @@ describe('P78-D81 — the routine pane’s dates are the open routine’s', () =
     const record = R.tabletsRecord as Record<string, unknown> | undefined;
     expect(record?.endDate).toBe('');
     expect(R.tablets).toEqual([record?.startDate, '']);
+  });
+
+  it('P109-S43-ROUTINEREFUSAL — the refusal is said only while the routine it was about is open', () => {
+    expect({ tablets: R.tabletsSaysRefusal, backOnPilates: R.backSaysRefusal }).toEqual({ tablets: false, backOnPilates: false });
+  });
+
+  it('…and the same refusal made a second time is said again, and still not written', () => {
+    expect({ again: R.againSaysRefusal, end: R.pilatesEndAgain }).toEqual({ again: true, end: '' });
+  });
+
+  it('…and so is a time that is not a time, refused on one routine and not said on the next', () => {
+    expect({ refused: R.timeRefused, onTablets: R.tabletsSaysTimeRefusal }).toEqual({ refused: true, onTablets: false });
   });
 
   it('no console errors', () => {

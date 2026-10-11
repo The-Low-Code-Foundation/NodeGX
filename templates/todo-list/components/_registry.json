@@ -62,8 +62,8 @@
     "Commands/Set deadline": {
       "path": "Commands/Set deadline",
       "type": "visual",
-      "nodeCount": 6,
-      "connectionCount": 14,
+      "nodeCount": 7,
+      "connectionCount": 16,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -142,16 +142,16 @@
     "Commands/Set schedule": {
       "path": "Commands/Set schedule",
       "type": "visual",
-      "nodeCount": 6,
-      "connectionCount": 19,
+      "nodeCount": 7,
+      "connectionCount": 21,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
     "Commands/Set routine dates": {
       "path": "Commands/Set routine dates",
       "type": "visual",
-      "nodeCount": 6,
-      "connectionCount": 17,
+      "nodeCount": 7,
+      "connectionCount": 19,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -646,7 +646,7 @@
   },
   "stats": {
     "totalComponents": 80,
-    "totalNodes": 885,
-    "totalConnections": 2036
+    "totalNodes": 888,
+    "totalConnections": 2042
   }
 }

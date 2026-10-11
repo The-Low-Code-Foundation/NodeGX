@@ -23,6 +23,7 @@ import * as path from 'path';
 import {
   CLOCK_SCRIPT,
   ROUTINE_DATES_SCRIPT,
+  SAY_REFUSAL_SCRIPT,
   SCHEDULE_FNS,
   SELECTED_ROUTINE_SCRIPT,
   SET_SCHEDULE_SCRIPT,
@@ -293,6 +294,9 @@ describe('§3 a routine’s pane, and Missed (RC4)', () => {
 
 // ── §4 ─────────────────────────────────────────────────────────────────────
 
+/** The words of a guard's verdict (`refusalAbout` in `tpl008Components.ts`): '' accepted, a sentence refused. */
+const said = (r: { outputs: Record<string, unknown> }) => (r.outputs.verdict as { about: string; error: string } | undefined)?.error;
+
 describe('§4 the commands', () => {
   const daily = { id: 'x', title: 'Tablets', cadence: 'daily', slots: '08:00,20:00', startDate: '2026-09-01', endDate: '' };
   const weekly = { id: 'w', title: 'Call', cadence: 'weekly', slots: 'fri@10:00', startDate: '2026-09-01', endDate: '' };
@@ -311,10 +315,10 @@ describe('§4 the commands', () => {
 
   it('add: the typed time on every day picked — Tuesday and Thursday at 9 is one Add', () => {
     const added = sched(weekly, 'add', { days: 'thu,tue', timeText: '9' });
-    expect([added.outputs.slots, added.outputs.summary, added.outputs.hasError]).toEqual([
+    expect([added.outputs.slots, added.outputs.summary, added.outputs.verdict]).toEqual([
       'tue@09:00,thu@09:00,fri@10:00',
       'Schedule: every Tue at 09:00; Thu at 09:00; Fri at 10:00',
-      false
+      { about: 'w', error: '' }
     ]);
     expect(sched(daily, 'add', { timeText: '1pm' }).outputs.slots).toBe('08:00,13:00,20:00');
   });
@@ -325,7 +329,7 @@ describe('§4 the commands', () => {
       sched(weekly, 'add', { days: '', timeText: '09:00' }),
       sched(daily, 'add', { timeText: '8' })
     ];
-    expect(cases.map((c) => [c.outputs.error, c.signals])).toEqual([
+    expect(cases.map((c) => [said(c), c.signals])).toEqual([
       ['Type a time like 08:00, 8:30 or 8pm.', []],
       ['Pick at least one day first.', []],
       ['That time is already there.', []]
@@ -340,14 +344,34 @@ describe('§4 the commands', () => {
   it('dates: a start is required, an end may be cleared, and it never ends before it starts', () => {
     const dates = (which: string, text: string, row = { ...daily, endDate: '2026-10-31' }) =>
       run(ROUTINE_DATES_SCRIPT, { routines: [row], routineId: row.id, which, text });
-    expect(dates('end', '2026-08-01').outputs.error).toBe('It cannot end before it starts.');
-    expect(dates('start', '2026-11-05').outputs.error).toBe('It cannot start after it ends.');
-    expect(dates('start', '').outputs.error).toBe('It needs a start date — the day it first comes up.');
-    expect(dates('end', '2026-02-30').outputs.error).toBe('Use a date like 2026-10-06.');
+    expect(dates('end', '2026-08-01').outputs.verdict).toEqual({ about: 'x', error: 'It cannot end before it starts.' });
+    expect(said(dates('start', '2026-11-05'))).toBe('It cannot start after it ends.');
+    expect(said(dates('start', ''))).toBe('It needs a start date — the day it first comes up.');
+    expect(said(dates('end', '2026-02-30'))).toBe('Use a date like 2026-10-06.');
     const cleared = dates('end', '');
     expect([cleared.outputs.endDate, cleared.outputs.startDate, cleared.outputs.summary, cleared.signals]).toEqual(['', '2026-09-01', 'End date cleared', ['go']]);
     expect(dates('end', '2026-10-31').signals).toEqual([]);
     expect(dates('start', '2026-09-08').outputs.summary).toBe('Starts Tue 8 Sep');
+  });
+
+  it('P109-S43-ROUTINEREFUSAL — a refusal is said while its record is open, and again when made again', () => {
+    // One node: `this` is kept between runs, as the runtime keeps it.
+    const self = {};
+    const say = (verdict: unknown, about: string) => {
+      const outputs: Record<string, unknown> = {};
+      // eslint-disable-next-line no-new-func
+      new Function('Inputs', 'Outputs', SAY_REFUSAL_SCRIPT).call(self, { verdict, about }, outputs);
+      return [outputs.error, outputs.hasError];
+    };
+    const refused = { about: 'pilates', error: 'It cannot end before it starts.' };
+    expect(say(undefined, 'pilates')).toEqual(['', false]);
+    expect(say(refused, 'pilates')).toEqual([refused.error, true]);
+    expect(say(refused, 'tablets')).toEqual(['', false]);
+    expect(say(refused, 'pilates')).toEqual(['', false]);
+    expect(say({ ...refused }, 'pilates')).toEqual([refused.error, true]);
+    expect(say({ about: 'pilates', error: '' }, 'pilates')).toEqual(['', false]);
+    // A verdict about a record no longer open when it lands is not said.
+    expect(say({ ...refused }, 'tablets')).toEqual(['', false]);
   });
 
   it('a tick is one occurrence — that routine, that day, that time — with or without a note', () => {

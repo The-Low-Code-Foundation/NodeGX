@@ -95,12 +95,24 @@
     },
     {
       "fromId": "SetroutineGuard",
+      "fromProperty": "out-verdict",
+      "toId": "SetroutineSay",
+      "toProperty": "in-verdict"
+    },
+    {
+      "fromId": "SetroutineIn",
+      "fromProperty": "routineId",
+      "toId": "SetroutineSay",
+      "toProperty": "in-about"
+    },
+    {
+      "fromId": "SetroutineSay",
       "fromProperty": "out-error",
       "toId": "SetroutineOut",
       "toProperty": "error"
     },
     {
-      "fromId": "SetroutineGuard",
+      "fromId": "SetroutineSay",
       "fromProperty": "out-hasError",
       "toId": "SetroutineOut",
       "toProperty": "hasError"

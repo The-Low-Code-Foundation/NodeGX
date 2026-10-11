@@ -2940,12 +2940,37 @@ interface CommandSpec {
   /** The history line: its kind, and where each of its inputs comes from. */
   history: { kind: string; taskId: [string, string]; summary?: [string, string]; body?: [string, string]; from?: [string, string]; to?: [string, string]; mergeKey?: [string, string] };
   extraWires?: (p: string) => unknown[];
+  /**
+   * P109-S43-ROUTINEREFUSAL. The input naming the record a refusal is about (`taskId`, `routineId`).
+   * Set, the command gains `error` and `hasError`, and its guard publishes each verdict as
+   * `Outputs.verdict = { about, error }` instead of writing them itself: the pane that shows the
+   * sentence stays drawn while another record is opened, and the guard runs only on `do`, so
+   * nothing it writes could take the sentence away. {@link SAY_REFUSAL_SCRIPT} does.
+   */
+  refusalAbout?: string;
 }
+
+/**
+ * A refusal is said while the record it was about is open. The guard's verdict is a new object every
+ * time, even in the same words, so a refusal made again after a visit elsewhere is said again: a
+ * `hasError` hidden from outside would be `true` twice, which is no change, and stay hidden.
+ */
+export const SAY_REFUSAL_SCRIPT = `var verdict = Inputs.verdict || null;
+var about = String(Inputs.about || '');
+if (verdict !== this.verdict) {
+  this.verdict = verdict;
+  this.error = verdict && verdict.about === about ? String(verdict.error || '') : '';
+} else if (about !== this.about) this.error = '';
+this.about = about;
+Outputs.error = this.error;
+Outputs.hasError = this.error !== '';`;
 
 function command(spec: CommandSpec): Tpl008Component {
   const p = spec.path.split('/')[1].replace(/[^A-Za-z]/g, '').slice(0, 10);
   const ins: Array<[string, string]> = [...spec.ins, ['do', 'signal']];
-  const outs: Array<[string, string]> = [['done', 'signal'], ...(spec.extraOuts ?? [])];
+  const about = spec.refusalAbout;
+  const refusalOuts: Array<[string, string]> = about ? [['error', 'string'], ['hasError', 'boolean']] : [];
+  const outs: Array<[string, string]> = [['done', 'signal'], ...refusalOuts, ...(spec.extraOuts ?? [])];
   const built = spec.body(p);
   const h = spec.history;
   const historyWires: unknown[] = [
@@ -2968,7 +2993,8 @@ function command(spec: CommandSpec): Tpl008Component {
       script(`${p}Guard`, 'Is there anything to write?', spec.guard, [...spec.guardIns, ...(spec.quietIns ?? [])]),
       ...built.nodes,
       logic(`${p}History`, C.writeHistory, 'Write the history line', { kind: h.kind }),
-      { ...(logic(`${p}Problem`, SET_VARIABLE, 'Say it did not save', { name: VAR.problem, setWith: 'string', value: PROBLEM_TEXT }) as object), comment: SHARED_PROBLEM }
+      { ...(logic(`${p}Problem`, SET_VARIABLE, 'Say it did not save', { name: VAR.problem, setWith: 'string', value: PROBLEM_TEXT }) as object), comment: SHARED_PROBLEM },
+      ...(about ? [derive(`${p}Say`, 'Say a refusal while its record is open', SAY_REFUSAL_SCRIPT)] : [])
     ],
     connections: [
       ...spec.guardIns.map((n) => wire(`${p}In`, n, `${p}Guard`, `in-${n}`)),
@@ -2977,6 +3003,14 @@ function command(spec: CommandSpec): Tpl008Component {
       ...historyWires,
       wire(`${p}History`, 'done', `${p}Out`, 'done'),
       ...built.failures.map(([id, portName]) => wire(id, portName, `${p}Problem`, 'do')),
+      ...(about
+        ? [
+            wire(`${p}Guard`, 'out-verdict', `${p}Say`, 'in-verdict'),
+            wire(`${p}In`, about, `${p}Say`, 'in-about'),
+            wire(`${p}Say`, 'out-error', `${p}Out`, 'error'),
+            wire(`${p}Say`, 'out-hasError', `${p}Out`, 'hasError')
+          ]
+        : []),
       ...(spec.extraWires ? spec.extraWires(p) : [])
     ]
   };
@@ -3243,12 +3277,10 @@ else if (raw === 'today' || raw === 'tomorrow') {
   }
 }
 if (value === null) {
-  Outputs.error = 'Use a date like 2026-09-30, or leave it empty.';
-  Outputs.hasError = true;
+  Outputs.verdict = { about: String(Inputs.taskId || ''), error: 'Use a date like 2026-09-30, or leave it empty.' };
   return;
 }
-Outputs.error = '';
-Outputs.hasError = false;
+Outputs.verdict = { about: String(Inputs.taskId || ''), error: '' };
 if (String(Inputs.taskId || '') === '' || value === current) return;
 Outputs.value = value;
 Outputs.summary = value === '' ? 'Deadline cleared' : 'Deadline set to ' + fmtDay(toDay(value));
@@ -3258,7 +3290,7 @@ const SET_DEADLINE = command({
   path: 'Commands/Set deadline',
   description: 'Sets or clears a task’s deadline from the date picker (YYYY-MM-DD; "today" and "tomorrow" also work). Anything else is refused with a sentence saying so.',
   ins: [['taskId', 'string'], ['text', 'string'], ['current', 'string']],
-  extraOuts: [['error', 'string'], ['hasError', 'boolean']],
+  refusalAbout: 'taskId',
   guard: DEADLINE_SCRIPT,
   guardIns: ['taskId', 'text', 'current'],
   body: (p) => {
@@ -3270,8 +3302,7 @@ const SET_DEADLINE = command({
       failures: [[`${p}Write`, 'failure']]
     };
   },
-  history: { kind: 'deadline', taskId: ['SetdeadlinIn', 'taskId'], summary: ['SetdeadlinGuard', 'out-summary'] },
-  extraWires: (p) => [wire(`${p}Guard`, 'out-error', `${p}Out`, 'error'), wire(`${p}Guard`, 'out-hasError', `${p}Out`, 'hasError')]
+  history: { kind: 'deadline', taskId: ['SetdeadlinIn', 'taskId'], summary: ['SetdeadlinGuard', 'out-summary'] }
 });
 
 const ADD_ACTION = command({
@@ -3519,8 +3550,7 @@ var cadence = row.cadence === 'weekly' || row.cadence === 'monthly' ? row.cadenc
 var slots = schedSlots(cadence, row.slots);
 var next = cadence, keys = [], i;
 function fail(text) {
-  Outputs.error = text;
-  Outputs.hasError = true;
+  Outputs.verdict = { about: String(Inputs.routineId || ''), error: text };
 }
 if (change === 'daily' || change === 'weekly' || change === 'monthly') {
   if (change === cadence) return;
@@ -3552,8 +3582,7 @@ if (next === cadence && text === schedJoin(slots)) {
   if (change === 'add') fail('That time is already there.');
   return;
 }
-Outputs.error = '';
-Outputs.hasError = false;
+Outputs.verdict = { about: String(Inputs.routineId || ''), error: '' };
 Outputs.cadence = next;
 Outputs.slots = text;
 var said = schedDescribe({ cadence: next, slots: text });
@@ -3565,7 +3594,7 @@ const SET_SCHEDULE = command({
   description:
     'Changes when something repeats. Place it with Change set to daily, weekly or monthly (the timescale — its times are kept), add (the typed time, on every day picked) or remove (the time in Slot Key). A time that is not a time, or a weekly one with no day picked, is refused in words.',
   ins: [['routines', 'array'], ['routineId', 'string'], ['change', 'string'], ['days', 'string'], ['timeText', 'string'], ['slotKey', 'string']],
-  extraOuts: [['error', 'string'], ['hasError', 'boolean']],
+  refusalAbout: 'routineId',
   guard: SET_SCHEDULE_SCRIPT,
   guardIns: ['routines', 'routineId', 'change', 'days', 'timeText', 'slotKey'],
   body: (p) => {
@@ -3577,8 +3606,7 @@ const SET_SCHEDULE = command({
       failures: [[`${p}Write`, 'failure']]
     };
   },
-  history: { kind: 'schedule', taskId: ['SetschedulIn', 'routineId'], summary: ['SetschedulGuard', 'out-summary'], mergeKey: ['SetschedulIn', 'routineId'] },
-  extraWires: (p) => [wire(`${p}Guard`, 'out-error', `${p}Out`, 'error'), wire(`${p}Guard`, 'out-hasError', `${p}Out`, 'hasError')]
+  history: { kind: 'schedule', taskId: ['SetschedulIn', 'routineId'], summary: ['SetschedulGuard', 'out-summary'], mergeKey: ['SetschedulIn', 'routineId'] }
 });
 
 /** RC8. Place it twice, Which set to `start` and `end`. A start is required; an end may be cleared; never end before start. */
@@ -3592,16 +3620,14 @@ var which = String(Inputs.which || '') === 'end' ? 'end' : 'start';
 var raw = String(Inputs.text || '').trim();
 var value = raw === '' ? '' : schedDate(raw) ? raw : null;
 function fail(text) {
-  Outputs.error = text;
-  Outputs.hasError = true;
+  Outputs.verdict = { about: String(Inputs.routineId || ''), error: text };
 }
 if (value === null) return fail('Use a date like 2026-10-06.');
 if (which === 'start' && value === '') return fail('It needs a start date — the day it first comes up.');
 var start = which === 'start' ? value : String(row.startDate || '');
 var end = which === 'end' ? value : String(row.endDate || '');
 if (start !== '' && end !== '' && end < start) return fail(which === 'end' ? 'It cannot end before it starts.' : 'It cannot start after it ends.');
-Outputs.error = '';
-Outputs.hasError = false;
+Outputs.verdict = { about: String(Inputs.routineId || ''), error: '' };
 if (value === String((which === 'start' ? row.startDate : row.endDate) || '')) return;
 Outputs.startDate = start;
 Outputs.endDate = end;
@@ -3612,7 +3638,7 @@ const SET_ROUTINE_DATES = command({
   path: 'Commands/Set routine dates',
   description: 'Sets when something that repeats starts or ends. Place it with Which set to start or end. It cannot end before it starts, and it always has a start.',
   ins: [['routines', 'array'], ['routineId', 'string'], ['which', 'string'], ['text', 'string']],
-  extraOuts: [['error', 'string'], ['hasError', 'boolean']],
+  refusalAbout: 'routineId',
   guard: ROUTINE_DATES_SCRIPT,
   guardIns: ['routines', 'routineId', 'which', 'text'],
   body: (p) => {
@@ -3624,8 +3650,7 @@ const SET_ROUTINE_DATES = command({
       failures: [[`${p}Write`, 'failure']]
     };
   },
-  history: { kind: 'routine-dates', taskId: ['SetroutineIn', 'routineId'], summary: ['SetroutineGuard', 'out-summary'], mergeKey: ['SetroutineIn', 'which'] },
-  extraWires: (p) => [wire(`${p}Guard`, 'out-error', `${p}Out`, 'error'), wire(`${p}Guard`, 'out-hasError', `${p}Out`, 'hasError')]
+  history: { kind: 'routine-dates', taskId: ['SetroutineIn', 'routineId'], summary: ['SetroutineGuard', 'out-summary'], mergeKey: ['SetroutineIn', 'which'] }
 });
 
 /** RC3. One occurrence ticked off: a `RoutineCheck` for that day and time, and a line with the note if there is one. */

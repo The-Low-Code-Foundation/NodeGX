@@ -107,12 +107,24 @@
     },
     {
       "fromId": "SetschedulGuard",
+      "fromProperty": "out-verdict",
+      "toId": "SetschedulSay",
+      "toProperty": "in-verdict"
+    },
+    {
+      "fromId": "SetschedulIn",
+      "fromProperty": "routineId",
+      "toId": "SetschedulSay",
+      "toProperty": "in-about"
+    },
+    {
+      "fromId": "SetschedulSay",
       "fromProperty": "out-error",
       "toId": "SetschedulOut",
       "toProperty": "error"
     },
     {
-      "fromId": "SetschedulGuard",
+      "fromId": "SetschedulSay",
       "fromProperty": "out-hasError",
       "toId": "SetschedulOut",
       "toProperty": "hasError"
