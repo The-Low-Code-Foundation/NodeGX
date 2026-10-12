@@ -41175,7 +41175,7 @@
       "inputs": [
         {
           "name": "maxBytes",
-          "displayName": "Max Bytes",
+          "displayName": "Max Characters",
           "group": "General",
           "plug": "input",
           "type": {
@@ -41183,7 +41183,7 @@
           },
           "isSignal": false,
           "default": 5242880,
-          "description": "Refuse a document larger than this, before parsing it. Raise it for a source that really does publish its whole archive in one file"
+          "description": "Refuse a document longer than this many characters (not bytes), before parsing it. Raise it for a source that really does publish its whole archive in one file"
         },
         {
           "name": "text",
@@ -41386,7 +41386,7 @@
         },
         {
           "name": "maxBytes",
-          "displayName": "Max Bytes",
+          "displayName": "Max Characters",
           "group": "General",
           "plug": "input",
           "type": {
@@ -41394,7 +41394,7 @@
           },
           "isSignal": false,
           "default": 5242880,
-          "description": "Refuse a document larger than this, before parsing it. A big document costs many times its own size in memory once it is an object, and a server can always send more than you expected"
+          "description": "Refuse a document longer than this many characters (not bytes), before parsing it. A big document costs many times its own size in memory once it is an object, and a server can always send more than you expected"
         },
         {
           "name": "text",

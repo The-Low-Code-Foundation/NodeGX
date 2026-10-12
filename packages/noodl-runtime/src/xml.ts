@@ -152,8 +152,8 @@ export function parseXML(text: string | undefined | null, options: XMLParseOptio
       error: {
         code: 'xml/too-large',
         message:
-          `This XML is ${Math.round(text.length / 1024)} KB, over the ${Math.round(maxBytes / 1024)} KB ` +
-          'limit. Raise Max Bytes on the node if the source really is this big'
+          `This XML is ${Math.round(text.length / 1024)} K characters, over the ${Math.round(maxBytes / 1024)} K limit. ` +
+          'Raise Max Characters on the node if the source really is this big'
       }
     };
   }

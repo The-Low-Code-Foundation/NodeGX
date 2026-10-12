@@ -14,7 +14,7 @@
  * was (:210-221). A success clears both (sent — a wire keeps the last reason), replaces `Result`
  * with the fresh object, and pulses `Changed` (:223-230). `Attribute Prefix` falls back to `@` on
  * `undefined` / `null` only (:94 — `''` is a real prefix: attributes keyed by their bare name);
- * `Always Array` is `value || ''` (:108); `Trim Values` is truthiness (:119); `Max Bytes` is
+ * `Always Array` is `value || ''` (:108); `Trim Values` is truthiness (:119); `Max Characters` (port id `maxBytes`) is
  * `Number(value)`, the default unless finite and above 0 (:132-133).
  *
  * `Always Array` is read as text on arrival (`String(value)`, v2 — NSP-013 §6 row C18, ruled "Turn it into
@@ -47,7 +47,18 @@ export const ParseXML = defineNode({
   type: 'net.noodl.ParseXML',
   // v2 (P109 ISL-026, P107-C18 ruled "Turn it into text"): Always Array is `String(value)` on arrival; v1 wrote the runtime's
   // silence for a value that was not text.
-  version: 2,
+  // v3 (P107 s92, row C162 — R28): the cap is named Max Characters, and its Error says so
+  version: 3,
+  changes: [
+    {
+      version: 3,
+      says: 'Words only: "Max Bytes" is now "Max Characters", and the xml/too-large Error says "N K characters, over the M K limit. Raise Max Characters on the node…" where it said "N KB, over the M KB limit. Raise Max Bytes…". The check is the same: it always counted characters, not bytes',
+      row: 'P107-C162 (R28)',
+      migration: {
+        none: 'Ruled "Rename it Max Characters and keep the check" (R28): the port id stays `maxBytes`, so a saved project reads as before, and only the words of an Error changed. The reach measured on 2026-10-12 was 0 Parse XML or Parse Feed nodes in Richard\'s projects'
+      }
+    }
+  ],
   source: 'packages/noodl-runtime/src/nodes/std-library/data/parsexml.ts; packages/noodl-runtime/src/xml.ts',
 
   // :61-66 initialize — the real defaults (a declared `default` never runs its setter)
@@ -98,10 +109,10 @@ export const ParseXML = defineNode({
       default: DEFAULT_MAX_BYTES,
       coerce: 'none',
       examples: [8, 30, 1000, 0, -1, 'x'],
-      displayName: 'Max Bytes',
+      displayName: 'Max Characters',
       group: 'General',
       description:
-        'Refuse a document larger than this, before parsing it. A big document costs many times ' +
+        'Refuse a document longer than this many characters (not bytes), before parsing it. A big document costs many times ' +
         'its own size in memory once it is an object, and a server can always send more than you expected'
     }
   },

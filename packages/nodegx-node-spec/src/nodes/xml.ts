@@ -9,7 +9,7 @@
  * type-inferred (every value a string), the five predefined entities, HTML entities and numeric
  * references decoded, a tag with attributes AND text giving `{ '@a': …, '#text': … }`, the tags
  * named in Always Array an array however many times they appear. Before the library sees a byte:
- * an empty or non-string text is `xml/empty` (:146), a text longer than Max Bytes CHARACTERS is
+ * an empty or non-string text is `xml/empty` (:146), a text longer than Max Characters (port id `maxBytes`) is
  * `xml/too-large` (:150), and a `<!ENTITY` or a `<!DOCTYPE … [` in the first 64 K characters is
  * refused (:107-134). Nothing here throws: a library throw is `xml/parse-failed` with the
  * library's own message (:189-191).
@@ -120,8 +120,8 @@ export function parseXML(text: string | undefined | null, options: XMLParseOptio
       error: {
         code: 'xml/too-large',
         message:
-          `This XML is ${Math.round(text.length / 1024)} KB, over the ${Math.round(maxBytes / 1024)} KB ` +
-          'limit. Raise Max Bytes on the node if the source really is this big'
+          `This XML is ${Math.round(text.length / 1024)} K characters, over the ${Math.round(maxBytes / 1024)} K limit. ` +
+          'Raise Max Characters on the node if the source really is this big'
       }
     };
   }

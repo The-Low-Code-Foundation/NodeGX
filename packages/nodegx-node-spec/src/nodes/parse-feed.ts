@@ -59,7 +59,18 @@ export const ParseFeed = defineNode({
   type: 'net.noodl.ParseFeed',
   // v2 (P109 ISL-032, row D16): a zoneless date is UTC everywhere, an unknown zone name gives no date.
   // v3 (row D17): Feed Updated is empty text when a feed does not say. v4 (row D18): Count is what Items holds.
-  version: 4,
+  // v5 (P107 s92, row C162 — R28): the cap is named Max Characters, and its Error says so
+  version: 5,
+  changes: [
+    {
+      version: 5,
+      says: 'Words only: "Max Bytes" is now "Max Characters", and the xml/too-large Error says "N K characters, over the M K limit. Raise Max Characters on the node…" where it said "N KB, over the M KB limit. Raise Max Bytes…". The check is the same: it always counted characters, not bytes',
+      row: 'P107-C162 (R28)',
+      migration: {
+        none: 'Ruled "Rename it Max Characters and keep the check" (R28): the port id stays `maxBytes`, so a saved project reads as before, and only the words of an Error changed. The reach measured on 2026-10-12 was 0 Parse XML or Parse Feed nodes in Richard\'s projects'
+      }
+    }
+  ],
   source: 'packages/noodl-runtime/src/nodes/std-library/data/parsefeed.ts; packages/noodl-runtime/src/feed.ts; packages/noodl-runtime/src/xml.ts',
   needs: ['registry', 'random', 'timezone'],
 
@@ -85,10 +96,10 @@ export const ParseFeed = defineNode({
       default: DEFAULT_MAX_BYTES,
       coerce: 'none',
       examples: [40, 1000, 0, -1, 'x'],
-      displayName: 'Max Bytes',
+      displayName: 'Max Characters',
       group: 'General',
       description:
-        'Refuse a document larger than this, before parsing it. Raise it for a source that really ' +
+        'Refuse a document longer than this many characters (not bytes), before parsing it. Raise it for a source that really ' +
         'does publish its whole archive in one file'
     }
   },

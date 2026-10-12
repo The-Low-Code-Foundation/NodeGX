@@ -92,11 +92,11 @@ const ParseFeedNode: NodeDefinitionOptions = {
     },
     maxBytes: {
       type: 'number',
-      displayName: 'Max Bytes',
+      displayName: 'Max Characters',
       group: 'General',
       default: DEFAULT_MAX_BYTES,
       description:
-        'Refuse a document larger than this, before parsing it. Raise it for a source that really ' +
+        'Refuse a document longer than this many characters (not bytes), before parsing it. Raise it for a source that really ' +
         'does publish its whole archive in one file',
       set: function (this: ParseFeedNodeInstance, value: number) {
         const n = Number(value);

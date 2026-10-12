@@ -91,7 +91,7 @@
     "steps": [{ "set": "text", "value": "<rss><channel><title>V</title><item><guid>k</guid><title>v1</title></item></channel></rss>" }, "settle", { "set": "text", "value": "<rss><channel><title>V</title><item><guid>k</guid><title>v2</title></item><item><guid>m</guid><title>new</title></item></channel></rss>" }, "settle"]
   },
   {
-    "name": "null is not an arrival; Max Bytes refuses a long feed as xml/too-large and 0 restores the default; two inputs in one frame parse once",
+    "name": "null is not an arrival; Max Characters refuses a long feed as xml/too-large and 0 restores the default; two inputs in one frame parse once",
     "because": "parsefeed.ts :88, :234; :102-103; :224-231; feed.ts :399 maxBytes reaches parseXML",
     "params": {},
     "world": { "timeZone": "UTC" },

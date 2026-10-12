@@ -5855,8 +5855,8 @@
           "type": "number",
           "plug": "input",
           "group": "General",
-          "displayName": "Max Bytes",
-          "description": "Refuse a document larger than this, before parsing it. A big document costs many times its own size in memory once it is an object, and a server can always send more than you expected",
+          "displayName": "Max Characters",
+          "description": "Refuse a document longer than this many characters (not bytes), before parsing it. A big document costs many times its own size in memory once it is an object, and a server can always send more than you expected",
           "default": 5242880
         },
         {
@@ -5925,8 +5925,8 @@
           "type": "number",
           "plug": "input",
           "group": "General",
-          "displayName": "Max Bytes",
-          "description": "Refuse a document larger than this, before parsing it. Raise it for a source that really does publish its whole archive in one file",
+          "displayName": "Max Characters",
+          "description": "Refuse a document longer than this many characters (not bytes), before parsing it. Raise it for a source that really does publish its whole archive in one file",
           "default": 5242880
         },
         {
