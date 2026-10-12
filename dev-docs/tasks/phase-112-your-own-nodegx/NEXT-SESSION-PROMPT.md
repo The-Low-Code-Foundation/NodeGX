@@ -88,7 +88,7 @@ Read OWN-015 §9–§10 first. s14 had been left uncommitted at the `/clear`; it
 committed: CFPORTS (`5ff71216f`: the bare-port refusal also covers an instance's own `ports` and the cloud
 Request/Response; 10 examples rewired), UNDEPLOYED (`787876713`: cloud writes say "deploy now" and reveal the tool)
 and DETACHEDVISUAL (`9505d342d`: a warning). A fresh `claude -p` round from tarballs packed at HEAD, with a sentence
-that never says NodeGX, built `french-phrases` ($3.75, 84 turns) and deployed it unprompted. Richard pasted the key
+that never says NodeGX, built `french-phrases` (84 turns; `claude -p` is Claude Code on Richard's subscription, never the API; its "$3.75" is an API-price equivalent) and deployed it unprompted. Richard pasted the key
 into the project's `.env`; it **speaks** (desktop and phone, to the end, key 0 hits in 2 MB, control 4).
 
 **Next, in order:**

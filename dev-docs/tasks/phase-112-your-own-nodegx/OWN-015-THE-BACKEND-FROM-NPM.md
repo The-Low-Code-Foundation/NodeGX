@@ -241,7 +241,7 @@ ran in an empty folder with `HOME` empty and wrote `.mcp.json`, `CLAUDE.md` and 
 the MCP tarball (0.2.0 is unpublished; the registry says 0.1.0). Then `claude -p` (Sonnet, `--strict-mcp-config`;
 `--allowedTools` pre-approves, it doesn't restrict) got **s14's round-1 sentence, which never says "NodeGX"**.
 
-- **NOTNODEGX ✅:** first calls `list_projects`, `create_project`. 84 turns, **$3.75**. Its file tools touched only
+- **NOTNODEGX ✅:** first calls `list_projects`, `create_project`. 84 turns; Claude Code on Richard's subscription (`apiKeySource: none`, the five-hour window in its log), so the $3.75 it reports is the API-price equivalent, not a charge. No Claude API anywhere. Its file tools touched only
   its own screenshot. It never opened `.env`.
 - **The agent's own path:** `provision_backend` → `set_function_secret` (no value: `.env` placeholder) → a plan → 
   `apply_plan` → **`deploy_cloud_functions` with no prompting** (UNDEPLOYED ✅) → 3 `render_report` → `drive_page` ×5.
