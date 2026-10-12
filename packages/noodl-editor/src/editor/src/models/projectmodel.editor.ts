@@ -230,6 +230,25 @@ export function projectFromDirectory(projectdir: string, callback: (project?: Pr
  * folder back.
  */
 async function backupBeforeUpgrade(projectdir: string, suffix = '.before-0.3'): Promise<string> {
+  const key = `${projectdir}\n${suffix}`;
+  const made = await copiesMadeThisRun.get(key)?.catch(() => undefined);
+  if (made && filesystem.exists(made)) return made;
+  const making = copyProjectFolder(projectdir, suffix);
+  copiesMadeThisRun.set(key, making);
+  making.catch(() => copiesMadeThisRun.delete(key));
+  return making;
+}
+
+/**
+ * P112 s12 — one copy per folder per editor run. *Open project…* loads the folder twice
+ * (`openProjectFromFolder`, then `loadProject`), both before the first save, so each load made its
+ * own copy: `Desk A.before-0.4` and `Desk A.before-0.4-1`, identical, in the same second (measured
+ * 2026-10-12; `CMG Drive Tokens.before-0.3-1` says 0.3.0's copy did the same). A later load in the
+ * same run that still owes a copy reuses the first one while it exists.
+ */
+const copiesMadeThisRun = new Map<string, Promise<string>>();
+
+async function copyProjectFolder(projectdir: string, suffix: string): Promise<string> {
   const backupPath = filesystem.makeUniquePath(
     filesystem.join(filesystem.dirname(projectdir), `${filesystem.basename(projectdir)}${suffix}`)
   );

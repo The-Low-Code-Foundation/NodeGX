@@ -459,6 +459,11 @@ export function buildProjectV2File(project: LegacyProject, now: string): Project
   if (project.metadata) {
     const rest = { ...(project.metadata as Record<string, unknown>) };
     delete rest.styles;
+    // P112-S11-OPENWRITES — a key holding `undefined` is not on disk (`JSON.stringify` drops it), so it
+    // is not content. A project's metadata carries three (`dbCollections`, `systemCollections`,
+    // `dbVersionMajor`, measured 2026-10-12), so every save wrote `"metadata": {}` while the baseline,
+    // built from the importer's project, had none: the hashes never agreed and every open rewrote the file.
+    for (const key of Object.keys(rest)) if (rest[key] === undefined) delete rest[key];
     if (Array.isArray(rest.routes)) {
       delete rest.routes;
     }
