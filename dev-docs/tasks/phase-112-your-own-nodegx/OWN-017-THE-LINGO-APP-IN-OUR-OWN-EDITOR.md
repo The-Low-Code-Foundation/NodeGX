@@ -77,4 +77,16 @@ stranger from the brief. It doesn't replace OWN-007–009. What it trips over is
 
 ## 7. Built
 
-*(empty)*
+### s16 (2026-10-12, Opus): the ruling and the stranger round
+
+**R28 (Richard, one AskUserQuestion):** all four edits (fix the static, a phrase, the voice, a colour or a tap); the
+editor is a **table / form**; **a stranger's Claude Code builds it**. He chose the shape and the builder against the
+recommendation.
+
+**Before the round, measured from the registry** (empty scratchpad folder, `npm install @nodegx/project-contract
+@nodegx/node-spec @nodegx/canvas-look`, all 0.1.0): 0.1.0's `V2ProjectStore(diskFiles(dir))` opens a copy of the app.
+That's 7 components, the cloud function included, and every project/component/nodes/connections file passes
+`validateSchema`. Writing `PhraseRow` back with no change returns `unchanged: true`. **No format skew** between the
+0.1.0 kit and the files MCP 0.2.0 wrote. 🔴 The published `@nodegx/project-contract` README describes only the
+token/logic-builder/world modules. It never mentions `format`, `V2ProjectStore` or how to open a project, and it still
+says *"`private: true` for now"*. An outsider has to find the store by reading `.d.ts` files.
