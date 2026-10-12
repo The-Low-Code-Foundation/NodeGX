@@ -162,7 +162,7 @@ const DragNode: ReactNodeDefinition = {
     enabled: {
       group: 'Drag',
       displayName: 'Enabled',
-      description: 'Lets the user drag this element; when off it still renders and still responds to the Snap actions',
+      description: 'Lets the user drag this element; when off (false, 0, empty or the text "false") it still renders and still responds to the Snap actions',
       type: 'boolean',
       default: true
     },

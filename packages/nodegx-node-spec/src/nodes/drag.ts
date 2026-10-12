@@ -17,8 +17,8 @@
  * THE GESTURE (the acts `pressAt`, `moveTo`, `releaseAt`: a pointer at a point, in pixels from the page's corner). Pure arithmetic —
  * the face lays nothing out, so the pointer is read against the page (DraggableCore `getControlPosition`: the offset parent is the
  * body, at 0, 0). In order:
- *   - **a press** on the child (a mouse's main button, or a finger), while the Drag is on the page and Enabled is not `false`
- *     (Draggable `disabled={enabled === false}`): the drag starts where the pointer is. **Drag Started**; Drag X / Y are sent as the
+ *   - **a press** on the child (a mouse's main button, or a finger), while the Drag is on the page and Enabled is not off
+ *     (Draggable `disabled={!dragEnabled(enabled)}`: off is `false`, `0`, empty or the text "false"; nothing yet is on — v4, row C160): the drag starts where the pointer is. **Drag Started**; Drag X / Y are sent as the
  *     element's position and Delta X / Y as 0 (`setDragValues`); both snaps stop. Another mouse button starts nothing. A press while
  *     a drag is under way starts it again from the new point.
  *   - **a move** of the pointer that is down: the element moves by the pointer's movement divided by Scale (`createDraggableData`:
@@ -140,13 +140,26 @@ const DROPPED = 'visual/action-dropped';
 const DEFAULT_DURATION = 300;
 const POSITIONS: Val[] = ['positionX', 'positionY', 'deltaX', 'deltaY'];
 
+// v4 (row C160, ruled R26 "Off means off"): Drag.tsx `dragEnabled`
+const dragEnabled = (v: unknown): boolean => (v === undefined || v === null ? true : !!v && v !== 'false');
+
 const LOOK = (displayName: string, group: string, description: string, extra: Record<string, unknown> = {}) => ({ coerce: 'none' as const, displayName, group, description, ...extra });
 
 export const Drag = defineNode({
   type: 'Drag',
   // v2 (P109 ISL-048, s31): a Start Drag X / Y that is NaN again is no change — `Object.is` (row C106)
   // v3 (P109 ISL-048, s32): a Start Drag X / Y that is text is read as a number (row C138)
-  version: 3,
+  version: 4,
+  changes: [
+    {
+      version: 4,
+      says: 'Enabled turns dragging off on 0, empty and the text "false" as well as on false. Before, only the exact false did, so a wired 0 or "false" left the element draggable while the port read as off. Nothing yet (undefined, or null from an Expression that has not answered) still leaves it on',
+      row: 'P107-C160 (R26)',
+      migration: {
+        none: 'Ruled "Off means off" (R26): the description already promised it, and the reach measured on 2026-10-12 was 5 wired Enabled ports in 258 of Richard\'s projects, every one fed by a Switch (true / false), which reads the same either way'
+      }
+    }
+  ],
   source: 'packages/noodl-viewer-react/src/nodes/visual/drag.ts; packages/noodl-viewer-react/src/components/visual/Drag/Drag.tsx; react-draggable 4.5.0',
   needs: ['person', 'clock'],
   worldPool: { advances: [0, 16, 100, 150, 300, 301, 1000] },
@@ -212,7 +225,7 @@ export const Drag = defineNode({
     'snapToPositionY.value': { type: 'number', default: 0, coerce: 'none', displayName: 'Value', group: 'Snap To Position Y', description: 'Y position the element animates to when Snap To Position Y — Do fires. An empty value leaves the current position alone', portability: 'logic', examples: [0, 50, -30, 12.5, null, '', '40', 'x'] },
     'snapToPositionY.duration': { type: 'number', default: 300, coerce: 'none', displayName: 'Duration', group: 'Snap To Position Y', description: 'How long the Y snap animation takes, in milliseconds', portability: 'logic', examples: [0, 100, 300, -5, '100'] },
     // drag.ts inputProps — at the paint
-    enabled: { type: 'boolean', default: true, coerce: 'none', displayName: 'Enabled', group: 'Drag', description: 'Lets the user drag this element; when off it still renders and still responds to the Snap actions', portability: 'logic', examples: [true, false, 0, 'false'] },
+    enabled: { type: 'boolean', default: true, coerce: 'none', displayName: 'Enabled', group: 'Drag', description: 'Lets the user drag this element; when off (false, 0, empty or the text "false") it still renders and still responds to the Snap actions', portability: 'logic', examples: [true, false, 0, 'false', '', null] },
     axis: { type: 'enum', enums: ['x', 'y', 'both'], default: 'x', coerce: 'none', displayName: 'Axis', group: 'Drag', description: 'Which axes dragging is allowed on', portability: 'logic', examples: ['z'] },
     useParentBounds: { type: 'boolean', default: true, coerce: 'none', displayName: 'Constrain to parent', group: 'Drag', description: "Stops the element being dragged outside its parent's bounds", portability: 'logic' },
     inputPositionX: { type: 'number', coerce: 'none', displayName: 'Start Drag X', group: 'Values', description: 'Sets the X position the element starts at, before any dragging', portability: 'logic', examples: [0, 25, -40, 7.5] },
@@ -285,7 +298,7 @@ export const Drag = defineNode({
     'snapToPositionX.duration': (_s, v) => ({ says: 'always: read at the next Do — how long the X snap takes, in milliseconds; nothing means 300, and 0 or less lands at Value at the next frame', set: { durationX: v }, send: [] }),
     'snapToPositionY.duration': (_s, v) => ({ says: 'always: read at the next Do — how long the Y snap takes, in milliseconds; nothing means 300, and 0 or less lands at Value at the next frame', set: { durationY: v }, send: [] }),
     // react-component-node.ts inputProps — the prop, at the next paint
-    enabled: (_s, v) => ({ says: 'always: read at the next press — off (exactly false; 0 or the text "false" is not off), a press starts no drag, a drag under way carries on to its let go, and the snaps still run', set: { enabled: v }, send: [] }),
+    enabled: (_s, v) => ({ says: 'always: read at the next press — off (false, 0, empty or the text "false"; nothing yet is on), a press starts no drag, a drag under way carries on to its let go, and the snaps still run', set: { enabled: v }, send: [] }),
     axis: (_s, v) => ({ says: 'always: read at the next press, move or let go, a drag under way included — X, Y or Both; on an axis it does not allow the element stays, Drag X / Y say where it is and Delta X / Y is 0; any other value moves it on neither', set: { axis: v }, send: [] }),
     useParentBounds: (_s, v) => ({ says: "always: read at the next move, a drag under way included — on, the element is kept inside its parent's box; off, it can leave it", set: { useParentBounds: v }, send: [] }),
     scale: (_s, v) => ({ says: "always: read at the next press, move or let go, a drag under way included — the pointer's movement is divided by it before it moves the element; nothing or 0 counts as 1", set: { scale: v }, send: [] }),
@@ -503,7 +516,7 @@ function pressed(s: Readonly<State>, v: unknown): Act {
   const finger: Finger = p.touch ? (s.onPage ? 'child' : 'body') : 'none';
   if (!s.onPage) return { ...NONE, set: { finger } };
   const kind: Kind = p.touch ? 'touch' : 'mouse';
-  if ((!p.touch && p.button !== 0) || s.shown.enabled === false) return { ...NONE, set: { finger, kind } };
+  if ((!p.touch && p.button !== 0) || !dragEnabled(s.shown.enabled)) return { ...NONE, set: { finger, kind } };
   const sc = scaleOf(s);
   const cdx = isNum(s.lastX) ? p.x - s.lastX : 0;
   const cdy = isNum(s.lastY) ? p.y - s.lastY : 0;

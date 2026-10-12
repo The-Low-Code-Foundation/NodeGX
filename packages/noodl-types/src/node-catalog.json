@@ -8154,7 +8154,7 @@
           },
           "isSignal": false,
           "default": true,
-          "description": "Lets the user drag this element; when off it still renders and still responds to the Snap actions"
+          "description": "Lets the user drag this element; when off (false, 0, empty or the text \"false\") it still renders and still responds to the Snap actions"
         },
         {
           "name": "inputPositionX",
@@ -8600,7 +8600,7 @@
           "always: read at the next Do — how long the Y snap takes, in milliseconds; nothing means 300, and 0 or less lands at Value at the next frame"
         ],
         "enabled": [
-          "always: read at the next press — off (exactly false; 0 or the text \"false\" is not off), a press starts no drag, a drag under way carries on to its let go, and the snaps still run"
+          "always: read at the next press — off (false, 0, empty or the text \"false\"; nothing yet is on), a press starts no drag, a drag under way carries on to its let go, and the snaps still run"
         ],
         "axis": [
           "always: read at the next press, move or let go, a drag under way included — X, Y or Both; on an axis it does not allow the element stays, Drag X / Y say where it is and Delta X / Y is 0; any other value moves it on neither"

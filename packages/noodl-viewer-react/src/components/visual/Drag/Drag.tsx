@@ -8,7 +8,7 @@ export interface DragProps extends Noodl.ReactProps {
   inputPositionX: number;
   inputPositionY: number;
 
-  enabled: boolean;
+  enabled: unknown;
   scale: number;
   axis: 'x' | 'y' | 'both';
 
@@ -36,6 +36,16 @@ function setDragValues(event, props) {
 /** react-draggable's `canDragX` / `canDragY`: the axes Axis lets the element move on (any other value: neither). */
 function canDrag(axis: DragProps['axis'], on: 'x' | 'y') {
   return axis === on || axis === 'both';
+}
+
+/**
+ * P107-C160, ruled R26 "Off means off": Enabled turns dragging off on `false`, `0`, empty and the text "false" — before, only the
+ * exact `false` did, so a wired 0 or "false" left the element draggable. Nothing yet (`undefined`, `null` from an Expression that
+ * has not answered) leaves it on, as the port's default.
+ */
+export function dragEnabled(enabled: unknown): boolean {
+  if (enabled === undefined || enabled === null) return true;
+  return !!enabled && enabled !== 'false';
 }
 
 /** P107-C101 — what a press inside a Drag operates instead of dragging. */
@@ -259,7 +269,7 @@ export class Drag extends React.Component<DragProps, State> {
         nodeRef={this.draggableNodeRef}
         axis={props.axis}
         bounds={bounds}
-        disabled={props.enabled === false}
+        disabled={!dragEnabled(props.enabled)}
         /**
          * P107-C101. react-draggable cancels every `touchstart` on the element it moves, and a browser
          * that sees a cancelled `touchstart` sends no click and no focus for that touch — so on a phone

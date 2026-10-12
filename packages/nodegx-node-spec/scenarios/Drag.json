@@ -237,6 +237,151 @@
     ]
   },
   {
+    "name": "Enabled wired 0 or the text 'false' disables dragging like false (row C160)",
+    "because": "v4, ruled R26 \"Off means off\": Drag.tsx `dragEnabled` — false, 0, empty and the text \"false\" are off; null (nothing yet) and the text \"true\" drag",
+    "params": {
+      "axis": "both"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "act": "moveTo",
+        "value": {
+          "x": 10,
+          "y": 0
+        }
+      },
+      {
+        "act": "releaseAt",
+        "value": {
+          "x": 10,
+          "y": 0
+        }
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": "false"
+      },
+      "settle",
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "act": "moveTo",
+        "value": {
+          "x": 10,
+          "y": 0
+        }
+      },
+      {
+        "act": "releaseAt",
+        "value": {
+          "x": 10,
+          "y": 0
+        }
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": ""
+      },
+      "settle",
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "act": "moveTo",
+        "value": {
+          "x": 10,
+          "y": 0
+        }
+      },
+      {
+        "act": "releaseAt",
+        "value": {
+          "x": 10,
+          "y": 0
+        }
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": null
+      },
+      "settle",
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "act": "moveTo",
+        "value": {
+          "x": 10,
+          "y": 0
+        }
+      },
+      {
+        "act": "releaseAt",
+        "value": {
+          "x": 10,
+          "y": 0
+        }
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": "true"
+      },
+      "settle",
+      {
+        "act": "pressAt",
+        "value": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "act": "moveTo",
+        "value": {
+          "x": 10,
+          "y": 0
+        }
+      },
+      {
+        "act": "releaseAt",
+        "value": {
+          "x": 10,
+          "y": 0
+        }
+      },
+      "settle"
+    ]
+  },
+  {
     "name": "another mouse button starts nothing; a finger drags",
     "because": "DraggableCore `handleDragStart`: only the main button; a touch has no button",
     "params": {
