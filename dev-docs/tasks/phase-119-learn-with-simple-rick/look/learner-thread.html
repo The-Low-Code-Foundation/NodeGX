@@ -1,0 +1,328 @@
+<title>Seven This Morning</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a message thread. One message at a time; the next one only exists once you've dealt with this one. A reply box at the bottom, like any chat. */
+:root {
+  --bg: #F3F4F7;
+  --fg: #171A21;
+  --muted: #646B78;
+  --bubble: #FFFFFF;
+  --line: #DCDFE6;
+  --accent: #2457D6;
+  --accent-ink: #FFFFFF;
+  --soft: #E6ECFB;
+  --screen: #1B1E25;
+  --screen-ink: #E3E6EC;
+  --ui: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101216; --fg: #E9EAEE; --muted: #9AA1AE; --bubble: #1C2028; --line: #2B303A;
+    --accent: #6D93FF; --accent-ink: #0B1430; --soft: #1C2742; --screen: #000000; --screen-ink: #D5D9E0; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101216; --fg: #E9EAEE; --muted: #9AA1AE; --bubble: #1C2028; --line: #2B303A;
+  --accent: #6D93FF; --accent-ink: #0B1430; --soft: #1C2742; --screen: #000000; --screen-ink: #D5D9E0; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--ui); font-size: 17px; line-height: 1.45; }
+.wrap { max-width: 560px; margin: 0 auto; padding-inline: 16px; padding-block: 14px 150px; }
+p { margin: 0; }
+button { font: inherit; }
+.top { display: flex; align-items: center; gap: 10px; padding-bottom: 14px; margin-bottom: 10px; border-bottom: 1px solid var(--line); }
+.face { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-weight: 600; flex: none; }
+.top .name { font-weight: 600; }
+.top .meta { font-size: 13px; color: var(--muted); }
+
+.thread { display: grid; gap: 10px; }
+.msg { display: flex; gap: 8px; align-items: flex-end; }
+.msg .face { width: 28px; height: 28px; font-size: 13px; visibility: hidden; }
+.msg.last .face { visibility: visible; }
+.bubble { background: var(--bubble); border: 1px solid var(--line); border-radius: 18px 18px 18px 6px; padding: 12px 14px; max-width: 86%; min-width: 0; display: grid; gap: 10px; }
+.msg.me { justify-content: flex-end; }
+.msg.me .bubble { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); border-radius: 18px 18px 6px 18px; }
+.bubble p { font-size: 17px; }
+.typing { display: inline-flex; gap: 4px; padding: 4px 2px; }
+.typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); opacity: .5; }
+@media (prefers-reduced-motion: no-preference) {
+  .typing i { animation: blink 1s infinite; } .typing i:nth-child(2) { animation-delay: .2s } .typing i:nth-child(3) { animation-delay: .4s }
+  @keyframes blink { 50% { opacity: 1; } }
+  .msg.in { animation: rise .25s ease-out; } @keyframes rise { from { transform: translateY(8px); opacity: 0 } }
+}
+
+/* clip */
+.clip { position: relative; width: 100%; aspect-ratio: 16/9; max-width: 100%; border-radius: 12px; overflow: hidden; background: var(--screen); color: var(--screen-ink); border: 0; padding: 0; cursor: pointer; text-align: left; font-family: var(--ui); }
+.clip:focus-visible, .btn:focus-visible, .chip:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.clip .play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,.94); }
+.clip .play::after { content: ""; position: absolute; left: 24px; top: 18px; border-left: 20px solid #171A21; border-top: 12px solid transparent; border-bottom: 12px solid transparent; }
+.clip .len { position: absolute; right: 10px; bottom: 10px; background: rgba(0,0,0,.65); color: #fff; padding: 2px 7px; border-radius: 4px; font-size: 12px; font-family: var(--mono); }
+.clip .playing { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(36,87,214,.92); color: #fff; font-size: 15px; text-align: center; padding: 16px; }
+.clip-title { font-size: 15px; color: var(--muted); display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.clip-title button { background: none; border: 0; color: var(--muted); text-decoration: underline; cursor: pointer; padding: 0; font-size: 13px; white-space: nowrap; }
+
+/* poster 1: a phone lock screen */
+.phone { position: absolute; left: 50%; top: 8%; transform: translateX(-50%); width: 44%; height: 120%; border-radius: 22px; background: linear-gradient(170deg, #35406A, #141A33); border: 3px solid #3A3F4B; padding: 14px 10px; }
+.phone .time { text-align: center; font-size: 30px; font-weight: 600; color: #fff; letter-spacing: .02em; }
+.phone .date { text-align: center; font-size: 10px; color: #C8CDE0; margin-bottom: 14px; }
+.phone .notif { background: rgba(255,255,255,.92); color: #171A21; border-radius: 10px; padding: 8px 9px; font-size: 10px; line-height: 1.3; }
+.phone .notif b { display: block; font-size: 10px; }
+.phone .notif .app { color: #646B78; font-size: 9px; display: flex; justify-content: space-between; margin-bottom: 2px; }
+
+/* poster 2: a browser window on the Projects page */
+.win { position: absolute; inset: 9% 7% 0 7%; background: #F6F7FA; color: #171A21; border-radius: 8px 8px 0 0; overflow: hidden; font-size: 10px; }
+.win .chrome { height: 16px; background: #E3E6EC; display: flex; align-items: center; gap: 4px; padding-left: 8px; }
+.win .chrome i { width: 7px; height: 7px; border-radius: 50%; background: #B8BDC9; display: block; }
+.win .body { display: grid; grid-template-columns: 30% 1fr; height: 100%; }
+.win .side { background: #ECEEF3; padding: 8px; display: grid; gap: 5px; align-content: start; }
+.win .side span { padding: 3px 6px; border-radius: 4px; }
+.win .side .on { background: #fff; font-weight: 600; }
+.win .main { padding: 8px 10px; display: grid; gap: 5px; align-content: start; }
+.win .main .h { font-weight: 600; font-size: 11px; }
+.win .field { border: 1px solid #C9CDD8; border-radius: 4px; padding: 3px 6px; background: #fff; color: #646B78; }
+.win .field.on { border-color: #2457D6; color: #171A21; }
+.win .cta { background: #2457D6; color: #fff; border-radius: 4px; padding: 3px 6px; width: max-content; font-weight: 600; }
+.cursor { position: absolute; width: 14px; height: 14px; border: 2px solid #FFD36B; border-radius: 50%; }
+
+/* choices */
+.chips { display: grid; gap: 8px; }
+.chip { text-align: left; background: var(--soft); color: var(--fg); border: 1px solid transparent; border-radius: 12px; padding: 10px 12px; cursor: pointer; font-size: 16px; }
+.chip:hover { border-color: var(--accent); }
+
+/* the do-it card */
+.steps { display: grid; gap: 12px; }
+.step { display: grid; grid-template-columns: 26px 1fr; gap: 8px; align-items: start; }
+.step .n { width: 24px; height: 24px; border-radius: 50%; background: var(--soft); color: var(--accent); font-weight: 600; font-size: 13px; display: grid; place-items: center; margin-top: 2px; }
+.step p { font-size: 16px; }
+.paste { display: grid; gap: 6px; }
+.paste pre { margin: 0; white-space: pre-wrap; font-family: var(--mono); font-size: 13px; line-height: 1.5; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+.btn { border: 1px solid var(--line); background: var(--bubble); color: var(--fg); border-radius: 999px; padding: 9px 14px; cursor: pointer; font-weight: 600; font-size: 15px; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* reply bar */
+.bar { position: fixed; left: 0; right: 0; bottom: 0; background: var(--bubble); border-top: 1px solid var(--line); padding: 10px 16px; padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
+.bar .in { max-width: 560px; margin: 0 auto; display: grid; gap: 8px; }
+.bar form { display: flex; gap: 8px; }
+.bar input { flex: 1 1 0; min-width: 0; font: inherit; font-size: 16px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--bg); color: var(--fg); }
+.bar .book { font-size: 13px; color: var(--muted); display: flex; justify-content: space-between; align-items: center; }
+.bar .book a { color: var(--accent); font-weight: 600; text-decoration: none; }
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <div class="face">R</div>
+    <div><div class="name">Rick</div><div class="meta">This morning · about four minutes, most of it watching</div></div>
+  </div>
+
+  <div class="thread" id="thread">
+    <div class="msg last" data-id="b1">
+      <div class="face">R</div>
+      <div class="bubble">
+        <p>You said you've seen Scheduled tasks on the Projects page and never pressed it. Same here until last week.</p>
+        <p>Watch this first. It's 38 seconds.</p>
+        <button class="clip" type="button" data-clip="c1" aria-label="Play: what was waiting for me at seven this morning">
+          <div class="phone">
+            <div class="time">06:58</div>
+            <div class="date">Monday 6 October</div>
+            <div class="notif"><div class="app"><span>Claude</span><span>now</span></div><b>Your Monday brief is ready</b>Two things to prepare for before Wednesday. Open to read.</div>
+          </div>
+          <span class="len">0:38</span>
+          <span class="play"></span>
+        </button>
+        <div class="clip-title"><span>What was waiting for me at seven this morning</span><button type="button" data-skip="c1">Seen it, carry on</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bar">
+  <div class="in">
+    <form id="reply"><input id="replyText" type="text" placeholder="Reply to Rick"><button class="btn primary" type="submit">Send</button></form>
+    <div class="book"><span>Replies reach Rick the same day.</span><a href="https://cal.com" target="_blank" rel="noopener">Book an hour</a></div>
+  </div>
+</div>
+
+<template id="t-b2">
+  <div class="bubble">
+    <p>That's a scheduled task. It's a message to Claude that sends itself at a time you choose. The answer turns up on its own.</p>
+  </div>
+</template>
+<template id="t-b3">
+  <div class="bubble">
+    <p>Want one? Pick what yours should do. I'll show you mine, then give you the words to paste.</p>
+    <div class="chips">
+      <button class="chip" type="button" data-pick="week">Tell me my week every Monday morning</button>
+      <button class="chip" type="button" data-pick="friday">Sum up this project every Friday</button>
+      <button class="chip" type="button" data-pick="story">Find me one story a day about AI in training</button>
+    </div>
+  </div>
+</template>
+<template id="t-b4">
+  <div class="bubble">
+    <p>Mine's the Monday one. Here's the button and what I typed. 1:40.</p>
+    <button class="clip" type="button" data-clip="c2" aria-label="Play: the button, and what I typed">
+      <div class="win">
+        <div class="chrome"><i></i><i></i><i></i></div>
+        <div class="body">
+          <div class="side"><span>Chats</span><span class="on">Projects</span><span>Scheduled tasks</span></div>
+          <div class="main">
+            <div class="h">New scheduled task</div>
+            <div class="field">Name · Monday brief</div>
+            <div class="field on">It's Monday morning. Read my calendar for this week…</div>
+            <div class="field">Every Monday · 07:00</div>
+            <div class="cta">Create</div>
+          </div>
+        </div>
+      </div>
+      <span class="cursor" style="left:70%;top:72%"></span>
+      <span class="len">1:40</span>
+      <span class="play"></span>
+    </button>
+    <div class="clip-title"><span>The button, and what I typed</span><button type="button" data-skip="c2">Seen it, carry on</button></div>
+  </div>
+</template>
+<template id="t-b5">
+  <div class="bubble">
+    <p>Your turn. One paste and three taps.</p>
+    <div class="steps">
+      <div class="step"><span class="n">1</span><p>Open claude.ai and go to Projects. Open any project. Press Scheduled tasks.</p></div>
+      <div class="step"><span class="n">2</span><div class="paste"><p>Paste this into the big box.</p><pre id="pasteText"></pre><div class="row"><button class="btn" type="button" id="copyBtn">Copy</button></div></div></div>
+      <div class="step"><span class="n">3</span><p>Set it to tomorrow at seven. Press Create.</p></div>
+    </div>
+    <div class="row"><button class="btn primary" type="button" data-next="b6">I've pressed Create</button></div>
+  </div>
+</template>
+<template id="t-b6">
+  <div class="bubble">
+    <p>Done for today. Tomorrow at seven something arrives. Come back and tell me which one happened.</p>
+    <div class="row"><button class="btn primary" type="button" data-result="arrived">It arrived</button><button class="btn" type="button" data-result="nothing">Nothing came</button></div>
+  </div>
+</template>
+<template id="t-arrived">
+  <div class="bubble"><p>Paste what it said. I'll read it before we next talk.</p></div>
+</template>
+<template id="t-nothing">
+  <div class="bubble"><p>Tell me what you see on the Scheduled tasks page. I'll sort it today.</p></div>
+</template>
+
+<script>
+(function () {
+  var thread = document.getElementById('thread');
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var prompts = {
+    week: "It's Monday morning. Read my calendar for this week. Tell me in plain English what's on and what I should prepare for.",
+    friday: "Read this project's conversations from the last seven days. Write me a short note on what we worked on and what's still open.",
+    story: "Find one news story from this week about AI in workplace training. Give me the link and three lines on why it matters to a trainer."
+  };
+  var picked = 'week';
+
+  function markLast(el) {
+    thread.querySelectorAll('.msg.last').forEach(function (m) { m.classList.remove('last'); });
+    if (el && !el.classList.contains('me')) el.classList.add('last');
+  }
+  function scrollTo(el) { try { el.scrollIntoView({ block: 'end', behavior: reduced ? 'auto' : 'smooth' }); } catch (e) {} }
+
+  function addRick(templateId, cb) {
+    var typing = document.createElement('div');
+    typing.className = 'msg in last';
+    typing.innerHTML = '<div class="face">R</div><div class="bubble"><span class="typing"><i></i><i></i><i></i></span></div>';
+    markLast(typing);
+    thread.appendChild(typing);
+    scrollTo(typing);
+    setTimeout(function () {
+      var tpl = document.getElementById(templateId);
+      typing.querySelector('.bubble').replaceWith(tpl.content.cloneNode(true));
+      wire(typing);
+      scrollTo(typing);
+      if (cb) cb(typing);
+    }, reduced ? 0 : 700);
+  }
+  function addMe(text) {
+    var m = document.createElement('div');
+    m.className = 'msg me in';
+    m.innerHTML = '<div class="bubble"><p></p></div>';
+    m.querySelector('p').textContent = text;
+    markLast(null);
+    thread.appendChild(m);
+    scrollTo(m);
+  }
+
+  var played = {};
+  function endClip(id) {
+    if (played[id]) return;
+    played[id] = true;
+    if (id === 'c1') addRick('t-b2', function () { addRick('t-b3'); });
+    if (id === 'c2') addRick('t-b5', function (m) {
+      m.querySelector('#pasteText').textContent = prompts[picked];
+    });
+  }
+
+  function wire(root) {
+    root.querySelectorAll('[data-clip]').forEach(function (c) {
+      c.addEventListener('click', function () {
+        if (c.querySelector('.playing')) return;
+        var p = document.createElement('span');
+        p.className = 'playing';
+        p.textContent = 'In the real thing the clip plays here: Rick’s screen and his voice, just this part.';
+        c.appendChild(p);
+        setTimeout(function () { p.remove(); endClip(c.getAttribute('data-clip')); }, reduced ? 300 : 2400);
+      });
+    });
+    root.querySelectorAll('[data-skip]').forEach(function (b) {
+      b.addEventListener('click', function () { endClip(b.getAttribute('data-skip')); });
+    });
+    root.querySelectorAll('[data-pick]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        picked = b.getAttribute('data-pick');
+        var chips = b.closest('.chips');
+        addMe(b.textContent);
+        if (chips) chips.remove();
+        addRick('t-b4');
+      });
+    });
+    root.querySelectorAll('[data-next]').forEach(function (b) {
+      b.addEventListener('click', function () { b.disabled = true; b.textContent = 'Pressed Create'; addRick('t-b6'); });
+    });
+    root.querySelectorAll('[data-result]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var r = b.getAttribute('data-result');
+        var row = b.closest('.row');
+        addMe(b.textContent);
+        if (row) row.remove();
+        addRick(r === 'arrived' ? 't-arrived' : 't-nothing', function () {
+          var input = document.getElementById('replyText');
+          input.placeholder = r === 'arrived' ? 'Paste what it said' : 'What do you see?';
+          input.focus();
+        });
+      });
+    });
+    var copy = root.querySelector('#copyBtn');
+    if (copy) copy.addEventListener('click', function () {
+      var text = root.querySelector('#pasteText').textContent;
+      var done = function () { copy.textContent = 'Copied'; };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { selectIt(root.querySelector('#pasteText')); });
+      } else { selectIt(root.querySelector('#pasteText')); }
+    });
+  }
+  function selectIt(el) {
+    try { var r = document.createRange(); r.selectNodeContents(el); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); } catch (e) {}
+  }
+
+  wire(thread);
+  document.getElementById('reply').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var input = document.getElementById('replyText');
+    if (!input.value.trim()) return;
+    addMe(input.value.trim());
+    input.value = '';
+    addRick('t-sent');
+  });
+  var sent = document.createElement('template');
+  sent.id = 't-sent';
+  sent.innerHTML = '<div class="bubble"><p>Got it. You\'ll hear from me today.</p></div>';
+  document.body.appendChild(sent);
+})();
+</script>
