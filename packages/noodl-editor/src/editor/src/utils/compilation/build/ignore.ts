@@ -101,6 +101,14 @@ export const DEFAULT_IGNORE_ENTRIES: readonly DefaultIgnoreEntry[] = [
   { pattern: '.noodl/', reason: "the editor's own project state" },
   { pattern: '.nodegx/', reason: "the editor's own project state" },
 
+  // The agent's files (P112-S13-AGENTFILES). `create_project` writes `.mcp.json` (the server command and this
+  // machine's path to the project) and `CLAUDE.md` (the project brief) into every project it makes, and a deploy
+  // from the npm kit copied both to the public site.
+  { pattern: '.mcp.json', reason: "an AI agent's configuration (names this machine's paths)" },
+  { pattern: 'CLAUDE.md', reason: "an AI agent's instructions, not for publication" },
+  { pattern: 'AGENTS.md', reason: "an AI agent's instructions, not for publication" },
+  { pattern: '.claude/', reason: "an AI agent's settings" },
+
   // Dependencies and container build files. `node_modules/` is both a size and
   // a privacy problem, and the walk prunes it rather than descending.
   { pattern: 'node_modules/', reason: 'installed dependencies' },

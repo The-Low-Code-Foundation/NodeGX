@@ -5,7 +5,7 @@ the VM route only. The rest of P115 stays parked (Richard, 2026-10-07: *"after p
 experiment phase"*). **Model:** **Opus** for step 1 and the packaging. **Fable** if step 3's server layout (static
 site, backend, TLS, restarts) turns out to have no existing design to follow.
 
-**Status: 📋 not started. Needs OWN-015 (the backend from npm) for AC3.**
+**Status: 🟡 s13 (2026-10-12): step 1 built and AC1 ✅ from a packed tarball (§6): `npx --package @nodegx/preview nodegx-deploy <project> <out>`. Steps 2–4 (the VM) need Richard: a VM with SSH, a domain, and the go-ahead.**
 
 ## 1. The person sentence
 
@@ -55,3 +55,33 @@ site, backend, TLS, restarts) turns out to have no existing design to follow.
 
 - Cloudflare Pages, Workers and D1 (HST-003, HST-004, HST-006), and buying the domain (HST-007): P115, parked.
 - Choosing a hosting vendor for the person. Step 3 works on any VM with SSH.
+
+## 6. Session 13 (2026-10-12, Opus): step 1, the folder from npm
+
+**Measured first:** the published `@nodegx/preview@0.1.0`'s `dist/nodegx-deploy.cjs`, run by hand on a project the npm
+kit made, already deploys it: `ok: true`, a production runtime (1.74 MB, no source map), 163 node types, 10 files.
+So step 1 needed a **name**, not an engine: `bin/nodegx-deploy.js`, a three-line wrapper like the preview's own bin.
+The engine's contract is unchanged (`<project-dir> <out-dir> [--base-url <url>]`, one JSON report on stdout). Chosen
+over publishing `@nodegx/export`, whose `nodegx deploy` refuses outside a checkout by design and would need the same
+engine anyway.
+
+**Found and fixed: P112-S13-AGENTFILES (medium).** That first deploy also copied `.mcp.json` (the person's local
+project path and the server command) and `CLAUDE.md` (the brief) into the public folder. They're now default
+exclusions in the rule list the editor's Deploy and the npm engine share (`ignore.ts`), with a jest spec and its
+control (5/5). The cloud function's graph does **not** reach the browser bundle (0 hits for `__cloud__` in the
+bundle and `index-*.js`).
+
+**AC1 ✅.** Empty folder, `HOME` empty: `npx -y --package <packed preview tgz> nodegx-deploy ./lingo ./site` → `ok:
+true`, 8 files, excluded `.gitignore .mcp.json CLAUDE.md components/ docs/ nodegx.project.json`. Served statically and
+read in headless Chrome over CDP: the page renders its text (*"Lingo — nothing built yet…"*) with **0** exceptions and
+**0** console errors. **Control:** a copy with a malformed `nodes.json` → `ok: false`, nothing written. That run also
+filed P112-S13-DEPLOYBADJSON (low): it says stage `write` for a read failure and names no file.
+
+**Not built: an MCP tool for the deploy.** An agent in Claude Code has a terminal, and the command is one line. A
+person on Claude Desktop has no terminal, so a `deploy_to_folder` tool is still owed. It would need the engine inside
+`@nodegx/mcp` too, as OWN-014/015 did for the harness and the backend.
+
+**Steps 2–4 (the VM) need Richard:** a VM he owns with SSH access, a DNS name for it, and his word to go. Before
+writing anything new, read DEP-005/006 and HST-005 (step 2). The backend for the VM is the same one-file
+`cli.js` OWN-015 ships (`node cli.js serve`).
+
