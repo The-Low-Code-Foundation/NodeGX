@@ -158,3 +158,26 @@ minutes. The editor's webpack had begun a recompile right after launch ("App upd
 `webpack-dev-middleware` held the lazy chunk (`…spec_tryNodeModel_ts.bundle.js`) until it finished (99 s). The chunk then
 served 200. The panel shows no timeout or error while it waits. Dev-only (a packaged build has no dev server), but a
 spinner that never says why is worth a line in the modal's loading state.
+
+### 5.4 s93, 2026-10-12 — the modal as a mockup, for Richard's look (not built)
+
+A canvas of two artboards, private to Richard: https://claude.ai/artifact/CmkJLfJu7NGhzsquJgoDHS. Answers §5.3's five points
+on the Counter, the node he tried:
+
+1. **The button** sits at the top of the property panel, under the node's name: *How this node works* (artboard 2). A node
+   whose spec has no words (the five) shows a dashed *How it works: spec in progress* in its place instead (R31's second
+   choice; the first, no button at all, is one line to change).
+2. **The modal**, 1,200 × 788 over the dimmed editor: the rules on the left (each input with its cases and the outcome as a
+   chip, Done or Unchanged, in the spec's own words), *Try it* on the right. Both open (R31).
+3. **The node as the canvas draws it**, on the canvas's dotted ground: its card (icon, title, type), inputs left and outputs
+   right with their dots, a value bubble on each port, and the canvas's dark preview pill above it showing Current Count.
+   A press lights the input it reached, the outputs it moved, and the preview for about a second; a signal's bubble reads
+   *sent* or *fired* while lit.
+4. **Styled controls** from the editor's tokens: the signals as 44-px blue pill buttons, numbers as − / + steppers, Limits
+   Enabled as a switch. No clock or *Same frame* for the Counter (it has no timer); a node with one would show them here.
+5. **What happened follows the latest event**: newest at the bottom, scrolled into view and tinted on arrival, its outcome as
+   a chip. *Start over* clears it.
+
+The artboard works (press the buttons on the canvas's Play). It plays a hand-written copy of the Counter's rules, not the
+interpreter: the built modal runs `tryNodeModel` as the panel does today. Not yet asked: the modal's loading state
+(§5.3's two-minute "Loading the spec…" in the dev stack).

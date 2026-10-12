@@ -251,3 +251,41 @@ Transition, and the four user-email nodes ("Use cloud functions", no single node
 Input and Button, now the current controls; the same `onTextChanged` / `onClick` wiring) and `code-rest-list`, which
 *is* REST2's documentation (its enrichment's only example). The examples gate now lets an example carry
 `deprecated-node` only for the node whose enrichment lists it, and its description now opens by saying REST is retired.
+
+### 6.5 s93 (2026-10-12, Opus) — R24 and R25 seen where a person and the agent see them; the next §3.2 rows measured
+
+**R24 and R25, driven.** The agent: `explain_component` (the data flow) over stdio on a copy of Rocket School with one
+Variable's label removed reads `Variable "hangarTab" [hsTab].value` and the row carries `"title": "hangarTab"`; the labelled
+Expression beside it still reads `face [hsFirstTab].result` (the control). `get_component` is the raw graph and never named
+a node, so the handoff's "call `get_component`" was the wrong tool. The handoff's project, Erleah-2-react19, is a legacy
+`project.json`, which the agent server refuses (exit 2, "Migrate it to the v2 format"). `validate_project` on a copy of
+fld-012 warns `deprecated-node` 3 times, once per retired node on `/Pages/Deprecated`, and 0 on the two pages built from
+their successors. The editor (one launch, `dev:debug`, a renamed copy of Erleah-2-react19, the source's SHA unchanged):
+**over 7,326 nodes the card title under R24's `portTitle` equals the pre-R24 rule run in the page on every node** (2,324
+titled by a port); a control that drops the truncation differs on 35, so the zero can see. The unlabelled `screenWidth`
+Variables read "screenWidth". The Problems panel lists 8 `deprecated-node` rows, every one naming HTTP Request, equal to
+the file's 8 REST2. Each row also ended "— did you mean “net.noodl.HTTP”?": **P107-S93-DIDYOUMEAN**, fixed (`e1f847269`):
+2,457 of 2,677 suggested rows on that project repeated a name their sentence had given. The 220 left (an instruction, not
+a name, in "did you mean") are **P107-S93-NOTANAME** (open, owes words).
+
+**`deprecated-node` over the projects.** 370 project directories today (the s89 recipe; 357 on s90). The rule, run by
+`npm run validate:project -- <370> --only deprecated-node --json`: **55 warnings in 21 projects**, equal project by project
+and type by type to a file scan of both formats. s90's 52 was the export's flag over 357; the 3 more are not attributed (no
+s90 per-project list was kept).
+
+**Units and enum labels** (census §5). The catalog copies a port's `type` from the runtime export (`sanitize`), so they
+should agree by construction; measured, not assumed: the runtime export (`generateNodeLibrary` over both runtimes, a
+scratch bundle by the s89 recipe) against `noodl-mcp/dist/node-catalog.json`, 180 types, 1,481 typed ports: **units and
+default unit differ on 0 of 596; enums, values and labels, differ on 0 of 365**; no port's enums are computed by a function.
+A planted label and a planted unit are both caught (2 of 2). What stays owed is the spec format's: it has neither, which
+matters only to an editor that reads ports from the spec (P112).
+
+**Singleton** (census §5): measured, ruled (R34, "Warn on the second one, in both") and built. The bug's proposed fix would
+have put an error on 1,477 single Pages and cloud Requests (`hasNodesWithType` counts the node asking); 0 components over
+370 projects hold two. Built: `@nodegx/project-contract/singleton` (`extraSingletons`: every node after the first of its
+singleton type, in tree order); the editor's `node-singleton` reads the runtime's `singleton` through it, at `warning`;
+the checker's new `duplicate-singleton` warns on the same nodes. Graded: the contract test and
+`tests-unit/nsp-021/duplicateSingleton.test.ts` (4 and 4), red under `hasNodesWithType`'s meaning (3 and 2). Driven in the
+editor on a copy of fld-012: 0 `node-singleton` with one Page per page; a second Page added to `/Pages/Controls` carries
+it and the first does not; removed, 0. The agent server gets the rule when `packages/noodl-mcp` is next built (`dist/` not
+rebuilt this session: it would bundle peers' open edits).

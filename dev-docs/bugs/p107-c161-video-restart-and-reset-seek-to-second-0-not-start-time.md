@@ -8,6 +8,7 @@ area: runtime / Video (noodl-viewer-react/src/components/visual/Video/Video.tsx 
 found: P107 NSP-018 s77, 2026-10-10 — writing the node's rules in words
 kit: node-spec
 evidence: read on the runtime 2026-10-10 — video.ts :70 Restart "Seeks to the beginning and plays, then fires Done", :105 Reset "Stops playback and seeks to the beginning"; Video.tsx :187 and :200 `this.video.currentTime = 0`; Start Time / End Time reach the element only as the `#t=start,end` media fragment on `src` (Video.tsx :84-89, media-fragment.ts :56 `withMediaFragment`), never as a seek. The spec records it (packages/nodegx-node-spec/src/nodes/video.ts :351 / :353 copy the two descriptions; its words at :533 and :541 already say "goes back to second 0 (Playback Position 0 — not Start Time)")
+regression: packages/nodegx-node-spec/scenarios/Video.json "Restart with a Start Time of 30 goes to Playback Position 30, not 0 (row C161)" and "Restart with Start Time as the text \"12\" goes to 12; … (row C161)" — red on the `currentTime = 0` runtime (s92 control)
 ---
 
 A Video with Start Time 30 loads at second 30: the port composes `#t=30` onto the source (Video.tsx :89), and the browser

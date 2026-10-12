@@ -8,6 +8,7 @@ area: runtime / Parse XML and Parse Feed (noodl-runtime/src/nodes/std-library/da
 found: P107 NSP-018 s77, 2026-10-10 — writing the two nodes' rules in words (the streams-and-parsers lane)
 kit: node-spec
 evidence: read on the runtime 2026-10-10 — xml.ts :118 `if (text.length > maxBytes)` refuses on the JavaScript string length (UTF-16 code units), never on a byte count; the spec's parse-xml.ts and parse-feed.ts mirror it, and their s77 words say "(counted in characters)"; the port is named Max Bytes and described as the size the text may not be larger than
+regression: packages/nodegx-node-spec/scenarios/net.noodl.ParseXML.json "Max Characters counts characters: …" and net.noodl.ParseFeed.json "… Max Characters refuses a long feed as xml/too-large …" — red on the old `xml.ts` message (s92 control)
 ---
 
 Both parsers refuse a text past the cap by `text.length` (xml.ts :118), which is the number of UTF-16 code units, not

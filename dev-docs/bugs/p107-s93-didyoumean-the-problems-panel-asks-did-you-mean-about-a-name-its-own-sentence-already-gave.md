@@ -6,7 +6,7 @@ severity: low
 area: editor / Problems panel row text (`packages/noodl-editor/src/editor/src/views/panels/ProblemsPanel/ProblemsPanel.tsx` `diagnosticText`, now `ProblemsPanel/diagnosticText.ts`)
 found: P107 s93, 2026-10-12 — driving R25 in the running editor on a renamed copy of Erleah-2-react19
 evidence: the panel's own text over CDP — 8 rows "is a retired node type", each ending "— did you mean “net.noodl.HTTP”?"; `npm run validate:project -- <copy> --json` — 2,677 of 4,936 diagnostics carry a `suggestion`, 2,457 of them already name it in the message (raw-spacing-literal 2,310, inert-dimension 139, deprecated-node 8)
-commit: TBD
+commit: e1f847269
 regression: packages/noodl-editor/tests-unit/nsp-021/problems-panel-did-you-mean.test.ts
 ---
 

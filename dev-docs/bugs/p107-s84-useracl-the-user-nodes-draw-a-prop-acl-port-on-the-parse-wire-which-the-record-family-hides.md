@@ -8,6 +8,7 @@ area: noodl-runtime/src/nodes/std-library/user/user-ports.ts `userPropertyPorts`
 found: P107 NSP-020 s84 (L1, the User family moved onto the port format), 2026-10-11 — oracle (a) drove the three User rows with an accounts class holding an `ACL` column
 evidence: packages/noodl-runtime/test/node-spec/nsp-020-module-table.ts (`USERS`, the User, Set User Properties and Sign Up rows, case "the accounts class"); packages/nodegx-node-spec/src/nodes/user.ts `userFields`
 kit: node-spec
+regression: packages/noodl-runtime/test/nodes/user-ports.test.ts "s84's five cases" — red with the spec's ACL filter off (s92 control); the spec side is packages/nodegx-node-spec/golden/net.noodl.user.User.json, SetUserProperties and SignUp
 ---
 
 On a Parse-wire backend the three User-family nodes offer the accounts class's `ACL` column as a property port: a

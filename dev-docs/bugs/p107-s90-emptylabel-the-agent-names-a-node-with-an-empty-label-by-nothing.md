@@ -7,6 +7,7 @@ area: agent server / `packages/noodl-mcp/src/describe.ts` (`endpoint`)
 found: P107 NSP-021 s90, 2026-10-12
 fixed: P107 NSP-021 s90, 2026-10-12
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-021-THE-SECOND-EDITOR.md §6.4
+commit: 97617baab
 ---
 
 A node saved with `label: ""` is unlabelled to the editor: `NodeGraphNode.label` falls through to the type's
