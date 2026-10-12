@@ -13,9 +13,9 @@ export interface EmailTemplate {
 }
 
 /** Every template this backend ships. Also the enumerable set the MCP/panel edit. */
-export type TemplateId = 'passwordReset' | 'verifyEmail' | 'magicLink';
+export type TemplateId = 'passwordReset' | 'verifyEmail' | 'magicLink' | 'emailCode';
 
-export const TEMPLATE_IDS: TemplateId[] = ['passwordReset', 'verifyEmail', 'magicLink'];
+export const TEMPLATE_IDS: TemplateId[] = ['passwordReset', 'verifyEmail', 'magicLink', 'emailCode'];
 
 /**
  * Shipped defaults. `{{appName}}`, `{{resetUrl}}` / `{{verifyUrl}}`, and
@@ -71,6 +71,23 @@ export const DEFAULT_TEMPLATES: Record<TemplateId, EmailTemplate> = {
       '<p><a href="{{magicLinkUrl}}">Sign in to {{appName}}</a></p>' +
       '<p>This link expires in {{expiresIn}} and can only be used once. Anyone who has it can sign in with it, so ' +
       "don't forward it. If you didn't ask to sign in, you can ignore this email.</p>"
+  },
+  /**
+   * SRK-001: the code typed into the app. The code is the subject's first
+   * words, so a phone's notification shows it without opening the mail.
+   */
+  emailCode: {
+    subject: '{{code}} is your sign-in code for {{appName}}',
+    text:
+      'Your sign-in code for {{appName}} is:\n\n' +
+      '{{code}}\n\n' +
+      'Type it into the app. It expires in {{expiresIn}} and works once. ' +
+      "Nobody from {{appName}} will ask you for it. If you didn't ask to sign in, you can ignore this email.\n",
+    html:
+      '<p>Your sign-in code for <strong>{{appName}}</strong> is:</p>' +
+      '<p style="font-size:28px;font-weight:bold;letter-spacing:4px">{{code}}</p>' +
+      '<p>Type it into the app. It expires in {{expiresIn}} and works once. ' +
+      "Nobody from {{appName}} will ask you for it. If you didn't ask to sign in, you can ignore this email.</p>"
   }
 };
 
@@ -145,6 +162,11 @@ export const TEMPLATE_VARIABLES: Record<TemplateId, TemplateVariable[]> = {
     APP_NAME,
     { name: 'magicLinkUrl', label: 'Sign-in link', sample: 'https://example.com/auth/magic-link/callback?token=SAMPLE' },
     { name: 'expiresIn', label: 'How long the link lasts', sample: '15 minutes' }
+  ],
+  emailCode: [
+    APP_NAME,
+    { name: 'code', label: 'Sign-in code', sample: '428913' },
+    { name: 'expiresIn', label: 'How long the code lasts', sample: '10 minutes' }
   ]
 };
 
@@ -161,13 +183,17 @@ export function magicLinkExpiresIn(ttlMinutes: number | undefined): string {
 /** The backend's own settings a sample must say rather than invent. */
 export interface SamplePolicy {
   magicLinkTtlMinutes?: number;
+  emailCodeTtlMinutes?: number;
 }
 
 /** A template's variables, with the samples the policy decides (the chips show these). */
 export function templateVariables(id: TemplateId, policy: SamplePolicy = {}): TemplateVariable[] {
-  return TEMPLATE_VARIABLES[id].map((v) =>
-    id === 'magicLink' && v.name === 'expiresIn' ? { ...v, sample: magicLinkExpiresIn(policy.magicLinkTtlMinutes) } : v
-  );
+  return TEMPLATE_VARIABLES[id].map((v) => {
+    if (v.name !== 'expiresIn') return v;
+    if (id === 'magicLink') return { ...v, sample: magicLinkExpiresIn(policy.magicLinkTtlMinutes) };
+    if (id === 'emailCode') return { ...v, sample: magicLinkExpiresIn(policy.emailCodeTtlMinutes ?? 10) };
+    return v;
+  });
 }
 
 /** The sample values a preview and a test send render with — the same set, so the two cannot differ (AC2). */

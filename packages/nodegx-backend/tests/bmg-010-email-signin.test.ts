@@ -74,7 +74,8 @@ describe('BMG-010 the Email and Sign-in routes', () => {
     const SENDERS: Record<TemplateId, string[]> = {
       passwordReset: ['appName', 'username', 'resetUrl', 'expiresIn'], // email-routes.ts requestPasswordReset
       verifyEmail: ['appName', 'username', 'verifyUrl'], // email-routes.ts sendVerification
-      magicLink: ['appName', 'magicLinkUrl', 'expiresIn'] // oauth-routes.ts sendMagicLink
+      magicLink: ['appName', 'magicLinkUrl', 'expiresIn'], // oauth-routes.ts sendMagicLink
+      emailCode: ['appName', 'code', 'expiresIn'] // oauth-routes.ts sendEmailCode
     };
 
     it('the list answers `variables` per template, equal to what its sender supplies', async () => {

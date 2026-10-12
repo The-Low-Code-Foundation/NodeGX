@@ -8,6 +8,8 @@
  *   POST /auth/magic-link  { email, redirect }
  *   GET  /auth/magic-link/callback?token=   the click in the inbox: a page, spends nothing
  *   POST /auth/magic-link/callback  token=  the page's button: spends the link, signs in
+ *   POST /auth/email-code  { email }        SRK-001: mails a six-digit code
+ *   POST /auth/email-code/verify  { email, code }  the code typed into the app: the session, as JSON
  *
  * Not to be confused with the EDITOR's `noodl://` OAuth (NodeGX cloud sign-in),
  * which is unrelated and untouched. This is plain web redirects on the deployed
@@ -163,6 +165,21 @@ export class OAuthRoutes {
    * nothing is not worth guarding as tightly as one that signs you in.
    */
   private static readonly MAGIC_OPEN_POLICY: RateLimitPolicy = { ratePerMinute: 60 / 15, burst: 60 };
+  /**
+   * SRK-001. Sending a code costs what sending a link costs, per caller AND
+   * per address: rotating addresses past the first budget must not turn one
+   * inbox into a target for a hundred codes.
+   */
+  private static readonly CODE_SEND_POLICY: RateLimitPolicy = { ratePerMinute: 5 / 15, burst: 5 };
+  /**
+   * Typing a code, per caller and per address. The per-address budget is the
+   * one that bounds guessing, because callers can rotate: ten guesses per
+   * address per fifteen minutes is about one in a hundred thousand per window
+   * against a million codes, and each new code to guess at is a mail its owner
+   * sees. The price is that ten wrong guesses lock the owner out for a while too.
+   */
+  private static readonly CODE_VERIFY_POLICY: RateLimitPolicy = { ratePerMinute: 20 / 15, burst: 20 };
+  private static readonly CODE_VERIFY_ADDRESS_POLICY: RateLimitPolicy = { ratePerMinute: 10 / 15, burst: 10 };
 
   constructor(deps: OAuthRoutesDeps) {
     this.deps = deps;
@@ -218,6 +235,11 @@ export class OAuthRoutes {
       magicLink: {
         enabled: this.deps.auth.config.magicLink.enabled && this.deps.emailConfig.isConfigured(),
         requestUrl: `${base}/auth/magic-link`
+      },
+      emailCode: {
+        enabled: this.deps.auth.config.emailCode.enabled && this.deps.emailConfig.isConfigured(),
+        requestUrl: `${base}/auth/email-code`,
+        verifyUrl: `${base}/auth/email-code/verify`
       },
       handoffParam: HANDOFF_PARAM,
       errorParam: ERROR_PARAM
@@ -442,33 +464,25 @@ export class OAuthRoutes {
   }
 
   /**
-   * The shared tail of every sign-in: apply the linking rule, issue an ordinary
-   * BAK-003 session, and hand the app a one-time code.
+   * The shared tail of every sign-in: apply the linking rule, issue an ordinary BAK-003 session, record it.
+   * Throws `AuthLinkError` for the caller to answer: a redirect for the
+   * browser flows, a JSON error for the code typed into the app (SRK-001).
    */
-  private async finishSignIn(
+  private async signIn(
     ctx: RequestContext,
     identity: ProviderIdentity,
     displayLabel: string,
     providerAllowsSignup: boolean,
-    redirectUrl: string
-  ): Promise<void> {
-    let result: SignInResult;
-    try {
-      result = await this.identities.resolveSignIn(identity, {
-        autoLinkVerifiedEmail: this.deps.auth.config.linking.autoLinkVerifiedEmail,
-        // BOTH gates must allow it: the backend's own signup rule (BAK-003) and
-        // this provider's. Either one saying no means no.
-        allowSignup: providerAllowsSignup && this.deps.signupAllowedForAnonymous(),
-        displayLabel
-      });
-    } catch (e) {
-      if (e instanceof AuthLinkError) {
-        logger.warn('auth.link-refused', { provider: identity.providerId, code: e.code, detail: e.message });
-        redirectTo(ctx.res, withError(redirectUrl, ERROR_PARAM, e.message));
-        return;
-      }
-      throw e;
-    }
+    status: number,
+    route: string
+  ): Promise<{ result: SignInResult; sessionToken: string }> {
+    const result = await this.identities.resolveSignIn(identity, {
+      autoLinkVerifiedEmail: this.deps.auth.config.linking.autoLinkVerifiedEmail,
+      // BOTH gates must allow it: the backend's own signup rule (BAK-003) and
+      // this provider's. Either one saying no means no.
+      allowSignup: providerAllowsSignup && this.deps.signupAllowedForAnonymous(),
+      displayLabel
+    });
 
     const sessionToken = await this.deps.sessions.mint(result.userId);
 
@@ -479,11 +493,11 @@ export class OAuthRoutes {
       target: { provider: identity.providerId },
       detail: { outcome: result.outcome, emailVerified: identity.emailVerified },
       outcome: 'success',
-      status: 302,
+      status,
       ip: ctx.clientIp,
       requestId: ctx.requestId,
       method: ctx.req.method || 'GET',
-      route: 'oauth/:provider/callback'
+      route
     });
 
     logger.info('auth.signed-in', {
@@ -491,6 +505,30 @@ export class OAuthRoutes {
       provider: identity.providerId,
       outcome: result.outcome
     });
+
+    return { result, sessionToken };
+  }
+
+  /** The browser flows' tail: sign in, then hand the app a one-time code on the redirect. */
+  private async finishSignIn(
+    ctx: RequestContext,
+    identity: ProviderIdentity,
+    displayLabel: string,
+    providerAllowsSignup: boolean,
+    redirectUrl: string
+  ): Promise<void> {
+    let signedIn: { result: SignInResult; sessionToken: string };
+    try {
+      signedIn = await this.signIn(ctx, identity, displayLabel, providerAllowsSignup, 302, 'oauth/:provider/callback');
+    } catch (e) {
+      if (e instanceof AuthLinkError) {
+        logger.warn('auth.link-refused', { provider: identity.providerId, code: e.code, detail: e.message });
+        redirectTo(ctx.res, withError(redirectUrl, ERROR_PARAM, e.message));
+        return;
+      }
+      throw e;
+    }
+    const { result, sessionToken } = signedIn;
 
     const handoff = this.flows.issueHandoff({
       userId: result.userId,
@@ -753,6 +791,152 @@ export class OAuthRoutes {
     );
   }
 
+  // ==========================================================================
+  // Six-digit codes (SRK-001)
+  // ==========================================================================
+
+  /**
+   * `POST /auth/email-code { email }` — ALWAYS 200/{}, for the reason
+   * `requestMagicLink` gives. Asking again spends the code already out.
+   */
+  async requestEmailCode(ctx: RequestContext): Promise<void> {
+    this.enforce(ctx, 'auth:email-code', OAuthRoutes.CODE_SEND_POLICY);
+    const body = await readJSONBody(ctx.req);
+    const email = String(body.email || '').trim().toLowerCase();
+
+    void this.tryIssueEmailCode(email).catch((e) =>
+      logger.error('auth.email-code-failed', { detail: e instanceof Error ? e.message : String(e) })
+    );
+    sendJSON(ctx.res, 200, {});
+  }
+
+  private async tryIssueEmailCode(email: string): Promise<void> {
+    if (!email || !email.includes('@')) return;
+
+    const off = this.emailCodeUnavailable();
+    if (off) {
+      logger.warn(off.event, { detail: off.reason });
+      return;
+    }
+    if (!this.deps.limiter.checkPolicy('auth:email-code-address', email, OAuthRoutes.CODE_SEND_POLICY).allowed) {
+      logger.warn('auth.email-code-address-budget', { detail: 'Too many codes asked for one address. No mail was sent.' });
+      return;
+    }
+
+    const { results } = await this.deps.facade.rawQuery('_User', { where: { email }, limit: 1 });
+    const user = results[0];
+    if (!user && !(this.deps.auth.config.emailCode.allowSignup && this.deps.signupAllowedForAnonymous())) {
+      logger.warn('auth.email-code-unknown-address', {
+        detail: 'A code was requested for an unknown address and signup is not allowed. No mail was sent.'
+      });
+      return;
+    }
+
+    const result = await this.sendEmailCode(email, user ? (user.objectId as string) : '');
+    if (!result.success) logger.error('auth.email-code-send-failed', { detail: result.error });
+  }
+
+  /** Why a code cannot be sent from this backend right now, or null. */
+  emailCodeUnavailable(): { event: string; reason: string } | null {
+    if (!this.deps.auth.config.emailCode.enabled) {
+      return {
+        event: 'auth.email-code-disabled',
+        reason: 'Sign-in by code is switched off on this backend (auth.json: emailCode.enabled).'
+      };
+    }
+    if (!this.deps.emailConfig.isConfigured()) {
+      return { event: 'auth.email-code-no-email', reason: this.deps.emailConfig.notConfiguredReason() || 'Email is not set up on this backend.' };
+    }
+    return null;
+  }
+
+  private async sendEmailCode(email: string, userId: string): Promise<{ success: boolean; error?: string }> {
+    const config = this.deps.auth.config.emailCode;
+    const ttlMinutes = config.ttlMinutes > 0 ? config.ttlMinutes : 10;
+    const code = await this.deps.tokens.issueCode(email, userId, ttlMinutes * 60_000);
+    const rendered = renderTemplate(this.deps.emailConfig.effectiveTemplate('emailCode'), {
+      appName: this.deps.backendName,
+      code,
+      expiresIn: magicLinkExpiresIn(ttlMinutes)
+    });
+    const result = await this.deps.mailer.send({
+      to: email,
+      subject: rendered.subject,
+      text: rendered.text,
+      html: rendered.html
+    });
+    return { success: result.success, error: result.success ? undefined : String(result.error || 'The mail was not sent.') };
+  }
+
+  /**
+   * `POST /auth/email-code/verify { email, code }` — the code typed into the
+   * app. Answers with the session itself, in `/oauth/exchange`'s shape: there
+   * is no redirect to carry a handoff code, because the app that asked is the
+   * page that is waiting.
+   *
+   * The identity is the magic link's (`magic-link`, `email:<address>`): both
+   * are proof of the same inbox, so a person who used a link last month and a
+   * code today is one account, under the same linking rule.
+   */
+  async verifyEmailCode(ctx: RequestContext): Promise<void> {
+    this.enforce(ctx, 'auth:email-code-verify', OAuthRoutes.CODE_VERIFY_POLICY);
+    const body = await readJSONBody(ctx.req);
+    const email = String(body.email || '').trim().toLowerCase();
+    // People type codes with spaces in, and phones paste them with a newline.
+    const code = String(body.code || '').replace(/\s+/g, '');
+    if (!email || !code) throw new HttpError(400, 'email and code are required', 101);
+
+    const off = this.emailCodeUnavailable();
+    if (off) throw new HttpError(400, off.reason, 101);
+
+    const budget = this.deps.limiter.checkPolicy('auth:email-code-verify-address', email, OAuthRoutes.CODE_VERIFY_ADDRESS_POLICY);
+    if (!budget.allowed) {
+      ctx.res.setHeader('Retry-After', String(budget.retryAfterSeconds));
+      throw new HttpError(429, `Too many tries for this address. Try again in ${budget.retryAfterSeconds}s.`);
+    }
+
+    ctx.res.setHeader('Cache-Control', 'no-store');
+    const row = await this.deps.tokens.redeemCode(email, code);
+    if (!row) {
+      // One answer for wrong, expired, spent and never-sent: no oracle.
+      throw new HttpError(
+        400,
+        'That code is not right, or it has expired. Check the newest email, or ask for a new code.',
+        101
+      );
+    }
+
+    const identity: ProviderIdentity = {
+      providerId: 'magic-link',
+      subject: `email:${email}`,
+      email,
+      emailVerified: true,
+      displayName: null,
+      raw: {}
+    };
+
+    let signedIn: { result: SignInResult; sessionToken: string };
+    try {
+      signedIn = await this.signIn(ctx, identity, 'email code', this.deps.auth.config.emailCode.allowSignup, 200, 'auth/email-code/verify');
+    } catch (e) {
+      if (e instanceof AuthLinkError) {
+        logger.warn('auth.link-refused', { provider: identity.providerId, code: e.code, detail: e.message });
+        throw new HttpError(403, e.message, 101);
+      }
+      throw e;
+    }
+
+    const user = await this.deps.facade.rawFetch('_User', signedIn.result.userId);
+    const wire = await this.deps.facade.wireRecord('_User', user);
+    sendJSON(ctx.res, 200, {
+      ...wire,
+      roles: await this.deps.rolesForUser(signedIn.result.userId),
+      sessionToken: signedIn.sessionToken,
+      authOutcome: signedIn.result.outcome,
+      authNotice: signedIn.result.notice
+    });
+  }
+
   /** The page's button posts a form; a script may post JSON. Either carries `token`. */
   private async readTokenBody(req: http.IncomingMessage): Promise<Record<string, unknown>> {
     const contentType = String(req.headers['content-type'] || '');
@@ -784,7 +968,8 @@ export class OAuthRoutes {
   }
 
   private providerLabel(providerId: string): string {
-    if (providerId === 'magic-link') return 'Magic link';
+    // Both a link and a code (SRK-001) prove the inbox and land on this identity.
+    if (providerId === 'magic-link') return 'Email';
     const provider = this.deps.auth.provider(providerId);
     return provider ? provider.displayName : providerId;
   }

@@ -2,7 +2,7 @@
  * Admin auth surface (BAK-004): configuring who can sign in.
  *
  *   GET    /admin/auth                    providers (redacted), policy, callback URLs, presets
- *   PUT    /admin/auth                    magic-link policy, redirect allow-list, linking toggle, session idle days
+ *   PUT    /admin/auth                    magic-link and email-code policy, redirect allow-list, linking toggle, session idle days
  *   PUT    /admin/auth/providers/:id      add or update one provider (+ its client secret)
  *   DELETE /admin/auth/providers/:id      remove a provider and forget its secret
  *
@@ -104,7 +104,9 @@ export class AdminAuthRoutes {
       },
       /** Magic links need BOTH their own switch and working SMTP; report the compound state, not just the flag. */
       magicLinkReady: this.deps.auth.config.magicLink.enabled && this.deps.emailConfig.isConfigured(),
-      magicLinkNotReadyReason: this.magicLinkNotReadyReason()
+      magicLinkNotReadyReason: this.magicLinkNotReadyReason(),
+      /** SRK-001: the same compound state for the six-digit code. */
+      emailCodeReady: this.deps.auth.config.emailCode.enabled && this.deps.emailConfig.isConfigured()
     });
   }
 
@@ -125,7 +127,7 @@ export class AdminAuthRoutes {
    */
   async putConfig(ctx: RequestContext): Promise<void> {
     const body = await readJSONBody(ctx.req);
-    const known = ['magicLink', 'redirectAllowList', 'linking', 'sessions'];
+    const known = ['magicLink', 'emailCode', 'redirectAllowList', 'linking', 'sessions'];
     const given = Object.keys(body).filter((k) => k !== 'version');
     if (given.length === 0 || given.some((k) => !known.includes(k))) {
       throw new HttpError(
@@ -143,6 +145,7 @@ export class AdminAuthRoutes {
     const candidate: AuthConfig = {
       ...this.deps.auth.config,
       ...(body.magicLink ? { magicLink: { ...this.deps.auth.config.magicLink, ...(body.magicLink as object) } } : {}),
+      ...(body.emailCode ? { emailCode: { ...this.deps.auth.config.emailCode, ...(body.emailCode as object) } } : {}),
       ...(allowList ? { redirectAllowList: allowList } : {}),
       ...(body.linking ? { linking: { ...this.deps.auth.config.linking, ...(body.linking as object) } } : {}),
       ...(body.sessions ? { sessions: { ...this.deps.auth.config.sessions, ...(body.sessions as object) } } : {})
@@ -153,6 +156,7 @@ export class AdminAuthRoutes {
     }
 
     if (body.magicLink) Object.assign(this.deps.auth.config.magicLink, body.magicLink);
+    if (body.emailCode) Object.assign(this.deps.auth.config.emailCode, body.emailCode);
     if (allowList) this.deps.auth.config.redirectAllowList = candidate.redirectAllowList;
     if (body.linking) Object.assign(this.deps.auth.config.linking, body.linking);
     if (body.sessions) Object.assign(this.deps.auth.config.sessions, body.sessions);

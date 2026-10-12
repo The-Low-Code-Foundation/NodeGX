@@ -62,11 +62,12 @@ export interface Template {
 
 // ------------------------------------------------------------------ words --
 
-/** The three templates the backend ships, in words (`email/templates.ts` TEMPLATE_IDS). */
+/** The four templates the backend ships, in words (`email/templates.ts` TEMPLATE_IDS). */
 export const TEMPLATE_WORDS: Record<string, { title: string; line: string }> = {
   passwordReset: { title: 'Password reset', line: 'Sent when someone asks to reset their password.' },
   verifyEmail: { title: 'Verify your email', line: 'Sent on sign-up when verification is on, and when someone asks again.' },
-  magicLink: { title: 'Sign-in link', line: 'Sent when someone signs in with a link instead of a password.' }
+  magicLink: { title: 'Sign-in link', line: 'Sent when someone signs in with a link instead of a password.' },
+  emailCode: { title: 'Sign-in code', line: 'Sent when someone signs in with a six-digit code instead of a password.' }
 };
 
 export function templateTitle(id: string): string {

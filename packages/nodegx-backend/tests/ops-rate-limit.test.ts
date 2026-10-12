@@ -296,9 +296,14 @@ describe('BAK-009 rate limiting over real sockets', () => {
     // spec. Left in the `admin` budget: one person saying yes to one change, and
     // a run that takes the backup first is not a thing a page polls. Counted —
     // 101 → 102.
+    // SRK-001 moved `auth` by 2: `POST auth/email-code` (mail a six-digit code)
+    // and `POST auth/email-code/verify` (type it: the session, as JSON). Both
+    // are steps in obtaining a session, so `auth`, in AUTH_PATTERNS beside the
+    // magic link's; each handler adds per-caller and per-address buckets on
+    // top. Counted — 17 → 19.
     expect(counts).toEqual({
       admin: 102,
-      auth: 17,
+      auth: 19,
       data: 19,
       files: 4,
       functions: 1,

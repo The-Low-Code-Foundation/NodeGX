@@ -559,7 +559,10 @@ export class HttpServer {
       persistence: deps.persistenceControl
     });
     this.adminWorld = new AdminWorldRoutes({ facade: deps.facade, security: deps.security, backups: deps.backups });
-    this.adminEmail = new AdminEmailRoutes(deps.emailConfig, deps.mailer, () => ({ magicLinkTtlMinutes: deps.auth ? deps.auth.config.magicLink.ttlMinutes : undefined }));
+    this.adminEmail = new AdminEmailRoutes(deps.emailConfig, deps.mailer, () => ({
+      magicLinkTtlMinutes: deps.auth ? deps.auth.config.magicLink.ttlMinutes : undefined,
+      emailCodeTtlMinutes: deps.auth ? deps.auth.config.emailCode.ttlMinutes : undefined
+    }));
     this.adminSearch = new AdminSearchRoutes(deps.search, deps.facade);
     this.dashboard = deps.options.adminDashboard
       ? new AdminDashboardRoutes({
@@ -883,6 +886,19 @@ export class HttpServer {
         pattern: 'auth/magic-link/callback',
         access: { kind: 'public' },
         handler: (ctx) => this.oauth.magicLinkCallback(ctx)
+      },
+      // SRK-001: a six-digit code, for an installed app a link cannot reach.
+      {
+        method: 'POST',
+        pattern: 'auth/email-code',
+        access: { kind: 'public' },
+        handler: (ctx) => this.oauth.requestEmailCode(ctx)
+      },
+      {
+        method: 'POST',
+        pattern: 'auth/email-code/verify',
+        access: { kind: 'public' },
+        handler: (ctx) => this.oauth.verifyEmailCode(ctx)
       },
       // The two identity routes ARE session-scoped: `requireUser` resolves the
       // caller and everything below acts on that user only, never on an id from
