@@ -2,6 +2,7 @@
 id: P112-OWN018-PROJECTAGENTS
 title: "create_project writes the project's CLAUDE.md but no AGENTS.md, so only Claude reads the project's own rules (\"use the MCP server, don't hand-edit components/\") — the same gap NOTNODEGX closed for create-nodegx's folder"
 status: fixed
+commit: 4a18723fe
 severity: medium
 area: mcp / create_project (`packages/noodl-mcp/src/tools/createProject.ts` BST-005, :676-680)
 found: P112 OWN-018 round 1, 2026-10-12 (the `studio-hub` project Mistral Large 4 created in Mistral Vibe)

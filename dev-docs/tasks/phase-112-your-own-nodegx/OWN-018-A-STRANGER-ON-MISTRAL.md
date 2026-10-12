@@ -319,3 +319,91 @@ wall time, cache %, and a phone screenshot.
 
 One factor at a time from the baseline; a "win" needs to hold on a repeat, because one run is one sample.
 
+
+## 14. Session 2 (2026-10-12, Opus): the grader, the yardstick, and what two Mistral runs found
+
+**Richard, during s2:** *"you've got 3 USD left, keep going"*, then *"I added another 10 euros and I'm authorising you
+to do as many testing rounds as needed, but you must keep perfecting the Mistral interface and config to make it run
+like a dream with the nodegx MCP, as well as Claude Code … Don't give up"*, and *"Mistral offers Claude-style
+subscriptions we could use with Vibe … if after you master Mistral Large 4 in OpenCode you can have the same if not
+better results in Vibe, that would be a huge win"*. So the series is now: perfect Large 4 on OpenCode, then carry the
+same kit and config to Vibe (subscription, not pay-as-you-go) and run the same graded series there.
+
+### The grader (`own-018/grade-quiz.mjs`), proven
+
+Headless Chrome over the PACKED preview at phone size, a real CDP press checked with `elementFromPoint`, colours read
+from a screenshot of the answer's box (share of green / red pixels against the same box before the press). 12 checks:
+start · order (every question numbered, in order, three answers in the brief's order) · timer (a number ≤ 10 that
+falls untouched) · green · advance (0.4–3 s) · red (+ the right one green) · timeout (8.5–14 s) · score 3 · best 3 ·
+again (Play again → Q1, an all-wrong run scores 0) · keep (best stays 3) · reload (best survives). Plus an audit:
+node census, list nodes, custom components with inputs, Timer/Repeat, JavaScript nodes and what they call, where
+"Coimbra" is written, `validate_project` through the packed MCP (read-only).
+
+| app | score | failed | as predicted |
+|---|---|---|---|
+| Sonnet run 0, graded twice | 12/12, 12/12 | — | |
+| mutant noscore (the score wire cut) | 8/12 | score, best, keep, reload | ✓ |
+| mutant notimer (Repeat removed) | 4/12 | timer, timeout (+ six not reached) | ✓ |
+| mutant nopersist (best in a page variable) | 11/12 | reload | ✓ |
+| mutant nocolour (styles never change) | 10/12 | green, red | ✓ |
+| mutant nodelay (reveal Timer 0 ms) | 9/12 | advance, green, red (no colour is ever on screen) | ✓ |
+
+Two grader bugs found on the way and fixed: Chrome's profile deleted while it was still writing; a quick run pressing
+the instant a new question appeared (a person reads first: 400 ms settle).
+
+### Run 0 — the yardstick: Claude Sonnet in Claude Code (`round-claude.mjs`)
+
+`claude -p --model sonnet` (resolves to `claude-sonnet-5` in Claude Code 2.1.251), Richard's subscription,
+`--strict-mcp-config`, `--setting-sources project,local`, shell/web denied, reads outside the lab denied where a rule
+can name them, and audited after (`peek-claude.mjs`: 0 paths outside the folder). **12/12. 85 turns, 28 min, $6.30
+API-equivalent** (not a cost), 17.7M input tokens, **98% cached**. Its build: three screen components + a page,
+a States node for the screens, Repeat + Counter for the countdown, three fixed answer buttons per question with the
+data in a JavaScript Function (no list node), 8 JavaScript nodes, best score via `localStorage` in a Function;
+`validate_project` 0 errors, 1 warning (Inter not shipped: NOSTARTERASSETS). It reported three "NodeGX runtime
+quirks"; all three were run-on-change (its fix: `runOnChange-…: false` and explicit signals). Its "States default
+isn't honored" was a misdiagnosis: a Condition firing at load drove the screen to Results.
+
+### Run 1 — Mistral Large 4 on OpenCode, the baseline (`r1-oc-base`)
+
+As a person sets it up (model only), $1.50 cap. **35 min, capped at $1.61; then a "keep going" sitting to $2.26.**
+Built a better-designed app than Sonnet's: the `playful` preset, a Quiz Engine component, Static Data → For Each
+over an AnswerButton component with inputs (the list node Sonnet skipped), Repeat + Counter, 0 validation errors.
+Verified its game with `drive_page` (42 steps passed) — opened on `page: "quiz"`, so it never pressed Start.
+
+**Graded 2/12 at the cap**: pressing Start skipped question 1. Root cause, measured (below): a runtime defect, not
+Mistral's. On the Counter fix alone (tgz4, dd7ff4756) the same unchanged app grades 10/12 — the best score was
+overwritten by a worse game, which was the same runtime class again. **On both fixes (tgz5, be46f18bc) Mistral's
+unchanged run-1 app grades 12/12.** Large 4 built a correct quiz on its first attempt; both failures were NodeGX's.
+
+### Run 2 — the 128k context (`r2-oc-ctx128`)
+
+Ended on its own after 8 steps and $0.21: *"Good progress. Let me study three examples…"* and no tool call, which
+ends an OpenCode run. Nothing built. The cache did its job (every step under 128k).
+
+### What was found, and done
+
+- **P112-OWN018-CACHE128K** (filed; harness, not ours): Mistral caches 70% of a prompt under ~128k tokens and 5% over
+  it (run 1, 28 steps: 12 under / 16 over). A recording proxy (`record-proxy.mjs`) showed consecutive requests over
+  128k extending each other exactly and still missing — so it is size, not a changing prefix. A tool-list change
+  does move the prefix once (15 → 40 tools after `open_project`: diverged at char 4,340). OpenCode takes Large 4's
+  context as 1,048,576 (models.dev), so it never compacts. **Mitigation built:** `create-nodegx` writes
+  `opencode.json` with Large 4's context as 128k (17b992839).
+- **P112-OWN018-COUNTERZERO** (fixed, dd7ff4756 + this session's Variable fix): a node's parameters are queued and
+  land at its first update, but its wires are made before that and hand the target the getter's value at once. A
+  Counter with Start Value 10 told its consumers 0 first, so Mistral's `count === 0 && !answered` gate fired at page
+  load (browser: time's-up at 23 ms, the engine's own start at 38 ms). Then the same class on the Results page: a
+  Variable read on Did Mount had no name yet, `max(score, best)` wrote 0 over the saved best. Both getters now answer
+  from the model until the queued parameter lands, and don't deliver the same value twice (exp-011 s66-5 pins once).
+  Regression over Mistral's own engine (`test/fixtures/own018-quiz-engine/`), sabotage-checked both. Counter v2
+  conforms (P107 and my run). **The class is not censused**: any getter that reads state a queued parameter sets.
+- **P112-OWN018-NOLIBRARY** (filed): the npm kit reveals `list_library` / `install_prefab`, which only read a repo
+  checkout. Mistral wanted icons after its render called the app "a default template".
+- **Kit guidance (17b992839):** the folder notes say keep going until the app is built and tried (run 2), and try it
+  from the start page with `drive_page` without `page` (run 1). Condition's notes: a gate whose On True/On False does
+  something fires whenever its input settles, page load included — `runOnChange-condition: false` and `eval` from
+  the signal that should ask (Sonnet ×3, Mistral round 3).
+- **Lab fixes (mine):** the seal denied OpenCode's own `$TMPDIR/opencode/*` (Mistral could not read its own
+  screenshots; a person's OpenCode allows it) — fixed in `round-opencode.mjs`; `--max-usd` spend cap from OpenCode's
+  database; `round-opencode-resume.mjs` for a "keep going" sitting; the runner now uses the kit's `opencode.json`.
+
+**Money:** run 1 $2.26 (both sittings), run 2 $0.21. Richard added €10 mid-session.

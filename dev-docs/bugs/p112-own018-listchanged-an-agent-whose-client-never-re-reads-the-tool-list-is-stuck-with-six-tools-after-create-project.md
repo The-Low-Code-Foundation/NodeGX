@@ -2,6 +2,7 @@
 id: P112-OWN018-LISTCHANGED
 title: "An agent whose client never re-reads the tool list is stuck with the six bootstrap tools after create_project — it can scope an app but never build it (Mistral Vibe 2.26.1; any client that ignores tools/list_changed)"
 status: fixed
+commit: 4a18723fe
 severity: high
 area: mcp / bootstrap mode and tool disclosure (`packages/noodl-mcp/src/cli.ts` bootstrap, `src/tools/createProject.ts` :589-593, `src/tools/disclosure.ts` :306-307, `--all-tools`)
 found: P112 OWN-018 round 1, 2026-10-12 (Mistral Large 4 in Mistral Vibe 2.26.1, from the 0.2.0 tarballs packed at `9505d342d`)

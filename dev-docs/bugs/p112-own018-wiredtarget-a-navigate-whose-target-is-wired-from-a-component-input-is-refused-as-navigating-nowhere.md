@@ -2,6 +2,7 @@
 id: P112-OWN018-WIREDTARGET
 title: "An agent can't write a reusable nav item: a RouterNavigate whose target is wired in from a Component Input is refused as \"navigates nowhere: no Target Page is set\" (a blocking warning for authored output)"
 status: fixed
+commit: 4a18723fe
 severity: medium
 area: editor validation / navigation (`packages/noodl-editor/src/editor/src/validation/navigation.ts` `checkNavigation` :198-232, called from `authoredCandidate.ts` `authoredPreconditionDiagnostics` :590 with nodes only; `UnresolvedNavigation` is in `AUTHORED_BLOCKING_WARNINGS`)
 found: P112 OWN-018 sitting 2, 2026-10-12 (Mistral Large 4's `Components/NavItem`, replayed against the 0.2.0 tarball's server because Vibe's default harness hid the diagnostic, P112-OWN018-OPAQUEERRORS)

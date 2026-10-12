@@ -35,13 +35,18 @@
 // the refreshed list (25 nodegx tools) arrives a step later (mock), so a direct get_project_info right away is
 // "unavailable tool" — AGENTS.md's call_tool line is what carries that step.
 //
-//   node round-opencode.mjs <root> <tgz-dir> <prompt-file> [--max-steps N] [--variant none|high]
+//   node round-opencode.mjs <root> <tgz-dir> <prompt-file> [--max-steps N] [--variant none|high] [--max-usd X] [--context N]
+// --context (s2): the person's opencode.json tells OpenCode Large 4's context is N tokens (models.dev says 1,048,576, so
+// OpenCode never compacts). Measured in run 1: Mistral cached 70% of a prompt under 128k tokens and 5% over it.
+// --max-usd (s2): OpenCode has no spend cap. Every 15 s the runner reprices the round from OpenCode's own database (every
+// session, subagents included; launch-sale prices as peek-opencode.mjs) and stops the run past X — the agent sees nothing
+// of the guard until then. agent.exit then says "capped".
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 
 const [rootArg, tgzDir, promptFile, ...rest] = process.argv.slice(2);
-if (!rootArg || !tgzDir || !promptFile) throw new Error('usage: node round-opencode.mjs <root> <tgz-dir> <prompt-file> [--max-steps N] [--variant none|high]');
+if (!rootArg || !tgzDir || !promptFile) throw new Error('usage: node round-opencode.mjs <root> <tgz-dir> <prompt-file> [--max-steps N] [--variant none|high] [--max-usd X]');
 if (fs.existsSync(rootArg)) throw new Error(`${rootArg} exists; a round starts from an empty folder`);
 const opt = (name, dflt) => { const i = rest.indexOf(name); return i >= 0 ? rest[i + 1] : dflt; };
 
@@ -77,7 +82,10 @@ Object.assign(env, {
 const seal = {
   $schema: 'https://opencode.ai/config.json',
   autoupdate: false,
-  permission: { external_directory: 'deny', bash: 'deny', webfetch: 'deny', websearch: 'deny' },
+  // OpenCode allows $TMPDIR/opencode/* by default (its own scratch, where an agent saves screenshots to read back);
+  // a bare "deny" removed that too (s2, run 1: Mistral could not read its own drive_page screenshots). TMPDIR is
+  // inside the lab's empty HOME, so allowing it reaches nothing of the real user's.
+  permission: { external_directory: { '*': 'deny', [path.join(HOME, 'tmp', 'opencode', '*')]: 'allow' }, bash: 'deny', webfetch: 'deny', websearch: 'deny' },
   experimental: { continue_loop_on_deny: true },
   ...(opt('--max-steps', null) ? { agent: { build: { steps: Number(opt('--max-steps')) } } } : {})
 };
@@ -91,26 +99,33 @@ fs.writeFileSync(path.join(root, 'create.log'), created.stdout + created.stderr)
 if (created.status !== 0) throw new Error(`create-nodegx exited ${created.status}; see create.log`);
 if (!/Another AI coder: give it the server "npx -y @nodegx\/mcp@0\.2\.0 --allow-writes" \(stdio\)\./.test(created.stdout)) throw new Error('create-nodegx no longer prints the "Another AI coder" line this round follows; see create.log');
 
-// 2. What the person writes from that line and OpenCode's docs — with the registry name → the tarball.
-const person = {
-  $schema: 'https://opencode.ai/config.json',
-  model: MODEL,
-  mcp: { nodegx: { type: 'local', command: ['npx', '-y', '@nodegx/mcp@0.2.0', '--allow-writes'], enabled: true } }
-};
-const project = structuredClone(person);
+// 2. The folder's opencode.json. Since s2 (17b992839) create-nodegx writes it (the server, Large 4's 128k context) and
+// says `opencode -m mistral/mistral-large-4`; before, the person wrote it from the "Another AI coder" line. Either way
+// the registry name → the tarball, as round-kit.mjs does for Vibe. --context overrides the kit's limit (0 removes it).
+const configFile = path.join(APPS, 'opencode.json');
+const kitWrote = fs.existsSync(configFile);
+const project = kitWrote
+  ? JSON.parse(fs.readFileSync(configFile, 'utf8'))
+  : { $schema: 'https://opencode.ai/config.json', mcp: { nodegx: { type: 'local', command: ['npx', '-y', '@nodegx/mcp@0.2.0', '--allow-writes'], enabled: true } } };
+const asWritten = JSON.stringify(project.mcp.nodegx.command);
+if (asWritten !== JSON.stringify(['npx', '-y', '@nodegx/mcp@0.2.0', '--allow-writes'])) throw new Error(`opencode.json names the server as ${asWritten}`);
 project.mcp.nodegx.command = ['npx', '-y', `--package=${tgz('nodegx-mcp-0.2.0.tgz')}`, 'noodl-mcp', '--allow-writes'];
-fs.writeFileSync(path.join(APPS, 'opencode.json'), JSON.stringify(project, null, 2) + '\n');
-fs.writeFileSync(path.join(root, 'opencode-config.json'), JSON.stringify(project, null, 2) + '\n');
+if (opt('--context', null) !== null) {
+  if (Number(opt('--context')) === 0) delete project.provider;
+  else project.provider = { mistral: { models: { 'mistral-large-4': { limit: { context: Number(opt('--context')), output: 16384 } } } } };
+}
+fs.writeFileSync(configFile, JSON.stringify(project, null, 2) + '\n');
+fs.writeFileSync(path.join(root, 'opencode-config.json'), JSON.stringify({ kitWrote, ...project }, null, 2) + '\n');
 
 // 3. opencode run in the folder, headless. The model is the project config's; --variant only for a control arm.
 const variant = opt('--variant', null);
 const prompt = fs.readFileSync(promptFile, 'utf8').trim();
-const args = ['-y', OPENCODE, 'run', '--format', 'json', ...(variant ? ['--variant', variant] : []), prompt];
+const args = ['-y', OPENCODE, 'run', '-m', MODEL, '--format', 'json', ...(variant ? ['--variant', variant] : []), prompt];
 fs.writeFileSync(
   path.join(root, 'command.txt'),
   `cd ${APPS} && npx ${args.slice(0, -1).join(' ')} "$(cat ${path.resolve(promptFile)})"\n` +
     `# HOME=${HOME} (XDG_* and TMPDIR inside it); seal ${sealFile}\n` +
-    `# the person's opencode.json names the server as: ${person.mcp.nodegx.command.join(' ')}\n`
+    `# opencode.json ${kitWrote ? 'written by create-nodegx' : 'written by the person'}; its server was: ${JSON.parse(asWritten).join(' ')}\n`
 );
 const log = fs.createWriteStream(path.join(root, 'agent.jsonl'));
 const err = fs.createWriteStream(path.join(root, 'agent.stderr'));
@@ -119,4 +134,28 @@ const err = fs.createWriteStream(path.join(root, 'agent.stderr'));
 const child = spawn('npx', args, { cwd: APPS, env: { ...env, PWD: APPS }, stdio: ['ignore', 'pipe', 'pipe'] });
 child.stdout.pipe(log);
 child.stderr.pipe(err);
-child.on('close', (code) => { fs.writeFileSync(path.join(root, 'agent.exit'), String(code)); console.log('exit', code); });
+const t0 = Date.now();
+let capped = null;
+const maxUsd = Number(opt('--max-usd', 0));
+const db = path.join(XDG.XDG_DATA_HOME, 'opencode', 'opencode.db');
+const guard = maxUsd && setInterval(() => {
+  if (!fs.existsSync(db)) return;
+  const q = "select coalesce(sum(json_extract(data,'$.tokens.input')),0), coalesce(sum(json_extract(data,'$.tokens.cache.read')),0), coalesce(sum(json_extract(data,'$.tokens.output')),0) + coalesce(sum(json_extract(data,'$.tokens.reasoning')),0) from message where json_extract(data,'$.role')='assistant'";
+  const r = spawnSync('sqlite3', ['-readonly', '-separator', ' ', db, q], { encoding: 'utf8' });
+  const [input, cached, out] = (r.stdout || '').trim().split(' ').map(Number);
+  const usd = (input * 0.68 + cached * 0.07 + out * 2.09) / 1e6;
+  fs.writeFileSync(path.join(root, 'agent.spend'), `${usd.toFixed(4)} input=${input} cached=${cached} out=${out}\n`);
+  if (usd > maxUsd && !capped) {
+    capped = usd;
+    // The whole tree under this runner's own child (npx → launcher → opencode → its MCP server), found by parent pid;
+    // never by name, which would reach a peer's processes.
+    const tree = (pid) => [pid, ...(spawnSync('pgrep', ['-P', String(pid)], { encoding: 'utf8' }).stdout || '').split('\n').filter(Boolean).flatMap((c) => tree(Number(c)))];
+    for (const pid of tree(child.pid).reverse()) try { process.kill(pid, 'SIGTERM'); } catch {}
+  }
+}, 15000);
+child.on('close', (code) => {
+  if (guard) clearInterval(guard);
+  const how = capped ? `capped at $${capped.toFixed(2)}` : String(code);
+  fs.writeFileSync(path.join(root, 'agent.exit'), `${how} ${Math.round((Date.now() - t0) / 1000)}s`);
+  console.log('exit', how);
+});

@@ -2,6 +2,7 @@
 id: P112-OWN018-READWASTE
 title: "An agent read 651k characters of tool answers to write one app and used ~16% of them — a whole-catalog dump, repeat reads, 19% indentation, phrase-only search, one-at-a-time schema reads, and route ports the notes never named"
 status: fixed
+commit: 8a28e7860
 severity: medium
 area: mcp / tool answers (`src/tools/util.ts` `jsonResult`/`errorResult`, `renderTools.ts`, `catalog.ts` `listExamples`, `catalogTools.ts` `list_examples`, `disclosure.ts` `call_tool`, `unknownArguments.ts`), node notes (`docs/node-catalog/enrichment/routernavigate.json`)
 found: P112 OWN-018, 2026-10-12 (Mistral Large 4 in Vibe; Richard: "Did it really need all 550K characters?")
