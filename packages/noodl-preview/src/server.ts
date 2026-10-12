@@ -247,6 +247,16 @@ export class PreviewServer {
       return this.sendFile(req, res, target);
     }
 
+    // P112-S16-DEEPLINK: an app routed by path ("/lesson/greetings") is one page; any address that names no file is
+    // the app, as the deploy's server answers it (Caddy `try_files {path} /index.html`). Without this every reload off
+    // "/" — and the live reload after each edit is one — showed "Not found". A missing asset (it has an extension) and
+    // a file the deploy would not publish (it exists, refused above) stay 404.
+    const base = path.basename(pathname);
+    if (!fs.existsSync(target) && path.extname(base) === '' && !base.startsWith('.')) {
+      const html = this.build ? injectClient(this.build.html) : bootstrapPage(path.basename(this.projectDir));
+      return this.sendDynamic(res, html, 'text/html; charset=utf-8');
+    }
+
     return this.notFound(res);
   }
 
