@@ -29,6 +29,7 @@ import { danglingConnection } from './danglingConnection';
 import { unresolvedComponentRef } from './unresolvedComponentRef';
 import { orphanedNode } from './orphanedNode';
 import { detachedPageContent } from './detachedPageContent';
+import { invalidHierarchy } from './invalidHierarchy';
 import { typeIncompatibleConnection } from './typeIncompatibleConnection';
 import { signalDrivenStaleInput } from './signalDrivenStaleInput';
 import { signalIntoValuePort } from './signalIntoValuePort';
@@ -62,6 +63,9 @@ export const ALL_RULES: Rule[] = [
   unresolvedComponentRef,
   orphanedNode,
   detachedPageContent,
+  // P107 R23 — beside the other two tree rules: `orphanedNode` asks whether a parent exists, this one whether the
+  // node may sit in it
+  invalidHierarchy,
   typeIncompatibleConnection,
   signalDrivenStaleInput,
   // DEF-002 §3 — beside `typeIncompatibleConnection`'s neighbours because it is
@@ -113,6 +117,7 @@ export {
   unresolvedComponentRef,
   orphanedNode,
   detachedPageContent,
+  invalidHierarchy,
   typeIncompatibleConnection,
   signalDrivenStaleInput,
   signalIntoValuePort,

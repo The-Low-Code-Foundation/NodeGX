@@ -1,5 +1,6 @@
 import _ from 'underscore';
 
+import { componentChildCategories, componentHierarchyType } from '@nodegx/project-contract/hierarchy';
 import { UndoQueue } from '@noodl-models/undo-queue-model';
 import Utils from '@noodl-utils/utils';
 
@@ -122,13 +123,12 @@ export class ComponentModel extends Model {
   }
 
   collectAllowedChildCategories() {
-    let categories = [];
-
+    // P107 R23 — `@nodegx/project-contract/hierarchy`, the derivation the agent's checker reads too
+    const types = [];
     this.graph.forEachNode(function (node) {
-      if (node.type.haveComponentChildren) categories = _.union(node.type.haveComponentChildren, categories);
+      types.push(node.type);
     });
-
-    return categories.length > 0 ? categories : undefined;
+    return componentChildCategories(types);
   }
   // Returns the ports for this components, port types are derrived from connections
   // to any ports on node with the "haveComponentPorts" property
@@ -434,14 +434,11 @@ export class ComponentModel extends Model {
   }
 
   get category() {
-    let category;
-
-    // The component will assume the category of any roots that may act as children
-    _.each(this.graph.roots, function (root) {
-      if (root.type.allowAsChild) category = root.type.category;
-    });
-
-    return category;
+    // The component will assume the category of any roots that may act as children (the last one names it)
+    return componentHierarchyType(
+      this.graph.roots.map((root) => root.type),
+      []
+    ).category;
   }
 
   get color() {
@@ -459,9 +456,10 @@ export class ComponentModel extends Model {
   // in that case the component type may act as a child
 
   get allowAsChild() {
-    return !!_.find(this.graph.roots, function (n) {
-      return n.type.allowAsChild;
-    });
+    return componentHierarchyType(
+      this.graph.roots.map((root) => root.type),
+      []
+    ).allowAsChild;
   }
 
   // The component can have children if there are nodes with "haveComponentChildren"

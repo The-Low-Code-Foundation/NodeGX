@@ -212,7 +212,19 @@ describe('the editor’s seam has the same consequence as the server’s', () =>
     // the same number. The load-bearing figures are the two beside it.
     expect(after.infos).toBe(0);
     expect(after.endpointsChecked).toBe(4);
-    expect(after.errors).toBe(1);
+    // P107 R23 (s89): the kit's types also say where a node may sit — `/Broken` puts a Badge inside a Meter that
+    // declares `allowChildren: false`, which the editor marks too. The wrong port is still the one other error.
+    const errorCodes = new SemanticValidator(editorCatalogIndex())
+      .validate(loadV2Directory(KIT_APP), {})
+      .diagnostics.filter((d) => d.severity === 'error')
+      .map((d) => `${d.code} ${d.location.component} ${d.location.nodeId}`)
+      .sort();
+    expect(errorCodes).toEqual([
+      'invalid-hierarchy /Broken broken_badge',
+      'invalid-hierarchy /Broken broken_meter',
+      'nonexistent-port /Broken broken_badge'
+    ]);
+    expect(after.errors).toBe(3);
     expect(after.warnings).toBe(0);
   });
 

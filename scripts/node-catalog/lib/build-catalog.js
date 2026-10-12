@@ -182,8 +182,21 @@ function detectDynamism(typeName, metadata, rawDef) {
 
 /**
  * @param records Map<typeName, { metadata, rawDef, providedBy, environments:Set }>
- * @param extras { typecasts, packageVersions }
+ * @param extras { typecasts, packageVersions, nodePickerTypes, exportedTypes }
+ *   `exportedTypes`: name -> the runtime's own node library export of that type (`nodelibraryexport.ts`, browser
+ *   first, then cloud) — where the child/parent rules are read from, rather than derived again here.
  */
+/** The export's child/parent fields for one type, as the catalog writes them (absent rather than false). */
+function exportedChildRules(exported) {
+  return {
+    singleton: exported.singleton || undefined,
+    allowAsChild: exported.allowAsChild ? true : undefined,
+    allowChildrenWithCategory: sanitize(exported.allowChildrenWithCategory),
+    haveComponentChildren: sanitize(exported.haveComponentChildren),
+    allowAsExportRoot: exported.allowAsExportRoot
+  };
+}
+
 function buildCatalog(records, extras) {
   const nodes = [];
   const portTypeNames = new Set();
@@ -235,22 +248,15 @@ function buildCatalog(records, extras) {
       node.ssr = metadata.ssr ? sanitize(metadata.ssr) : { compat: 'safe' };
     }
 
-    // Mirror the effective child/parent rules the editor derives in
-    // nodelibraryexport.js: Visual nodes may be placed as children and used
-    // as export roots unless overridden; allowChildren implies Visual children.
-    let allowChildrenWithCategory;
-    if (metadata.allowChildren) allowChildrenWithCategory = ['Visual'];
-    if (metadata.allowChildrenWithCategory) allowChildrenWithCategory = metadata.allowChildrenWithCategory;
+    // The child/parent rules are the runtime export's own answer for this type (P107 s89, R23): until s89 this file
+    // mirrored `nodelibraryexport.ts` by hand, and the mirror never carried `haveComponentChildren`.
+    const exported = extras.exportedTypes.get(typeName) || {};
 
     assignDefined(node, {
       docs: metadata.docs,
       searchTags: sanitize(metadata.searchTags),
       module: metadata.module,
-      singleton: metadata.singleton || undefined,
-      allowAsChild: isVisual || metadata.allowAsChild ? true : undefined,
-      allowChildrenWithCategory: sanitize(allowChildrenWithCategory),
-      allowAsExportRoot:
-        metadata.allowAsExportRoot !== undefined ? metadata.allowAsExportRoot : isVisual ? true : undefined,
+      ...exportedChildRules(exported),
       useVariants: metadata.useVariants || undefined,
       visualStates: sanitize(metadata.visualStates)
     });
@@ -282,7 +288,7 @@ function buildCatalog(records, extras) {
     providedBy: 'noodl-editor',
     ssr: { compat: 'safe' },
     shortDesc: 'Placeholder marking where children given to an instance of this component are inserted.',
-    allowAsChild: true,
+    ...exportedChildRules(extras.exportedTypes.get('Component Children') || {}),
     inputs: [],
     outputs: [],
     dynamicPorts: null,

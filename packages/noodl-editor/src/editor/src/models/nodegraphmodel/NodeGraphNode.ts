@@ -1,5 +1,6 @@
 import { each, filter, find, isEqual, some } from 'underscore';
 
+import { cannotBeAChild, cannotHaveChildren, cannotHoldChild, rootCategoryDisagrees } from '@nodegx/project-contract/hierarchy';
 import { stripCodeHistoryMetadata } from '@noodl-models/CodeHistory/codeHistoryMetadata';
 import { ComponentModel } from '@noodl-models/componentmodel';
 import { NodeGraphModel } from '@noodl-models/nodegraphmodel/NodeGraphModel';
@@ -983,8 +984,10 @@ export class NodeGraphNode extends Model {
         : undefined
     );
 
+    // Where it sits in the tree — P107 R23: the rule's one body is `@nodegx/project-contract/hierarchy`, which the
+    // agent's checker (`validation/rules/invalidHierarchy.ts`) calls too
     // Cannot be a child
-    var w = this.parent && !this.type.allowAsChild;
+    var w = this.parent && cannotBeAChild(this.type);
     WarningsModel.instance.setWarning(
       { component: this.owner.owner, node: this, key: 'node-not-child' },
       !missingType && w //don't show this warning if type is missing since it's a bit superfluous
@@ -997,13 +1000,7 @@ export class NodeGraphNode extends Model {
     );
 
     // Parent cannot have children
-    var w =
-      this.type &&
-      this.parent &&
-      this.parent.type &&
-      (!this.parent.type.allowChildrenWithCategory ||
-        !this.type.category ||
-        this.parent.type.allowChildrenWithCategory.indexOf(this.type.category) === -1);
+    var w = this.type && this.parent && this.parent.type && cannotHoldChild(this.parent.type, this.type);
 
     WarningsModel.instance.setWarning(
       { component: this.owner.owner, node: this, key: 'node-invalid-child' },
@@ -1016,7 +1013,7 @@ export class NodeGraphNode extends Model {
     );
 
     // Cannot have children
-    w = !this.type.allowChildrenWithCategory && this.children && this.children.length > 0;
+    w = cannotHaveChildren(this.type) && this.children && this.children.length > 0;
     WarningsModel.instance.setWarning(
       { component: this.owner.owner, node: this, key: 'node-no-children' },
       !missingType && w //don't show this warning if type is missing since it's a bit superfluous
@@ -1045,10 +1042,10 @@ export class NodeGraphNode extends Model {
     // Roots must have same category
     var w =
       !this.parent &&
-      this.type.allowAsChild &&
-      !!find(this.owner.roots, function (n) {
-        return n !== _this && n.type.allowAsChild && n.type.category !== _this.type.category;
-      });
+      rootCategoryDisagrees(
+        this.type,
+        this.owner.roots.filter((n) => n !== _this).map((n) => n.type)
+      );
     WarningsModel.instance.setWarning(
       { component: this.owner.owner, node: this, key: 'node-child-cat' },
       w

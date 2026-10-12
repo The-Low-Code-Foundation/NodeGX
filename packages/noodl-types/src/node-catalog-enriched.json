@@ -135,7 +135,8 @@
       "from": "array",
       "to": [
         "collection",
-        "string"
+        "string",
+        "optionslist"
       ]
     }
   ],
@@ -6675,6 +6676,9 @@
       },
       "shortDesc": "Placeholder marking where children given to an instance of this component are inserted.",
       "allowAsChild": true,
+      "haveComponentChildren": [
+        "Visual"
+      ],
       "inputs": [],
       "outputs": [],
       "dynamicPorts": null,
@@ -30394,7 +30398,7 @@
           "unchanged": "Signal; the Router was already showing that page with those parameters, so nothing needed rebuilding.",
           "failure": "Signal; no Pages, no start page, a start page this Router does not serve, or a routed component that is not a page. ⚠️ Reset is also called on mount so the start page is created, and that call reports nothing — a mount that fired Done would pulse every chain in the app at boot.",
           "completed": "Signal; fires after every Reset the author triggered, whatever the outcome.",
-          "currentPageTitle": "String value; the title of the page currently shown (also written to the document title).",
+          "currentPageTitle": "String value; the title of the page currently shown, as typed in the Pages list. The browser tab shows the Page node's current Title, which is this one unless a wire into the Page's Title gives it another.",
           "currentPageComponent": "String value; the component name of the page currently shown."
         },
         "runtimeBehavior": "Runtime-determined ports (runtime-discovered + editor-adapter, RouterAdapter): the `pages` parameter decides which page components exist, and the editor derives navigation metadata — page titles, URL patterns, parameters — from each page component's Page node. An authoring tool should set `name` and `pages` on the Router and declare titles/paths on the Page node inside each page component; it cannot enumerate page-dependent ports statically.",
@@ -69946,6 +69950,7 @@
       "array→collection": "Array and collection (legacy shared-list type) are interchangeable: the same underlying list object flows through unchanged.",
       "object→string": "The runtime serialises with JSON.stringify before the receiver's cast runs (NDA-014, PORT-TYPE-CONTRACT.md). Values with their own toString (e.g. Date) keep that rendering; circular structures deliver '' and raise a warning.",
       "array→string": "The runtime serialises with JSON.stringify before the receiver's cast runs (NDA-014, PORT-TYPE-CONTRACT.md). Circular structures deliver '' and raise a warning.",
+      "array→optionslist": "The list arrives unchanged; the Dropdown reads each item as an option (P107 R21, Dropdown v8). A { Label, Value } row keeps its label, its value and its Disabled; a bare word or number becomes an option labelled and valued by its text; a null or missing item is skipped.",
       "color→string": "The resolved color string — a style name resolves to its value (context.styles.resolveColor) before crossing the wire.",
       "enum→string": "The option's value (not its label), which is already a string, arrives unchanged. There is no enum→number cast: parse it with an Expression."
     },
@@ -72206,35 +72211,10 @@
               "id": "list",
               "type": "For Each",
               "label": "One row per item",
-              "parent": "root",
-              "children": [
-                "row"
-              ]
-            },
-            {
-              "id": "row",
-              "type": "Group",
-              "label": "Row",
               "parameters": {
-                "flexDirection": "column"
+                "template": "/Post Row"
               },
-              "parent": "list",
-              "children": [
-                "row_title",
-                "row_date"
-              ]
-            },
-            {
-              "id": "row_title",
-              "type": "Text",
-              "label": "Title",
-              "parent": "row"
-            },
-            {
-              "id": "row_date",
-              "type": "Text",
-              "label": "Published",
-              "parent": "row"
+              "parent": "root"
             },
             {
               "id": "fetch",
@@ -72310,6 +72290,66 @@
               "fromProperty": "failure",
               "toId": "parse_failed_log",
               "toProperty": "log"
+            }
+          ]
+        },
+        {
+          "name": "/Post Row",
+          "nodes": [
+            {
+              "id": "row",
+              "type": "Group",
+              "label": "Row",
+              "parameters": {
+                "flexDirection": "column"
+              },
+              "children": [
+                "row_title",
+                "row_date"
+              ]
+            },
+            {
+              "id": "row_title",
+              "type": "Text",
+              "label": "Title",
+              "parent": "row"
+            },
+            {
+              "id": "row_date",
+              "type": "Text",
+              "label": "Published",
+              "parent": "row"
+            },
+            {
+              "id": "item",
+              "type": "Component Inputs",
+              "label": "One item's fields, by name",
+              "ports": [
+                {
+                  "name": "Title",
+                  "plug": "output",
+                  "type": "*"
+                },
+                {
+                  "name": "Published",
+                  "plug": "output",
+                  "type": "*"
+                }
+              ]
+            }
+          ],
+          "connections": [
+            {
+              "fromId": "item",
+              "fromProperty": "Title",
+              "toId": "row_title",
+              "toProperty": "text"
+            },
+            {
+              "fromId": "item",
+              "fromProperty": "Published",
+              "toId": "row_date",
+              "toProperty": "text"
             }
           ]
         }
@@ -72444,16 +72484,10 @@
               "id": "list",
               "type": "For Each",
               "label": "One row per tool",
-              "parent": "root",
-              "children": [
-                "row_label"
-              ]
-            },
-            {
-              "id": "row_label",
-              "type": "Text",
-              "label": "Tool label",
-              "parent": "list"
+              "parameters": {
+                "template": "/Tool Row"
+              },
+              "parent": "root"
             },
             {
               "id": "fetch",
@@ -72524,6 +72558,17 @@
               "toProperty": "log"
             }
           ]
+        },
+        {
+          "name": "/Tool Row",
+          "nodes": [
+            {
+              "id": "row_label",
+              "type": "Text",
+              "label": "Tool label"
+            }
+          ],
+          "connections": []
         }
       ]
     },

@@ -6216,6 +6216,9 @@
       },
       "shortDesc": "Placeholder marking where children given to an instance of this component are inserted.",
       "allowAsChild": true,
+      "haveComponentChildren": [
+        "Visual"
+      ],
       "inputs": [],
       "outputs": [],
       "dynamicPorts": null,

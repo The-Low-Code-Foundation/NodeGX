@@ -327,7 +327,10 @@ describe('acceptance criterion 3 — the skipped checks run, and find something'
     // would pass just as well on a change that deleted the diagnostics.
     expect(after.summary.endpointsChecked).toBe(4);
     expect(after.byCode['nonexistent-port']).toBe(1);
-    expect(after.summary.errors).toBe(1);
+    // P107 R23 (s89): known types also say where a node may sit — `/Broken`'s Badge inside a Meter that declares
+    // `allowChildren: false` is two more errors (the Meter holds a child; the Badge sits where it is not held)
+    expect(after.byCode['invalid-hierarchy']).toBe(2);
+    expect(after.summary.errors).toBe(3);
   });
 
   it('names the port, the node and the component that were wrong', () => {

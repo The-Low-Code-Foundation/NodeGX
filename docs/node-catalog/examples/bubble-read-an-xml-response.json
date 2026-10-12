@@ -20,14 +20,10 @@
           "id": "list",
           "type": "For Each",
           "label": "One row per tool",
-          "parent": "root",
-          "children": ["row_label"]
-        },
-        {
-          "id": "row_label",
-          "type": "Text",
-          "label": "Tool label",
-          "parent": "list"
+          "parameters": {
+            "template": "/Tool Row"
+          },
+          "parent": "root"
         },
         {
           "id": "fetch",
@@ -98,6 +94,17 @@
           "toProperty": "log"
         }
       ]
+    },
+    {
+      "name": "/Tool Row",
+      "nodes": [
+        {
+          "id": "row_label",
+          "type": "Text",
+          "label": "Tool label"
+        }
+      ],
+      "connections": []
     }
   ]
 }

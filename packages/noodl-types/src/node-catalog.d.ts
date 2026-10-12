@@ -367,6 +367,8 @@ export interface CatalogNode {
   singleton?: boolean;
   allowAsChild?: boolean;
   allowChildrenWithCategory?: string[];
+  /** Set on `Component Children`: a component that holds one holds children of these categories. */
+  haveComponentChildren?: string[];
   allowAsExportRoot?: boolean;
   useVariants?: boolean;
   visualStates?: Array<{ name: string; label: string }>;

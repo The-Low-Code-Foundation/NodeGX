@@ -64,9 +64,10 @@
  * The two figures the doctrine argues from, each the share of components with an interface that publish any
  * `Component Outputs`. The corpus moves whenever examples are added, so the figure lives here once and
  * `noodl-mcp/tests/cmp001InterfaceDoctrine.test.ts` counts the artefacts and says when this has gone stale (P109-S9:
- * the doctrine said 33 for months while the corpus read 37, then 39). Count the artefact; move this; never a copy.
+ * the doctrine said 33 for months while the corpus read 37, then 39; P107 s89's `/Post Row`, a row that only shows two
+ * fields, made it 38). Count the artefact; move this; never a copy.
  */
-export const CORPUS_PUBLISH_RATE = 39;
+export const CORPUS_PUBLISH_RATE = 38;
 export const SHELF_PUBLISH_RATE = 84;
 
 export const INTERFACE_DOCTRINE_MD = `## What goes on a component's interface

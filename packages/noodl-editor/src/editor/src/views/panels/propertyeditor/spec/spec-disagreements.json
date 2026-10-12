@@ -1020,6 +1020,13 @@
       "status": "fixed",
       "commit": "5d40a7aa3",
       "ruling": "Ruled 2026-10-05 (Track F rulings page), as recommended: \"Fix it now\". The pick survives hiding and a refreshed list, and Changed fires only for a person's pick. Small to medium change in the Dropdown's two files."
+    },
+    {
+      "id": "P107-S88-OPTIONSCAST",
+      "title": "A list cannot be wired into a Dropdown's Items since Items became an `optionslist` — the canvas refuses the wire and the Problems panel and the agent server warn \"Type mismatch\" on the 30 that exist",
+      "status": "fixed",
+      "commit": "813657773, fecab7823",
+      "ruling": "Ruled 2026-10-11 (R21, s88), as recommended: \"Allow it, and fix bare labels\"."
     }
   ],
   "net.noodl.controls.radiobutton": [

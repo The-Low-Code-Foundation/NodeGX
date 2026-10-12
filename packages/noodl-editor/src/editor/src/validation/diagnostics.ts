@@ -77,6 +77,12 @@ export enum DiagnosticCode {
    * `Page` node rather than inside it, so the page renders blank.
    */
   DetachedPageContent = 'detached-page-content',
+  /**
+   * P107 R23: a node sits where the editor does not let it sit in the visual tree — a logic node (or a component with
+   * no visual root) inside another node, a child its parent does not hold, children under a node that holds none, or
+   * visual roots of different categories. `error`, as the editor marks it (`@nodegx/project-contract/hierarchy`).
+   */
+  InvalidHierarchy = 'invalid-hierarchy',
   TypeIncompatibleConnection = 'type-incompatible-connection',
   /**
    * NDA-017: a control signal fires without waiting for the asynchronous producer of a value
