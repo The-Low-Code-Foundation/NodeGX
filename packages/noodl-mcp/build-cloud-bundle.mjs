@@ -6,6 +6,7 @@
  *
  *     node build-cloud-bundle.mjs [outfile]
  */
+import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -37,6 +38,28 @@ export async function buildCloudBundle(outfile = path.join(here, 'dist', 'cloud-
     // resolve them into a Node bundle.
     loader: { '.css': 'empty', '.scss': 'empty', '.svg': 'empty', '.png': 'empty' }
   });
+  /**
+   * P112-S13-CLOUDDEPLOY (register row C68, the preview's `build.mjs` has the same fix). `@noodl/platform-node`'s
+   * `getAppPath()` throws at import unless a `package.json` is in `process.cwd()` or beside the bundle, and the
+   * bundler is spawned with the MCP server's own working directory. Under `npx`, or a packaged editor's sidecar,
+   * that is the person's project folder, which is not an npm package, so `deploy_cloud_functions` failed on every
+   * one of them (installed 0.3.0 and `@nodegx/mcp@0.1.0` both). One file beside the bundle makes `__dirname`
+   * answer, whoever spawns it from wherever. Named apart from the package so no tool reads it as a second copy.
+   */
+  const pkg = JSON.parse(readFileSync(path.join(here, 'package.json'), 'utf8'));
+  writeFileSync(
+    path.join(path.dirname(outfile), 'package.json'),
+    JSON.stringify(
+      {
+        name: 'nodegx-mcp-bundles',
+        version: pkg.version,
+        private: true,
+        description: 'Build metadata for the bundled CLIs beside it. See build-cloud-bundle.mjs: @noodl/platform reads it.'
+      },
+      null,
+      2
+    ) + '\n'
+  );
   return { outfile };
 }
 

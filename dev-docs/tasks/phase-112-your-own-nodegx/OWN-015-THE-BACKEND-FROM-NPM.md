@@ -4,7 +4,7 @@
 when it leaves the monorepo, and the secret's shape across the MCP, the backend and the cloud node). **Opus** for the
 packaging, the stranger's runs and the publish.
 
-**Status: 📋 not started.**
+**Status: 🟡 s13 (2026-10-12): the mechanism is built and graded from a packed tarball (§6): provision, secret, deploy, call, and AC2's search with its control, AC3's two refusals. Owed: AC1's stranger agent and the page that speaks (audio in the preview); AC2's capture of the page's own requests; AC4 publish.**
 
 ## 1. The person sentence
 
@@ -66,3 +66,64 @@ Today, on the npm path, the key can only go into an HTTP Request node in the bro
 - Hosting the backend somewhere other than the person's machine: OWN-016.
 - A Worker or D1 backend: P115 HST-004 and HST-006, still parked.
 - The admin dashboard: P104.
+
+## 6. Session 13 (2026-10-12, Opus): built, and graded from a tarball
+
+**Step 1, measured.** No design question was left for Fable:
+- The backend already builds into **one self-contained file**, `nodegx-backend/dist/cli.js` (4.6 MB, its
+  `scripts/build.js`: *"copy this file and run it"*). The packaged editor ships exactly that file.
+- At runtime it requires Node built-ins and `node:sqlite` only, with `sharp`, `pg-native` and `better-sqlite3` as
+  guarded optional requires.
+- Everything it inlines is MIT (`noodl-runtime`, `noodl-viewer-cloud`, `nodegx-backend-contract`). It declares
+  `engines.node >=22.13.0`.
+
+**Step 2, decided: it ships inside `@nodegx/mcp`**, not as a dependency.
+- `build-backend-copy.mjs` (prepack, `--remove` at postpack) bundles it with the backend's own exported esbuild config
+  to `dist/backend/cli.js`. It writes there, never over the `dist/` a running editor or peer uses.
+- `provision.ts` probes `dist/backend/cli.js`, and its refusal names the npm case. The old "installed copy" candidate
+  names `node_modules/nodegx-backend`, a package that has never existed.
+- Why not a dependency: no workspace is called `@nodegx/backend`, so declaring one would send the monorepo's own
+  install to the registry. A standalone package for a server is OWN-016's question.
+- The tarball grows to 6.8 MB packed.
+
+**Step 3: two tools in the deferred backend group.** `set_function_secret {name, value}` (write-gated) and
+`list_function_secrets` (names only), both over CWF-009's existing `PUT/GET /admin/secrets`. The value is never
+echoed. The resident surface is unchanged at 8,279 of 8,280, measured with and without them.
+
+**Found and fixed: P112-S13-CLOUDDEPLOY (high).** `deploy_cloud_functions` failed on every npm install, with
+*"[@noodl/platform] Cannot find package.json"*. The installed NodeGX 0.3.0's bundler fails the same way from any
+folder that isn't an npm package (measured). This is C68's defect, and the fix is C68's: a `package.json` beside the
+bundle, shipped by npm and by the editor's `extraResources`. New spec `own015CloudBundleCwd`, 3/3 with its control.
+ISL-042's spec runs with `cwd: PKG`, which is why it never saw this.
+
+**The fixture and the run.** `node scripts/own/stranger-backend.mjs <tgz>` runs in an empty folder, with `HOME`
+empty and `NODEGX_*` removed, the MCP over stdio. Google is a local stand-in that returns audio **only** for the right
+key in `x-goog-api-key`.
+- `create_project` "Lingo" with `backend: nodegx` → `find_tools` → `provision_backend` (from `dist/backend/cli.js`).
+- `create_component #__cloud__/speak` is Request(text, voice) → Secret `GOOGLE_TTS_KEY` → Function (`fetch`
+  text:synthesize, MP3) → Response `audioContent`, with failures to a second Response. It reported 0 errors, then
+  `deploy_cloud_functions` deployed it.
+- **AC3:** `POST /functions/speak` before the secret is set → **400**, *"Secret: "GOOGLE_TTS_KEY" is not provisioned
+  on this machine. Add it under the "functions" section of …/secrets.json, or set NODEGX_SECRET_GOOGLE_TTS_KEY"*, with
+  no call to the API. With no backend at all, the registry's `@nodegx/mcp@0.1.0` refuses `provision_backend` and has no
+  `set_function_secret` (control arm).
+- `set_function_secret` → `list_function_secrets` shows the name and not the value → `POST /functions/speak` →
+  **200**, the audio decodes to the sentence, and the stand-in saw the right key.
+- **AC2 (files and results):** the key's value appears in **0** of the project's 18 files and in **0** tool results or
+  HTTP answers the agent saw. It is in **1** file, the backend's own `secrets.json` under `~/.noodl/backends/<id>/`.
+  **Control:** the same key in an HTTP Request node in a page is found by the same search
+  (`components/Control/KeyInThePage/nodes.json`).
+- The fixture differs from what ships only in its endpoint constant (the real one is `FIXTURE_ENDPOINT` in the script).
+
+**Found: P112-S13-SECRETPATH (low, open, a question for the fix).** That AC3 message carries the server's
+`secrets.json` path. The fixture routed the Secret node's `Error` into the public Response, the obvious wiring, so
+anyone calling the function learns the home directory and backend id. No value leaks.
+
+**Owed.**
+- **AC1's stranger.** A fresh agent with one sentence builds this itself, plus the page: a button wired to a Cloud
+  Function call and playback through a `create_node_kit` node. The app must speak in the preview. Driving a real Claude
+  Code in an empty folder is the honest form.
+- **AC2's last third.** A capture of every request the page makes in the preview.
+- **AC4.** Publish, after asking Richard (R11), in a worktree at the pushed commit.
+- **A real Google key** for the video. The stand-in proves the path, not Google.
+

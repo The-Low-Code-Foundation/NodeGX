@@ -110,7 +110,11 @@ export function resolveServiceEntry(): { entry: string | null; probed: string[] 
     path.resolve(__dirname, '..', '..', '..', 'nodegx-backend', 'dist', 'cli.js'),
     path.resolve(__dirname, '..', '..', 'nodegx-backend', 'dist', 'cli.js'),
     // An installed copy.
-    path.resolve(__dirname, '..', '..', 'node_modules', 'nodegx-backend', 'dist', 'cli.js')
+    path.resolve(__dirname, '..', '..', 'node_modules', 'nodegx-backend', 'dist', 'cli.js'),
+    // P112 OWN-015 — the npm install: `prepack` copies the service bundle into this package's own
+    // `dist/backend/cli.js` (`build-backend-copy.mjs`), so `npx @nodegx/mcp` can start a backend with nothing else
+    // installed. Bundled, `__dirname` is `dist/`. (The candidate above names a package that has never existed on npm.)
+    path.resolve(__dirname, 'backend', 'cli.js')
   ];
   for (const candidate of candidates) {
     const found = push(candidate);
@@ -459,8 +463,10 @@ export async function startBackend(
   if (!entry) {
     throw new ToolError(
       'backend-error',
-      'The nodegx-backend service bundle was not found, so no backend can be started. Build it with ' +
-        '`npm run build` in packages/nodegx-backend, or set NODEGX_BACKEND_ENTRY. Probed:\n  ' +
+      'The nodegx-backend service bundle was not found, so no backend can be started. Installed from npm, it ' +
+        'ships inside @nodegx/mcp from version 0.2.0 on; an older version has none, so run npx -y @nodegx/mcp@latest. ' +
+        'In a source checkout, build it with `npm run build` in packages/nodegx-backend, or set NODEGX_BACKEND_ENTRY. ' +
+        'Probed:\n  ' +
         probed.join('\n  ')
     );
   }

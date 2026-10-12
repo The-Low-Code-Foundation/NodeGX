@@ -19,7 +19,9 @@
     "dist/kit-extract.cjs",
     "dist/kit-extract.inputs.json",
     "dist/cloud-bundle.cjs",
+    "dist/package.json",
     "dist/node-catalog.json",
+    "dist/backend",
     "dist/render-harness",
     "dist/src/external/viewer",
     "README.md",
@@ -27,8 +29,8 @@
   ],
   "scripts": {
     "build": "node build.mjs",
-    "prepack": "node build.mjs && node build-render-harness.mjs",
-    "postpack": "node build-render-harness.mjs --remove",
+    "prepack": "node build.mjs && node build-render-harness.mjs && node build-backend-copy.mjs",
+    "postpack": "node build-render-harness.mjs --remove && node build-backend-copy.mjs --remove",
     "test": "jest",
     "typecheck": "tsc --noEmit"
   },

@@ -136,6 +136,10 @@
         "to": "noodl-mcp/cloud-bundle.cjs"
       },
       {
+        "from": "../noodl-mcp/dist/package.json",
+        "to": "noodl-mcp/package.json"
+      },
+      {
         "from": "src/assets/preset-fonts",
         "to": "noodl-mcp/preset-fonts"
       },
