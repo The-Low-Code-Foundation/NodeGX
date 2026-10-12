@@ -210,3 +210,44 @@ plus the launcher's recent list, de-duplicated) and the 85 committed (export fix
 **Left (s90 on):** the kit overlay's copy of the child rules; display name / deprecation at node level; Router's labels
 only if a reason appears. nightbook's fix is the template owner's (P78), and moves the pinned 26 in
 `tests-unit/nsp-021/hierarchy`.
+
+### 6.4 s90 (2026-10-12, Opus) — the kit overlay's mirror retired; display name and deprecation measured, ruled (R24, R25) and built
+
+**The kit overlay's child rules, measured first.** The overlay's input is the runtime's own `generateNodeLibrary`
+payload, so its "mirror" was a second application of the export's derivation (`isVisual || allowAsChild`, a Visual
+`allowAsExportRoot`). Every project with a `noodl_modules` folder under `vscode_projects` plus the committed kit fixtures
+(204 folders, 203 extracted with the agent server's real `kit-extract.cjs`, 358 kit entries, 65 distinct types): the
+overlay's `allowAsChild`, `allowChildrenWithCategory`, `allowAsExportRoot`, `singleton` differed from the payload's
+**0** times. Control: a Visual entry the export could not produce (no `allowAsChild`) differed on two fields. The overlay
+now copies the four fields (`429404268`). It cannot import `@nodegx/project-contract`: it is a plain-JS package with no
+build step, and the rule needs nothing derived, only the fields. A test pins the copy (planted: old derivation → red).
+
+**Display name and deprecation, measured.** Types first: over the 180 exported types, the export's
+`displayNodeName || name` and `deprecated` against the catalog's `displayName` and `isDeprecated`: **0 and 0**
+different. A `displayName` on the spec's `NodeDecl` would change nothing a person sees. Nodes next, over 357 projects
+(258 of Richard's, 122,451 nodes; a synthetic control project beside them, which fired): the card's title (the editor's
+`label || labelForNode`) against the agent's name for the same node (`describe.ts` `endpoint`):
+- **17,130 nodes in 169 projects** whose card is titled by a port (`usePortAsLabel`, 45 types: Text 5,404, Expression
+  3,350, Variable2 1,467, the Button control 1,014, …), where the agent read the type. The value is among the agent's
+  `parameters` for all but about 100 of them, but never as the node's name. **R24 "Card title + type"**.
+- **97 nodes with `label: ""`**: the canvas shows the type, and the agent's endpoint was an empty name (`??` kept `""`).
+  P107-S90-EMPTYLABEL, fixed (`97617baab`).
+- **52 nodes of deprecated types** (REST2 34, Button 7, the user-email four 6, Variable 2, Radio Button 2, Range 1). The
+  editor refuses to create one; no check in the agent's validator read `isDeprecated` (by grep). **R25 "Warn on any"**.
+
+**Built.** R24: `@nodegx/project-contract/node-title` `portTitle(parameters, type)`, called by the editor's
+`BasicNodeType.labelForNode` (its electron spec's 11 cases pass under jest against it) and by `describe.ts`, whose data flow
+now reads `Variable "screenWidth" [v].value` and whose tree / logic rows carry `title`. The catalog (from the export),
+the enriched catalog and the kit overlay carry `usePortAsLabel` / `portLabelTruncationMode`. R25: `replacedBy` on the
+node definition (`@noodl/types` options and metadata, the register, `createNodeFromReactComponent`, the export), set on
+the 16 deprecated types with a clear successor (the 10 that share a display name with a current type, plus DbModel →
+Record, DbCollection → Query Records, Options → Dropdown, Range → Slider, Label → Text, and REST2 → HTTP Request, which
+NDA-011 names). `catalog:generate` throws if a successor is missing or itself deprecated. The validator's
+`deprecated-node` warns with a `suggestion`, and `get_node_type` / `list_node_types` show `replacedBy`. The 14 left with
+none: Animation, Field Set, Form, Globals, Gyroscope, Number Blend, Script Downloader, Signal To Index, String Selector,
+Transition, and the four user-email nodes ("Use cloud functions", no single node).
+
+**What the new rule found at once.** Two published examples taught retired nodes: `data-websocket-agent-chat` (old Text
+Input and Button, now the current controls; the same `onTextChanged` / `onClick` wiring) and `code-rest-list`, which
+*is* REST2's documentation (its enrichment's only example). The examples gate now lets an example carry
+`deprecated-node` only for the node whose enrichment lists it, and its description now opens by saying REST is retired.
