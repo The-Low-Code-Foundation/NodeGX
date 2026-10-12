@@ -1,0 +1,443 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b54afe82-5b13-5a7c-8097-595eb4c99851",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "qe_inputs",
+      "type": "Component Inputs",
+      "label": "Engine interface in",
+      "ports": [
+        {
+          "name": "start",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "tapped",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "qe_outputs",
+      "type": "Component Outputs",
+      "label": "Engine interface out",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "questionText",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "questionNumber",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "secondsLeft",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "score",
+          "plug": "input",
+          "type": "number"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "qe_questions",
+      "type": "Static Data",
+      "label": "The five questions",
+      "parameters": {
+        "type": "json",
+        "json": "[{\"text\":\"What is the capital of Portugal?\",\"answers\":[\"Lisbon\",\"Porto\",\"Coimbra\"],\"correct\":0},{\"text\":\"What is the capital of Australia?\",\"answers\":[\"Sydney\",\"Canberra\",\"Melbourne\"],\"correct\":1},{\"text\":\"What is the capital of Canada?\",\"answers\":[\"Toronto\",\"Vancouver\",\"Ottawa\"],\"correct\":2},{\"text\":\"What is the capital of Morocco?\",\"answers\":[\"Rabat\",\"Casablanca\",\"Marrakesh\"],\"correct\":0},{\"text\":\"What is the capital of Switzerland?\",\"answers\":[\"Zurich\",\"Geneva\",\"Bern\"],\"correct\":2}]"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "qe_var_score",
+      "type": "Variable2",
+      "label": "Read score",
+      "parameters": {
+        "name": "score"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "qe_var_index",
+      "type": "Variable2",
+      "label": "Read question index",
+      "parameters": {
+        "name": "questionIndex"
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "qe_var_answered",
+      "type": "Variable2",
+      "label": "Read answered flag",
+      "parameters": {
+        "name": "answered"
+      },
+      "x": 40,
+      "y": 640
+    },
+    {
+      "id": "qe_var_picked",
+      "type": "Variable2",
+      "label": "Read picked answer",
+      "parameters": {
+        "name": "picked"
+      },
+      "x": 40,
+      "y": 760
+    },
+    {
+      "id": "qe_current",
+      "type": "JavaScriptFunction",
+      "label": "Current question",
+      "parameters": {
+        "functionScript": "const questions = Inputs.questions || [];\nconst index = Inputs.index || 0;\nconst q = questions[index] || { text: '', answers: [], correct: 0 };\nOutputs.text = q.text;\nOutputs.answers = q.answers;\nOutputs.correct = q.correct;"
+      },
+      "x": 40,
+      "y": 880,
+      "ports": [
+        {
+          "name": "in-questions",
+          "displayName": "questions",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-index",
+          "displayName": "index",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-text",
+          "displayName": "text",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-answers",
+          "displayName": "answers",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-correct",
+          "displayName": "correct",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "qe_rows",
+      "type": "JavaScriptFunction",
+      "label": "Answer rows with feedback state",
+      "parameters": {
+        "functionScript": "const answers = Inputs.answers || [];\nconst answered = Inputs.answered;\nconst picked = Inputs.picked;\nconst correct = Inputs.correct;\nOutputs.rows = answers.map((label, index) => {\n  let state = 'idle';\n  if (answered) {\n    if (index === correct) state = 'correct';\n    else if (index === picked) state = 'wrong';\n  }\n  return { label, index, state, enabled: !answered };\n});"
+      },
+      "x": 40,
+      "y": 1000,
+      "ports": [
+        {
+          "name": "in-answers",
+          "displayName": "answers",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-answered",
+          "displayName": "answered",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-picked",
+          "displayName": "picked",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-correct",
+          "displayName": "correct",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "qe_expr_counter",
+      "type": "Expression",
+      "label": "Question number, 1-based",
+      "parameters": {
+        "expression": "(questionIndex || 0) + 1"
+      },
+      "x": 40,
+      "y": 1120
+    },
+    {
+      "id": "qe_counter",
+      "type": "Counter",
+      "label": "Seconds left",
+      "parameters": {
+        "startValue": 10,
+        "limitsEnabled": true,
+        "limitsMin": 0
+      },
+      "x": 40,
+      "y": 1240
+    },
+    {
+      "id": "qe_beat",
+      "type": "Repeat",
+      "label": "One-second beat",
+      "parameters": {
+        "interval": 1000
+      },
+      "x": 40,
+      "y": 1360
+    },
+    {
+      "id": "qe_expr_open",
+      "type": "Expression",
+      "label": "Question still open",
+      "parameters": {
+        "expression": "!answered"
+      },
+      "x": 40,
+      "y": 1480
+    },
+    {
+      "id": "qe_gate",
+      "type": "Condition",
+      "label": "Tick only while unanswered",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 40,
+      "y": 1600
+    },
+    {
+      "id": "qe_expr_zero",
+      "type": "Expression",
+      "label": "Countdown hit zero",
+      "parameters": {
+        "expression": "count === 0 && !answered"
+      },
+      "x": 40,
+      "y": 1720
+    },
+    {
+      "id": "qe_timeout",
+      "type": "Condition",
+      "label": "Countdown reached zero",
+      "metadata": {
+        "comment": "Reaching 0 counts as a wrong answer: lock the question and run the same one-second feedback pause as a tap."
+      },
+      "x": 40,
+      "y": 1840
+    },
+    {
+      "id": "qe_advance",
+      "type": "Timer",
+      "label": "Feedback pause",
+      "parameters": {
+        "duration": 1000
+      },
+      "metadata": {
+        "comment": "About a second of green/red feedback before the next question."
+      },
+      "x": 40,
+      "y": 1960
+    },
+    {
+      "id": "qe_set_answered_true",
+      "type": "Set Variable",
+      "label": "Lock the question",
+      "parameters": {
+        "name": "answered",
+        "setWith": "boolean",
+        "value": true
+      },
+      "x": 40,
+      "y": 2080
+    },
+    {
+      "id": "qe_set_answered_false",
+      "type": "Set Variable",
+      "label": "Unlock for the next question",
+      "parameters": {
+        "name": "answered",
+        "setWith": "boolean",
+        "value": false
+      },
+      "x": 40,
+      "y": 2200
+    },
+    {
+      "id": "qe_set_picked_reset",
+      "type": "Set Variable",
+      "label": "Clear the picked answer",
+      "parameters": {
+        "name": "picked",
+        "setWith": "number",
+        "value": -1
+      },
+      "x": 40,
+      "y": 2320
+    },
+    {
+      "id": "qe_set_score_reset",
+      "type": "Set Variable",
+      "label": "Reset the score",
+      "parameters": {
+        "name": "score",
+        "setWith": "number",
+        "value": 0
+      },
+      "x": 40,
+      "y": 2440
+    },
+    {
+      "id": "qe_set_index_reset",
+      "type": "Set Variable",
+      "label": "Back to question 1",
+      "parameters": {
+        "name": "questionIndex",
+        "setWith": "number",
+        "value": 0
+      },
+      "x": 40,
+      "y": 2560
+    },
+    {
+      "id": "qe_expr_more",
+      "type": "Expression",
+      "label": "More questions left",
+      "parameters": {
+        "expression": "(questionIndex || 0) < 4"
+      },
+      "x": 40,
+      "y": 2680
+    },
+    {
+      "id": "qe_more",
+      "type": "Condition",
+      "label": "Advance or finish",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 40,
+      "y": 2800
+    },
+    {
+      "id": "qe_expr_next",
+      "type": "Expression",
+      "label": "Next question index",
+      "parameters": {
+        "expression": "(questionIndex || 0) + 1"
+      },
+      "x": 40,
+      "y": 2920
+    },
+    {
+      "id": "qe_set_index_next",
+      "type": "Set Variable",
+      "label": "Advance the question index",
+      "parameters": {
+        "name": "questionIndex",
+        "setWith": "number"
+      },
+      "x": 40,
+      "y": 3040
+    },
+    {
+      "id": "qe_expr_scored",
+      "type": "Expression",
+      "label": "Tapped answer was correct",
+      "parameters": {
+        "expression": "answered && picked === correct"
+      },
+      "x": 40,
+      "y": 3160
+    },
+    {
+      "id": "qe_scored",
+      "type": "Condition",
+      "label": "Award a point",
+      "metadata": {
+        "comment": "The 'answered &&' guard keeps the undefined-at-load values from reading as a match."
+      },
+      "x": 40,
+      "y": 3280
+    },
+    {
+      "id": "qe_expr_score_up",
+      "type": "Expression",
+      "label": "Score plus one",
+      "parameters": {
+        "expression": "score + 1"
+      },
+      "x": 40,
+      "y": 3400
+    },
+    {
+      "id": "qe_set_score_up",
+      "type": "Set Variable",
+      "label": "Add a point",
+      "parameters": {
+        "name": "score",
+        "setWith": "number"
+      },
+      "x": 40,
+      "y": 3520
+    },
+    {
+      "id": "qe_nav_results",
+      "type": "RouterNavigate",
+      "label": "Go to results",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Results"
+      },
+      "x": 40,
+      "y": 3640
+    }
+  ]
+}

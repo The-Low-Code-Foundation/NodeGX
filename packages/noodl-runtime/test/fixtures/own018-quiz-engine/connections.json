@@ -1,0 +1,277 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b54afe82-5b13-5a7c-8097-595eb4c99851",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "qe_inputs",
+      "fromProperty": "start",
+      "toId": "qe_set_score_reset",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "qe_inputs",
+      "fromProperty": "start",
+      "toId": "qe_set_index_reset",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "qe_inputs",
+      "fromProperty": "start",
+      "toId": "qe_set_answered_false",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "qe_inputs",
+      "fromProperty": "start",
+      "toId": "qe_set_picked_reset",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "qe_inputs",
+      "fromProperty": "start",
+      "toId": "qe_beat",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "qe_questions",
+      "fromProperty": "items",
+      "toId": "qe_current",
+      "toProperty": "in-questions"
+    },
+    {
+      "fromId": "qe_var_index",
+      "fromProperty": "value",
+      "toId": "qe_current",
+      "toProperty": "in-index"
+    },
+    {
+      "fromId": "qe_current",
+      "fromProperty": "out-text",
+      "toId": "qe_outputs",
+      "toProperty": "questionText"
+    },
+    {
+      "fromId": "qe_current",
+      "fromProperty": "out-answers",
+      "toId": "qe_rows",
+      "toProperty": "in-answers"
+    },
+    {
+      "fromId": "qe_current",
+      "fromProperty": "out-correct",
+      "toId": "qe_rows",
+      "toProperty": "in-correct"
+    },
+    {
+      "fromId": "qe_var_answered",
+      "fromProperty": "value",
+      "toId": "qe_rows",
+      "toProperty": "in-answered"
+    },
+    {
+      "fromId": "qe_var_picked",
+      "fromProperty": "value",
+      "toId": "qe_rows",
+      "toProperty": "in-picked"
+    },
+    {
+      "fromId": "qe_rows",
+      "fromProperty": "out-rows",
+      "toId": "qe_outputs",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "qe_var_index",
+      "fromProperty": "value",
+      "toId": "qe_expr_counter",
+      "toProperty": "questionIndex"
+    },
+    {
+      "fromId": "qe_expr_counter",
+      "fromProperty": "asNumber",
+      "toId": "qe_outputs",
+      "toProperty": "questionNumber"
+    },
+    {
+      "fromId": "qe_counter",
+      "fromProperty": "currentCount",
+      "toId": "qe_outputs",
+      "toProperty": "secondsLeft"
+    },
+    {
+      "fromId": "qe_var_score",
+      "fromProperty": "value",
+      "toId": "qe_outputs",
+      "toProperty": "score"
+    },
+    {
+      "fromId": "qe_beat",
+      "fromProperty": "tick",
+      "toId": "qe_gate",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "qe_var_answered",
+      "fromProperty": "value",
+      "toId": "qe_expr_open",
+      "toProperty": "answered"
+    },
+    {
+      "fromId": "qe_expr_open",
+      "fromProperty": "asBoolean",
+      "toId": "qe_gate",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "qe_gate",
+      "fromProperty": "ontrue",
+      "toId": "qe_counter",
+      "toProperty": "decrease"
+    },
+    {
+      "fromId": "qe_counter",
+      "fromProperty": "currentCount",
+      "toId": "qe_expr_zero",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "qe_var_answered",
+      "fromProperty": "value",
+      "toId": "qe_expr_zero",
+      "toProperty": "answered"
+    },
+    {
+      "fromId": "qe_expr_zero",
+      "fromProperty": "asBoolean",
+      "toId": "qe_timeout",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "qe_timeout",
+      "fromProperty": "ontrue",
+      "toId": "qe_set_answered_true",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "qe_timeout",
+      "fromProperty": "ontrue",
+      "toId": "qe_advance",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "qe_inputs",
+      "fromProperty": "tapped",
+      "toId": "qe_set_answered_true",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "qe_inputs",
+      "fromProperty": "tapped",
+      "toId": "qe_advance",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "qe_advance",
+      "fromProperty": "timerFinished",
+      "toId": "qe_set_answered_false",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "qe_advance",
+      "fromProperty": "timerFinished",
+      "toId": "qe_set_picked_reset",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "qe_advance",
+      "fromProperty": "timerFinished",
+      "toId": "qe_counter",
+      "toProperty": "reset"
+    },
+    {
+      "fromId": "qe_advance",
+      "fromProperty": "timerFinished",
+      "toId": "qe_more",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "qe_var_index",
+      "fromProperty": "value",
+      "toId": "qe_expr_more",
+      "toProperty": "questionIndex"
+    },
+    {
+      "fromId": "qe_expr_more",
+      "fromProperty": "asBoolean",
+      "toId": "qe_more",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "qe_more",
+      "fromProperty": "ontrue",
+      "toId": "qe_set_index_next",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "qe_var_index",
+      "fromProperty": "value",
+      "toId": "qe_expr_next",
+      "toProperty": "questionIndex"
+    },
+    {
+      "fromId": "qe_expr_next",
+      "fromProperty": "asNumber",
+      "toId": "qe_set_index_next",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "qe_more",
+      "fromProperty": "onfalse",
+      "toId": "qe_nav_results",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "qe_var_answered",
+      "fromProperty": "value",
+      "toId": "qe_expr_scored",
+      "toProperty": "answered"
+    },
+    {
+      "fromId": "qe_var_picked",
+      "fromProperty": "value",
+      "toId": "qe_expr_scored",
+      "toProperty": "picked"
+    },
+    {
+      "fromId": "qe_current",
+      "fromProperty": "out-correct",
+      "toId": "qe_expr_scored",
+      "toProperty": "correct"
+    },
+    {
+      "fromId": "qe_expr_scored",
+      "fromProperty": "asBoolean",
+      "toId": "qe_scored",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "qe_scored",
+      "fromProperty": "ontrue",
+      "toId": "qe_set_score_up",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "qe_var_score",
+      "fromProperty": "value",
+      "toId": "qe_expr_score_up",
+      "toProperty": "score"
+    },
+    {
+      "fromId": "qe_expr_score_up",
+      "fromProperty": "asNumber",
+      "toId": "qe_set_score_up",
+      "toProperty": "value"
+    }
+  ]
+}

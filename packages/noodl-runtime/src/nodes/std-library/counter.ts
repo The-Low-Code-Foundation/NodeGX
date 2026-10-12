@@ -190,6 +190,14 @@ const CounterNode: NodeDefinitionOptions = {
       type: 'number',
       description: 'The count as it stands',
       getter: function (this: CounterNodeInstance) {
+        // P112-OWN018-COUNTERZERO. A node's parameters are queued and land at its first update, but its wires are
+        // made before that, and a wire hands its target this getter's value at once. So a Counter whose Start Value
+        // is 10 used to tell every consumer 0 first: Mistral's quiz countdown (`count === 0` → time's up) fired at
+        // page load and skipped question 1. Until the first Start Value lands, the count is the one the model says.
+        if (this._internal.startValueSet === false) {
+          const start = (this as { model?: { parameters?: Record<string, unknown> } }).model?.parameters?.startValue;
+          if (start !== undefined && start !== null && start !== '' && !isNaN(Number(start))) return Number(start);
+        }
         return this._internal.currentValue;
       }
     },
