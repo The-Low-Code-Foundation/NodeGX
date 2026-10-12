@@ -32,6 +32,7 @@ import SetVariableNode = require('../src/nodes/std-library/data/setvariablenode'
 import FunctionNode = require('../src/nodes/std-library/simplejavascript');
 import ComponentInputs = require('../src/nodes/componentinputs');
 import ComponentOutputs = require('../src/nodes/componentoutputs');
+import Model = require('../src/model');
 
 type Wire = { fromId: string; fromProperty: string; toId: string; toProperty: string };
 type Node = { id: string; type: string; parameters?: Record<string, unknown> };
@@ -127,5 +128,55 @@ describe('P112-OWN018-COUNTERZERO — a countdown at page load', () => {
   // size of the engine above, which is why that test carries the proof (its sabotage fails; this shape's would not).
   test('🟢 control: a Counter with no Start Value still starts at 0', async () => {
     expect(await countsHandedOn({})).toEqual([0]);
+  });
+
+  // The same class one page later: Mistral's Results page (run 1) reads two Variables into `max(score, best)`, run by
+  // the Page's Did Mount, and writes the answer back into `bestScore`. Browser, sampled every 5 ms at the second Results
+  // mount: bestScore 3 → 0 and localStorage "3" → "0" (the Function ran with `best` not yet arrived). Sabotage (the
+  // Variable's `value` getter reading only the applied name) → bestScore ends 0.
+  test('🟢 a Variable read on Did Mount already holds the saved value: the best score survives a worse game', async () => {
+    const variables = Model.get('--ndl--global-variables');
+    variables.set('score', 0);
+    variables.set('bestScore', 3);
+    const mount = {
+      node: {
+        name: 'own018.PageMount',
+        category: 'Test',
+        outputs: { didMount: { type: 'signal' } },
+        initialize(this: { scheduleAfterInputsHaveUpdated(f: () => void): void; sendSignalOnOutput(n: string): void }) {
+          this.scheduleAfterInputsHaveUpdated(() => this.sendSignalOnOutput('didMount'));
+        }
+      }
+    } as unknown as NodeModule;
+    const graph = await createCorpusGraph({
+      modules: [...MODULES, mount],
+      rootComponent: '/root',
+      data: {
+        components: [
+          {
+            name: '/root',
+            nodes: [
+              { id: 'res_page', type: 'own018.PageMount' },
+              { id: 'res_var_score', type: 'Variable2', parameters: { name: 'score' } },
+              { id: 'res_var_best', type: 'Variable2', parameters: { name: 'bestScore' } },
+              {
+                id: 'res_update_best',
+                type: 'JavaScriptFunction',
+                parameters: { functionScript: 'const score = Inputs.score || 0;\nconst best = Inputs.best || 0;\nOutputs.newBest = Math.max(score, best);' }
+              }
+            ],
+            connections: asConnections([
+              { fromId: 'res_page', fromProperty: 'didMount', toId: 'res_update_best', toProperty: 'run' },
+              { fromId: 'res_var_score', fromProperty: 'value', toId: 'res_update_best', toProperty: 'in-score' },
+              { fromId: 'res_var_best', fromProperty: 'value', toId: 'res_update_best', toProperty: 'in-best' },
+              { fromId: 'res_update_best', fromProperty: 'out-newBest', toId: 'res_var_best', toProperty: 'value' }
+            ])
+          }
+        ]
+      } as never
+    });
+    await graph.settle(8);
+    console.log('OWN-018 results page at load:', JSON.stringify({ bestScore: variables.get('bestScore'), fn: graph.signalsFor('res_update_best') }));
+    expect(variables.get('bestScore')).toBe(3);
   });
 });

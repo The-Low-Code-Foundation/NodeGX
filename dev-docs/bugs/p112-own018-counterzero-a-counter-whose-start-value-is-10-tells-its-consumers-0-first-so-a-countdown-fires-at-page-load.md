@@ -8,6 +8,7 @@ found: P112 OWN-018 s2, 2026-10-12 (Mistral Large 4 in OpenCode, quiz run 1; tar
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/OWN-018-A-STRANGER-ON-MISTRAL.md §14
 kit: runtime
 regression: packages/noodl-runtime/test/own018-a-countdown-condition-fires-at-load.test.ts
+commit: dd7ff4756
 ---
 
 Mistral's `Logic/Quiz Engine`: Counter (Start Value "10") → Expression `count === 0 && !answered` → Condition (Run On
@@ -32,5 +33,14 @@ evaluates in that window depends on update order, so a small graph hides it and 
 `test/fixtures/own018-quiz-engine/` (Mistral's graph): green with the fix; with the getter reverted the gate fires
 `ontrue` at load. A lone Counter → recorder does NOT reproduce it (passes both ways) and is not a test.
 
-**Not fixed, the class:** any node whose output getter reads state a queued parameter sets has the same window. The
-Counter is the one two agents built a countdown on. Census owed before claiming the class.
+**The second instance, fixed the same way:** Mistral's Results page reads two Variables into `max(score, best)` on
+Did Mount and writes the answer back into `bestScore`. In the browser at the second Results mount: bestScore 3 → 0
+and localStorage "3" → "0". The Variable's Name is a queued parameter too, so its `value` getter answered nothing
+until it landed. The getter now answers from the model's Name until then. Both getters remember what they handed
+out, so the queued parameter landing does not deliver the same value twice (exp-011 s66-5 pins exactly once; it
+failed with the first version of this fix). Test: the same file, sabotage → bestScore ends 0. Counter v2, Variable2
+v1 and Variable v1 conform.
+
+**Not fixed, the class:** any node whose output getter reads state a queued parameter sets has the same window, and
+the principled fix is in the runtime (apply a node's queued parameters before its wires seed), which touches every
+node. Census owed before claiming the class or changing the queue.

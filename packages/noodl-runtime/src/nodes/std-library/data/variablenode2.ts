@@ -30,6 +30,8 @@ interface VariableNodeInstance extends NodeInstance {
     lastError?: string;
     variablesModel: ModelLike;
     onModelChangedCallback(args: ModelChangeEvent): void;
+    /** What the `value` getter answered before the queued Name landed (P112-OWN018-COUNTERZERO). */
+    seeded?: { name: string; value: unknown };
   };
   hasScheduledStore?: boolean;
   scheduleStore(): void;
@@ -155,9 +157,17 @@ const VariableNodeDefinition: NodeDefinitionOptions = {
       group: 'General',
       getter: function (this: VariableNodeInstance) {
         const internal = this._internal;
-        if (!internal.name) return;
-
-        return internal.variablesModel.get(internal.name);
+        // P112-OWN018-COUNTERZERO's class. The Name parameter is queued and lands at this node's first update, but its
+        // wires seed their targets before that. Mistral's quiz Results page ran `max(score, best)` on Did Mount with
+        // `best` not yet arrived, wrote 0 back into the same variable, and lost the saved best score. Until the queued
+        // Name lands, the variable is the one the model names.
+        // `seeded` remembers what was handed out, so `setVariableName` does not deliver the same value a second time.
+        if (internal.name) return internal.variablesModel.get(internal.name);
+        const name = (this as { model?: { parameters?: { name?: unknown } } }).model?.parameters?.name;
+        if (!name || typeof name !== 'string') return;
+        const value = internal.variablesModel.get(name);
+        internal.seeded = { name, value };
+        return value;
       }
     }
   },
@@ -250,9 +260,13 @@ const VariableNodeDefinition: NodeDefinitionOptions = {
       });
     },
     setVariableName: function (this: VariableNodeInstance, name: string) {
+      const seeded = this._internal.seeded;
+      this._internal.seeded = undefined;
       this._internal.name = name;
       this.flagOutputDirty('name');
-      this.flagOutputDirty('value');
+      // A wire made before this name landed was already handed this variable's value (the `value` getter); announcing
+      // the same value again delivers it twice (exp-011 s66-5 pins exactly once).
+      if (!seeded || seeded.name !== name || this._internal.variablesModel.get(name) !== seeded.value) this.flagOutputDirty('value');
       this.sendSignalOnOutput('fetched');
     },
     _onNodeDeleted: function (this: VariableNodeInstance) {

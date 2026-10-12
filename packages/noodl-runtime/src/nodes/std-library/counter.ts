@@ -16,6 +16,8 @@ interface CounterNodeInstance extends NodeInstance {
     currentValue: number;
     startValue: number;
     startValueSet: boolean;
+    /** The count `currentCount` answered before the queued Start Value landed (P112-OWN018-COUNTERZERO). */
+    seededCount?: number;
     limitsEnabled: boolean;
     limitsMin: number;
     limitsMax: number;
@@ -139,7 +141,9 @@ const CounterNode: NodeDefinitionOptions = {
         if (this._internal.startValueSet === false) {
           this._internal.startValueSet = true;
           this._internal.currentValue = this._internal.startValue;
-          this.flagOutputDirty('currentCount');
+          // A wire made before this landed was already handed this count (`currentCount`); not a second time.
+          if (this._internal.seededCount !== this._internal.currentValue) this.flagOutputDirty('currentCount');
+          this._internal.seededCount = undefined;
           this.sendSignalOnOutput('countChanged');
         }
       }
@@ -196,7 +200,10 @@ const CounterNode: NodeDefinitionOptions = {
         // page load and skipped question 1. Until the first Start Value lands, the count is the one the model says.
         if (this._internal.startValueSet === false) {
           const start = (this as { model?: { parameters?: Record<string, unknown> } }).model?.parameters?.startValue;
-          if (start !== undefined && start !== null && start !== '' && !isNaN(Number(start))) return Number(start);
+          if (start !== undefined && start !== null && start !== '' && !isNaN(Number(start))) {
+            this._internal.seededCount = Number(start);
+            return Number(start);
+          }
         }
         return this._internal.currentValue;
       }
