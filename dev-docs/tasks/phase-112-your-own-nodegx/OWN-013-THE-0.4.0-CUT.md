@@ -35,7 +35,7 @@ was created (`gh release view v0.4.0` → not found), tag deleted on origin and 
 | G6 | Editor test floor **by name**. s11's `test:ci` (HEAD `120baf39`): 3,012 specs, 2 failures — SUB-006 *nonexistent-port … lists available alternatives*, and *pending project saves … re-arms a held save* (the order-dependent one) | agent | ✅ s12 (§8): cut tree `76372696` + two spec fixes, seed 44986 → 3015 specs, **1 failure by name**: *re-arms a held save* (order-dependent, known since s43) |
 | G7 | **Opening writes.** Richard ruled the release knowing opening still writes: P112-S11-PAGEPORTS (a Page's `dynamicports`), P112-S11-OPENWRITES (`nodegx.project.json` on every open). Fixed before the cut if cheap; otherwise named under *Good to know*. P112-S11-IDREPLACE is fixed (`f2505b83f`) and **undriven in the editor** — drive it on the cut | agent | 🟡 s12 (§6.3, §7): R17's copy built and **driven**; OPENWRITES **fixed and driven** (`1ed87f2ef`); IDREPLACE **driven**; PAGEPORTS still open (named under *Good to know*) |
 | G8 | **The upgrade 0.3.0 → 0.4.0**: install over 0.3.0 and open (a) a 0.3.0 project — the 4 → 5 migration runs once (ISL-018) and the project still works; (b) a project the npm kit made — it opens. P112-S11-REFUSALWORDS stays visible to anyone still on 0.3.0 opening a 0.4.0 project | agent + Richard | ⬜ |
-| G9 | The shelf: the tag run's *every authored library entry is installable*; if red, Publish library first | agent / CI | ⬜ |
+| G9 | The shelf: the tag run's *every authored library entry is installable*; if red, Publish library first | agent / CI | ✅ s12: red on the tag run (4 unreachable entries); Publish library run `38231663830` (R24) → 47/47, 36/36 |
 | G10 | Richard's drives of what 0.4.0 announces (each phase's owed driven rows — list them from the phase READMEs at the cut) | Richard | ⬜ |
 
 ## 4. The cut (after G1–G10)
@@ -185,4 +185,17 @@ commit instruction, the checks, R17/R19/R21. Since the CI'd `01aeb0868`: `a94119
 - **Merged** `gh pr merge 48 --merge` → `2a258a4b5` "Release 0.4.0 (#48)", second parent `7162e1b83`; tree diff main vs
   release branch 0 lines; editor `package.json` 0.4.0.
 - **Tagged** `v0.4.0` → `2a258a4b5`, pushed (no tag existed on origin before). Release run `38228960399` (§4).
+
+## 10. The Release run (`38228960399`, 2026-10-12 09:17–09:41 UTC)
+
+| leg | result |
+|---|---|
+| linux-x64, win32-x64 | ✅ — the draft holds 7 files: `.deb`, `.AppImage`, `.rpm`, `latest-linux.yml`, `.exe`, `.exe.blockmap`, `latest.yml` |
+| darwin-arm64, darwin-x64 | ❌ — **signed** (Developer ID, Osborne Solutions) and then **refused by notarytool: "HTTP status code: 403. A required agreement is missing or has expired"**. Not code: Apple's updated agreement is unsigned (R23) |
+| merge mac update feed, verify draft release is complete | ❌ — follow from the Mac legs |
+| every authored library entry is installable | ❌ — 4 unreachable entries; fixed by Publish library (R24) |
+
+**After Richard accepts the agreement:** `gh run rerun 38228960399 --failed` re-runs the two Mac legs (publishing to the
+same draft), the library check, the feed merge and the verify step. A draft with files in it is not a green run:
+read *verify draft release is complete*.
 

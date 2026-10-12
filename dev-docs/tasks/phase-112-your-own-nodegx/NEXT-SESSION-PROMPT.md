@@ -48,6 +48,8 @@ should switch** (README §0.2). Do not wait for an answer.
 1. ✅ *Done 2026-10-12 (OWN-013 §7).* Not driven: a **new project from a template makes no copy** (the opt-out in
    `newProject`); check it on the next launch.
 2. ✅ *Done s12: PR #48 merged (`2a258a4b5`), **`v0.4.0` tagged on `main`** (R22), Release run `38228960399` (OWN-013 §9).*
+   🔴 **The tag run's Mac legs were refused by Apple's notary (403, an unsigned agreement — OWN-013 §10).** Once
+   Richard has accepted it (R23): `gh run rerun 38228960399 --failed`, then read every leg. G9 is done (R24).
    **Next, by RELEASE-PROCESS §4 and UPG-008 §4:** read the Release run (four legs, *merge mac update feed*, *verify
    draft release is complete*; read durations, a draft with files is not a green run); paste
    `GITHUB-RELEASE-0.4.0.md` into the draft body; G9 (the run's *every authored library entry is installable*; if red,

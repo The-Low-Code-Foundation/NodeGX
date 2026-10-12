@@ -215,6 +215,8 @@ OWN-008 → OWN-009. **OWN-010 runs alongside all of them**: its ledger half is 
 | R20 | **Push `cline-dev`, push `release/0.4.0`, open the PR into `main`?** | ✅ **Ruled 2026-10-12 (s12): push `cline-dev` only**, read CI's six checks on it, then ask again for the release branch and the PR. |
 | R21 | **More is coming from P107 and P116: hold 0.4.0 for it, or ship now and put it in 0.4.1?** | ✅ **Ruled 2026-10-12 (s12): ship now from today's `cline-dev`; their next work is 0.4.1.** Then: *yes, branch + PR* (asked as R20's second half). |
 | R22 | **PR #48 is green on all six required checks: merge it and tag `v0.4.0`?** | ✅ **Ruled 2026-10-12 (s12): merge and tag.** Merged `2a258a4b5` (merge commit), tagged `v0.4.0` on `main`; Release run `38228960399`. Publish is still Richard's. |
+| R23 | **Both Mac builds were refused by Apple's notary: "HTTP 403. A required agreement is missing or has expired."** Only the account holder can accept it. | ✅ **2026-10-12 (s12): Richard accepts it now**; then the two Mac jobs are re-run on the same draft. |
+| R24 | **The release run's library check: 4 entries are authored but not on the shelf** (Ask a Local Model, Bot Garden Fonts, Garden 3D Kit, Garden Kit). Run the live Publish library? | ✅ **Ruled 2026-10-12 (s12): publish all four now.** Run `38231663830` ✅; `library:verify-origin --require-published` → 47/47 prefabs, 36/36 modules, exit 0. |
 
 ## 9. Not this phase
 
