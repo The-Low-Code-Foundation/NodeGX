@@ -5,7 +5,7 @@ the VM route only. The rest of P115 stays parked (Richard, 2026-10-07: *"after p
 experiment phase"*). **Model:** **Opus** for step 1 and the packaging. **Fable** if step 3's server layout (static
 site, backend, TLS, restarts) turns out to have no existing design to follow.
 
-**Status: 🟡 s13 (2026-10-12): AC1 ✅ (§6); the VM route ✅ on nexus-1 without a public address (§8): site, backend, function and secret shipped by `own-016/ship-to-vm.sh`, real Gemini speech on the box, key nowhere but `secrets.env`, restart and crash recovery. Owed: DNS + https with a real app, a real reboot (Richard), publish.**
+**Status: 🟡 s13 (2026-10-12): AC1 ✅ (§6); the VM route ✅ on nexus-1 (§8): site, backend, function and secret shipped by `own-016/ship-to-vm.sh`; **live at https://lingo.nodegx.io** with real Gemini speech through it, the key nowhere public, admin routes 404; restart, crash and a real reboot survived (AC4 ✅). Owed: the phone check with the real app, publish.**
 
 ## 1. The person sentence
 
@@ -160,3 +160,18 @@ The script lost its executable bit because the `chmod +x` was inside a refused c
 since the zone is IPv4 only). Then re-run `ship-to-vm.sh` with `lingo.nodegx.io` as the sixth argument. That adds the
 Caddy drop-in (validated, removed again if invalid) and gets the certificate, which completes AC2's `https://` half.
 The phone check comes with the real app.
+
+**AC2's public half ✅: `https://lingo.nodegx.io` (2026-10-12, after Richard saved the A record at Namecheap).**
+- The record was missing from both authoritative nameservers for 40 minutes (a row not saved). Once it was saved it
+  was live in about 15 s.
+- Caddy obtained the Let's Encrypt certificate at 09:50:30 by itself on its next retry (`CN=lingo.nodegx.io`, until
+  2027-01-10), with no re-run.
+- Checked from outside with the IP pinned (this Mac's resolver still held the earlier NXDOMAIN):
+  - `/` answers 200 over HTTP/2, with HSTS and nosniff.
+  - `/_admin`, `/admin`, `/executions` and `/metrics` all return 404.
+  - `POST /functions/speak` → `audio/wav`, 100,194 bytes, RIFF/WAVE: **real Gemini speech through the public
+    address**.
+  - The key appears in 0 of the 5 public files fetched, and all 5 answered 200, so the search read them.
+  - In headless Chrome the page renders with 0 exceptions and 0 console errors.
+- The five neighbouring sites answer 200.
+- **Owed:** the phone check comes with the real app. AC5, the publish, waits for Richard's 2FA.
