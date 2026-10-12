@@ -199,3 +199,19 @@ commit instruction, the checks, R17/R19/R21. Since the CI'd `01aeb0868`: `a94119
 same draft), the library check, the feed merge and the verify step. A draft with files in it is not a green run:
 read *verify draft release is complete*.
 
+**Re-runs after Richard accepted the agreement (R23), `gh run rerun 38228960399 --failed`:**
+
+| attempt | darwin-arm64 | darwin-x64 | library | feed / verify |
+|---|---|---|---|---|
+| 2 (10:14–10:44) | ✅ signed, notarised; `.dmg`, `.zip` + blockmaps, `latest-mac.yml` in the draft | ❌ `codesign --timestamp` on `dugite/git/libexec/git-core/git`: *"A timestamp was expected but was not found"* (Apple's timestamp server) | ✅ | ❌ (x64 missing) |
+| 3 (10:44–11:16) | — | ❌ signed **and notarised**, then *"Failed to staple … code 68"*: the stapler lost its connection to `api.apple-cloudkit.com` (`NSURLErrorDomain -1005`) | — | ❌ |
+| 4 (11:17–11:43) | — | ❌ notarised, then the same staple failure (`-1005`, Error 68) | — | ❌ |
+| 5 (11:45–12:05) | — | ❌ the same again | — | ❌ |
+
+Five Intel attempts: the agreement, Apple's timestamp server once, then the ticket server three times running —
+none in the code. Apple Silicon stapled at 10:36 between them. The draft holds 12 files: Linux, Windows, Apple
+Silicon. 🔴 **Do not publish without Intel:** `latest-mac.yml` would list only the Apple Silicon files, and an Intel
+Mac on 0.3.0 would be offered them. **R25 (Richard): re-run later today, no code change.** A re-run is scheduled for
+~14:20 CEST (`gh run rerun 38228960399 --failed`). `e471cb8e6` on `cline-dev` retries the staple over 30–240 s for
+the next release (a re-run of this tag's run does not use it).
+

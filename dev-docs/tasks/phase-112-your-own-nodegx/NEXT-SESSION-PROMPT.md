@@ -48,8 +48,12 @@ should switch** (README §0.2). Do not wait for an answer.
 1. ✅ *Done 2026-10-12 (OWN-013 §7).* Not driven: a **new project from a template makes no copy** (the opt-out in
    `newProject`); check it on the next launch.
 2. ✅ *Done s12: PR #48 merged (`2a258a4b5`), **`v0.4.0` tagged on `main`** (R22), Release run `38228960399` (OWN-013 §9).*
-   🔴 **The tag run's Mac legs were refused by Apple's notary (403, an unsigned agreement — OWN-013 §10).** Once
-   Richard has accepted it (R23): `gh run rerun 38228960399 --failed`, then read every leg. G9 is done (R24).
+   🔴 **The draft lacks the Intel Mac build (OWN-013 §10).** Agreement accepted (R23); Apple Silicon ✅; Intel fails
+   at the staple (Apple's ticket server unreachable from the Intel runner, 3 runs running). R25: re-run later — s12
+   scheduled one for ~14:20 CEST 2026-10-12. Check `gh run view 38228960399 --json attempt,jobs`; if Intel is still
+   red, `gh run rerun 38228960399 --failed` again; if it stays red for a day, ask Richard about re-tagging with
+   `e471cb8e6` (the patient staple). **Never publish without Intel** (the Mac feed would list only Apple Silicon).
+   G9 is done (R24).
    **Next, by RELEASE-PROCESS §4 and UPG-008 §4:** read the Release run (four legs, *merge mac update feed*, *verify
    draft release is complete*; read durations, a draft with files is not a green run); paste
    `GITHUB-RELEASE-0.4.0.md` into the draft body; G9 (the run's *every authored library entry is installable*; if red,
@@ -77,6 +81,23 @@ should switch** (README §0.2). Do not wait for an answer.
   picker?* (OWN-006 §6.3); who bumps the next npm release (s10).
 
 **Not this phase's to fix, but owed:** P112-S7-TEXTDEFAULTS, P112-S8-SHAREDTARGET, P112-S9-FRESHFONT (open).
+
+## s14 (2026-10-12, Opus): the language app, built by a stranger, speaks
+
+Read OWN-015 §7 first. **Not committed at write time.** Two `claude -p` rounds from the 0.2.0 tarballs. Round 1
+never used NodeGX (NOTNODEGX). Round 2 built the app ($4.29). It speaks (real Gemini, phone and desktop) only after:
+fixes **KEYCHAIN** (render hung on a macOS dialog **on Richard's screen**; never start Chrome under a fake `HOME`
+without `--use-mock-keychain`), **DAYTWO** (`provision_backend` restarts the project's own backend) and **NOBACKEND**
+(the preview keeps a loopback backend); a deploy the agent skipped (UNDEPLOYED); and two repairs on a copy
+(**CFPORTS**: every cloud port needs its `in-`/`out-`/`pm-` prefix and the checker doesn't say so; **DETACHEDVISUAL**).
+The key was in 0 of the page's requests (control 6). Richard ruled that the agent never sees the key (PERSONKEY,
+needs a ruling on the fix).
+
+**Next, in order:** (1) ask Richard for NOTNODEGX's and PERSONKEY's rulings; (2) fix CFPORTS (the checker derives a
+`CloudFunction2`'s and Request/Response's ports, and the two examples get fixed), UNDEPLOYED (a `next` on cloud
+writes) and DETACHEDVISUAL; (3) a fresh round 2 that must speak with no repair, which is AC1; (4) re-pack 0.2.0 in a
+worktree and ask before publishing. KITROOTDEPLOY (GAM-014 red since P107's `9da5979f9`) is P107's.
+The scratch stack lived in this session's scratchpad (`own015-r2/`: `run.mjs`, `stack.mjs`, `drive.mjs`, `put-key.py`).
 
 ## OWN-014 / 015 / 016: the npm full stack (s13, 2026-10-12, Opus)
 
