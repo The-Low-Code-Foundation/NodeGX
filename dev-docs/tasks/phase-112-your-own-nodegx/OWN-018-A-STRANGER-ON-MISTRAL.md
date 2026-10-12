@@ -375,10 +375,16 @@ Mistral's. On the Counter fix alone (tgz4, dd7ff4756) the same unchanged app gra
 overwritten by a worse game, which was the same runtime class again. **On both fixes (tgz5, be46f18bc) Mistral's
 unchanged run-1 app grades 12/12.** Large 4 built a correct quiz on its first attempt; both failures were NodeGX's.
 
-### Run 2 — the 128k context (`r2-oc-ctx128`)
+### Runs 2 and 3 — cut off by my own output limit
 
-Ended on its own after 8 steps and $0.21: *"Good progress. Let me study three examples…"* and no tool call, which
-ends an OpenCode run. Nothing built. The cache did its job (every step under 128k).
+Run 2 (`--context 128000`, $0.21, 8 steps) and run 3 (the kit's first `opencode.json`, tgz5, $0.18, 13 steps) both
+ended before building anything. **Not Mistral stopping early, as I first wrote:** both last steps finished
+`length` at exactly 16,384 output tokens, the `output` I had set beside the 128k context, and OpenCode ends the run on
+a cut-off answer. OpenCode 1.19.0 (read from its build) sends `max_tokens = min(limit.output, 32000)` — run 1, with
+no override, had a 24,484-token step that fitted — and compacts once a step's total reaches `context − that`. Fixed
+in the kit: `context 150000, output 32000` (compaction near 118k, answers up to 32k). The "keep going" note written
+from run 2's misreading is removed (no evidence for it); the start-page note stays (run 1's evidence). The cache did
+its job in both (every step under 128k; run 3 75% cached).
 
 ### What was found, and done
 
@@ -387,7 +393,7 @@ ends an OpenCode run. Nothing built. The cache did its job (every step under 128
   128k extending each other exactly and still missing — so it is size, not a changing prefix. A tool-list change
   does move the prefix once (15 → 40 tools after `open_project`: diverged at char 4,340). OpenCode takes Large 4's
   context as 1,048,576 (models.dev), so it never compacts. **Mitigation built:** `create-nodegx` writes
-  `opencode.json` with Large 4's context as 128k (17b992839).
+  `opencode.json` with Large 4's limits (17b992839; corrected to `context 150000, output 32000` after runs 2–3).
 - **P112-OWN018-COUNTERZERO** (fixed, dd7ff4756 + this session's Variable fix): a node's parameters are queued and
   land at its first update, but its wires are made before that and hand the target the getter's value at once. A
   Counter with Start Value 10 told its consumers 0 first, so Mistral's `count === 0 && !answered` gate fired at page
@@ -398,8 +404,8 @@ ends an OpenCode run. Nothing built. The cache did its job (every step under 128
   conforms (P107 and my run). **The class is not censused**: any getter that reads state a queued parameter sets.
 - **P112-OWN018-NOLIBRARY** (filed): the npm kit reveals `list_library` / `install_prefab`, which only read a repo
   checkout. Mistral wanted icons after its render called the app "a default template".
-- **Kit guidance (17b992839):** the folder notes say keep going until the app is built and tried (run 2), and try it
-  from the start page with `drive_page` without `page` (run 1). Condition's notes: a gate whose On True/On False does
+- **Kit guidance (17b992839):** the folder notes say try the app from the start page with `drive_page` without `page`
+  (run 1). (A "keep going" line from run 2's misreading was removed again; see runs 2 and 3.) Condition's notes: a gate whose On True/On False does
   something fires whenever its input settles, page load included — `runOnChange-condition: false` and `eval` from
   the signal that should ask (Sonnet ×3, Mistral round 3).
 - **Lab fixes (mine):** the seal denied OpenCode's own `$TMPDIR/opencode/*` (Mistral could not read its own

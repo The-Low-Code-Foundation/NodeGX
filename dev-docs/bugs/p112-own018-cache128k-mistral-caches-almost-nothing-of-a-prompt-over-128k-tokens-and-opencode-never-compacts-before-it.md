@@ -23,8 +23,10 @@ one miss per reveal, see LISTCHANGED.)
 
 OpenCode compacts a session near the model's context limit, which models.dev gives as 1,048,576 for
 `mistral-large-4`; a build never gets there, so it never compacts. The person's `opencode.json` can override it
-(`provider.mistral.models["mistral-large-4"].limit = {context: 128000, output: 16384}`, read by `opencode models
---verbose`). Measured effect: run 2 (§14).
+(`provider.mistral.models["mistral-large-4"].limit`, read by `opencode models --verbose`). OpenCode 1.19.0 sends
+`max_tokens = min(limit.output, 32000)` and compacts once a step's total reaches `context − that`; the first value
+tried, `{context: 128000, output: 16384}`, cut Mistral's long steps off at 16,384 (finish `length`) and ended two runs.
+The kit now writes `{context: 150000, output: 32000}`.
 
 Not ours to fix in Mistral or OpenCode. Ours to decide: whether `create-nodegx` writes that `opencode.json`, as it
 writes `.vibe/config.toml` for Vibe.

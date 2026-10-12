@@ -112,7 +112,7 @@ if (asWritten !== JSON.stringify(['npx', '-y', '@nodegx/mcp@0.2.0', '--allow-wri
 project.mcp.nodegx.command = ['npx', '-y', `--package=${tgz('nodegx-mcp-0.2.0.tgz')}`, 'noodl-mcp', '--allow-writes'];
 if (opt('--context', null) !== null) {
   if (Number(opt('--context')) === 0) delete project.provider;
-  else project.provider = { mistral: { models: { 'mistral-large-4': { limit: { context: Number(opt('--context')), output: 16384 } } } } };
+  else project.provider = { mistral: { models: { 'mistral-large-4': { limit: { context: Number(opt('--context')), output: 32000 } } } } };
 }
 fs.writeFileSync(configFile, JSON.stringify(project, null, 2) + '\n');
 fs.writeFileSync(path.join(root, 'opencode-config.json'), JSON.stringify({ kitWrote, ...project }, null, 2) + '\n');

@@ -48,12 +48,8 @@ const AGENT_NOTE = [
   'Build in small steps: one component at a time, reading each answer before the next. A change the server refuses',
   'says exactly what to fix.',
   '',
-  // P112 OWN-018 s2, quiz run 2: Mistral Large 4 in OpenCode ended its session after eight steps with "Let me study
-  // three examples" and no tool call — a reply without one ends the run there. Run 1 tested its quiz with
-  // `drive_page {page: "quiz"}` and never saw that pressing Start skipped question 1.
-  'Keep going until the app is built and you have tried it. Some agents end the session at the first reply that',
-  "calls no tool, so don't stop at a plan or a progress note: call the next tool.",
-  '',
+  // P112 OWN-018 s2, quiz run 1: Mistral Large 4 tested its quiz with `drive_page {page: "quiz"}` and never saw
+  // that pressing Start skipped question 1.
   "Try it the way a person arrives: `drive_page` from the app's start page (leave out `page`) and press through it,",
   'not a page opened on its own.',
   ''
@@ -61,10 +57,15 @@ const AGENT_NOTE = [
 
 /**
  * P112 OWN-018 s2 — OpenCode's settings for this folder (`opencode.json`, read from the folder it runs in): the same
- * pinned server, and Mistral Large 4's context given as 128k. models.dev lists it at 1,048,576, so OpenCode never
- * compacts a session; Mistral caches 70% of a prompt under ~128k tokens and 5% of one over it (quiz run 1:
- * P112-OWN018-CACHE128K), so a long build paid full price on most of its steps. The model is left to the person;
- * the limit only applies when they choose Large 4. Written only when absent, like the agent notes.
+ * pinned server, and limits for Mistral Large 4 that keep its prompts where Mistral caches them. Measured
+ * (P112-OWN018-CACHE128K): Mistral caches 70% of a prompt under ~128k tokens and 5% of one over it, and models.dev gives
+ * Large 4's context as 1,048,576, so OpenCode never compacts and a long build pays full price on most steps.
+ *
+ * OpenCode 1.19.0 (read from its build): a request's max_tokens is min(limit.output, 32000), and it compacts once a
+ * step's total reaches context − that. So `output` must stay 32000 — at 16384 (s2's first version) Mistral's long
+ * planning steps were cut off mid-answer (finish `length`) and the run ENDED, twice — and `context` 150000 starts
+ * compaction near 118k, leaving room for a tool result below 128k. The model is left to the person; these limits only
+ * apply when they choose Large 4. Written only when absent, like the agent notes.
  */
 const OPENCODE_CONFIG = 'opencode.json';
 
@@ -75,7 +76,7 @@ function renderOpenCodeConfig(platform = process.platform) {
       {
         $schema: 'https://opencode.ai/config.json',
         mcp: { [SERVER_NAME]: { type: 'local', command: [entry.command, ...entry.args], enabled: true } },
-        provider: { mistral: { models: { 'mistral-large-4': { limit: { context: 128000, output: 16384 } } } } }
+        provider: { mistral: { models: { 'mistral-large-4': { limit: { context: 150000, output: 32000 } } } } }
       },
       null,
       2
