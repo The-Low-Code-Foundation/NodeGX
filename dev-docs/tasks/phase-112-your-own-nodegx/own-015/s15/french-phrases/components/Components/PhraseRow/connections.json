@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f6cdc78f-7741-575d-81f3-e14611be18fe",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "row_inputs",
+      "fromProperty": "french",
+      "toId": "french_text",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "row_inputs",
+      "fromProperty": "english",
+      "toId": "english_text",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "row_inputs",
+      "fromProperty": "french",
+      "toId": "call_speak",
+      "toProperty": "in-text"
+    },
+    {
+      "fromId": "row",
+      "fromProperty": "onClick",
+      "toId": "call_speak",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "call_speak",
+      "fromProperty": "out-audioBase64",
+      "toId": "play_audio",
+      "toProperty": "in-audioBase64"
+    },
+    {
+      "fromId": "call_speak",
+      "fromProperty": "out-mimeType",
+      "toId": "play_audio",
+      "toProperty": "in-mimeType"
+    },
+    {
+      "fromId": "call_speak",
+      "fromProperty": "done",
+      "toId": "play_audio",
+      "toProperty": "run"
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "4bdac92b-c59e-5cdc-8e38-8054f611a32e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "fn_request",
+      "type": "noodl.cloud.request",
+      "label": "Request",
+      "parameters": {
+        "params": "text",
+        "ptype-text": "string",
+        "preq-text": true,
+        "allowNoAuth": true
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "api_key",
+      "type": "noodl.cloud.secret",
+      "label": "Only the NAME is in the graph",
+      "parameters": {
+        "name": "GEMINI_API_KEY"
+      },
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "tts_call",
+      "type": "JavaScriptFunction",
+      "label": "Call Gemini TTS",
+      "parameters": {
+        "functionScript": "const apiKey = Inputs.apiKey;\nconst text = Inputs.text;\nif (apiKey === undefined || text === undefined) return;\n\nconst model = \"gemini-3.8-flash-tts\";\nconst resp = await fetch(\n  `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,\n  {\n    method: \"POST\",\n    headers: { \"Content-Type\": \"application/json\" },\n    body: JSON.stringify({\n      contents: [{ parts: [{ text }] }],\n      generationConfig: {\n        responseModalities: [\"AUDIO\"],\n        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: \"Kore\" } } }\n      }\n    })\n  }\n);\n\nif (!resp.ok) {\n  throw new Error(`Gemini TTS request failed (${resp.status}): ${await resp.text()}`);\n}\n\nconst data = await resp.json();\nconst part = data?.candidates?.[0]?.content?.parts?.[0]?.inlineData;\nif (!part || !part.data) {\n  throw new Error(\"Gemini TTS returned no audio data.\");\n}\n\nOutputs.audioBase64 = part.data;\nOutputs.mimeType = part.mimeType || \"audio/L16;rate=24000\";\n"
+      },
+      "metadata": {
+        "comment": "Gemini TTS returns raw PCM, not a playable file; the browser side wraps it in a WAV header before playback."
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-apiKey",
+          "displayName": "apiKey",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-text",
+          "displayName": "text",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-audioBase64",
+          "displayName": "audioBase64",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mimeType",
+          "displayName": "mimeType",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "ok_response",
+      "type": "noodl.cloud.response",
+      "label": "The audio",
+      "parameters": {
+        "params": "audioBase64,mimeType"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "fail_response",
+      "type": "noodl.cloud.response",
+      "label": "Failure",
+      "parameters": {
+        "status": "failure"
+      },
+      "x": 40,
+      "y": 520
+    }
+  ]
+}

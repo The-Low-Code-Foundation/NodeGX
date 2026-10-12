@@ -1,0 +1,189 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "fe071479-9bfb-5ad4-8748-18088286aae7",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "card",
+      "type": "Group",
+      "label": "Card",
+      "children": [
+        "body"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "body",
+      "type": "Group",
+      "label": "Body",
+      "parent": "card",
+      "children": [
+        "title_text",
+        "meta_row"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-5)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "title_text",
+      "type": "Text",
+      "label": "Title",
+      "parent": "body",
+      "parameters": {
+        "text": "Lesson title",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "meta_row",
+      "type": "Group",
+      "label": "Meta row",
+      "parent": "body",
+      "children": [
+        "meta_text",
+        "badge"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "meta_text",
+      "type": "Text",
+      "label": "Phrase count",
+      "parent": "meta_row",
+      "parameters": {
+        "text": "6 phrases",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "badge",
+      "type": "Group",
+      "label": "Completed badge",
+      "parent": "meta_row",
+      "children": [
+        "badge_text"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "backgroundColor": "var(--accent)",
+        "borderRadius": "var(--radius-full)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "badge_text",
+      "type": "Text",
+      "label": "Completed label",
+      "parent": "badge",
+      "parameters": {
+        "text": "✓ Completed",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--accent-foreground)"
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "meta_expr",
+      "type": "Expression",
+      "label": "Format phrase count",
+      "parameters": {
+        "expression": "phraseCount + \" phrases\""
+      },
+      "x": 530,
+      "y": 520
+    },
+    {
+      "id": "card_inputs",
+      "type": "Component Inputs",
+      "label": "Card data in",
+      "ports": [
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "phraseCount",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "completed",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 530,
+      "y": 280
+    },
+    {
+      "id": "card_outputs",
+      "type": "Component Outputs",
+      "label": "Card out",
+      "ports": [
+        {
+          "name": "open",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 530,
+      "y": 40
+    }
+  ],
+  "visualRoots": [
+    "card"
+  ]
+}

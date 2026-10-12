@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4bdac92b-c59e-5cdc-8e38-8054f611a32e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "fn_request",
+      "fromProperty": "receive",
+      "toId": "api_key",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "fn_request",
+      "fromProperty": "pm-text",
+      "toId": "tts_call",
+      "toProperty": "in-text"
+    },
+    {
+      "fromId": "api_key",
+      "fromProperty": "value",
+      "toId": "tts_call",
+      "toProperty": "in-apiKey"
+    },
+    {
+      "fromId": "api_key",
+      "fromProperty": "done",
+      "toId": "tts_call",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tts_call",
+      "fromProperty": "success",
+      "toId": "ok_response",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "tts_call",
+      "fromProperty": "out-audioBase64",
+      "toId": "ok_response",
+      "toProperty": "pm-audioBase64"
+    },
+    {
+      "fromId": "tts_call",
+      "fromProperty": "out-mimeType",
+      "toId": "ok_response",
+      "toProperty": "pm-mimeType"
+    },
+    {
+      "fromId": "api_key",
+      "fromProperty": "error",
+      "toId": "fail_response",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "tts_call",
+      "fromProperty": "error",
+      "toId": "fail_response",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "api_key",
+      "fromProperty": "failure",
+      "toId": "fail_response",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "tts_call",
+      "fromProperty": "failure",
+      "toId": "fail_response",
+      "toProperty": "send"
+    }
+  ]
+}

@@ -92,6 +92,13 @@ that never says NodeGX, built `french-phrases` (84 turns; `claude -p` is Claude 
 into the project's `.env`; it **speaks** (desktop and phone, to the end, key 0 hits in 2 MB, control 4).
 
 **Next, in order:**
+0. **Richard's ask (s15), first: [OWN-017](OWN-017-THE-LINGO-APP-IN-OUR-OWN-EDITOR.md), the proof it's a NodeGX
+   app.** Build our own small editor from the npm kit and use it to tweak real parts of the stranger's app
+   (`own-015/s15/french-phrases/`, work on a copy). Open with one AskUserQuestion: which edits (recommend fixing
+   WAVTWICE there, which proves it and removes the static), the editor's shape, and who builds it. Items 1–2 below
+   fold into it if WAVTWICE is fixed through the editor.
+   Context Richard confirmed: the lingo app is the proof of concept for the full-stack, no-editor npm path (R18),
+   not a product.
 1. **P112-S15-WAVTWICE** (medium): 2/2 agents double-wrap Gemini's finished WAV, so each phrase ends in static.
    Smallest fix: a catalog example that plays a cloud function's audio as it is (wrapping only when the MIME type is
    `audio/L16`). Grade it with a fresh round whose tail RMS stays at speech-end levels.

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f6cdc78f-7741-575d-81f3-e14611be18fe",
+  "name": "PhraseRow",
+  "path": "/Components/PhraseRow",
+  "type": "visual",
+  "created": "2026-10-12T12:59:07.027Z",
+  "modified": "2026-10-12T12:59:07.027Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A tappable phrase row: French + English text; tapping calls Speak Phrase and plays the audio."
+}
